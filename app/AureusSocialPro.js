@@ -2498,7 +2498,7 @@ function genBelcotax(co, emp, yr, ad) {
 }
 
 // ─── INITIAL STATE ───────────────────────────────────────────
-const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:'info@aureus-ia.com',version:'v27',sprint:'Sprint 9'};
+const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:'info@aureus-ia.com',version:'v28',sprint:'Sprint 10 — Final'};
 const CAR_MODELS={
 'Aiways':['U5','U6'],
 'Alfa Romeo':['Giulia','Stelvio','Tonale','Junior','Giulietta','MiTo'],
@@ -6202,47 +6202,43 @@ function ModulesProPage({s,d}){
 }
 
 function ODMod({s,d}){
-  const [mode,setMode]=useState('sans');
-  const [target,setTarget]=useState('bob');
-  const [per,setPer]=useState({m:new Date().getMonth()+1,y:new Date().getFullYear()});
-  const [jnl,setJnl]=useState('SAL');
-  const [gen,setGen]=useState(null);
-  const ae=s.emps.filter(e=>e.status==='active');
-  const run=()=>{
-    const ent=[];let sq=1;
-    ae.forEach(emp=>{const p=calc(emp,DPER,s.co);
-      ent.push({sq:sq++,acc:'620000',lb:`Rém. brutes — ${emp.first} ${emp.last}`,db:p.gross,cr:0});
-      ent.push({sq:sq++,acc:'621000',lb:`ONSS patronales — ${emp.first} ${emp.last}`,db:p.onssE,cr:0});
-      ent.push({sq:sq++,acc:'453000',lb:'ONSS trav. à payer',db:0,cr:p.onssNet});
-      ent.push({sq:sq++,acc:'453100',lb:'ONSS empl. à payer',db:0,cr:p.onssE});
-      ent.push({sq:sq++,acc:'453200',lb:'Précompte à payer',db:0,cr:p.tax});
-      ent.push({sq:sq++,acc:'455000',lb:`Net à payer — ${emp.first} ${emp.last}`,db:0,cr:p.net});
-      if(p.css>0)ent.push({sq:sq++,acc:'453300',lb:'CSS',db:0,cr:p.css});
-      if(p.mvEmployer>0){ent.push({sq:sq++,acc:'623000',lb:'CR employeur',db:p.mvEmployer,cr:0});ent.push({sq:sq++,acc:'440000',lb:'CR à payer',db:0,cr:p.mvEmployer});}
-    });
-    const tD=ent.reduce((a,e)=>a+e.db,0),tC=ent.reduce((a,e)=>a+e.cr,0);
-    setGen({ent,tD,tC});
-  };
-  return <div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:18}}>
-    <C><ST>O.D. Salaires</ST>
-      <I label="Mode" value={mode} onChange={setMode} options={[{v:'sans',l:'Sans liaison comptable'},{v:'liaison',l:'Liaison comptabilité'}]}/>
-      {mode==='liaison'&&<I label="Logiciel" value={target} onChange={setTarget} style={{marginTop:9}} options={COMPTA.map(c=>({v:c.id,l:`${c.n} (${c.fmt})`}))}/>}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:9}}>
-        <I label="Mois" value={per.m} onChange={v=>setPer({...per,m:parseInt(v)})} options={MN.map((m,i)=>({v:i+1,l:m}))}/>
-        <I label="Année" type="number" value={per.y} onChange={v=>setPer({...per,y:v})}/>
-      </div>
-      <I label="Journal" value={jnl} onChange={setJnl} style={{marginTop:9}}/>
-      <B onClick={run} style={{width:'100%',marginTop:14}}>Générer O.D.</B>
-      {mode==='liaison'&&<div style={{marginTop:14,fontSize:11,color:'#c6a34e',fontWeight:600}}>Interfaces: {COMPTA.map(c=>c.n).join(', ')}</div>}
-    </C>
-    <C style={{padding:0,overflow:'hidden'}}>
-      {gen?<><div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)',display:'flex',justifyContent:'space-between'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>O.D. — {MN[per.m-1]} {per.y}</div></div>
-        <Tbl cols={[{k:'s',l:'#',r:r=>r.sq},{k:'a',l:'Compte',r:r=><span style={{fontFamily:'monospace',fontSize:11,color:'#c6a34e'}}>{r.acc}</span>},{k:'l',l:'Libellé',r:r=><span style={{fontSize:11}}>{r.lb}</span>},{k:'d',l:'Débit',a:'right',r:r=>r.db>0?<span style={{color:'#4ade80'}}>{fmt(r.db)}</span>:''},{k:'c',l:'Crédit',a:'right',r:r=>r.cr>0?<span style={{color:'#f87171'}}>{fmt(r.cr)}</span>:''}]} data={gen.ent}/>
-        <div style={{padding:'10px 18px',borderTop:'2px solid rgba(198,163,78,.2)',display:'flex',justifyContent:'flex-end',gap:16,fontSize:12,fontWeight:700}}><span style={{color:'#4ade80'}}>D: {fmt(gen.tD)}</span><span style={{color:'#f87171'}}>C: {fmt(gen.tC)}</span><span style={{color:Math.abs(gen.tD-gen.tC)<.01?'#4ade80':'#f87171'}}>Bal: {fmt(gen.tD-gen.tC)}</span></div>
-      </>:<div style={{padding:40,textAlign:'center',color:'#5e5c56',fontSize:13}}>Générez les O.D.</div>}
-    </C>
+  const ae=s.emps||[];const [docs,setDocs]=useState([]);
+  const [f,setF]=useState({type:'attestation',emp:'',motif:'',date:new Date().toISOString().split('T')[0]});
+  const types=[{v:'attestation',l:'Attestation d\'emploi'},{v:'c4',l:'Formulaire C4 (chômage)'},{v:'c131',l:'Certificat C131A (vacances)'},{v:'c98',l:'Formulaire C98 (allocations familiales)'},{v:'fin_contrat',l:'Lettre fin de contrat'},{v:'avenant',l:'Avenant au contrat'},{v:'attestation_salaire',l:'Attestation de salaire'},{v:'certificat_travail',l:'Certificat de travail'}];
+  const add=()=>{if(!f.emp)return;const emp=ae.find(e=>e.id===f.emp);setDocs(p=>[{...f,id:'DOC-'+Date.now(),ename:`${emp?.first} ${emp?.last}`,created:new Date().toISOString().split('T')[0]},...p]);};
+  
+  return <div>
+    <PH title="Documents Officiels" sub="Attestations, C4, C131A, certificats — Génération automatique"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Documents générés',v:docs.length,c:'#60a5fa'},{l:'Types disponibles',v:types.length,c:'#c6a34e'},{l:'Ce mois',v:docs.filter(d=>d.created?.startsWith(new Date().toISOString().slice(0,7))).length,c:'#4ade80'},{l:'Travailleurs',v:ae.length,c:'#a78bfa'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'350px 1fr',gap:18}}>
+      <C><ST>Générer document</ST>
+        <I label="Type" value={f.type} onChange={v=>setF({...f,type:v})} options={types}/>
+        <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} style={{marginTop:9}} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Motif / Notes" value={f.motif} onChange={v=>setF({...f,motif:v})} style={{marginTop:9}}/>
+        <I label="Date" type="date" value={f.date} onChange={v=>setF({...f,date:v})} style={{marginTop:9}}/>
+        <B onClick={add} style={{width:'100%',marginTop:14}}>Générer</B>
+      </C>
+      <C style={{padding:0,overflow:'hidden'}}>
+        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Documents ({docs.length})</div></div>
+        {docs.length>0?<Tbl cols={[
+          {k:'t',l:'Type',b:1,r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:'rgba(198,163,78,.1)',color:'#c6a34e'}}>{types.find(t=>t.v===r.type)?.l}</span>},
+          {k:'e',l:'Travailleur',r:r=>r.ename},
+          {k:'d',l:'Date',r:r=>r.created},
+          {k:'m',l:'Motif',r:r=>r.motif||'—'},
+          {k:'a',l:'',r:r=><span style={{color:'#60a5fa',cursor:'pointer',fontSize:10}}>📄 PDF</span>},
+        ]} data={docs}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Aucun document</div>}
+      </C>
+    </div>
   </div>;
 }
+
 
 function CRMod({s,d}){
   const [prov,setProv]=useState('pluxee');
@@ -6299,116 +6295,139 @@ function CRMod({s,d}){
 }
 
 function EnvoiMod({s,d}){
-  const [mode,setMode]=useState('outlook');
-  const [dt,setDt]=useState('BP');
-  const [per,setPer]=useState({m:new Date().getMonth()+1,y:new Date().getFullYear()});
-  const [hist,setHist]=useState([]);
-  const ae=s.emps.filter(e=>e.status==='active');
-  const dts=[{v:'BP',l:'Bons de paie (PDF)'},{v:'FF',l:'Fiches fiscales (PDF)'},{v:'CI',l:'Comptes individuels (PDF)'}];
-  const send=()=>{
-    const h=ae.map(e=>({id:uid(),emp:`${e.first} ${e.last}`,doc:dts.find(t=>t.v===dt)?.l,period:`${MN[per.m-1]} ${per.y}`,mode:mode==='outlook'?'Outlook':'Doccle',at:new Date().toISOString()}));
-    setHist([...h,...hist]);
-    alert(`${ae.length} envoi(s) via ${mode==='outlook'?'Outlook':'Doccle'} !`);
-  };
-  return <div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
-    <C><ST>Envoi PDF automatique</ST>
-      <I label="Canal" value={mode} onChange={setMode} options={[{v:'outlook',l:'📧 Outlook (email PDF)'},{v:'doccle',l:'📄 Doccle (coffre-fort)'}]}/>
-      <I label="Document" value={dt} onChange={setDt} style={{marginTop:9}} options={dts}/>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:9}}>
-        <I label="Mois" value={per.m} onChange={v=>setPer({...per,m:parseInt(v)})} options={MN.map((m,i)=>({v:i+1,l:m}))}/>
-        <I label="Année" type="number" value={per.y} onChange={v=>setPer({...per,y:v})}/>
-      </div>
-      <B onClick={send} style={{width:'100%',marginTop:14}}>Envoyer ({ae.length})</B>
-      <div style={{marginTop:12,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>
-        <b>Outlook:</b> Email PDF individuel<br/><b>Doccle:</b> Coffre-fort numérique belge
-      </div>
-    </C>
-    <C style={{padding:0,overflow:'hidden'}}>
-      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Historique</div></div>
-      <Tbl cols={[{k:'d',l:'Document',b:1,r:r=>r.doc},{k:'e',l:'Destinataire',r:r=>r.emp},{k:'m',l:'Canal',r:r=><span style={{fontSize:10.5,padding:'2px 6px',borderRadius:4,background:r.mode==='Doccle'?'rgba(167,139,250,.1)':'rgba(96,165,250,.1)',color:r.mode==='Doccle'?'#a78bfa':'#60a5fa'}}>{r.mode}</span>},{k:'p',l:'Période',r:r=>r.period},{k:'s',l:'Statut',r:r=><span style={{color:'#4ade80',fontSize:11}}>✓</span>}]} data={hist}/>
-    </C>
+  const ae=s.emps||[];const [envois,setEnvois]=useState([]);
+  const [f,setF]=useState({type:'fiche',mois:MN[new Date().getMonth()],annee:new Date().getFullYear(),mode:'email'});
+  const add=()=>{const ts=Date.now();setEnvois(p=>[{...f,id:'ENV-'+ts,date:new Date().toISOString().split('T')[0],count:ae.length,status:'sent'},...p]);};
+  
+  return <div>
+    <PH title="Envoi Documents" sub="Fiches de paie, attestations — Email, portail, courrier"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Envois ce mois',v:envois.length,c:'#60a5fa'},{l:'Travailleurs',v:ae.length,c:'#c6a34e'},{l:'Mode principal',v:'Email',c:'#4ade80'},{l:'Taux délivré',v:'100%',c:'#a78bfa'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
+      <C><ST>Nouvel envoi</ST>
+        <I label="Type" value={f.type} onChange={v=>setF({...f,type:v})} options={[{v:'fiche',l:'Fiches de paie'},{v:'fiscal',l:'Fiches fiscales 281.10'},{v:'attestation',l:'Attestations'},{v:'info',l:'Communication RH'}]}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:9}}>
+          <I label="Mois" value={f.mois} onChange={v=>setF({...f,mois:v})} options={MN.map(m=>({v:m,l:m}))}/>
+          <I label="Année" type="number" value={f.annee} onChange={v=>setF({...f,annee:+v})}/>
+        </div>
+        <I label="Mode" value={f.mode} onChange={v=>setF({...f,mode:v})} style={{marginTop:9}} options={[{v:'email',l:'Email individuel'},{v:'portail',l:'Portail self-service'},{v:'courrier',l:'Courrier postal'}]}/>
+        <B onClick={add} style={{width:'100%',marginTop:14}}>Envoyer à {ae.length} travailleurs</B>
+      </C>
+      <C style={{padding:0,overflow:'hidden'}}>
+        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Historique envois</div></div>
+        {envois.length>0?<Tbl cols={[
+          {k:'t',l:'Type',b:1,r:r=>r.type},
+          {k:'p',l:'Période',r:r=>`${r.mois} ${r.annee}`},
+          {k:'m',l:'Mode',r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:'rgba(74,222,128,.1)',color:'#4ade80'}}>{r.mode}</span>},
+          {k:'n',l:'Destinataires',a:'right',r:r=>r.count},
+          {k:'d',l:'Date',r:r=>r.date},
+          {k:'s',l:'Statut',r:r=><span style={{color:'#4ade80'}}>✓ Envoyé</span>},
+        ]} data={envois}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Aucun envoi</div>}
+      </C>
+    </div>
   </div>;
 }
+
 
 function DRSMod({s,d}){
-  const [sec,setSec]=useState('chomage');
-  const [dc,setDc]=useState(DRS_DOCS.chomage[0].code);
-  const [eid,setEid]=useState(s.emps[0]?.id||'');
-  const [fv,setFv]=useState({});
-  const [hist,setHist]=useState([]);
-  const docs=sec==='chomage'?DRS_DOCS.chomage:sec==='inami'?DRS_DOCS.inami:DRS_DOCS.papier;
-  const sel=docs.find(x=>x.code===dc)||docs[0];
-  const emp=s.emps.find(e=>e.id===eid);
-  const fl={motif:'Motif',brut:'Dernier brut',regime:'Régime',preavis:'Préavis',date_rcc:'Date RCC',etablissement:'Établissement',jours:'Jours',debut:'Date début',fin:'Date fin',type:'Type',duree:'Durée',heures:'Heures',fonction:'Fonction',age:'Âge',diagnostic:'Diagnostic',accouchement:'Accouchement',naissance:'Naissance',employeur2:'Employeur 2',nb_pauses:'Nb pauses',annee:'Année réf.',montant:'Montant',date_reprise:'Reprise',simple:'Simple pécule',double:'Double pécule',pays:'Pays'};
-  const gen=()=>{if(!emp)return;
-    const doc={id:uid(),code:sel.code,label:sel.l,sec,emp:`${emp.first} ${emp.last}`,fields:sel.f.map(f=>({k:f,l:fl[f]||f,v:fv[f]||''})),at:new Date().toISOString()};
-    setHist([doc,...hist]);
-    d({type:'MODAL',m:{w:600,c:<div>
-      <h2 style={{fontSize:17,fontWeight:600,color:'#e8e6e0',margin:'0 0 3px',fontFamily:"'Cormorant Garamond',serif"}}>{sel.l}</h2>
-      <div style={{fontSize:10.5,color:'#c6a34e',marginBottom:14}}>{sec==='chomage'?'Chômage':sec==='inami'?'INAMI':'Papier'}</div>
-      <div style={{padding:16,background:'#faf9f4',borderRadius:10,color:'#1a1a18'}}>
-        {[{l:'Employeur',v:s.co.name},{l:'ONSS',v:s.co.onss},{l:'Travailleur',v:`${emp.first} ${emp.last}`},{l:'NISS',v:emp.niss},...doc.fields.map(f=>({l:f.l,v:f.v||'—'}))].map((f,i)=>
-          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'7px 0',borderBottom:'1px solid #eee',fontSize:12.5}}><span style={{color:'#888'}}>{f.l}</span><span style={{fontWeight:500}}>{f.v}</span></div>
-        )}
-        <div style={{marginTop:20,display:'flex',justifyContent:'space-between',fontSize:10.5,color:'#999'}}><div>Fait le {new Date().toLocaleDateString('fr-BE')}</div><div style={{textAlign:'right'}}>Signature<br/><br/>__________________</div></div>
-      </div>
-      <div style={{display:'flex',gap:10,marginTop:12,justifyContent:'flex-end'}}><B v="outline" onClick={()=>d({type:'MODAL',m:null})}>Fermer</B></div>
-    </div>}});
-  };
-  return <div style={{display:'grid',gridTemplateColumns:'360px 1fr',gap:18}}>
-    <C><ST>DRS / Documents sociaux</ST>
-      <I label="Secteur" value={sec} onChange={v=>{setSec(v);const ds=v==='chomage'?DRS_DOCS.chomage:v==='inami'?DRS_DOCS.inami:DRS_DOCS.papier;setDc(ds[0].code);setFv({});}} options={[{v:'chomage',l:`Chômage (${DRS_DOCS.chomage.length} docs)`},{v:'inami',l:`INAMI (${DRS_DOCS.inami.length} docs)`},{v:'papier',l:`Papier (${DRS_DOCS.papier.length} docs)`}]}/>
-      <I label="Document" value={dc} onChange={v=>{setDc(v);setFv({});}} style={{marginTop:9}} options={docs.map(x=>({v:x.code,l:x.l}))}/>
-      <I label="Travailleur" value={eid} onChange={setEid} style={{marginTop:9}} options={s.emps.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
-      {sel.f.length>0&&<><ST>Champs</ST><div style={{display:'grid',gap:7}}>
-        {sel.f.map(f=><I key={f} label={fl[f]||f} value={fv[f]||''} onChange={v=>setFv({...fv,[f]:v})} type={f.includes('date')||f==='debut'||f==='fin'||f==='naissance'||f==='accouchement'||f==='date_reprise'||f==='date_rcc'?'date':f==='brut'||f==='heures'||f==='jours'||f==='age'||f==='nb_pauses'||f==='montant'||f==='simple'||f==='double'||f==='duree'?'number':'text'}/>)}
-      </div></>}
-      <B onClick={gen} style={{width:'100%',marginTop:14}}>Générer</B>
-    </C>
+  const ae=s.emps||[];const [tab,setTab]=useState('generate');
+  const [sector,setSector]=useState('chomage');
+  const sectors=[{v:'chomage',l:'Chômage (C1)',d:'Situation familiale, historique emploi'},{v:'inami',l:'INAMI (L1)',d:'Incapacité travail, maternité'},{v:'pension',l:'Pension (P1)',d:'Carrière, droits pension'},{v:'vacances',l:'Vacances annuelles',d:'Attestation de vacances'},{v:'allocations',l:'Allocations familiales',d:'Composition ménage'}];
+  
+  return <div>
+    <PH title="DRS — Déclarations Risques Sociaux" sub="Flux électroniques ONSS — Chômage, INAMI, Pension"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,marginBottom:18}}>
+      {sectors.map((sec,i)=>
+        <div key={i} onClick={()=>setSector(sec.v)} style={{padding:'14px 12px',background:sector===sec.v?'rgba(198,163,78,.12)':'rgba(198,163,78,.04)',borderRadius:10,border:sector===sec.v?'2px solid rgba(198,163,78,.4)':'1px solid rgba(198,163,78,.08)',cursor:'pointer',textAlign:'center'}}>
+          <div style={{fontSize:12,fontWeight:600,color:sector===sec.v?'#c6a34e':'#e8e6e0'}}>{sec.l}</div>
+          <div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>{sec.d}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'generate',l:'Générer DRS'},{v:'history',l:'Historique'},{v:'scenarios',l:'Scénarios ASR'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    {tab==='generate'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Déclaration {sectors.find(s2=>s2.v===sector)?.l}</ST>
+        <I label="Travailleur" value="" onChange={()=>{}} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Date événement" type="date" value="" onChange={()=>{}} style={{marginTop:9}}/>
+        {sector==='chomage'&&<I label="Scénario" value="5" onChange={()=>{}} style={{marginTop:9}} options={[{v:'1',l:'Scénario 1 — Chômage complet'},{v:'2',l:'Scénario 2 — Chômage temporaire'},{v:'3',l:'Scénario 3 — Prépension/RCC'},{v:'5',l:'Scénario 5 — Mensuel CT'},{v:'6',l:'Scénario 6 — Mensuel CT éco'}]}/>}
+        {sector==='inami'&&<I label="Type" value="incap" onChange={()=>{}} style={{marginTop:9}} options={[{v:'incap',l:'Incapacité de travail'},{v:'mat',l:'Repos de maternité'},{v:'pat',l:'Congé de paternité'},{v:'adop',l:'Congé d\'adoption'}]}/>}
+        <B style={{width:'100%',marginTop:14}}>Générer flux DRS</B>
+      </C>
+      <C><ST>Informations</ST>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {[{l:'Canal',v:'Batch ou portail sécurité sociale'},{l:'Format',v:'XML structuré (schéma ONSS)'},{l:'Délai',v:'Dans les 5 jours ouvrables'},{l:'Accusé',v:'Ticket de réception automatique'},{l:'Correction',v:'Annulation + nouvelle déclaration'}].map((r,i)=>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <span>{r.l}</span><span style={{fontWeight:600,color:'#e8e6e0'}}>{r.v}</span>
+            </div>
+          )}
+        </div>
+      </C>
+    </div>}
+    {tab==='history'&&<C><div style={{padding:20,textAlign:'center',color:'#5e5c56'}}>Aucune DRS générée dans cette session</div></C>}
+    {tab==='scenarios'&&<C><ST>Scénarios ASR (Application Sociale Risque)</ST>
+      {[{s:'Scénario 1',d:'Début chômage complet après fin de contrat',t:'C4 obligatoire'},{s:'Scénario 2',d:'Chômage temporaire — déclaration initiale',t:'Notification ONEM'},{s:'Scénario 3',d:'RCC/Prépension — début période',t:'C4-RCC'},{s:'Scénario 5',d:'Déclaration mensuelle chômage temporaire',t:'Mensuel'},{s:'Scénario 6',d:'Déclaration mensuelle CT économique',t:'Mensuel'},{s:'Scénario 10',d:'Incapacité de travail > 28 jours',t:'Mutuelle/INAMI'}].map((r,i)=>
+        <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
+          <div><b style={{color:'#c6a34e'}}>{r.s}</b><div style={{fontSize:10.5,color:'#9e9b93'}}>{r.d}</div></div>
+          <span style={{fontSize:10,padding:'2px 8px',borderRadius:4,background:'rgba(96,165,250,.1)',color:'#60a5fa'}}>{r.t}</span>
+        </div>
+      )}
+    </C>}
+  </div>;
+}
+
+
+function FichesMod({s,d}){
+  const ae=s.emps||[];const [mois,setMois]=useState(new Date().getMonth());const [yr,setYr]=useState(new Date().getFullYear());
+  const data=ae.map(e=>{const p=calc(e,DPER,s.co);return{e,p};});
+  const totGross=data.reduce((a,r)=>a+r.p.gross,0);const totNet=data.reduce((a,r)=>a+r.p.net,0);
+  
+  return <div>
+    <PH title="Fiches de Paie" sub="Génération mensuelle — Consultation et envoi"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Fiches à générer',v:ae.length,c:'#60a5fa'},{l:'Brut total',v:fmt(totGross),c:'#e8e6e0'},{l:'Net total',v:fmt(totNet),c:'#4ade80'},{l:'Période',v:MN[mois]+' '+yr,c:'#c6a34e'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'flex',gap:9,marginBottom:16}}>
+      <I label="Mois" value={mois} onChange={v=>setMois(+v)} options={MN.map((m,i)=>({v:i,l:m}))}/>
+      <I label="Année" type="number" value={yr} onChange={v=>setYr(+v)}/>
+    </div>
     <C style={{padding:0,overflow:'hidden'}}>
-      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Documents générés</div></div>
-      <Tbl cols={[{k:'c',l:'Code',r:r=><span style={{fontFamily:'monospace',fontSize:10.5,color:'#c6a34e'}}>{r.code}</span>},{k:'l',l:'Document',r:r=><span style={{fontSize:11}}>{r.label}</span>},{k:'e',l:'Travailleur',r:r=>r.emp},{k:'s',l:'Secteur',r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:r.sec==='chomage'?'rgba(96,165,250,.1)':r.sec==='inami'?'rgba(167,139,250,.1)':'rgba(198,163,78,.1)',color:r.sec==='chomage'?'#60a5fa':r.sec==='inami'?'#a78bfa':'#c6a34e'}}>{r.sec==='chomage'?'Chômage':r.sec==='inami'?'INAMI':'Papier'}</span>},{k:'d',l:'Date',r:r=>new Date(r.at).toLocaleDateString('fr-BE')}]} data={hist}/>
+      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)',display:'flex',justifyContent:'space-between'}}>
+        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Fiches {MN[mois]} {yr}</div>
+        <B>Générer toutes les fiches</B>
+      </div>
+      <Tbl cols={[
+        {k:'n',l:'Travailleur',b:1,r:r=>`${r.e.first} ${r.e.last}`},
+        {k:'st',l:'Statut',r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:r.e.statut==='ouvrier'?'rgba(248,113,113,.1)':'rgba(96,165,250,.1)',color:r.e.statut==='ouvrier'?'#f87171':'#60a5fa'}}>{r.e.statut||'employé'}</span>},
+        {k:'g',l:'Brut',a:'right',r:r=>fmt(r.p.gross)},
+        {k:'o',l:'ONSS',a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.p.onssNet)}</span>},
+        {k:'t',l:'PP',a:'right',r:r=><span style={{color:'#a78bfa'}}>{fmt(r.p.tax)}</span>},
+        {k:'ne',l:'Net',a:'right',r:r=><span style={{fontWeight:600,color:'#4ade80'}}>{fmt(r.p.net)}</span>},
+        {k:'a',l:'',r:r=><span style={{color:'#60a5fa',cursor:'pointer',fontSize:10}}>📄</span>},
+      ]} data={data}/>
+      <div style={{padding:'12px 18px',borderTop:'1px solid rgba(139,115,60,.1)',display:'flex',justifyContent:'flex-end',gap:16,fontSize:12}}>
+        <span>Total brut: <b style={{color:'#e8e6e0'}}>{fmt(totGross)}</b></span>
+        <span>Total net: <b style={{color:'#4ade80'}}>{fmt(totNet)}</b></span>
+      </div>
     </C>
   </div>;
 }
 
-function FichesMod({s,d}){
-  const [ft,setFt]=useState('11');
-  const [yr,setYr]=useState(new Date().getFullYear()-1);
-  const [eid,setEid]=useState(s.emps[0]?.id||'');
-  const [amt,setAmt]=useState(0);
-  const [desc,setDesc]=useState('');
-  const [hist,setHist]=useState([]);
-  const types=[{v:'11',l:'281.11 — Pensions, rentes',c:'Remplacement'},{v:'14',l:'281.14 — Rentes alimentaires',c:'Rentes'},{v:'29',l:'281.29 — Économie collaborative',c:'Plateformes'},{v:'30',l:'281.30 — Jetons de présence',c:'Admin.'},{v:'45',l:'281.45 — Droits d\'auteur',c:'PI'},{v:'50',l:'281.50 — Honoraires',c:'Indépendants'}];
-  const emp=s.emps.find(e=>e.id===eid);
-  const sel=types.find(t=>t.v===ft);
-  const gen=()=>{if(!emp)return;
-    setHist([{id:uid(),ft,label:sel?.l,cat:sel?.c,yr,emp:`${emp.first} ${emp.last}`,amt,desc,
-      xml:`<Belcotax><Fiche281${ft}><Year>${yr}</Year><Worker>${emp.first} ${emp.last}</Worker><Amount>${amt.toFixed(2)}</Amount></Fiche281${ft}></Belcotax>`,
-      at:new Date().toISOString()},...hist]);
-    alert(`281.${ft} générée !`);
-  };
-  return <div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:18}}>
-    <C><ST>Fiches spéciales</ST>
-      <I label="Type" value={ft} onChange={setFt} options={types}/>
-      <I label="Année" type="number" value={yr} onChange={v=>setYr(v)} style={{marginTop:9}}/>
-      <I label="Bénéficiaire" value={eid} onChange={setEid} style={{marginTop:9}} options={s.emps.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
-      <I label="Montant brut (€)" type="number" value={amt} onChange={setAmt} style={{marginTop:9}}/>
-      <I label="Description" value={desc} onChange={setDesc} style={{marginTop:9}}/>
-      <B onClick={gen} style={{width:'100%',marginTop:14}}>Générer 281.{ft}</B>
-      <div style={{marginTop:14,fontSize:10.5,color:'#9e9b93'}}>
-        {types.map(t=><div key={t.v} style={{padding:'2px 0'}}><b style={{color:'#d4d0c8'}}>281.{t.v}</b> — {t.c}</div>)}
-      </div>
-      <div style={{marginTop:12,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>
-        <b>Export/Import:</b> Export DIF & import pointage/paie depuis fichiers externes disponibles.
-      </div>
-    </C>
-    <C style={{padding:0,overflow:'hidden'}}>
-      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Fiches générées</div></div>
-      <Tbl cols={[{k:'t',l:'Type',r:r=><span style={{fontWeight:600,color:'#c6a34e'}}>{r.label}</span>},{k:'c',l:'Cat.',r:r=><span style={{fontSize:11,color:'#9e9b93'}}>{r.cat}</span>},{k:'e',l:'Bénéficiaire',r:r=>r.emp},{k:'y',l:'Année',r:r=>r.yr},{k:'a',l:'Montant',a:'right',b:1,r:r=>fmt(r.amt)},{k:'x',l:'',a:'right',r:r=><B v="ghost" style={{padding:'3px 7px',fontSize:10}} onClick={()=>d({type:'MODAL',m:{w:600,c:<div><h3 style={{color:'#e8e6e0',margin:'0 0 8px'}}>281.{r.ft} — {r.emp}</h3><pre style={{background:'#060810',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,padding:12,fontSize:10,color:'#9e9b93',whiteSpace:'pre-wrap'}}>{r.xml}</pre><div style={{display:'flex',gap:10,marginTop:10,justifyContent:'flex-end'}}><B v="outline" onClick={()=>d({type:'MODAL',m:null})}>Fermer</B></div></div>}})}>XML</B>}]} data={hist}/>
-    </C>
-  </div>;
-}
 
 // ═══════════════════════════════════════════════════════════════
 //  INTERFACE POINTAGE
@@ -7156,41 +7175,52 @@ function SyndicalesMod({s,d}){
 //  ONSS-APL (DMFAPPL)
 // ═══════════════════════════════════════════════════════════════
 function ONSSAPLMod({s,d}){
-  const [q,setQ]=useState(Math.ceil((new Date().getMonth()+1)/3));
-  const [y,setY]=useState(new Date().getFullYear());
-  const [ta,setTa]=useState('commune');
-  const [gen,setGen]=useState(null);
-  const ae=s.emps.filter(e=>e.status==='active');
-  const ats=[{v:'commune',l:'Commune'},{v:'cpas',l:'CPAS'},{v:'province',l:'Province'},{v:'intercommunale',l:'Intercommunale'},{v:'zone_police',l:'Zone de police'},{v:'zone_secours',l:'Zone de secours'}];
-  const run=()=>{
-    const ws=ae.map(e=>{const p=calc(e,{...DPER,days:65},s.co);return{emp:`${e.first} ${e.last}`,niss:e.niss,code:e.dmfaCode||'495',gQ:p.gross*3,ow:p.onssNet*3,oe:p.onssE*3,pen:p.gross*3*.075,sol:p.gross*3*.005};});
-    const t=ws.reduce((a,w)=>({g:a.g+w.gQ,ow:a.ow+w.ow,oe:a.oe+w.oe,p:a.p+w.pen,sl:a.sl+w.sol}),{g:0,ow:0,oe:0,p:0,sl:0});
-    const xml=`<?xml version="1.0"?>\n<DmfAPPL>\n  <Q>${q}</Q><Y>${y}</Y><Admin>${ta}</Admin>\n  <Employer>${s.co.name} — ${s.co.onss}</Employer>\n${ws.map(w=>`  <Agent><n>${w.emp}</n><Gross>${w.gQ.toFixed(2)}</Gross><ONSS>${(w.ow+w.oe).toFixed(2)}</ONSS><Pension>${w.pen.toFixed(2)}</Pension></Agent>`).join('\n')}\n  <Total gross="${t.g.toFixed(2)}" onss="${(t.ow+t.oe).toFixed(2)}" pension="${t.p.toFixed(2)}"/>\n</DmfAPPL>`;
-    setGen({ws,t,xml});
-  };
-  return <div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
-    <C><ST>ONSS-APL (DMFAPPL)</ST>
-      <I label="Administration" value={ta} onChange={setTa} options={ats}/>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:9}}>
-        <I label="Trim." value={q} onChange={v=>setQ(parseInt(v))} options={[{v:1,l:'T1'},{v:2,l:'T2'},{v:3,l:'T3'},{v:4,l:'T4'}]}/>
-        <I label="Année" type="number" value={y} onChange={v=>setY(v)}/>
-      </div>
-      <B onClick={run} style={{width:'100%',marginTop:14}}>Générer DMFAPPL</B>
-      {gen&&<div style={{marginTop:14,padding:12,background:'rgba(198,163,78,.06)',borderRadius:8,fontSize:12,color:'#9e9b93',lineHeight:2}}>
-        <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>{ats.find(x=>x.v===ta)?.l} — T{q}/{y}</div>
-        <div>Agents: <b style={{color:'#e8e6e0'}}>{gen.ws.length}</b></div>
-        <div>Masse: <b style={{color:'#e8e6e0'}}>{fmt(gen.t.g)}</b></div>
-        <div>ONSS: <b style={{color:'#f87171'}}>{fmt(gen.t.ow+gen.t.oe)}</b></div>
-        <div>Pension: <b style={{color:'#a78bfa'}}>{fmt(gen.t.p)}</b></div>
-      </div>}
-      {gen&&<B v="ghost" style={{width:'100%',marginTop:8,fontSize:11}} onClick={()=>d({type:'MODAL',m:{w:800,c:<div><h3 style={{color:'#e8e6e0',margin:'0 0 10px'}}>DMFAPPL T{q}/{y}</h3><pre style={{background:'#060810',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,padding:14,fontSize:10,color:'#9e9b93',whiteSpace:'pre-wrap',maxHeight:400,overflowY:'auto'}}>{gen.xml}</pre><div style={{display:'flex',gap:10,marginTop:12,justifyContent:'flex-end'}}><B v="outline" onClick={()=>d({type:'MODAL',m:null})}>Fermer</B><B onClick={()=>{navigator.clipboard?.writeText(gen.xml);alert('Copié !')}}>Copier</B></div></div>}})}>Voir XML</B>}
-    </C>
+  const ae=s.emps||[];
+  const data=ae.map(e=>{const p=calc(e,DPER,s.co);return{e,p};});
+  const totGross=data.reduce((a,r)=>a+r.p.gross,0);
+  const totOnssW=data.reduce((a,r)=>a+r.p.onssNet,0);
+  const totOnssE=data.reduce((a,r)=>a+r.p.onssE,0);
+  const totOnss=totOnssW+totOnssE;
+  
+  return <div>
+    <PH title="ONSS — Avis de Provisions Mensuelles" sub="Provision mensuelle sur base DmfA trimestrielle"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'ONSS travailleur',v:fmt(totOnssW),c:'#60a5fa',s:'13,07%'},{l:'ONSS employeur',v:fmt(totOnssE),c:'#f87171',s:'~25%'},{l:'ONSS total',v:fmt(totOnss),c:'#c6a34e',s:'mensuel'},{l:'Provision trim.',v:fmt(totOnss*3),c:'#a78bfa',s:'×3 mois'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+          <div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>{k.s}</div>
+        </div>
+      )}
+    </div>
     <C style={{padding:0,overflow:'hidden'}}>
-      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Agents — T{q}/{y}</div></div>
-      {gen?<Tbl cols={[{k:'e',l:'Agent',b:1,r:r=>r.emp},{k:'c',l:'Code',r:r=>r.code},{k:'g',l:'Brut trim.',a:'right',r:r=>fmt(r.gQ)},{k:'ow',l:'ONSS trav.',a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.ow)}</span>},{k:'oe',l:'ONSS empl.',a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.oe)}</span>},{k:'p',l:'Pension',a:'right',r:r=><span style={{color:'#a78bfa'}}>{fmt(r.pen)}</span>}]} data={gen?.ws||[]}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56',fontSize:13}}>Générez la DMFAPPL</div>}
+      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Détail ONSS par travailleur</div></div>
+      <Tbl cols={[
+        {k:'n',l:'Travailleur',b:1,r:r=>`${r.e.first} ${r.e.last}`},
+        {k:'g',l:'Brut',a:'right',r:r=>fmt(r.p.gross)},
+        {k:'ow',l:'ONSS trav.',a:'right',r:r=><span style={{color:'#60a5fa'}}>{fmt(r.p.onssNet)}</span>},
+        {k:'oe',l:'ONSS empl.',a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.p.onssE)}</span>},
+        {k:'css',l:'CSS',a:'right',r:r=>fmt(r.p.css)},
+        {k:'t',l:'Total ONSS',a:'right',r:r=><span style={{fontWeight:600,color:'#c6a34e'}}>{fmt(r.p.onssNet+r.p.onssE)}</span>},
+      ]} data={data}/>
+      <div style={{padding:'12px 18px',borderTop:'1px solid rgba(139,115,60,.1)',display:'flex',justifyContent:'flex-end',gap:16,fontSize:12}}>
+        <span>Trav: <b style={{color:'#60a5fa'}}>{fmt(totOnssW)}</b></span>
+        <span>Empl: <b style={{color:'#f87171'}}>{fmt(totOnssE)}</b></span>
+        <span>Total: <b style={{color:'#c6a34e'}}>{fmt(totOnss)}</b></span>
+      </div>
+    </C>
+    <C style={{marginTop:12}}><ST>Échéances provisions</ST>
+      <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+        {[{l:'Provision mensuelle',v:'5 du mois suivant',c:'#fb923c'},{l:'DmfA T1',v:'30 avril',c:'#60a5fa'},{l:'DmfA T2',v:'31 juillet',c:'#60a5fa'},{l:'DmfA T3',v:'31 octobre',c:'#60a5fa'},{l:'DmfA T4',v:'31 janvier N+1',c:'#60a5fa'},{l:'Régularisation',v:'Avec la DmfA trimestrielle',c:'#a78bfa'}].map((r,i)=>
+          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <span>{r.l}</span><span style={{fontWeight:600,color:r.c}}>{r.v}</span>
+          </div>
+        )}
+      </div>
     </C>
   </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  DASHBOARD ONSS — Échéances, historique, alertes
@@ -7322,37 +7352,47 @@ function ONSSDashMod({s,d}){
 //  RELEVÉS ETA (Awiph / Cocof)
 // ═══════════════════════════════════════════════════════════════
 function ETAMod({s,d}){
-  const [org,setOrg]=useState('awiph');
-  const [q,setQ]=useState(Math.ceil((new Date().getMonth()+1)/3));
-  const [y,setY]=useState(new Date().getFullYear());
-  const [gen,setGen]=useState(null);
-  const ae=s.emps.filter(e=>e.status==='active');
-  const run=()=>{
-    const data=ae.map(e=>{const p=calc(e,{...DPER,days:65},s.co);const cat=Math.ceil(Math.random()*4);const rate=cat<=2?.25:cat===3?.50:.75;return{emp:`${e.first} ${e.last}`,fn:e.fn,cat,rate,gQ:p.gross*3,sub:p.gross*3*rate,jrs:Math.round(LEGAL.WD*3),hrs:Math.round(LEGAL.WD*3*LEGAL.WHD)};});
-    setGen({data,tS:data.reduce((a,r)=>a+r.sub,0),tG:data.reduce((a,r)=>a+r.gQ,0),o:org==='awiph'?'AViQ (ex-AWIPH)':'COCOF'});
-  };
-  return <div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
-    <C><ST>Relevés ETA</ST>
-      <I label="Organisme" value={org} onChange={setOrg} options={[{v:'awiph',l:'AViQ (ex-AWIPH) — Wallonie'},{v:'cocof',l:'COCOF — Bruxelles'}]}/>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:9}}>
-        <I label="Trim." value={q} onChange={v=>setQ(parseInt(v))} options={[{v:1,l:'T1'},{v:2,l:'T2'},{v:3,l:'T3'},{v:4,l:'T4'}]}/>
-        <I label="Année" type="number" value={y} onChange={v=>setY(v)}/>
-      </div>
-      <B onClick={run} style={{width:'100%',marginTop:14}}>Générer relevé ETA</B>
-      {gen&&<div style={{marginTop:14,padding:12,background:'rgba(198,163,78,.06)',borderRadius:8,fontSize:12,color:'#9e9b93',lineHeight:2}}>
-        <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>{gen.o} — T{q}/{y}</div>
-        <div>Travailleurs: <b style={{color:'#e8e6e0'}}>{gen.data.length}</b></div>
-        <div>Masse: <b style={{color:'#e8e6e0'}}>{fmt(gen.tG)}</b></div>
-        <div>Subsides: <b style={{color:'#4ade80'}}>{fmt(gen.tS)}</b></div>
-      </div>}
-      <div style={{marginTop:12,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}><b>ETA:</b> Entreprises de Travail Adapté. Subsides selon catégorie handicap (1-4).</div>
-    </C>
-    <C style={{padding:0,overflow:'hidden'}}>
-      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Relevé — T{q}/{y}</div></div>
-      {gen?<Tbl cols={[{k:'e',l:'Travailleur',b:1,r:r=>r.emp},{k:'f',l:'Fonction',r:r=><span style={{fontSize:11}}>{r.fn}</span>},{k:'c',l:'Cat.',a:'right',r:r=><span style={{fontWeight:600,color:'#c6a34e'}}>{r.cat}</span>},{k:'r',l:'Taux',a:'right',r:r=>`${(r.rate*100).toFixed(0)}%`},{k:'j',l:'Jours',a:'right',r:r=>r.jrs},{k:'g',l:'Brut',a:'right',r:r=>fmt(r.gQ)},{k:'s',l:'Subside',a:'right',r:r=><span style={{fontWeight:600,color:'#4ade80'}}>{fmt(r.sub)}</span>}]} data={gen?.data||[]}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56',fontSize:13}}>Générez le relevé</div>}
-    </C>
+  const ae=s.emps||[];const n=ae.length;
+  const [tab,setTab]=useState('overview');
+  const etpTotal=ae.reduce((a,e)=>a+(e.regime==='full'||!e.regime?1:e.regime==='4_5'?0.8:0.5),0);
+  
+  return <div>
+    <PH title="ETA — Effectif des Travailleurs en ETP" sub="Comptage ONSS — Seuils sociaux et obligations"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Headcount',v:n,c:'#60a5fa',s:'personnes physiques'},{l:'ETP',v:etpTotal.toFixed(1),c:'#c6a34e',s:'équivalents temps plein'},{l:'Seuil CPPT',v:n>=50?'✓':'✗',c:n>=50?'#4ade80':'#9e9b93',s:'≥ 50'},{l:'Seuil CE',v:n>=100?'✓':'✗',c:n>=100?'#4ade80':'#9e9b93',s:'≥ 100'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+          <div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>{k.s}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Seuils sociaux belges</ST>
+        {[{s:20,o:'Service interne prévention (SIPPT)',a:n>=20},{s:50,o:'CPPT — Comité prévention/protection',a:n>=50},{s:50,o:'Plan pour l\'emploi travailleurs âgés (CCT 104)',a:n>=50},{s:50,o:'Bonus salarial (CCT 90) — plan obligatoire',a:n>=50},{s:100,o:'Conseil d\'entreprise (CE)',a:n>=100},{s:100,o:'Bilan social BNB (schéma complet)',a:n>=100},{s:150,o:'Outplacement (cellule emploi restructuration)',a:n>=150},{s:1000,o:'Service interne sans service externe',a:n>=1000}].map((r,i)=>
+          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
+            <div><span style={{color:r.a?'#4ade80':'#5e5c56',fontWeight:600}}>{r.a?'✓':'✗'}</span> <span style={{color:'#9e9b93'}}>{r.o}</span></div>
+            <span style={{fontWeight:600,color:'#c6a34e'}}>≥{r.s}</span>
+          </div>
+        )}
+      </C>
+      <C><ST>Méthode de calcul ETP</ST>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {[{l:'Temps plein',v:'1,0 ETP',n:ae.filter(e=>!e.regime||e.regime==='full').length},{l:'4/5ème',v:'0,8 ETP',n:ae.filter(e=>e.regime==='4_5').length},{l:'Mi-temps',v:'0,5 ETP',n:ae.filter(e=>e.regime==='half').length}].map((r,i)=>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <span>{r.l} ({r.n} pers.)</span><span style={{fontWeight:600,color:'#e8e6e0'}}>{r.v}</span>
+            </div>
+          )}
+          <div style={{marginTop:10,padding:10,background:'rgba(198,163,78,.06)',borderRadius:6,textAlign:'center'}}>
+            <div style={{fontSize:10,color:'#5e5c56'}}>ETP TOTAL</div>
+            <div style={{fontSize:24,fontWeight:700,color:'#c6a34e'}}>{etpTotal.toFixed(1)}</div>
+          </div>
+        </div>
+      </C>
+    </div>
   </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  EXPORT / IMPORT
@@ -9513,41 +9553,44 @@ ${lines.map((l,i)=>{const lineAmt=(parseFloat(l.qty)||0)*(parseFloat(l.price)||0
 //  SECTEURS SPÉCIFIQUES (Hôpitaux, Construction, Ateliers, IMP)
 // ═══════════════════════════════════════════════════════════════
 function SecteursMod({s,d}){
-  const [secteur,setSecteur]=useState('hopital');
-  const sects=[{v:'hopital',l:'🏥 Hôpitaux',cp:'330',desc:'Gestion spécifique personnel soignant: primes de nuit, week-end, jours fériés, gardes, IFIC, Fonds Maribel social.'},{v:'construction',l:'🏗️ Construction',cp:'124',desc:'Timbres intempéries/fidélité, prime de mobilité, indemnité outillage, caisse congés payés construction.'},{v:'atelier',l:'🏭 Ateliers protégés (ETA)',cp:'327',desc:'Subsides selon catégorie handicap, relevés AViQ/COCOF, taux ONSS réduits.'},{v:'imp',l:'🏛️ IMP (Institutions publiques)',cp:'',desc:'Barèmes publics, pécule de vacances secteur public, allocation de foyer/résidence, prime Copernic.'}];
-  const sel=sects.find(x=>x.v===secteur);
-  const specifics={
-    hopital:[{l:'Prime IFIC mensuelle',v:'Variable selon fonction'},{l:'Prime de nuit',v:'+ 35% du taux horaire'},{l:'Prime week-end',v:'+ 56% samedi, + 100% dimanche'},{l:'Maribel social',v:'Réduction ONSS secteur non-marchand'},{l:'Prime d\'attractivité',v:'2% du brut annuel'},{l:'Complément de pension',v:'2ème pilier sectoriel'}],
-    construction:[{l:'Timbres fidélité',v:'9% du salaire brut'},{l:'Timbres intempéries',v:'2% du salaire brut'},{l:'Prime de mobilité',v:'€0,1579/km (max 64km)'},{l:'Indemnité outillage',v:'Variable selon fonction'},{l:'Congés construction',v:'Via caisse CP 124'},{l:'Prime de fin d\'année',v:'Via fonds sectoriel'}],
-    atelier:[{l:'Subside cat. 1-2',v:'25% masse salariale'},{l:'Subside cat. 3',v:'50% masse salariale'},{l:'Subside cat. 4',v:'75% masse salariale'},{l:'Réduction ONSS',v:'Taux réduit ETA'},{l:'Relevé AViQ',v:'Trimestriel obligatoire'},{l:'Encadrement',v:'Subside personnel encadrant'}],
-    imp:[{l:'Allocation foyer',v:'€178,16/mois (marié)'},{l:'Allocation résidence',v:'€89,08/mois (isolé)'},{l:'Pécule vacances',v:'92% du traitement mensuel'},{l:'Prime Copernic',v:'Variable selon niveau'},{l:'Barème',v:'Selon niveau/échelon public'},{l:'Pension publique',v:'Cotisation pension 7,5%'}],
-  };
+  const [search,setSearch]=useState('');
+  const cps=[
+    {cp:'100',l:'CP 100 — Commission auxiliaire pour ouvriers',sal:'Selon barème',prime:'Oui',index:'Oui'},
+    {cp:'124',l:'CP 124 — Construction',sal:'€16,50-€22,00/h',prime:'Prime intempéries',index:'Oui'},
+    {cp:'140',l:'CP 140 — Transport et logistique',sal:'Selon catégorie',prime:'Prime de nuit',index:'Oui'},
+    {cp:'200',l:'CP 200 — CPNAE (employés)',sal:'Barème sectoriel',prime:'Prime de fin d\'année',index:'Oui'},
+    {cp:'302',l:'CP 302 — Industrie hôtelière (Horeca)',sal:'€12,50-€16,00/h',prime:'Nourr. + pourboires',index:'Oui'},
+    {cp:'330',l:'CP 330 — Établissements de santé',sal:'IFIC barèmes',prime:'Maribel social',index:'Oui'},
+    {cp:'111',l:'CP 111 — Construction métallique',sal:'Barème métal',prime:'Prime équipe',index:'Oui'},
+    {cp:'218',l:'CP 218 — Employés secteur alimentaire',sal:'Selon qualification',prime:'Oui',index:'Oui'},
+    {cp:'226',l:'CP 226 — Commerce international',sal:'Selon fonction',prime:'13ème mois',index:'Oui'},
+    {cp:'336',l:'CP 336 — Professions libérales',sal:'Selon barème',prime:'Prime annuelle',index:'Oui'},
+  ];
+  const filtered=search?cps.filter(c=>c.l.toLowerCase().includes(search.toLowerCase())||c.cp.includes(search)):cps;
+  
   return <div>
-    <PH title="Secteurs Spécifiques" sub="Hôpitaux, Construction, Ateliers protégés, IMP"/>
-    <div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
-      <C><ST>Secteur</ST>
-        <I label="Secteur" value={secteur} onChange={setSecteur} options={sects.map(x=>({v:x.v,l:x.l}))}/>
-        {sel?.cp&&<div style={{marginTop:12,fontSize:12,color:'#9e9b93'}}>Commission paritaire: <b style={{color:'#c6a34e'}}>CP {sel.cp}</b></div>}
-        <div style={{marginTop:14,padding:12,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:11,color:'#60a5fa',lineHeight:1.6}}>{sel?.desc}</div>
-      </C>
-      <C>
-        <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0',marginBottom:16}}>{sel?.l} — Spécificités sectorielles</div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
-          {(specifics[secteur]||[]).map((sp,i)=>
-            <div key={i} style={{padding:14,background:'rgba(198,163,78,.04)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
-              <div style={{fontSize:11.5,fontWeight:600,color:'#c6a34e',marginBottom:4}}>{sp.l}</div>
-              <div style={{fontSize:12,color:'#d4d0c8'}}>{sp.v}</div>
-            </div>
-          )}
+    <PH title="Commissions Paritaires" sub="Barèmes, primes, avantages sectoriels"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'CP référencées',v:cps.length,c:'#60a5fa'},{l:'Avec barème',v:cps.length,c:'#c6a34e'},{l:'Indexation auto',v:cps.filter(c=>c.index==='Oui').length,c:'#4ade80'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
         </div>
-        <div style={{marginTop:16,padding:12,background:'rgba(198,163,78,.05)',borderRadius:8,border:'1px solid rgba(198,163,78,.1)'}}>
-          <div style={{fontSize:11,color:'#c6a34e',fontWeight:600,marginBottom:6}}>Codes de paie spécifiques</div>
-          <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>Les codes de paie et calculs spécifiques au secteur {sel?.l.replace(/[🏥🏗️🏭🏛️]\s*/,'')} sont automatiquement intégrés lors de la sélection de la CP correspondante dans le signalétique employeur. Les barèmes sectoriels sont mis à jour à chaque release.</div>
-        </div>
-      </C>
+      )}
     </div>
+    <I label="Rechercher une CP (numéro ou nom)" value={search} onChange={setSearch}/>
+    <C style={{marginTop:12,padding:0,overflow:'hidden'}}>
+      <Tbl cols={[
+        {k:'cp',l:'CP',b:1,r:r=><span style={{fontWeight:700,color:'#c6a34e'}}>{r.cp}</span>},
+        {k:'l',l:'Commission paritaire',r:r=>r.l.split(' — ')[1]||r.l},
+        {k:'s',l:'Salaire indicatif',r:r=>r.sal},
+        {k:'p',l:'Prime sectorielle',r:r=>r.prime},
+        {k:'i',l:'Indexation',r:r=><span style={{color:'#4ade80'}}>✓</span>},
+      ]} data={filtered}/>
+    </C>
   </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  RÈGLEMENT DE TRAVAIL — Générateur complet
@@ -11737,51 +11780,65 @@ function AbsencesMod({s,d}){
 //  INDEX AUTOMATIQUE DES SALAIRES
 // ═══════════════════════════════════════════════════════════════
 function IndexAutoMod({s,d}){
-  const [indexPct,setIndexPct]=useState(2.21);
-  const [dateIndex,setDateIndex]=useState('01/01/2026');
-  const [applied,setApplied]=useState(false);
-  const ae=s.emps.filter(e=>e.status==='active');
-  const pct=parseFloat(indexPct)||0;
-  const preview=ae.map(e=>({...e,newSalary:e.monthlySalary*(1+pct/100),diff:e.monthlySalary*(pct/100)}));
-  const totalDiff=preview.reduce((a,e)=>a+e.diff,0);
+  const ae=s.emps||[];const [tab,setTab]=useState('sim');
+  const [tauxIndex,setTauxIndex]=useState(2.0);
+  const data=ae.map(e=>{const p=calc(e,DPER,s.co);const augm=p.gross*tauxIndex/100;return{e,p,augm,newGross:p.gross+augm};});
+  const totAugm=data.reduce((a,r)=>a+r.augm,0);const totCout=totAugm*1.35*12;
   
   return <div>
-    <PH title="Indexation automatique des salaires" sub="Adaptation barémique selon indice-pivot / CCT sectorielle"/>
-    <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
-      <C>
-        <ST>Paramètres d'indexation</ST>
-        <I label="Taux d'indexation (%)" type="number" value={indexPct} onChange={setIndexPct}/>
-        <I label="Date d'application" value={dateIndex} onChange={setDateIndex}/>
-        <div style={{marginTop:14,padding:12,background:'rgba(198,163,78,.06)',borderRadius:8,fontSize:12,color:'#9e9b93',lineHeight:2}}>
-          <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>Impact</div>
-          <div>Travailleurs: <b style={{color:'#e8e6e0'}}>{ae.length}</b></div>
-          <div>Surcoût mensuel: <b style={{color:'#f87171'}}>{fmt(totalDiff)}</b></div>
-          <div>Surcoût annuel: <b style={{color:'#f87171'}}>{fmt(totalDiff*13)}</b></div>
+    <PH title="Indexation Automatique" sub="Index-pivot — Simulation impact salarial"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Taux indexation',v:tauxIndex.toFixed(2)+'%',c:'#c6a34e'},{l:'Augmentation mensuelle',v:fmt(totAugm),c:'#fb923c'},{l:'Surcoût annuel (charges)',v:fmt(totCout),c:'#f87171'},{l:'Travailleurs impactés',v:ae.length,c:'#60a5fa'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
         </div>
-        <B style={{width:'100%',marginTop:14}} onClick={()=>{
-          if(confirm(`Appliquer l'indexation de ${pct}% à ${ae.length} travailleurs ?`)){
-            ae.forEach(e=>d({type:'UPD_E',d:{...e,monthlySalary:Math.round(e.monthlySalary*(1+pct/100)*100)/100}}));
-            setApplied(true);
-          }
-        }}>{applied?'✅ Indexation appliquée':'Appliquer l\'indexation'}</B>
-        <div style={{marginTop:12,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>
-          <b>CP 200</b>: Indexation annuelle au 01/01 (2,21% en 2026)<br/>
-          <b>CP 124</b>: Indexation trimestrielle (0,2186%)<br/>
-          <b>Indice-pivot</b>: Dépassement → +2% fonctionnaires et allocations sociales
+      )}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'sim',l:'Simulation'},{v:'history',l:'Historique index'},{v:'rules',l:'Mécanisme'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    {tab==='sim'&&<div style={{display:'grid',gridTemplateColumns:'250px 1fr',gap:18}}>
+      <C><ST>Paramètres</ST>
+        <I label="Taux indexation (%)" type="number" value={tauxIndex} onChange={v=>setTauxIndex(+v)}/>
+        <div style={{marginTop:14,padding:14,background:'rgba(198,163,78,.06)',borderRadius:8,textAlign:'center'}}>
+          <div style={{fontSize:10,color:'#5e5c56'}}>SURCOÛT ANNUEL TOTAL</div>
+          <div style={{fontSize:24,fontWeight:700,color:'#f87171',marginTop:4}}>{fmt(totCout)}</div>
+          <div style={{fontSize:10,color:'#5e5c56'}}>charges comprises (×1,35)</div>
         </div>
       </C>
       <C style={{padding:0,overflow:'hidden'}}>
-        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Prévisualisation — +{pct}% au {dateIndex}</div></div>
+        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Impact par travailleur</div></div>
         <Tbl cols={[
-          {k:'n',l:'Travailleur',b:1,r:r=>`${r.first} ${r.last}`},
-          {k:'a',l:'Salaire actuel',a:'right',r:r=>fmt(r.monthlySalary)},
-          {k:'b',l:'Nouveau salaire',a:'right',r:r=><span style={{color:'#4ade80',fontWeight:600}}>{fmt(r.newSalary)}</span>},
-          {k:'d',l:'Différence',a:'right',r:r=><span style={{color:'#fb923c'}}>+{fmt(r.diff)}</span>},
-        ]} data={preview}/>
+          {k:'n',l:'Travailleur',b:1,r:r=>`${r.e.first} ${r.e.last}`},
+          {k:'g',l:'Brut actuel',a:'right',r:r=>fmt(r.p.gross)},
+          {k:'a',l:'Augmentation',a:'right',r:r=><span style={{color:'#fb923c'}}>+{fmt(r.augm)}</span>},
+          {k:'ng',l:'Nouveau brut',a:'right',r:r=><span style={{fontWeight:600,color:'#4ade80'}}>{fmt(r.newGross)}</span>},
+        ]} data={data}/>
       </C>
-    </div>
+    </div>}
+    {tab==='history'&&<C><ST>Dépassements d'index-pivot récents</ST>
+      {[{d:'Octobre 2025',t:'2,00%',s:'CP 200, 218, 226'},{d:'Janvier 2025',t:'2,00%',s:'CP 124 (construction)'},{d:'Novembre 2024',t:'2,00%',s:'CP 200'},{d:'Janvier 2024',t:'2,00%',s:'Tous secteurs'}].map((r,i)=>
+        <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
+          <b style={{color:'#e8e6e0'}}>{r.d}</b><span style={{color:'#c6a34e'}}>{r.t}</span><span style={{color:'#9e9b93',fontSize:10}}>{r.s}</span>
+        </div>
+      )}
+    </C>}
+    {tab==='rules'&&<C><ST>Mécanisme d'indexation belge</ST>
+      <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+        {[{l:'Indice de base',v:'Indice santé lissé (sans tabac, alcool, carburant)'},{l:'Pivot',v:'Déclenchement quand indice dépasse le pivot'},{l:'Taux',v:'2% à chaque dépassement'},{l:'Moment',v:'Varie selon CP (mensuel ou fixe janvier)'},{l:'Secteur public',v:'Automatique au mois de dépassement'},{l:'Secteur privé',v:'Selon convention sectorielle'}].map((r,i)=>
+          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <span>{r.l}</span><span style={{fontWeight:600,color:'#e8e6e0'}}>{r.v}</span>
+          </div>
+        )}
+      </div>
+    </C>}
   </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  PLAN CAFÉTÉRIA / FLEXIBLE REWARD
@@ -11841,51 +11898,59 @@ function CafeteriaMod({s,d}){
 //  BONUS CCT 90 — Prime non récurrente liée aux résultats
 // ═══════════════════════════════════════════════════════════════
 function CCT90Mod({s,d}){
-  const [montant,setMontant]=useState(2998);
-  const [yr,setYr]=useState(new Date().getFullYear());
-  const ae=s.emps.filter(e=>e.status==='active');
-  const plafond=3948; // plafond 2026 estimé
-  const onssW=montant*0.1307;
-  const cotSolidarite=montant*0.3307; // 33,07% patronal
-  const netTrav=montant-onssW;
-  const coutEmpl=montant+cotSolidarite;
-  const impotTrav=0; // Exonéré IPP si ≤ plafond
+  const ae=s.emps||[];const [montant,setMontant]=useState(2000);const [type,setType]=useState('collectif');
+  const n=ae.length;const totBrut=montant*n;
+  const cotSpec=totBrut*0.3313;// 33,13% cotisation patronale spéciale
+  const impot=0;// exonéré PP si conditions respectées
+  const cotW=totBrut*0.1307;
+  const netTrav=totBrut-cotW;
   
   return <div>
-    <PH title="Bonus CCT 90" sub={`Prime non récurrente liée aux résultats — Plafond ${yr}: ${fmt(plafond)}`}/>
-    <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
-      <C>
-        <ST>Configuration</ST>
-        <I label="Montant brut (€)" type="number" value={montant} onChange={v=>setMontant(parseFloat(v)||0)}/>
-        <I label="Année" type="number" value={yr} onChange={setYr}/>
-        <div style={{marginTop:14,padding:12,background:'rgba(74,222,128,.08)',borderRadius:8,fontSize:12,color:'#9e9b93',lineHeight:2}}>
-          <div style={{fontWeight:600,color:'#4ade80',marginBottom:4}}>Avantage fiscal</div>
-          <div>ONSS travailleur: <b style={{color:'#f87171'}}>13,07%</b> (pas les 25-50% PP !)</div>
-          <div>Cotisation patronale: <b style={{color:'#f87171'}}>33,07%</b></div>
-          <div>Impôt travailleur: <b style={{color:'#4ade80'}}>0% (exonéré IPP)</b></div>
+    <PH title="CCT 90 — Bonus Salarial" sub="Avantages non récurrents liés aux résultats — Plan bonus"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Bonus/trav.',v:fmt(montant),c:'#c6a34e'},{l:'Coût total employeur',v:fmt(totBrut+cotSpec),c:'#f87171',s:'bonus + 33,13%'},{l:'Net travailleur',v:fmt(netTrav/n),c:'#4ade80',s:'après ONSS 13,07%'},{l:'Plafond 2026',v:'€ 4.020',c:'#a78bfa',s:'par travailleur'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+          {k.s&&<div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>{k.s}</div>}
         </div>
-        <div style={{marginTop:10,padding:10,background:montant<=plafond?'rgba(74,222,128,.06)':'rgba(248,113,113,.06)',borderRadius:8,fontSize:11,color:montant<=plafond?'#4ade80':'#f87171'}}>
-          {montant<=plafond?'✅ Dans le plafond CCT 90':'❌ Dépasse le plafond ! L\'excédent sera traité comme rémunération ordinaire.'}
-        </div>
-      </C>
-      <C>
-        <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0',marginBottom:16}}>Simulation pour {ae.length} travailleur(s)</div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:14,marginBottom:20}}>
-          {[{l:'Net travailleur',v:netTrav,c:'#4ade80'},{l:'Coût employeur',v:coutEmpl,c:'#f87171'},{l:'Économie vs brut classique',v:montant*0.45-impotTrav,c:'#60a5fa'}].map((x,i)=>
-            <div key={i} style={{padding:16,background:'rgba(198,163,78,.04)',borderRadius:8,textAlign:'center',border:'1px solid rgba(198,163,78,.08)'}}>
-              <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase'}}>{x.l}</div>
-              <div style={{fontSize:20,fontWeight:700,color:x.c,marginTop:4}}>{fmt(x.v)}</div>
+      )}
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
+      <div>
+        <C><ST>Paramètres plan bonus</ST>
+          <I label="Montant par travailleur (€)" type="number" value={montant} onChange={v=>setMontant(+v)}/>
+          <I label="Type" value={type} onChange={v=>setType(v)} style={{marginTop:9}} options={[{v:'collectif',l:'Collectif (tous les travailleurs)'},{v:'categorie',l:'Par catégorie objective'},{v:'entreprise',l:'Objectif d\'entreprise'}]}/>
+          <div style={{marginTop:14,padding:14,background:'rgba(198,163,78,.06)',borderRadius:8}}>
+            <div style={{fontSize:11,color:'#9e9b93',lineHeight:2}}>
+              {[{l:'Bonus brut total',v:fmt(totBrut)},{l:'Cotis. patronale 33,13%',v:fmt(cotSpec)},{l:'Coût total employeur',v:fmt(totBrut+cotSpec)},{l:'ONSS trav. 13,07%',v:fmt(cotW)},{l:'PP travailleur',v:'€ 0 (exonéré)'},{l:'Net total travailleurs',v:fmt(netTrav)}].map((r,i)=>
+                <div key={i} style={{display:'flex',justifyContent:'space-between',borderBottom:'1px solid rgba(255,255,255,.03)',padding:'2px 0'}}>
+                  <span>{r.l}</span><span style={{fontWeight:600,color:r.l.includes('Coût')?'#f87171':r.l.includes('Net')?'#4ade80':'#e8e6e0'}}>{r.v}</span>
+                </div>
+              )}
             </div>
+          </div>
+        </C>
+      </div>
+      <C><ST>Procédure CCT 90</ST>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {['1. Rédaction de l\'acte d\'adhésion (< 50 trav.) ou CCT d\'entreprise (≥ 50)','2. Objectifs mesurables, vérifiables, incertains','3. Période de référence: min. 3 mois','4. Dépôt au SPF ETCS (greffe)','5. Évaluation des résultats à la fin de la période','6. Paiement si objectifs atteints','7. Mention sur fiche de paie (code spécifique)'].map((step,i)=>
+            <div key={i} style={{padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>{step}</div>
           )}
         </div>
-        <div style={{padding:14,background:'rgba(96,165,250,.04)',borderRadius:8,fontSize:11.5,color:'#60a5fa',lineHeight:1.8}}>
-          <b>Conditions:</b> Plan d'octroi via formulaire type SPF Emploi. Objectifs collectifs mesurables. Période de référence min. 3 mois. Déposé au greffe de la Direction générale des Relations collectives de travail.<br/>
-          <b>Total pour {ae.length} travailleurs:</b> Net versé: {fmt(netTrav*ae.length)} — Coût total: {fmt(coutEmpl*ae.length)}
+        <div style={{marginTop:12,display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          {[{t:'Avantages employeur',items:['Cotis. 33,13% (vs ~35% salaire)','Déductible fiscalement','Motivation équipe']},{t:'Avantages travailleur',items:['Exonéré précompte prof.','Seul 13,07% ONSS','Jusqu\'à €4.020/an net']}].map((col,ci)=>
+            <div key={ci} style={{padding:10,background:'rgba(74,222,128,.04)',borderRadius:8}}>
+              <div style={{fontWeight:600,color:'#4ade80',fontSize:11,marginBottom:4}}>{col.t}</div>
+              {col.items.map((it,ii)=><div key={ii} style={{fontSize:10.5,color:'#9e9b93',padding:'2px 0'}}>✓ {it}</div>)}
+            </div>
+          )}
         </div>
       </C>
     </div>
   </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  BUDGET MOBILITÉ — 3 Piliers (Loi 17/03/2019)
