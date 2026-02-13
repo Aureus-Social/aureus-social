@@ -2498,7 +2498,7 @@ function genBelcotax(co, emp, yr, ad) {
 }
 
 // ─── INITIAL STATE ───────────────────────────────────────────
-const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:'info@aureu-ia.com'};
+const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:'info@aureus-ia.com',version:'v22',sprint:'Sprint 4'};
 const CAR_MODELS={
 'Aiways':['U5','U6'],
 'Alfa Romeo':['Giulia','Stelvio','Tonale','Junior','Giulietta','MiTo'],
@@ -3786,7 +3786,7 @@ function AppInner({ supabase, user, onLogout }) {
           </div>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
             <LangSwitch/>
-            <span style={{fontSize:8.5,padding:'2px 8px',borderRadius:4,background:'rgba(198,163,78,.08)',color:'#8b7340',fontWeight:600,letterSpacing:'.5px'}}>v22</span>
+            <span style={{fontSize:8.5,padding:'2px 8px',borderRadius:4,background:'rgba(198,163,78,.08)',color:'#8b7340',fontWeight:600,letterSpacing:'.5px'}}>{AUREUS_INFO.version}</span>
           </div>
           {s.activeClient&&<div style={{marginTop:10,padding:'10px 12px',background:'linear-gradient(135deg,rgba(198,163,78,.06),rgba(198,163,78,.02))',borderRadius:10,border:'1px solid rgba(198,163,78,.12)'}}>
             <div style={{fontSize:11.5,fontWeight:600,color:'#c6a34e'}}>{s.co.name||'Client'}</div>
@@ -3835,7 +3835,7 @@ function AppInner({ supabase, user, onLogout }) {
         <div style={{padding:'12px 16px',borderTop:'1px solid rgba(139,115,60,.1)',fontSize:9,color:'#5e5c56'}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
             <span>{s.co.vat||'Aureus IA SPRL'}</span>
-            <span style={{color:'#8b7340',fontWeight:600}}>v22 Pro — Sprint 2</span>
+            <span style={{color:'#8b7340',fontWeight:600}}>{AUREUS_INFO.version} Pro — {AUREUS_INFO.sprint}</span>
           </div>
         </div>
       </aside>
