@@ -2283,7 +2283,7 @@ function genDimonaXML(d) {
       </ExtraData>`:''}
     </Feature>
     <SenderSoftware>AureusSocialPro</SenderSoftware>
-    <SenderSoftwareVersion>2026.3</SenderSoftwareVersion>
+    <SenderSoftwareVersion>2026.4</SenderSoftwareVersion>
   </DimonaDeclaration>
 </Dimona>`;
 }
@@ -2377,7 +2377,7 @@ function genDMFAXML(co, emps, q, y) {
     <Reference>${ref}</Reference>
     <FormSubType>ORIGINAL</FormSubType>
     <SenderSoftware>AureusSocialPro</SenderSoftware>
-    <SenderSoftwareVersion>2026.3</SenderSoftwareVersion>
+    <SenderSoftwareVersion>2026.4</SenderSoftwareVersion>
     <SenderCompanyID>${nrEnt}</SenderCompanyID>
   </FormCreation>
   <EmployerDeclaration>
@@ -2498,7 +2498,7 @@ function genBelcotax(co, emp, yr, ad) {
 }
 
 // ─── INITIAL STATE ───────────────────────────────────────────
-const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:'info@aureus-ia.com',version:'v22',sprint:'Sprint 4'};
+const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:'info@aureus-ia.com',version:'v23',sprint:'Sprint 5'};
 const CAR_MODELS={
 'Aiways':['U5','U6'],
 'Alfa Romeo':['Giulia','Stelvio','Tonale','Junior','Giulietta','MiTo'],
@@ -8420,27 +8420,91 @@ function AssGroupeMod({s,d}){
 //  MÉDECINE DU TRAVAIL
 // ═══════════════════════════════════════════════════════════════
 function MedTravailMod({s,d}){
-  const [entries,setEntries]=useState([]);
-  const [f,setF]=useState({eid:s.emps[0]?.id||'',typeVisite:'periodique',date:'',resultat:'apte',prochaine:'',remarques:''});
-  const visites=[{v:'periodique',l:'Visite périodique'},{v:'embauche',l:'Visite d\'embauche'},{v:'reprise',l:'Visite de reprise'},{v:'spontanee',l:'Consultation spontanée'},{v:'prealable',l:'Évaluation préalable'}];
-  const resultats=[{v:'apte',l:'Apte'},{v:'apte_restrict',l:'Apte avec restrictions'},{v:'inapte_temp',l:'Inapte temporaire'},{v:'inapte_def',l:'Inapte définitif'}];
-  const add=()=>{const emp=s.emps.find(e=>e.id===f.eid);if(!emp)return;
-    setEntries([...entries,{id:uid(),emp:`${emp.first} ${emp.last}`,...f,typeLabel:visites.find(v=>v.v===f.typeVisite)?.l,at:new Date().toISOString()}]);
-  };
-  return <div style={{display:'grid',gridTemplateColumns:'340px 1fr',gap:18}}>
-    <C><ST>Médecine du Travail</ST>
-      <I label="Travailleur" value={f.eid} onChange={v=>setF({...f,eid:v})} options={s.emps.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
-      <I label="Type de visite" value={f.typeVisite} onChange={v=>setF({...f,typeVisite:v})} style={{marginTop:9}} options={visites}/>
-      <I label="Date" type="date" value={f.date} onChange={v=>setF({...f,date:v})} style={{marginTop:9}}/>
-      <I label="Résultat" value={f.resultat} onChange={v=>setF({...f,resultat:v})} style={{marginTop:9}} options={resultats}/>
-      <I label="Prochaine visite" type="date" value={f.prochaine} onChange={v=>setF({...f,prochaine:v})} style={{marginTop:9}}/>
-      <I label="Remarques" value={f.remarques} onChange={v=>setF({...f,remarques:v})} style={{marginTop:9}}/>
-      <B onClick={add} style={{width:'100%',marginTop:14}}>Enregistrer</B>
-    </C>
-    <C style={{padding:0,overflow:'hidden'}}>
-      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Suivi médical</div></div>
-      <Tbl cols={[{k:'e',l:'Travailleur',b:1,r:r=>r.emp},{k:'t',l:'Type',r:r=>r.typeLabel},{k:'d',l:'Date',r:r=>r.date},{k:'r',l:'Résultat',r:r=><span style={{fontSize:10.5,padding:'2px 6px',borderRadius:4,fontWeight:600,background:r.resultat==='apte'?'rgba(74,222,128,.1)':r.resultat==='apte_restrict'?'rgba(198,163,78,.1)':'rgba(248,113,113,.1)',color:r.resultat==='apte'?'#4ade80':r.resultat==='apte_restrict'?'#c6a34e':'#f87171'}}>{resultats.find(x=>x.v===r.resultat)?.l}</span>},{k:'p',l:'Prochaine',r:r=>r.prochaine||'—'},{k:'rm',l:'Remarques',r:r=><span style={{fontSize:10.5,color:'#9e9b93'}}>{r.remarques||'—'}</span>}]} data={entries}/>
-    </C>
+  const ae=s.emps||[];const [tab,setTab]=useState('planning');
+  const [visite,setVisite]=useState([]);
+  const n=ae.length;
+  const coutUnit=91.50;// tarif 2026 SPMT/Cohezio/Securex
+  const coutAn=n*coutUnit;
+  
+  // Planning based on risk categories
+  const planning=ae.map(e=>{
+    const risk=e.fn?.toLowerCase().includes('chauffeur')||e.fn?.toLowerCase().includes('ouvrier')?'elevé':'standard';
+    const freq=risk==='elevé'?12:60;// mois entre visites
+    const lastVisit=e.startD||'2025-01-15';
+    const nextD=new Date(lastVisit);nextD.setMonth(nextD.getMonth()+freq);
+    const isOverdue=nextD<new Date();
+    return{e,risk,freq,lastVisit,nextD:nextD.toISOString().split('T')[0],isOverdue};
+  });
+  const overdue=planning.filter(p=>p.isOverdue).length;
+  
+  return <div>
+    <PH title="Médecine du Travail" sub="SEPPT — Surveillance santé, planning, coûts"/>
+    {/* KPIs */}
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Travailleurs soumis',v:n,c:'#60a5fa'},{l:'En retard',v:overdue,c:overdue>0?'#f87171':'#4ade80'},{l:'Coût annuel',v:fmt(coutAn),c:'#c6a34e'},{l:'Tarif/trav.',v:'€'+coutUnit,c:'#9e9b93'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    {/* Tabs */}
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'planning',l:'Planning visites'},{v:'types',l:'Types d\'examens'},{v:'seppt',l:'SEPPT & Tarifs'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    
+    {tab==='planning'&&<C style={{padding:0,overflow:'hidden'}}>
+      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Planning surveillance santé</div></div>
+      <Tbl cols={[
+        {k:'n',l:'Travailleur',b:1,r:r=>`${r.e.first} ${r.e.last}`},
+        {k:'f',l:'Fonction',r:r=><span style={{fontSize:11}}>{r.e.fn||'—'}</span>},
+        {k:'r',l:'Risque',r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:r.risk==='elevé'?'rgba(248,113,113,.1)':'rgba(74,222,128,.1)',color:r.risk==='elevé'?'#f87171':'#4ade80',fontWeight:600}}>{r.risk}</span>},
+        {k:'fr',l:'Fréquence',r:r=><span style={{fontSize:11}}>{r.freq} mois</span>},
+        {k:'l',l:'Dernière',r:r=><span style={{fontSize:11}}>{r.lastVisit}</span>},
+        {k:'nx',l:'Prochaine',r:r=><span style={{fontWeight:600,color:r.isOverdue?'#f87171':'#4ade80'}}>{r.nextD} {r.isOverdue?'⚠':''}</span>},
+      ]} data={planning}/>
+    </C>}
+    
+    {tab==='types'&&<C><ST>Types d'examens médicaux</ST>
+      <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+        {[{t:'Évaluation santé préalable',d:'Avant mise au travail — postes de sécurité/vigilance',f:'Obligatoire',c:'#f87171'},
+          {t:'Évaluation santé périodique',d:'Selon risque: annuel (élevé) ou quinquennal (standard)',f:'12 ou 60 mois',c:'#60a5fa'},
+          {t:'Examen de reprise',d:'Après absence > 4 semaines (maladie/accident)',f:'Dans les 10 jours ouvrables',c:'#fb923c'},
+          {t:'Visite de pré-reprise',d:'À la demande du travailleur pendant incapacité',f:'Facultatif',c:'#a78bfa'},
+          {t:'Surveillance prolongée',d:'Exposition agents chimiques/biologiques',f:'Selon substance',c:'#f59e0b'},
+          {t:'Examen de sortie',d:'Exposition à des agents à risque',f:'À la fin du contrat',c:'#9e9b93'},
+        ].map((r,i)=><div key={i} style={{padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+          <div style={{display:'flex',justifyContent:'space-between'}}><b style={{color:'#e8e6e0'}}>{r.t}</b><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:`${r.c}15`,color:r.c}}>{r.f}</span></div>
+          <div style={{fontSize:10.5,marginTop:2}}>{r.d}</div>
+        </div>)}
+      </div>
+    </C>}
+    
+    {tab==='seppt'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Services externes (SEPPT)</ST>
+        {[{n:'Cohezio',z:'Bruxelles, Wallonie',t:'€91.50/trav./an'},{n:'SPMT-ARISTA',z:'Bruxelles, Wallonie',t:'€91.50/trav./an'},{n:'Securex Prevention',z:'Nationale',t:'€91.50/trav./an'},{n:'Mensura',z:'Nationale',t:'€91.50/trav./an'},{n:'Liantis',z:'Flandre, Bruxelles',t:'€91.50/trav./an'},{n:'IDEWE',z:'Flandre, Bruxelles',t:'€91.50/trav./an'}].map((r,i)=>
+          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
+            <div><b style={{color:'#e8e6e0'}}>{r.n}</b><div style={{fontSize:10,color:'#5e5c56'}}>{r.z}</div></div>
+            <span style={{color:'#c6a34e',fontWeight:600}}>{r.t}</span>
+          </div>
+        )}
+      </C>
+      <C><ST>Coût pour votre entreprise</ST>
+        <div style={{padding:16,textAlign:'center',background:'rgba(198,163,78,.06)',borderRadius:8,marginBottom:12}}>
+          <div style={{fontSize:10,color:'#5e5c56'}}>COÛT ANNUEL TOTAL</div>
+          <div style={{fontSize:28,fontWeight:700,color:'#c6a34e',marginTop:4}}>{fmt(coutAn)}</div>
+          <div style={{fontSize:11,color:'#5e5c56'}}>{n} trav. × €{coutUnit}/an</div>
+        </div>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          <div>Cotisation forfaitaire min.: <b style={{color:'#e8e6e0'}}>€91,50/trav./an</b></div>
+          <div>Facturation: <b style={{color:'#e8e6e0'}}>Trimestrielle par SEPPT</b></div>
+          <div>Base légale: <b style={{color:'#e8e6e0'}}>Code du bien-être au travail, Livre I, Titre 4</b></div>
+        </div>
+      </C>
+    </div>}
   </div>;
 }
 
@@ -12036,19 +12100,105 @@ function ATNMod({s,d}){
 }
 
 function ChomTempMod({s,d}){
-  const ae=s.emps||[];const [ds,setDs]=useState([]);const [f,setF]=useState({emp:'',motif:'eco',debut:'',fin:'',jours:0});
-  const mots=[{v:'eco',l:'Économique'},{v:'fm',l:'Force majeure'},{v:'int',l:'Intempéries'},{v:'tech',l:'Technique'}];
-  const add=()=>{if(!f.emp)return;setDs(p=>[...p,{...f,id:'CT-'+Date.now()}]);setF({emp:'',motif:'eco',debut:'',fin:'',jours:0});};
-  return <div><C style={{padding:'18px 20px'}}><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}><span style={{fontSize:24}}>⚠</span><div><div style={{fontWeight:700,fontSize:16}}>Chômage temporaire</div><div style={{fontSize:11,color:'#5e5c56'}}>C3.2, notification ONEM. Client verse les cotisations.</div></div></div>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10}}>
-      <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
-      <I label="Motif" value={f.motif} onChange={v=>setF({...f,motif:v})} options={mots}/>
-      <I label="Début" type="date" value={f.debut} onChange={v=>setF({...f,debut:v})}/>
-      <I label="Fin" type="date" value={f.fin} onChange={v=>setF({...f,fin:v})}/>
-      <I label="Jours" type="number" value={f.jours} onChange={v=>setF({...f,jours:v})}/>
-    </div><button onClick={add} style={{marginTop:12,padding:'8px 20px',background:'linear-gradient(135deg,#c6a34e,#e8c547)',border:'none',borderRadius:8,color:'#000',fontWeight:700,cursor:'pointer'}}>+ Créer dossier</button></C>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginTop:12}}><SC label="Dossiers" value={ds.length} color="#fb923c"/><SC label="Jours" value={ds.reduce((a,c)=>a+(+c.jours||0),0)} color="#60a5fa"/><SC label="C3.2" value={ds.length} color="#a78bfa"/></div>
-    {ds.length>0&&<C style={{marginTop:12}}><TB cols={[{k:'e',l:'Travailleur'},{k:'m',l:'Motif'},{k:'p',l:'Période'},{k:'j',l:'Jours'}]} rows={ds.map(x=>{const e=ae.find(a=>a.id===x.emp);return{e:e?`${e.first} ${e.last}`:'?',m:mots.find(m=>m.v===x.motif)?.l,p:`${x.debut||'?'} → ${x.fin||'?'}`,j:x.jours};})}/></C>}</div>;
+  const ae=s.emps||[];const [ds,setDs]=useState([]);
+  const [f,setF]=useState({emp:'',motif:'eco',debut:'',fin:'',jours:0,regime:'ft'});
+  const [tab,setTab]=useState('new');
+  const mots=[{v:'eco',l:'Économique (Art. 51 Loi 3/7/1978)'},{v:'fm',l:'Force majeure (Art. 26)'},{v:'int',l:'Intempéries (Art. 50)'},{v:'tech',l:'Technique (Art. 49)'},{v:'med',l:'Force majeure médicale'},{v:'energie',l:'Crise énergétique (AR 11/2022)'}];
+  
+  const emp=ae.find(e=>e.id===f.emp);
+  const add=()=>{
+    if(!emp)return;
+    const p=emp.id?calc(emp,DPER,s.co):{gross:0};
+    const alloc=Math.min(p.gross*0.65,2000);// plafond ONEM simplifié
+    const suppl=f.motif==='eco'?2:f.motif==='energie'?6.22:0;// supplément employeur
+    setDs(p2=>[{...f,id:'CT-'+Date.now(),ename:`${emp.first} ${emp.last}`,niss:emp.niss,alloc,suppl,statut:emp.statut},...p2]);
+    setF({emp:'',motif:'eco',debut:'',fin:'',jours:0,regime:'ft'});
+  };
+  
+  const totJours=ds.reduce((a,c)=>a+(+c.jours||0),0);
+  const totCost=ds.reduce((a,c)=>a+((+c.jours||0)*(c.suppl||0)),0);
+
+  return <div>
+    <PH title="Chômage Temporaire" sub="Notification ONEM — C3.2, allocations, suppléments"/>
+    {/* KPIs */}
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Dossiers actifs',v:ds.length,c:'#fb923c'},{l:'Jours total',v:totJours,c:'#60a5fa'},{l:'Coût suppl. employeur',v:fmt(totCost),c:'#f87171'},{l:'C3.2 générés',v:ds.length,c:'#a78bfa'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    {/* Tabs */}
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'new',l:'Nouveau dossier'},{v:'list',l:'Dossiers'},{v:'rules',l:'Règles ONEM'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    
+    {tab==='new'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Créer dossier chômage temporaire</ST>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9}}>
+          <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} span={2} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+          <I label="Motif" value={f.motif} onChange={v=>setF({...f,motif:v})} span={2} options={mots}/>
+          <I label="Début" type="date" value={f.debut} onChange={v=>setF({...f,debut:v})}/>
+          <I label="Fin" type="date" value={f.fin} onChange={v=>setF({...f,fin:v})}/>
+          <I label="Jours prévus" type="number" value={f.jours} onChange={v=>setF({...f,jours:v})}/>
+          <I label="Régime" value={f.regime} onChange={v=>setF({...f,regime:v})} options={[{v:'ft',l:'Temps plein'},{v:'pt',l:'Temps partiel'},{v:'gd',l:'Grande suspension'},{v:'pd',l:'Petite suspension'}]}/>
+        </div>
+        <B onClick={add} style={{width:'100%',marginTop:14}}>Créer dossier CT</B>
+      </C>
+      <C><ST>Règles par motif</ST>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {[{m:'Économique — Ouvriers',r:'Max 4 sem. consécutives. Notification 7j avant. Suppl. ≥ €2/jour.',c:'#fb923c'},
+            {m:'Économique — Employés',r:'Max 16 sem./an (26 si reconnu). Notification 14j. Suppl. ≥ €6.22/jour (CCT 172).',c:'#fb923c'},
+            {m:'Force majeure',r:'Durée illimitée si reconnue. Demande via formulaire spécifique ONEM.',c:'#f87171'},
+            {m:'Intempéries',r:'Ouvriers uniquement. Secteurs construction, agriculture. Notification jour même.',c:'#60a5fa'},
+            {m:'Technique',r:'Ouvriers. Panne machines, manque matériaux. Notification 7j.',c:'#a78bfa'},
+          ].map((r,i)=><div key={i} style={{padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <div style={{fontWeight:600,color:r.c}}>{r.m}</div>
+            <div style={{fontSize:10.5,marginTop:2}}>{r.r}</div>
+          </div>)}
+        </div>
+      </C>
+    </div>}
+    
+    {tab==='list'&&<C style={{padding:0,overflow:'hidden'}}>
+      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Dossiers ({ds.length})</div></div>
+      <Tbl cols={[
+        {k:'e',l:'Travailleur',b:1,r:r=>r.ename},
+        {k:'m',l:'Motif',r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:'rgba(251,146,56,.1)',color:'#fb923c'}}>{mots.find(m=>m.v===r.motif)?.l?.split(' (')[0]||r.motif}</span>},
+        {k:'p',l:'Période',r:r=>`${r.debut||'?'} → ${r.fin||'?'}`},
+        {k:'j',l:'Jours',a:'right',r:r=><span style={{fontWeight:600}}>{r.jours}</span>},
+        {k:'a',l:'Alloc./jour',a:'right',r:r=><span style={{color:'#4ade80'}}>{fmt(r.alloc/21)}</span>},
+        {k:'s',l:'Suppl.',a:'right',r:r=><span style={{color:'#f87171'}}>€{(r.suppl||0).toFixed(2)}/j</span>},
+      ]} data={ds}/>
+    </C>}
+    
+    {tab==='rules'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Procédure ONEM</ST>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {['1. Notification au bureau régional ONEM (délai selon motif)','2. Notification aux travailleurs (affichage + individuel)','3. Communication à l\'ONEM des 1ers jours effectifs de chômage','4. Formulaire C3.2 (constat du droit) → travailleur','5. Validation mensuelle ASR (scénario 5 ou 6)','6. Paiement allocations via organisme de paiement','7. Supplément employeur versé sur fiche de paie'].map((step,i)=>
+            <div key={i} style={{padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>{step}</div>
+          )}
+        </div>
+      </C>
+      <C><ST>Allocations 2026</ST>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {[{l:'Cohabitant avec charge',v:'65% du salaire plafonné'},{l:'Isolé',v:'65% du salaire plafonné'},{l:'Cohabitant sans charge',v:'65% du salaire plafonné'},{l:'Plafond mensuel ONEM',v:'€ 3.199,26 (cat. A)'},{l:'Supplément CCT 172 (employés)',v:'Min. €6,22/jour'},{l:'Supplément ouvriers économique',v:'Min. €2,00/jour'},{l:'Supplément énergie',v:'€6,22/jour'}].map((r,i)=>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <span>{r.l}</span><span style={{fontWeight:600,color:'#c6a34e'}}>{r.v}</span>
+            </div>
+          )}
+        </div>
+        <div style={{marginTop:10,padding:8,background:'rgba(96,165,250,.06)',borderRadius:6,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>
+          <b>Portail:</b> www.onem.be → Chômage temporaire<br/>
+          <b>ASR:</b> Via portail sécurité sociale (batch ou web)
+        </div>
+      </C>
+    </div>}
+  </div>;
 }
 
 function CongeEducMod({s,d}){
@@ -12066,16 +12216,94 @@ function CongeEducMod({s,d}){
 }
 
 function RCCMod({s,d}){
-  const ae=s.emps||[];const [f,setF]=useState({emp:'',brut:4000});const [r,setR]=useState(null);
-  const calc=()=>{const al=Math.min(f.brut*0.60,1800);const co=(f.brut-al)*0.50;setR({al,co,tot:al+co,cs:co*0.0632});};
-  const fm=n=>'€ '+n.toFixed(2);
-  return <div><C style={{padding:'18px 20px'}}><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}><span style={{fontSize:24}}>🏖</span><div><div style={{fontWeight:700,fontSize:16}}>RCC — Prépension</div><div style={{fontSize:11,color:'#5e5c56'}}>Complément entreprise, C4-RCC, ONEM, DECAVA</div></div></div>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
-      <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
-      <I label="Brut réf. (€)" type="number" value={f.brut} onChange={v=>setF({...f,brut:+v})}/>
-      <div style={{display:'flex',alignItems:'flex-end'}}><button onClick={calc} style={{padding:'8px 24px',background:'linear-gradient(135deg,#c6a34e,#e8c547)',border:'none',borderRadius:8,color:'#000',fontWeight:700,cursor:'pointer'}}>Calculer</button></div>
-    </div></C>
-    {r&&<div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginTop:12}}><SC label="Alloc. chômage" value={fm(r.al)} sub="/mois" color="#60a5fa"/><SC label="Complément" value={fm(r.co)} sub="/mois" color="#fb923c"/><SC label="Total RCC" value={fm(r.tot)} sub="/mois" color="#4ade80"/><SC label="Cotis. spéc." value={fm(r.cs)} sub="/mois" color="#a78bfa"/></div>}</div>;
+  const ae=s.emps||[];const [f,setF]=useState({emp:'',brut:4000,age:60,anc:30,sex:'M'});const [r,setR]=useState(null);
+  const emp=ae.find(e=>e.id===f.emp);
+  
+  const doCalc=()=>{
+    const brutRef=+f.brut;const age=+f.age;const anc=+f.anc;
+    // Allocation chômage (simplifié - barème ONEM 2026)
+    const plafond=age>=60?2500:2200;
+    const alloc=Math.min(brutRef*0.60,plafond);
+    // Complément entreprise = (brut net réf - allocation) / 2
+    const complement=(brutRef-alloc)*0.50;
+    // Cotisation spéciale DECAVA
+    const pctDecava=age<52?0.10:age<55?0.08:age<58?0.05:age<60?0.04:0.0325;
+    const decava=complement*pctDecava;
+    // Cotisation patronale
+    const pctPatr=anc>=20?0.50:anc>=10?0.33:0.25;
+    const cotPatr=complement*pctPatr*12;
+    // Retenue INSS 6.50%
+    const inss=(alloc+complement)*0.065;
+    const netRCC=alloc+complement-inss-decava;
+    setR({alloc,complement,decava,pctDecava,inss,netRCC,cotPatr,pctPatr,brutRef});
+  };
+  
+  return <div>
+    <PH title="RCC — Régime de Chômage avec Complément d'entreprise" sub="Ex-prépension — Calcul, DECAVA, cotisations"/>
+    <div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:18}}>
+      <div>
+        <C><ST>Paramètres</ST>
+          <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+          <I label="Brut réf. mensuel (€)" type="number" value={f.brut} onChange={v=>setF({...f,brut:+v})} style={{marginTop:9}}/>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:9}}>
+            <I label="Âge" type="number" value={f.age} onChange={v=>setF({...f,age:+v})}/>
+            <I label="Ancienneté (ans)" type="number" value={f.anc} onChange={v=>setF({...f,anc:+v})}/>
+          </div>
+          <B onClick={doCalc} style={{width:'100%',marginTop:14}}>Calculer RCC</B>
+        </C>
+        {r&&<C style={{marginTop:12}}><ST>Cotisation patronale</ST>
+          <div style={{fontSize:11,color:'#9e9b93',lineHeight:2}}>
+            <div>Taux DECAVA travailleur: <b style={{color:'#f87171'}}>{(r.pctDecava*100).toFixed(2)}%</b></div>
+            <div>Cotisation patronale: <b style={{color:'#f87171'}}>{(r.pctPatr*100).toFixed(0)}%</b></div>
+            <div>Coût annuel employeur: <b style={{color:'#c6a34e'}}>{fmt(r.cotPatr)}</b></div>
+          </div>
+          <div style={{marginTop:10,padding:8,background:'rgba(96,165,250,.06)',borderRadius:6,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>
+            <b>DECAVA:</b> Cotisation spéciale sur complément<br/>
+            <b>Déclaration:</b> DmfA + code travailleur spécifique<br/>
+            <b>C4-RCC:</b> Document de sortie obligatoire
+          </div>
+        </C>}
+      </div>
+      {r?<div>
+        {/* KPIs */}
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:16}}>
+          {[{l:'Allocation ONEM',v:fmt(r.alloc),c:'#60a5fa',s:'/mois'},{l:'Complément entreprise',v:fmt(r.complement),c:'#fb923c',s:'/mois'},{l:'Net RCC',v:fmt(r.netRCC),c:'#4ade80',s:'/mois'},{l:'Coût annuel empl.',v:fmt(r.cotPatr),c:'#f87171',s:'/an'}].map((k,i)=>
+            <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+              <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase'}}>{k.l}</div>
+              <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+              <div style={{fontSize:10,color:'#5e5c56'}}>{k.s}</div>
+            </div>
+          )}
+        </div>
+        <C><ST>Décomposition mensuelle</ST>
+          {[{l:'Salaire brut de référence',v:r.brutRef,c:'#e8e6e0'},
+            {l:'Allocation chômage ONEM (60%)',v:r.alloc,c:'#60a5fa'},
+            {l:'Complément entreprise (50% différence)',v:r.complement,c:'#fb923c'},
+            {l:'Sous-total brut RCC',v:r.alloc+r.complement,c:'#e8e6e0'},
+            {l:'INSS -6,50%',v:-r.inss,c:'#f87171'},
+            {l:'DECAVA -'+((r.pctDecava*100).toFixed(2))+'%',v:-r.decava,c:'#f87171'},
+          ].map((row,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
+            <span style={{color:'#9e9b93'}}>{row.l}</span>
+            <span style={{fontWeight:600,color:row.c}}>{row.v<0?'- '+fmt(Math.abs(row.v)):fmt(row.v)}</span>
+          </div>)}
+          <div style={{display:'flex',justifyContent:'space-between',padding:'12px 0',borderTop:'2px solid rgba(198,163,78,.3)',marginTop:8}}>
+            <span style={{fontSize:14,fontWeight:700,color:'#e8e6e0'}}>NET RCC mensuel</span>
+            <span style={{fontSize:18,fontWeight:700,color:'#4ade80'}}>{fmt(r.netRCC)}</span>
+          </div>
+        </C>
+        <C style={{marginTop:12}}><ST>Conditions d'accès RCC 2026</ST>
+          <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+            {[{l:'Régime général',v:'62 ans + 40 ans carrière (H) / 38 ans (F)'},{l:'Travail de nuit/lourd',v:'60 ans + 33 ans carrière dont 20 ans régime'},{l:'Entreprise en difficulté',v:'60 ans + 10 ans secteur dans les 15 dernières années'},{l:'Entreprise en restructuration',v:'60 ans (dérogation possible à 58 ans)'},{l:'Métiers lourds',v:'60 ans + 35 ans carrière'}].map((r2,i)=>
+              <div key={i} style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+                <div style={{fontWeight:600,color:'#c6a34e'}}>{r2.l}</div>
+                <div style={{fontSize:10.5}}>{r2.v}</div>
+              </div>
+            )}
+          </div>
+        </C>
+      </div>:<C style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:300,color:'#5e5c56'}}><div style={{textAlign:'center'}}><div style={{fontSize:40,marginBottom:10}}>🏖</div><div>Sélectionnez un travailleur et lancez le calcul</div></div></C>}
+    </div>
+  </div>;
 }
 
 function OutplacementMod({s,d}){
