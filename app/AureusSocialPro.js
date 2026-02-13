@@ -2498,7 +2498,7 @@ function genBelcotax(co, emp, yr, ad) {
 }
 
 // ─── INITIAL STATE ───────────────────────────────────────────
-const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:'info@aureus-ia.com',version:'v25',sprint:'Sprint 7'};
+const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:'info@aureus-ia.com',version:'v26',sprint:'Sprint 8'};
 const CAR_MODELS={
 'Aiways':['U5','U6'],
 'Alfa Romeo':['Giulia','Stelvio','Tonale','Junior','Giulietta','MiTo'],
@@ -12479,18 +12479,59 @@ function ChomTempMod({s,d}){
 }
 
 function CongeEducMod({s,d}){
-  const ae=s.emps||[];const [ds,setDs]=useState([]);const [f,setF]=useState({emp:'',formation:'',heures:0,region:'bxl'});
+  const ae=s.emps||[];const [ds,setDs]=useState([]);
+  const [f,setF]=useState({emp:'',formation:'',organisme:'',heures:0,region:'bxl',debut:'',fin:''});
   const pl={bxl:120,wal:180,vla:125};
-  const add=()=>{if(!f.emp)return;setDs(p=>[...p,{...f,id:'CE-'+Date.now(),max:pl[f.region],remb:Math.min(+f.heures,pl[f.region])*22.07}]);setF({emp:'',formation:'',heures:0,region:'bxl'});};
-  return <div><C style={{padding:'18px 20px'}}><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}><span style={{fontSize:24}}>🎓</span><div><div style={{fontWeight:700,fontSize:16}}>Congé-éducation payé</div><div style={{fontSize:11,color:'#5e5c56'}}>Remboursement Région — heures et formulaires</div></div></div>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
-      <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
-      <I label="Formation" value={f.formation} onChange={v=>setF({...f,formation:v})}/>
-      <I label="Heures" type="number" value={f.heures} onChange={v=>setF({...f,heures:v})}/>
-      <I label="Région" value={f.region} onChange={v=>setF({...f,region:v})} options={[{v:'bxl',l:'Bruxelles (120h)'},{v:'wal',l:'Wallonie (180h)'},{v:'vla',l:'Flandre (125h)'}]}/>
-    </div><button onClick={add} style={{marginTop:12,padding:'8px 20px',background:'linear-gradient(135deg,#c6a34e,#e8c547)',border:'none',borderRadius:8,color:'#000',fontWeight:700,cursor:'pointer'}}>+ Ajouter</button></C>
-    {ds.length>0&&<C style={{marginTop:12}}><TB cols={[{k:'e',l:'Travailleur'},{k:'f',l:'Formation'},{k:'h',l:'Heures'},{k:'m',l:'Plafond'},{k:'r',l:'Remb.'}]} rows={ds.map(x=>{const e=ae.find(a=>a.id===x.emp);return{e:e?`${e.first} ${e.last}`:'?',f:x.formation,h:x.heures,m:x.max+'h',r:'€ '+x.remb.toFixed(0)};})}/></C>}</div>;
+  const tarif={bxl:22.07,wal:22.07,vla:22.07};
+  const add=()=>{if(!f.emp)return;const max=pl[f.region];const h=Math.min(+f.heures,max);const remb=h*tarif[f.region];const emp=ae.find(e=>e.id===f.emp);setDs(p=>[{...f,id:'CE-'+Date.now(),max,remb,hRemb:h,ename:`${emp?.first} ${emp?.last}`},...p]);setF({emp:'',formation:'',organisme:'',heures:0,region:'bxl',debut:'',fin:''});};
+  const totH=ds.reduce((a,c)=>a+c.hRemb,0);const totR=ds.reduce((a,c)=>a+c.remb,0);
+  
+  return <div>
+    <PH title="Congé-Éducation Payé" sub="Remboursement régional — Heures, plafonds, formulaires"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Dossiers',v:ds.length,c:'#60a5fa'},{l:'Heures totales',v:totH+'h',c:'#a78bfa'},{l:'Remboursement total',v:fmt(totR),c:'#4ade80'},{l:'Tarif horaire',v:'€22,07',c:'#c6a34e'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'350px 1fr',gap:18}}>
+      <div>
+        <C><ST>Nouveau dossier</ST>
+          <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+          <I label="Formation" value={f.formation} onChange={v=>setF({...f,formation:v})} style={{marginTop:9}}/>
+          <I label="Organisme" value={f.organisme} onChange={v=>setF({...f,organisme:v})} style={{marginTop:9}}/>
+          <I label="Région" value={f.region} onChange={v=>setF({...f,region:v})} style={{marginTop:9}} options={[{v:'bxl',l:'Bruxelles (120h)'},{v:'wal',l:'Wallonie (180h)'},{v:'vla',l:'Flandre (125h)'}]}/>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:9}}>
+            <I label="Heures" type="number" value={f.heures} onChange={v=>setF({...f,heures:v})}/>
+            <I label="Début" type="date" value={f.debut} onChange={v=>setF({...f,debut:v})}/>
+          </div>
+          <B onClick={add} style={{width:'100%',marginTop:14}}>Ajouter dossier</B>
+        </C>
+        <C style={{marginTop:12}}><ST>Plafonds par région (2026)</ST>
+          {[{r:'Bruxelles',h:120,t:'€22,07/h',tot:'€2.648'},{r:'Wallonie',h:180,t:'€22,07/h',tot:'€3.973'},{r:'Flandre (Vlaams Opleidingsverlof)',h:125,t:'€22,07/h',tot:'€2.759'}].map((r,i)=>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
+              <div><b style={{color:'#e8e6e0'}}>{r.r}</b><div style={{fontSize:10,color:'#5e5c56'}}>{r.h}h max · {r.t}</div></div>
+              <span style={{fontWeight:700,color:'#c6a34e'}}>{r.tot}</span>
+            </div>
+          )}
+        </C>
+      </div>
+      <C style={{padding:0,overflow:'hidden'}}>
+        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Dossiers ({ds.length})</div></div>
+        {ds.length>0?<Tbl cols={[
+          {k:'e',l:'Travailleur',b:1,r:r=>r.ename},
+          {k:'f',l:'Formation',r:r=>r.formation||'—'},
+          {k:'rg',l:'Région',r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:'rgba(96,165,250,.1)',color:'#60a5fa'}}>{r.region.toUpperCase()}</span>},
+          {k:'h',l:'Heures',a:'right',r:r=><span>{r.hRemb}h <span style={{color:'#5e5c56',fontSize:10}}>/{r.max}h</span></span>},
+          {k:'r',l:'Remboursement',a:'right',r:r=><span style={{fontWeight:600,color:'#4ade80'}}>{fmt(r.remb)}</span>},
+        ]} data={ds}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Aucun dossier</div>}
+      </C>
+    </div>
+  </div>;
 }
+
 
 function RCCMod({s,d}){
   const ae=s.emps||[];const [f,setF]=useState({emp:'',brut:4000,age:60,anc:30,sex:'M'});const [r,setR]=useState(null);
@@ -12584,18 +12625,62 @@ function RCCMod({s,d}){
 }
 
 function OutplacementMod({s,d}){
-  const ae=s.emps||[];const [ds,setDs]=useState([]);const [f,setF]=useState({emp:'',type:'legal',prest:'',budget:1800});
-  const tps=[{v:'legal',l:'Légal (≥45 ans)'},{v:'general',l:'CCT 82'},{v:'restr',l:'Restructuration'}];
-  const add=()=>{if(!f.emp)return;setDs(p=>[...p,{...f,id:'OP-'+Date.now()}]);};
-  return <div><C style={{padding:'18px 20px'}}><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}><span style={{fontSize:24}}>🔄</span><div><div style={{fontWeight:700,fontSize:16}}>Outplacement</div><div style={{fontSize:11,color:'#5e5c56'}}>Offre dans les 15 jours fin préavis</div></div></div>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
-      <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
-      <I label="Type" value={f.type} onChange={v=>setF({...f,type:v})} options={tps}/>
-      <I label="Prestataire" value={f.prest} onChange={v=>setF({...f,prest:v})}/>
-      <I label="Budget (€)" type="number" value={f.budget} onChange={v=>setF({...f,budget:+v})}/>
-    </div><button onClick={add} style={{marginTop:12,padding:'8px 20px',background:'linear-gradient(135deg,#c6a34e,#e8c547)',border:'none',borderRadius:8,color:'#000',fontWeight:700,cursor:'pointer'}}>+ Créer</button></C>
-    {ds.length>0&&<C style={{marginTop:12}}><TB cols={[{k:'e',l:'Travailleur'},{k:'t',l:'Type'},{k:'p',l:'Prestataire'},{k:'b',l:'Budget'}]} rows={ds.map(x=>{const e=ae.find(a=>a.id===x.emp);return{e:e?`${e.first} ${e.last}`:'?',t:tps.find(t=>t.v===x.type)?.l,p:x.prest||'À désigner',b:'€ '+x.budget};})}/></C>}</div>;
+  const ae=s.emps||[];const [ds,setDs]=useState([]);
+  const [f,setF]=useState({emp:'',type:'legal',prest:'',budget:1800,debut:'',duree:12});
+  const tps=[{v:'legal',l:'Légal ≥45 ans (60h/12 mois)'},{v:'cct82',l:'CCT 82 (30h/3 mois min.)'},{v:'restr',l:'Restructuration'},{v:'volontaire',l:'Volontaire'}];
+  const add=()=>{if(!f.emp)return;const emp=ae.find(e=>e.id===f.emp);setDs(p=>[{...f,id:'OP-'+Date.now(),ename:`${emp?.first} ${emp?.last}`,status:'en_cours'},...p]);};
+  
+  return <div>
+    <PH title="Outplacement" sub="Accompagnement reclassement — Offre obligatoire dans les 15 jours"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Dossiers actifs',v:ds.filter(x=>x.status==='en_cours').length,c:'#fb923c'},{l:'Budget total',v:fmt(ds.reduce((a,c)=>a+c.budget,0)),c:'#c6a34e'},{l:'Dossiers terminés',v:ds.filter(x=>x.status==='termine').length,c:'#4ade80'},{l:'Budget moyen',v:ds.length?fmt(ds.reduce((a,c)=>a+c.budget,0)/ds.length):'—',c:'#a78bfa'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'350px 1fr',gap:18}}>
+      <div>
+        <C><ST>Créer dossier</ST>
+          <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+          <I label="Type" value={f.type} onChange={v=>setF({...f,type:v})} style={{marginTop:9}} options={tps}/>
+          <I label="Prestataire" value={f.prest} onChange={v=>setF({...f,prest:v})} style={{marginTop:9}}/>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:9}}>
+            <I label="Budget (€)" type="number" value={f.budget} onChange={v=>setF({...f,budget:+v})}/>
+            <I label="Durée (mois)" type="number" value={f.duree} onChange={v=>setF({...f,duree:+v})}/>
+          </div>
+          <B onClick={add} style={{width:'100%',marginTop:14}}>Créer dossier</B>
+        </C>
+        <C style={{marginTop:12}}><ST>Obligations légales</ST>
+          <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+            {[{r:'≥ 45 ans, licencié',o:'Obligatoire — 60h sur 12 mois',b:'Min. €1.800'},{r:'Préavis ≥ 30 sem.',o:'CCT 82 — 1/12 du préavis en outplacement',b:'Déduit du préavis'},{r:'Restructuration',o:'Cellule pour l\'emploi obligatoire',b:'Selon plan social'}].map((r,i)=>
+              <div key={i} style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+                <b style={{color:'#c6a34e'}}>{r.r}</b>
+                <div style={{fontSize:10.5}}>{r.o}</div>
+                <div style={{fontSize:10,color:'#60a5fa'}}>{r.b}</div>
+              </div>
+            )}
+          </div>
+          <div style={{marginTop:10,padding:8,background:'rgba(248,113,113,.06)',borderRadius:6,fontSize:10.5,color:'#f87171'}}>
+            <b>Sanction:</b> Non-offre = indemnité compensatoire de 4 semaines de rémunération.
+          </div>
+        </C>
+      </div>
+      <C style={{padding:0,overflow:'hidden'}}>
+        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Dossiers ({ds.length})</div></div>
+        {ds.length>0?<Tbl cols={[
+          {k:'e',l:'Travailleur',b:1,r:r=>r.ename},
+          {k:'t',l:'Type',r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:'rgba(251,146,56,.1)',color:'#fb923c'}}>{tps.find(t=>t.v===r.type)?.l?.split(' (')[0]}</span>},
+          {k:'p',l:'Prestataire',r:r=>r.prest||'À désigner'},
+          {k:'d',l:'Durée',a:'right',r:r=>`${r.duree} mois`},
+          {k:'b',l:'Budget',a:'right',r:r=><span style={{fontWeight:600,color:'#c6a34e'}}>{fmt(r.budget)}</span>},
+        ]} data={ds}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Aucun dossier</div>}
+      </C>
+    </div>
+  </div>;
 }
+
 
 function AbsenteismeMod({s,d}){
   const ae=s.emps||[];const n=ae.length||1;
@@ -13160,62 +13245,197 @@ function AureusSuitePage({s,d}){
   </div>;
 }
 
-function BienetrePage({s,d}){const sub=s.sub||'planglobal';return <div>
-  <PH title="Bien-être & Prévention" sub={`Module: ${{'planglobal':'Plan global','paa':'PAA','risquespsycho':'Risques psychosociaux','alcool':'Alcool/drogues','elections':'Élections sociales','organes':'CE/CPPT/DS'}[sub]||sub}`}/>
-  {sub==='planglobal'&&<PlanGlobalMod s={s} d={d}/>}{sub==='paa'&&<PAAMod s={s} d={d}/>}{sub==='risquespsycho'&&<RisquesPsychoMod s={s} d={d}/>}{sub==='alcool'&&<AlcoolMod s={s} d={d}/>}{sub==='elections'&&<ElectionsMod s={s} d={d}/>}{sub==='organes'&&<OrganesMod s={s} d={d}/>}
-</div>;}
+function BienetrePage({s,d}){
+  const [sub,setSub]=useState('dashboard');
+  const mods={dashboard:'Dashboard',planglobal:'Plan Global',paa:'Plan Annuel',risques:'Risques Psychosociaux',alcool:'Politique Alcool/Drogues',organes:'Organes de concertation'};
+  return <div>
+    <div style={{display:'flex',gap:6,marginBottom:16,flexWrap:'wrap'}}>
+      {Object.entries(mods).map(([k,l])=>
+        <button key={k} onClick={()=>setSub(k)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:sub===k?600:400,fontFamily:'inherit',
+          background:sub===k?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:sub===k?'#c6a34e':'#9e9b93'}}>{l}</button>
+      )}
+    </div>
+    {sub==='dashboard'&&<BienEtreDash s={s}/>}
+    {sub==='planglobal'&&<PlanGlobalMod s={s} d={d}/>}
+    {sub==='paa'&&<PAAMod s={s} d={d}/>}
+    {sub==='risques'&&<RisquesPsychoMod s={s} d={d}/>}
+    {sub==='alcool'&&<AlcoolMod s={s} d={d}/>}
+    {sub==='organes'&&<OrganesMod s={s} d={d}/>}
+  </div>;
+}
+
+function BienEtreDash({s}){
+  const n=(s.emps||[]).length;
+  return <div>
+    <PH title="Bien-être au Travail" sub="Code du bien-être — Loi du 4/8/1996"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Effectif',v:n,c:'#60a5fa',s:'travailleurs'},{l:'Conseiller prévention',v:n<20?'Employeur':'Interne',c:'#c6a34e',s:n<20?'< 20 trav.':'≥ 20 trav.'},{l:'SEPPT',v:'Obligatoire',c:'#4ade80',s:'Service externe'},{l:'SIPPT',v:n>=20?'Obligatoire':'Facultatif',c:n>=20?'#fb923c':'#9e9b93',s:'Service interne'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+          <div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>{k.s}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>7 domaines du bien-être</ST>
+        {[{d:'Sécurité au travail',ic:'🦺',c:'#f87171'},{d:'Protection de la santé',ic:'🏥',c:'#60a5fa'},{d:'Risques psychosociaux',ic:'🧠',c:'#a78bfa'},{d:'Ergonomie',ic:'🪑',c:'#fb923c'},{d:'Hygiène du travail',ic:'🧹',c:'#4ade80'},{d:'Embellissement des lieux',ic:'🌿',c:'#c6a34e'},{d:'Environnement (impact)',ic:'🌍',c:'#60a5fa'}].map((r,i)=>
+          <div key={i} style={{display:'flex',gap:10,alignItems:'center',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <span style={{fontSize:18}}>{r.ic}</span>
+            <span style={{fontSize:12,color:r.c,fontWeight:500}}>{r.d}</span>
+          </div>
+        )}
+      </C>
+      <C><ST>Obligations employeur</ST>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {['Plan global de prévention (5 ans)','Plan annuel d\'action (PAA)','Analyse des risques (tous postes)','Désigner conseiller(s) en prévention','Affilier à un SEPPT (service externe)','Constituer CPPT si ≥ 50 travailleurs','Politique alcool et drogues (CCT 100)','Procédure risques psychosociaux','Registre de faits de tiers'].map((o,i)=>
+            <div key={i} style={{padding:'3px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>{o}</div>
+          )}
+        </div>
+      </C>
+    </div>
+  </div>;
+}
 
 function PlanGlobalMod({s,d}){
-  const secs=[{t:'Politique bien-être',s:'✅',i:['Déclaration politique','Objectifs 5 ans','Moyens']},{t:'Organisation travail',s:'🟡',i:['Analyse postes','Ergonomie','Charge']},{t:'Conditions',s:'🟡',i:['Ambiance','EPI','Locaux']},{t:'Risques psycho',s:'⚠',i:['Stress/burnout','Prévention','Personne confiance']},{t:'Hygiène',s:'✅',i:['Produits dangereux','Ventilation','Sanitaires']},{t:'Surveillance santé',s:'✅',i:['Examens','Vaccination','Réintégration']}];
-  return <div><C style={{padding:'18px 20px'}}><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}><span style={{fontSize:24}}>📋</span><div><div style={{fontWeight:700,fontSize:16}}>Plan global de prévention (5 ans)</div><div style={{fontSize:11,color:'#5e5c56'}}>Art. II.1-2 Code bien-être au travail</div></div></div></C>
-    {secs.map((sec,si)=><C key={si} style={{marginTop:8}}><div style={{padding:'8px 18px',display:'flex',justifyContent:'space-between',background:'rgba(198,163,78,.03)',borderBottom:'1px solid rgba(198,163,78,.08)'}}><span style={{fontWeight:700,fontSize:13}}>{sec.t}</span><span>{sec.s}</span></div>
-      <div style={{padding:'6px 18px'}}>{sec.i.map((it,ii)=><div key={ii} style={{fontSize:12,color:'#9e9b93',padding:'2px 0 2px 14px',position:'relative'}}><span style={{position:'absolute',left:0}}>•</span>{it}</div>)}</div></C>)}</div>;
+  return <div>
+    <PH title="Plan Global de Prévention" sub="Obligatoire — Durée 5 ans — Code bien-être Livre I Titre 2"/>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Structure du Plan Global</ST>
+        {[{s:'1. Résultats analyse des risques',d:'Identification de tous les dangers et risques par poste/activité'},{s:'2. Mesures de prévention prioritaires',d:'Hiérarchie: élimination > protection collective > protection individuelle'},{s:'3. Objectifs prioritaires',d:'Par domaine du bien-être — indicateurs mesurables'},{s:'4. Moyens et ressources',d:'Budget prévention, formation, équipements'},{s:'5. Missions et obligations',d:'Ligne hiérarchique, conseillers, travailleurs'},{s:'6. Critères d\'évaluation',d:'Indicateurs de suivi annuel'}].map((r,i)=>
+          <div key={i} style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <b style={{color:'#c6a34e',fontSize:12}}>{r.s}</b>
+            <div style={{fontSize:10.5,color:'#9e9b93',marginTop:1}}>{r.d}</div>
+          </div>
+        )}
+      </C>
+      <C><ST>Calendrier</ST>
+        {[{p:'Année 1 (2025)',a:'Analyse complète des risques + rédaction plan'},{p:'Année 2',a:'Mise en oeuvre priorités 1 + évaluation'},{p:'Année 3',a:'Mise en oeuvre priorités 2 + révision'},{p:'Année 4',a:'Évaluation intermédiaire'},{p:'Année 5 (2029)',a:'Évaluation finale + nouveau plan'}].map((r,i)=>
+          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
+            <b style={{color:'#e8e6e0'}}>{r.p}</b><span style={{color:'#9e9b93'}}>{r.a}</span>
+          </div>
+        )}
+        <div style={{marginTop:10,padding:8,background:'rgba(248,113,113,.06)',borderRadius:6,fontSize:10.5,color:'#f87171'}}>
+          <b>Avis CPPT:</b> Le plan doit être soumis au CPPT (ou à la DS, ou aux travailleurs).
+        </div>
+      </C>
+    </div>
+  </div>;
 }
 
 function PAAMod({s,d}){
-  const [acts]=useState([{a:'MAJ analyse risques',r:'Cons. prévention',d:'31/03/2026',s:'en_cours'},{a:'Formation secours',r:'SEPP',d:'30/06/2026',s:'planifie'},{a:'Enquête psycho',r:'SEPP',d:'30/09/2026',s:'planifie'}]);
-  return <div><C style={{padding:'18px 20px'}}><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}><span style={{fontSize:24}}>📅</span><div><div style={{fontWeight:700,fontSize:16}}>Plan d'action annuel 2026</div><div style={{fontSize:11,color:'#5e5c56'}}>Art. II.1-4 Code bien-être</div></div></div></C>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginTop:12}}><SC label="Planifiées" value={acts.filter(a=>a.s==='planifie').length} color="#60a5fa"/><SC label="En cours" value={acts.filter(a=>a.s==='en_cours').length} color="#fb923c"/><SC label="Terminées" value={0} color="#4ade80"/></div>
-    <C style={{marginTop:12}}><TB cols={[{k:'a',l:'Action'},{k:'r',l:'Responsable'},{k:'d',l:'Échéance'},{k:'s',l:'Statut'}]} rows={acts.map(a=>({a:a.a,r:a.r,d:a.d,s:a.s==='en_cours'?'🟡 En cours':'🔵 Planifié'}))}/></C></div>;
+  return <div>
+    <PH title="Plan Annuel d'Action" sub="Concrétisation du Plan Global — Objectifs de l'année"/>
+    <C><ST>Contenu obligatoire du PAA</ST>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18,fontSize:11,color:'#9e9b93'}}>
+        <div>
+          {[{t:'Objectifs prioritaires de l\'année',d:'Actions concrètes par domaine'},{t:'Moyens et délais',d:'Budget, calendrier, responsables'},{t:'Modifications d\'installations',d:'Nouvelles machines, aménagements, produits'},{t:'Formations planifiées',d:'Secouristes, incendie, ergonomie, risques psycho'}].map((r,i)=>
+            <div key={i} style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <b style={{color:'#c6a34e'}}>{r.t}</b><div style={{marginTop:1}}>{r.d}</div>
+            </div>
+          )}
+        </div>
+        <div>
+          {[{t:'Mesures d\'urgence',d:'Plan d\'évacuation, premiers secours'},{t:'EPI — Équipements protection',d:'Inventaire, renouvellement, formations'},{t:'Surveillance santé',d:'Planning examens médicaux, postes à risque'},{t:'Évaluation N-1',d:'Bilan des actions réalisées l\'année précédente'}].map((r,i)=>
+            <div key={i} style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <b style={{color:'#c6a34e'}}>{r.t}</b><div style={{marginTop:1}}>{r.d}</div>
+            </div>
+          )}
+        </div>
+      </div>
+    </C>
+  </div>;
 }
 
 function RisquesPsychoMod({s,d}){
-  const cs=[{t:'Stress',ic:'😰',i:['Charge excessive','Manque autonomie','Insécurité']},{t:'Harcèlement moral',ic:'⚠',i:['Hostilité','Isolement','Dénigrement']},{t:'Harcèlement sexuel',ic:'🚫',i:['Propos déplacés','Contact non-consenti']},{t:'Violence',ic:'💥',i:['Agression','Menaces','Violence tiers']}];
-  return <div><C style={{padding:'18px 20px'}}><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}><span style={{fontSize:24}}>🧠</span><div><div style={{fontWeight:700,fontSize:16}}>Risques psychosociaux</div><div style={{fontSize:11,color:'#5e5c56'}}>Loi 04/08/1996</div></div></div></C>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:12,marginTop:12}}>{cs.map((c,ci)=><C key={ci}><div style={{padding:'10px 18px',background:'rgba(198,163,78,.03)',borderBottom:'1px solid rgba(198,163,78,.08)'}}><span style={{marginRight:8}}>{c.ic}</span><span style={{fontWeight:700}}>{c.t}</span></div><div style={{padding:'8px 18px'}}>{c.i.map((it,ii)=><div key={ii} style={{fontSize:12,color:'#9e9b93',padding:'2px 0'}}>• {it}</div>)}</div></C>)}</div>
-    <C style={{marginTop:12,padding:'14px 18px'}}><ST>Obligations</ST>{['Personne de confiance','Procédure plainte','Règlement travail','Former hiérarchie','Collaborer SEPP'].map((o,i)=><div key={i} style={{fontSize:12,padding:'4px 0 4px 14px',position:'relative',borderBottom:'1px solid rgba(255,255,255,.02)'}}><span style={{position:'absolute',left:0,color:'#c6a34e'}}>✓</span>{o}</div>)}</C></div>;
+  return <div>
+    <PH title="Risques Psychosociaux" sub="Loi du 28/2/2014 — Stress, harcèlement, violence, burnout"/>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Procédure interne obligatoire</ST>
+        {[{e:'Procédure informelle',d:'Demande d\'intervention auprès de la personne de confiance ou du conseiller en prévention psychosocial. Entretien, médiation, conciliation.',c:'#60a5fa'},
+          {e:'Procédure formelle',d:'Demande écrite motivée. Analyse par le conseiller en prévention. Rapport avec propositions. L\'employeur doit agir.',c:'#fb923c'},
+          {e:'Procédure externe',d:'Si procédure interne échouée: Contrôle du bien-être au travail (CBE) ou tribunal du travail.',c:'#f87171'},
+        ].map((r,i)=><div key={i} style={{padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+          <div style={{fontWeight:600,color:r.c}}>{r.e}</div>
+          <div style={{fontSize:10.5,color:'#9e9b93',marginTop:2}}>{r.d}</div>
+        </div>)}
+      </C>
+      <div>
+        <C><ST>Facteurs de risque (5A)</ST>
+          {[{f:'Organisation du travail',ex:'Charge, horaires, autonomie'},{f:'Contenu du travail',ex:'Complexité, monotonie, responsabilité'},{f:'Conditions de travail',ex:'Contrat, rémunération, évaluation'},{f:'Conditions de vie au travail',ex:'Bruit, espace, équipement'},{f:'Relations interpersonnelles',ex:'Hiérarchie, collègues, tiers'}].map((r,i)=>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
+              <b style={{color:'#e8e6e0'}}>{r.f}</b><span style={{color:'#9e9b93',fontSize:10.5}}>{r.ex}</span>
+            </div>
+          )}
+        </C>
+        <C style={{marginTop:12}}><ST>Personnes de confiance</ST>
+          <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+            <div>Désignation: <b style={{color:'#e8e6e0'}}>Accord préalable des travailleurs</b></div>
+            <div>Formation: <b style={{color:'#e8e6e0'}}>Min. 5 jours + supervision annuelle</b></div>
+            <div>Rôle: <b style={{color:'#e8e6e0'}}>Écoute, médiation, pas de pouvoir disciplinaire</b></div>
+            <div>Protection: <b style={{color:'#e8e6e0'}}>Contre le licenciement</b></div>
+          </div>
+        </C>
+      </div>
+    </div>
+  </div>;
 }
 
 function AlcoolMod({s,d}){
-  return <div><C style={{padding:'18px 20px'}}><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}><span style={{fontSize:24}}>🍷</span><div><div style={{fontWeight:700,fontSize:16}}>Politique alcool et drogues</div><div style={{fontSize:11,color:'#5e5c56'}}>CCT 100 — Obligation toutes entreprises</div></div></div></C>
-    <C style={{marginTop:12,padding:'14px 18px'}}>{[{p:'Phase 1 — Intention',d:'Principes. OBLIGATOIRE.',s:'⚠ Règlement travail'},{p:'Phase 2 — Règles',d:'Interdiction/limitation.',s:'Recommandé'},{p:'Phase 3 — Procédures',d:'Intoxication: entretien, aide.',s:'Facultatif'},{p:'Phase 4 — Tests',d:'Détection. CPPT consulté.',s:'Très encadré'}].map((p,i)=><div key={i} style={{padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
-      <div style={{fontWeight:700,fontSize:12,color:'#c6a34e'}}>{p.p}</div><div style={{fontSize:12,color:'#d4d0c8',marginTop:3}}>{p.d}</div><div style={{fontSize:11,color:'#5e5c56',marginTop:2,fontStyle:'italic'}}>{p.s}</div></div>)}</C></div>;
-}
-
-function ElectionsMod({s,d}){
-  const nb=(s.emps||[]).length;
-  return <div><C style={{padding:'18px 20px'}}><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}><span style={{fontSize:24}}>🗳</span><div><div style={{fontWeight:700,fontSize:16}}>Élections sociales</div><div style={{fontSize:11,color:'#5e5c56'}}>Tous les 4 ans — Prochaines: mai 2028</div></div></div></C>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginTop:12}}><SC label="Effectif" value={nb} color="#60a5fa"/><SC label="CPPT (≥50)" value={nb>=50?'OUI':'NON'} color={nb>=50?'#ef4444':'#4ade80'}/><SC label="CE (≥100)" value={nb>=100?'OUI':'NON'} color={nb>=100?'#ef4444':'#4ade80'}/></div>
-    <C style={{marginTop:12,padding:'14px 18px'}}><ST>Calendrier (150 jours)</ST>
-      {[['X-60','Seuils et UTE'],['X-60','Affichage avis'],['X-35','Listes électorales'],['X-35','Candidatures syndicales'],['X-13','Affichage candidats'],['X','Jour du vote'],['X+2','Résultats et installation']].map(([j,l],i)=><div key={i} style={{display:'flex',gap:14,padding:'7px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
-        <div style={{minWidth:45,fontSize:11,fontWeight:700,color:'#c6a34e'}}>{j}</div><div style={{fontSize:12,fontWeight:600}}>{l}</div></div>)}
-    </C></div>;
+  return <div>
+    <PH title="Politique Alcool & Drogues" sub="CCT n° 100 du 1/4/2009 — Obligation pour tout employeur"/>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>4 phases obligatoires</ST>
+        {[{p:'Phase 1 — Déclaration d\'intention',d:'L\'employeur fixe les principes: prévention, pas de tolérance zéro, approche santé.',c:'#4ade80'},
+          {p:'Phase 2 — Cadre règlementaire',d:'Intégrer dans le règlement de travail. Procédures en cas de dysfonctionnement.',c:'#60a5fa'},
+          {p:'Phase 3 — Information et formation',d:'Sensibiliser les travailleurs et la ligne hiérarchique.',c:'#a78bfa'},
+          {p:'Phase 4 — Tests (facultatif)',d:'Tests de dépistage possibles UNIQUEMENT si prévus dans règlement et si fonctions de sécurité.',c:'#fb923c'},
+        ].map((r,i)=><div key={i} style={{padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+          <b style={{color:r.c}}>{r.p}</b>
+          <div style={{fontSize:10.5,color:'#9e9b93',marginTop:2}}>{r.d}</div>
+        </div>)}
+      </C>
+      <C><ST>Points clés</ST>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {[{l:'Base légale',v:'CCT 100 (CNT) — étendue par AR'},{l:'Champ',v:'Tous les employeurs du secteur privé'},{l:'Objectif',v:'Prévention, pas répression'},{l:'Tests',v:'Facultatifs — uniquement fonctions sécurité'},{l:'Sanctions',v:'Proportionnées, après entretien'},{l:'CPPT',v:'Doit être consulté sur la politique'},{l:'Confidentialité',v:'Données médicales = strictement confidentielles'}].map((r,i)=>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <span>{r.l}</span><span style={{fontWeight:600,color:'#e8e6e0'}}>{r.v}</span>
+            </div>
+          )}
+        </div>
+      </C>
+    </div>
+  </div>;
 }
 
 function OrganesMod({s,d}){
-  const org=[{t:'Conseil d\'Entreprise (CE)',s:'≥ 100',ic:'🏛',m:['Info économique annuelle','Avis règlement travail','Œuvres sociales']},{t:'CPPT',s:'≥ 50',ic:'🛡',m:['Avis plan prévention','Initiative bien-être','Rapports conseiller']},{t:'Délégation syndicale',s:'Selon CCT',ic:'🤝',m:['Négociation CCT','Réclamations','Contrôle législation']}];
-  return <div><C style={{padding:'18px 20px'}}><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}><span style={{fontSize:24}}>🏛</span><div><div style={{fontWeight:700,fontSize:16}}>Organes sociaux — CE / CPPT / DS</div><div style={{fontSize:11,color:'#5e5c56'}}>Préparation réunions, informations, suivi</div></div></div></C>
-    {org.map((o,oi)=><C key={oi} style={{marginTop:10}}><div style={{padding:'10px 18px',background:'rgba(198,163,78,.03)',display:'flex',justifyContent:'space-between',borderBottom:'1px solid rgba(198,163,78,.08)'}}><div><span style={{fontSize:16,marginRight:8}}>{o.ic}</span><span style={{fontWeight:700,fontSize:14}}>{o.t}</span></div><span style={{fontSize:11,color:'#c6a34e'}}>{o.s}</span></div>
-      <div style={{padding:'10px 18px'}}>{o.m.map((m,mi)=><div key={mi} style={{fontSize:12,color:'#d4d0c8',padding:'3px 0 3px 14px',position:'relative'}}><span style={{position:'absolute',left:0,color:'#c6a34e'}}>•</span>{m}</div>)}</div></C>)}</div>;
+  const n=(s.emps||[]).length;
+  return <div>
+    <PH title="Organes de Concertation Sociale" sub="CPPT, CE, DS — Seuils et obligations"/>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:14}}>
+      {[{o:'CPPT',full:'Comité pour la Prévention et la Protection au Travail',seuil:50,freq:'Min. 1×/mois',comp:'Paritaire: employeur + représentants travailleurs',miss:'Bien-être, sécurité, santé, plan global, analyse risques',active:n>=50},
+        {o:'CE',full:'Conseil d\'Entreprise',seuil:100,freq:'Min. 1×/mois',comp:'Chef d\'entreprise + délégués élus',miss:'Info économique/financière, règlement travail, emploi',active:n>=100},
+        {o:'DS',full:'Délégation Syndicale',seuil:0,freq:'Selon nécessité',comp:'Délégués syndicaux désignés',miss:'Réclamations, négociation conditions travail, CCT',active:true},
+      ].map((r,i)=><C key={i}>
+        <div style={{textAlign:'center',marginBottom:10}}>
+          <div style={{fontSize:18,fontWeight:700,color:r.active?'#c6a34e':'#5e5c56'}}>{r.o}</div>
+          <div style={{fontSize:10,color:'#5e5c56'}}>{r.full}</div>
+          {r.seuil>0&&<div style={{fontSize:10,marginTop:4,padding:'2px 8px',borderRadius:4,display:'inline-block',background:n>=r.seuil?'rgba(74,222,128,.1)':'rgba(158,155,147,.1)',color:n>=r.seuil?'#4ade80':'#5e5c56'}}>Seuil: {r.seuil} trav. {n>=r.seuil?'✓ Atteint':'✗ Non atteint'}</div>}
+        </div>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          <div>Fréquence: <b style={{color:'#e8e6e0'}}>{r.freq}</b></div>
+          <div>Composition: <b style={{color:'#e8e6e0'}}>{r.comp}</b></div>
+          <div>Missions: <b style={{color:'#e8e6e0'}}>{r.miss}</b></div>
+        </div>
+      </C>)}
+    </div>
+  </div>;
 }
-
 function SelfServiceMod({s,d}){
   const ae=s.emps||[];const [sel,setSel]=useState(ae[0]?.id||'');const [tab,setTab]=useState('fiches');
   const emp=ae.find(e=>e.id===sel)||ae[0]||{};
-  const p=emp.id?calc(emp,DPER,s.co):{gross:0,net:0};
-  
+  const p=emp.id?calc(emp,DPER,s.co):{gross:0,net:0,tax:0};
   const tabs=[{v:'fiches',l:'Fiches de paie',ic:'📄'},{v:'conges',l:'Congés',ic:'📅'},{v:'docs',l:'Documents',ic:'📋'},{v:'perso',l:'Données perso',ic:'👤'},{v:'contact',l:'Contact RH',ic:'💬'}];
-  
   return <div>
     <PH title="Portail Self-Service Travailleur" sub="Accès autonome — Fiches, congés, documents, données personnelles"/>
     <div style={{display:'grid',gridTemplateColumns:'260px 1fr',gap:18}}>
@@ -13335,15 +13555,59 @@ function SelfServiceMod({s,d}){
 
 
 function GEDMod({s,d}){
-  const cats=[{t:'📄 Contrats',n:0},{t:'🏥 Certificats médicaux',n:0},{t:'📬 Courriers',n:0},{t:'📋 Avenants',n:0},{t:'📊 Rapports',n:0},{t:'⚖ Juridique',n:0}];
-  return <div><C style={{padding:'18px 20px'}}><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}><span style={{fontSize:24}}>📁</span><div><div style={{fontWeight:700,fontSize:16}}>GED — Archivage documents</div><div style={{fontSize:11,color:'#5e5c56'}}>Par client et travailleur — Conservation 5 ans min.</div></div></div></C>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginTop:12}}>
-      {cats.map((c,ci)=><C key={ci} style={{padding:'14px 18px',textAlign:'center'}}><div style={{fontSize:14,fontWeight:700}}>{c.t}</div><div style={{fontSize:22,fontWeight:700,color:'#c6a34e',marginTop:6}}>{c.n}</div><div style={{fontSize:10,color:'#5e5c56'}}>documents</div></C>)}
+  const ae=s.emps||[];const [tab,setTab]=useState('arbo');const [search,setSearch]=useState('');
+  const cats=[{t:'Contrats',ic:'📄',n:ae.length,docs:ae.map(e=>`Contrat_${e.last}_${e.first}.pdf`)},
+    {t:'Certificats médicaux',ic:'🏥',n:Math.floor(ae.length*0.3),docs:[]},
+    {t:'Avenants',ic:'📋',n:Math.floor(ae.length*0.2),docs:[]},
+    {t:'Fiches de paie',ic:'💰',n:ae.length*12,docs:[]},
+    {t:'Documents fiscaux',ic:'📊',n:ae.length*2,docs:[]},
+    {t:'Courriers',ic:'📬',n:Math.floor(ae.length*0.5),docs:[]},
+    {t:'Règlements',ic:'📕',n:2,docs:['Reglement_travail.pdf','CCT_interne.pdf']},
+    {t:'Juridique',ic:'⚖',n:Math.floor(ae.length*0.1),docs:[]}];
+  const totDocs=cats.reduce((a,c)=>a+c.n,0);
+  
+  return <div>
+    <PH title="GED — Gestion Électronique des Documents" sub="Archivage par client et travailleur — Conservation légale"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Documents total',v:totDocs,c:'#60a5fa'},{l:'Catégories',v:cats.length,c:'#a78bfa'},{l:'Travailleurs',v:ae.length,c:'#c6a34e'},{l:'Stockage',v:Math.round(totDocs*0.2)+'MB',c:'#4ade80'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
     </div>
-    <C style={{marginTop:12,padding:'14px 18px'}}><ST>Structure</ST>
-      {['📂 Client → Travailleur → Année → Documents','Conservation: contrats 5 ans, fiches 5 ans','Format: PDF/A archivage','Recherche: nom, NISS, type, date','Accès: gestionnaire (tout), client (ses dossiers), travailleur (portail)'].map((l,i)=><div key={i} style={{fontSize:12,color:'#d4d0c8',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.02)'}}>{l}</div>)}
-    </C></div>;
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'arbo',l:'Arborescence'},{v:'retention',l:'Conservation légale'},{v:'search',l:'Recherche'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    {tab==='arbo'&&<div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}}>
+      {cats.map((c,ci)=><C key={ci} style={{padding:'16px',textAlign:'center',cursor:'pointer'}}>
+        <div style={{fontSize:28}}>{c.ic}</div>
+        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0',marginTop:6}}>{c.t}</div>
+        <div style={{fontSize:22,fontWeight:700,color:'#c6a34e',marginTop:4}}>{c.n}</div>
+        <div style={{fontSize:10,color:'#5e5c56'}}>documents</div>
+      </C>)}
+    </div>}
+    {tab==='retention'&&<C><ST>Durées de conservation légales</ST>
+      {[{t:'Contrats de travail',d:'5 ans après fin',b:'Art. 15 Loi 3/7/1978'},{t:'Fiches de paie',d:'5 ans',b:'Art. 58 AR 8/8/1980'},{t:'Compte individuel',d:'5 ans',b:'AR 8/8/1980'},{t:'Documents ONSS',d:'7 ans',b:'Loi ONSS'},{t:'Documents fiscaux (281.xx)',d:'7 ans',b:'CIR Art. 315'},{t:'Registre du personnel',d:'5 ans après dernière mention',b:'AR 9/12/1992'},{t:'Certificats médicaux',d:'5 ans',b:'Code bien-être'},{t:'Accidents du travail',d:'10 ans',b:'Loi 10/4/1971'},{t:'RGPD — Données personnelles',d:'Durée nécessaire + suppression',b:'RGPD Art. 5'}].map((r,i)=>
+        <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
+          <div><b style={{color:'#e8e6e0'}}>{r.t}</b><div style={{fontSize:10,color:'#5e5c56'}}>{r.b}</div></div>
+          <span style={{fontWeight:600,color:'#c6a34e',whiteSpace:'nowrap'}}>{r.d}</span>
+        </div>
+      )}
+    </C>}
+    {tab==='search'&&<C>
+      <ST>Recherche documents</ST>
+      <I label="Rechercher (nom, NISS, type, date)" value={search} onChange={setSearch}/>
+      <div style={{marginTop:14,padding:20,textAlign:'center',color:'#5e5c56',fontSize:12}}>
+        {search?`Recherche de "${search}" dans ${totDocs} documents...`:'Tapez un terme de recherche'}
+      </div>
+    </C>}
+  </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  AGENT IA JURIDIQUE — BOUTON FLOTTANT
