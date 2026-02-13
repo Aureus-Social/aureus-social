@@ -12934,9 +12934,9 @@ function AbsenteismeMod({s,d}){
         </C>
         <C style={{marginTop:12}}><ST>Bradford Factor — Interprétation</ST>
           <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
-            {[{range:'0 — 50',action:'Normal — pas d'action',c:'#4ade80'},
+            {[{range:'0 — 50',action:'Normal — pas d\'action',c:'#4ade80'},
               {range:'51 — 200',action:'Entretien informel de retour',c:'#f59e0b'},
-              {range:'201 — 500',action:'Avertissement écrit / plan d'action',c:'#fb923c'},
+              {range:'201 — 500',action:'Avertissement écrit / plan d\'action',c:'#fb923c'},
               {range:'> 500',action:'Mesure disciplinaire / médecin contrôle',c:'#f87171'},
             ].map((r,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
               <span style={{color:r.c,fontWeight:600}}>{r.range}</span><span style={{fontSize:10.5}}>{r.action}</span>
