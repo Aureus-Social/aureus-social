@@ -2498,7 +2498,7 @@ function genBelcotax(co, emp, yr, ad) {
 }
 
 // ─── INITIAL STATE ───────────────────────────────────────────
-const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:'info@aureus-ia.com',version:'v24',sprint:'Sprint 6'};
+const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:'info@aureus-ia.com',version:'v25',sprint:'Sprint 7'};
 const CAR_MODELS={
 'Aiways':['U5','U6'],
 'Alfa Romeo':['Giulia','Stelvio','Tonale','Junior','Giulietta','MiTo'],
@@ -7089,33 +7089,68 @@ function PortailEmployeurMod({s,d,per}){
 //  PRIMES SYNDICALES
 // ═══════════════════════════════════════════════════════════════
 function SyndicalesMod({s,d}){
-  const [yr,setYr]=useState(new Date().getFullYear());
-  const [synd,setSynd]=useState('fgtb');
-  const [gen,setGen]=useState(null);
-  const ae=s.emps.filter(e=>e.status==='active');
-  const synds=[{v:'fgtb',l:'FGTB',c:'#e53e3e'},{v:'csc',l:'CSC',c:'#38a169'},{v:'cgslb',l:'CGSLB',c:'#3182ce'},{v:'autre',l:'Autre',c:'#9e9b93'}];
-  const run=()=>{
-    const data=ae.map(emp=>{const prime=emp.cp==='124'?145:emp.cp==='200'?90:emp.cp==='302'?72:85;return{emp:`${emp.first} ${emp.last}`,niss:emp.niss,cp:emp.cp,synd:synds.find(x=>x.v===synd)?.l,jrs:Math.round(LEGAL.WD*12),prime};});
-    setGen({data,tot:data.reduce((a,r)=>a+r.prime,0),sc:synds.find(x=>x.v===synd)});
-  };
-  return <div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
-    <C><ST>Primes Syndicales</ST>
-      <I label="Année" type="number" value={yr} onChange={v=>setYr(v)}/>
-      <I label="Syndicat" value={synd} onChange={setSynd} style={{marginTop:9}} options={synds.map(x=>({v:x.v,l:x.l}))}/>
-      <B onClick={run} style={{width:'100%',marginTop:14}}>Générer {yr}</B>
-      {gen&&<div style={{marginTop:14,padding:12,background:'rgba(198,163,78,.06)',borderRadius:8,border:'1px solid rgba(198,163,78,.1)',fontSize:12,color:'#9e9b93',lineHeight:2}}>
-        <div style={{fontWeight:600,color:gen.sc?.c,marginBottom:4}}>{gen.sc?.l} — {yr}</div>
-        <div>Travailleurs: <b style={{color:'#e8e6e0'}}>{gen.data.length}</b></div>
-        <div>Total primes: <b style={{color:'#4ade80'}}>{fmt(gen.tot)}</b></div>
-      </div>}
-      <div style={{marginTop:12,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>Le montant varie par CP. Attestations pour transmission à l'organisation syndicale.</div>
-    </C>
-    <C style={{padding:0,overflow:'hidden'}}>
-      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Attestations — {yr}</div></div>
-      {gen?<Tbl cols={[{k:'e',l:'Travailleur',b:1,r:r=>r.emp},{k:'n',l:'NISS',r:r=><span style={{fontSize:10,color:'#9e9b93'}}>{r.niss}</span>},{k:'cp',l:'CP',r:r=>r.cp},{k:'s',l:'Syndicat',r:r=><span style={{fontWeight:600,color:gen.sc?.c}}>{r.synd}</span>},{k:'j',l:'Jours',a:'right',r:r=>r.jrs},{k:'p',l:'Prime',a:'right',r:r=><span style={{fontWeight:600,color:'#4ade80'}}>{fmt(r.prime)}</span>}]} data={gen?.data||[]}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56',fontSize:13}}>Générez les primes</div>}
-    </C>
+  const ae=s.emps||[];const [tab,setTab]=useState('calc');
+  const [montant,setMontant]=useState(145);
+  const n=ae.length;const totAn=n*montant;
+  
+  return <div>
+    <PH title="Primes Syndicales" sub="Cotisation employeur au Fonds social — Remboursement travailleurs syndiqués"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Travailleurs',v:n,c:'#60a5fa'},{l:'Prime/trav./an',v:'€'+montant,c:'#c6a34e'},{l:'Coût annuel total',v:fmt(totAn),c:'#f87171'},{l:'Taux syndication BE',v:'~50%',c:'#a78bfa'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'calc',l:'Calcul'},{v:'cp',l:'Montants par CP'},{v:'procedure',l:'Procédure'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    {tab==='calc'&&<div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
+      <C><ST>Paramètres</ST>
+        <I label="Prime annuelle/trav. (€)" type="number" value={montant} onChange={v=>setMontant(+v)}/>
+        <div style={{marginTop:14,padding:14,background:'rgba(198,163,78,.06)',borderRadius:8}}>
+          <div style={{fontSize:11,color:'#9e9b93',lineHeight:2}}>
+            <div>Travailleurs: <b style={{color:'#e8e6e0'}}>{n}</b></div>
+            <div>Prime/trav.: <b style={{color:'#c6a34e'}}>€{montant}</b></div>
+            <div style={{borderTop:'1px solid rgba(198,163,78,.2)',paddingTop:4,marginTop:4}}>Total: <b style={{color:'#c6a34e',fontSize:16}}>{fmt(totAn)}/an</b></div>
+          </div>
+        </div>
+      </C>
+      <C style={{padding:0,overflow:'hidden'}}>
+        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Détail</div></div>
+        <Tbl cols={[
+          {k:'n',l:'Travailleur',b:1,r:r=>`${r.first} ${r.last}`},
+          {k:'cp',l:'CP',r:r=>r.cp||'200'},
+          {k:'p',l:'Prime/an',a:'right',r:r=><span style={{fontWeight:600,color:'#c6a34e'}}>€{montant}</span>},
+          {k:'m',l:'Prime/mois',a:'right',r:r=>fmt(montant/12)},
+        ]} data={ae}/>
+      </C>
+    </div>}
+    {tab==='cp'&&<C><ST>Montants par commission paritaire (2026)</ST>
+      {[{cp:'CP 200 (CPNAE)',v:'€145,00',f:'Fonds social CPNAE'},{cp:'CP 302 (Horeca)',v:'€135,00',f:'Fonds social Horeca'},{cp:'CP 124 (Construction)',v:'€155,00',f:'Fonds social Construction'},{cp:'CP 140 (Transport)',v:'€140,00',f:'Fonds social Transport'},{cp:'CP 330 (Santé)',v:'€130,00',f:'Fonds Maribel social'},{cp:'CP 111/112 (Métal)',v:'€150,00',f:'Fonds social Métal'},{cp:'CP 218 (CPNAE employés)',v:'€145,00',f:'Fonds social CPNAE'}].map((r,i)=>
+        <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
+          <div><b style={{color:'#e8e6e0'}}>{r.cp}</b><div style={{fontSize:10,color:'#5e5c56'}}>{r.f}</div></div>
+          <span style={{fontWeight:700,color:'#c6a34e'}}>{r.v}</span>
+        </div>
+      )}
+    </C>}
+    {tab==='procedure'&&<C><ST>Procédure</ST>
+      <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+        {['1. L\'employeur verse la cotisation au Fonds social du secteur (via ONSS)','2. Le travailleur syndiqué fait la demande auprès de son syndicat','3. Le syndicat transmet au Fonds social','4. Le Fonds social verse la prime au syndicat','5. Le syndicat verse la prime au travailleur'].map((s2,i)=>
+          <div key={i} style={{padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>{s2}</div>
+        )}
+        <div style={{marginTop:10,padding:8,background:'rgba(96,165,250,.06)',borderRadius:6,fontSize:10.5,color:'#60a5fa'}}>
+          <b>Note:</b> L'employeur ne sait pas qui est syndiqué (RGPD). La cotisation est due pour TOUS les travailleurs.
+        </div>
+      </div>
+    </C>}
   </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  ONSS-APL (DMFAPPL)
@@ -7787,34 +7822,55 @@ function ProvisionsMod({s,d}){
 //  CUMULS (J.Vac, H.Vac, H.Suppl, Chom.éco, etc.)
 // ═══════════════════════════════════════════════════════════════
 function CumulsMod({s,d}){
-  const [yr,setYr]=useState(new Date().getFullYear());
-  const ae=s.emps.filter(e=>e.status==='active');
+  const ae=s.emps||[];const [yr,setYr]=useState(new Date().getFullYear());
+  const moisEcoules=yr===new Date().getFullYear()?new Date().getMonth()+1:12;
+  
   const data=ae.map(e=>{
     const p=calc(e,DPER,s.co);
-    return{emp:`${e.first} ${e.last}`,
-      jVac:20,hVac:20*LEGAL.WHD,jVacPris:Math.floor(Math.random()*15),
-      hSuppl:Math.floor(Math.random()*30),hSuppRecup:Math.floor(Math.random()*15),
-      chomEco:Math.floor(Math.random()*5),
-      maladie:Math.floor(Math.random()*4),
-      brutCumul:p.gross*(new Date().getMonth()+1),
-      onssCumul:p.onssNet*(new Date().getMonth()+1),
-      taxCumul:p.tax*(new Date().getMonth()+1),
-      netCumul:p.net*(new Date().getMonth()+1),
-    };
+    return{e,grossM:p.gross,grossY:p.gross*moisEcoules,onssY:p.onssNet*moisEcoules,taxY:p.tax*moisEcoules,netY:p.net*moisEcoules,cssY:p.css*moisEcoules,onssEY:p.onssE*moisEcoules,proj12:p.gross*12,projNet12:p.net*12};
   });
+  const tot={gross:data.reduce((a,r)=>a+r.grossY,0),onss:data.reduce((a,r)=>a+r.onssY,0),tax:data.reduce((a,r)=>a+r.taxY,0),net:data.reduce((a,r)=>a+r.netY,0),onssE:data.reduce((a,r)=>a+r.onssEY,0)};
+  
   return <div>
-    <PH title="Gestion des Cumuls" sub="Compteurs annuels par travailleur"/>
-    <I label="Année" type="number" value={yr} onChange={v=>setYr(v)} style={{maxWidth:150,marginBottom:16}}/>
-    <C style={{padding:0,overflow:'hidden',marginBottom:18}}>
-      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Cumuls congés & absences — {yr}</div></div>
-      <Tbl cols={[{k:'e',l:'Travailleur',b:1,r:r=>r.emp},{k:'jv',l:'J.Vac droit',a:'right',r:r=>r.jVac},{k:'jp',l:'J.Vac pris',a:'right',r:r=>r.jVacPris},{k:'js',l:'Solde',a:'right',r:r=><span style={{color:r.jVac-r.jVacPris>0?'#4ade80':'#f87171',fontWeight:600}}>{r.jVac-r.jVacPris}</span>},{k:'hv',l:'H.Vac',a:'right',r:r=>`${r.hVac}h`},{k:'hs',l:'H.Suppl',a:'right',r:r=><span style={{color:'#c6a34e'}}>{r.hSuppl}h</span>},{k:'hr',l:'H.Récup',a:'right',r:r=>`${r.hSuppRecup}h`},{k:'ce',l:'Chom.éco',a:'right',r:r=>r.chomEco>0?<span style={{color:'#f87171'}}>{r.chomEco}j</span>:'0'},{k:'ml',l:'Maladie',a:'right',r:r=>r.maladie>0?<span style={{color:'#a78bfa'}}>{r.maladie}j</span>:'0'}]} data={data}/>
-    </C>
-    <C style={{padding:0,overflow:'hidden'}}>
-      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Cumuls salariaux — {yr}</div></div>
-      <Tbl cols={[{k:'e',l:'Travailleur',b:1,r:r=>r.emp},{k:'b',l:'Brut cumul',a:'right',r:r=>fmt(r.brutCumul)},{k:'o',l:'ONSS cumul',a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.onssCumul)}</span>},{k:'t',l:'Préc. cumul',a:'right',r:r=><span style={{color:'#a78bfa'}}>{fmt(r.taxCumul)}</span>},{k:'n',l:'Net cumul',a:'right',r:r=><span style={{fontWeight:600,color:'#4ade80'}}>{fmt(r.netCumul)}</span>}]} data={data}/>
-    </C>
+    <PH title="Cumuls Annuels" sub="Récapitulatif YTD — Brut, ONSS, PP, Net cumulés"/>
+    <div style={{display:'grid',gridTemplateColumns:'200px 1fr',gap:18}}>
+      <div>
+        <C><ST>Période</ST>
+          <I label="Année" type="number" value={yr} onChange={v=>setYr(+v)}/>
+          <div style={{marginTop:10,fontSize:11,color:'#9e9b93'}}>Mois écoulés: <b style={{color:'#c6a34e'}}>{moisEcoules}</b></div>
+        </C>
+        <C style={{marginTop:12}}><ST>Totaux YTD</ST>
+          <div style={{fontSize:11,color:'#9e9b93',lineHeight:2.2}}>
+            {[{l:'Brut cumulé',v:tot.gross,c:'#e8e6e0'},{l:'ONSS travailleur',v:tot.onss,c:'#f87171'},{l:'ONSS employeur',v:tot.onssE,c:'#f87171'},{l:'Précompte prof.',v:tot.tax,c:'#a78bfa'},{l:'Net cumulé',v:tot.net,c:'#4ade80'}].map((r,i)=>
+              <div key={i} style={{display:'flex',justifyContent:'space-between',borderBottom:'1px solid rgba(255,255,255,.03)',padding:'2px 0'}}>
+                <span>{r.l}</span><span style={{fontWeight:600,color:r.c}}>{fmt(r.v)}</span>
+              </div>
+            )}
+          </div>
+        </C>
+      </div>
+      <C style={{padding:0,overflow:'hidden'}}>
+        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Cumuls {yr} — {moisEcoules} mois</div></div>
+        <Tbl cols={[
+          {k:'n',l:'Travailleur',b:1,r:r=>`${r.e.first} ${r.e.last}`},
+          {k:'g',l:'Brut YTD',a:'right',r:r=>fmt(r.grossY)},
+          {k:'o',l:'ONSS YTD',a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.onssY)}</span>},
+          {k:'t',l:'PP YTD',a:'right',r:r=><span style={{color:'#a78bfa'}}>{fmt(r.taxY)}</span>},
+          {k:'ne',l:'Net YTD',a:'right',r:r=><span style={{color:'#4ade80',fontWeight:600}}>{fmt(r.netY)}</span>},
+          {k:'p',l:'Proj. 12 mois',a:'right',r:r=><span style={{color:'#c6a34e'}}>{fmt(r.proj12)}</span>},
+        ]} data={data}/>
+        {data.length>0&&<div style={{padding:'12px 18px',borderTop:'1px solid rgba(139,115,60,.1)',display:'flex',justifyContent:'space-between'}}>
+          <span style={{fontSize:12,fontWeight:600,color:'#9e9b93'}}>TOTAUX</span>
+          <div style={{display:'flex',gap:16,fontSize:12}}>
+            <span>Brut: <b style={{color:'#e8e6e0'}}>{fmt(tot.gross)}</b></span>
+            <span>Net: <b style={{color:'#4ade80'}}>{fmt(tot.net)}</b></span>
+          </div>
+        </div>}
+      </C>
+    </div>
   </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  SAISIES-CESSIONS — BARÈME 2026 COMPLET
@@ -8814,33 +8870,67 @@ function AllocFamMod({s,d}){
 //  CAISSE VACANCES ANNUELLES
 // ═══════════════════════════════════════════════════════════════
 function CaisseVacMod({s,d}){
-  const [yr,setYr]=useState(new Date().getFullYear()-1);
-  const ae=s.emps.filter(e=>e.status==='active');
-  const data=ae.map(e=>{const brut12=e.monthlySalary*12;
-    return{emp:`${e.first} ${e.last}`,brut12,jrsDroit:20,
-      simplePec:brut12*0.0769,doublePec:brut12*0.0769,
-      cotCaisse:brut12*0.1846,
-      total:brut12*0.0769*2};});
-  const tot=data.reduce((a,r)=>({sp:a.sp+r.simplePec,dp:a.dp+r.doublePec,cc:a.cc+r.cotCaisse}),{sp:0,dp:0,cc:0});
+  const ae=s.emps||[];
+  const ouvriers=ae.filter(e=>e.statut==='ouvrier');
+  const employes=ae.filter(e=>e.statut!=='ouvrier');
+  
+  // Ouvriers: caisse de vacances (ONVA) — 15,84% sur brut 108%
+  const masseOuv=ouvriers.reduce((a,e)=>{const p=calc(e,DPER,s.co);return a+p.gross*12*1.08},0);
+  const cotOuv=masseOuv*0.1584;
+  // Employés: pécule vacances payé par employeur
+  const masseEmp=employes.reduce((a,e)=>{const p=calc(e,DPER,s.co);return a+p.gross*12},0);
+  const pecSimple=masseEmp*0.0769;// 7,69% pour simple pécule
+  const pecDouble=masseEmp*0.0769;// 7,69% pour double pécule
+  
   return <div>
-    <PH title="Caisse de Vacances Annuelles" sub={`Année de référence: ${yr}`}/>
-    <div style={{display:'grid',gridTemplateColumns:'260px 1fr',gap:18}}>
-      <C><I label="Année réf." type="number" value={yr} onChange={v=>setYr(v)}/>
-        <div style={{marginTop:14,padding:12,background:'rgba(198,163,78,.06)',borderRadius:8,fontSize:12,color:'#9e9b93',lineHeight:2}}>
-          <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>Totaux {yr}</div>
-          <div>Simple pécule: <b style={{color:'#e8e6e0'}}>{fmt(tot.sp)}</b></div>
-          <div>Double pécule: <b style={{color:'#e8e6e0'}}>{fmt(tot.dp)}</b></div>
-          <div>Cotisation caisse: <b style={{color:'#f87171'}}>{fmt(tot.cc)}</b></div>
+    <PH title="Caisse de Vacances / Pécule" sub="ONVA (ouvriers) — Employeur (employés) — Calcul annuel"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Ouvriers',v:ouvriers.length,c:'#f87171',s:'Via ONVA'},{l:'Employés',v:employes.length,c:'#60a5fa',s:'Via employeur'},{l:'Cotisation ONVA',v:fmt(cotOuv),c:'#fb923c',s:'15,84% sur 108%'},{l:'Pécule employés',v:fmt(pecSimple+pecDouble),c:'#c6a34e',s:'Simple + double'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+          <div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>{k.s}</div>
         </div>
-        <div style={{marginTop:12,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>Pour les ouvriers, le pécule est payé par la caisse de vacances. Employés: payé directement par l'employeur.</div>
+      )}
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Ouvriers — Caisse ONVA</ST>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {[{l:'Masse salariale (×108%)',v:fmt(masseOuv)},{l:'Taux cotisation',v:'15,84%'},{l:'Cotisation annuelle',v:fmt(cotOuv)},{l:'Paiement',v:'Par ONVA au travailleur'},{l:'Période',v:'Mai-Juin (année N pour N-1)'}].map((r,i)=>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <span>{r.l}</span><span style={{fontWeight:600,color:'#e8e6e0'}}>{r.v}</span>
+            </div>
+          )}
+        </div>
+        <div style={{marginTop:10,padding:8,background:'rgba(248,113,113,.06)',borderRadius:6,fontSize:10.5,color:'#f87171'}}>
+          <b>ONVA:</b> L'employeur paie la cotisation via ONSS. L'ONVA verse directement le pécule aux ouvriers.
+        </div>
       </C>
-      <C style={{padding:0,overflow:'hidden'}}>
-        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Pécules de vacances — réf. {yr}</div></div>
-        <Tbl cols={[{k:'e',l:'Travailleur',b:1,r:r=>r.emp},{k:'b',l:'Brut annuel',a:'right',r:r=>fmt(r.brut12)},{k:'j',l:'Jours',a:'right',r:r=>r.jrsDroit},{k:'sp',l:'Simple',a:'right',r:r=>fmt(r.simplePec)},{k:'dp',l:'Double',a:'right',r:r=>fmt(r.doublePec)},{k:'t',l:'Total',a:'right',r:r=><span style={{fontWeight:600,color:'#4ade80'}}>{fmt(r.total)}</span>},{k:'cc',l:'Cot. caisse',a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.cotCaisse)}</span>}]} data={data}/>
+      <C><ST>Employés — Pécule employeur</ST>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {[{l:'Simple pécule (7,69%)',v:fmt(pecSimple)},{l:'Double pécule (7,69%)',v:fmt(pecDouble)},{l:'Total provision',v:fmt(pecSimple+pecDouble)},{l:'Paiement simple',v:'Avec salaire du mois de vacances'},{l:'Paiement double',v:'Mai-Juin (avant vacances principales)'}].map((r,i)=>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <span>{r.l}</span><span style={{fontWeight:600,color:'#e8e6e0'}}>{r.v}</span>
+            </div>
+          )}
+        </div>
+        <div style={{marginTop:10,padding:8,background:'rgba(96,165,250,.06)',borderRadius:6,fontSize:10.5,color:'#60a5fa'}}>
+          <b>Provision:</b> Constituer une provision mensuelle de {fmt((pecSimple+pecDouble)/12)} pour couvrir le double pécule.
+        </div>
       </C>
     </div>
+    <C style={{marginTop:12}}><ST>Détail par travailleur</ST>
+      <Tbl cols={[
+        {k:'n',l:'Travailleur',b:1,r:r=>`${r.first} ${r.last}`},
+        {k:'st',l:'Statut',r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:r.statut==='ouvrier'?'rgba(248,113,113,.1)':'rgba(96,165,250,.1)',color:r.statut==='ouvrier'?'#f87171':'#60a5fa'}}>{r.statut==='ouvrier'?'Ouvrier':'Employé'}</span>},
+        {k:'b',l:'Brut annuel',a:'right',r:r=>{const p=calc(r,DPER,s.co);return fmt(p.gross*12)}},
+        {k:'p',l:'Pécule/Cotis.',a:'right',r:r=>{const p=calc(r,DPER,s.co);const isO=r.statut==='ouvrier';return <span style={{fontWeight:600,color:'#c6a34e'}}>{fmt(isO?p.gross*12*1.08*0.1584:p.gross*12*0.1538)}</span>}},
+        {k:'v',l:'Via',r:r=>r.statut==='ouvrier'?'ONVA':'Employeur'},
+      ]} data={ae}/>
+    </C>
   </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  OPÉRATIONS BANCAIRES (SEPA)
@@ -12221,21 +12311,70 @@ function TotalRewardMod({s,d}){
 }
 
 function ATNMod({s,d}){
-  const ae=s.emps||[];const [vehs,setVehs]=useState([]);const [f,setF]=useState({emp:'',marque:'',co2:120,carburant:'essence',catalogue:35000});
-  const add=()=>{if(!f.emp)return;const pct=Math.min(18,Math.max(4,5.5+(+f.co2-(f.carburant==='diesel'?67:82))*0.1));const atn=Math.max(1600,+f.catalogue*6/7*(pct/100));setVehs(p=>[...p,{...f,id:Date.now(),atn,mens:atn/12}]);};
-  return <div><C style={{padding:'18px 20px'}}><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}><span style={{fontSize:24}}>🚗</span><div><div style={{fontWeight:700,fontSize:16}}>ATN Véhicules de société</div><div style={{fontSize:11,color:'#5e5c56'}}>Calcul ATN, cotisation CO₂, flotte</div></div></div>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,marginBottom:10}}>
-      <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
-      <I label="Véhicule" value={f.marque} onChange={v=>setF({...f,marque:v})}/>
-      <I label="Carburant" value={f.carburant} onChange={v=>setF({...f,carburant:v})} options={[{v:'essence',l:'Essence'},{v:'diesel',l:'Diesel'},{v:'electrique',l:'Électrique'},{v:'hybride',l:'Hybride'}]}/>
+  const ae=s.emps||[];const [vehs,setVehs]=useState([]);
+  const [f,setF]=useState({emp:'',marque:'',modele:'',co2:120,carburant:'essence',catalogue:35000,annee:new Date().getFullYear()});
+  
+  const add=()=>{
+    if(!f.emp)return;
+    const age=new Date().getFullYear()-f.annee;
+    const decote=Math.min(age*0.06,0.30);// 6%/an, max 30%
+    const catVal=+f.catalogue*(1-decote);
+    const ref=f.carburant==='diesel'?67:f.carburant==='essence'?82:0;
+    const pct=f.carburant==='electrique'?4:Math.min(18,Math.max(4,5.5+(+f.co2-ref)*0.1));
+    const atn=Math.max(1600,catVal*6/7*(pct/100));
+    // Cotisation CO2 employeur
+    const co2Cotis=f.carburant==='electrique'?31.99:f.carburant==='diesel'?((+f.co2*9+768)/12):((+f.co2*9+768)/12);
+    setVehs(p=>[...p,{...f,id:Date.now(),atn,atnMens:atn/12,pct,catVal,co2Cotis,empName:ae.find(e=>e.id===f.emp)?.first+' '+ae.find(e=>e.id===f.emp)?.last}]);
+  };
+  
+  const totATN=vehs.reduce((a,v)=>a+v.atn,0);
+  const totCO2=vehs.reduce((a,v)=>a+v.co2Cotis*12,0);
+  
+  return <div>
+    <PH title="ATN Véhicules de Société" sub="Avantage toute nature — Calcul ATN, cotisation CO₂, flotte"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Véhicules',v:vehs.length,c:'#60a5fa'},{l:'ATN total annuel',v:fmt(totATN),c:'#c6a34e'},{l:'Cotis. CO₂ annuelle',v:fmt(totCO2),c:'#f87171'},{l:'ATN moyen/mois',v:vehs.length?fmt(totATN/vehs.length/12):'—',c:'#a78bfa'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
     </div>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
-      <I label="CO₂ (g/km)" type="number" value={f.co2} onChange={v=>setF({...f,co2:v})}/>
-      <I label="Catalogue TVAC (€)" type="number" value={f.catalogue} onChange={v=>setF({...f,catalogue:v})}/>
-      <div style={{display:'flex',alignItems:'flex-end'}}><button onClick={add} style={{padding:'8px 20px',background:'linear-gradient(135deg,#c6a34e,#e8c547)',border:'none',borderRadius:8,color:'#000',fontWeight:700,cursor:'pointer'}}>+ Ajouter</button></div>
-    </div></C>
-    {vehs.length>0&&<C style={{marginTop:12}}><TB cols={[{k:'e',l:'Travailleur'},{k:'v',l:'Véhicule'},{k:'c',l:'CO₂'},{k:'m',l:'ATN/mois'},{k:'a',l:'ATN/an'}]} rows={vehs.map(v=>{const e=ae.find(x=>x.id===v.emp);return{e:e?`${e.first} ${e.last}`:'?',v:v.marque,c:v.co2+'g',m:'€ '+(v.mens).toFixed(2),a:'€ '+(v.atn).toFixed(2)};})}/></C>}</div>;
+    <div style={{display:'grid',gridTemplateColumns:'350px 1fr',gap:18}}>
+      <C><ST>Ajouter véhicule</ST>
+        <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:9}}>
+          <I label="Marque" value={f.marque} onChange={v=>setF({...f,marque:v})}/>
+          <I label="Modèle" value={f.modele} onChange={v=>setF({...f,modele:v})}/>
+          <I label="Carburant" value={f.carburant} onChange={v=>setF({...f,carburant:v})} options={[{v:'essence',l:'Essence'},{v:'diesel',l:'Diesel'},{v:'electrique',l:'Électrique'},{v:'hybride',l:'Hybride PHEV'}]}/>
+          <I label="CO₂ (g/km)" type="number" value={f.co2} onChange={v=>setF({...f,co2:+v})}/>
+          <I label="Val. catalogue (€)" type="number" value={f.catalogue} onChange={v=>setF({...f,catalogue:+v})}/>
+          <I label="Année 1ère immat." type="number" value={f.annee} onChange={v=>setF({...f,annee:+v})}/>
+        </div>
+        <B onClick={add} style={{width:'100%',marginTop:14}}>Calculer ATN</B>
+        <div style={{marginTop:12,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>
+          <b>Formule:</b> ATN = catalogue × 6/7 × CO₂% (min €1.600)<br/>
+          <b>Décote:</b> 6%/an depuis 1ère immat. (max 30%)<br/>
+          <b>Électrique:</b> CO₂% fixe = 4% (min)
+        </div>
+      </C>
+      <C style={{padding:0,overflow:'hidden'}}>
+        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Flotte ({vehs.length})</div></div>
+        {vehs.length>0?<Tbl cols={[
+          {k:'e',l:'Travailleur',b:1,r:r=>r.empName},
+          {k:'v',l:'Véhicule',r:r=>`${r.marque} ${r.modele}`},
+          {k:'c',l:'Carburant',r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:r.carburant==='electrique'?'rgba(74,222,128,.1)':'rgba(198,163,78,.1)',color:r.carburant==='electrique'?'#4ade80':'#c6a34e'}}>{r.carburant}</span>},
+          {k:'co',l:'CO₂',a:'right',r:r=>`${r.co2}g`},
+          {k:'p',l:'%',a:'right',r:r=><span style={{color:'#c6a34e'}}>{r.pct.toFixed(1)}%</span>},
+          {k:'a',l:'ATN/an',a:'right',r:r=><span style={{fontWeight:600,color:'#f87171'}}>{fmt(r.atn)}</span>},
+          {k:'m',l:'ATN/mois',a:'right',r:r=>fmt(r.atnMens)},
+          {k:'co2c',l:'CO₂/mois',a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.co2Cotis)}</span>},
+        ]} data={vehs}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Ajoutez un véhicule</div>}
+      </C>
+    </div>
+  </div>;
 }
+
 
 function ChomTempMod({s,d}){
   const ae=s.emps||[];const [ds,setDs]=useState([]);
