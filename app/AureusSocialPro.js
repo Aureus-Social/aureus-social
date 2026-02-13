@@ -2498,7 +2498,7 @@ function genBelcotax(co, emp, yr, ad) {
 }
 
 // ─── INITIAL STATE ───────────────────────────────────────────
-const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:'info@aureus-ia.com',version:'v26',sprint:'Sprint 8'};
+const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:'info@aureus-ia.com',version:'v27',sprint:'Sprint 9'};
 const CAR_MODELS={
 'Aiways':['U5','U6'],
 'Alfa Romeo':['Giulia','Stelvio','Tonale','Junior','Giulietta','MiTo'],
@@ -7358,47 +7358,75 @@ function ETAMod({s,d}){
 //  EXPORT / IMPORT
 // ═══════════════════════════════════════════════════════════════
 function ExportImportMod({s,d}){
-  const [mode,setMode]=useState('export');
-  const [ef,setEf]=useState('dif');
-  const [ed,setEd]=useState('employees');
-  const [res,setRes]=useState(null);
-  const [impD,setImpD]=useState('');
-  const ae=s.emps.filter(e=>e.status==='active');
-  const fmts=[{v:'dif',l:'DIF (Data Interchange)'},{v:'csv',l:'CSV'},{v:'tsv',l:'TSV'},{v:'xls',l:'XLS (Excel)'},{v:'txt',l:'TXT'}];
-  const dsets=[{v:'employees',l:'Signalétiques'},{v:'payslips',l:'Fiches de paie'},{v:'cumuls',l:'Cumuls annuels'},{v:'onss',l:'Données ONSS'},{v:'fiscal',l:'Données fiscales'}];
-  const doExp=()=>{
-    let lines=[];
-    if(ed==='employees'){lines=['Nom;Prénom;NISS;Fonction;Dept;Contrat;CP;Brut;Enfants;IBAN',...ae.map(e=>`${e.last};${e.first};${e.niss};${e.fn};${e.dept};${e.contract};${e.cp};${e.monthlySalary};${e.depChildren};${e.iban}`)];}
-    else if(ed==='payslips'){lines=['Nom;Brut;ONSS;Précompte;CSS;Net;Coût',...ae.map(e=>{const p=calc(e,DPER,s.co);return`${e.last} ${e.first};${p.gross.toFixed(2)};${p.onssNet.toFixed(2)};${p.tax.toFixed(2)};${p.css.toFixed(2)};${p.net.toFixed(2)};${p.costTotal.toFixed(2)}`;})];} 
-    else{lines=['Nom;NISS;DMFA;CP;Brut;ONSS_T;ONSS_E',...ae.map(e=>{const p=calc(e,DPER,s.co);return`${e.last} ${e.first};${e.niss};${e.dmfaCode};${e.cp};${p.gross.toFixed(2)};${p.onssNet.toFixed(2)};${p.onssE.toFixed(2)}`;})];} 
-    const sep=ef==='csv'?',':ef==='tsv'?'\t':';';
-    const out=ef==='dif'?`TABLE\n0,1\n""\nVECTORS\n0,${ae.length}\n""\nTUPLES\n0,${lines[0].split(';').length}\n""\nDATA\n`+lines.join('\n')+'\n-1,0\nEOD':lines.join('\n').replaceAll(';',sep);
-    setRes({out,n:lines.length-1,f:lines[0].split(';').length,fl:fmts.find(f=>f.v===ef)?.l});
+  const ae=s.emps||[];const [tab,setTab]=useState('export');const [format,setFormat]=useState('csv');const [scope,setScope]=useState('all');
+  const n=ae.length;
+  
+  const doExport=(type)=>{
+    let data='';let filename='';
+    if(type==='emps'){
+      const headers='Nom;Prénom;NISS;Statut;CP;Brut;Entrée;Fonction';
+      const rows=ae.map(e=>`${e.last};${e.first};${e.niss||''};${e.statut||'employé'};${e.cp||200};${e.brut||0};${e.startD||''};${e.fn||''}`);
+      data=headers+'\n'+rows.join('\n');
+      filename='export_travailleurs_'+new Date().toISOString().split('T')[0];
+    }else if(type==='paie'){
+      const headers='Nom;Brut;ONSS;PP;Net;ONSS Empl.';
+      const rows=ae.map(e=>{const p=calc(e,DPER,s.co);return `${e.last} ${e.first};${p.gross.toFixed(2)};${p.onssNet.toFixed(2)};${p.tax.toFixed(2)};${p.net.toFixed(2)};${p.onssE.toFixed(2)}`});
+      data=headers+'\n'+rows.join('\n');
+      filename='export_paie_'+new Date().toISOString().split('T')[0];
+    }else if(type==='onss'){
+      const headers='Nom;NISS;Brut;ONSS Trav.;ONSS Empl.;CSS';
+      const rows=ae.map(e=>{const p=calc(e,DPER,s.co);return `${e.last} ${e.first};${e.niss||''};${p.gross.toFixed(2)};${p.onssNet.toFixed(2)};${p.onssE.toFixed(2)};${p.css.toFixed(2)}`});
+      data=headers+'\n'+rows.join('\n');
+      filename='export_onss_'+new Date().toISOString().split('T')[0];
+    }
+    if(data){const blob=new Blob([data],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename+'.csv';a.click();}
   };
-  return <div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:18}}>
-    <C><ST>Export / Import</ST>
-      <I label="Mode" value={mode} onChange={setMode} options={[{v:'export',l:'📤 Exportation'},{v:'import',l:'📥 Importation (pointage/paie)'}]}/>
-      {mode==='export'?<>
-        <I label="Données" value={ed} onChange={setEd} style={{marginTop:9}} options={dsets}/>
-        <I label="Format" value={ef} onChange={setEf} style={{marginTop:9}} options={fmts}/>
-        <B onClick={doExp} style={{width:'100%',marginTop:14}}>Exporter</B>
-      </>:<>
-        <I label="Source" value="pointage" onChange={()=>{}} style={{marginTop:9}} options={[{v:'pointage',l:'Pointage'},{v:'paie',l:'Paie'},{v:'sig',l:'Signalétiques'}]}/>
-        <div style={{marginTop:9}}><label style={{fontSize:10.5,fontWeight:600,color:'#9e9b93',display:'block',marginBottom:5,textTransform:'uppercase',letterSpacing:'.7px'}}>Données CSV/TXT</label>
-        <textarea value={impD} onChange={e=>setImpD(e.target.value)} rows={6} placeholder="Collez ici..." style={{width:'100%',padding:'9px 12px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:7,color:'#d4d0c8',fontSize:11,fontFamily:'monospace',outline:'none',resize:'vertical',boxSizing:'border-box'}}/></div>
-        <B onClick={()=>{if(!impD.trim())return alert('Collez les données');alert(`${impD.trim().split('\n').length-1} ligne(s) importées !`);}} style={{width:'100%',marginTop:14}}>Importer</B>
-      </>}
-      <div style={{marginTop:14,padding:10,background:'rgba(198,163,78,.05)',borderRadius:8}}><div style={{fontSize:10.5,color:'#c6a34e',fontWeight:600,marginBottom:4}}>Formats</div>{fmts.map(f=><div key={f.v} style={{fontSize:10.5,color:'#9e9b93',padding:'1px 0'}}>• {f.l}</div>)}</div>
-    </C>
-    <C style={{padding:0,overflow:'hidden'}}>
-      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>{mode==='export'?'Résultat':'Import'}</div></div>
-      {res?<div style={{padding:16}}>
-        <div style={{display:'flex',gap:14,marginBottom:12}}><span style={{fontSize:11,color:'#9e9b93'}}>Format: <b style={{color:'#c6a34e'}}>{res.fl}</b></span><span style={{fontSize:11,color:'#9e9b93'}}>Lignes: <b style={{color:'#e8e6e0'}}>{res.n}</b></span><span style={{fontSize:11,color:'#9e9b93'}}>Champs: <b style={{color:'#e8e6e0'}}>{res.f}</b></span><B v="ghost" style={{padding:'3px 8px',fontSize:10,marginLeft:'auto'}} onClick={()=>{navigator.clipboard?.writeText(res.out);alert('Copié !')}}>Copier</B></div>
-        <pre style={{background:'#060810',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,padding:12,fontSize:10,color:'#9e9b93',overflowX:'auto',whiteSpace:'pre-wrap',maxHeight:380,overflowY:'auto'}}>{res.out}</pre>
-      </div>:<div style={{padding:40,textAlign:'center',color:'#5e5c56',fontSize:13}}>{mode==='export'?'Lancez un export':'Collez les données'}</div>}
-    </C>
+  
+  return <div>
+    <PH title="Export / Import Données" sub="CSV, Excel — Travailleurs, paie, ONSS, comptabilité"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Travailleurs',v:n,c:'#60a5fa'},{l:'Formats disponibles',v:'CSV, XLSX',c:'#c6a34e'},{l:'Dernière export',v:'—',c:'#9e9b93'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'export',l:'Exports'},{v:'import',l:'Import'},{v:'historique',l:'Historique'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    {tab==='export'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:14}}>
+      {[{t:'Travailleurs',d:'Signalétique complète — nom, NISS, statut, CP, brut',ic:'👥',type:'emps'},
+        {t:'Fiches de paie',d:'Brut, ONSS, PP, net — mois en cours',ic:'💰',type:'paie'},
+        {t:'Déclarations ONSS',d:'ONSS travailleur + employeur, CSS, base',ic:'🏛',type:'onss'},
+      ].map((ex,i)=><C key={i} style={{cursor:'pointer'}} onClick={()=>doExport(ex.type)}>
+        <div style={{textAlign:'center',padding:'10px 0'}}>
+          <div style={{fontSize:32}}>{ex.ic}</div>
+          <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0',marginTop:8}}>{ex.t}</div>
+          <div style={{fontSize:11,color:'#9e9b93',marginTop:4}}>{ex.d}</div>
+          <div style={{marginTop:10,padding:'6px 16px',display:'inline-block',background:'linear-gradient(135deg,#c6a34e,#e8c547)',borderRadius:6,fontSize:11,fontWeight:600,color:'#000'}}>Exporter CSV</div>
+        </div>
+      </C>)}
+    </div>}
+    {tab==='import'&&<C>
+      <ST>Import fichier</ST>
+      <div style={{padding:30,textAlign:'center',border:'2px dashed rgba(198,163,78,.2)',borderRadius:10,marginTop:10}}>
+        <div style={{fontSize:32,marginBottom:8}}>📁</div>
+        <div style={{fontSize:13,color:'#e8e6e0',fontWeight:600}}>Glissez un fichier CSV ici</div>
+        <div style={{fontSize:11,color:'#9e9b93',marginTop:4}}>Format: CSV séparateur point-virgule (;) — Encodage UTF-8</div>
+        <div style={{marginTop:12,fontSize:10.5,color:'#60a5fa'}}>Colonnes attendues: Nom, Prénom, NISS, Statut, CP, Brut, Date entrée</div>
+      </div>
+    </C>}
+    {tab==='historique'&&<C>
+      <ST>Historique des exports</ST>
+      <div style={{padding:20,textAlign:'center',color:'#5e5c56',fontSize:12}}>Aucun export enregistré dans cette session</div>
+    </C>}
   </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  NET AU BRUT
@@ -7629,44 +7657,83 @@ function NetBrutMod({s,d}){
 //  DECAVA
 // ═══════════════════════════════════════════════════════════════
 function DecavaMod({s,d}){
-  const [eid,setEid]=useState(s.emps[0]?.id||'');
-  const [yr,setYr]=useState(new Date().getFullYear());
-  const [typeRCC,setTypeRCC]=useState('rcc');
-  const [dateDeb,setDateDeb]=useState('');
-  const [hist,setHist]=useState([]);
-  const emp=s.emps.find(e=>e.id===eid);
-  const types=[{v:'rcc',l:'RCC (Régime chômage avec complément)'},{v:'canada_dry',l:'Canada Dry / Pseudo-prépension'},{v:'prepension',l:'Prépension conventionnelle'}];
-  const gen=()=>{if(!emp)return;
-    const p=calc(emp,DPER,s.co);
-    const cotSpec=p.gross*0.0132;const cotPatr=p.gross*0.5;
-    const doc={id:uid(),emp:`${emp.first} ${emp.last}`,yr,type:types.find(t=>t.v===typeRCC)?.l,dateDeb,brut:p.gross,cotSpec,cotPatr,at:new Date().toISOString()};
-    setHist([doc,...hist]);
-    d({type:'MODAL',m:{w:600,c:<div>
-      <h2 style={{fontSize:17,fontWeight:600,color:'#e8e6e0',margin:'0 0 3px',fontFamily:"'Cormorant Garamond',serif"}}>DECAVA — {doc.type}</h2>
-      <div style={{fontSize:10.5,color:'#c6a34e',marginBottom:14}}>Année {yr}</div>
-      <div style={{padding:16,background:'#faf9f4',borderRadius:10,color:'#1a1a18'}}>
-        {[{l:'Employeur',v:s.co.name},{l:'Travailleur',v:doc.emp},{l:'Type',v:doc.type},{l:'Date début',v:dateDeb||'—'},{l:'Dernier brut',v:fmt(doc.brut)},{l:'Cotisation spéciale',v:fmt(doc.cotSpec)},{l:'Cotisation patronale',v:fmt(doc.cotPatr)}].map((f,i)=>
-          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'7px 0',borderBottom:'1px solid #eee',fontSize:12.5}}><span style={{color:'#888'}}>{f.l}</span><span style={{fontWeight:500}}>{f.v}</span></div>
+  const [age,setAge]=useState(60);const [complement,setComplement]=useState(500);const [tab,setTab]=useState('calc');
+  
+  // Taux DECAVA selon âge (cotisation spéciale sécurité sociale)
+  const getTaux=()=>{if(age<52)return{trav:0.0,patr:0.10};if(age<55)return{trav:0.0,patr:0.0833};if(age<58)return{trav:0.0,patr:0.0583};if(age<60)return{trav:0.0,patr:0.0417};return{trav:0.0,patr:0.0325};};
+  const tx=getTaux();
+  const retTrav=complement*tx.trav;
+  const cotPatr=complement*tx.patr;
+  const cotPatrAn=cotPatr*12;
+  const netCompl=complement-retTrav;
+  
+  return <div>
+    <PH title="DECAVA — Cotisation Spéciale Prépension/RCC" sub="Retenue sur complément d'entreprise — AR 22/03/2006"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Complément brut',v:fmt(complement),c:'#e8e6e0',s:'/mois'},{l:'Cotisation patronale',v:(tx.patr*100).toFixed(2)+'%',c:'#f87171'},{l:'Coût patronal/an',v:fmt(cotPatrAn),c:'#fb923c'},{l:'Net complément',v:fmt(netCompl),c:'#4ade80',s:'/mois'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+          {k.s&&<div style={{fontSize:10,color:'#5e5c56',marginTop:1}}>{k.s}</div>}
+        </div>
+      )}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'calc',l:'Calcul'},{v:'baremes',l:'Barèmes par âge'},{v:'legal',l:'Cadre légal'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    {tab==='calc'&&<div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
+      <C><ST>Paramètres</ST>
+        <I label="Âge du bénéficiaire" type="number" value={age} onChange={v=>setAge(+v)}/>
+        <I label="Complément mensuel (€)" type="number" value={complement} onChange={v=>setComplement(+v)} style={{marginTop:9}}/>
+        <div style={{marginTop:14,padding:14,background:'rgba(198,163,78,.06)',borderRadius:8}}>
+          <div style={{fontSize:11,color:'#9e9b93',lineHeight:2}}>
+            <div>Taux patronal: <b style={{color:'#f87171'}}>{(tx.patr*100).toFixed(2)}%</b></div>
+            <div>Cotisation/mois: <b style={{color:'#f87171'}}>{fmt(cotPatr)}</b></div>
+            <div>Cotisation/an: <b style={{color:'#fb923c'}}>{fmt(cotPatrAn)}</b></div>
+            <div>Net complément: <b style={{color:'#4ade80'}}>{fmt(netCompl)}/mois</b></div>
+          </div>
+        </div>
+      </C>
+      <C><ST>Décomposition</ST>
+        {[{l:'Complément brut',v:complement,c:'#e8e6e0'},
+          {l:'Cotisation patronale DECAVA ('+((tx.patr*100).toFixed(2))+'%)',v:-cotPatr,c:'#f87171'},
+          {l:'Précompte professionnel (selon barème)',v:0,c:'#a78bfa'},
+        ].map((row,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
+          <span style={{color:'#9e9b93'}}>{row.l}</span>
+          <span style={{fontWeight:600,color:row.c}}>{row.v<0?'- '+fmt(Math.abs(row.v)):fmt(row.v)}</span>
+        </div>)}
+        <div style={{display:'flex',justifyContent:'space-between',padding:'12px 0',borderTop:'2px solid rgba(198,163,78,.3)',marginTop:8}}>
+          <span style={{fontWeight:700,color:'#e8e6e0'}}>NET</span>
+          <span style={{fontSize:18,fontWeight:700,color:'#4ade80'}}>{fmt(netCompl)}</span>
+        </div>
+      </C>
+    </div>}
+    {tab==='baremes'&&<C><ST>Taux DECAVA par tranche d'âge</ST>
+      {[{age:'< 52 ans',patr:'10,00%',trav:'0%',c:'#f87171'},{age:'52 — 54 ans',patr:'8,33%',trav:'0%',c:'#fb923c'},{age:'55 — 57 ans',patr:'5,83%',trav:'0%',c:'#f59e0b'},{age:'58 — 59 ans',patr:'4,17%',trav:'0%',c:'#a78bfa'},{age:'≥ 60 ans',patr:'3,25%',trav:'0%',c:'#4ade80'}].map((r,i)=>
+        <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
+          <b style={{color:'#e8e6e0'}}>{r.age}</b>
+          <div style={{display:'flex',gap:16}}><span>Patronale: <b style={{color:r.c}}>{r.patr}</b></span><span>Travailleur: <b>{r.trav}</b></span></div>
+        </div>
+      )}
+      <div style={{marginTop:10,padding:8,background:'rgba(96,165,250,.06)',borderRadius:6,fontSize:10.5,color:'#60a5fa'}}>
+        <b>Note:</b> Depuis 2023, la cotisation travailleur est supprimée. Seule la cotisation patronale subsiste.
+      </div>
+    </C>}
+    {tab==='legal'&&<C><ST>Cadre légal DECAVA</ST>
+      <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+        {[{l:'Base légale',v:'AR 22/03/2006 + Loi-programme 27/12/2006'},{l:'Débiteur',v:'L\'employeur qui verse le complément'},{l:'Déclaration',v:'DmfA — Code travailleur spécifique RCC'},{l:'Durée',v:'Jusqu\'à la pension légale du bénéficiaire'},{l:'Indexation',v:'Le complément suit l\'indice-pivot (sauf CCT contraire)'}].map((r,i)=>
+          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <span>{r.l}</span><span style={{fontWeight:600,color:'#e8e6e0'}}>{r.v}</span>
+          </div>
         )}
       </div>
-      <div style={{display:'flex',gap:10,marginTop:12,justifyContent:'flex-end'}}><B v="outline" onClick={()=>d({type:'MODAL',m:null})}>Fermer</B></div>
-    </div>}});
-  };
-  return <div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:18}}>
-    <C><ST>DECAVA — Prépensions</ST>
-      <I label="Travailleur" value={eid} onChange={setEid} options={s.emps.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
-      <I label="Type" value={typeRCC} onChange={setTypeRCC} style={{marginTop:9}} options={types}/>
-      <I label="Année" type="number" value={yr} onChange={v=>setYr(v)} style={{marginTop:9}}/>
-      <I label="Date début" type="date" value={dateDeb} onChange={setDateDeb} style={{marginTop:9}}/>
-      <B onClick={gen} style={{width:'100%',marginTop:14}}>Générer DECAVA</B>
-      <div style={{marginTop:12,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>Déclaration anticipée de vacances / cotisations spéciales RCC. Calcul automatique des cotisations patronales et spéciales.</div>
-    </C>
-    <C style={{padding:0,overflow:'hidden'}}>
-      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Historique DECAVA</div></div>
-      <Tbl cols={[{k:'e',l:'Travailleur',b:1,r:r=>r.emp},{k:'t',l:'Type',r:r=><span style={{fontSize:11}}>{r.type}</span>},{k:'y',l:'Année',r:r=>r.yr},{k:'b',l:'Brut',a:'right',r:r=>fmt(r.brut)},{k:'c',l:'Cot. spéc.',a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.cotSpec)}</span>},{k:'p',l:'Cot. patr.',a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.cotPatr)}</span>}]} data={hist}/>
-    </C>
+    </C>}
   </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  BILAN SOCIAL
@@ -11878,45 +11945,69 @@ function BudgetMobiliteMod({s,d}){
 //  STATISTIQUES INS — Structure des rémunérations
 // ═══════════════════════════════════════════════════════════════
 function StatsINSMod({s,d}){
-  const [yr,setYr]=useState(new Date().getFullYear()-1);
-  const ae=s.emps.filter(e=>e.status==='active');
-  const h=ae.filter(e=>(e.sexe||'M')==='M').length;const f=ae.length-h;
-  const masseH=ae.filter(e=>(e.sexe||'M')==='M').reduce((a,e)=>a+e.monthlySalary*13,0);
-  const masseF=ae.filter(e=>(e.sexe||'M')!=='M').reduce((a,e)=>a+e.monthlySalary*13,0);
-  const masseTot=masseH+masseF;
-  const moyH=h>0?masseH/h/13:0;const moyF=f>0?masseF/f/13:0;
-  const ecart=moyH>0?((moyH-moyF)/moyH*100).toFixed(1):0;
+  const ae=s.emps||[];const n=ae.length;
+  const [yr,setYr]=useState(new Date().getFullYear());
+  
+  // Stats par genre
+  const hommes=ae.filter(e=>e.sex==='M').length;const femmes=ae.filter(e=>e.sex==='F').length;const autres=n-hommes-femmes;
+  // Stats par statut
+  const emp=ae.filter(e=>e.statut!=='ouvrier').length;const ouv=ae.filter(e=>e.statut==='ouvrier').length;
+  // Stats par régime
+  const ft=ae.filter(e=>!e.regime||e.regime==='full').length;const pt=n-ft;
+  // Masse salariale
+  const masse=ae.reduce((a,e)=>{const p=calc(e,DPER,s.co);return a+p.gross*12},0);
+  // Age moyen
+  const ages=ae.map(e=>{if(!e.birth)return 35;const b=new Date(e.birth);return Math.floor((Date.now()-b)/31557600000);});
+  const ageMoy=ages.length?Math.round(ages.reduce((a,b)=>a+b,0)/ages.length):0;
+  // Ancienneté moyenne
+  const ancs=ae.map(e=>{if(!e.startD)return 2;const s2=new Date(e.startD);return Math.round((Date.now()-s2)/31557600000*10)/10;});
+  const ancMoy=ancs.length?(ancs.reduce((a,b)=>a+b,0)/ancs.length).toFixed(1):0;
   
   return <div>
-    <PH title="Statistiques INS" sub={`Déclaration structure des rémunérations — ${yr}`}/>
-    <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
-      <C>
-        <I label="Année" type="number" value={yr} onChange={setYr}/>
-        <div style={{marginTop:14,padding:12,background:'rgba(198,163,78,.06)',borderRadius:8,fontSize:12,color:'#9e9b93',lineHeight:2}}>
-          <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>Données clés</div>
-          <div>Effectif: <b style={{color:'#e8e6e0'}}>{ae.length}</b> ({h}H / {f}F)</div>
-          <div>Masse salariale: <b style={{color:'#4ade80'}}>{fmt(masseTot)}</b></div>
-          <div>Salaire moyen H: <b style={{color:'#e8e6e0'}}>{fmt(moyH)}</b></div>
-          <div>Salaire moyen F: <b style={{color:'#e8e6e0'}}>{fmt(moyF)}</b></div>
-          <div>Écart salarial: <b style={{color:parseFloat(ecart)>5?'#f87171':'#4ade80'}}>{ecart}%</b></div>
+    <PH title="Statistiques & Indicateurs RH" sub="Données consolidées — Bilan social, reporting, benchmarks"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(6,1fr)',gap:10,marginBottom:18}}>
+      {[{l:'Effectif',v:n,c:'#60a5fa'},{l:'Âge moyen',v:ageMoy+'a',c:'#a78bfa'},{l:'Ancienneté moy.',v:ancMoy+'a',c:'#c6a34e'},{l:'Masse salariale',v:fmt(masse),c:'#4ade80'},{l:'Temps plein',v:ft,c:'#e8e6e0'},{l:'Temps partiel',v:pt,c:'#fb923c'}].map((k,i)=>
+        <div key={i} style={{padding:'12px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)',textAlign:'center'}}>
+          <div style={{fontSize:9,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
         </div>
-        <div style={{marginTop:12,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>
-          Déclaration obligatoire pour les entreprises de 50+ travailleurs. Transmise à Statbel via l'ONSS (intégrée dans la DmfA).
+      )}
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:18}}>
+      <C><ST>Répartition H/F</ST>
+        {[{l:'Hommes',v:hommes,pct:n?Math.round(hommes/n*100):0,c:'#60a5fa'},{l:'Femmes',v:femmes,pct:n?Math.round(femmes/n*100):0,c:'#f472b6'},{l:'Non renseigné',v:autres,pct:n?Math.round(autres/n*100):0,c:'#9e9b93'}].map((r,i)=>
+          <div key={i} style={{marginBottom:8}}>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:12,marginBottom:3}}><span style={{color:'#9e9b93'}}>{r.l}</span><span style={{fontWeight:600,color:r.c}}>{r.v} ({r.pct}%)</span></div>
+            <div style={{height:6,background:'rgba(255,255,255,.04)',borderRadius:3}}><div style={{height:6,background:r.c,borderRadius:3,width:r.pct+'%'}}/></div>
+          </div>
+        )}
+      </C>
+      <C><ST>Statut</ST>
+        {[{l:'Employés',v:emp,pct:n?Math.round(emp/n*100):0,c:'#60a5fa'},{l:'Ouvriers',v:ouv,pct:n?Math.round(ouv/n*100):0,c:'#fb923c'}].map((r,i)=>
+          <div key={i} style={{marginBottom:8}}>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:12,marginBottom:3}}><span style={{color:'#9e9b93'}}>{r.l}</span><span style={{fontWeight:600,color:r.c}}>{r.v} ({r.pct}%)</span></div>
+            <div style={{height:6,background:'rgba(255,255,255,.04)',borderRadius:3}}><div style={{height:6,background:r.c,borderRadius:3,width:r.pct+'%'}}/></div>
+          </div>
+        )}
+        <div style={{marginTop:12,fontSize:11,color:'#9e9b93'}}>
+          <div>Ratio employés/ouvriers: <b style={{color:'#e8e6e0'}}>{ouv>0?(emp/ouv).toFixed(1):'∞'}</b></div>
+          <div>Benchmark BE: <b style={{color:'#e8e6e0'}}>~70/30</b></div>
         </div>
       </C>
-      <C>
-        <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0',marginBottom:16}}>Répartition — {yr}</div>
-        <Tbl cols={[
-          {k:'n',l:'Travailleur',b:1,r:r=>`${r.first} ${r.last}`},
-          {k:'s',l:'Sexe',r:r=>r.sexe==='F'?'F':'M'},
-          {k:'f',l:'Fonction',r:r=>r.fn||'Employé'},
-          {k:'b',l:'Brut mensuel',a:'right',r:r=>fmt(r.monthlySalary)},
-          {k:'a',l:'Brut annuel',a:'right',r:r=><span style={{color:'#4ade80'}}>{fmt(r.monthlySalary*13)}</span>},
-        ]} data={ae}/>
+      <C><ST>Pyramide des âges</ST>
+        {[{t:'< 25 ans',c:'#4ade80'},{t:'25-34',c:'#60a5fa'},{t:'35-44',c:'#a78bfa'},{t:'45-54',c:'#fb923c'},{t:'55+',c:'#f87171'}].map((tr,i)=>{
+          const count=ages.filter(a=>i===0?a<25:i===1?a>=25&&a<35:i===2?a>=35&&a<45:i===3?a>=45&&a<55:a>=55).length;
+          const pct=n?Math.round(count/n*100):0;
+          return <div key={i} style={{marginBottom:6}}>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:11,marginBottom:2}}><span style={{color:'#9e9b93'}}>{tr.t}</span><span style={{color:tr.c,fontWeight:600}}>{count} ({pct}%)</span></div>
+            <div style={{height:5,background:'rgba(255,255,255,.04)',borderRadius:3}}><div style={{height:5,background:tr.c,borderRadius:3,width:Math.max(2,pct)+'%'}}/></div>
+          </div>;
+        })}
       </C>
     </div>
   </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  WARRANTS — Stock options / Optimisation fiscale
@@ -11977,45 +12068,67 @@ function WarrantsMod({s,d}){
 //  PLAN DE FORMATION — Obligation légale (Loi 3/10/2022)
 // ═══════════════════════════════════════════════════════════════
 function PlanFormationMod({s,d}){
-  const [yr,setYr]=useState(new Date().getFullYear());
-  const ae=s.emps.filter(e=>e.status==='active');
-  const droitJours=ae.length>=10?5:(ae.length>=20?5:1);
-  const [formations,setFormations]=useState([]);
-  const addF=()=>setFormations(p=>[...p,{id:Date.now(),titre:'',type:'interne',heures:0,cout:0,travailleurs:[]}]);
-  const updF=(id,k,v)=>setFormations(p=>p.map(f=>f.id===id?{...f,[k]:v}:f));
-  const totalH=formations.reduce((a,f)=>a+parseFloat(f.heures||0),0);
-  const totalCout=formations.reduce((a,f)=>a+parseFloat(f.cout||0),0);
+  const ae=s.emps||[];const [formations,setFormations]=useState([]);
+  const [f,setF]=useState({titre:'',type:'interne',duree:8,emps:[],budget:500,date:'',formateur:''});
+  const n=ae.length;
+  // Obligation: 5 jours/an/ETP (loi 3/10/2022)
+  const obligMin=n*5;const hRealisees=formations.reduce((a,c)=>a+(+c.duree||0)*(c.emps?.length||0),0);
+  const budgetTotal=formations.reduce((a,c)=>a+(+c.budget||0),0);
+  
+  const add=()=>{if(!f.titre)return;setFormations(p=>[{...f,id:'FORM-'+Date.now()},...p]);setF({titre:'',type:'interne',duree:8,emps:[],budget:500,date:'',formateur:''});};
   
   return <div>
-    <PH title="Plan de formation" sub={`Loi du 03/10/2022 — ${droitJours} jours/an/ETP`} actions={<B onClick={addF}>+ Formation</B>}/>
-    <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
-      <C>
-        <I label="Année" type="number" value={yr} onChange={setYr}/>
-        <div style={{marginTop:14,padding:12,background:'rgba(198,163,78,.06)',borderRadius:8,fontSize:12,color:'#9e9b93',lineHeight:2}}>
-          <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>Résumé {yr}</div>
-          <div>Formations planifiées: <b style={{color:'#e8e6e0'}}>{formations.length}</b></div>
-          <div>Total heures: <b style={{color:'#e8e6e0'}}>{totalH}h</b></div>
-          <div>Budget total: <b style={{color:'#f87171'}}>{fmt(totalCout)}</b></div>
-          <div>Droit individuel: <b style={{color:'#60a5fa'}}>{droitJours} jours/ETP/an</b></div>
+    <PH title="Plan de Formation" sub="Obligation 5 jours/an/ETP — Loi du 3/10/2022"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,marginBottom:18}}>
+      {[{l:'Formations',v:formations.length,c:'#60a5fa'},{l:'Heures réalisées',v:hRealisees,c:'#a78bfa'},{l:'Objectif (jours)',v:obligMin,c:'#c6a34e',s:n+' ETP × 5j'},{l:'Budget consommé',v:fmt(budgetTotal),c:'#f87171'},{l:'Taux réalisation',v:obligMin?(Math.round(hRealisees/8/obligMin*100))+'%':'0%',c:hRealisees/8>=obligMin?'#4ade80':'#fb923c'}].map((k,i)=>
+        <div key={i} style={{padding:'12px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)',textAlign:'center'}}>
+          <div style={{fontSize:9,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+          {k.s&&<div style={{fontSize:9,color:'#5e5c56',marginTop:1}}>{k.s}</div>}
         </div>
-        <div style={{marginTop:12,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>
-          <b>Obligation:</b> Entreprises 20+ ETP: plan annuel obligatoire. Déductible 120% ISOC si PME. À déposer via l'application du SPF Emploi.
-        </div>
-      </C>
-      <C style={{padding:'14px 18px',maxHeight:600,overflowY:'auto'}}>
-        {formations.length===0&&<div style={{textAlign:'center',padding:40,color:'#5e5c56'}}>Aucune formation planifiée</div>}
-        {formations.map((f,i)=><div key={f.id} style={{padding:14,marginBottom:10,background:'rgba(198,163,78,.03)',border:'1px solid rgba(198,163,78,.08)',borderRadius:10}}>
-          <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr 1fr',gap:10}}>
-            <I label="Titre" value={f.titre} onChange={v=>updF(f.id,'titre',v)}/>
-            <I label="Type" value={f.type} onChange={v=>updF(f.id,'type',v)} options={[{v:'interne',l:'Interne'},{v:'externe',l:'Externe'},{v:'elearning',l:'E-learning'}]}/>
-            <I label="Heures" type="number" value={f.heures} onChange={v=>updF(f.id,'heures',v)}/>
-            <I label="Coût (€)" type="number" value={f.cout} onChange={v=>updF(f.id,'cout',v)}/>
+      )}
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'350px 1fr',gap:18}}>
+      <div>
+        <C><ST>Nouvelle formation</ST>
+          <I label="Titre" value={f.titre} onChange={v=>setF({...f,titre:v})}/>
+          <I label="Type" value={f.type} onChange={v=>setF({...f,type:v})} style={{marginTop:9}} options={[{v:'interne',l:'Formation interne'},{v:'externe',l:'Formation externe'},{v:'elearning',l:'E-learning'},{v:'conference',l:'Conférence/Séminaire'},{v:'coaching',l:'Coaching individuel'}]}/>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:9}}>
+            <I label="Durée (heures)" type="number" value={f.duree} onChange={v=>setF({...f,duree:+v})}/>
+            <I label="Budget (€)" type="number" value={f.budget} onChange={v=>setF({...f,budget:+v})}/>
           </div>
-        </div>)}
+          <I label="Formateur" value={f.formateur} onChange={v=>setF({...f,formateur:v})} style={{marginTop:9}}/>
+          <I label="Date" type="date" value={f.date} onChange={v=>setF({...f,date:v})} style={{marginTop:9}}/>
+          <B onClick={add} style={{width:'100%',marginTop:14}}>Ajouter formation</B>
+        </C>
+        <C style={{marginTop:12}}><ST>Obligation légale</ST>
+          <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+            <div>Minimum: <b style={{color:'#c6a34e'}}>5 jours/an/ETP</b></div>
+            <div>Base: <b style={{color:'#e8e6e0'}}>Loi 3/10/2022 (deal emploi)</b></div>
+            <div>Entreprises ≥20: <b style={{color:'#e8e6e0'}}>Plan obligatoire (30/09)</b></div>
+            <div>Entreprises 10-19: <b style={{color:'#e8e6e0'}}>Crédit individuel 1j/an</b></div>
+            <div>Droit individuel: <b style={{color:'#e8e6e0'}}>Pas de report sur N+1</b></div>
+          </div>
+          <div style={{marginTop:8,padding:8,background:'rgba(248,113,113,.06)',borderRadius:6,fontSize:10.5,color:'#f87171'}}>
+            <b>CCT sectorielle:</b> Vérifier si le secteur prévoit des obligations supérieures.
+          </div>
+        </C>
+      </div>
+      <C style={{padding:0,overflow:'hidden'}}>
+        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Formations planifiées ({formations.length})</div></div>
+        {formations.length>0?<Tbl cols={[
+          {k:'t',l:'Formation',b:1,r:r=>r.titre},
+          {k:'tp',l:'Type',r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:'rgba(96,165,250,.1)',color:'#60a5fa'}}>{r.type}</span>},
+          {k:'d',l:'Durée',a:'right',r:r=>`${r.duree}h`},
+          {k:'f',l:'Formateur',r:r=>r.formateur||'—'},
+          {k:'dt',l:'Date',r:r=>r.date||'À planifier'},
+          {k:'b',l:'Budget',a:'right',r:r=><span style={{fontWeight:600,color:'#c6a34e'}}>{fmt(r.budget)}</span>},
+        ]} data={formations}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Aucune formation planifiée</div>}
       </C>
     </div>
   </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  NOTES DE FRAIS — Remboursement frais propres employeur
