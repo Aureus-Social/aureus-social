@@ -9849,7 +9849,7 @@ function ContratsTravailMod({s,d}){
       if(type==='indep_conjoint_aidant')doc+=`Art. 6 — STATUT CONJOINT AIDANT\nLe prestataire aide régulièrement son conjoint dans l'exercice de son activité indépendante.\nStatut social: [maxi-statut / mini-statut].\nAffiliation caisse sociale obligatoire.\n\n`;
       doc+=`Art. ${type==='indep_mandataire'||type==='indep_conjoint_aidant'?7:6} — OBLIGATIONS SOCIALES\n`;
       doc+=`Le prestataire déclare être en règle de:\n- Affiliation à une caisse d'assurances sociales\n- Cotisations sociales trimestrielles\n- Assurance maladie-invalidité\n- Assurance responsabilité professionnelle\n\n`;
-      doc+=`Fait en double exemplaire à ${s.co.address?.split(',").pop()?.trim()||"Bruxelles'}, le ${now}\n\n`;
+      doc+=`Fait en double exemplaire à ${s.co.address?.split(',').pop()?.trim()||'Bruxelles'}, le ${now}\n\n`;
       doc+=`Le donneur d'ordre:\t\t\tLe prestataire:\n[Signature]\t\t\t\t[Signature]\n`;
     }
     else if(sel.cat==='special'){
@@ -9872,7 +9872,7 @@ function ContratsTravailMod({s,d}){
         doc+=`Le présent contrat est de type: ${sel.l}\n${sel.desc}\n`;
         doc+=`Début: ${form.debut}${form.fin?` — Fin: ${form.fin}`:''}\n`;
       }
-      doc+=`\nFait à ${s.co.address?.split(',").pop()?.trim()||"Bruxelles'}, le ${now}\n\n`;
+      doc+=`\nFait à ${s.co.address?.split(',').pop()?.trim()||'Bruxelles'}, le ${now}\n\n`;
       doc+=`Signature 1:\t\t\t\tSignature 2:\n[Signature]\t\t\t\t[Signature]\n`;
     }
     else doc+=`Début: ${form.debut}${form.fin?` — Fin: ${form.fin}`:''}\n`;
@@ -9884,7 +9884,7 @@ function ContratsTravailMod({s,d}){
     if(form.clauseNonConcurrence==='Oui')doc+=`\nArt. 7 — CLAUSE DE NON-CONCURRENCE\nConformément à l'art. 65 de la loi du 03/07/1978.\n`;
     if(form.clauseEcolage==='Oui')doc+=`\nArt. 8 — CLAUSE D'ÉCOLAGE\nConformément à l'art. 22bis de la loi du 03/07/1978.\n`;
     doc+=`\nArt. 9 — DISPOSITIONS GÉNÉRALES\nLe règlement de travail fait partie intégrante du présent contrat.\nLe contrat est régi par la loi du 03/07/1978 relative aux contrats de travail.\n`;
-    doc+=`\nFait en double exemplaire à ${s.co.address?.split(',").pop()?.trim()||"Bruxelles'}, le ${now}\n\n`;
+    doc+=`\nFait en double exemplaire à ${s.co.address?.split(',').pop()?.trim()||'Bruxelles'}, le ${now}\n\n`;
     doc+=`L'employeur:\t\t\t\tLe travailleur:\n[Signature]\t\t\t\t[Signature]\n`;
     doc+=`Précédé de la mention\t\t\tPrécédé de la mention\n"Lu et approuvé"\t\t\t\t"Lu et approuvé"\n`;
     }
