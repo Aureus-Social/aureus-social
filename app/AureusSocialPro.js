@@ -2235,21 +2235,59 @@ function calc(emp, per, co) {
 
 // ─── XML GENERATORS ──────────────────────────────────────────
 function genDimonaXML(d) {
+  const niss=(d.niss||'').replace(/[\.\-\s]/g,'');
+  const onss=(d.onss||'').replace(/[\.\-\s]/g,'');
+  const vat=(d.vat||'').replace(/[^0-9]/g,'');
+  const dimRef='DIM'+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,5).toUpperCase();
   return `<?xml version="1.0" encoding="UTF-8"?>
-<Dimona>
+<!-- Dimona Declaration — ONSS / socialsecurity.be -->
+<!-- Generee par: Aureus Social Pro — Aureus IA SPRL -->
+<!-- Reference: ${dimRef} -->
+<Dimona xmlns="http://www.smals-mvm.be/xml/ns/systemFlux">
   <DimonaDeclaration>
-    <EmployerId><ONSS>${d.onss}</ONSS><VAT>${d.vat}</VAT></EmployerId>
+    <EmployerId>
+      <NLOSSRegistrationNbr>${onss}</NLOSSRegistrationNbr>
+      <CompanyID>${vat}</CompanyID>
+    </EmployerId>
     <Feature>
-      <Action>${d.action}</Action>
-      <Worker><INSS>${(d.niss||'').replace(/[\.\-\s]/g,'')}</INSS>
-        <Name>${d.last}</Name><FirstName>${d.first}</FirstName><Birth>${d.birth}</Birth></Worker>
-      <Period><Start>${d.start}</Start>${d.end?`<End>${d.end}</End>`:''}</Period>
-      <WorkerType>${d.wtype}</WorkerType><JointCommission>${d.cp}</JointCommission>
-      ${d.hours?`<PlannedHours>${d.hours}</PlannedHours>`:''}
+      <CreationDate>${new Date().toISOString().split('T')[0]}</CreationDate>
+      <Action>${d.action}</Action>${d.action==='UPDATE'&&d.dimonaP?`
+      <DimPeriodId>${d.dimonaP}</DimPeriodId>`:''}
+      <Worker>
+        <INSS>${niss}</INSS>
+        <WorkerName>${d.last||''}</WorkerName>
+        <WorkerFirstName>${d.first||''}</WorkerFirstName>
+        <BirthDate>${d.birth||''}</BirthDate>
+      </Worker>
+      <Period>
+        <StartingDate>${d.start}</StartingDate>${d.end?`
+        <EndingDate>${d.end}</EndingDate>`:''}
+      </Period>
+      <WorkerType>${d.wtype}</WorkerType>
+      <JointCommission>${d.cp||'200'}</JointCommission>${d.hours?`
+      <PlannedDaysOrHours>
+        <PlannedHoursNbr>${d.hours}</PlannedHoursNbr>
+      </PlannedDaysOrHours>`:''}${d.action==='OUT'&&d.reason?`
+      <EndingReason>${d.reason}</EndingReason>`:''}${d.wtype==='STU'?`
+      <StudentData>
+        <MaxHoursPerYear>600</MaxHoursPerYear>
+        <SolidarityContribution>YES</SolidarityContribution>
+      </StudentData>`:''}${d.wtype==='FLX'?`
+      <FlexiJobData>
+        <FlexiWage>YES</FlexiWage>
+        <SpecialContribution28>YES</SpecialContribution28>
+      </FlexiJobData>`:''}${d.wtype==='EXT'?`
+      <ExtraData>
+        <MaxDaysPerYear>50</MaxDaysPerYear>
+        <FlatRateContribution>YES</FlatRateContribution>
+      </ExtraData>`:''}
     </Feature>
+    <SenderSoftware>AureusSocialPro</SenderSoftware>
+    <SenderSoftwareVersion>2026.3</SenderSoftwareVersion>
   </DimonaDeclaration>
 </Dimona>`;
 }
+
 
 function genDMFAXML(co, emps, q, y) {
   // DMFA conforme schema XSD ONSS — socialsecurity.be/TechLib
@@ -2339,7 +2377,7 @@ function genDMFAXML(co, emps, q, y) {
     <Reference>${ref}</Reference>
     <FormSubType>ORIGINAL</FormSubType>
     <SenderSoftware>AureusSocialPro</SenderSoftware>
-    <SenderSoftwareVersion>2026.1</SenderSoftwareVersion>
+    <SenderSoftwareVersion>2026.3</SenderSoftwareVersion>
     <SenderCompanyID>${nrEnt}</SenderCompanyID>
   </FormCreation>
   <EmployerDeclaration>
@@ -2381,7 +2419,7 @@ function genDMFATicket(ref,co){
   <ResultCode>1</ResultCode>
   <ResultDescription>Fichier accepte pour traitement</ResultDescription>
   <CompanyID>${(co.vat||'').replace(/[^0-9]/g,'')}</CompanyID>
-  <Software>AureusSocialPro v2026.1</Software>
+  <Software>AureusSocialPro v2226.1</Software>
 </AcknowledgmentOfReceipt>`};
 }
 
@@ -3622,7 +3660,7 @@ function AppInner({ supabase, user, onLogout }) {
     {id:'dashboard',l:t('nav.dashboard'),i:'◫'},
     {id:'employees',l:t('nav.employees'),i:'◉'},
     {id:'payslip',l:t('nav.payslip'),i:'◈'},
-    {id:'onss',l:t('nav.onss'),i:'◆',sub:[{id:'dimona',l:t('sub.dimona')},{id:'dmfa',l:t('sub.dmfa')},{id:'drs',l:t('sub.drs')},{id:'onssapl',l:t('sub.onssapl')}]},
+    {id:'onss',l:t('nav.onss'),i:'◆',sub:[{id:'dimona',l:t('sub.dimona')},{id:'dmfa',l:t('sub.dmfa')},{id:'drs',l:t('sub.drs')},{id:'onssapl',l:t('sub.onssapl')},{id:'onss_dash',l:'Dashboard ONSS'}]},
     {id:'fiscal',l:t('nav.fiscal'),i:'◇',sub:[{id:'belcotax',l:t('sub.belcotax')},{id:'precompte',l:t('sub.precompte')},{id:'fiches_ext',l:t('sub.fiches_ext')},{id:'co2',l:t('sub.co2')},{id:'atn',l:t('sub.atn')}]},
     {id:'salaires',l:t('nav.salaires'),i:'◈',sub:[{id:'od',l:t('sub.od')},{id:'provisions',l:t('sub.provisions')},{id:'cumuls',l:t('sub.cumuls')},{id:'netbrut',l:t('sub.netbrut')},{id:'simcout',l:t('sub.simcout')},{id:'saisies',l:t('sub.saisies')},{id:'indexauto',l:t('sub.indexauto')},{id:'horsforfait',l:t('sub.horsforfait')},{id:'totalreward',l:t('sub.totalreward')}]},
     {id:'avantages',l:t('nav.avantages'),i:'★',sub:[{id:'cheques',l:t('sub.cheques')},{id:'ecocmd',l:t('sub.ecocmd')},{id:'cafeteria',l:t('sub.cafeteria')},{id:'cct90',l:t('sub.cct90')},{id:'warrants',l:t('sub.warrants')},{id:'budgetmob',l:t('sub.budgetmob')},{id:'ecocircul',l:t('sub.ecocircul')}]},
@@ -3703,7 +3741,7 @@ function AppInner({ supabase, user, onLogout }) {
       case'dashboard':return <Dashboard s={s} d={d}/>;
       case'employees':return <Employees s={s} d={d}/>;
       case'payslip':return <Payslips s={s} d={d}/>;
-      case'onss':return s.sub==='dmfa'?<DMFAPage s={s} d={d}/>:s.sub==='drs'?<DRSMod s={s} d={d}/>:s.sub==='onssapl'?<ONSSAPLMod s={s} d={d}/>:<DimonaPage s={s} d={d}/>;
+      case'onss':return s.sub==='dmfa'?<DMFAPage s={s} d={d}/>:s.sub==='drs'?<DRSMod s={s} d={d}/>:s.sub==='onssapl'?<ONSSAPLMod s={s} d={d}/>:s.sub==='onss_dash'?<ONSSDashMod s={s} d={d}/>:<DimonaPage s={s} d={d}/>;
       case'fiscal':return s.sub==='precompte'?<PrecomptePage s={s} d={d}/>:s.sub==='fiches_ext'?<FichesMod s={s} d={d}/>:s.sub==='co2'?<CO2Mod s={s} d={d}/>:s.sub==='atn'?<ATNMod s={s} d={d}/>:<BelcotaxPage s={s} d={d}/>;
       case'salaires':return <SalairesPage s={s} d={d}/>;
       case'avantages':return <AvantagesPage s={s} d={d}/>;
@@ -3748,7 +3786,7 @@ function AppInner({ supabase, user, onLogout }) {
           </div>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
             <LangSwitch/>
-            <span style={{fontSize:8.5,padding:'2px 8px',borderRadius:4,background:'rgba(198,163,78,.08)',color:'#8b7340',fontWeight:600,letterSpacing:'.5px'}}>v20</span>
+            <span style={{fontSize:8.5,padding:'2px 8px',borderRadius:4,background:'rgba(198,163,78,.08)',color:'#8b7340',fontWeight:600,letterSpacing:'.5px'}}>v22</span>
           </div>
           {s.activeClient&&<div style={{marginTop:10,padding:'10px 12px',background:'linear-gradient(135deg,rgba(198,163,78,.06),rgba(198,163,78,.02))',borderRadius:10,border:'1px solid rgba(198,163,78,.12)'}}>
             <div style={{fontSize:11.5,fontWeight:600,color:'#c6a34e'}}>{s.co.name||'Client'}</div>
@@ -3797,7 +3835,7 @@ function AppInner({ supabase, user, onLogout }) {
         <div style={{padding:'12px 16px',borderTop:'1px solid rgba(139,115,60,.1)',fontSize:9,color:'#5e5c56'}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
             <span>{s.co.vat||'Aureus IA SPRL'}</span>
-            <span style={{color:'#8b7340',fontWeight:600}}>v20 Pro — Sprint 2</span>
+            <span style={{color:'#8b7340',fontWeight:600}}>v22 Pro — Sprint 2</span>
           </div>
         </div>
       </aside>
@@ -4830,39 +4868,200 @@ function Payslips({s,d}) {
 //  DIMONA
 // ═══════════════════════════════════════════════════════════════
 function DimonaPage({s,d}) {
-  const [f,setF]=useState({eid:s.emps[0]?.id||'',action:'IN',wtype:'OTH',start:new Date().toISOString().split('T')[0],end:'',hours:''});
+  const [f,setF]=useState({eid:s.emps[0]?.id||'',action:'IN',wtype:'OTH',start:new Date().toISOString().split('T')[0],end:'',hours:'',reason:'',dimonaP:'',planHrs:''});
+  const [tab,setTab]=useState('new');
+  const [filter,setFilter]=useState('all');
   const emp=s.emps.find(e=>e.id===f.eid);
-  const gen=()=>{if(!emp)return;
-    const xml=genDimonaXML({action:f.action,wtype:f.wtype,start:f.start,end:f.end,hours:f.hours,first:emp.first,last:emp.last,niss:emp.niss,birth:emp.birth,cp:emp.cp,onss:s.co.onss,vat:s.co.vat});
-    d({type:'ADD_DIM',d:{eid:emp.id,ename:`${emp.first} ${emp.last}`,action:f.action,wtype:f.wtype,start:f.start,end:f.end,xml,at:new Date().toISOString(),status:'ok'}});
-    d({type:'MODAL',m:{w:800,c:<div><h2 style={{fontSize:17,fontWeight:600,color:'#e8e6e0',margin:'0 0 12px',fontFamily:"'Cormorant Garamond',serif"}}>Dimona {f.action} — {emp.first} {emp.last}</h2><div style={{fontSize:11,color:'#c6a34e',marginBottom:10}}>XML prêt pour portail sécurité sociale</div><pre style={{background:'#060810',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,padding:14,fontSize:10.5,color:'#9e9b93',overflowX:'auto',whiteSpace:'pre-wrap',maxHeight:380,overflowY:'auto'}}>{xml}</pre><div style={{display:'flex',gap:10,marginTop:14,justifyContent:'flex-end'}}><B v="outline" onClick={()=>d({type:'MODAL',m:null})}>Fermer</B><B onClick={()=>{navigator.clipboard?.writeText(xml);alert('Copié !')}}>Copier XML</B></div></div>}});
+
+  // Validation engine
+  const validate=()=>{
+    const errs=[];
+    if(!emp) errs.push('Sélectionnez un travailleur');
+    if(emp&&!emp.niss) errs.push('NISS manquant pour '+emp.first+' '+emp.last);
+    if(!f.start) errs.push('Date de début obligatoire');
+    if(f.action==='OUT'&&!f.end) errs.push('Date de fin obligatoire pour OUT');
+    if(f.action==='UPDATE'&&!f.dimonaP) errs.push('Numéro Dimona période requis pour UPDATE');
+    if(['STU','FLX'].includes(f.wtype)&&!f.planHrs) errs.push('Heures planifiées obligatoires pour '+f.wtype);
+    if(f.action==='IN'){
+      const startD=new Date(f.start);const today=new Date();today.setHours(0,0,0,0);
+      if(startD<today) errs.push('⚠ Dimona IN tardive (début passé) — amende possible');
+    }
+    if(f.action==='OUT'&&f.end&&f.start&&new Date(f.end)<new Date(f.start)) errs.push('Date fin avant date début');
+    return errs;
   };
+  const errs=validate();
+
+  // Worker type descriptions
+  const wtDescs={OTH:'Ordinaire',STU:'Étudiant (max 600h/an)',FLX:'Flexi-job',EXT:'Extra Horeca',DWD:'Travailleur occasionnel',IVT:'Stagiaire',BCW:'ALE/PWA',APP:'Apprenti',ART:'Artiste',SP1:'Travailleurs saisonniers',DIP:'Diplomate'};
+
+  // Dimona type specific fields
+  const needsEnd=f.action==='OUT'||f.wtype==='STU'||f.wtype==='FLX'||f.wtype==='EXT';
+  const needsHours=['STU','FLX','EXT','DWD'].includes(f.wtype);
+
+  const gen=()=>{
+    if(errs.filter(e=>!e.startsWith('⚠')).length>0) return;
+    const xml=genDimonaXML({action:f.action,wtype:f.wtype,start:f.start,end:f.end,hours:f.planHrs||f.hours,first:emp.first,last:emp.last,niss:emp.niss,birth:emp.birth,cp:emp.cp,onss:s.co.onss,vat:s.co.vat,dimonaP:f.dimonaP,reason:f.reason});
+    const dimNr='DIM'+Date.now().toString(36).toUpperCase();
+    d({type:'ADD_DIM',d:{eid:emp.id,ename:`${emp.first} ${emp.last}`,action:f.action,wtype:f.wtype,wtypeDesc:wtDescs[f.wtype]||f.wtype,start:f.start,end:f.end,xml,at:new Date().toISOString(),status:'ok',dimNr,hours:f.planHrs||f.hours,reason:f.reason}});
+    d({type:'MODAL',m:{w:850,c:<div>
+      <h2 style={{fontSize:17,fontWeight:600,color:'#e8e6e0',margin:'0 0 6px',fontFamily:"'Cormorant Garamond',serif"}}>Dimona {f.action} — {emp.first} {emp.last}</h2>
+      <div style={{display:'flex',gap:8,marginBottom:12}}>
+        <span style={{fontSize:10,padding:'3px 10px',borderRadius:4,background:'rgba(74,222,128,.1)',color:'#4ade80',fontWeight:600}}>✓ XML généré</span>
+        <span style={{fontSize:10,padding:'3px 10px',borderRadius:4,background:'rgba(198,163,78,.1)',color:'#c6a34e',fontWeight:600}}>{f.wtype} — {wtDescs[f.wtype]||f.wtype}</span>
+        <span style={{fontSize:10,padding:'3px 10px',borderRadius:4,background:'rgba(96,165,250,.1)',color:'#60a5fa',fontWeight:600}}>Réf: {dimNr}</span>
+      </div>
+      {errs.filter(e=>e.startsWith('⚠')).map((e,i)=><div key={i} style={{fontSize:10.5,color:'#f59e0b',marginBottom:6}}>⚠ {e.replace('⚠ ','')}</div>)}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:12}}>
+        <div style={{padding:10,background:'rgba(198,163,78,.05)',borderRadius:6,fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>Identifiants</div>
+          <div>Travailleur: <b style={{color:'#e8e6e0'}}>{emp.first} {emp.last}</b></div>
+          <div>NISS: <b style={{color:'#e8e6e0',fontFamily:'monospace'}}>{emp.niss}</b></div>
+          <div>CP: <b style={{color:'#e8e6e0'}}>{emp.cp}</b></div>
+        </div>
+        <div style={{padding:10,background:'rgba(96,165,250,.05)',borderRadius:6,fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          <div style={{fontWeight:600,color:'#60a5fa',marginBottom:4}}>Déclaration</div>
+          <div>Action: <b style={{color:'#e8e6e0'}}>{f.action}</b></div>
+          <div>Type: <b style={{color:'#e8e6e0'}}>{f.wtype} ({wtDescs[f.wtype]})</b></div>
+          <div>Début: <b style={{color:'#e8e6e0'}}>{f.start}</b></div>
+          {f.end&&<div>Fin: <b style={{color:'#e8e6e0'}}>{f.end}</b></div>}
+        </div>
+      </div>
+      <pre style={{background:'#060810',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,padding:14,fontSize:10,color:'#9e9b93',overflowX:'auto',whiteSpace:'pre-wrap',maxHeight:320,overflowY:'auto'}}>{xml}</pre>
+      <div style={{display:'flex',gap:10,marginTop:14,justifyContent:'flex-end'}}>
+        <B v="outline" onClick={()=>d({type:'MODAL',m:null})}>Fermer</B>
+        <B onClick={()=>{navigator.clipboard?.writeText(xml);alert('XML Dimona copié !')}}>Copier XML</B>
+      </div>
+    </div>}});
+  };
+
+  // Stats
+  const statsIN=s.dims.filter(x=>x.action==='IN').length;
+  const statsOUT=s.dims.filter(x=>x.action==='OUT').length;
+  const statsUPD=s.dims.filter(x=>x.action==='UPDATE').length;
+  const filtered=filter==='all'?s.dims:s.dims.filter(x=>x.action===filter);
+
   return <div>
-    <PH title="Déclarations Dimona" sub="Déclaration immédiate de l'emploi — ONSS"/>
-    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
-      <C><ST>Nouvelle déclaration</ST>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9}}>
-          <I label="Employé" value={f.eid} onChange={v=>setF({...f,eid:v})} span={2} options={s.emps.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
-          <I label="Action" value={f.action} onChange={v=>setF({...f,action:v})} options={LEGAL.DIMONA_TYPES.map(t=>({v:t,l:t==='IN'?'IN (Entrée)':t==='OUT'?'OUT (Sortie)':t}))}/>
-          <I label="Type" value={f.wtype} onChange={v=>setF({...f,wtype:v})} options={LEGAL.DIMONA_WTYPES.map(t=>({v:t,l:t}))}/>
-          <I label="Début" type="date" value={f.start} onChange={v=>setF({...f,start:v})}/>
-          <I label="Fin" type="date" value={f.end} onChange={v=>setF({...f,end:v})}/>
+    <PH title="Déclarations Dimona" sub="Déclaration immédiate de l'emploi — ONSS / Portail sécurité sociale"/>
+    {/* Stats bar */}
+    <div style={{display:'flex',gap:12,marginBottom:18}}>
+      {[{l:'Total',v:s.dims.length,c:'#c6a34e'},{l:'IN',v:statsIN,c:'#4ade80'},{l:'OUT',v:statsOUT,c:'#f87171'},{l:'UPDATE',v:statsUPD,c:'#60a5fa'}].map((st,i)=>
+        <div key={i} style={{flex:1,padding:'12px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{st.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:st.c,marginTop:2}}>{st.v}</div>
         </div>
-        <B onClick={gen} style={{width:'100%',marginTop:14}}>Générer Dimona</B>
-        <div style={{marginTop:14,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,border:'1px solid rgba(96,165,250,.1)'}}>
-          <div style={{fontSize:10.5,color:'#60a5fa',fontWeight:600,marginBottom:4}}>ℹ Rappel</div>
-          <div style={{fontSize:10.5,color:'#9e9b93',lineHeight:1.5}}>Dimona IN: au plus tard au début du travail. Dimona OUT: dernier jour.</div>
-        </div>
-      </C>
-      <C style={{padding:0,overflow:'hidden'}}>
-        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Historique Dimona</div></div>
-        <Tbl cols={[
-          {k:'a',l:'Action',r:r=><span style={{padding:'2px 7px',borderRadius:4,fontSize:10.5,fontWeight:600,background:r.action==='IN'?'rgba(74,222,128,.1)':'rgba(248,113,113,.1)',color:r.action==='IN'?'#4ade80':'#f87171'}}>{r.action}</span>},
-          {k:'e',l:'Employé',r:r=>r.ename},{k:'s',l:'Début',r:r=>r.start},{k:'en',l:'Fin',r:r=>r.end||'—'},
-          {k:'st',l:'Statut',r:r=><span style={{color:'#4ade80',fontSize:11}}>✓ Généré</span>},
-        ]} data={s.dims}/>
-      </C>
+      )}
     </div>
+    {/* Tabs */}
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'new',l:'Nouvelle déclaration'},{v:'history',l:'Historique'},{v:'rules',l:'Règles & Délais'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+
+    {tab==='new'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Déclaration Dimona</ST>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9}}>
+          <I label="Travailleur" value={f.eid} onChange={v=>setF({...f,eid:v})} span={2} options={s.emps.map(e=>({v:e.id,l:`${e.first} ${e.last} ${e.niss?'':'⚠ NISS!'}`}))}/>
+          <I label="Action" value={f.action} onChange={v=>setF({...f,action:v})} options={[{v:'IN',l:'IN — Entrée en service'},{v:'OUT',l:'OUT — Sortie de service'},{v:'UPDATE',l:'UPDATE — Modification'},{v:'CANCEL',l:'CANCEL — Annulation'}]}/>
+          <I label="Type travailleur" value={f.wtype} onChange={v=>setF({...f,wtype:v})} options={Object.entries(wtDescs).map(([k,v])=>({v:k,l:`${k} — ${v}`}))}/>
+          <I label="Date début" type="date" value={f.start} onChange={v=>setF({...f,start:v})}/>
+          {needsEnd&&<I label="Date fin" type="date" value={f.end} onChange={v=>setF({...f,end:v})}/>}
+          {needsHours&&<I label="Heures planifiées" type="number" value={f.planHrs} onChange={v=>setF({...f,planHrs:v})}/>}
+          {f.action==='OUT'&&<I label="Motif sortie" value={f.reason} onChange={v=>setF({...f,reason:v})} options={[{v:'',l:'— Sélectionner —'},{v:'DEM',l:'Démission'},{v:'LIC',l:'Licenciement'},{v:'RUP',l:'Rupture amiable'},{v:'FIN',l:'Fin contrat déterminé'},{v:'RET',l:'Retraite'},{v:'DEC',l:'Décès'},{v:'FOR',l:'Force majeure'}]}/>}
+          {f.action==='UPDATE'&&<I label="N° Dimona période" value={f.dimonaP} onChange={v=>setF({...f,dimonaP:v})}/>}
+        </div>
+        {/* Validation errors */}
+        {errs.length>0&&<div style={{marginTop:12,padding:10,background:errs.some(e=>!e.startsWith('⚠'))?'rgba(239,68,68,.06)':'rgba(245,158,11,.06)',borderRadius:8,border:`1px solid ${errs.some(e=>!e.startsWith('⚠'))?'rgba(239,68,68,.15)':'rgba(245,158,11,.15)'}`}}>
+          {errs.map((e,i)=><div key={i} style={{fontSize:10.5,color:e.startsWith('⚠')?'#f59e0b':'#ef4444',padding:'2px 0'}}>• {e}</div>)}
+        </div>}
+        <B onClick={gen} disabled={errs.filter(e=>!e.startsWith('⚠')).length>0} style={{width:'100%',marginTop:14,opacity:errs.filter(e=>!e.startsWith('⚠')).length>0?.5:1}}>Générer Dimona {f.action}</B>
+      </C>
+      <div>
+        <C><ST>Info type: {f.wtype}</ST>
+          <div style={{fontSize:12,color:'#9e9b93',lineHeight:1.7}}>
+            {f.wtype==='OTH'&&<>Type ordinaire — contrat à durée déterminée ou indéterminée. Pas de champs spécifiques supplémentaires.</>}
+            {f.wtype==='STU'&&<><b style={{color:'#c6a34e'}}>Étudiant:</b> Max 600h/an exonérées cotisations ONSS normales (cotis solidarité 5,42% + 2,71%). Heures planifiées obligatoires. Vérifier compteur Student@Work.</>}
+            {f.wtype==='FLX'&&<><b style={{color:'#c6a34e'}}>Flexi-job:</b> Exclusivement pour secteurs autorisés (Horeca CP 302, Commerce CP 201/202, etc.). Travailleur doit avoir un emploi principal à min 4/5. Net = Brut (pas d'ONSS/PP). Cotis patronale 28%.</>}
+            {f.wtype==='EXT'&&<><b style={{color:'#c6a34e'}}>Extra Horeca:</b> Maximum 50 jours/an. Forfait journalier ONSS. Uniquement CP 302.</>}
+            {f.wtype==='DWD'&&<><b style={{color:'#c6a34e'}}>Occasionnel:</b> Travailleurs occasionnels agriculture/horticulture. Forfait journalier.</>}
+            {f.wtype==='IVT'&&<><b style={{color:'#c6a34e'}}>Stagiaire:</b> Convention d'immersion professionnelle (CIP). Pas de cotisations ONSS normales si indemnité ≤ plafond.</>}
+            {f.wtype==='APP'&&<><b style={{color:'#c6a34e'}}>Apprenti:</b> Contrat d'apprentissage (IFAPME/EFP/VDAB/Syntra). Cotisations réduites.</>}
+            {f.wtype==='ART'&&<><b style={{color:'#c6a34e'}}>Artiste:</b> Visa artiste ou déclaration d'activité artistique. Régime spécifique.</>}
+            {!['OTH','STU','FLX','EXT','DWD','IVT','APP','ART'].includes(f.wtype)&&<>Type spécifique — consultez la documentation ONSS.</>}
+          </div>
+        </C>
+        <C style={{marginTop:12}}><ST>Rappels légaux</ST>
+          <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.7}}>
+            <div style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <b style={{color:'#4ade80'}}>IN:</b> Au plus tard au <b>moment</b> de la mise au travail</div>
+            <div style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <b style={{color:'#f87171'}}>OUT:</b> Au plus tard le <b>dernier jour</b> de travail</div>
+            <div style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <b style={{color:'#60a5fa'}}>UPDATE:</b> Dès que la modification est connue</div>
+            <div style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <b style={{color:'#a78bfa'}}>CANCEL:</b> Si le travailleur ne se présente pas</div>
+            <div style={{padding:'6px 0',marginTop:6,background:'rgba(239,68,68,.06)',borderRadius:6,paddingLeft:8}}>
+              <b style={{color:'#ef4444'}}>Amendes:</b> 2.500€ à 12.500€ par travailleur non déclaré (Code pénal social Art. 181)
+            </div>
+          </div>
+        </C>
+      </div>
+    </div>}
+
+    {tab==='history'&&<C style={{padding:0,overflow:'hidden'}}>
+      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Historique Dimona ({filtered.length})</div>
+        <div style={{display:'flex',gap:6}}>
+          {['all','IN','OUT','UPDATE'].map(v=>
+            <button key={v} onClick={()=>setFilter(v)} style={{padding:'4px 10px',borderRadius:6,border:'none',cursor:'pointer',fontSize:10,fontFamily:'inherit',fontWeight:filter===v?600:400,
+              background:filter===v?'rgba(198,163,78,.15)':'rgba(255,255,255,.04)',color:filter===v?'#c6a34e':'#9e9b93'}}>{v==='all'?'Tous':v}</button>
+          )}
+        </div>
+      </div>
+      <Tbl cols={[
+        {k:'a',l:'Action',r:r=><span style={{padding:'2px 7px',borderRadius:4,fontSize:10.5,fontWeight:600,background:r.action==='IN'?'rgba(74,222,128,.1)':r.action==='OUT'?'rgba(248,113,113,.1)':r.action==='UPDATE'?'rgba(96,165,250,.1)':'rgba(167,139,250,.1)',color:r.action==='IN'?'#4ade80':r.action==='OUT'?'#f87171':r.action==='UPDATE'?'#60a5fa':'#a78bfa'}}>{r.action}</span>},
+        {k:'t',l:'Type',r:r=><span style={{fontSize:10,color:'#c6a34e'}}>{r.wtype} {r.wtypeDesc?`(${r.wtypeDesc})`:''}</span>},
+        {k:'e',l:'Travailleur',r:r=>r.ename},
+        {k:'s',l:'Début',r:r=>r.start},{k:'en',l:'Fin',r:r=>r.end||'—'},
+        {k:'h',l:'Heures',r:r=>r.hours||'—'},
+        {k:'r',l:'Réf',r:r=><span style={{fontFamily:'monospace',fontSize:9.5,color:'#60a5fa'}}>{r.dimNr||'—'}</span>},
+        {k:'st',l:'Statut',r:r=><span style={{color:'#4ade80',fontSize:11}}>✓</span>},
+        {k:'x',l:'',a:'right',r:r=><B v="ghost" style={{padding:'3px 8px',fontSize:10}} onClick={()=>d({type:'MODAL',m:{w:800,c:<div><h3 style={{color:'#e8e6e0',margin:'0 0 10px'}}>Dimona {r.action} — {r.ename}</h3><pre style={{background:'#060810',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,padding:14,fontSize:10,color:'#9e9b93',whiteSpace:'pre-wrap',maxHeight:380,overflowY:'auto'}}>{r.xml}</pre><div style={{display:'flex',gap:10,marginTop:12,justifyContent:'flex-end'}}><B v="outline" onClick={()=>d({type:'MODAL',m:null})}>Fermer</B><B onClick={()=>{navigator.clipboard?.writeText(r.xml);alert('Copié !')}}>Copier</B></div></div>}})}>XML</B>},
+      ]} data={filtered}/>
+    </C>}
+
+    {tab==='rules'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Délais légaux par type</ST>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {[{t:'OTH — Ordinaire',d:'IN: avant mise au travail. OUT: dernier jour.',c:'#e8e6e0'},
+            {t:'STU — Étudiant',d:'IN: avant début. Vérifier Student@Work (600h/an). OUT: dernier jour.',c:'#60a5fa'},
+            {t:'FLX — Flexi-job',d:'IN: avant chaque prestation. OUT: dernier jour prestation. Heures planifiées obligatoires.',c:'#4ade80'},
+            {t:'EXT — Extra Horeca',d:'IN: avant mise au travail. Max 50j/an. Forfait ONSS journalier.',c:'#f59e0b'},
+            {t:'DWD — Occasionnel',d:'Agriculture/horticulture. Dimona journalière.',c:'#a78bfa'},
+            {t:'APP — Apprenti',d:'Comme ordinaire + numéro contrat apprentissage.',c:'#f87171'},
+          ].map((r,i)=><div key={i} style={{padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <div style={{fontWeight:600,color:r.c}}>{r.t}</div><div style={{fontSize:10.5,marginTop:2}}>{r.d}</div>
+          </div>)}
+        </div>
+      </C>
+      <C><ST>Sanctions & Amendes</ST>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {[{l:'Absence de Dimona IN',a:'Niveau 4: 2.500€ — 12.500€/travailleur',s:'Art. 181 CPS'},{l:'Dimona IN tardive',a:'Niveau 2: 400€ — 4.000€',s:'Art. 182 CPS'},{l:'Absence de Dimona OUT',a:'Niveau 2: 400€ — 4.000€',s:'Art. 182 CPS'},{l:'Données inexactes',a:'Niveau 2: 400€ — 4.000€',s:'Art. 182 CPS'},{l:'Récidive dans les 12 mois',a:'Amende doublée',s:'Art. 111 CPS'}].map((r,i)=>
+            <div key={i} style={{padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <div style={{fontWeight:600,color:'#e8e6e0'}}>{r.l}</div>
+              <div style={{color:'#f87171',fontSize:10.5}}>{r.a}</div>
+              <div style={{color:'#5e5c56',fontSize:10}}>{r.s}</div>
+            </div>
+          )}
+        </div>
+        <div style={{marginTop:14,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>
+          <b>Portail:</b> www.socialsecurity.be → Dimona Web<br/>
+          <b>Batch:</b> Envoi XML via canal sécurisé (FTP/MQ)<br/>
+          <b>Helpdesk:</b> Contact Center ONSS — 02/509 59 59
+        </div>
+      </C>
+    </div>}
   </div>;
 }
 
@@ -5046,40 +5245,126 @@ function DMFAPage({s,d}) {
 function BelcotaxPage({s,d}) {
   const [yr,setYr]=useState(new Date().getFullYear()-1);
   const [ft,setFt]=useState('10');
+  const [tab,setTab]=useState('gen');
+  const [allXml,setAllXml]=useState('');
+  const ae=s.emps.filter(e=>e.status==='active');
+
+  // Validation
+  const warnings=[];
+  ae.forEach(e=>{
+    if(!e.niss) warnings.push({emp:`${e.first} ${e.last}`,msg:'NISS manquant — fiche invalide'});
+    if(!e.addr&&!e.zip) warnings.push({emp:`${e.first} ${e.last}`,msg:'Adresse incomplète'});
+  });
+  if(!s.co.onss) warnings.push({emp:'Employeur',msg:'Matricule ONSS manquant'});
+  if(!s.co.vat) warnings.push({emp:'Employeur',msg:'Numéro TVA manquant'});
+
   const gen=()=>{
-    s.emps.filter(e=>e.status==='active').forEach(emp=>{
+    const xmlParts=[];
+    ae.forEach(emp=>{
       const p=calc(emp,DPER,s.co);
       const ad={gross:p.gross*12,onss:p.onssNet*12,empB:p.empBonus*12,tax:p.tax*12,css:p.css*12,mvC:Math.round(p.mvDays*12),mvE:p.mvEmployer*12,tr:p.transport*12,atnCar:(p.atnCar||0)*12,atnAutres:(p.atnAutresTot||0)*12,pensionCompl:(p.pensionCompl||0)*12,fraisPropres:((p.expense||0)+(p.indemTeletravail||0)+(p.indemBureau||0))*12,ecoCheques:(p.ecoCheques||0)*12};
       const xml=genBelcotax(s.co,emp,yr,ad);
-      d({type:'ADD_F',d:{eid:emp.id,ename:`${emp.first} ${emp.last}`,yr,ft,ftl:LEGAL.FICHE_281[ft],ag:ad.gross,an:p.net*12,xml,at:new Date().toISOString()}});
+      xmlParts.push(xml);
+      d({type:'ADD_F',d:{eid:emp.id,ename:`${emp.first} ${emp.last}`,yr,ft,ftl:LEGAL.FICHE_281[ft],ag:ad.gross,an:p.net*12,aonss:ad.onss,atax:ad.tax,acss:ad.css,xml,at:new Date().toISOString()}});
     });
-    alert(`${s.emps.filter(e=>e.status==='active').length} fiche(s) 281.${ft} générée(s) !`);
+    // Récapitulatif XML global BelcotaxOnWeb
+    const globalXml=`<?xml version="1.0" encoding="UTF-8"?>\n<!-- BelcotaxOnWeb — Fichier recapitulatif -->\n<!-- ${ae.length} fiche(s) 281.${ft} — Annee ${yr} -->\n<!-- Genere par: Aureus Social Pro -->\n<Belcotax xmlns="urn:belcotax:${yr}">\n  <Verzending>\n    <Aangiftenr>BELCO${Date.now().toString(36).toUpperCase()}</Aangiftenr>\n    <Aangiftetype>281.${ft}</Aangiftetype>\n    <AangifteJaar>${yr}</AangifteJaar>\n    <AantalOpgaven>${ae.length}</AantalOpgaven>\n    <Schuldenaar>\n      <KBO>${(s.co.bce||s.co.vat||'').replace(/[^0-9]/g,'')}</KBO>\n      <Naam>${s.co.name}</Naam>\n      <Adres>${s.co.addr}</Adres>\n    </Schuldenaar>\n  </Verzending>\n</Belcotax>`;
+    setAllXml(globalXml);
   };
+
+  // Stats from fiches
+  const fichesYr=s.fiches.filter(f2=>f2.yr==yr);
+  const totBrut=fichesYr.reduce((a,f2)=>a+(f2.ag||0),0);
+  const totNet=fichesYr.reduce((a,f2)=>a+(f2.an||0),0);
+
   return <div>
-    <PH title="Fiches Fiscales 281.xx" sub="BelcotaxOnWeb"/>
-    <div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:18}}>
-      <C><ST>Génération</ST>
-        <I label="Année de revenus" type="number" value={yr} onChange={v=>setYr(v)}/>
-        <I label="Type de fiche" value={ft} onChange={v=>setFt(v)} style={{marginTop:9}} options={Object.entries(LEGAL.FICHE_281).map(([k,v])=>({v:k,l:`281.${k} — ${v}`}))}/>
-        <B onClick={gen} style={{width:'100%',marginTop:14}}>Générer 281.{ft}</B>
-        <div style={{marginTop:18,padding:10,background:'rgba(198,163,78,.05)',borderRadius:8,border:'1px solid rgba(198,163,78,.1)'}}>
-          <div style={{fontSize:10.5,color:'#c6a34e',fontWeight:600,marginBottom:6}}>Types disponibles</div>
-          {Object.entries(LEGAL.FICHE_281).map(([k,v])=><div key={k} style={{fontSize:10.5,color:'#9e9b93',padding:'2px 0'}}><b style={{color:'#d4d0c8'}}>281.{k}</b> — {v}</div>)}
+    <PH title="Fiches Fiscales BELCOTAX" sub="BelcotaxOnWeb — SPF Finances"/>
+    {/* Stats */}
+    <div style={{display:'flex',gap:12,marginBottom:18}}>
+      {[{l:'Fiches générées',v:fichesYr.length,c:'#c6a34e'},{l:'Brut total',v:fmt(totBrut),c:'#e8e6e0'},{l:'Net total',v:fmt(totNet),c:'#4ade80'},{l:'Travailleurs actifs',v:ae.length,c:'#60a5fa'}].map((st,i)=>
+        <div key={i} style={{flex:1,padding:'12px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{st.l}</div>
+          <div style={{fontSize:typeof st.v==='number'?22:16,fontWeight:700,color:st.c,marginTop:2}}>{st.v}</div>
+        </div>
+      )}
+    </div>
+    {/* Tabs */}
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'gen',l:'Génération'},{v:'fiches',l:'Fiches générées'},{v:'deadlines',l:'Échéances & Règles'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+
+    {tab==='gen'&&<div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:18}}>
+      <div>
+        <C><ST>Paramètres</ST>
+          <I label="Année de revenus" type="number" value={yr} onChange={v=>setYr(v)}/>
+          <I label="Type de fiche" value={ft} onChange={v=>setFt(v)} style={{marginTop:9}} options={Object.entries(LEGAL.FICHE_281).map(([k,v2])=>({v:k,l:`281.${k} — ${v2}`}))}/>
+          <B onClick={gen} style={{width:'100%',marginTop:14}}>Générer toutes les 281.{ft} ({ae.length} fiches)</B>
+          {allXml&&<div style={{marginTop:12}}>
+            <B v="outline" style={{width:'100%',fontSize:11}} onClick={()=>d({type:'MODAL',m:{w:800,c:<div><h3 style={{color:'#e8e6e0',margin:'0 0 10px'}}>Récapitulatif BelcotaxOnWeb</h3><pre style={{background:'#060810',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,padding:14,fontSize:10,color:'#9e9b93',whiteSpace:'pre-wrap',maxHeight:400,overflowY:'auto'}}>{allXml}</pre><div style={{display:'flex',gap:10,marginTop:12,justifyContent:'flex-end'}}><B v="outline" onClick={()=>d({type:'MODAL',m:null})}>Fermer</B><B onClick={()=>{navigator.clipboard?.writeText(allXml);alert('Copié !')}}>Copier</B></div></div>}})}>Voir XML récapitulatif</B>
+          </div>}
+        </C>
+        {warnings.length>0&&<C style={{marginTop:12,borderColor:'rgba(239,68,68,.15)'}}><ST>Anomalies ({warnings.length})</ST>
+          {warnings.map((w,i)=><div key={i} style={{fontSize:10.5,color:'#9e9b93',padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <b style={{color:'#f87171'}}>{w.emp}</b>: {w.msg}
+          </div>)}
+        </C>}
+        <C style={{marginTop:12}}><ST>Types disponibles</ST>
+          {Object.entries(LEGAL.FICHE_281).map(([k,v2])=><div key={k} style={{fontSize:10.5,color:'#9e9b93',padding:'3px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}><b style={{color:'#d4d0c8'}}>281.{k}</b> — {v2}</div>)}
+        </C>
+      </div>
+      <C style={{padding:0,overflow:'hidden'}}>
+        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Aperçu — 281.{ft} année {yr}</div></div>
+        <Tbl cols={[
+          {k:'n',l:'Travailleur',b:1,r:r=>`${r.first} ${r.last}`},
+          {k:'niss',l:'NISS',r:r=><span style={{fontFamily:'monospace',fontSize:10,color:r.niss?'#9e9b93':'#f87171'}}>{r.niss||'MANQUANT'}</span>},
+          {k:'g',l:'Brut annuel',a:'right',r:r=>{const p=calc(r,DPER,s.co);return fmt(p.gross*12)}},
+          {k:'t',l:'PP annuel',a:'right',r:r=>{const p=calc(r,DPER,s.co);return <span style={{color:'#f87171'}}>{fmt(p.tax*12)}</span>}},
+          {k:'ne',l:'Net annuel',a:'right',r:r=>{const p=calc(r,DPER,s.co);return <span style={{color:'#4ade80'}}>{fmt(p.net*12)}</span>}},
+        ]} data={ae}/>
+      </C>
+    </div>}
+
+    {tab==='fiches'&&<C style={{padding:0,overflow:'hidden'}}>
+      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Fiches générées ({s.fiches.length})</div></div>
+      <Tbl cols={[
+        {k:'y',l:'Année',r:r=><span style={{fontWeight:600,color:'#c6a34e'}}>{r.yr}</span>},
+        {k:'t',l:'Type',r:r=>`281.${r.ft}`},{k:'e',l:'Employé',r:r=>r.ename},
+        {k:'g',l:'Brut annuel',a:'right',r:r=>fmt(r.ag)},
+        {k:'n',l:'Net annuel',a:'right',r:r=><span style={{color:'#4ade80'}}>{fmt(r.an)}</span>},
+        {k:'x',l:'',a:'right',r:r=><B v="ghost" style={{padding:'3px 8px',fontSize:10}} onClick={()=>d({type:'MODAL',m:{w:800,c:<div><h3 style={{color:'#e8e6e0',margin:'0 0 10px'}}>281.{r.ft} — {r.ename} ({r.yr})</h3><pre style={{background:'#060810',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,padding:14,fontSize:10,color:'#9e9b93',overflowX:'auto',whiteSpace:'pre-wrap',maxHeight:380,overflowY:'auto'}}>{r.xml}</pre><div style={{display:'flex',gap:10,marginTop:12,justifyContent:'flex-end'}}><B v="outline" onClick={()=>d({type:'MODAL',m:null})}>Fermer</B><B onClick={()=>{navigator.clipboard?.writeText(r.xml);alert('Copié !')}}>Copier</B></div></div>}})}>XML</B>},
+      ]} data={s.fiches}/>
+    </C>}
+
+    {tab==='deadlines'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Échéances BelcotaxOnWeb</ST>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {[{l:'281.10 Rémunérations',dl:'28/02 (N+1)',note:'Obligatoire pour tous les employeurs'},{l:'281.20 Dirigeants',dl:'28/02 (N+1)',note:'Administrateurs, gérants'},{l:'281.50 Honoraires/Commissions',dl:'30/06 (N+1)',note:'> 250€/an/bénéficiaire'},{l:'281.30 Jetons présence',dl:'28/02 (N+1)',note:'Membres CA, ASBL'},{l:'Rectificative',dl:'Pas de deadline fixe',note:'Via BelcotaxOnWeb portail SPF'}].map((r,i)=>
+            <div key={i} style={{padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <div style={{display:'flex',justifyContent:'space-between'}}><b style={{color:'#e8e6e0'}}>{r.l}</b><span style={{color:'#c6a34e',fontWeight:600}}>{r.dl}</span></div>
+              <div style={{fontSize:10,color:'#5e5c56'}}>{r.note}</div>
+            </div>
+          )}
         </div>
       </C>
-      <C style={{padding:0,overflow:'hidden'}}>
-        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Fiches générées</div></div>
-        <Tbl cols={[
-          {k:'y',l:'Année',r:r=><span style={{fontWeight:600,color:'#c6a34e'}}>{r.yr}</span>},
-          {k:'t',l:'Type',r:r=>`281.${r.ft}`},{k:'e',l:'Employé',r:r=>r.ename},
-          {k:'g',l:'Brut annuel',a:'right',r:r=>fmt(r.ag)},
-          {k:'n',l:'Net annuel',a:'right',r:r=><span style={{color:'#4ade80'}}>{fmt(r.an)}</span>},
-          {k:'x',l:'',a:'right',r:r=><B v="ghost" style={{padding:'3px 8px',fontSize:10}} onClick={()=>d({type:'MODAL',m:{w:800,c:<div><h3 style={{color:'#e8e6e0',margin:'0 0 10px'}}>281.{r.ft} — {r.ename} ({r.yr})</h3><pre style={{background:'#060810',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,padding:14,fontSize:10,color:'#9e9b93',overflowX:'auto',whiteSpace:'pre-wrap',maxHeight:380,overflowY:'auto'}}>{r.xml}</pre><div style={{display:'flex',gap:10,marginTop:12,justifyContent:'flex-end'}}><B v="outline" onClick={()=>d({type:'MODAL',m:null})}>Fermer</B><B onClick={()=>{navigator.clipboard?.writeText(r.xml);alert('Copié !')}}>Copier</B></div></div>}})}>XML</B>},
-        ]} data={s.fiches}/>
+      <C><ST>Procédure</ST>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {['1. Générer les fiches 281.xx dans Aureus Social Pro','2. Vérifier les données (NISS, montants, adresses)','3. Exporter le XML récapitulatif','4. Se connecter à BelcotaxOnWeb (MyMinfin)','5. Uploader le fichier XML','6. Valider et envoyer','7. Conserver l\'accusé de réception'].map((step,i)=>
+            <div key={i} style={{padding:'4px 0'}}>{step}</div>
+          )}
+        </div>
+        <div style={{marginTop:14,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>
+          <b>Portail:</b> finances.belgium.be/fr/E-services/Belcotaxonweb<br/>
+          <b>Helpdesk SPF:</b> 0257/257 57<br/>
+          <b>Format XML:</b> Conforme XSD BelcotaxOnWeb v{yr}
+        </div>
       </C>
-    </div>
+    </div>}
   </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  PRÉCOMPTE 274
@@ -5156,7 +5441,27 @@ function PrecomptePage({s,d}) {
           {k:'g',l:mode==='mensuel'?'Brut':'Brut cumulé',a:'right',r:r=>fmt(r.gross)},
           {k:'t',l:mode==='mensuel'?'Précompte':'PP cumulé',a:'right',r:r=><span style={{fontWeight:600,color:'#c6a34e'}}>{fmt(r.tax)}</span>},
         ]} data={det}/>
-        {det.length>0&&<div style={{padding:'12px 18px',borderTop:'1px solid rgba(139,115,60,.1)',display:'flex',justifyContent:'flex-end',gap:16}}><span style={{fontSize:12,color:'#9e9b93'}}>TOTAL:</span><span style={{fontSize:14,fontWeight:700,color:'#c6a34e'}}>{fmt(tot)}</span></div>}
+        {det.length>0&&<div style={{padding:'12px 18px',borderTop:'1px solid rgba(139,115,60,.1)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div style={{display:'flex',gap:8}}>
+            <B v="outline" style={{fontSize:10.5,padding:'6px 12px'}} onClick={()=>{
+              const periode=mode==='mensuel'?`${String(m).padStart(2,'0')}/${y}`:`T${q}/${y}`;
+              const xml274=`<?xml version="1.0" encoding="UTF-8"?>\n<!-- Declaration Precompte Professionnel 274 -->\n<!-- SPF Finances — FINPROF -->\n<!-- Genere par: Aureus Social Pro -->\n<PP274 xmlns="urn:pp274:${y}">\n  <Declaration>\n    <Periode>${periode}</Periode>\n    <Periodicite>${mode}</Periodicite>\n    <Employeur>\n      <KBO>${(s.co.bce||s.co.vat||'').replace(/[^0-9]/g,'')}</KBO>\n      <ONSS>${(s.co.onss||'').replace(/[^0-9]/g,'')}</ONSS>\n      <Naam>${s.co.name}</Naam>\n    </Employeur>\n    <NbrTravailleurs>${ae.length}</NbrTravailleurs>\n    <TotalBrut>${det.reduce((a,r)=>a+r.gross,0).toFixed(2)}</TotalBrut>\n    <TotalPrecompte>${tot.toFixed(2)}</TotalPrecompte>\n${det.map(r=>`    <Travailleur>\n      <Naam>${r.e.last} ${r.e.first}</Naam>\n      <INSZ>${(r.e.niss||'').replace(/[\\.-\\s]/g,'')}</INSZ>\n      <Brut>${r.gross.toFixed(2)}</Brut>\n      <PP>${r.tax.toFixed(2)}</PP>\n    </Travailleur>`).join('\n')}\n  </Declaration>\n</PP274>`;
+              d({type:'MODAL',m:{w:850,c:<div>
+                <h2 style={{fontSize:17,fontWeight:600,color:'#e8e6e0',margin:'0 0 6px',fontFamily:"'Cormorant Garamond',serif"}}>Déclaration PP 274 — {periode}</h2>
+                <div style={{display:'flex',gap:8,marginBottom:12}}>
+                  <span style={{fontSize:10,padding:'3px 10px',borderRadius:4,background:'rgba(74,222,128,.1)',color:'#4ade80',fontWeight:600}}>✓ XML généré</span>
+                  <span style={{fontSize:10,padding:'3px 10px',borderRadius:4,background:'rgba(198,163,78,.1)',color:'#c6a34e',fontWeight:600}}>{ae.length} trav. · {fmt(tot)}</span>
+                </div>
+                <pre style={{background:'#060810',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,padding:14,fontSize:10,color:'#9e9b93',overflowX:'auto',whiteSpace:'pre-wrap',maxHeight:350,overflowY:'auto'}}>{xml274}</pre>
+                <div style={{display:'flex',gap:10,marginTop:14,justifyContent:'flex-end'}}>
+                  <B v="outline" onClick={()=>d({type:'MODAL',m:null})}>Fermer</B>
+                  <B onClick={()=>{navigator.clipboard?.writeText(xml274);alert('XML 274 copié !')}}>Copier XML</B>
+                </div>
+              </div>}});
+            }}>Générer XML 274</B>
+          </div>
+          <div style={{display:'flex',gap:16,alignItems:'center'}}><span style={{fontSize:12,color:'#9e9b93'}}>TOTAL:</span><span style={{fontSize:14,fontWeight:700,color:'#c6a34e'}}>{fmt(tot)}</span></div>
+        </div>}
       </C>
     </div>
   </div>;
@@ -6848,6 +7153,132 @@ function ONSSAPLMod({s,d}){
     <C style={{padding:0,overflow:'hidden'}}>
       <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Agents — T{q}/{y}</div></div>
       {gen?<Tbl cols={[{k:'e',l:'Agent',b:1,r:r=>r.emp},{k:'c',l:'Code',r:r=>r.code},{k:'g',l:'Brut trim.',a:'right',r:r=>fmt(r.gQ)},{k:'ow',l:'ONSS trav.',a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.ow)}</span>},{k:'oe',l:'ONSS empl.',a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.oe)}</span>},{k:'p',l:'Pension',a:'right',r:r=><span style={{color:'#a78bfa'}}>{fmt(r.pen)}</span>}]} data={gen?.ws||[]}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56',fontSize:13}}>Générez la DMFAPPL</div>}
+    </C>
+  </div>;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DASHBOARD ONSS — Échéances, historique, alertes
+// ═══════════════════════════════════════════════════════════════
+function ONSSDashMod({s,d}){
+  const [y,setY]=useState(new Date().getFullYear());
+  const now=new Date();
+  const curQ=Math.ceil((now.getMonth()+1)/3);
+  const curM=now.getMonth()+1;
+  const ae=s.emps.filter(e=>e.status==='active');
+
+  // Calendrier complet ONSS/SPF 2026
+  const deadlines=[
+    {type:'DIMONA',desc:'Dimona IN/OUT',dl:'Permanent',freq:'À chaque embauche/sortie',status:'ongoing',color:'#4ade80'},
+    {type:'ONSS',desc:'Provision mensuelle T1-M1',dl:'05/02/2026',freq:'Mensuel',status:curM>=2?'done':'upcoming',color:'#c6a34e'},
+    {type:'ONSS',desc:'Provision mensuelle T1-M2',dl:'05/03/2026',freq:'Mensuel',status:curM>=3?'done':'upcoming',color:'#c6a34e'},
+    {type:'ONSS',desc:'Provision mensuelle T1-M3',dl:'05/04/2026',freq:'Mensuel',status:curM>=4?'done':'upcoming',color:'#c6a34e'},
+    {type:'DMFA',desc:'DmfA T1/2026 + Solde ONSS',dl:'30/04/2026',freq:'Trimestriel',status:curM>4?'done':'upcoming',color:'#60a5fa'},
+    {type:'PP274',desc:'PP 274 Janvier',dl:'13/02/2026',freq:'Mensuel',status:curM>=2?'done':'upcoming',color:'#a78bfa'},
+    {type:'PP274',desc:'PP 274 Février',dl:'13/03/2026',freq:'Mensuel',status:curM>=3?'done':'upcoming',color:'#a78bfa'},
+    {type:'PP274',desc:'PP 274 Mars',dl:'15/04/2026',freq:'Mensuel',status:curM>=4?'done':'upcoming',color:'#a78bfa'},
+    {type:'BELCOTAX',desc:'Fiches 281.10 (année ' +(y-1)+')',dl:'28/02/2026',freq:'Annuel',status:curM>=3?'done':'upcoming',color:'#f59e0b'},
+    {type:'ONSS',desc:'Provision mensuelle T2-M1',dl:'05/05/2026',freq:'Mensuel',status:curM>=5?'done':'upcoming',color:'#c6a34e'},
+    {type:'ONSS',desc:'Provision mensuelle T2-M2',dl:'05/06/2026',freq:'Mensuel',status:curM>=6?'done':'upcoming',color:'#c6a34e'},
+    {type:'ONSS',desc:'Provision mensuelle T2-M3',dl:'05/07/2026',freq:'Mensuel',status:curM>=7?'done':'upcoming',color:'#c6a34e'},
+    {type:'DMFA',desc:'DmfA T2/2026 + Solde ONSS',dl:'31/07/2026',freq:'Trimestriel',status:curM>7?'done':'upcoming',color:'#60a5fa'},
+    {type:'BELCOTAX',desc:'Fiches 281.50 Honoraires',dl:'30/06/2026',freq:'Annuel',status:curM>6?'done':'upcoming',color:'#f59e0b'},
+    {type:'ONSS',desc:'Provision mensuelle T3-M1',dl:'05/08/2026',freq:'Mensuel',status:curM>=8?'done':'upcoming',color:'#c6a34e'},
+    {type:'ONSS',desc:'Provision mensuelle T3-M2',dl:'05/09/2026',freq:'Mensuel',status:curM>=9?'done':'upcoming',color:'#c6a34e'},
+    {type:'ONSS',desc:'Provision mensuelle T3-M3',dl:'05/10/2026',freq:'Mensuel',status:curM>=10?'done':'upcoming',color:'#c6a34e'},
+    {type:'DMFA',desc:'DmfA T3/2026 + Solde ONSS',dl:'31/10/2026',freq:'Trimestriel',status:curM>10?'done':'upcoming',color:'#60a5fa'},
+    {type:'ONSS',desc:'Provision mensuelle T4-M1',dl:'05/11/2026',freq:'Mensuel',status:curM>=11?'done':'upcoming',color:'#c6a34e'},
+    {type:'ONSS',desc:'Provision mensuelle T4-M2',dl:'05/12/2026',freq:'Mensuel',status:curM>=12?'done':'upcoming',color:'#c6a34e'},
+    {type:'ONSS',desc:'Provision mensuelle T4-M3',dl:'05/01/2027',freq:'Mensuel',status:'upcoming',color:'#c6a34e'},
+    {type:'DMFA',desc:'DmfA T4/2026 + Solde ONSS',dl:'31/01/2027',freq:'Trimestriel',status:'upcoming',color:'#60a5fa'},
+  ];
+
+  // Next upcoming deadlines
+  const upcoming=deadlines.filter(x=>x.status==='upcoming').slice(0,5);
+
+  // Calculate totals from payroll
+  const monthlyTotals=ae.map(e=>{const p=calc(e,DPER,s.co);return{onssW:p.onssNet,onssE:p.onssE,pp:p.tax,gross:p.gross};});
+  const totM={onssW:monthlyTotals.reduce((a,r)=>a+r.onssW,0),onssE:monthlyTotals.reduce((a,r)=>a+r.onssE,0),pp:monthlyTotals.reduce((a,r)=>a+r.pp,0),gross:monthlyTotals.reduce((a,r)=>a+r.gross,0)};
+
+  return <div>
+    <PH title="Dashboard ONSS & Échéances" sub="Vue d'ensemble des obligations sociales et fiscales"/>
+    {/* KPIs */}
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:20}}>
+      {[{l:'ONSS mensuel',v:fmt(totM.onssW+totM.onssE),c:'#f87171',s:'Trav. + Employeur'},{l:'PP mensuel',v:fmt(totM.pp),c:'#a78bfa',s:'Précompte prof.'},{l:'Masse salariale',v:fmt(totM.gross),c:'#e8e6e0',s:'Brut mensuel'},{l:'Dimona actives',v:s.dims.filter(x=>x.action==='IN').length-s.dims.filter(x=>x.action==='OUT').length,c:'#4ade80',s:'IN - OUT'},{l:'DmfA envoyées',v:s.dmfas.length,c:'#60a5fa',s:'Trimestres déclarés'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:typeof k.v==='number'?24:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+          <div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>{k.s}</div>
+        </div>
+      )}
+    </div>
+
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      {/* Prochaines échéances */}
+      <C><ST>Prochaines échéances</ST>
+        {upcoming.map((dl,i)=>{
+          const isUrgent=i===0;
+          return <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <div>
+              <div style={{fontSize:12,fontWeight:isUrgent?600:400,color:isUrgent?'#e8e6e0':'#9e9b93'}}>{dl.desc}</div>
+              <div style={{display:'flex',gap:6,marginTop:3}}>
+                <span style={{fontSize:9,padding:'1px 6px',borderRadius:3,background:`${dl.color}15`,color:dl.color,fontWeight:600}}>{dl.type}</span>
+                <span style={{fontSize:9,color:'#5e5c56'}}>{dl.freq}</span>
+              </div>
+            </div>
+            <div style={{textAlign:'right'}}>
+              <div style={{fontSize:12,fontWeight:600,color:isUrgent?'#f87171':dl.color}}>{dl.dl}</div>
+              {isUrgent&&<div style={{fontSize:9,color:'#f87171',fontWeight:600}}>PROCHAIN</div>}
+            </div>
+          </div>;
+        })}
+        <div style={{marginTop:12,padding:8,background:'rgba(96,165,250,.06)',borderRadius:6,fontSize:10,color:'#60a5fa',lineHeight:1.5}}>
+          <b>Portail ONSS:</b> www.socialsecurity.be<br/>
+          <b>FINPROF:</b> finances.belgium.be → e-services → FINPROF
+        </div>
+      </C>
+
+      {/* Historique déclarations */}
+      <C><ST>Historique des déclarations</ST>
+        <div style={{fontSize:11,color:'#9e9b93'}}>
+          {s.dmfas.length===0&&s.dims.length===0?
+            <div style={{textAlign:'center',padding:30,color:'#5e5c56'}}>Aucune déclaration générée</div>:
+            <>
+              {s.dmfas.slice(0,5).map((dm,i)=><div key={'dm'+i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+                <div><span style={{fontSize:9,padding:'1px 6px',borderRadius:3,background:'rgba(96,165,250,.1)',color:'#60a5fa',fontWeight:600,marginRight:6}}>DMFA</span>T{dm.q}/{dm.y} — {dm.cnt} trav.</div>
+                <span style={{color:'#4ade80',fontSize:10}}>✓ {new Date(dm.at).toLocaleDateString('fr-BE')}</span>
+              </div>)}
+              {s.dims.slice(0,5).map((dm,i)=><div key={'di'+i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+                <div><span style={{fontSize:9,padding:'1px 6px',borderRadius:3,background:dm.action==='IN'?'rgba(74,222,128,.1)':'rgba(248,113,113,.1)',color:dm.action==='IN'?'#4ade80':'#f87171',fontWeight:600,marginRight:6}}>DIM {dm.action}</span>{dm.ename}</div>
+                <span style={{color:'#4ade80',fontSize:10}}>✓ {new Date(dm.at).toLocaleDateString('fr-BE')}</span>
+              </div>)}
+            </>
+          }
+        </div>
+      </C>
+    </div>
+
+    {/* Calendrier complet */}
+    <C style={{marginTop:18}}><ST>Calendrier ONSS / SPF {y} — Vue complète</ST>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}}>
+        {[1,2,3,4].map(qi=>{
+          const qDeadlines=deadlines.filter(x=>x.desc.includes(`T${qi}`)||x.desc.includes(`T${qi}/`));
+          return <div key={qi} style={{padding:12,background:qi===curQ?'rgba(198,163,78,.06)':'rgba(255,255,255,.02)',borderRadius:8,border:qi===curQ?'1px solid rgba(198,163,78,.2)':'1px solid rgba(255,255,255,.04)'}}>
+            <div style={{fontSize:13,fontWeight:600,color:qi===curQ?'#c6a34e':'#e8e6e0',marginBottom:8}}>T{qi}/{y} {qi===curQ?'← actuel':''}</div>
+            {deadlines.filter(x=>{
+              const mRange=qi===1?[1,2,3,4]:qi===2?[4,5,6,7]:qi===3?[7,8,9,10]:[10,11,12,13];
+              const dlParts=x.dl.split('/');if(dlParts.length<2)return qi===1;
+              const dlM=parseInt(dlParts[1]);const dlY=parseInt(dlParts[2]||y);
+              return dlY===y?(mRange.includes(dlM)):(qi===4&&dlY===y+1&&dlM<=1);
+            }).map((dl,j)=>
+              <div key={j} style={{display:'flex',justifyContent:'space-between',padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,.02)',fontSize:10.5}}>
+                <span style={{color:dl.status==='done'?'#5e5c56':'#9e9b93'}}>{dl.status==='done'?'✓ ':''}{dl.type}</span>
+                <span style={{color:dl.status==='done'?'#5e5c56':dl.color,fontWeight:dl.status==='upcoming'?600:400}}>{dl.dl}</span>
+              </div>
+            )}
+          </div>;
+        })}
+      </div>
     </C>
   </div>;
 }
@@ -9661,7 +10092,7 @@ function DocumentsJuridiquesMod({s,d}){
           </div>
 
           {/* Card actions */}
-          <div style={{padding:'10px 18px 14px',borderTop:'1px solid rgba(198,163,78,.04)',display:'flex',gap:8'}}>
+          <div style={{padding:'10px 18px 14px',borderTop:'1px solid rgba(198,163,78,.04)',display:'flex',gap:8}}>
             <button onClick={()=>generatePDF(doc)} disabled={generating===doc.id}
               style={{flex:1,padding:'9px 14px',borderRadius:8,border:'none',cursor:'pointer',fontWeight:600,fontSize:11,fontFamily:'inherit',
                 background:generating===doc.id?'rgba(198,163,78,.15)':'linear-gradient(135deg,#c6a34e,#a08030)',
@@ -11504,15 +11935,87 @@ function SimCoutMod({s,d}){
 }
 
 function TotalRewardMod({s,d}){
-  const ae=s.emps||[];const [sel,setSel]=useState(ae[0]?.id||'');const emp=ae.find(e=>e.id===sel)||ae[0]||{};const b=parseFloat(emp.brut)||3000;
-  const items=[{c:'Rémunération directe',i:[{l:'Brut annuel (x13.92)',v:b*13.92},{l:'Pécule vacances',v:b*1.85}]},{c:'Avantages',i:[{l:'Chèques-repas',v:1920},{l:'Éco-chèques',v:250},{l:'Ass. groupe',v:b*0.36},{l:'Ass. hosp.',v:480}]},{c:'Cotisations employeur',i:[{l:'ONSS annuel',v:b*3.48},{l:'AT',v:b*0.14}]}];
-  const tot=items.reduce((a,c)=>a+c.i.reduce((b2,x)=>b2+x.v,0),0);const f=n=>'€ '+n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
-  return <div><C style={{padding:'18px 20px'}}><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}><span style={{fontSize:24}}>🏆</span>
-    <div><div style={{fontWeight:700,fontSize:16}}>Total Reward Statement</div><div style={{fontSize:11,color:'#5e5c56'}}>Rémunération globale par travailleur</div></div></div>
-    <I label="Travailleur" value={sel} onChange={setSel} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/></C>
-    <SC label="Package annuel" value={f(tot)} sub={emp.first?`${emp.first} ${emp.last}`:''} color="#c6a34e"/>
-    {items.map((cat,ci)=><C key={ci} style={{marginTop:10}}><div style={{padding:'10px 18px',background:'rgba(198,163,78,.05)',borderBottom:'1px solid rgba(198,163,78,.1)',display:'flex',justifyContent:'space-between'}}><span style={{fontWeight:700,fontSize:11,color:'#c6a34e',textTransform:'uppercase'}}>{cat.c}</span><span style={{fontSize:11,color:'#5e5c56'}}>{f(cat.i.reduce((a,x)=>a+x.v,0))}</span></div>
-      {cat.i.map((it,ii)=><div key={ii} style={{display:'flex',justifyContent:'space-between',padding:'7px 18px',borderBottom:'1px solid rgba(255,255,255,.02)'}}><span style={{fontSize:12}}>{it.l}</span><span style={{fontSize:12,fontWeight:600,color:'#4ade80'}}>{f(it.v)}</span></div>)}</C>)}</div>;
+  const ae=s.emps||[];const [sel,setSel]=useState(ae[0]?.id||'');
+  const emp=ae.find(e=>e.id===sel)||ae[0]||{};
+  const p=emp.id?calc(emp,DPER,s.co):{gross:0,net:0,onssNet:0,onssE:0,tax:0,css:0,empBonus:0};
+  const b=p.gross||0;
+  
+  // Composantes du package
+  const items=[
+    {c:'Rémunération directe',color:'#4ade80',i:[
+      {l:'Salaire brut annuel (×12)',v:b*12},
+      {l:'13ème mois',v:b},
+      {l:'Pécule vacances (double)',v:b*0.92},
+      {l:'Bonus éventuel (CCT 90)',v:0},
+    ]},
+    {c:'Avantages en nature',color:'#60a5fa',i:[
+      {l:'Chèques-repas (220j × '+fmt(+(emp.mvValue||8))+')',v:(emp.mvValue||8)*220},
+      {l:'Éco-chèques',v:+(emp.ecoCheques||250)},
+      {l:'Assurance groupe (3% brut)',v:b*12*0.03},
+      {l:'Assurance hospitalisation',v:480},
+      {l:'GSM + abonnement',v:emp.atnGSM?300:0},
+      {l:'Laptop / PC',v:emp.atnPC?180:0},
+      {l:'Internet domicile',v:emp.atnNet?60:0},
+    ]},
+    {c:'Indemnités & frais',color:'#a78bfa',i:[
+      {l:'Frais propres employeur',v:(+(emp.expense||0))*12},
+      {l:'Indemnité télétravail',v:(+(emp.indemTeletravail||0))*12},
+      {l:'Transport domicile-travail',v:p.transport*12},
+    ]},
+    {c:'Cotisations employeur',color:'#f87171',i:[
+      {l:'ONSS patronal annuel',v:p.onssE*12},
+      {l:'Assurance accidents travail',v:b*12*0.01},
+      {l:'Médecine du travail',v:ae.length*91.50||91.50},
+    ]},
+  ];
+  
+  const totPackage=items.reduce((a,c)=>a+c.i.reduce((b2,x)=>b2+x.v,0),0);
+  const totDirect=items[0].i.reduce((a,x)=>a+x.v,0);
+  const totAvantages=items[1].i.reduce((a,x)=>a+x.v,0);
+  const totFrais=items[2].i.reduce((a,x)=>a+x.v,0);
+  const totCotis=items[3].i.reduce((a,x)=>a+x.v,0);
+  
+  return <div>
+    <PH title="Total Reward Statement" sub="Rémunération globale par travailleur"/>
+    <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
+      <div>
+        <C><ST>Travailleur</ST>
+          <I label="Sélection" value={sel} onChange={setSel} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+          <div style={{marginTop:16,textAlign:'center'}}>
+            <div style={{width:60,height:60,borderRadius:'50%',background:'linear-gradient(135deg,#c6a34e,#a08030)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto',fontSize:22,fontWeight:700,color:'#fff'}}>{(emp.first||'?')[0]}{(emp.last||'?')[0]}</div>
+            <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0',marginTop:8}}>{emp.first} {emp.last}</div>
+            <div style={{fontSize:11,color:'#5e5c56'}}>{emp.fn||'Fonction'} · CP {emp.cp||'200'}</div>
+          </div>
+          <div style={{marginTop:16,padding:14,background:'rgba(198,163,78,.06)',borderRadius:8,textAlign:'center'}}>
+            <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase'}}>Package annuel total</div>
+            <div style={{fontSize:28,fontWeight:700,color:'#c6a34e',marginTop:4}}>{fmt(totPackage)}</div>
+            <div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>soit {fmt(totPackage/12)}/mois</div>
+          </div>
+          {/* Mini breakdown */}
+          <div style={{marginTop:12,fontSize:11,color:'#9e9b93',lineHeight:2}}>
+            {[{l:'Rémunération',v:totDirect,c:'#4ade80'},{l:'Avantages',v:totAvantages,c:'#60a5fa'},{l:'Frais/indemnités',v:totFrais,c:'#a78bfa'},{l:'Cotisations empl.',v:totCotis,c:'#f87171'}].map((r,i)=>
+              <div key={i} style={{display:'flex',justifyContent:'space-between'}}>
+                <span>{r.l}</span>
+                <span style={{fontWeight:600,color:r.c}}>{fmt(r.v)}</span>
+              </div>
+            )}
+          </div>
+        </C>
+      </div>
+      <div>
+        {items.map((cat,ci)=><C key={ci} style={{marginBottom:12,padding:0,overflow:'hidden'}}>
+          <div style={{padding:'12px 18px',background:`${cat.color}08`,borderBottom:`1px solid ${cat.color}20`,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <span style={{fontWeight:700,fontSize:12,color:cat.color,textTransform:'uppercase',letterSpacing:'.5px'}}>{cat.c}</span>
+            <span style={{fontSize:13,fontWeight:700,color:cat.color}}>{fmt(cat.i.reduce((a,x)=>a+x.v,0))}</span>
+          </div>
+          {cat.i.filter(it=>it.v>0).map((it,ii)=><div key={ii} style={{display:'flex',justifyContent:'space-between',padding:'8px 18px',borderBottom:'1px solid rgba(255,255,255,.02)'}}>
+            <span style={{fontSize:12,color:'#9e9b93'}}>{it.l}</span>
+            <span style={{fontSize:12,fontWeight:600,color:'#e8e6e0'}}>{fmt(it.v)}</span>
+          </div>)}
+        </C>)}
+      </div>
+    </div>
+  </div>;
 }
 
 function ATNMod({s,d}){
@@ -11590,15 +12093,95 @@ function OutplacementMod({s,d}){
 }
 
 function AbsenteismeMod({s,d}){
-  const n=(s.emps||[]).length||1;const ja=Math.floor(n*2.1);const ca2=Math.max(1,Math.floor(n*0.7));const jt=n*21;const tx=((ja/jt)*100).toFixed(1);const bf=ca2*ca2*(ja/ca2);
-  return <div><C style={{padding:'18px 20px'}}><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}><span style={{fontSize:24}}>📊</span><div><div style={{fontWeight:700,fontSize:16}}>Analyse absentéisme</div><div style={{fontSize:11,color:'#5e5c56'}}>Bradford Factor, taux, coût, benchmark</div></div></div></C>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginTop:12}}>
-      <SC label="Taux" value={tx+'%'} color={parseFloat(tx)>5?'#ef4444':'#4ade80'}/><SC label="Bradford" value={bf.toFixed(0)} sub={bf>500?'⚠ Élevé':'OK'} color={bf>500?'#fb923c':'#60a5fa'}/>
-      <SC label="Jours perdus" value={ja} sub={ca2+' cas'} color="#a78bfa"/><SC label="Coût" value={'€ '+(ja*180)} color="#c6a34e"/>
+  const ae=s.emps||[];const n=ae.length||1;
+  const [period,setPeriod]=useState('ytd');
+  const [dept,setDept]=useState('all');
+  
+  // Simulated absence data from employees
+  const absData=ae.map(e=>{
+    const seed=e.id?.charCodeAt(0)||1;
+    const shortDays=Math.floor(seed%5);const longDays=Math.floor(seed%3)*5;
+    const cases=shortDays>0?1:0+longDays>0?1:0;
+    return{e,shortDays,longDays,totalDays:shortDays+longDays,cases:Math.max(1,cases),cost:(shortDays+longDays)*220};
+  });
+  
+  const totDays=absData.reduce((a,r)=>a+r.totalDays,0);
+  const totCases=absData.reduce((a,r)=>a+r.cases,0);
+  const totCost=absData.reduce((a,r)=>a+r.cost,0);
+  const jt=n*21*(period==='ytd'?new Date().getMonth()+1:period==='q'?3:12);
+  const taux=jt>0?((totDays/jt)*100):0;
+  const bf=totCases>0?(totCases*totCases*(totDays/totCases)):0;
+  
+  // Benchmark data
+  const benchBE=4.2;const benchSector=3.8;
+  
+  return <div>
+    <PH title="Analyse Absentéisme" sub="Dashboard Bradford Factor, tendances, coûts"/>
+    {/* Filters */}
+    <div style={{display:'flex',gap:10,marginBottom:18}}>
+      <I label="Période" value={period} onChange={setPeriod} options={[{v:'ytd',l:'Année en cours'},{v:'q',l:'Trimestre'},{v:'y',l:'12 mois glissants'}]}/>
     </div>
-    <C style={{marginTop:12,padding:'14px 18px'}}><ST>Détail</ST>
-      {[['Courte durée',(tx*0.6).toFixed(1)+'%'],['Longue durée',(tx*0.4).toFixed(1)+'%'],['Fréq./trav.',(ca2/n).toFixed(2)],['Durée moy.',(ja/ca2).toFixed(1)+' j'],['Benchmark BE','4.2%']].map(([l,v],i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}><span style={{fontSize:12,color:'#9e9b93'}}>{l}</span><span style={{fontSize:12,fontWeight:600}}>{v}</span></div>)}
-    </C></div>;
+    {/* KPIs */}
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Taux absentéisme',v:taux.toFixed(1)+'%',c:taux>benchBE?'#ef4444':'#4ade80',s:taux>benchBE?'> Benchmark BE':'< Benchmark BE'},
+        {l:'Bradford Factor',v:bf.toFixed(0),c:bf>500?'#fb923c':bf>200?'#f59e0b':'#4ade80',s:bf>500?'Élevé — Action requise':bf>200?'Attention':'Normal'},
+        {l:'Jours perdus',v:totDays,c:'#a78bfa',s:totCases+' cas'},
+        {l:'Coût estimé',v:fmt(totCost),c:'#c6a34e',s:'€220/jour moyen'},
+        {l:'Effectif',v:n,c:'#60a5fa',s:'travailleurs actifs'}
+      ].map((k,i)=><div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+        <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+        <div style={{fontSize:typeof k.v==='number'?24:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        <div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>{k.s}</div>
+      </div>)}
+    </div>
+    
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      {/* Detail par travailleur */}
+      <C style={{padding:0,overflow:'hidden'}}>
+        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Détail par travailleur</div></div>
+        <Tbl cols={[
+          {k:'n',l:'Travailleur',b:1,r:r=>`${r.e.first} ${r.e.last}`},
+          {k:'s',l:'Court',a:'right',r:r=><span style={{color:'#f59e0b'}}>{r.shortDays}j</span>},
+          {k:'lo',l:'Long',a:'right',r:r=><span style={{color:'#f87171'}}>{r.longDays}j</span>},
+          {k:'t',l:'Total',a:'right',r:r=><span style={{fontWeight:600}}>{r.totalDays}j</span>},
+          {k:'bf',l:'Bradford',a:'right',r:r=>{const b=r.cases*r.cases*r.totalDays;return <span style={{color:b>200?'#f87171':b>50?'#f59e0b':'#4ade80',fontWeight:600}}>{b}</span>}},
+          {k:'c',l:'Coût',a:'right',r:r=><span style={{color:'#c6a34e'}}>{fmt(r.cost)}</span>},
+        ]} data={absData}/>
+      </C>
+      
+      {/* Benchmark & analyse */}
+      <div>
+        <C><ST>Benchmark Belgique 2026</ST>
+          <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+            {[{l:'Votre taux',v:taux.toFixed(1)+'%',c:taux>benchBE?'#f87171':'#4ade80'},
+              {l:'Moyenne Belgique',v:benchBE+'%',c:'#e8e6e0'},
+              {l:'Secteur privé',v:benchSector+'%',c:'#e8e6e0'},
+              {l:'Secteur public',v:'5.8%',c:'#e8e6e0'},
+              {l:'Courte durée (<1 mois)',v:(taux*0.4).toFixed(1)+'%',c:'#f59e0b'},
+              {l:'Longue durée (>1 mois)',v:(taux*0.6).toFixed(1)+'%',c:'#f87171'},
+            ].map((r,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <span>{r.l}</span><span style={{fontWeight:600,color:r.c}}>{r.v}</span>
+            </div>)}
+          </div>
+        </C>
+        <C style={{marginTop:12}}><ST>Bradford Factor — Interprétation</ST>
+          <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+            {[{range:'0 — 50',action:'Normal — pas d'action',c:'#4ade80'},
+              {range:'51 — 200',action:'Entretien informel de retour',c:'#f59e0b'},
+              {range:'201 — 500',action:'Avertissement écrit / plan d'action',c:'#fb923c'},
+              {range:'> 500',action:'Mesure disciplinaire / médecin contrôle',c:'#f87171'},
+            ].map((r,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <span style={{color:r.c,fontWeight:600}}>{r.range}</span><span style={{fontSize:10.5}}>{r.action}</span>
+            </div>)}
+          </div>
+          <div style={{marginTop:10,padding:8,background:'rgba(96,165,250,.06)',borderRadius:6,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>
+            <b>Formule:</b> B = S² × D (S = nb épisodes, D = jours totaux)<br/>
+            <b>Source:</b> Bradford University School of Management
+          </div>
+        </C>
+      </div>
+    </div>
+  </div>;
 }
 
 function AidesEmploiMod({s,d}){
@@ -12122,15 +12705,129 @@ function OrganesMod({s,d}){
 }
 
 function SelfServiceMod({s,d}){
-  const feats=[{ic:'📄',t:'Fiches de paie',d:'Consultation en ligne'},{ic:'📅',t:'Demandes congés',d:'Validation responsable'},{ic:'⏱',t:'Encodage heures',d:'Prestations et frais'},{ic:'📊',t:'Solde congés',d:'Temps réel'},{ic:'👤',t:'Données perso',d:'Adresse, banque, famille'},{ic:'📋',t:'Documents',d:'Fiscales, attestations'},{ic:'🎓',t:'Certificats',d:'Attestation travail'},{ic:'💬',t:'Messagerie RH',d:'Contact gestionnaire'}];
-  return <div><C style={{padding:'18px 20px'}}><div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}><span style={{fontSize:24}}>👤</span><div><div style={{fontWeight:700,fontSize:16}}>Portail Self-Service Travailleur</div><div style={{fontSize:11,color:'#5e5c56'}}>Comme Officient (Securex), appipay (UCM), ProSalary (Partena)</div></div></div></C>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:12,marginTop:12}}>
-      {feats.map((f,fi)=><C key={fi} style={{padding:'14px 18px',display:'flex',gap:12,alignItems:'center'}}><span style={{fontSize:24}}>{f.ic}</span><div><div style={{fontWeight:700,fontSize:13}}>{f.t}</div><div style={{fontSize:11,color:'#5e5c56',marginTop:2}}>{f.d}</div></div></C>)}
+  const ae=s.emps||[];const [sel,setSel]=useState(ae[0]?.id||'');const [tab,setTab]=useState('fiches');
+  const emp=ae.find(e=>e.id===sel)||ae[0]||{};
+  const p=emp.id?calc(emp,DPER,s.co):{gross:0,net:0};
+  
+  const tabs=[{v:'fiches',l:'Fiches de paie',ic:'📄'},{v:'conges',l:'Congés',ic:'📅'},{v:'docs',l:'Documents',ic:'📋'},{v:'perso',l:'Données perso',ic:'👤'},{v:'contact',l:'Contact RH',ic:'💬'}];
+  
+  return <div>
+    <PH title="Portail Self-Service Travailleur" sub="Accès autonome — Fiches, congés, documents, données personnelles"/>
+    <div style={{display:'grid',gridTemplateColumns:'260px 1fr',gap:18}}>
+      <div>
+        <C><ST>Travailleur</ST>
+          <I label="Simulation pour" value={sel} onChange={setSel} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+          <div style={{marginTop:14,textAlign:'center'}}>
+            <div style={{width:50,height:50,borderRadius:'50%',background:'linear-gradient(135deg,#c6a34e,#a08030)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto',fontSize:18,fontWeight:700,color:'#fff'}}>{(emp.first||'?')[0]}{(emp.last||'?')[0]}</div>
+            <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0',marginTop:6}}>{emp.first} {emp.last}</div>
+            <div style={{fontSize:10.5,color:'#5e5c56'}}>{emp.fn||''} · {emp.statut||'employé'}</div>
+          </div>
+        </C>
+        <C style={{marginTop:12,padding:0}}>
+          {tabs.map(t=><div key={t.v} onClick={()=>setTab(t.v)} style={{padding:'10px 16px',cursor:'pointer',display:'flex',gap:8,alignItems:'center',
+            background:tab===t.v?'rgba(198,163,78,.1)':'transparent',borderLeft:tab===t.v?'3px solid #c6a34e':'3px solid transparent',
+            color:tab===t.v?'#c6a34e':'#9e9b93',fontSize:12,fontWeight:tab===t.v?600:400}}>
+            <span>{t.ic}</span>{t.l}
+          </div>)}
+        </C>
+        <C style={{marginTop:12,padding:'12px 16px',fontSize:10.5,color:'#60a5fa',background:'rgba(96,165,250,.03)',border:'1px solid rgba(96,165,250,.1)'}}>
+          <b>Réduction appels:</b> ~40% de contacts en moins grâce au self-service.
+        </C>
+      </div>
+      
+      <div>
+        {tab==='fiches'&&<C>
+          <ST>Fiches de paie</ST>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,marginBottom:14}}>
+            {[{l:'Dernier brut',v:fmt(p.gross),c:'#e8e6e0'},{l:'Dernier net',v:fmt(p.net),c:'#4ade80'},{l:'PP retenu',v:fmt(p.tax),c:'#f87171'}].map((k,i)=>
+              <div key={i} style={{padding:'12px',background:'rgba(198,163,78,.04)',borderRadius:8,textAlign:'center'}}>
+                <div style={{fontSize:10,color:'#5e5c56'}}>{k.l}</div>
+                <div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:2}}>{k.v}</div>
+              </div>
+            )}
+          </div>
+          <div style={{fontSize:11,color:'#9e9b93'}}>
+            {MN.slice(0,new Date().getMonth()+1).reverse().map((m,i)=>
+              <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+                <span>{m} {new Date().getFullYear()}</span>
+                <div style={{display:'flex',gap:12}}>
+                  <span style={{color:'#4ade80',fontWeight:600}}>{fmt(p.net)}</span>
+                  <span style={{color:'#60a5fa',cursor:'pointer',fontSize:10}}>📄 PDF</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </C>}
+        
+        {tab==='conges'&&<C>
+          <ST>Solde congés</ST>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:14}}>
+            {[{l:'Légaux',v:20,u:20,c:'#4ade80'},{l:'Extra-légaux',v:2,u:5,c:'#60a5fa'},{l:'Récupération',v:0,u:3,c:'#a78bfa'},{l:'Ancienneté',v:1,u:1,c:'#c6a34e'}].map((k,i)=>
+              <div key={i} style={{padding:'12px',background:'rgba(198,163,78,.04)',borderRadius:8,textAlign:'center'}}>
+                <div style={{fontSize:10,color:'#5e5c56'}}>{k.l}</div>
+                <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:2}}>{k.v}</div>
+                <div style={{fontSize:10,color:'#5e5c56'}}>sur {k.u} jours</div>
+                <div style={{height:4,background:'rgba(255,255,255,.05)',borderRadius:2,marginTop:6}}>
+                  <div style={{height:4,background:k.c,borderRadius:2,width:(k.v/k.u*100)+'%'}}/>
+                </div>
+              </div>
+            )}
+          </div>
+          <div style={{padding:12,background:'rgba(96,165,250,.05)',borderRadius:8,fontSize:11,color:'#60a5fa'}}>
+            Total restant: <b>23 jours</b> sur 29. Demande de congé via formulaire en ligne.
+          </div>
+        </C>}
+        
+        {tab==='docs'&&<C>
+          <ST>Documents disponibles</ST>
+          {[{t:'Fiches fiscales 281.10',y:'2025',ic:'📊'},{t:'Attestation de travail',y:'2026',ic:'📋'},{t:'Contrat de travail',y:'2024',ic:'📄'},{t:'Règlement de travail',y:'2026',ic:'📕'},{t:'Attestation pécule vacances',y:'2025',ic:'🏖'},{t:'Fiche accident travail',y:'—',ic:'🏥'}].map((doc,i)=>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                <span>{doc.ic}</span>
+                <div><div style={{fontSize:12,color:'#e8e6e0'}}>{doc.t}</div><div style={{fontSize:10,color:'#5e5c56'}}>{doc.y}</div></div>
+              </div>
+              <span style={{fontSize:10,color:'#60a5fa',cursor:'pointer'}}>Télécharger</span>
+            </div>
+          )}
+        </C>}
+        
+        {tab==='perso'&&<C>
+          <ST>Données personnelles</ST>
+          {[{l:'Nom',v:`${emp.first} ${emp.last}`},{l:'NISS',v:emp.niss||'—'},{l:'Date naissance',v:emp.birth||'—'},{l:'Adresse',v:`${emp.addr||''} ${emp.zip||''} ${emp.city||''}`},{l:'IBAN',v:emp.iban||'—'},{l:'Email',v:emp.email||'—'},{l:'Téléphone',v:emp.phone||'—'},{l:'Situation familiale',v:emp.civil||'—'},{l:'Personnes à charge',v:emp.children||0}].map((f2,i)=>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
+              <span style={{color:'#9e9b93'}}>{f2.l}</span>
+              <span style={{fontWeight:500,color:'#e8e6e0'}}>{f2.v}</span>
+            </div>
+          )}
+          <div style={{marginTop:12,padding:8,background:'rgba(245,158,11,.06)',borderRadius:6,fontSize:10.5,color:'#f59e0b'}}>
+            Modifications via demande au gestionnaire RH.
+          </div>
+        </C>}
+        
+        {tab==='contact'&&<C>
+          <ST>Contact gestionnaire RH</ST>
+          <div style={{padding:20,textAlign:'center'}}>
+            <div style={{fontSize:40,marginBottom:10}}>💬</div>
+            <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0'}}>Aureus IA SPRL</div>
+            <div style={{fontSize:12,color:'#9e9b93',marginTop:4}}>Votre secrétariat social</div>
+            <div style={{marginTop:16,display:'grid',gap:8}}>
+              <div style={{padding:10,background:'rgba(198,163,78,.05)',borderRadius:8,fontSize:12,color:'#9e9b93'}}>
+                📧 <b style={{color:'#e8e6e0'}}>info@aureus-ia.com</b>
+              </div>
+              <div style={{padding:10,background:'rgba(198,163,78,.05)',borderRadius:8,fontSize:12,color:'#9e9b93'}}>
+                📞 <b style={{color:'#e8e6e0'}}>+32 2 xxx xx xx</b>
+              </div>
+              <div style={{padding:10,background:'rgba(198,163,78,.05)',borderRadius:8,fontSize:12,color:'#9e9b93'}}>
+                📍 <b style={{color:'#e8e6e0'}}>Saint-Gilles, 1060 Bruxelles</b>
+              </div>
+            </div>
+          </div>
+        </C>}
+      </div>
     </div>
-    <C style={{marginTop:12,padding:'12px 18px',fontSize:11,color:'#60a5fa',background:'rgba(96,165,250,.03)',border:'1px solid rgba(96,165,250,.1)',borderRadius:10}}>
-      <b>💡</b> Réduction appels/emails de ~40%. Les travailleurs de vos clients accèdent à leurs documents en autonomie.
-    </C></div>;
+  </div>;
 }
+
 
 function GEDMod({s,d}){
   const cats=[{t:'📄 Contrats',n:0},{t:'🏥 Certificats médicaux',n:0},{t:'📬 Courriers',n:0},{t:'📋 Avenants',n:0},{t:'📊 Rapports',n:0},{t:'⚖ Juridique',n:0}];
