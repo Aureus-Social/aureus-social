@@ -4158,8 +4158,8 @@ function Employees({s,d}) {
   const exportCSV=()=>{
     const headers=['Prénom',"Nom","NISS","Fonction","Département","Contrat","CP","Brut","Statut","Entrée","IBAN"];
     const rows=filtered.map(e=>[e.first,e.last,e.niss,e.fn,e.dept,e.contract,e.cp,e.monthlySalary,e.status||'active',e.startD,e.iban]);
-    const csv=[headers,...rows].map(r=>r.map(c=>`"${(c||'').toString().replace(/"/g,"""")}"`).join(';')).join('\n');
-    const blob=new Blob(['\ufeff'+csv],{type:"text/csv;charset=utf-8;"});
+    const csv=[headers,...rows].map(r=>r.map(c=>`"${(c||'').toString().replace(/"/g,'""')}"`).join(';')).join('\n');
+    const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');a.href=url;a.download=`employees_${new Date().toISOString().slice(0,10)}.csv`;a.click();
     URL.revokeObjectURL(url);
