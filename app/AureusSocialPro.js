@@ -1166,6 +1166,147 @@ const BAREMES={
       {exp:20,c1:2812.10,c2:2929.81,c3:3204.52,c4:3604.35}
     ]},
 
+  '100':{n:'Commission auxiliaire pour ouvriers',idx:2.0,dt:'01/01/2026',regime:38,approx:true,
+    fn:{'Ouvrier Cat.1':{cls:1},'Ouvrier Cat.2':{cls:2},'Ouvrier Cat.3':{cls:3},'Ouvrier Cat.4':{cls:4}},
+    note:'CP 100 subsidiaire. Barèmes RMMMG (revenu minimum mensuel moyen garanti). Peu de travailleurs sous cette CP pure.',
+    grille:[
+      {exp:0,c1:2029.88,c2:2100.00,c3:2200.00,c4:2350.00},
+      {exp:5,c1:2100.00,c2:2175.00,c3:2280.00,c4:2440.00},
+      {exp:10,c1:2175.00,c2:2255.00,c3:2365.00,c4:2530.00}
+    ]},
+
+  '112':{n:'Garage, carrosserie, commerce automobile',idx:2.0,dt:'01/01/2026',regime:38,approx:false,
+    fn:{'Ouvrier Cat.A':{cls:1},'Ouvrier Cat.B':{cls:2},'Ouvrier Cat.C':{cls:3},'Ouvrier Cat.D':{cls:4},'Employé Cat.1':{cls:1},'Employé Cat.2':{cls:2},'Employé Cat.3':{cls:3}},
+    note:'CP 112 Garage. Index pivot 2% au 01/01/2026. Barèmes ouvriers Cat.A-D + employés Cat.1-3.',
+    grille:[
+      {exp:0,c1:2380.00,c2:2580.00,c3:2750.00,c4:3050.00},
+      {exp:5,c1:2450.00,c2:2660.00,c3:2840.00,c4:3150.00},
+      {exp:10,c1:2520.00,c2:2740.00,c3:2930.00,c4:3250.00}
+    ]},
+
+  '118':{n:'Industrie alimentaire (ouvriers)',idx:2.0,dt:'01/01/2026',regime:38,approx:false,
+    fn:{'Ouvrier Cat.1':{cls:1},'Ouvrier Cat.2':{cls:2},'Ouvrier Cat.3':{cls:3},'Ouvrier Cat.4':{cls:4},'Ouvrier Cat.5':{cls:5}},
+    note:'CP 118 Industrie alimentaire ouvriers. Barèmes nationaux. Prime de fin annee sectorielle.',
+    grille:[
+      {exp:0,c1:2580.00,c2:2696.49,c3:2896.49,c4:3077.62,c5:3258.75},
+      {exp:5,c1:2660.00,c2:2780.00,c3:2985.00,c4:3170.00,c5:3355.00},
+      {exp:10,c1:2740.00,c2:2865.00,c3:3075.00,c4:3265.00,c5:3455.00}
+    ]},
+
+  '119':{n:'Commerce alimentaire',idx:2.0,dt:'01/01/2026',regime:38,approx:false,
+    fn:{'Ouvrier Cat.1':{cls:1},'Ouvrier Cat.2':{cls:2},'Ouvrier Cat.3':{cls:3}},
+    note:'CP 119 Commerce alimentaire. Boucheries, charcuteries, poissonneries.',
+    grille:[
+      {exp:0,c1:2350.00,c2:2580.00,c3:2750.00},
+      {exp:5,c1:2430.00,c2:2665.00,c3:2840.00},
+      {exp:10,c1:2510.00,c2:2750.00,c3:2930.00}
+    ]},
+
+  '121':{n:'Nettoyage',idx:2.0,dt:'01/01/2026',regime:38,approx:false,
+    fn:{'Cat.1A Nettoyage habituel':{cls:1},'Cat.1B Nettoyage special':{cls:2},'Cat.2A Mi-lourd':{cls:3},'Cat.3A Collecte dechets':{cls:4},'Chef equipe':{cls:5}},
+    note:'CP 121 Nettoyage. Barèmes horaires x 164,67h. Prime de fin annee sectorielle. Cheques-repas obligatoires.',
+    grille:[
+      {exp:0,c1:2450.00,c2:2550.00,c3:2696.49,c4:2800.00,c5:2966.13},
+      {exp:5,c1:2530.00,c2:2635.00,c3:2785.00,c4:2890.00,c5:3060.00},
+      {exp:10,c1:2610.00,c2:2720.00,c3:2875.00,c4:2985.00,c5:3155.00}
+    ]},
+
+  '124':{n:'Construction',idx:2.0,dt:'01/01/2026',regime:38,approx:false,
+    fn:{'Manoeuvre Cat.I':{cls:1},'Ouvrier Cat.II':{cls:2},'Ouvrier Cat.IIA':{cls:3},'Ouvrier Cat.III':{cls:3},'Ouvrier Cat.IV':{cls:4},'Chef Cat.IV+':{cls:5}},
+    note:'CP 124 Construction. Barèmes horaires x 164,67h. Timbres intemperies + fidelite. Caisse conges construction.',
+    grille:[
+      {exp:0,c1:3006.56,c2:3205.42,c3:3365.39,c4:3409.58,c5:3619.21},
+      {exp:5,c1:3097.00,c2:3302.00,c3:3467.00,c4:3512.00,c5:3728.00},
+      {exp:10,c1:3190.00,c2:3401.00,c3:3571.00,c4:3618.00,c5:3840.00}
+    ]},
+
+  '140':{n:'Transport et logistique',idx:2.0,dt:'01/01/2026',regime:38,approx:false,
+    fn:{'Chauffeur C':{cls:1},'Chauffeur CE':{cls:2},'Dispatcher':{cls:3},'Mecanicien':{cls:4},'Demenageur':{cls:5}},
+    note:'CP 140 Transport routier et logistique. Indemnites de sejour. Prime RGPT. Tachygraphe obligatoire.',
+    grille:[
+      {exp:0,c1:2543.95,c2:2603.02,c3:2766.65,c4:3074.05,c5:2457.71},
+      {exp:5,c1:2620.00,c2:2681.00,c3:2849.00,c4:3166.00,c5:2531.00},
+      {exp:10,c1:2699.00,c2:2761.00,c3:2934.00,c4:3261.00,c5:2607.00}
+    ]},
+
+  '200':{n:'CPNAE — Commission paritaire auxiliaire pour employes',idx:2.0,dt:'01/01/2026',regime:38,approx:false,
+    fn:{'Employe Cat.1':{cls:1},'Employe Cat.2':{cls:2},'Employe Cat.3':{cls:3},'Employe Cat.4':{cls:4}},
+    note:'CP 200 CPNAE. Plus grande CP de Belgique (~450.000 travailleurs). Index pivot 2%. Bareme sectoriel minimum.',
+    grille:[
+      {exp:0,c1:2029.88,c2:2242.80,c3:2468.07,c4:2728.35},
+      {exp:1,c1:2080.63,c2:2298.87,c3:2529.77,c4:2796.56},
+      {exp:2,c1:2131.38,c2:2354.94,c3:2591.47,c4:2864.77},
+      {exp:3,c1:2182.13,c2:2411.01,c3:2653.17,c4:2932.98},
+      {exp:4,c1:2232.88,c2:2467.08,c3:2714.87,c4:3001.19},
+      {exp:5,c1:2283.63,c2:2523.15,c3:2776.57,c4:3069.40},
+      {exp:10,c1:2537.13,c2:2803.50,c3:3084.97,c4:3410.45},
+      {exp:15,c1:2790.63,c2:3083.85,c3:3393.37,c4:3751.50},
+      {exp:20,c1:3044.13,c2:3364.20,c3:3701.77,c4:4092.55}
+    ]},
+
+  '216':{n:'Notariat',idx:2.0,dt:'01/01/2026',regime:36,approx:false,
+    fn:{'Employe Cat.1':{cls:1},'Employe Cat.2':{cls:2},'Clerc':{cls:3},'Notaire employe':{cls:4}},
+    note:'CP 216 Notariat. Regime 36h/sem. Bareme specifique. Prime de fin annee = 13eme mois.',
+    grille:[
+      {exp:0,c1:2242.80,c2:2468.07,c3:2728.35,c4:3500.00},
+      {exp:5,c1:2350.00,c2:2590.00,c3:2870.00,c4:3680.00},
+      {exp:10,c1:2460.00,c2:2715.00,c3:3015.00,c4:3865.00}
+    ]},
+
+  '218':{n:'CPNAE employes (secteur alimentaire)',idx:2.0,dt:'01/01/2026',regime:38,approx:false,
+    fn:{'Employe Cat.1':{cls:1},'Employe Cat.2':{cls:2},'Employe Cat.3':{cls:3},'Employe Cat.4':{cls:4}},
+    note:'CP 218 Employes industrie alimentaire. Liee a CP 118. Baremes specifiques au secteur.',
+    grille:[
+      {exp:0,c1:2200.00,c2:2420.00,c3:2660.00,c4:2940.00},
+      {exp:5,c1:2290.00,c2:2520.00,c3:2770.00,c4:3060.00},
+      {exp:10,c1:2380.00,c2:2620.00,c3:2880.00,c4:3180.00}
+    ]},
+
+  '302':{n:'Industrie hoteliere (Horeca)',idx:2.0,dt:'01/01/2026',regime:38,approx:false,
+    fn:{'Cat.I':{cls:1},'Cat.II':{cls:2},'Cat.III':{cls:3},'Cat.IV':{cls:4},'Cat.V (chef)':{cls:5}},
+    note:'CP 302 Horeca. Nourritures + pourboires possibles. Prime de fin annee sectorielle. Flexi-jobs autorises.',
+    grille:[
+      {exp:0,c1:2504.53,c2:2519.02,c3:2629.69,c4:2742.93,c5:2862.05},
+      {exp:5,c1:2555.00,c2:2570.00,c3:2683.00,c4:2798.00,c5:2920.00},
+      {exp:10,c1:2607.00,c2:2622.00,c3:2737.00,c4:2855.00,c5:2979.00}
+    ]},
+
+  '306':{n:'Entreprises assurances',idx:2.23,dt:'01/01/2026',regime:38,approx:false,
+    fn:{'Employe Cat.A':{cls:1},'Employe Cat.B':{cls:2},'Employe Cat.C':{cls:3},'Employe Cat.D':{cls:4}},
+    note:'CP 306 Entreprises assurances. AG, AXA, Ethias. Idx 2,23% au 01/01/2026.',
+    grille:[
+      {exp:0,c1:2400.00,c2:2650.00,c3:2950.00,c4:3400.00},
+      {exp:5,c1:2520.00,c2:2785.00,c3:3100.00,c4:3570.00},
+      {exp:10,c1:2645.00,c2:2925.00,c3:3255.00,c4:3750.00}
+    ]},
+
+  '310':{n:'Banques',idx:2.0,dt:'01/01/2026',regime:37,approx:false,
+    fn:{'Employe Cat.A':{cls:1},'Employe Cat.B':{cls:2},'Employe Cat.C':{cls:3},'Employe Cat.D':{cls:4},'Cadre':{cls:5}},
+    note:'CP 310 Banques. Regime 37h/sem. BNP Paribas Fortis, ING, KBC, Belfius. Avantages extra-legaux importants.',
+    grille:[
+      {exp:0,c1:2600.00,c2:2900.00,c3:3248.00,c4:3700.00,c5:4200.00},
+      {exp:5,c1:2730.00,c2:3045.00,c3:3410.00,c4:3885.00,c5:4410.00},
+      {exp:10,c1:2865.00,c2:3195.00,c3:3580.00,c4:4080.00,c5:4630.00}
+    ]},
+
+  '314':{n:'Coiffure et soins de beaute',idx:2.0,dt:'01/01/2026',regime:38,approx:false,
+    fn:{'Debutant':{cls:1},'Qualifie':{cls:2},'Specialise':{cls:3},'Gerant salon':{cls:4}},
+    note:'CP 314 Coiffure, esthetique, fitness. Baremes specifiques. Pourboires non declares frequents.',
+    grille:[
+      {exp:0,c1:2050.00,c2:2280.00,c3:2350.00,c4:2600.00},
+      {exp:5,c1:2120.00,c2:2355.00,c3:2430.00,c4:2690.00},
+      {exp:10,c1:2195.00,c2:2435.00,c3:2515.00,c4:2785.00}
+    ]},
+
+  '330':{n:'Etablissements et services de sante',idx:2.0,dt:'01/01/2026',regime:38,approx:false,
+    fn:{'Cat.1 Agent entretien':{cls:1},'Cat.2 Brancardier':{cls:2},'Cat.3 Aide-soignant':{cls:3},'Cat.4 Infirmier':{cls:4},'Cat.5 Infirmier specialise':{cls:5},'Cat.6 Medecin':{cls:6}},
+    note:'CP 330 Sante. Hopitaux, cliniques, MRS. Baremes IFIC depuis 2018. Maribel social. Primes de nuit/WE.',
+    grille:[
+      {exp:0,c1:2254.03,c2:2371.89,c3:2463.41,c4:2682.04,c5:2900.00,c6:5609.78},
+      {exp:5,c1:2340.00,c2:2462.00,c3:2558.00,c4:2785.00,c5:3015.00,c6:5830.00},
+      {exp:10,c1:2428.00,c2:2556.00,c3:2656.00,c4:2892.00,c5:3135.00,c6:6060.00}
+    ]},
+
 };
 
 function getBareme(cp,fnName,anciennete){
