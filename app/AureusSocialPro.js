@@ -2498,7 +2498,7 @@ function genBelcotax(co, emp, yr, ad) {
 }
 
 // ─── INITIAL STATE ───────────────────────────────────────────
-const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:'info@aureus-ia.com',version:'v23',sprint:'Sprint 5'};
+const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:'info@aureus-ia.com',version:'v24',sprint:'Sprint 6'};
 const CAR_MODELS={
 'Aiways':['U5','U6'],
 'Alfa Romeo':['Giulia','Stelvio','Tonale','Junior','Giulietta','MiTo'],
@@ -8358,63 +8358,153 @@ function RentesMod({s,d}){
 //  ASSURANCE-LOI (Accident du travail)
 // ═══════════════════════════════════════════════════════════════
 function AssLoiMod({s,d}){
-  const [yr,setYr]=useState(new Date().getFullYear());
-  const [gen,setGen]=useState(null);
-  const ae=s.emps.filter(e=>e.status==='active');
-  const run=()=>{
-    const data=ae.map(e=>{const brut12=e.monthlySalary*12;const prime=brut12*0.0087;return{emp:`${e.first} ${e.last}`,fn:e.fn,cp:e.cp,brut12,prime,jrs:Math.round(LEGAL.WD*12),hrs:Math.round(LEGAL.WD*12*LEGAL.WHD)};});
-    const totPrime=data.reduce((a,r)=>a+r.prime,0);const totBrut=data.reduce((a,r)=>a+r.brut12,0);
-    setGen({data,totPrime,totBrut});
-  };
-  return <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
-    <C><ST>Assurance-Loi (AT)</ST>
-      <I label="Année" type="number" value={yr} onChange={v=>setYr(v)}/>
-      <B onClick={run} style={{width:'100%',marginTop:14}}>Générer relevé {yr}</B>
-      {gen&&<div style={{marginTop:14,padding:12,background:'rgba(198,163,78,.06)',borderRadius:8,fontSize:12,color:'#9e9b93',lineHeight:2}}>
-        <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>Récapitulatif {yr}</div>
-        <div>Assureur: <b style={{color:'#e8e6e0'}}>{s.co.insurer}</b></div>
-        <div>Police: <b style={{color:'#e8e6e0'}}>{s.co.policyNr}</b></div>
-        <div>Masse assurable: <b style={{color:'#e8e6e0'}}>{fmt(gen.totBrut)}</b></div>
-        <div>Prime totale: <b style={{color:'#f87171'}}>{fmt(gen.totPrime)}</b></div>
-        <div>Taux: <b style={{color:'#e8e6e0'}}>0,87%</b></div>
-      </div>}
-      <div style={{marginTop:12,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>Relevé annuel pour contrôle de la facture assurance accidents du travail. Base = masse salariale brute.</div>
-    </C>
-    <C style={{padding:0,overflow:'hidden'}}>
-      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Détail — {yr}</div></div>
-      {gen?<Tbl cols={[{k:'e',l:'Travailleur',b:1,r:r=>r.emp},{k:'f',l:'Fonction',r:r=>r.fn},{k:'cp',l:'CP',r:r=>r.cp},{k:'j',l:'Jours',a:'right',r:r=>r.jrs},{k:'b',l:'Brut annuel',a:'right',r:r=>fmt(r.brut12)},{k:'p',l:'Prime AT',a:'right',r:r=><span style={{color:'#f87171',fontWeight:600}}>{fmt(r.prime)}</span>}]} data={gen?.data||[]}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56',fontSize:13}}>Générez le relevé</div>}
-    </C>
+  const ae=s.emps||[];const [tab,setTab]=useState('overview');
+  const n=ae.length;
+  
+  // Tarif AT selon secteur (base 2026 - Fedris)
+  const sectors={bureau:{rate:0.30,label:'Bureau/Admin'},commerce:{rate:0.80,label:'Commerce'},construction:{rate:6.00,label:'Construction'},transport:{rate:3.50,label:'Transport'},horeca:{rate:2.00,label:'Horeca'},industrie:{rate:4.00,label:'Industrie'}};
+  const [sec,setSec]=useState('bureau');
+  const rate=sectors[sec]?.rate||0.30;
+  const masse=ae.reduce((a,e)=>{const p=calc(e,DPER,s.co);return a+p.gross*12},0);
+  const prime=masse*(rate/100);
+  
+  return <div>
+    <PH title="Assurance Accidents du Travail" sub="Loi du 10/04/1971 — Fedris — Obligation légale"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Masse salariale annuelle',v:fmt(masse),c:'#e8e6e0'},{l:'Taux AT',v:rate.toFixed(2)+'%',c:'#c6a34e'},{l:'Prime annuelle estimée',v:fmt(prime),c:'#f87171'},{l:'Travailleurs couverts',v:n,c:'#60a5fa'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'overview',l:'Vue d\'ensemble'},{v:'tarifs',l:'Tarifs par secteur'},{v:'sinistres',l:'Gestion sinistres'},{v:'legal',l:'Obligations'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    
+    {tab==='overview'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Simulation prime AT</ST>
+        <I label="Secteur d'activité" value={sec} onChange={setSec} options={Object.entries(sectors).map(([k,v])=>({v:k,l:`${v.label} (${v.rate}%)`}))}/>
+        <div style={{marginTop:14,padding:16,background:'rgba(198,163,78,.06)',borderRadius:8,textAlign:'center'}}>
+          <div style={{fontSize:10,color:'#5e5c56'}}>PRIME ANNUELLE ESTIMÉE</div>
+          <div style={{fontSize:28,fontWeight:700,color:'#c6a34e',marginTop:4}}>{fmt(prime)}</div>
+          <div style={{fontSize:11,color:'#5e5c56'}}>{n} trav. · masse {fmt(masse)} · taux {rate}%</div>
+        </div>
+        <div style={{marginTop:12,fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {[{l:'Prime min. légale',v:'Selon assureur'},{l:'Franchise',v:'Aucune (couverture intégrale)'},{l:'Paiement',v:'Annuel ou trimestriel'},{l:'Déclaration',v:'Masse salariale réelle N-1'}].map((r,i)=>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <span>{r.l}</span><span style={{fontWeight:600,color:'#e8e6e0'}}>{r.v}</span>
+            </div>
+          )}
+        </div>
+      </C>
+      <C><ST>Couverture obligatoire</ST>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+          {[{t:'Accident sur le lieu de travail',d:'Couvert à 100% — incapacité temporaire et permanente',c:'#4ade80'},
+            {t:'Accident sur le chemin du travail',d:'Trajet normal domicile-travail. Détours autorisés limités.',c:'#4ade80'},
+            {t:'Incapacité temporaire totale',d:'90% du salaire plafonné les 30 premiers jours',c:'#60a5fa'},
+            {t:'Incapacité permanente',d:'Rente selon % incapacité × salaire de base',c:'#fb923c'},
+            {t:'Décès',d:'30× salaire de base annuel (max). Rentes aux ayants droit.',c:'#f87171'},
+            {t:'Frais médicaux',d:'Remboursement intégral des soins liés à l\'AT',c:'#a78bfa'},
+          ].map((r,i)=><div key={i} style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <div style={{display:'flex',justifyContent:'space-between'}}><b style={{color:'#e8e6e0'}}>{r.t}</b><span style={{color:r.c,fontSize:10}}>●</span></div>
+            <div style={{fontSize:10.5,marginTop:1}}>{r.d}</div>
+          </div>)}
+        </div>
+      </C>
+    </div>}
+    
+    {tab==='tarifs'&&<C><ST>Tarifs indicatifs par secteur (2026)</ST>
+      {Object.entries(sectors).map(([k,v])=>{const p=masse*(v.rate/100);return <div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+        <div><b style={{color:'#e8e6e0'}}>{v.label}</b><div style={{fontSize:10,color:'#5e5c56'}}>Taux: {v.rate}%</div></div>
+        <span style={{fontSize:14,fontWeight:700,color:k===sec?'#c6a34e':'#9e9b93'}}>{fmt(p)}/an</span>
+      </div>})}
+      <div style={{marginTop:12,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>
+        <b>Assureurs agréés:</b> AG Insurance, Ethias, AXA, Baloise, KBC, Federale, P&V<br/>
+        <b>Fedris:</b> fedris.be — Agence fédérale des risques professionnels
+      </div>
+    </C>}
+    
+    {tab==='sinistres'&&<C><ST>Procédure de déclaration AT</ST>
+      <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+        {['1. Premiers soins + constat médical','2. Déclaration à l\'assureur dans les 8 jours calendrier','3. Formulaire de déclaration AT (modèle légal)','4. Certificat médical initial (médecin)','5. Déclaration Fedris si incapacité > 4 jours','6. Suivi médical et guérison/consolidation','7. Indemnisation par l\'assureur AT'].map((step,i)=>
+          <div key={i} style={{padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>{step}</div>
+        )}
+      </div>
+      <div style={{marginTop:12,padding:10,background:'rgba(248,113,113,.06)',borderRadius:8,fontSize:10.5,color:'#f87171',lineHeight:1.5}}>
+        <b>Délai:</b> 8 jours calendrier maximum pour déclarer l'AT<br/>
+        <b>Sanction:</b> Amende administrative si déclaration tardive
+      </div>
+    </C>}
+    
+    {tab==='legal'&&<C><ST>Obligations légales</ST>
+      <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+        {[{l:'Souscription obligatoire',d:'Tout employeur doit souscrire une assurance AT (Loi 10/04/1971)'},{l:'Couverture',d:'Tous les travailleurs, y compris intérimaires et stagiaires'},{l:'Déclaration masse salariale',d:'Annuelle — base de calcul de la prime'},{l:'Registre AT',d:'Obligation de tenir un registre des accidents du travail'},{l:'Prévention',d:'Plan de prévention obligatoire (CPPT, conseiller prévention)'}].map((r,i)=>
+          <div key={i} style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <b style={{color:'#c6a34e'}}>{r.l}</b><div style={{fontSize:10.5,marginTop:1}}>{r.d}</div>
+          </div>
+        )}
+      </div>
+    </C>}
   </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  ASSURANCE DE GROUPE
 // ═══════════════════════════════════════════════════════════════
 function AssGroupeMod({s,d}){
-  const [entries,setEntries]=useState([]);
-  const [f,setF]=useState({eid:s.emps[0]?.id||'',assureur:'',police:'',cotW:0,cotE:0,typeplan:'DC'});
-  const plans=[{v:'DC',l:'Contributions Définies'},{v:'DB',l:'Prestations Définies'},{v:'CASH',l:'Cash Balance'}];
-  const add=()=>{const emp=s.emps.find(e=>e.id===f.eid);if(!emp)return;
-    setEntries([...entries,{id:uid(),emp:`${emp.first} ${emp.last}`,brut:emp.monthlySalary,...f,cotTot:(f.cotW+f.cotE)*12,at:new Date().toISOString()}]);
-  };
-  const totAn=entries.reduce((a,e)=>a+e.cotTot,0);
-  return <div style={{display:'grid',gridTemplateColumns:'340px 1fr',gap:18}}>
-    <C><ST>Assurance de Groupe</ST>
-      <I label="Travailleur" value={f.eid} onChange={v=>setF({...f,eid:v})} options={s.emps.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
-      <I label="Assureur" value={f.assureur} onChange={v=>setF({...f,assureur:v})} style={{marginTop:9}}/>
-      <I label="N° police" value={f.police} onChange={v=>setF({...f,police:v})} style={{marginTop:9}}/>
-      <I label="Type de plan" value={f.typeplan} onChange={v=>setF({...f,typeplan:v})} style={{marginTop:9}} options={plans}/>
-      <I label="Cotisation trav./mois (€)" type="number" value={f.cotW} onChange={v=>setF({...f,cotW:v})} style={{marginTop:9}}/>
-      <I label="Cotisation empl./mois (€)" type="number" value={f.cotE} onChange={v=>setF({...f,cotE:v})} style={{marginTop:9}}/>
-      <B onClick={add} style={{width:'100%',marginTop:14}}>Ajouter</B>
-      {entries.length>0&&<div style={{marginTop:12,padding:10,background:'rgba(198,163,78,.06)',borderRadius:8,fontSize:12,color:'#9e9b93'}}><div>Coût annuel total: <b style={{color:'#c6a34e'}}>{fmt(totAn)}</b></div></div>}
-    </C>
-    <C style={{padding:0,overflow:'hidden'}}>
-      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Plans d'assurance groupe</div></div>
-      <Tbl cols={[{k:'e',l:'Travailleur',b:1,r:r=>r.emp},{k:'a',l:'Assureur',r:r=>r.assureur},{k:'p',l:'Plan',r:r=>plans.find(p=>p.v===r.typeplan)?.l},{k:'cw',l:'Cot. trav.',a:'right',r:r=>fmt(r.cotW)},{k:'ce',l:'Cot. empl.',a:'right',r:r=><span style={{color:'#c6a34e'}}>{fmt(r.cotE)}</span>},{k:'ct',l:'Total/an',a:'right',r:r=><span style={{fontWeight:600,color:'#c6a34e'}}>{fmt(r.cotTot)}</span>}]} data={entries}/>
-    </C>
+  const ae=s.emps||[];const [plan,setPlan]=useState('dc');const [pct,setPct]=useState(3);
+  const masse=ae.reduce((a,e)=>{const p=calc(e,DPER,s.co);return a+p.gross*12},0);
+  const cotAn=masse*(pct/100);const cotMens=cotAn/12;
+  const taxe=cotAn*0.045;// taxe sur primes 4.5%
+  
+  return <div>
+    <PH title="Assurance Groupe / Pension complémentaire" sub="2ème pilier — LPC (Loi Vandenbroucke)"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:'Cotisation annuelle',v:fmt(cotAn),c:'#c6a34e'},{l:'Cotisation mensuelle',v:fmt(cotMens),c:'#e8e6e0'},{l:'Taxe sur primes (4,5%)',v:fmt(taxe),c:'#f87171'},{l:'Travailleurs affiliés',v:ae.length,c:'#60a5fa'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:18}}>
+      <div>
+        <C><ST>Configuration</ST>
+          <I label="Type de plan" value={plan} onChange={setPlan} options={[{v:'dc',l:'Contributions définies (DC)'},{v:'db',l:'Prestations définies (DB)'},{v:'cash',l:'Cash balance'}]}/>
+          <I label="Taux cotisation (%)" type="number" value={pct} onChange={v=>setPct(+v)} style={{marginTop:9}}/>
+          <div style={{marginTop:14,padding:14,background:'rgba(198,163,78,.06)',borderRadius:8,textAlign:'center'}}>
+            <div style={{fontSize:10,color:'#5e5c56'}}>COÛT TOTAL ANNUEL (prime + taxe)</div>
+            <div style={{fontSize:26,fontWeight:700,color:'#c6a34e',marginTop:4}}>{fmt(cotAn+taxe)}</div>
+          </div>
+        </C>
+        <C style={{marginTop:12}}><ST>Rendement garanti LPC</ST>
+          <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
+            <div>Taux garanti: <b style={{color:'#c6a34e'}}>1,75%</b> (2026)</div>
+            <div>Cotis. employeur: <b style={{color:'#e8e6e0'}}>min. 1,75%</b></div>
+            <div>Cotis. travailleur: <b style={{color:'#e8e6e0'}}>min. 1,75%</b></div>
+            <div>Plafond 80%: <b style={{color:'#e8e6e0'}}>Pension légale + 2ème pilier ≤ 80% dernier brut</b></div>
+          </div>
+        </C>
+      </div>
+      <C style={{padding:0,overflow:'hidden'}}>
+        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Détail par travailleur</div></div>
+        <Tbl cols={[
+          {k:'n',l:'Travailleur',b:1,r:r=>`${r.first} ${r.last}`},
+          {k:'b',l:'Brut annuel',a:'right',r:r=>{const p=calc(r,DPER,s.co);return fmt(p.gross*12)}},
+          {k:'c',l:'Cotisation/an',a:'right',r:r=>{const p=calc(r,DPER,s.co);return <span style={{color:'#c6a34e',fontWeight:600}}>{fmt(p.gross*12*(pct/100))}</span>}},
+          {k:'m',l:'Cotisation/mois',a:'right',r:r=>{const p=calc(r,DPER,s.co);return fmt(p.gross*(pct/100))}},
+          {k:'t',l:'Taxe 4,5%',a:'right',r:r=>{const p=calc(r,DPER,s.co);return <span style={{color:'#f87171'}}>{fmt(p.gross*12*(pct/100)*0.045)}</span>}},
+        ]} data={ae}/>
+      </C>
+    </div>
   </div>;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  MÉDECINE DU TRAVAIL
@@ -11974,29 +12064,77 @@ function HeuresSupMod({s,d}){
 // ═══════════════════════════════════════════════════════════════
 
 function SimCoutMod({s,d}){
-  const [brut,setBrut]=useState(3500);const [reg,setReg]=useState('employe');const [prem,setPrem]=useState(false);
-  const op=reg==='ouvrier'?0.3838:0.2500;const onss=brut*op;const red=prem?onss:0;const cb=brut+onss-red;
-  const net=brut-(brut*0.1307)-(brut>2500?brut*0.35:brut*0.25);const prov=(brut*0.0769*2.92+brut)/12;const ct=cb+prov;const ca=ct*13;
-  const f=n=>'€ '+n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
-  return <div><C><div style={{padding:'18px 20px'}}>
-    <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}><span style={{fontSize:24}}>💰</span>
-    <div><div style={{fontWeight:700,fontSize:16}}>Simulateur coût salarial employeur</div>
-    <div style={{fontSize:11,color:'#5e5c56'}}>Brut → coût total. Le client verse lui-même les cotisations ONSS.</div></div></div>
-    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:12}}>
-      <I label="Brut mensuel (€)" type="number" value={brut} onChange={v=>setBrut(+v||0)}/>
-      <I label="Statut" value={reg} onChange={setReg} options={[{v:'employe',l:'Employé (25%)'},{v:'ouvrier',l:'Ouvrier (38.38%)'}]}/>
-      <div style={{display:'flex',alignItems:'flex-end',paddingBottom:4}}><label style={{fontSize:11,color:'#9e9b93',display:'flex',gap:6,alignItems:'center'}}><input type="checkbox" checked={prem} onChange={e=>setPrem(e.target.checked)}/> Réduction 1er engagement</label></div>
-    </div></div></C>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginTop:12}}>
-      <SC label="Brut" value={f(brut)} color="#60a5fa"/><SC label="ONSS patronal" value={f(onss-red)} sub={prem?'Réduc.':(op*100).toFixed(1)+'%'} color="#fb923c"/>
-      <SC label="Net estimé" value={f(net)} color="#4ade80"/><SC label="Coût total/mois" value={f(ct)} sub="Avec provisions" color="#c6a34e"/>
+  const [brut,setBrut]=useState(3500);const [statut,setStatut]=useState('employe');const [regime,setRegime]=useState('full');
+  const [cp,setCp]=useState('200');const [sec,setSec]=useState('marchand');
+  
+  const isOuv=statut==='ouvrier';
+  const baseONSS=isOuv?brut*1.08:brut;
+  const onssW=baseONSS*0.1307;
+  const onssERate=sec==='marchand'?0.25:0.3240;
+  const onssE=baseONSS*onssERate;
+  const ffe=baseONSS*0.0013;
+  const chomT=baseONSS*0.001;
+  const totONSSE=onssE+ffe+chomT;
+  const pecVac=isOuv?0:brut*0.1538;// employeurs - ouvriers via caisse
+  const assAT=brut*12*0.003/12;
+  const assGroupe=brut*0.03;
+  const medTrav=91.50/12;
+  const cr=220*(8-1.09)/12;// chèques repas part employeur
+  const eco=250/12;
+  const totCout=brut+totONSSE+pecVac+assAT+assGroupe+medTrav+cr+eco;
+  const ratio=totCout/brut;
+  
+  return <div>
+    <PH title="Simulation Coût Salarial Total" sub="Coût employeur complet — ONSS, avantages, provisions"/>
+    <div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
+      <div>
+        <C><ST>Paramètres</ST>
+          <I label="Brut mensuel (€)" type="number" value={brut} onChange={v=>setBrut(+v)}/>
+          <I label="Statut" value={statut} onChange={setStatut} style={{marginTop:9}} options={[{v:'employe',l:'Employé'},{v:'ouvrier',l:'Ouvrier'}]}/>
+          <I label="Secteur" value={sec} onChange={setSec} style={{marginTop:9}} options={[{v:'marchand',l:'Marchand (25%)'},{v:'non_marchand',l:'Non-marchand (32,40%)'}]}/>
+          <I label="CP" value={cp} onChange={setCp} style={{marginTop:9}} options={[{v:'200',l:'CP 200 (CPNAE)'},{v:'302',l:'CP 302 (Horeca)'},{v:'124',l:'CP 124 (Construction)'},{v:'140',l:'CP 140 (Transport)'},{v:'330',l:'CP 330 (Santé)'}]}/>
+          <div style={{marginTop:16,padding:16,background:'rgba(198,163,78,.06)',borderRadius:8,textAlign:'center'}}>
+            <div style={{fontSize:10,color:'#5e5c56'}}>COÛT TOTAL EMPLOYEUR</div>
+            <div style={{fontSize:28,fontWeight:700,color:'#c6a34e',marginTop:4}}>{fmt(totCout)}</div>
+            <div style={{fontSize:11,color:'#5e5c56'}}>Ratio: ×{ratio.toFixed(2)} du brut</div>
+          </div>
+        </C>
+      </div>
+      <C><ST>Décomposition coût mensuel</ST>
+        {[{l:'Salaire brut',v:brut,c:'#e8e6e0',pct:100},
+          {l:'ONSS patronal ('+((onssERate*100).toFixed(1))+'%)',v:onssE,c:'#f87171',pct:onssE/brut*100},
+          {l:'Fonds fermeture entreprise (FFE)',v:ffe,c:'#f87171',pct:ffe/brut*100},
+          {l:'Chômage temporaire',v:chomT,c:'#f87171',pct:chomT/brut*100},
+          {l:'Pécule vacances (provision)',v:pecVac,c:'#fb923c',pct:pecVac/brut*100},
+          {l:'Assurance AT',v:assAT,c:'#a78bfa',pct:assAT/brut*100},
+          {l:'Assurance groupe (3%)',v:assGroupe,c:'#a78bfa',pct:assGroupe/brut*100},
+          {l:'Médecine du travail',v:medTrav,c:'#60a5fa',pct:medTrav/brut*100},
+          {l:'Chèques-repas (part employeur)',v:cr,c:'#4ade80',pct:cr/brut*100},
+          {l:'Éco-chèques',v:eco,c:'#4ade80',pct:eco/brut*100},
+        ].map((row,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+          <div style={{flex:1,fontSize:12,color:'#9e9b93'}}>{row.l}</div>
+          <div style={{width:120,height:6,background:'rgba(255,255,255,.04)',borderRadius:3}}>
+            <div style={{height:6,background:row.c,borderRadius:3,width:Math.min(100,row.pct)+'%'}}/>
+          </div>
+          <div style={{width:80,textAlign:'right',fontSize:12,fontWeight:600,color:row.c}}>{fmt(row.v)}</div>
+        </div>)}
+        <div style={{display:'flex',justifyContent:'space-between',padding:'14px 0',borderTop:'2px solid rgba(198,163,78,.3)',marginTop:8}}>
+          <span style={{fontSize:14,fontWeight:700,color:'#e8e6e0'}}>COÛT TOTAL MENSUEL</span>
+          <span style={{fontSize:20,fontWeight:700,color:'#c6a34e'}}>{fmt(totCout)}</span>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginTop:12}}>
+          {[{l:'Coût annuel',v:fmt(totCout*13.92),c:'#c6a34e'},{l:'Coût horaire',v:fmt(totCout/164.67),c:'#60a5fa'},{l:'Coût journalier',v:fmt(totCout/21.67),c:'#a78bfa'}].map((k,i)=>
+            <div key={i} style={{padding:10,background:'rgba(198,163,78,.04)',borderRadius:8,textAlign:'center'}}>
+              <div style={{fontSize:10,color:'#5e5c56'}}>{k.l}</div>
+              <div style={{fontSize:16,fontWeight:700,color:k.c,marginTop:2}}>{k.v}</div>
+            </div>
+          )}
+        </div>
+      </C>
     </div>
-    <C style={{marginTop:12,padding:'14px 18px'}}><ST>Détail</ST>
-      {[['Brut',brut],['ONSS patronal',onss],['Réduction 1er eng.',-red],['= Coût brut',cb],['Provisions/mois',prov],['= Total mensuel',ct],['= Total annuel',ca]].map(([l,v],i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:String(l).startsWith('=')?'2px solid rgba(198,163,78,.3)':'1px solid rgba(255,255,255,.03)',fontWeight:String(l).startsWith('=')?700:400}}>
-        <span style={{fontSize:12,color:String(l).startsWith('=')?'#c6a34e':'#9e9b93'}}>{l}</span><span style={{fontSize:12,fontWeight:600,color:v<0?'#4ade80':'#d4d0c8'}}>{f(v)}</span></div>)}
-      <div style={{marginTop:12,padding:10,background:'rgba(96,165,250,.05)',borderRadius:8,fontSize:11,color:'#60a5fa'}}><b>ℹ</b> Bureau social: calcul et déclarations. Le client verse les cotisations ONSS et précompte.</div>
-    </C></div>;
+  </div>;
 }
+
 
 function TotalRewardMod({s,d}){
   const ae=s.emps||[];const [sel,setSel]=useState(ae[0]?.id||'');
