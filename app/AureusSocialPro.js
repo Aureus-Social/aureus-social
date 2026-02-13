@@ -2799,7 +2799,7 @@ function LoginPage({onLogin}){
   };
 
   return(
-    <div style={{minHeight:'100vh',background:"linear-gradient(135deg,#060810 0%,#0a0e1a 40%,#0e1225 100%)",display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Outfit',"DM Sans",system-ui,sans-serif"}}>
+    <div style={{minHeight:'100vh',background:"linear-gradient(135deg,#060810 0%,#0a0e1a 40%,#0e1225 100%)",display:'flex',alignItems:'center',justifyContent:'center',fontFamily:`'Outfit','DM Sans',system-ui,sans-serif`}}>
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet"/>
       <div style={{width:420,textAlign:'center'}}>
         {/* Logo */}
@@ -3511,7 +3511,7 @@ function ClientsPage({s,d,user,onLogout}){
   const stats={total:s.clients?.length||0,emps:(s.clients||[]).reduce((a,c)=>a+(c.emps?.length||0),0)};
 
   return(
-    <div style={{minHeight:'100vh',background:"#060810",color:'#d4d0c8',fontFamily:"'Outfit',"DM Sans",system-ui,sans-serif"}}>
+    <div style={{minHeight:'100vh',background:"#060810",color:'#d4d0c8',fontFamily:`'Outfit','DM Sans',system-ui,sans-serif`}}>
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet"/>
       
       {/* Header */}
@@ -3814,7 +3814,7 @@ function AppInner({ supabase, user, onLogout }) {
   };
 
   return (
-    <div style={{minHeight:'100vh',background:"#060810",color:'#d4d0c8',fontFamily:"'Outfit',"DM Sans",system-ui,sans-serif",display:'flex'}}>
+    <div style={{minHeight:'100vh',background:"#060810",color:'#d4d0c8',fontFamily:`'Outfit','DM Sans',system-ui,sans-serif`,display:'flex'}}>
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet"/>
       <style>{`
         *{box-sizing:border-box}
