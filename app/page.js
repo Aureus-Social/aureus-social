@@ -9,11 +9,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!supabase) {
-      setUser({ email: 'demo@aureus.be' });
-      setLoading(false);
-      return;
-    }
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user || null);
       setLoading(false);
@@ -48,7 +43,7 @@ export default function Home() {
   }
 
   return <AureusSocialPro supabase={supabase} user={user} onLogout={async () => {
-    if (supabase) await supabase.auth.signOut();
+    await supabase.auth.signOut();
     setUser(null);
   }} />;
 }
