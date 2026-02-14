@@ -114,7 +114,7 @@ export default function LoginPage({ onLogin }) {
           <div style={{ fontSize: 11, color: '#5e5c56', letterSpacing: 2, marginTop: 4 }}>GESTION DE PAIE BELGE</div>
         </div>
 
-        {/* â•â•â• LOGIN â•â•â• */}
+        {/* ═══ LOGIN ═══ */}
         {mode === 'login' && (
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom: 16 }}>
@@ -123,11 +123,11 @@ export default function LoginPage({ onLogin }) {
             </div>
             <div style={{ marginBottom: 24 }}>
               <label style={{ display: 'block', fontSize: 12, color: '#9e9b93', marginBottom: 6 }}>Mot de passe</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={inputStyle} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={inputStyle} placeholder="••••••••" />
             </div>
             {error && <div style={{ marginBottom: 16, padding: 12, borderRadius: 8, background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.2)', color: '#fb923c', fontSize: 13 }}>{error}</div>}
             {success && <div style={{ marginBottom: 16, padding: 12, borderRadius: 8, background: 'rgba(74,222,128,0.06)', border: '1px solid rgba(74,222,128,0.2)', color: '#4ade80', fontSize: 13 }}>{success}</div>}
-            <button type="submit" disabled={loading} style={btnStyle(loading)}>{loading ? 'â³ Connexion...' : 'Se connecter'}</button>
+            <button type="submit" disabled={loading} style={btnStyle(loading)}>{loading ? '⏳ Connexion...' : 'Se connecter'}</button>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16 }}>
               <button type="button" onClick={() => switchMode('reset')} style={linkStyle}>Mot de passe oublie ?</button>
               <button type="button" onClick={() => switchMode('signup')} style={{...linkStyle, fontWeight: 600}}>Creer un compte</button>
@@ -135,7 +135,7 @@ export default function LoginPage({ onLogin }) {
           </form>
         )}
 
-        {/* â•â•â• SIGN UP â•â•â• */}
+        {/* ═══ SIGN UP ═══ */}
         {mode === 'signup' && (
           <form onSubmit={handleSignup}>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#c6a34e', marginBottom: 16, textAlign: 'center' }}>Creer votre compte</div>
@@ -164,16 +164,16 @@ export default function LoginPage({ onLogin }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 11, color: '#9e9b93', marginBottom: 4 }}>Mot de passe * (min 6)</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={inputStyle} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={inputStyle} placeholder="••••••••" />
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: 11, color: '#9e9b93', marginBottom: 4 }}>Confirmer *</label>
-                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required style={inputStyle} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
+                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required style={inputStyle} placeholder="••••••••" />
               </div>
             </div>
             {error && <div style={{ marginBottom: 12, padding: 12, borderRadius: 8, background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.2)', color: '#fb923c', fontSize: 13 }}>{error}</div>}
             {success && <div style={{ marginBottom: 12, padding: 12, borderRadius: 8, background: 'rgba(74,222,128,0.06)', border: '1px solid rgba(74,222,128,0.2)', color: '#4ade80', fontSize: 13 }}>{success}</div>}
-            <button type="submit" disabled={loading} style={btnStyle(loading)}>{loading ? 'â³ Creation...' : 'Creer mon compte gratuitement'}</button>
+            <button type="submit" disabled={loading} style={btnStyle(loading)}>{loading ? '⏳ Creation...' : 'Creer mon compte gratuitement'}</button>
             <div style={{ textAlign: 'center', marginTop: 8, fontSize: 10, color: '#5e5c56', lineHeight: 1.5 }}>
               En creant un compte, vous acceptez nos conditions d'utilisation et notre politique de confidentialite.
             </div>
@@ -183,7 +183,7 @@ export default function LoginPage({ onLogin }) {
           </form>
         )}
 
-        {/* â•â•â• RESET â•â•â• */}
+        {/* ═══ RESET ═══ */}
         {mode === 'reset' && (
           <form onSubmit={handleReset}>
             <div style={{ fontSize: 13, color: '#9e9b93', marginBottom: 16 }}>Entrez votre email pour recevoir un lien de reinitialisation.</div>
@@ -192,7 +192,7 @@ export default function LoginPage({ onLogin }) {
             </div>
             {error && <div style={{ marginBottom: 16, padding: 12, borderRadius: 8, background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.2)', color: '#fb923c', fontSize: 13 }}>{error}</div>}
             {success && <div style={{ marginBottom: 16, padding: 12, borderRadius: 8, background: 'rgba(74,222,128,0.06)', border: '1px solid rgba(74,222,128,0.2)', color: '#4ade80', fontSize: 13 }}>{success}</div>}
-            <button type="submit" disabled={loading} style={btnStyle(loading)}>{loading ? 'â³ Envoi...' : 'Envoyer le lien'}</button>
+            <button type="submit" disabled={loading} style={btnStyle(loading)}>{loading ? '⏳ Envoi...' : 'Envoyer le lien'}</button>
             <div style={{ textAlign: 'center', marginTop: 16 }}>
               <button type="button" onClick={() => switchMode('login')} style={linkStyle}>Retour a la connexion</button>
             </div>
@@ -200,7 +200,7 @@ export default function LoginPage({ onLogin }) {
         )}
 
         <div style={{ textAlign: 'center', marginTop: 28, fontSize: 10, color: '#3a3832' }}>
-          Aureus IA SPRL Â· Saint-Gilles, Bruxelles
+          Aureus IA SPRL · Saint-Gilles, Bruxelles
         </div>
       </div>
     </div>
