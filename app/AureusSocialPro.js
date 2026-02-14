@@ -3638,7 +3638,7 @@ function ClientWizard({onFinish,onCancel}){
   </div>;
 }
 
-function ClientsPage({s,d,user,onLogout}){
+function ClientsPage({s,d,user,onLogout,veilleNotif,setVeilleNotif}){
   const [showWizard,setShowWizard]=useState(false);
   const [search,setSearch]=useState('');
   
@@ -4054,7 +4054,7 @@ function AppInner({ supabase, user, onLogout }) {
     </div>
   </div>;
   if(!loggedIn)return <LoginPage onLogin={handleLogin}/>;
-  if(!s.activeClient)return <ClientsPage s={s} d={d} user={user} onLogout={onLogout}/>;
+  if(!s.activeClient)return <ClientsPage s={s} d={d} user={user} onLogout={onLogout} veilleNotif={veilleNotif} setVeilleNotif={setVeilleNotif}/>;
 
   const pg=()=>{
     switch(s.page){
