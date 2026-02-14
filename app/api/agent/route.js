@@ -86,6 +86,20 @@ export async function POST(request) {
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }
 
+    const isVeille = messages.some(m => m.content?.includes('veille législative'));
+    
+    const body = {
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4096,
+      system: SYSTEM_PROMPT,
+      messages: messages.map(m => ({ role: m.role, content: m.content }))
+    };
+    
+    // Add web search for veille requests
+    if (isVeille) {
+      body.tools = [{ type: "web_search_20250305", name: "web_search" }];
+    }
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -93,12 +107,7 @@ export async function POST(request) {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        system: SYSTEM_PROMPT,
-        messages: messages.map(m => ({ role: m.role, content: m.content }))
-      })
+      body: JSON.stringify(body)
     });
 
     const data = await response.json();

@@ -3695,6 +3695,18 @@ function ClientsPage({s,d,user,onLogout}){
       <div style={{maxWidth:1200,margin:'0 auto',padding:'30px 36px'}}>
         {showWizard?<ClientWizard onFinish={handleFinish} onCancel={()=>setShowWizard(false)}/>:<>
         
+        {/* ═══ VEILLE LÉGALE AUTO ═══ */}
+        {veilleNotif&&<div style={{marginBottom:14,padding:'12px 18px',borderRadius:10,background:veilleNotif.changed?'rgba(248,113,113,.06)':'rgba(74,222,128,.06)',border:`1px solid ${veilleNotif.changed?'rgba(248,113,113,.15)':'rgba(74,222,128,.15)'}`,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div>
+            <div style={{fontSize:12,fontWeight:600,color:veilleNotif.changed?'#f87171':'#4ade80'}}>{veilleNotif.changed?'⚠️ Changements détectés':'✅ Veille légale — Tout est à jour'}</div>
+            <div style={{fontSize:10.5,color:'#9e9b93',marginTop:3,maxWidth:800,lineHeight:1.5}}>{veilleNotif.text}</div>
+          </div>
+          <div style={{textAlign:'right',flexShrink:0}}>
+            <div style={{fontSize:9,color:'#5e5c56'}}>Vérifié le {veilleNotif.date}</div>
+            <button onClick={()=>setVeilleNotif(null)} style={{fontSize:9,color:'#5e5c56',background:'none',border:'none',cursor:'pointer',marginTop:4}}>✕ Fermer</button>
+          </div>
+        </div>}
+        
         {/* ═══ GLOBAL DASHBOARD — Vue d'ensemble 1000 clients ═══ */}
         {(s.clients||[]).length>0&&<div style={{marginBottom:24}}>
           {/* KPI Row */}
@@ -3917,6 +3929,26 @@ function AppInner({ supabase, user, onLogout }) {
       setLoading(false);
     });
   },[]);
+
+  // ── AUTO VEILLE LÉGALE AU LOGIN (toutes les 24h) ──
+  const [veilleNotif,setVeilleNotif]=useState(null);
+  useEffect(()=>{
+    if(loading||!s.clients?.length)return;
+    const lastVeille=typeof window!=='undefined'?localStorage.getItem('aureus_last_veille'):null;
+    const now=new Date();
+    const hoursSince=lastVeille?((now-new Date(lastVeille))/3600000):999;
+    if(hoursSince>24){
+      fetch('/api/agent',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({messages:[{role:'user',content:`Fais une veille rapide du droit social belge. Date: ${now.toLocaleDateString('fr-BE')}. Vérifie s'il y a des changements récents pour: taux ONSS, précompte professionnel, RMMMG, chèques-repas, indexation CP200, quota étudiants, flexi-jobs. Réponds en 3-5 lignes: soit "✅ Tout est à jour" soit "⚠️ Changement détecté: [détail]".`}],lang:'fr'})
+      }).then(r=>r.json()).then(data=>{
+        if(data.text){
+          setVeilleNotif({text:data.text,date:now.toLocaleDateString('fr-BE'),changed:data.text.includes('⚠️')||data.text.includes('CHANGÉ')});
+          localStorage.setItem('aureus_last_veille',now.toISOString());
+        }
+      }).catch(()=>{});
+    }
+  },[loading,s.clients?.length]);
 
   const handleLogin=(pin)=>{
     if(!saved?.pin){
@@ -13478,15 +13510,12 @@ Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks) avec cett
   "resume": "résumé en 2-3 phrases des changements détectés ou confirmation que tout est à jour"
 }`;
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/agent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 4000,
-          messages: [{ role: "user", content: `Effectue une veille législative complète sur le droit social belge. Voici les sources à vérifier: ${SOURCES.join(', ')}. Date d'aujourd'hui: ${new Date().toLocaleDateString('fr-BE')}. Vérifie si les paramètres de paie belges sont toujours à jour pour ${y}.` }],
-          system: systemPrompt,
-          tools: [{ type: "web_search_20250305", name: "web_search" }],
+          messages: [{ role: "user", content: `Effectue une veille législative complète sur le droit social belge. Voici les sources à vérifier: ${SOURCES.join(', ')}. Date d'aujourd'hui: ${new Date().toLocaleDateString('fr-BE')}. Vérifie si les paramètres de paie belges sont toujours à jour pour ${y}. Réponds UNIQUEMENT en JSON valide.` }],
+          lang: 'fr'
         })
       });
       
@@ -13498,12 +13527,10 @@ Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks) avec cett
       }
       
       const data = await response.json();
+      if(data.error)throw new Error(data.error);
       
-      // Extract text from response (may have multiple content blocks due to tool use)
-      const fullText = data.content
-        .map(item => (item.type === "text" ? item.text : ""))
-        .filter(Boolean)
-        .join("\n");
+      // Extract text from response (route returns {text:...})
+      const fullText = data.text || '';
       
       addLog('🔎 Analyse des résultats...');
       
