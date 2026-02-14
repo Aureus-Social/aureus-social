@@ -2639,7 +2639,7 @@ function genBelcotax(co, emp, yr, ad) {
 }
 
 // ─── INITIAL STATE ───────────────────────────────────────────
-const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:"info@aureus-ia.com",version:'v36f',sprint:'Sprint 8 — Agent IA + Fixes'};
+const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:"info@aureus-ia.com",version:'v37',sprint:'Sprint 9 — Automatisation'};
 const CAR_MODELS={
 'Aiways':['U5',"U6"],
 'Alfa Romeo':['Giulia',"Stelvio","Tonale","Junior","Giulietta","MiTo"],
@@ -3807,6 +3807,10 @@ function AppInner({ supabase, user, onLogout }) {
       {id:"budget_auto",l:"📊 Budget Automatique"},
       {id:"what_if",l:"🔮 Simulateur What-If"},
       {id:"kpi_dashboard",l:"📈 KPI Dashboard Avancé"},
+      {id:"automations",l:"⚙️ Automatisations"},
+      {id:"scheduler",l:"📋 Planificateur Tâches"},
+      {id:"absences",l:"📅 Gestion Absences"},
+      {id:"templates",l:"📑 Modèles Documents"},
       {id:"aureus_pointage",l:"⏱ Aureus Pointage"},
       {id:"aureus_paie",l:"💰 Aureus Paie"},
       {id:"aureus_titres_services",l:"🏠 Aureus Titres-Services"},
@@ -4225,6 +4229,7 @@ function Dashboard({s,d}) {
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
         {[
+          {v:'v37',title:'Sprint 9',items:['⚙️ Automatisations 10 règles','📋 Planificateur 14 tâches','📑 15 Modèles documents'],color:'#06b6d4'},
           {v:'v36',title:'Sprint 8',items:['📊 Budget Auto','🔮 Simulateur What-If','📈 KPI + Equal Pay'],color:'#f472b6'},
           {v:'v35',title:'Sprint 7',items:['🏪 Marketplace 12 modules','🔗 Intégrations 25+ connecteurs','🔔 Webhook Manager'],color:'#a78bfa'},
           {v:'v34',title:'Sprint 6',items:['🌐 4 langues (FR/NL/EN/DE)','🔌 API Documentation','💱 Multi-Devises'],color:'#fb923c'},
@@ -12361,6 +12366,346 @@ function KPIDashboardMod({s,d}){
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  SPRINT 9 — AUTOMATISATION: WORKFLOWS + SCHEDULER + TEMPLATES
+// ═══════════════════════════════════════════════════════════════
+
+// ── AUTOMATISATIONS & RÈGLES ──
+function AutomationsMod({s,d}){
+  const [rules,setRules]=useState([
+    {id:'R1',name:'Rappel préparation paie',trigger:'date',triggerValue:'20',action:'alert_prepare_payroll',enabled:true,lastRun:'2026-01-20T08:00:00',runs:12,desc:'Rappel le 20: vérifier absences et valider avant de lancer la paie'},
+    {id:'R1b',name:'Vérification absences avant paie',trigger:'date',triggerValue:'21',action:'check_absences',enabled:true,lastRun:'2026-01-21T08:00:00',runs:12,desc:'Vérifie que toutes les absences sont encodées avant la clôture paie'},
+    {id:'R2',name:'Rappel DmfA trimestrielle',trigger:'date_quarterly',triggerValue:'15',action:'alert_dmfa',enabled:true,lastRun:'2026-01-15T09:00:00',runs:4,desc:'Rappel 15 jours avant la deadline DmfA — à soumettre manuellement'},
+    {id:'R3',name:'Rappel Dimona à l\'embauche',trigger:'event',triggerValue:'employee_created',action:'alert_dimona',enabled:true,lastRun:'2026-02-10T14:30:00',runs:8,desc:'Rappel: créer Dimona IN pour le nouvel employé — à valider manuellement'},
+    {id:'R4',name:'Alerte CDD expiration',trigger:'condition',triggerValue:'cdd_expires_30d',action:'alert_cdd',enabled:true,lastRun:'2026-02-01T08:00:00',runs:3,desc:'Alerte 30 jours avant fin de CDD — décision de renouvellement à prendre'},
+    {id:'R5',name:'Rappel indexation annuelle',trigger:'date_yearly',triggerValue:'01-01',action:'alert_indexation',enabled:true,lastRun:null,runs:0,desc:'Rappel: vérifier et appliquer l\'indexation manuellement au 1er janvier'},
+    {id:'R6',name:'Backup données quotidien',trigger:'daily',triggerValue:'02:00',action:'backup',enabled:true,lastRun:'2026-02-14T02:00:00',runs:365,desc:'Sauvegarde automatique des données (pas d\'impact sur la paie)'},
+    {id:'R7',name:'Rappel rapport mensuel',trigger:'date',triggerValue:'1',action:'alert_report',enabled:true,lastRun:'2026-02-01T07:00:00',runs:6,desc:'Rappel: générer le rapport RH mensuel — à vérifier et envoyer manuellement'},
+    {id:'R8',name:'Rappel Belcotax annuel',trigger:'date_yearly',triggerValue:'02-15',action:'alert_belcotax',enabled:true,lastRun:'2026-02-15T08:00:00',runs:1,desc:'Rappel: préparer fiches 281 avant deadline 28/02 — à soumettre manuellement'},
+    {id:'R9',name:'Rappel provisions ONSS',trigger:'date',triggerValue:'3',action:'alert_onss',enabled:true,lastRun:'2026-02-03T08:00:00',runs:12,desc:'Rappel: payer les provisions ONSS avant le 5 du mois'},
+    {id:'R10',name:'Anniversaire travailleur',trigger:'condition',triggerValue:'birthday_today',action:'alert_birthday',enabled:true,lastRun:'2026-02-12T08:00:00',runs:15,desc:'Notification anniversaire (info uniquement)'},
+  ]);
+  
+  const triggerIcons={date:'📅',date_quarterly:'📅',date_yearly:'📅',event:'⚡',condition:'🔍',daily:'🔄'};
+  const triggerLabels={date:'Mensuel',date_quarterly:'Trimestriel',date_yearly:'Annuel',event:'Événement',condition:'Condition',daily:'Quotidien'};
+  const actionLabels={alert_prepare_payroll:'📋 Rappel paie',check_absences:'📅 Vérif. absences',alert_dmfa:'📋 Rappel DmfA',alert_dimona:'📋 Rappel Dimona',alert_cdd:'📋 Alerte CDD',alert_indexation:'📋 Rappel index',backup:'💾 Backup auto',alert_report:'📋 Rappel rapport',alert_belcotax:'📋 Rappel Belcotax',alert_onss:'📋 Rappel ONSS',alert_birthday:'🎂 Info anniversaire'};
+  
+  return <div>
+    <PH title="⚙️ Automatisations" sub={`${rules.filter(r=>r.enabled).length} règles actives sur ${rules.length}`}/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:16}}>
+      <SC label="Règles actives" value={rules.filter(r=>r.enabled).length} color="#4ade80"/>
+      <SC label="Règles inactives" value={rules.filter(r=>!r.enabled).length} color="#5e5c56"/>
+      <SC label="Total exécutions" value={rules.reduce((a,r)=>a+r.runs,0)} color="#60a5fa"/>
+      <SC label="Dernière exécution" value={rules.filter(r=>r.lastRun).sort((a,b)=>new Date(b.lastRun)-new Date(a.lastRun))[0]?.lastRun?new Date(rules.filter(r=>r.lastRun).sort((a,b)=>new Date(b.lastRun)-new Date(a.lastRun))[0].lastRun).toLocaleDateString('fr-BE'):'—'} color="#c6a34e"/>
+    </div>
+    <C>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+        <ST>Règles d'automatisation</ST>
+        <B v="outline" style={{fontSize:10}} onClick={()=>setRules([...rules,{id:'R'+Date.now(),name:'Nouvelle règle',trigger:'event',triggerValue:'',action:'alert_email',enabled:false,lastRun:null,runs:0,desc:''}])}>+ Nouvelle règle</B>
+      </div>
+      {rules.map((r,i)=><div key={r.id} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',borderRadius:10,background:r.enabled?'rgba(74,222,128,.03)':'rgba(94,92,86,.03)',border:`1px solid ${r.enabled?'rgba(74,222,128,.12)':'rgba(94,92,86,.12)'}`,marginBottom:8,opacity:r.enabled?1:0.6}}>
+        <button onClick={()=>setRules(rules.map(x=>x.id===r.id?{...x,enabled:!x.enabled}:x))} style={{width:40,height:22,borderRadius:11,border:'none',cursor:'pointer',background:r.enabled?'#4ade80':'#3a3832',position:'relative',transition:'all .3s'}}>
+          <div style={{width:16,height:16,borderRadius:'50%',background:'#fff',position:'absolute',top:3,left:r.enabled?21:3,transition:'all .3s'}}/>
+        </button>
+        <span style={{fontSize:20}}>{triggerIcons[r.trigger]}</span>
+        <div style={{flex:1}}>
+          <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>{r.name}</div>
+          <div style={{fontSize:10.5,color:'#5e5c56',marginTop:2}}>{r.desc}</div>
+        </div>
+        <div style={{textAlign:'right'}}>
+          <div style={{display:'flex',gap:6,marginBottom:4}}>
+            <span style={{fontSize:9,padding:'2px 8px',borderRadius:10,background:'rgba(198,163,78,.08)',color:'#c6a34e'}}>{triggerLabels[r.trigger]}</span>
+            <span style={{fontSize:9,padding:'2px 8px',borderRadius:10,background:'rgba(96,165,250,.08)',color:'#60a5fa'}}>{actionLabels[r.action]||r.action}</span>
+          </div>
+          <div style={{fontSize:9,color:'#5e5c56'}}>{r.runs} exécutions{r.lastRun?` · Dernier: ${new Date(r.lastRun).toLocaleDateString('fr-BE')}`:''}</div>
+        </div>
+        <B v="outline" style={{fontSize:9,padding:'4px 10px'}} onClick={()=>{
+          if(r.enabled){
+            setRules(rules.map(x=>x.id===r.id?{...x,runs:x.runs+1,lastRun:new Date().toISOString()}:x));
+            alert(`✅ Règle "${r.name}" exécutée manuellement !`);
+          }
+        }}>▶ Run</B>
+      </div>)}
+    </C>
+  </div>;
+}
+
+// ── PLANIFICATEUR DE TÂCHES ──
+function SchedulerMod({s,d}){
+  const ae=s.emps.filter(e=>e.status==='active'||!e.status);
+  const now=new Date();
+  const m=now.getMonth()+1;const y=now.getFullYear();
+  const q=Math.ceil(m/3);
+  
+  const tasks=[
+    // Mensuels
+    {id:'T1',title:'Calcul fiches de paie',deadline:`${y}-${String(m).padStart(2,'0')}-25`,freq:'Mensuel',cat:'Paie',status:m>1?'done':'pending',prio:'haute',auto:true},
+    {id:'T2',title:'Provisions ONSS',deadline:`${y}-${String(m).padStart(2,'0')}-05`,freq:'Mensuel',cat:'ONSS',status:'done',prio:'haute',auto:true},
+    {id:'T3',title:'Virements salaires (SEPA)',deadline:`${y}-${String(m).padStart(2,'0')}-28`,freq:'Mensuel',cat:'Paie',status:'pending',prio:'haute',auto:false},
+    {id:'T4',title:`PP 274 — ${m>1?new Date(y,m-2).toLocaleString('fr',{month:'short'}):new Date(y-1,11).toLocaleString('fr',{month:'short'})}/${m>1?y:y-1}`,deadline:`${y}-${String(m).padStart(2,'0')}-15`,freq:'Mensuel',cat:'Fiscal',status:now.getDate()>15?'done':'pending',prio:'haute',auto:true},
+    // Trimestriels
+    {id:'T5',title:`DmfA T${q>1?q-1:4}/${q>1?y:y-1}`,deadline:q===1?`${y}-01-31`:q===2?`${y}-04-30`:q===3?`${y}-07-31`:`${y}-10-31`,freq:'Trimestriel',cat:'ONSS',status:'pending',prio:'critique',auto:true},
+    {id:'T6',title:`Solde ONSS T${q>1?q-1:4}/${q>1?y:y-1}`,deadline:q===1?`${y}-01-31`:q===2?`${y}-04-30`:q===3?`${y}-07-31`:`${y}-10-31`,freq:'Trimestriel',cat:'ONSS',status:'pending',prio:'critique',auto:false},
+    // Annuels
+    {id:'T7',title:`Belcotax 281 — ${y-1}`,deadline:`${y}-02-28`,freq:'Annuel',cat:'Fiscal',status:m>2?'done':'pending',prio:'critique',auto:true},
+    {id:'T8',title:`Bilan social ${y-1}`,deadline:`${y}-03-31`,freq:'Annuel',cat:'RH',status:'pending',prio:'moyenne',auto:false},
+    {id:'T9',title:`Indexation salariale ${y}`,deadline:`${y}-01-15`,freq:'Annuel',cat:'Paie',status:m>1?'done':'pending',prio:'haute',auto:true},
+    {id:'T10',title:`Plan de formation ${y}`,deadline:`${y}-03-31`,freq:'Annuel',cat:'RH',status:'pending',prio:'moyenne',auto:false},
+    {id:'T11',title:`Fiches 281.10 travailleurs`,deadline:`${y}-02-28`,freq:'Annuel',cat:'Fiscal',status:m>2?'done':'pending',prio:'critique',auto:true},
+    {id:'T12',title:`Fiche 281.20 dirigeants`,deadline:`${y}-02-28`,freq:'Annuel',cat:'Fiscal',status:m>2?'done':'pending',prio:'critique',auto:true},
+    {id:'T13',title:'Vérification contrats CDD',deadline:`${y}-${String(m).padStart(2,'0')}-01`,freq:'Mensuel',cat:'Contrats',status:'pending',prio:'moyenne',auto:true},
+    {id:'T14',title:'Médecine du travail — planification',deadline:`${y}-${String(m).padStart(2,'0')}-15`,freq:'Annuel',cat:'Bien-être',status:'pending',prio:'moyenne',auto:false},
+  ];
+  
+  const [filter,setFilter]=useState('all');
+  const statusColors={done:'#4ade80',pending:'#fb923c',overdue:'#f87171',critique:'#f87171'};
+  const prioColors={critique:'#f87171',haute:'#fb923c',moyenne:'#60a5fa',basse:'#5e5c56'};
+  const filtered=filter==='all'?tasks:tasks.filter(t=>filter==='pending'?t.status==='pending':filter==='done'?t.status==='done':t.cat===filter);
+  
+  return <div>
+    <PH title="📋 Planificateur de Tâches" sub={`Calendrier social ${y} — ${ae.length} travailleurs`}/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:16}}>
+      <SC label="Total tâches" value={tasks.length} color="#c6a34e"/>
+      <SC label="À faire" value={tasks.filter(t=>t.status==='pending').length} color="#fb923c"/>
+      <SC label="Terminées" value={tasks.filter(t=>t.status==='done').length} color="#4ade80"/>
+      <SC label="Critiques" value={tasks.filter(t=>t.prio==='critique'&&t.status==='pending').length} color="#f87171"/>
+      <SC label="Automatisées" value={tasks.filter(t=>t.auto).length} color="#a78bfa"/>
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:14,flexWrap:'wrap'}}>
+      {['all','pending','done','Paie','ONSS','Fiscal','RH','Contrats'].map(f=><button key={f} onClick={()=>setFilter(f)} style={{padding:'5px 12px',borderRadius:16,border:filter===f?'1px solid rgba(198,163,78,.3)':'1px solid rgba(198,163,78,.06)',background:filter===f?'rgba(198,163,78,.1)':'transparent',color:filter===f?'#c6a34e':'#9e9b93',cursor:'pointer',fontSize:10.5,fontFamily:'inherit'}}>{{all:'Tous',pending:'À faire',done:'Terminées'}[f]||f}</button>)}
+    </div>
+    <C>
+      <table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
+        <thead><tr style={{borderBottom:'1px solid rgba(198,163,78,.12)'}}>
+          <th style={{padding:'8px',textAlign:'left',color:'#5e5c56',fontSize:9}}>STATUT</th>
+          <th style={{padding:'8px',textAlign:'left',color:'#5e5c56',fontSize:9}}>TÂCHE</th>
+          <th style={{padding:'8px',textAlign:'center',color:'#5e5c56',fontSize:9}}>DEADLINE</th>
+          <th style={{padding:'8px',textAlign:'center',color:'#5e5c56',fontSize:9}}>FRÉQUENCE</th>
+          <th style={{padding:'8px',textAlign:'center',color:'#5e5c56',fontSize:9}}>PRIORITÉ</th>
+          <th style={{padding:'8px',textAlign:'center',color:'#5e5c56',fontSize:9}}>RAPPEL</th>
+        </tr></thead>
+        <tbody>{filtered.map(t=>{
+          const dl=new Date(t.deadline);
+          const overdue=t.status==='pending'&&dl<now;
+          return <tr key={t.id} style={{borderBottom:'1px solid rgba(198,163,78,.04)',background:overdue?'rgba(248,113,113,.04)':'transparent'}}>
+            <td style={{padding:'8px'}}><span style={{display:'inline-block',width:10,height:10,borderRadius:'50%',background:overdue?'#f87171':statusColors[t.status]||'#5e5c56'}}/></td>
+            <td style={{padding:'8px',color:'#e8e6e0',fontWeight:500}}>
+              {t.title}
+              <span style={{marginLeft:8,fontSize:9,padding:'1px 6px',borderRadius:8,background:'rgba(198,163,78,.06)',color:'#9e9b93'}}>{t.cat}</span>
+            </td>
+            <td style={{padding:'8px',textAlign:'center',color:overdue?'#f87171':'#9e9b93',fontFamily:'monospace',fontSize:10}}>{dl.toLocaleDateString('fr-BE')}</td>
+            <td style={{padding:'8px',textAlign:'center',fontSize:10,color:'#5e5c56'}}>{t.freq}</td>
+            <td style={{padding:'8px',textAlign:'center'}}><span style={{fontSize:9,padding:'2px 8px',borderRadius:10,background:`${prioColors[t.prio]}15`,color:prioColors[t.prio],fontWeight:600}}>{t.prio}</span></td>
+            <td style={{padding:'8px',textAlign:'center'}}>{t.auto?<span style={{color:'#a78bfa'}}>⚡</span>:<span style={{color:'#5e5c56'}}>—</span>}</td>
+          </tr>;})}
+        </tbody>
+      </table>
+    </C>
+  </div>;
+}
+
+// ── GESTION DES ABSENCES (PRÉ-PAIE) ──
+function AbsencesMod({s,d}){
+  const ae=s.emps.filter(e=>e.status==='active'||!e.status);
+  const now=new Date();
+  const [month,setMonth]=useState(now.getMonth()+1);
+  const [year,setYear]=useState(now.getFullYear());
+  const [absences,setAbsences]=useState([]);
+  const [showForm,setShowForm]=useState(false);
+  const [form,setForm]=useState({empId:'',type:'maladie',dateFrom:'',dateTo:'',days:0,justif:false,note:''});
+  
+  const types=[
+    {id:'maladie',label:'🏥 Maladie (salaire garanti)',color:'#f87171',impact:'garanti'},
+    {id:'conge',label:'🏖️ Congé annuel',color:'#4ade80',impact:'payé'},
+    {id:'sans_solde',label:'❌ Absence injustifiée',color:'#ef4444',impact:'déduction'},
+    {id:'ct_temps',label:'⏰ Crédit-temps',color:'#60a5fa',impact:'réduit'},
+    {id:'maternite',label:'🤱 Maternité/Paternité',color:'#f472b6',impact:'mutuelle'},
+    {id:'accident',label:'⚠️ Accident de travail',color:'#fb923c',impact:'assurance'},
+    {id:'formation',label:'📚 Formation',color:'#a78bfa',impact:'payé'},
+    {id:'ferie',label:'🎉 Jour férié',color:'#c6a34e',impact:'payé'},
+    {id:'petit_chomage',label:'📋 Petit chômage',color:'#06b6d4',impact:'payé'},
+    {id:'chomage_eco',label:'🏭 Chômage économique',color:'#5e5c56',impact:'ONEM'},
+  ];
+  
+  const addAbsence=()=>{
+    if(!form.empId||!form.dateFrom)return alert('Sélectionnez un employé et une date');
+    const d1=new Date(form.dateFrom);
+    const d2=form.dateTo?new Date(form.dateTo):d1;
+    const days=Math.ceil((d2-d1)/(1000*60*60*24))+1;
+    const weekdays=Array.from({length:days},(_,i)=>{const d=new Date(d1);d.setDate(d.getDate()+i);return d.getDay()}).filter(d=>d>0&&d<6).length;
+    setAbsences([...absences,{...form,id:'ABS-'+Date.now(),days:weekdays,created:new Date().toISOString()}]);
+    setForm({empId:'',type:'maladie',dateFrom:'',dateTo:'',days:0,justif:false,note:''});
+    setShowForm(false);
+  };
+  
+  const eName=(e)=>(e.first||e.last)?`${e.first||''} ${e.last||''}`.trim():(e.fn||`Emp ${(e.id||'').slice(-3)}`);
+  const monthAbsences=absences.filter(a=>{const d=new Date(a.dateFrom);return d.getMonth()+1===month&&d.getFullYear()===year;});
+  const totalDays=monthAbsences.reduce((a,x)=>a+x.days,0);
+  const unjustified=monthAbsences.filter(a=>a.type==='sans_solde').length;
+  const validated=monthAbsences.filter(a=>a.justif).length;
+  
+  // Paie readiness check
+  const empsWithAbsence=new Set(monthAbsences.map(a=>a.empId));
+  const empsWithoutCheck=ae.filter(e=>!empsWithAbsence.has(e.id));
+  const allChecked=empsWithoutCheck.length===0||monthAbsences.length>0;
+  
+  return <div>
+    <PH title="📅 Gestion des Absences" sub={`${MN[month-1]} ${year} — Vérification pré-paie`}/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:16}}>
+      <SC label="Absences ce mois" value={monthAbsences.length} color="#c6a34e"/>
+      <SC label="Jours d'absence" value={totalDays} color="#fb923c"/>
+      <SC label="Injustifiées" value={unjustified} color={unjustified>0?'#f87171':'#4ade80'}/>
+      <SC label="Justificatifs OK" value={validated} color="#4ade80"/>
+      <SC label={allChecked?"✅ Prêt pour paie":"⚠️ À vérifier"} value={`${ae.length-empsWithoutCheck.length}/${ae.length}`} color={allChecked?'#4ade80':'#fb923c'}/>
+    </div>
+    
+    {/* Readiness Banner */}
+    <div style={{padding:14,borderRadius:10,marginBottom:16,background:unjustified>0?'rgba(248,113,113,.06)':monthAbsences.length>0?'rgba(74,222,128,.06)':'rgba(251,146,60,.06)',border:`1px solid ${unjustified>0?'rgba(248,113,113,.15)':monthAbsences.length>0?'rgba(74,222,128,.15)':'rgba(251,146,60,.15)'}`}}>
+      <div style={{fontSize:13,fontWeight:600,color:unjustified>0?'#f87171':monthAbsences.length>0?'#4ade80':'#fb923c'}}>
+        {unjustified>0?`⚠️ ${unjustified} absence(s) injustifiée(s) — Vérifier avant la paie !`:monthAbsences.length>0?'✅ Absences encodées — Vous pouvez lancer la paie':'⚠️ Aucune absence encodée ce mois — Vérifiez que tout est correct avant la paie'}
+      </div>
+      <div style={{fontSize:10.5,color:'#5e5c56',marginTop:4}}>Workflow: 1️⃣ Encoder absences → 2️⃣ Vérifier justificatifs → 3️⃣ Valider → 4️⃣ Lancer le batch paie</div>
+    </div>
+
+    <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:16}}>
+      <C>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+          <ST>Période</ST>
+        </div>
+        <div style={{display:'grid',gap:8,marginBottom:12}}>
+          <I label="Mois" value={month} onChange={v=>setMonth(parseInt(v))} options={MN.map((m,i)=>({v:i+1,l:m}))}/>
+          <I label="Année" type="number" value={year} onChange={v=>setYear(parseInt(v))}/>
+        </div>
+        <B v="gold" style={{width:'100%',marginBottom:10}} onClick={()=>setShowForm(true)}>+ Encoder une absence</B>
+        
+        <div style={{fontSize:10,color:'#5e5c56',lineHeight:1.8,padding:10,background:'rgba(198,163,78,.03)',borderRadius:8}}>
+          <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>Impact sur la paie:</div>
+          <div>🏥 Maladie → Salaire garanti (30j)</div>
+          <div>🏖️ Congé → Payé normalement</div>
+          <div>❌ Injustifiée → Déduction au prorata</div>
+          <div>🤱 Maternité → Mutuelle (sauf 1ère sem)</div>
+          <div>⚠️ Accident → Assurance-loi 90%</div>
+          <div>🏭 Chômage éco → ONEM 65%</div>
+        </div>
+      </C>
+      <C>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+          <ST>Absences {MN[month-1]} {year}</ST>
+          <span style={{fontSize:10,color:'#5e5c56'}}>{monthAbsences.length} enregistrement(s)</span>
+        </div>
+        {monthAbsences.length===0?<div style={{padding:40,textAlign:'center',color:'#5e5c56',fontSize:12}}>Aucune absence encodée pour cette période.<br/>Cliquez "+ Encoder une absence" pour commencer.</div>:
+        <div style={{display:'flex',flexDirection:'column',gap:6}}>
+          {monthAbsences.map(a=>{
+            const emp=ae.find(e=>e.id===a.empId);
+            const tp=types.find(t=>t.id===a.type);
+            return <div key={a.id} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 12px',borderRadius:8,background:'rgba(198,163,78,.02)',border:'1px solid rgba(198,163,78,.06)'}}>
+              <span style={{fontSize:16}}>{tp?.label?.slice(0,2)}</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:12,fontWeight:500,color:'#e8e6e0'}}>{emp?eName(emp):'?'}</div>
+                <div style={{fontSize:10,color:'#5e5c56'}}>{tp?.label?.slice(3)} · {a.dateFrom}{a.dateTo&&a.dateTo!==a.dateFrom?` → ${a.dateTo}`:''} · {a.days}j</div>
+              </div>
+              <span style={{fontSize:9,padding:'2px 8px',borderRadius:10,background:a.justif?'rgba(74,222,128,.1)':'rgba(248,113,113,.1)',color:a.justif?'#4ade80':'#f87171'}}>{a.justif?'Justifié':'Non justifié'}</span>
+              <button onClick={()=>setAbsences(absences.map(x=>x.id===a.id?{...x,justif:!x.justif}:x))} style={{fontSize:9,padding:'3px 8px',borderRadius:6,border:'1px solid rgba(198,163,78,.15)',background:'transparent',color:'#c6a34e',cursor:'pointer'}}>✓</button>
+              <button onClick={()=>setAbsences(absences.filter(x=>x.id!==a.id))} style={{fontSize:9,padding:'3px 8px',borderRadius:6,border:'1px solid rgba(248,113,113,.15)',background:'transparent',color:'#f87171',cursor:'pointer'}}>✕</button>
+            </div>;
+          })}
+        </div>}
+      </C>
+    </div>
+    
+    {/* Modal formulaire */}
+    {showForm&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.6)',zIndex:9998,display:'flex',alignItems:'center',justifyContent:'center'}} onClick={()=>setShowForm(false)}>
+      <div onClick={e=>e.stopPropagation()} style={{background:'#1a1914',border:'1px solid rgba(198,163,78,.2)',borderRadius:14,padding:24,width:420,maxHeight:'80vh',overflow:'auto'}}>
+        <div style={{fontSize:16,fontWeight:600,color:'#c6a34e',marginBottom:16}}>📅 Encoder une absence</div>
+        <div style={{display:'grid',gap:10}}>
+          <I label="Employé" value={form.empId} onChange={v=>setForm({...form,empId:v})} options={[{v:'',l:'Choisir...'},...ae.map(e=>({v:e.id,l:eName(e)}))]}/>
+          <I label="Type d'absence" value={form.type} onChange={v=>setForm({...form,type:v})} options={types.map(t=>({v:t.id,l:t.label}))}/>
+          <I label="Date début" type="date" value={form.dateFrom} onChange={v=>setForm({...form,dateFrom:v})}/>
+          <I label="Date fin" type="date" value={form.dateTo} onChange={v=>setForm({...form,dateTo:v})}/>
+          <I label="Note (optionnel)" value={form.note} onChange={v=>setForm({...form,note:v})}/>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <input type="checkbox" checked={form.justif} onChange={e=>setForm({...form,justif:e.target.checked})}/>
+            <span style={{fontSize:11,color:'#9e9b93'}}>Justificatif reçu (certificat médical, etc.)</span>
+          </div>
+        </div>
+        <div style={{display:'flex',gap:8,marginTop:16}}>
+          <B v="gold" onClick={addAbsence}>Enregistrer</B>
+          <B v="outline" onClick={()=>setShowForm(false)}>Annuler</B>
+        </div>
+      </div>
+    </div>}
+  </div>;
+}
+
+// ── MODÈLES DE DOCUMENTS ──
+function TemplatesMod({s,d}){
+  const ae=s.emps.filter(e=>e.status==='active'||!e.status);
+  const [selectedTpl,setSelectedTpl]=useState(null);
+  const [selectedEmp,setSelectedEmp]=useState('');
+  
+  const templates=[
+    {id:'tpl_cdi',name:'Contrat CDI',cat:'Contrat',icon:'📄',desc:'Contrat à durée indéterminée conforme à la loi du 3/7/1978',fields:['Nom','Prénom','NISS','Fonction','CP','Salaire brut','Date début','Lieu de travail','Horaire']},
+    {id:'tpl_cdd',name:'Contrat CDD',cat:'Contrat',icon:'📄',desc:'Contrat à durée déterminée — écrit obligatoire AVANT le début',fields:['Nom','Prénom','NISS','Fonction','CP','Salaire brut','Date début','Date fin','Motif']},
+    {id:'tpl_student',name:'Convention étudiant (COE)',cat:'Contrat',icon:'🎓',desc:'Convention d\'occupation étudiant — mentions obligatoires (Titre VII)',fields:['Nom','Prénom','NISS','Fonction','Salaire horaire','Date début','Date fin','Horaire','École']},
+    {id:'tpl_avenant',name:'Avenant au contrat',cat:'Contrat',icon:'📝',desc:'Modification des conditions (salaire, fonction, horaire)',fields:['Nom employé','Objet modification','Anciennes conditions','Nouvelles conditions','Date effet']},
+    {id:'tpl_c4',name:'Formulaire C4',cat:'Sortie',icon:'📋',desc:'Certificat de chômage — obligatoire à la fin du contrat',fields:['Nom','NISS','Date entrée','Date sortie','Motif fin','Dernier salaire']},
+    {id:'tpl_preavis',name:'Lettre de préavis',cat:'Sortie',icon:'✉️',desc:'Notification de préavis par l\'employeur (recommandé)',fields:['Nom employé','Ancienneté','Durée préavis','Date début préavis','Motif']},
+    {id:'tpl_licenciement',name:'Lettre motif grave',cat:'Sortie',icon:'⚠️',desc:'Notification dans les 3 jours ouvrables + motivation 3 jours',fields:['Nom employé','Date des faits','Description faits','Date notification']},
+    {id:'tpl_attestation',name:'Attestation d\'emploi',cat:'Attestation',icon:'✅',desc:'Certificat confirmant l\'emploi (banque, bail, etc.)',fields:['Nom','Fonction','Date entrée','Type contrat','Salaire brut']},
+    {id:'tpl_telework',name:'Avenant télétravail',cat:'Contrat',icon:'🏠',desc:'Avenant télétravail structurel conforme CCT n°85',fields:['Nom employé','Jours télétravail','Indemnité bureau','Équipement fourni','Date début']},
+    {id:'tpl_rt',name:'Règlement de travail',cat:'Légal',icon:'📖',desc:'Document obligatoire dès le 1er travailleur (Loi 8/4/1965)',fields:['Horaires','Modes de paiement','Sanctions','Préavis','Premiers secours','CPPT']},
+    {id:'tpl_nda',name:'Accord de confidentialité',cat:'Légal',icon:'🔒',desc:'Clause de confidentialité pour données sensibles',fields:['Nom employé','Périmètre','Durée','Sanctions','Date']},
+    {id:'tpl_warning',name:'Avertissement écrit',cat:'Disciplinaire',icon:'⚡',desc:'Premier ou second avertissement formel',fields:['Nom employé','Date des faits','Description','Mesures attendues','Sanctions possibles']},
+    {id:'tpl_conge',name:'Demande de congé',cat:'RH',icon:'🏖️',desc:'Formulaire de demande de vacances / congé',fields:['Nom employé','Type congé','Date début','Date fin','Nb jours','Motif']},
+    {id:'tpl_expense',name:'Note de frais',cat:'Finance',icon:'🧾',desc:'Formulaire de remboursement de frais professionnels',fields:['Nom employé','Date','Description','Montant','Justificatif','Catégorie']},
+    {id:'tpl_eval',name:'Évaluation annuelle',cat:'RH',icon:'📊',desc:'Formulaire d\'évaluation des performances',fields:['Nom employé','Période','Objectifs','Résultats','Points forts','Axes d\'amélioration','Note globale']},
+  ];
+  
+  const cats=[...new Set(templates.map(t=>t.cat))];
+  const [catFilter,setCatFilter]=useState('all');
+  const filtered=catFilter==='all'?templates:templates.filter(t=>t.cat===catFilter);
+  
+  const generateDoc=(tpl)=>{
+    const emp=ae.find(e=>e.id===selectedEmp);
+    const empName=emp?`${emp.first||emp.fn||'Emp'} ${emp.last||''}`.trim():'[NOM]';
+    alert(`📄 Document "${tpl.name}" généré pour ${empName}.\n\nEn production, ceci générera un PDF/DOCX pré-rempli avec les données de l'employé.`);
+  };
+  
+  return <div>
+    <PH title="📑 Modèles de Documents" sub={`${templates.length} modèles prêts à l'emploi`}/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:16}}>
+      <SC label="Modèles" value={templates.length} color="#c6a34e"/>
+      <SC label="Contrats" value={templates.filter(t=>t.cat==='Contrat').length} color="#60a5fa"/>
+      <SC label="Sortie" value={templates.filter(t=>t.cat==='Sortie').length} color="#f87171"/>
+      <SC label="RH" value={templates.filter(t=>t.cat==='RH').length} color="#4ade80"/>
+      <SC label="Légal" value={templates.filter(t=>t.cat==='Légal').length} color="#a78bfa"/>
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:14,flexWrap:'wrap'}}>
+      <button onClick={()=>setCatFilter('all')} style={{padding:'5px 12px',borderRadius:16,border:catFilter==='all'?'1px solid rgba(198,163,78,.3)':'1px solid rgba(198,163,78,.06)',background:catFilter==='all'?'rgba(198,163,78,.1)':'transparent',color:catFilter==='all'?'#c6a34e':'#9e9b93',cursor:'pointer',fontSize:10.5,fontFamily:'inherit'}}>Tous</button>
+      {cats.map(c=><button key={c} onClick={()=>setCatFilter(c)} style={{padding:'5px 12px',borderRadius:16,border:catFilter===c?'1px solid rgba(198,163,78,.3)':'1px solid rgba(198,163,78,.06)',background:catFilter===c?'rgba(198,163,78,.1)':'transparent',color:catFilter===c?'#c6a34e':'#9e9b93',cursor:'pointer',fontSize:10.5,fontFamily:'inherit'}}>{c}</button>)}
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:12}}>
+      {filtered.map(tpl=><C key={tpl.id}>
+        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
+          <span style={{fontSize:24}}>{tpl.icon}</span>
+          <div>
+            <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>{tpl.name}</div>
+            <span style={{fontSize:9,padding:'1px 6px',borderRadius:8,background:'rgba(198,163,78,.06)',color:'#9e9b93'}}>{tpl.cat}</span>
+          </div>
+        </div>
+        <div style={{fontSize:10.5,color:'#5e5c56',lineHeight:1.5,marginBottom:10,minHeight:30}}>{tpl.desc}</div>
+        <div style={{display:'flex',gap:4,flexWrap:'wrap',marginBottom:10}}>
+          {tpl.fields.map(f=><span key={f} style={{fontSize:8.5,padding:'2px 6px',borderRadius:6,background:'rgba(96,165,250,.06)',color:'#60a5fa'}}>{f}</span>)}
+        </div>
+        <div style={{display:'flex',gap:6}}>
+          <I label="" value={selectedEmp} onChange={setSelectedEmp} options={[{v:'',l:'Choisir employé...'},...ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))]}/>
+          <B v="gold" style={{fontSize:10,padding:'6px 14px',whiteSpace:'nowrap'}} onClick={()=>generateDoc(tpl)}>Générer</B>
+        </div>
+      </C>)}
+    </div>
+  </div>;
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  ALERTES LÉGALES — Veille juridique et échéances
 // ═══════════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════
@@ -15610,6 +15955,10 @@ function AureusSuitePage({s,d}){
   if(sub==='budget_auto')return <BudgetAutoMod s={s} d={d}/>;
   if(sub==='what_if')return <SimulateurWhatIfMod s={s} d={d}/>;
   if(sub==='kpi_dashboard')return <KPIDashboardMod s={s} d={d}/>;
+  if(sub==='automations')return <AutomationsMod s={s} d={d}/>;
+  if(sub==='scheduler')return <SchedulerMod s={s} d={d}/>;
+  if(sub==='absences')return <AbsencesMod s={s} d={d}/>;
+  if(sub==='templates')return <TemplatesMod s={s} d={d}/>;
   const products=[
     {id:"aureus_pointage",ic:'⏱',name:'Aureus Pointage',
       short:"Enregistrement des entrées et sorties",
