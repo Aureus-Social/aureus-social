@@ -2639,7 +2639,7 @@ function genBelcotax(co, emp, yr, ad) {
 }
 
 // ─── INITIAL STATE ───────────────────────────────────────────
-const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:"info@aureus-ia.com",version:'v34',sprint:'Sprint 6 — Scale'};
+const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:"info@aureus-ia.com",version:'v35',sprint:'Sprint 7 — Écosystème'};
 const CAR_MODELS={
 'Aiways':['U5',"U6"],
 'Alfa Romeo':['Giulia',"Stelvio","Tonale","Junior","Giulietta","MiTo"],
@@ -3798,6 +3798,9 @@ function AppInner({ supabase, user, onLogout }) {
       {id:"ia_sante",l:"🏥 Score Santé Dossier"},
       {id:"api_doc",l:"🔌 API Documentation"},
       {id:"multi_currency",l:"💱 Multi-Devises"},
+      {id:"marketplace",l:"🏪 Marketplace"},
+      {id:"integrations",l:"🔗 Intégrations"},
+      {id:"webhooks",l:"🔔 Webhook Manager"},
       {id:"aureus_pointage",l:"⏱ Aureus Pointage"},
       {id:"aureus_paie",l:"💰 Aureus Paie"},
       {id:"aureus_titres_services",l:"🏠 Aureus Titres-Services"},
@@ -4215,6 +4218,7 @@ function Dashboard({s,d}) {
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
         {[
+          {v:'v35',title:'Sprint 7',items:['🏪 Marketplace 12 modules','🔗 Intégrations 25+ connecteurs','🔔 Webhook Manager'],color:'#a78bfa'},
           {v:'v34',title:'Sprint 6',items:['🌐 4 langues (FR/NL/EN/DE)','🔌 API Documentation','💱 Multi-Devises'],color:'#fb923c'},
           {v:'v33',title:'Sprint 5',items:['🧠 Prédiction Turnover','💡 Reco Salariales IA','📈 Prévision Masse','🔍 Détection Anomalies','🏥 Score Santé Dossier'],color:'#f87171'},
           {v:'v32',title:'Sprint 4',items:['⚡ Batch Processing','🔔 Alertes intelligentes','🔐 2FA (TOTP)','📡 DmfA améliorée'],color:'#a78bfa'},
@@ -12062,6 +12066,173 @@ function MultiCurrencyMod({s,d}){
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  SPRINT 7 — ÉCOSYSTÈME: INTÉGRATIONS + MARKETPLACE + WEBHOOKS
+// ═══════════════════════════════════════════════════════════════
+
+// ── MARKETPLACE MODULES ──
+function MarketplaceMod({s,d}){
+  const [cat,setCat]=useState('all');
+  const modules=[
+    {id:'mod_fleet',name:'Fleet Management',desc:'Gestion de flotte véhicules de société. Budget mobilité, cartes carburant, TCO, avantage de toute nature auto.',icon:'🚗',price:49,cat:'mobilite',status:'available',rating:4.8,installs:342},
+    {id:'mod_expense',name:'Expense Management',desc:'Notes de frais automatisées avec OCR. Scan ticket → remboursement. Politique de dépenses configurable.',icon:'🧾',price:29,cat:'finance',status:'available',rating:4.6,installs:567},
+    {id:'mod_recruitment',name:'Recruitment ATS',desc:'Applicant Tracking System intégré. Publication offres, CV parsing, pipeline candidats, scoring IA.',icon:'🎯',price:79,cat:'rh',status:'available',rating:4.5,installs:189},
+    {id:'mod_elearning',name:'E-Learning LMS',desc:'Plateforme de formation en ligne. Parcours obligatoires (sécurité, RGPD), certifications, suivi compliance.',icon:'📚',price:39,cat:'formation',status:'available',rating:4.7,installs:298},
+    {id:'mod_survey',name:'Employee Survey',desc:'Enquêtes de satisfaction, baromètre social, eNPS, pulse surveys hebdomadaires.',icon:'📊',price:19,cat:'rh',status:'available',rating:4.4,installs:423},
+    {id:'mod_planning',name:'Planning & Shifts',desc:'Planification des horaires et shifts. Rotation automatique, échanges entre collègues, respect temps de repos.',icon:'📅',price:39,cat:'temps',status:'available',rating:4.6,installs:512},
+    {id:'mod_onboarding',name:'Digital Onboarding',desc:'Parcours d\'intégration digital. Checklist, signature électronique, welcome pack, mentor assigné.',icon:'🎓',price:29,cat:'rh',status:'coming',rating:0,installs:0},
+    {id:'mod_offboarding',name:'Offboarding Suite',desc:'Processus de sortie complet. Récupération matériel, transfert connaissances, exit interview, alumni network.',icon:'👋',price:19,cat:'rh',status:'coming',rating:0,installs:0},
+    {id:'mod_analytics',name:'People Analytics Pro',desc:'Dashboards RH avancés. Turnover prédictif ML, cohortes, benchmarks sectoriels, equal pay analysis.',icon:'📈',price:99,cat:'analytics',status:'available',rating:4.9,installs:156},
+    {id:'mod_sign',name:'E-Signature',desc:'Signature électronique eIDAS. Contrats, avenants, règlement de travail. Intégration itsme® et eID belge.',icon:'✍️',price:29,cat:'documents',status:'available',rating:4.7,installs:678},
+    {id:'mod_whistleblower',name:'Whistleblower Channel',desc:'Canal de signalement anonyme conforme Directive UE 2019/1937. Obligatoire +50 travailleurs.',icon:'🔔',price:19,cat:'compliance',status:'available',rating:4.3,installs:89},
+    {id:'mod_ai_assistant',name:'AI Payroll Assistant',desc:'Assistant IA conversationnel spécialisé droit social belge. Répond aux questions CP, préavis, indexation.',icon:'🤖',price:59,cat:'ia',status:'available',rating:4.8,installs:834},
+  ];
+  const cats=[{v:'all',l:'Tous'},{v:'rh',l:'RH'},{v:'finance',l:'Finance'},{v:'temps',l:'Temps'},{v:'formation',l:'Formation'},{v:'mobilite',l:'Mobilité'},{v:'documents',l:'Documents'},{v:'compliance',l:'Compliance'},{v:'analytics',l:'Analytics'},{v:'ia',l:'IA'}];
+  const filtered=cat==='all'?modules:modules.filter(m=>m.cat===cat);
+  
+  return <div>
+    <PH title="🏪 Marketplace" sub={`${modules.length} modules disponibles — Étendez votre plateforme`}/>
+    <div style={{display:'flex',gap:6,marginBottom:16,flexWrap:'wrap'}}>
+      {cats.map(c=><button key={c.v} onClick={()=>setCat(c.v)} style={{padding:'6px 14px',borderRadius:20,border:cat===c.v?'1px solid rgba(198,163,78,.3)':'1px solid rgba(198,163,78,.08)',background:cat===c.v?'rgba(198,163,78,.12)':'transparent',color:cat===c.v?'#c6a34e':'#9e9b93',cursor:'pointer',fontSize:11,fontFamily:'inherit'}}>{c.l}</button>)}
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:12}}>
+      {filtered.map(m=><C key={m.id} style={{position:'relative',overflow:'hidden'}}>
+        {m.status==='coming'&&<div style={{position:'absolute',top:10,right:-30,transform:'rotate(45deg)',background:'#fb923c',color:'#fff',fontSize:9,padding:'2px 35px',fontWeight:700}}>BIENTÔT</div>}
+        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+          <span style={{fontSize:28}}>{m.icon}</span>
+          <div>
+            <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0'}}>{m.name}</div>
+            <div style={{display:'flex',gap:6,alignItems:'center'}}>
+              {m.rating>0&&<span style={{fontSize:10,color:'#c6a34e'}}>★ {m.rating}</span>}
+              {m.installs>0&&<span style={{fontSize:10,color:'#5e5c56'}}>{m.installs} installations</span>}
+            </div>
+          </div>
+        </div>
+        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.5,marginBottom:12,minHeight:45}}>{m.desc}</div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div style={{fontSize:16,fontWeight:700,color:'#c6a34e'}}>{m.price}€<span style={{fontSize:10,fontWeight:400,color:'#5e5c56'}}>/mois</span></div>
+          <B v={m.status==='coming'?'outline':'gold'} style={{fontSize:11,padding:'6px 16px'}} onClick={()=>{if(m.status==='available')alert(`✅ Module "${m.name}" activé ! (${m.price}€/mois)`)}}>
+            {m.status==='coming'?'Notifier':'Activer'}
+          </B>
+        </div>
+      </C>)}
+    </div>
+  </div>;
+}
+
+// ── INTÉGRATIONS CONNECTEURS ──
+function IntegrationsMod({s,d}){
+  const integrations=[
+    {cat:'Comptabilité',items:[
+      {name:'BOB Software',logo:'🟦',status:'connected',desc:'Export OD automatique mensuel'},
+      {name:'Winbooks',logo:'🟩',status:'connected',desc:'Sync journaux comptables'},
+      {name:'Exact Online',logo:'🟧',status:'available',desc:'API bi-directionnelle'},
+      {name:'ClearFact',logo:'🟨',status:'connected',desc:'Upload factures + pièces'},
+      {name:'Octopus',logo:'🟪',status:'available',desc:'Export écritures'},
+      {name:'Yuki',logo:'⬜',status:'available',desc:'XML automatique'},
+      {name:'Horus',logo:'🔵',status:'available',desc:'Interface comptable'},
+    ]},
+    {cat:'ONSS & Gouvernement',items:[
+      {name:'Portail Sécurité Sociale',logo:'🏛️',status:'connected',desc:'Dimona, DmfA, DRS'},
+      {name:'MyMinfin',logo:'🏦',status:'connected',desc:'Précompte 274, Belcotax 281'},
+      {name:'itsme®',logo:'📱',status:'available',desc:'Signature électronique + auth'},
+      {name:'CSAM',logo:'🔐',status:'available',desc:'Authentication fédérale'},
+    ]},
+    {cat:'Banque & Paiement',items:[
+      {name:'Isabel 6',logo:'🏦',status:'available',desc:'Virements SEPA batch'},
+      {name:'Codabox',logo:'📦',status:'available',desc:'CODA + SODA automatique'},
+      {name:'Ponto (Isabel)',logo:'💳',status:'available',desc:'Relevés bancaires PSD2'},
+    ]},
+    {cat:'RH & Bien-être',items:[
+      {name:'Pluxee (Sodexo)',logo:'🟠',status:'connected',desc:'Commande chèques-repas'},
+      {name:'Edenred',logo:'🔴',status:'available',desc:'Chèques-repas & éco-chèques'},
+      {name:'Monizze',logo:'🟢',status:'available',desc:'Chèques-repas digitaux'},
+      {name:'Attentia',logo:'🩺',status:'available',desc:'Médecine du travail'},
+      {name:'Mensura',logo:'🏥',status:'available',desc:'Prévention & bien-être'},
+    ]},
+    {cat:'Communication',items:[
+      {name:'Microsoft Teams',logo:'🟣',status:'available',desc:'Notifications paie & RH'},
+      {name:'Slack',logo:'💬',status:'available',desc:'Alertes & workflow'},
+      {name:'SMTP Email',logo:'📧',status:'connected',desc:'Fiches de paie par email'},
+    ]},
+  ];
+  const statusColors={connected:'#4ade80',available:'#5e5c56',error:'#f87171'};
+  const statusLabels={connected:'Connecté',available:'Disponible',error:'Erreur'};
+  
+  return <div>
+    <PH title="🔗 Intégrations" sub="Connecteurs et API partenaires"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      <SC label="Total connecteurs" value={integrations.reduce((a,c)=>a+c.items.length,0)} color="#c6a34e"/>
+      <SC label="Connectés" value={integrations.reduce((a,c)=>a+c.items.filter(i=>i.status==='connected').length,0)} color="#4ade80"/>
+      <SC label="Disponibles" value={integrations.reduce((a,c)=>a+c.items.filter(i=>i.status==='available').length,0)} color="#60a5fa"/>
+      <SC label="Catégories" value={integrations.length} color="#a78bfa"/>
+    </div>
+    {integrations.map((cat,ci)=><C key={ci} style={{marginBottom:12}}>
+      <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0',marginBottom:10}}>{cat.cat}</div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:8}}>
+        {cat.items.map((it,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 12px',borderRadius:8,background:'rgba(198,163,78,.02)',border:'1px solid rgba(198,163,78,.06)'}}>
+          <span style={{fontSize:20}}>{it.logo}</span>
+          <div style={{flex:1}}>
+            <div style={{fontSize:12,fontWeight:600,color:'#e8e6e0'}}>{it.name}</div>
+            <div style={{fontSize:9.5,color:'#5e5c56'}}>{it.desc}</div>
+          </div>
+          <span style={{width:8,height:8,borderRadius:'50%',background:statusColors[it.status]}} title={statusLabels[it.status]}/>
+        </div>)}
+      </div>
+    </C>)}
+  </div>;
+}
+
+// ── WEBHOOK MANAGER ──
+function WebhookManagerMod({s,d}){
+  const [hooks,setHooks]=useState([
+    {id:'WH-001',url:'https://accounting.example.com/webhook',events:['payroll.calculated','payroll.batch'],status:'active',lastCall:'2026-02-14T10:30:00',success:142,fail:2},
+    {id:'WH-002',url:'https://erp.example.com/aureus',events:['employee.created','employee.updated'],status:'active',lastCall:'2026-02-13T16:45:00',success:67,fail:0},
+  ]);
+  const allEvents=['payroll.calculated','payroll.batch','employee.created','employee.updated','employee.deleted','dimona.sent','dmfa.generated','contract.signed','absence.declared','alert.triggered'];
+  
+  return <div>
+    <PH title="🔔 Webhook Manager" sub="Événements temps réel vers vos systèmes"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:18}}>
+      <SC label="Webhooks actifs" value={hooks.filter(h=>h.status==='active').length} color="#4ade80"/>
+      <SC label="Appels réussis" value={hooks.reduce((a,h)=>a+h.success,0)} color="#60a5fa"/>
+      <SC label="Erreurs" value={hooks.reduce((a,h)=>a+h.fail,0)} color={hooks.reduce((a,h)=>a+h.fail,0)>0?'#f87171':'#4ade80'}/>
+    </div>
+    <C>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+        <ST>Webhooks configurés</ST>
+        <B v="outline" style={{fontSize:10}} onClick={()=>{
+          const newHook={id:'WH-'+Date.now().toString(36).toUpperCase(),url:'https://',events:[],status:'draft',lastCall:null,success:0,fail:0};
+          setHooks([...hooks,newHook]);
+        }}>+ Ajouter webhook</B>
+      </div>
+      {hooks.map((h,i)=><div key={h.id} style={{padding:14,borderRadius:10,background:'rgba(198,163,78,.02)',border:'1px solid rgba(198,163,78,.08)',marginBottom:8}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <span style={{width:8,height:8,borderRadius:'50%',background:h.status==='active'?'#4ade80':'#fb923c'}}/>
+            <code style={{fontSize:12,color:'#e8e6e0'}}>{h.url}</code>
+          </div>
+          <span style={{fontSize:10,color:'#5e5c56'}}>{h.id}</span>
+        </div>
+        <div style={{display:'flex',gap:4,flexWrap:'wrap',marginBottom:8}}>
+          {h.events.map(ev=><span key={ev} style={{fontSize:9,padding:'2px 8px',borderRadius:10,background:'rgba(96,165,250,.1)',color:'#60a5fa'}}>{ev}</span>)}
+        </div>
+        <div style={{display:'flex',gap:16,fontSize:10,color:'#5e5c56'}}>
+          <span>✅ {h.success} succès</span>
+          <span>❌ {h.fail} erreurs</span>
+          {h.lastCall&&<span>Dernier appel: {new Date(h.lastCall).toLocaleString('fr-BE')}</span>}
+        </div>
+      </div>)}
+    </C>
+    <C style={{marginTop:12}}>
+      <ST>Événements disponibles</ST>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:6}}>
+        {allEvents.map(ev=><div key={ev} style={{padding:'8px 10px',borderRadius:6,background:'rgba(198,163,78,.03)',border:'1px solid rgba(198,163,78,.06)',fontSize:10,color:'#9e9b93',textAlign:'center'}}>{ev}</div>)}
+      </div>
+    </C>
+  </div>;
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  ALERTES LÉGALES — Veille juridique et échéances
 // ═══════════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════
@@ -15305,6 +15476,9 @@ function AureusSuitePage({s,d}){
   if(sub==='ia_sante')return <ScoreSanteMod s={s} d={d}/>;
   if(sub==='api_doc')return <APIDocMod s={s} d={d}/>;
   if(sub==='multi_currency')return <MultiCurrencyMod s={s} d={d}/>;
+  if(sub==='marketplace')return <MarketplaceMod s={s} d={d}/>;
+  if(sub==='integrations')return <IntegrationsMod s={s} d={d}/>;
+  if(sub==='webhooks')return <WebhookManagerMod s={s} d={d}/>;
   const products=[
     {id:"aureus_pointage",ic:'⏱',name:'Aureus Pointage',
       short:"Enregistrement des entrées et sorties",
