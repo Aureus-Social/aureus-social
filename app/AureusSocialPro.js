@@ -4396,7 +4396,12 @@ function Employees({s,d}) {
   const onCPChange=(v)=>{
     const preset=CP_PRESETS[v];
     if(preset&&!ed){
-      setF({...form,cp:v,fn:form.fn||preset.fn,statut:preset.statut,monthlySalary:form.monthlySalary||preset.monthlySalary,whWeek:preset.whWeek});
+      setF({...form,cp:v,
+        fn:form.fn||preset.fn,
+        statut:preset.statut,
+        monthlySalary:(form.monthlySalary&&form.monthlySalary>0)?form.monthlySalary:preset.monthlySalary,
+        whWeek:preset.whWeek
+      });
     }else{
       setF({...form,cp:v});
     }
@@ -15438,4 +15443,4 @@ export default function AureusSocialPro({ supabase, user, onLogout }) {
   return <LangProvider><AppInner supabase={supabase} user={user} onLogout={onLogout}/></LangProvider>;
 }
 
-// v30 sprint2
+// v30b
