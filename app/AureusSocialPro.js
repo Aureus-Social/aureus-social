@@ -4527,9 +4527,9 @@ function Employees({s,d}) {
     const preset=CP_PRESETS[v];
     if(preset&&!ed){
       setF({...form,cp:v,
-        fn:form.fn||preset.fn,
+        fn:preset.fn,
         statut:preset.statut,
-        monthlySalary:(form.monthlySalary&&form.monthlySalary>0)?form.monthlySalary:preset.monthlySalary,
+        monthlySalary:preset.monthlySalary,
         whWeek:preset.whWeek
       });
     }else{
@@ -15573,4 +15573,4 @@ export default function AureusSocialPro({ supabase, user, onLogout }) {
   return <LangProvider><AppInner supabase={supabase} user={user} onLogout={onLogout}/></LangProvider>;
 }
 
-// v30c 153CP
+// v30d cpfix
