@@ -17263,3 +17263,5 @@ function FloatingLegalAgent({onAction}){
 export default function AureusSocialPro({ supabase, user, onLogout }) {
   return <LangProvider><AppInner supabase={supabase} user={user} onLogout={onLogout}/></LangProvider>;
 }
+/ /   v 3 7 b   f i x  
+ 
