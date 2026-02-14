@@ -2639,7 +2639,7 @@ function genBelcotax(co, emp, yr, ad) {
 }
 
 // ─── INITIAL STATE ───────────────────────────────────────────
-const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:"info@aureus-ia.com",version:'v36',sprint:'Sprint 8 — Prédictif'};
+const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:"info@aureus-ia.com",version:'v36b',sprint:'Sprint 8 — Performance'};
 const CAR_MODELS={
 'Aiways':['U5',"U6"],
 'Alfa Romeo':['Giulia',"Stelvio","Tonale","Junior","Giulietta","MiTo"],
@@ -2755,16 +2755,19 @@ async function loadFromSupabase(supabase, userId) {
 // Combined save: Supabase + localStorage backup
 let _supabaseRef = null;
 let _userIdRef = null;
+let _saveTimer = null;
 function setSupabaseRefs(sb, uid) { _supabaseRef = sb; _userIdRef = uid; }
 async function saveData(data){
   try{
     if (typeof window === 'undefined') return;
-    // Always save to localStorage as immediate backup
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch(e) { console.warn("localStorage error:", e); }
-    // Also persist to Supabase if available (non-blocking)
-    if (_supabaseRef && _userIdRef) {
-      saveToSupabase(_supabaseRef, _userIdRef, data).catch(()=>{});
-    }
+    // Debounce: cancel previous save, wait 500ms
+    if(_saveTimer)clearTimeout(_saveTimer);
+    _saveTimer=setTimeout(()=>{
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch(e) { console.warn("localStorage error:", e); }
+      if (_supabaseRef && _userIdRef) {
+        saveToSupabase(_supabaseRef, _userIdRef, data).catch(()=>{});
+      }
+    },500);
   }catch(e){console.warn('Save failed',e);}
 }
 async function loadData(supabase, userId){
@@ -4464,164 +4467,9 @@ function Employees({s,d}) {
     e.target.value='';
   };
 
-  // ── PRÉ-REMPLISSAGE INTELLIGENT PAR CP ──
-  const CP_PRESETS={
-    '100':{fn:'Ouvrier',statut:'ouvrier',monthlySalary:2100,whWeek:38},
-    '100.01':{fn:'Ouvrier sous-CP nationale',statut:'ouvrier',monthlySalary:2100,whWeek:38},
-    '101':{fn:'Mineur',statut:'ouvrier',monthlySalary:2200,whWeek:36},
-    '102':{fn:'Carrier',statut:'ouvrier',monthlySalary:2300,whWeek:38},
-    '102.01':{fn:'Carrier (petites entreprises)',statut:'ouvrier',monthlySalary:2200,whWeek:38},
-    '102.02':{fn:'Carrier (grandes entreprises)',statut:'ouvrier',monthlySalary:2400,whWeek:38},
-    '102.03':{fn:'Exploitation marbre',statut:'ouvrier',monthlySalary:2350,whWeek:38},
-    '102.04':{fn:'Exploitation grès',statut:'ouvrier',monthlySalary:2300,whWeek:38},
-    '102.05':{fn:'Exploitation silex',statut:'ouvrier',monthlySalary:2300,whWeek:38},
-    '102.06':{fn:'Exploitation ardoise',statut:'ouvrier',monthlySalary:2300,whWeek:38},
-    '102.07':{fn:'Exploitation porphyre',statut:'ouvrier',monthlySalary:2350,whWeek:38},
-    '102.08':{fn:'Exploitation kaolin',statut:'ouvrier',monthlySalary:2300,whWeek:38},
-    '102.09':{fn:'Exploitation sable',statut:'ouvrier',monthlySalary:2250,whWeek:38},
-    '104':{fn:'Ouvrier sidérurgie',statut:'ouvrier',monthlySalary:2500,whWeek:38},
-    '105':{fn:'Ouvrier métaux non-ferreux',statut:'ouvrier',monthlySalary:2400,whWeek:38},
-    '106.01':{fn:'Ouvrier cimenteries',statut:'ouvrier',monthlySalary:2450,whWeek:38},
-    '106.02':{fn:'Ouvrier béton',statut:'ouvrier',monthlySalary:2300,whWeek:38},
-    '106.03':{fn:'Ouvrier fibre-ciment',statut:'ouvrier',monthlySalary:2350,whWeek:38},
-    '107':{fn:'Maître-tailleur',statut:'ouvrier',monthlySalary:2150,whWeek:38},
-    '108':{fn:'Ouvrier brosserie',statut:'ouvrier',monthlySalary:2050,whWeek:38},
-    '109':{fn:'Ouvrier confection',statut:'ouvrier',monthlySalary:2050,whWeek:38},
-    '110':{fn:'Ouvrier textile',statut:'ouvrier',monthlySalary:2150,whWeek:36},
-    '111':{fn:'Ouvrier métallurgie',statut:'ouvrier',monthlySalary:2400,whWeek:38},
-    '111.01':{fn:'Mécanicien',statut:'ouvrier',monthlySalary:2450,whWeek:38},
-    '111.02':{fn:'Mécanicien réparation',statut:'ouvrier',monthlySalary:2400,whWeek:38},
-    '111.03':{fn:'Monteur',statut:'ouvrier',monthlySalary:2500,whWeek:38},
-    '112':{fn:'Ouvrier garage',statut:'ouvrier',monthlySalary:2300,whWeek:38},
-    '113':{fn:'Ouvrier céramique',statut:'ouvrier',monthlySalary:2200,whWeek:38},
-    '114':{fn:'Briquetier',statut:'ouvrier',monthlySalary:2250,whWeek:38},
-    '115':{fn:'Ouvrier verrerie',statut:'ouvrier',monthlySalary:2400,whWeek:38},
-    '116':{fn:'Ouvrier chimie',statut:'ouvrier',monthlySalary:2450,whWeek:38},
-    '117':{fn:'Ouvrier pétrole',statut:'ouvrier',monthlySalary:2600,whWeek:38},
-    '118':{fn:'Boulanger',statut:'ouvrier',monthlySalary:2200,whWeek:38},
-    '118.01':{fn:'Boulanger industriel',statut:'ouvrier',monthlySalary:2250,whWeek:38},
-    '118.02':{fn:'Boulanger petites entreprises',statut:'ouvrier',monthlySalary:2150,whWeek:38},
-    '118.03':{fn:'Boulanger artisanal',statut:'ouvrier',monthlySalary:2100,whWeek:38},
-    '119':{fn:'Ouvrier commerce alimentaire',statut:'ouvrier',monthlySalary:2100,whWeek:38},
-    '119.01':{fn:'Commerce alimentaire (PME)',statut:'ouvrier',monthlySalary:2050,whWeek:38},
-    '119.02':{fn:'Commerce alimentaire (grandes)',statut:'ouvrier',monthlySalary:2150,whWeek:38},
-    '120':{fn:'Ouvrier textile Flandre orientale',statut:'ouvrier',monthlySalary:2150,whWeek:36},
-    '121':{fn:'Nettoyeur',statut:'ouvrier',monthlySalary:2050,whWeek:38},
-    '122':{fn:'Ouvrier huilerie',statut:'ouvrier',monthlySalary:2200,whWeek:38},
-    '124':{fn:'Ouvrier construction',statut:'ouvrier',monthlySalary:2400,whWeek:38},
-    '125':{fn:'Ouvrier bois',statut:'ouvrier',monthlySalary:2200,whWeek:38},
-    '125.01':{fn:'Scierie',statut:'ouvrier',monthlySalary:2150,whWeek:38},
-    '125.02':{fn:'Menuisier',statut:'ouvrier',monthlySalary:2250,whWeek:38},
-    '125.03':{fn:'Fabricant meubles',statut:'ouvrier',monthlySalary:2200,whWeek:38},
-    '126':{fn:'Ouvrier ameublement',statut:'ouvrier',monthlySalary:2150,whWeek:38},
-    '127':{fn:'Ouvrier combustibles',statut:'ouvrier',monthlySalary:2250,whWeek:38},
-    '128':{fn:'Ouvrier cuir',statut:'ouvrier',monthlySalary:2100,whWeek:38},
-    '129':{fn:'Ouvrier papier',statut:'ouvrier',monthlySalary:2250,whWeek:38},
-    '130':{fn:'Imprimeur',statut:'ouvrier',monthlySalary:2350,whWeek:38},
-    '130.01':{fn:'Imprimeur offset',statut:'ouvrier',monthlySalary:2400,whWeek:38},
-    '130.02':{fn:'Imprimeur numérique',statut:'ouvrier',monthlySalary:2350,whWeek:38},
-    '131':{fn:'Batelier',statut:'ouvrier',monthlySalary:2300,whWeek:38},
-    '132':{fn:'Entreprise de travaux techniques',statut:'ouvrier',monthlySalary:2400,whWeek:38},
-    '133':{fn:'Ouvrier tabac',statut:'ouvrier',monthlySalary:2150,whWeek:38},
-    '136':{fn:'Ouvrier transformation papier',statut:'ouvrier',monthlySalary:2200,whWeek:38},
-    '140':{fn:'Chauffeur',statut:'ouvrier',monthlySalary:2350,whWeek:38},
-    '140.01':{fn:'Chauffeur autobus',statut:'ouvrier',monthlySalary:2400,whWeek:38},
-    '140.02':{fn:'Taxi',statut:'ouvrier',monthlySalary:2200,whWeek:38},
-    '140.03':{fn:'Déménageur',statut:'ouvrier',monthlySalary:2300,whWeek:38},
-    '140.04':{fn:'Chauffeur transport routier',statut:'ouvrier',monthlySalary:2350,whWeek:38},
-    '140.05':{fn:'Ambulancier',statut:'ouvrier',monthlySalary:2250,whWeek:38},
-    '142':{fn:'Récupérateur',statut:'ouvrier',monthlySalary:2150,whWeek:38},
-    '142.01':{fn:'Récupérateur métaux',statut:'ouvrier',monthlySalary:2200,whWeek:38},
-    '142.02':{fn:'Récupérateur textiles',statut:'ouvrier',monthlySalary:2100,whWeek:38},
-    '142.04':{fn:'Récupérateur papier',statut:'ouvrier',monthlySalary:2150,whWeek:38},
-    '143':{fn:'Ouvrier pêche maritime',statut:'ouvrier',monthlySalary:2400,whWeek:38},
-    '144':{fn:'Ouvrier agriculture',statut:'ouvrier',monthlySalary:2050,whWeek:38},
-    '145':{fn:'Ouvrier horticulture',statut:'ouvrier',monthlySalary:2050,whWeek:38},
-    '145.01':{fn:'Pépiniériste',statut:'ouvrier',monthlySalary:2050,whWeek:38},
-    '145.04':{fn:'Ouvrier parcs et jardins',statut:'ouvrier',monthlySalary:2100,whWeek:38},
-    '145.05':{fn:'Ouvrier champignonnière',statut:'ouvrier',monthlySalary:2000,whWeek:38},
-    '146':{fn:'Ouvrier forestier',statut:'ouvrier',monthlySalary:2100,whWeek:38},
-    '148':{fn:'Ouvrier fourrure',statut:'ouvrier',monthlySalary:2100,whWeek:38},
-    '149.01':{fn:'Électricien',statut:'ouvrier',monthlySalary:2400,whWeek:38},
-    '149.02':{fn:'Carrossier',statut:'ouvrier',monthlySalary:2350,whWeek:38},
-    '149.04':{fn:'Ouvrier métal précieux',statut:'ouvrier',monthlySalary:2300,whWeek:38},
-    '150':{fn:'Ouvrier poterie',statut:'ouvrier',monthlySalary:2150,whWeek:38},
-    '152':{fn:'Ouvrier non-marchand',statut:'ouvrier',monthlySalary:2200,whWeek:38},
-    '200':{fn:'Employé',statut:'employe',monthlySalary:2800,whWeek:38},
-    '201':{fn:'Employé commerce détail',statut:'employe',monthlySalary:2300,whWeek:38},
-    '202':{fn:'Employé commerce alimentaire',statut:'employe',monthlySalary:2200,whWeek:38},
-    '202.01':{fn:'Employé PME alimentaire',statut:'employe',monthlySalary:2150,whWeek:38},
-    '207':{fn:'Employé chimie',statut:'employe',monthlySalary:3200,whWeek:38},
-    '209':{fn:'Employé métal',statut:'employe',monthlySalary:3000,whWeek:38},
-    '210':{fn:'Employé sidérurgie',statut:'employe',monthlySalary:3100,whWeek:38},
-    '211':{fn:'Cadre',statut:'employe',monthlySalary:4500,whWeek:38},
-    '214':{fn:'Employé textile',statut:'employe',monthlySalary:2600,whWeek:36},
-    '215':{fn:'Employé confection',statut:'employe',monthlySalary:2500,whWeek:38},
-    '216':{fn:'Employé notaire',statut:'employe',monthlySalary:2700,whWeek:38},
-    '218':{fn:'Employé CNE',statut:'employe',monthlySalary:2600,whWeek:38},
-    '219':{fn:'Employé technologie',statut:'employe',monthlySalary:3500,whWeek:38},
-    '220':{fn:'Employé agro-alimentaire',statut:'employe',monthlySalary:2700,whWeek:38},
-    '222':{fn:'Employé papier',statut:'employe',monthlySalary:2800,whWeek:38},
-    '223':{fn:'Employé sport',statut:'employe',monthlySalary:2500,whWeek:38},
-    '224':{fn:'Employé métaux non-ferreux',statut:'employe',monthlySalary:3000,whWeek:38},
-    '225':{fn:'Employé établissement de crédit',statut:'employe',monthlySalary:3300,whWeek:37},
-    '226':{fn:'Employé commerce international',statut:'employe',monthlySalary:3100,whWeek:38},
-    '227':{fn:'Employé audiovisuel',statut:'employe',monthlySalary:2800,whWeek:38},
-    '302':{fn:'Ouvrier Horeca',statut:'ouvrier',monthlySalary:2150,whWeek:38},
-    '303':{fn:'Ouvrier cinéma',statut:'ouvrier',monthlySalary:2200,whWeek:38},
-    '304':{fn:'Artiste',statut:'employe',monthlySalary:2500,whWeek:38},
-    '305':{fn:'Employé santé',statut:'employe',monthlySalary:2800,whWeek:38},
-    '306':{fn:'Employé assurance',statut:'employe',monthlySalary:3200,whWeek:37},
-    '307':{fn:'Employé courtage',statut:'employe',monthlySalary:2900,whWeek:38},
-    '308':{fn:'Employé crédit hypothécaire',statut:'employe',monthlySalary:3100,whWeek:37},
-    '309':{fn:'Employé bourse',statut:'employe',monthlySalary:3400,whWeek:37},
-    '310':{fn:'Employé banque',statut:'employe',monthlySalary:3400,whWeek:37},
-    '311':{fn:'Employé grande distribution',statut:'employe',monthlySalary:2500,whWeek:38},
-    '312':{fn:'Employé grands magasins',statut:'employe',monthlySalary:2400,whWeek:38},
-    '313':{fn:'Employé pharmacie',statut:'employe',monthlySalary:2700,whWeek:38},
-    '314':{fn:'Coiffeur',statut:'employe',monthlySalary:2200,whWeek:38},
-    '315':{fn:'Employé aviation',statut:'employe',monthlySalary:3500,whWeek:38},
-    '316':{fn:'Employé intérim',statut:'employe',monthlySalary:2600,whWeek:38},
-    '317':{fn:'Employé gardiennage',statut:'employe',monthlySalary:2500,whWeek:38},
-    '318':{fn:'Aide familiale',statut:'employe',monthlySalary:2400,whWeek:38},
-    '318.01':{fn:'Aide familiale (service)',statut:'employe',monthlySalary:2400,whWeek:38},
-    '318.02':{fn:'Aide ménagère sociale',statut:'employe',monthlySalary:2300,whWeek:38},
-    '319':{fn:'Éducateur',statut:'employe',monthlySalary:2700,whWeek:38},
-    '319.01':{fn:'Éducateur milieu accueil',statut:'employe',monthlySalary:2600,whWeek:38},
-    '320':{fn:'Employé pompes funèbres',statut:'employe',monthlySalary:2400,whWeek:38},
-    '321':{fn:'Employé commerce de détail alimentaire',statut:'employe',monthlySalary:2200,whWeek:38},
-    '322':{fn:'Intérimaire',statut:'employe',monthlySalary:2500,whWeek:38},
-    '322.01':{fn:'Intérimaire (utilisateur)',statut:'employe',monthlySalary:2500,whWeek:38},
-    '323':{fn:'Concierge',statut:'employe',monthlySalary:2300,whWeek:38},
-    '324':{fn:'Employé diamant',statut:'employe',monthlySalary:3000,whWeek:38},
-    '325':{fn:'Employé institution publique crédit',statut:'employe',monthlySalary:3200,whWeek:37},
-    '326':{fn:'Employé gaz/électricité',statut:'employe',monthlySalary:3300,whWeek:38},
-    '327':{fn:'Employé entreprise de travail adapté',statut:'employe',monthlySalary:2300,whWeek:38},
-    '328':{fn:'Employé transport urbain',statut:'employe',monthlySalary:2800,whWeek:38},
-    '329':{fn:'Travailleur socio-culturel',statut:'employe',monthlySalary:2600,whWeek:38},
-    '329.01':{fn:'Animateur socio-culturel',statut:'employe',monthlySalary:2550,whWeek:38},
-    '329.02':{fn:'Employé éducation permanente',statut:'employe',monthlySalary:2600,whWeek:38},
-    '329.03':{fn:'Employé fédérations sportives',statut:'employe',monthlySalary:2500,whWeek:38},
-    '330':{fn:'Professionnel de santé',statut:'employe',monthlySalary:3000,whWeek:38},
-    '330.01':{fn:'Infirmier(e)',statut:'employe',monthlySalary:3100,whWeek:38},
-    '330.02':{fn:'Kinésithérapeute',statut:'employe',monthlySalary:3000,whWeek:38},
-    '330.03':{fn:'Logopède',statut:'employe',monthlySalary:2900,whWeek:38},
-    '330.04':{fn:'Ergothérapeute',statut:'employe',monthlySalary:2850,whWeek:38},
-    '331':{fn:'Employé tourisme',statut:'employe',monthlySalary:2500,whWeek:38},
-    '332':{fn:'Aide-soignant(e)',statut:'employe',monthlySalary:2500,whWeek:38},
-    '332.01':{fn:'Aide-soignant résidentiel',statut:'employe',monthlySalary:2500,whWeek:38},
-    '333':{fn:'Employé attraction touristique',statut:'employe',monthlySalary:2300,whWeek:38},
-    '334':{fn:'Ouvrier loterie',statut:'ouvrier',monthlySalary:2300,whWeek:38},
-    '335':{fn:'Employé prestataire de services',statut:'employe',monthlySalary:2600,whWeek:38},
-    '336':{fn:'Employé profession libérale',statut:'employe',monthlySalary:2700,whWeek:38},
-    '337':{fn:'Employé auxiliaire non-marchand',statut:'employe',monthlySalary:2500,whWeek:38},
-    '338':{fn:'Ouvrier titres-services',statut:'ouvrier',monthlySalary:2050,whWeek:38},
-    '339':{fn:'Employé société logement social',statut:'employe',monthlySalary:2700,whWeek:38},
-    '340':{fn:'Employé orthopédie',statut:'employe',monthlySalary:2800,whWeek:38},
-    '341':{fn:'Ouvrier intermittent spectacle',statut:'ouvrier',monthlySalary:2300,whWeek:38},
-  };
+  // ── PRÉ-REMPLISSAGE INTELLIGENT PAR CP (référence globale optimisée) ──
   const onCPChange=(v)=>{
-    const preset=CP_PRESETS[v];
+    const preset=CP_PRESETS_FULL[v];
     if(preset&&!ed){
       setF({...form,cp:v,
         fn:preset.fn,
@@ -11681,6 +11529,8 @@ function WorkflowMaladieMod({s,d}){
 //  SPRINT 5 — IA PRÉDICTIVE & RECOMMANDATIONS
 // ═══════════════════════════════════════════════════════════════
 const CP_PRESETS_GLOBAL={'100':{fn:'Ouvrier',monthlySalary:2100},'110':{fn:'Ouvrier textile',monthlySalary:2150},'111':{fn:'Ouvrier métallurgie',monthlySalary:2400},'112':{fn:'Ouvrier garage',monthlySalary:2300},'116':{fn:'Ouvrier chimie',monthlySalary:2450},'118':{fn:'Boulanger',monthlySalary:2200},'121':{fn:'Nettoyeur',monthlySalary:2050},'124':{fn:'Ouvrier construction',monthlySalary:2400},'125':{fn:'Ouvrier bois',monthlySalary:2200},'130':{fn:'Imprimeur',monthlySalary:2350},'140':{fn:'Chauffeur',monthlySalary:2350},'144':{fn:'Ouvrier agriculture',monthlySalary:2050},'145':{fn:'Ouvrier horticulture',monthlySalary:2050},'149.01':{fn:'Électricien',monthlySalary:2400},'200':{fn:'Employé',monthlySalary:2800},'201':{fn:'Employé commerce détail',monthlySalary:2300},'202':{fn:'Employé commerce alimentaire',monthlySalary:2200},'207':{fn:'Employé chimie',monthlySalary:3200},'209':{fn:'Employé métal',monthlySalary:3000},'211':{fn:'Cadre',monthlySalary:4500},'214':{fn:'Employé textile',monthlySalary:2600},'216':{fn:'Employé notaire',monthlySalary:2700},'218':{fn:'Employé CNE',monthlySalary:2600},'219':{fn:'Employé technologie',monthlySalary:3500},'220':{fn:'Employé agro-alimentaire',monthlySalary:2700},'225':{fn:'Employé crédit',monthlySalary:3300},'226':{fn:'Employé commerce international',monthlySalary:3100},'302':{fn:'Ouvrier Horeca',monthlySalary:2150},'304':{fn:'Artiste',monthlySalary:2500},'306':{fn:'Employé assurance',monthlySalary:3200},'310':{fn:'Employé banque',monthlySalary:3400},'311':{fn:'Employé grande distribution',monthlySalary:2500},'313':{fn:'Employé pharmacie',monthlySalary:2700},'314':{fn:'Coiffeur',monthlySalary:2200},'317':{fn:'Employé gardiennage',monthlySalary:2500},'318':{fn:'Aide familiale',monthlySalary:2400},'319':{fn:'Éducateur',monthlySalary:2700},'322':{fn:'Intérimaire',monthlySalary:2500},'329':{fn:'Travailleur socio-culturel',monthlySalary:2600},'330':{fn:'Professionnel de santé',monthlySalary:3000},'332':{fn:'Aide-soignant(e)',monthlySalary:2500},'336':{fn:'Employé profession libérale',monthlySalary:2700},'338':{fn:'Ouvrier titres-services',monthlySalary:2050}};
+// ── CP_PRESETS_FULL: 153 CP belges (module-level pour performance — alloué 1x) ──
+const CP_PRESETS_FULL={'100':{fn:'Ouvrier',statut:'ouvrier',monthlySalary:2100,whWeek:38},'100.01':{fn:'Ouvrier sous-CP nationale',statut:'ouvrier',monthlySalary:2100,whWeek:38},'101':{fn:'Mineur',statut:'ouvrier',monthlySalary:2200,whWeek:36},'102':{fn:'Carrier',statut:'ouvrier',monthlySalary:2300,whWeek:38},'102.01':{fn:'Carrier (petites)',statut:'ouvrier',monthlySalary:2200,whWeek:38},'102.02':{fn:'Carrier (grandes)',statut:'ouvrier',monthlySalary:2400,whWeek:38},'104':{fn:'Ouvrier sidérurgie',statut:'ouvrier',monthlySalary:2500,whWeek:38},'105':{fn:'Ouvrier métaux non-ferreux',statut:'ouvrier',monthlySalary:2400,whWeek:38},'106.01':{fn:'Ouvrier cimenteries',statut:'ouvrier',monthlySalary:2450,whWeek:38},'106.02':{fn:'Ouvrier béton',statut:'ouvrier',monthlySalary:2300,whWeek:38},'107':{fn:'Maître-tailleur',statut:'ouvrier',monthlySalary:2150,whWeek:38},'108':{fn:'Ouvrier brosserie',statut:'ouvrier',monthlySalary:2050,whWeek:38},'109':{fn:'Ouvrier confection',statut:'ouvrier',monthlySalary:2050,whWeek:38},'110':{fn:'Ouvrier textile',statut:'ouvrier',monthlySalary:2150,whWeek:36},'111':{fn:'Ouvrier métallurgie',statut:'ouvrier',monthlySalary:2400,whWeek:38},'111.01':{fn:'Mécanicien',statut:'ouvrier',monthlySalary:2450,whWeek:38},'111.02':{fn:'Mécanicien réparation',statut:'ouvrier',monthlySalary:2400,whWeek:38},'111.03':{fn:'Monteur',statut:'ouvrier',monthlySalary:2500,whWeek:38},'112':{fn:'Ouvrier garage',statut:'ouvrier',monthlySalary:2300,whWeek:38},'113':{fn:'Ouvrier céramique',statut:'ouvrier',monthlySalary:2200,whWeek:38},'114':{fn:'Briquetier',statut:'ouvrier',monthlySalary:2250,whWeek:38},'115':{fn:'Ouvrier verrerie',statut:'ouvrier',monthlySalary:2400,whWeek:38},'116':{fn:'Ouvrier chimie',statut:'ouvrier',monthlySalary:2450,whWeek:38},'117':{fn:'Ouvrier pétrole',statut:'ouvrier',monthlySalary:2600,whWeek:38},'118':{fn:'Boulanger',statut:'ouvrier',monthlySalary:2200,whWeek:38},'118.01':{fn:'Boulanger industriel',statut:'ouvrier',monthlySalary:2250,whWeek:38},'119':{fn:'Ouvrier commerce alimentaire',statut:'ouvrier',monthlySalary:2100,whWeek:38},'120':{fn:'Ouvrier textile Flandre',statut:'ouvrier',monthlySalary:2150,whWeek:36},'121':{fn:'Nettoyeur',statut:'ouvrier',monthlySalary:2050,whWeek:38},'124':{fn:'Ouvrier construction',statut:'ouvrier',monthlySalary:2400,whWeek:38},'125':{fn:'Ouvrier bois',statut:'ouvrier',monthlySalary:2200,whWeek:38},'125.02':{fn:'Menuisier',statut:'ouvrier',monthlySalary:2250,whWeek:38},'126':{fn:'Ouvrier ameublement',statut:'ouvrier',monthlySalary:2150,whWeek:38},'127':{fn:'Ouvrier combustibles',statut:'ouvrier',monthlySalary:2250,whWeek:38},'128':{fn:'Ouvrier cuir',statut:'ouvrier',monthlySalary:2100,whWeek:38},'129':{fn:'Ouvrier papier',statut:'ouvrier',monthlySalary:2250,whWeek:38},'130':{fn:'Imprimeur',statut:'ouvrier',monthlySalary:2350,whWeek:38},'131':{fn:'Batelier',statut:'ouvrier',monthlySalary:2300,whWeek:38},'132':{fn:'Travaux techniques',statut:'ouvrier',monthlySalary:2400,whWeek:38},'136':{fn:'Ouvrier transfo papier',statut:'ouvrier',monthlySalary:2200,whWeek:38},'140':{fn:'Chauffeur',statut:'ouvrier',monthlySalary:2350,whWeek:38},'140.01':{fn:'Chauffeur autobus',statut:'ouvrier',monthlySalary:2400,whWeek:38},'140.02':{fn:'Taxi',statut:'ouvrier',monthlySalary:2200,whWeek:38},'140.03':{fn:'Déménageur',statut:'ouvrier',monthlySalary:2300,whWeek:38},'140.04':{fn:'Transport routier',statut:'ouvrier',monthlySalary:2350,whWeek:38},'142':{fn:'Récupérateur',statut:'ouvrier',monthlySalary:2150,whWeek:38},'143':{fn:'Pêche maritime',statut:'ouvrier',monthlySalary:2400,whWeek:38},'144':{fn:'Ouvrier agriculture',statut:'ouvrier',monthlySalary:2050,whWeek:38},'145':{fn:'Ouvrier horticulture',statut:'ouvrier',monthlySalary:2050,whWeek:38},'146':{fn:'Ouvrier forestier',statut:'ouvrier',monthlySalary:2100,whWeek:38},'149.01':{fn:'Électricien',statut:'ouvrier',monthlySalary:2400,whWeek:38},'149.02':{fn:'Carrossier',statut:'ouvrier',monthlySalary:2350,whWeek:38},'150':{fn:'Ouvrier poterie',statut:'ouvrier',monthlySalary:2150,whWeek:38},'152':{fn:'Ouvrier non-marchand',statut:'ouvrier',monthlySalary:2200,whWeek:38},'200':{fn:'Employé',statut:'employe',monthlySalary:2800,whWeek:38},'201':{fn:'Employé commerce détail',statut:'employe',monthlySalary:2300,whWeek:38},'202':{fn:'Employé commerce alimentaire',statut:'employe',monthlySalary:2200,whWeek:38},'207':{fn:'Employé chimie',statut:'employe',monthlySalary:3200,whWeek:38},'209':{fn:'Employé métal',statut:'employe',monthlySalary:3000,whWeek:38},'210':{fn:'Employé sidérurgie',statut:'employe',monthlySalary:3100,whWeek:38},'211':{fn:'Cadre',statut:'employe',monthlySalary:4500,whWeek:38},'214':{fn:'Employé textile',statut:'employe',monthlySalary:2600,whWeek:36},'215':{fn:'Employé confection',statut:'employe',monthlySalary:2500,whWeek:38},'216':{fn:'Employé notaire',statut:'employe',monthlySalary:2700,whWeek:38},'218':{fn:'Employé CNE',statut:'employe',monthlySalary:2600,whWeek:38},'219':{fn:'Employé technologie',statut:'employe',monthlySalary:3500,whWeek:38},'220':{fn:'Employé agro-alimentaire',statut:'employe',monthlySalary:2700,whWeek:38},'222':{fn:'Employé papier',statut:'employe',monthlySalary:2800,whWeek:38},'224':{fn:'Employé métaux non-ferreux',statut:'employe',monthlySalary:3000,whWeek:38},'225':{fn:'Employé crédit',statut:'employe',monthlySalary:3300,whWeek:37},'226':{fn:'Employé commerce international',statut:'employe',monthlySalary:3100,whWeek:38},'227':{fn:'Employé audiovisuel',statut:'employe',monthlySalary:2800,whWeek:38},'302':{fn:'Ouvrier Horeca',statut:'ouvrier',monthlySalary:2150,whWeek:38},'303':{fn:'Ouvrier cinéma',statut:'ouvrier',monthlySalary:2200,whWeek:38},'304':{fn:'Artiste',statut:'employe',monthlySalary:2500,whWeek:38},'305':{fn:'Employé santé',statut:'employe',monthlySalary:2800,whWeek:38},'306':{fn:'Employé assurance',statut:'employe',monthlySalary:3200,whWeek:37},'307':{fn:'Employé courtage',statut:'employe',monthlySalary:2900,whWeek:38},'309':{fn:'Employé bourse',statut:'employe',monthlySalary:3400,whWeek:37},'310':{fn:'Employé banque',statut:'employe',monthlySalary:3400,whWeek:37},'311':{fn:'Employé grande distribution',statut:'employe',monthlySalary:2500,whWeek:38},'312':{fn:'Employé grands magasins',statut:'employe',monthlySalary:2400,whWeek:38},'313':{fn:'Employé pharmacie',statut:'employe',monthlySalary:2700,whWeek:38},'314':{fn:'Coiffeur',statut:'employe',monthlySalary:2200,whWeek:38},'315':{fn:'Employé aviation',statut:'employe',monthlySalary:3500,whWeek:38},'316':{fn:'Employé intérim',statut:'employe',monthlySalary:2600,whWeek:38},'317':{fn:'Employé gardiennage',statut:'employe',monthlySalary:2500,whWeek:38},'318':{fn:'Aide familiale',statut:'employe',monthlySalary:2400,whWeek:38},'319':{fn:'Éducateur',statut:'employe',monthlySalary:2700,whWeek:38},'320':{fn:'Employé pompes funèbres',statut:'employe',monthlySalary:2400,whWeek:38},'321':{fn:'Employé commerce détail alim.',statut:'employe',monthlySalary:2200,whWeek:38},'322':{fn:'Intérimaire',statut:'employe',monthlySalary:2500,whWeek:38},'323':{fn:'Concierge',statut:'employe',monthlySalary:2300,whWeek:38},'324':{fn:'Employé diamant',statut:'employe',monthlySalary:3000,whWeek:38},'326':{fn:'Employé gaz/électricité',statut:'employe',monthlySalary:3300,whWeek:38},'327':{fn:'Employé travail adapté',statut:'employe',monthlySalary:2300,whWeek:38},'328':{fn:'Employé transport urbain',statut:'employe',monthlySalary:2800,whWeek:38},'329':{fn:'Travailleur socio-culturel',statut:'employe',monthlySalary:2600,whWeek:38},'330':{fn:'Professionnel de santé',statut:'employe',monthlySalary:3000,whWeek:38},'330.01':{fn:'Infirmier(e)',statut:'employe',monthlySalary:3100,whWeek:38},'331':{fn:'Employé tourisme',statut:'employe',monthlySalary:2500,whWeek:38},'332':{fn:'Aide-soignant(e)',statut:'employe',monthlySalary:2500,whWeek:38},'333':{fn:'Employé attraction touristique',statut:'employe',monthlySalary:2300,whWeek:38},'335':{fn:'Employé prestataire services',statut:'employe',monthlySalary:2600,whWeek:38},'336':{fn:'Employé profession libérale',statut:'employe',monthlySalary:2700,whWeek:38},'337':{fn:'Employé auxiliaire non-marchand',statut:'employe',monthlySalary:2500,whWeek:38},'338':{fn:'Ouvrier titres-services',statut:'ouvrier',monthlySalary:2050,whWeek:38},'339':{fn:'Employé logement social',statut:'employe',monthlySalary:2700,whWeek:38},'340':{fn:'Employé orthopédie',statut:'employe',monthlySalary:2800,whWeek:38},'341':{fn:'Ouvrier intermittent spectacle',statut:'ouvrier',monthlySalary:2300,whWeek:38}};
 
 // ── PRÉDICTION TURNOVER ──
 function PredictionTurnoverMod({s,d}){
