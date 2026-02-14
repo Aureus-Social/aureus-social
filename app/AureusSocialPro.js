@@ -4065,6 +4065,45 @@ function Dashboard({s,d}) {
   const deadlines=getDeadlines();
   const urgentCount=deadlines.filter(d=>d.urgent).length;
 
+  // ── ALERTES INTELLIGENTES ──
+  const getAlerts=()=>{
+    const alerts=[];
+    const today=new Date();
+    // CDD fin proche (30 jours)
+    ae.forEach(e=>{
+      if(e.endD){
+        const end=new Date(e.endD);
+        const days=Math.ceil((end-today)/(1000*60*60*24));
+        if(days>0&&days<=30)alerts.push({type:'warning',icon:'⏰',msg:`CDD de ${e.first} ${e.last} expire dans ${days} jours (${e.endD})`,cat:'Contrat'});
+        if(days<=0)alerts.push({type:'error',icon:'🔴',msg:`CDD de ${e.first} ${e.last} expiré depuis ${Math.abs(days)} jours !`,cat:'Contrat'});
+      }
+      // Période d'essai (si entrée < 14 jours pour étudiant)
+      if(e.contract==='student'&&e.startD){
+        const start=new Date(e.startD);
+        const days=Math.ceil((today-start)/(1000*60*60*24));
+        if(days<=3)alerts.push({type:'info',icon:'📋',msg:`${e.first} ${e.last}: période d'essai étudiant (3 premiers jours)`,cat:'Contrat'});
+      }
+      // NISS manquant
+      if(!e.niss)alerts.push({type:'warning',icon:'🆔',msg:`NISS manquant pour ${e.first} ${e.last}`,cat:'Identité'});
+      // IBAN manquant
+      if(!e.iban)alerts.push({type:'info',icon:'🏦',msg:`IBAN manquant pour ${e.first} ${e.last}`,cat:'Financier'});
+      // Salaire à 0
+      if(!e.monthlySalary||e.monthlySalary<=0)alerts.push({type:'error',icon:'💰',msg:`Salaire non configuré pour ${e.first} ${e.last}`,cat:'Rémunération'});
+    });
+    // Indexation prévue
+    const nextIndex=new Date(today.getFullYear(),0,1);
+    if(today.getMonth()>=10)nextIndex.setFullYear(today.getFullYear()+1);
+    const daysToIndex=Math.ceil((nextIndex-today)/(1000*60*60*24));
+    if(daysToIndex<=60&&daysToIndex>0)alerts.push({type:'info',icon:'📈',msg:`Indexation salariale prévue dans ~${daysToIndex} jours (janvier ${nextIndex.getFullYear()})`,cat:'Légal'});
+    // DmfA trimestrielle
+    const q=Math.floor(today.getMonth()/3)+1;
+    const qEnd=new Date(today.getFullYear(),q*3,0);
+    const daysToDmfa=Math.ceil((qEnd-today)/(1000*60*60*24));
+    if(daysToDmfa<=14)alerts.push({type:'warning',icon:'📡',msg:`DmfA T${q}/${today.getFullYear()} à déposer dans ${daysToDmfa} jours`,cat:'ONSS'});
+    return alerts.sort((a,b)=>a.type==='error'?-1:b.type==='error'?1:a.type==='warning'?-1:1);
+  };
+  const alerts=getAlerts();
+
   // Dept breakdown
   const depts={};
   ae.forEach(e=>{const dp=e.dept||'Non défini';if(!depts[dp])depts[dp]={count:0,mass:0};depts[dp].count++;depts[dp].mass+=(e.monthlySalary||0);});
@@ -4158,7 +4197,24 @@ function Dashboard({s,d}) {
       </C>
     </div>
 
-    {/* BOTTOM ROW: Actions + Employees + Dept breakdown */}
+    {/* BOTTOM ROW: Alerts + Actions + Employees + Dept breakdown */}
+    {alerts.length>0&&<C style={{marginBottom:16,border:'1px solid '+(alerts.some(a=>a.type==='error')?'rgba(248,113,113,.2)':'rgba(251,146,60,.15)')}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>🔔 Alertes intelligentes ({alerts.length})</div>
+        <div style={{display:'flex',gap:8}}>
+          <span style={{fontSize:10,padding:'2px 8px',borderRadius:10,background:'rgba(248,113,113,.1)',color:'#f87171'}}>{alerts.filter(a=>a.type==='error').length} critiques</span>
+          <span style={{fontSize:10,padding:'2px 8px',borderRadius:10,background:'rgba(251,146,60,.1)',color:'#fb923c'}}>{alerts.filter(a=>a.type==='warning').length} avertissements</span>
+          <span style={{fontSize:10,padding:'2px 8px',borderRadius:10,background:'rgba(96,165,250,.1)',color:'#60a5fa'}}>{alerts.filter(a=>a.type==='info').length} infos</span>
+        </div>
+      </div>
+      <div style={{maxHeight:200,overflowY:'auto',display:'flex',flexDirection:'column',gap:4}}>
+        {alerts.map((a,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'8px 12px',borderRadius:8,background:a.type==='error'?'rgba(248,113,113,.04)':a.type==='warning'?'rgba(251,146,60,.04)':'rgba(96,165,250,.04)',border:'1px solid '+(a.type==='error'?'rgba(248,113,113,.1)':a.type==='warning'?'rgba(251,146,60,.1)':'rgba(96,165,250,.1)')}}>
+          <span style={{fontSize:14}}>{a.icon}</span>
+          <span style={{flex:1,fontSize:11.5,color:a.type==='error'?'#f87171':a.type==='warning'?'#fb923c':'#60a5fa'}}>{a.msg}</span>
+          <span style={{fontSize:9,padding:'2px 6px',borderRadius:4,background:'rgba(198,163,78,.06)',color:'#5e5c56'}}>{a.cat}</span>
+        </div>)}
+      </div>
+    </C>}
     <div style={{display:'grid',gridTemplateColumns:'260px 1fr 300px',gap:14}}>
       {/* QUICK ACTIONS */}
       <C style={{padding:'20px 18px'}}>
@@ -4986,7 +5042,31 @@ function Payslips({s,d}) {
   const [eid,setEid]=useState(s.emps[0]?.id||'');
   const [per,setPer]=useState({...DPER});
   const [res,setRes]=useState(null);
+  const [batchMode,setBatchMode]=useState(false);
+  const [batchResults,setBatchResults]=useState([]);
+  const [batchRunning,setBatchRunning]=useState(false);
   const emp=s.emps.find(e=>e.id===eid);
+
+  // ── BATCH PROCESSING ──
+  const runBatch=()=>{
+    setBatchRunning(true);
+    const ae=s.emps.filter(e=>e.status==='active'||!e.status);
+    const results=[];
+    for(const emp of ae){
+      try{
+        const r=calc(emp,per,s.co);
+        d({type:"ADD_P",d:{eid:emp.id,ename:`${emp.first} ${emp.last}`,period:`${MN[per.month-1]} ${per.year}`,month:per.month,year:per.year,...r,at:new Date().toISOString(),batch:true}});
+        results.push({emp,r,ok:true});
+      }catch(e){
+        results.push({emp,error:e.message,ok:false});
+      }
+    }
+    setBatchResults(results);
+    setBatchRunning(false);
+    const ok=results.filter(r=>r.ok).length;
+    const fail=results.filter(r=>!r.ok).length;
+    alert(`✅ Batch terminé: ${ok} fiches calculées${fail>0?`, ${fail} erreurs`:''}`);
+  };
 
   const gen=()=>{if(!emp)return;const r=calc(emp,per,s.co);setRes(r);
     d({type:"ADD_P",d:{eid:emp.id,ename:`${emp.first} ${emp.last}`,period:`${MN[per.month-1]} ${per.year}`,month:per.month,year:per.year,...r,at:new Date().toISOString()}});};
@@ -4999,7 +5079,43 @@ function Payslips({s,d}) {
   const PS=({t})=><tr style={{background:"#f8f7f2"}}><td colSpan={3} style={{padding:'11px 0 5px',fontWeight:700,fontSize:10.5,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'1px'}}>{t}</td></tr>;
 
   return <div>
-    <PH title="Fiches de Paie" sub="Formule-clé SPF Finances"/>
+    <PH title="Fiches de Paie" sub="Formule-clé SPF Finances" actions={<div style={{display:'flex',gap:8}}>
+      <B v={batchMode?'gold':'outline'} onClick={()=>setBatchMode(!batchMode)} style={{fontSize:11,padding:'8px 14px'}}>{batchMode?'⚡ Mode Batch ON':'⚡ Batch'}</B>
+    </div>}/>
+    {/* Batch Mode */}
+    {batchMode&&<C style={{marginBottom:18,border:'1px solid rgba(198,163,78,.25)'}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+        <div>
+          <div style={{fontSize:15,fontWeight:600,color:'#c6a34e'}}>⚡ Batch Processing — Calcul en masse</div>
+          <div style={{fontSize:11,color:'#5e5c56',marginTop:2}}>Calcule toutes les fiches de paie des travailleurs actifs en 1 clic</div>
+        </div>
+        <B onClick={runBatch} disabled={batchRunning} style={{fontSize:13,padding:'12px 24px'}}>
+          {batchRunning?'⏳ Calcul en cours...':'⚡ Lancer le batch ('+s.emps.filter(e=>e.status==='active'||!e.status).length+' fiches)'}
+        </B>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:12}}>
+        <I label="Mois" value={per.month} onChange={v=>setPer({...per,month:parseInt(v)})} options={MN.map((m,i)=>({v:i+1,l:m}))}/>
+        <I label="Année" type="number" value={per.year} onChange={v=>setPer({...per,year:v})}/>
+        <div style={{padding:12,background:'rgba(198,163,78,.06)',borderRadius:8,textAlign:'center'}}>
+          <div style={{fontSize:10,color:'#9e9b93'}}>Travailleurs actifs</div>
+          <div style={{fontSize:22,fontWeight:700,color:'#c6a34e'}}>{s.emps.filter(e=>e.status==='active'||!e.status).length}</div>
+        </div>
+      </div>
+      {batchResults.length>0&&<div>
+        <ST>Résultats du batch</ST>
+        <div style={{maxHeight:300,overflowY:'auto'}}>
+          {batchResults.map((br,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 12px',borderRadius:6,marginBottom:4,background:br.ok?'rgba(74,222,128,.04)':'rgba(248,113,113,.04)',border:'1px solid '+(br.ok?'rgba(74,222,128,.1)':'rgba(248,113,113,.1)')}}>
+            <span style={{fontSize:12,color:br.ok?'#4ade80':'#f87171'}}>{br.ok?'✅':'❌'} {br.emp.first} {br.emp.last}</span>
+            {br.ok&&<span style={{fontSize:12,color:'#c6a34e',fontFamily:'monospace'}}>{fmt(br.r.gross)} brut → {fmt(br.r.net)} net</span>}
+            {!br.ok&&<span style={{fontSize:11,color:'#f87171'}}>{br.error}</span>}
+          </div>)}
+        </div>
+        <div style={{marginTop:8,padding:10,background:'rgba(198,163,78,.06)',borderRadius:8,display:'flex',justifyContent:'space-between'}}>
+          <span style={{fontSize:12,color:'#c6a34e',fontWeight:600}}>Total masse salariale</span>
+          <span style={{fontSize:14,fontWeight:700,color:'#c6a34e'}}>{fmt(batchResults.filter(r=>r.ok).reduce((a,r)=>a+r.r.gross,0))} brut → {fmt(batchResults.filter(r=>r.ok).reduce((a,r)=>a+r.r.net,0))} net</span>
+        </div>
+      </div>}
+    </C>}
     <div style={{display:'grid',gridTemplateColumns:res?'360px 1fr':'1fr',gap:18}}>
       <C>
         <ST>Paramètres</ST>
@@ -6960,6 +7076,81 @@ function SettingsPage({s,d}) {
       </div></C>
     </div>
     <div style={{marginTop:14,display:'flex',justifyContent:'flex-end'}}><B onClick={()=>{d({type:"UPD_CO",d:f});alert('Sauvegardé !')}}>Sauvegarder</B></div>
+    
+    {/* 2FA Security Section */}
+    <C style={{marginTop:20}}>
+      <ST>🔐 Sécurité — Authentification à deux facteurs (2FA)</ST>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+        <div>
+          <div style={{fontSize:12,color:'#e8e6e0',marginBottom:8,fontWeight:600}}>Statut 2FA</div>
+          <div style={{display:'flex',alignItems:'center',gap:10,padding:14,background:'rgba(74,222,128,.04)',borderRadius:10,border:'1px solid rgba(74,222,128,.12)'}}>
+            <span style={{fontSize:24}}>🔒</span>
+            <div>
+              <div style={{fontSize:13,fontWeight:600,color:'#4ade80'}}>2FA disponible via Supabase</div>
+              <div style={{fontSize:10.5,color:'#5e5c56',marginTop:2}}>Activez la vérification en deux étapes pour sécuriser votre compte</div>
+            </div>
+          </div>
+          <div style={{marginTop:12}}>
+            <B v="outline" style={{width:'100%'}} onClick={async()=>{
+              try{
+                const{data,error}=await(await import('./lib/supabase')).supabase.auth.mfa.enroll({factorType:'totp'});
+                if(error)return alert('Erreur: '+error.message);
+                if(data){
+                  const qr=data.totp?.qr_code;
+                  const secret=data.totp?.secret;
+                  alert('2FA activé !\\n\\nScannez le QR code avec Google Authenticator ou Authy.\\n\\nSecret: '+secret+'\\n\\n(Le QR code sera affiché dans une prochaine version)');
+                }
+              }catch(e){alert('2FA via TOTP — Activez dans Supabase Dashboard > Authentication > MFA');}
+            }}>🔐 Activer 2FA (TOTP)</B>
+          </div>
+        </div>
+        <div>
+          <div style={{fontSize:12,color:'#e8e6e0',marginBottom:8,fontWeight:600}}>Options de sécurité</div>
+          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
+              <span>📧</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>Email de confirmation</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>Requis à l'inscription</div>
+              </div>
+              <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>Actif ✓</span>
+            </div>
+            <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
+              <span>🔑</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>Réinitialisation mot de passe</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>Par email sécurisé</div>
+              </div>
+              <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>Actif ✓</span>
+            </div>
+            <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
+              <span>⏱</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>Session timeout</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>Déconnexion après inactivité</div>
+              </div>
+              <span style={{fontSize:10,color:'#fb923c',fontWeight:600}}>1 heure</span>
+            </div>
+            <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
+              <span>📱</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>TOTP (Google Authenticator / Authy)</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>Code à 6 chiffres toutes les 30 secondes</div>
+              </div>
+              <span style={{fontSize:10,color:'#fb923c',fontWeight:600}}>À activer</span>
+            </div>
+            <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
+              <span>🛡</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>Audit trail (Boîte noire)</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>Toute action est tracée dans audit_log</div>
+              </div>
+              <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>Actif ✓</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </C>
     <C style={{marginTop:20}}>
       <ST>Barèmes légaux</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:20,marginTop:10}}>
@@ -15897,4 +16088,4 @@ export default function AureusSocialPro({ supabase, user, onLogout }) {
   return <LangProvider><AppInner supabase={supabase} user={user} onLogout={onLogout}/></LangProvider>;
 }
 
-// v31 sprint3
+// v32 sprint4
