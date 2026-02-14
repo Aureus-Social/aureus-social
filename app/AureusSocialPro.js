@@ -3786,7 +3786,7 @@ function AppInner({ supabase, user, onLogout }) {
     {id:"salaires",l:t('nav.salaires'),i:'◈',sub:[{id:"od",l:t('sub.od')},{id:"provisions",l:t('sub.provisions')},{id:"cumuls",l:t('sub.cumuls')},{id:"netbrut",l:t('sub.netbrut')},{id:"simcout",l:t('sub.simcout')},{id:"saisies",l:t('sub.saisies')},{id:"indexauto",l:t('sub.indexauto')},{id:"horsforfait",l:t('sub.horsforfait')},{id:"totalreward",l:t('sub.totalreward')}]},
     {id:"avantages",l:t('nav.avantages'),i:'★',sub:[{id:"cheques",l:t('sub.cheques')},{id:"ecocmd",l:t('sub.ecocmd')},{id:"cafeteria",l:t('sub.cafeteria')},{id:"cct90",l:t('sub.cct90')},{id:"warrants",l:t('sub.warrants')},{id:"budgetmob",l:t('sub.budgetmob')},{id:"ecocircul",l:t('sub.ecocircul')}]},
     {id:"contratsmenu",l:t('nav.contrats'),i:'▣',sub:[{id:"contrats",l:t('sub.contrats2')},{id:"reglement",l:t('sub.reglement')},{id:"compteindiv",l:t('sub.compteindiv')},{id:"preavis",l:t('sub.preavis')},{id:"pecsortie",l:t('sub.pecsortie')},{id:"certpme",l:t('sub.certpme')}]},
-    {id:"rh",l:t('nav.rh'),i:'◉',sub:[{id:"absences",l:t('sub.absences')},{id:"absenteisme",l:t('sub.absenteisme')},{id:"credittemps",l:t('sub.credittemps')},{id:"chomtemp",l:t('sub.chomtemp')},{id:"congeduc",l:t('sub.congeduc')},{id:"rcc",l:t('sub.rcc')},{id:"outplacement",l:t('sub.outplacement')},{id:"pointage",l:t('sub.pointage')},{id:"planform",l:t('sub.planform')},{id:"medtravail",l:t('sub.medtravail')},{id:"selfservice",l:t('sub.selfservice')}]},
+    {id:"rh",l:t('nav.rh'),i:'◉',sub:[{id:"wf_embauche",l:"⚡ Workflow Embauche"},{id:"wf_licenciement",l:"⚡ Workflow Licenciement"},{id:"wf_maladie",l:"⚡ Workflow Maladie"},{id:"absences",l:t('sub.absences')},{id:"absenteisme",l:t('sub.absenteisme')},{id:"credittemps",l:t('sub.credittemps')},{id:"chomtemp",l:t('sub.chomtemp')},{id:"congeduc",l:t('sub.congeduc')},{id:"rcc",l:t('sub.rcc')},{id:"outplacement",l:t('sub.outplacement')},{id:"pointage",l:t('sub.pointage')},{id:"planform",l:t('sub.planform')},{id:"medtravail",l:t('sub.medtravail')},{id:"selfservice",l:t('sub.selfservice')}]},
     {id:"social",l:t('nav.social'),i:'◆',sub:[{id:"assloi",l:t('sub.assloi')},{id:"assgroupe",l:t('sub.assgroupe')},{id:"syndicales",l:t('sub.syndicales')},{id:"allocfam",l:t('sub.allocfam')},{id:"caissevac",l:t('sub.caissevac')},{id:"rentes",l:t('sub.rentes')},{id:"decava",l:t('sub.decava')},{id:"aidesemploi",l:t('sub.aidesemploi')}]},
     {id:"bienetre",l:t('nav.bienetre'),i:'♥',sub:[{id:"planglobal",l:t('sub.planglobal')},{id:"paa",l:t('sub.paa')},{id:"risquespsycho",l:t('sub.risquespsycho')},{id:"alcool",l:t('sub.alcool')},{id:"elections",l:t('sub.elections')},{id:"organes",l:t('sub.organes')}]},
     {id:"reporting",l:t('nav.reporting'),i:'▤',sub:[{id:"accounting",l:t('sub.accounting')},{id:"bilanbnb",l:t('sub.bilanbnb')},{id:"bilan",l:t('sub.bilan')},{id:"statsins",l:t('sub.statsins')},{id:"sepa",l:t('sub.sepa')},{id:"peppol",l:t('sub.peppol')},{id:"envoi",l:t('sub.envoi')},{id:"exportimport",l:t('sub.exportimport')},{id:"ged",l:t('sub.ged')}]},
@@ -7144,7 +7144,7 @@ const DRS_DOCS={
     {code:'ATT-276',l:"Attestation 276 frontaliers",f:['pays',"annee"]},
   ],
 };
-const COMPTA=[{id:"bob",n:'BOB Software',fmt:'CSV/XML'},{id:"winbooks",n:'Winbooks',fmt:'TXT/CSV'},{id:"kluwer",n:'Kluwer Expert',fmt:'CSV'},{id:"popsy",n:'Popsy',fmt:'TXT'},{id:"soda",n:'Soda',fmt:'CSV'},{id:"other",n:'Autre (txt/xls)',fmt:'TXT/XLS'}];
+const COMPTA=[{id:"bob",n:'BOB Software',fmt:'CSV/XML'},{id:"winbooks",n:'Winbooks',fmt:'TXT/CSV'},{id:"kluwer",n:'Kluwer Expert',fmt:'CSV'},{id:"popsy",n:'Popsy',fmt:'TXT'},{id:"soda",n:'Soda',fmt:'CSV'},{id:"exact",n:'Exact Online',fmt:'CSV/XML'},{id:"octopus",n:'Octopus',fmt:'CSV'},{id:"clearfact",n:'ClearFact',fmt:'CSV/UBL'},{id:"yuki",n:'Yuki',fmt:'XML'},{id:"horus",n:'Horus',fmt:'CSV'},{id:"other",n:'Autre (txt/xls)',fmt:'TXT/XLS'}];
 const CR_PROV=[{id:"pluxee",n:'Pluxee (ex-Sodexo)',ic:'🟠'},{id:"edenred",n:'Edenred',ic:'🔴'},{id:"monizze",n:'Monizze',ic:'🟢'},{id:"got",n:'G.O.T. CONNECTION',ic:'🔵'}];
 
 // ═══════════════════════════════════════════════════════════════
@@ -7175,7 +7175,8 @@ function ContratsMenuPage({s,d}){const sub=s.sub||'contrats';return <div>
 </div>;}
 
 function RHPage({s,d}){const sub=s.sub||'absences';return <div>
-  <PH title="RH & Personnel" sub={`Module: ${{'absences':'Gestion absences',"absenteisme":'Analyse absentéisme',"credittemps":'Crédit-temps',"chomtemp":'Chômage temporaire',"congeduc":'Congé-éducation payé',"rcc":'RCC / Prépension',"outplacement":'Outplacement',"pointage":'Pointage & Portail Employeur',"planform":'Plan de formation',"medtravail":'Médecine du travail',"selfservice":'Portail travailleur'}[sub]||sub}`}/>
+  <PH title="RH & Personnel" sub={`Module: ${{'wf_embauche':'⚡ Workflow Embauche','wf_licenciement':'⚡ Workflow Licenciement','wf_maladie':'⚡ Workflow Maladie','absences':'Gestion absences',"absenteisme":'Analyse absentéisme',"credittemps":'Crédit-temps',"chomtemp":'Chômage temporaire',"congeduc":'Congé-éducation payé',"rcc":'RCC / Prépension',"outplacement":'Outplacement',"pointage":'Pointage & Portail Employeur',"planform":'Plan de formation',"medtravail":'Médecine du travail',"selfservice":'Portail travailleur'}[sub]||sub}`}/>
+  {sub==='wf_embauche'&&<WorkflowEmbaucheMod s={s} d={d}/>}{sub==='wf_licenciement'&&<WorkflowLicenciementMod s={s} d={d}/>}{sub==='wf_maladie'&&<WorkflowMaladieMod s={s} d={d}/>}
   {sub==='absences'&&<AbsencesMod s={s} d={d}/>}{sub==='absenteisme'&&<AbsenteismeMod s={s} d={d}/>}
   {sub==='credittemps'&&<CreditTempsMod s={s} d={d}/>}{sub==='chomtemp'&&<ChomTempMod s={s} d={d}/>}
   {sub==='congeduc'&&<CongeEducMod s={s} d={d}/>}{sub==='rcc'&&<RCCMod s={s} d={d}/>}
@@ -11116,8 +11117,331 @@ function AccountingOutputMod({s,d}){
           cur.items.filter(x=>!x.sep&&!x.text).forEach(it=>{csv+=`${it.l};${it.acc};${typeof it.v==='number'?it.v.toFixed(2):it.v}\n`;});
           navigator.clipboard?.writeText(csv);alert('CSV copié !');
         }}>📋 Copier en CSV (pour Excel/comptable)</B>
+        
+        {/* Export comptable multi-formats */}
+        <ST>Export comptable</ST>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:6}}>
+          {COMPTA.map(c=><button key={c.id} onClick={()=>{
+            const entries=cur.items.filter(x=>!x.sep&&!x.text);
+            let output='';
+            const date=`${per.y}${per.m.toString().padStart(2,'0')}`;
+            
+            if(c.id==='bob'){
+              output='JRNL;DATE;ACCOUNT;LABEL;AMOUNT_D;AMOUNT_C\n';
+              entries.forEach(it=>{if(typeof it.v==='number'&&it.v>0)output+=`OD;${date}01;${it.acc};${it.l};${it.v.toFixed(2)};0.00\n`;});
+            }else if(c.id==='winbooks'){
+              output='DocType\tDocNumber\tDate\tAccount\tDescription\tAmountD\tAmountC\n';
+              entries.forEach((it,i)=>{if(typeof it.v==='number'&&it.v>0)output+=`1\tSAL${date}\t${date}01\t${it.acc}\t${it.l}\t${it.v.toFixed(2)}\t0.00\n`;});
+            }else if(c.id==='exact'){
+              output='Journal;Date;GLAccount;Description;AmountDC;Amount\n';
+              entries.forEach(it=>{if(typeof it.v==='number'&&it.v>0)output+=`90;${date}01;${it.acc};${it.l};D;${it.v.toFixed(2)}\n`;});
+            }else if(c.id==='octopus'){
+              output='BookYear;Period;Journal;Date;Account;Description;Debit;Credit\n';
+              entries.forEach(it=>{if(typeof it.v==='number'&&it.v>0)output+=`${per.y};${per.m};DIV;${date}01;${it.acc};${it.l};${it.v.toFixed(2)};0.00\n`;});
+            }else if(c.id==='clearfact'){
+              output='Date;Journal;Account;Label;Debit;Credit;VAT;Reference\n';
+              entries.forEach(it=>{if(typeof it.v==='number'&&it.v>0)output+=`${date}01;SAL;${it.acc};${it.l};${it.v.toFixed(2)};0.00;0;SAL-${date}\n`;});
+            }else if(c.id==='yuki'){
+              output='<?xml version="1.0"?>\n<Transactions>\n';
+              entries.forEach(it=>{if(typeof it.v==='number'&&it.v>0)output+=`  <Transaction><Date>${per.y}-${per.m.toString().padStart(2,'0')}-01</Date><Account>${it.acc}</Account><Description>${it.l}</Description><Amount>${it.v.toFixed(2)}</Amount></Transaction>\n`;});
+              output+='</Transactions>';
+            }else if(c.id==='horus'){
+              output='Date;Compte;Libelle;Debit;Credit\n';
+              entries.forEach(it=>{if(typeof it.v==='number'&&it.v>0)output+=`${date}01;${it.acc};${it.l};${it.v.toFixed(2)};0.00\n`;});
+            }else{
+              output='Libellé;Compte;Montant\n';
+              entries.forEach(it=>{if(typeof it.v==='number')output+=`${it.l};${it.acc};${it.v.toFixed(2)}\n`;});
+            }
+            
+            const ext=c.id==='yuki'?'xml':'csv';
+            const blob=new Blob(['\ufeff'+output],{type:'text/'+ext+';charset=utf-8;'});
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement('a');a.href=url;a.download=`export_${c.id}_${date}.${ext}`;a.click();
+            URL.revokeObjectURL(url);
+          }} style={{padding:'8px 6px',borderRadius:8,border:'1px solid rgba(198,163,78,.12)',background:'rgba(198,163,78,.03)',color:'#c6a34e',fontSize:10,cursor:'pointer',fontFamily:'inherit',textAlign:'center'}}>
+            <div style={{fontSize:14,marginBottom:2}}>📂</div>
+            <div style={{fontWeight:600}}>{c.n}</div>
+            <div style={{fontSize:9,color:'#5e5c56'}}>{c.fmt}</div>
+          </button>)}
+        </div>
       </C>
     </div>
+  </div>;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  WORKFLOW EMBAUCHE — Checklist complète onboarding
+// ═══════════════════════════════════════════════════════════════
+function WorkflowEmbaucheMod({s,d}){
+  const [sel,setSel]=useState(null);
+  const ae=s.emps.filter(e=>e.status==='active'||!e.status);
+  const getChecklist=(emp)=>{
+    const items=[
+      {id:'contrat',l:'Contrat de travail signé',cat:'Documents',done:!!emp.startD},
+      {id:'dimona',l:'Dimona IN envoyée',cat:'ONSS',done:s.dims?.some(d=>d.empId===emp.id&&d.type==='IN')},
+      {id:'registre',l:'Registre du personnel mis à jour',cat:'Documents',done:true},
+      {id:'niss',l:'NISS vérifié (modulo 97)',cat:'Identité',done:!!emp.niss&&emp.niss.replace(/[\s.\-]/g,'').length===11},
+      {id:'iban',l:'IBAN vérifié',cat:'Financier',done:!!emp.iban},
+      {id:'medecine',l:'Visite médicale programmée',cat:'Bien-être',done:false},
+      {id:'mutuelle',l:'Affiliation mutuelle vérifiée',cat:'Social',done:false},
+      {id:'reglement',l:'Règlement de travail remis',cat:'Documents',done:false},
+      {id:'badge',l:'Badge / accès créé',cat:'IT',done:false},
+      {id:'assurance',l:'Assurance-loi AT déclarée',cat:'Social',done:false},
+      {id:'allocfam',l:'Caisse allocations familiales notifiée',cat:'Social',done:false},
+      {id:'fiscal',l:'Fiche fiscale (état civil, enfants)',cat:'Fiscal',done:!!emp.civil},
+      {id:'transport',l:'Transport domicile-travail configuré',cat:'Rémunération',done:emp.commType&&emp.commType!=='none'},
+      {id:'cheques',l:'Chèques-repas activés',cat:'Avantages',done:emp.mvT>0},
+      {id:'email',l:'Email de bienvenue envoyé',cat:'Communication',done:false},
+    ];
+    return items;
+  };
+  
+  return <div>
+    <PH title="Workflow Embauche" sub="Checklist automatique pour chaque nouveau travailleur"/>
+    {!sel?<div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:12}}>
+        {ae.map(emp=>{
+          const cl=getChecklist(emp);
+          const done=cl.filter(c=>c.done).length;
+          const pct=Math.round(done/cl.length*100);
+          return <C key={emp.id} style={{cursor:'pointer',transition:'all .15s'}} onClick={()=>setSel(emp)}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+              <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0'}}>{emp.first} {emp.last}</div>
+              <span style={{fontSize:11,padding:'2px 8px',borderRadius:10,background:pct===100?'rgba(74,222,128,.15)':pct>=50?'rgba(251,146,60,.15)':'rgba(248,113,113,.15)',color:pct===100?'#4ade80':pct>=50?'#fb923c':'#f87171',fontWeight:600}}>{pct}%</span>
+            </div>
+            <div style={{fontSize:11,color:'#5e5c56',marginBottom:8}}>{emp.fn||'—'} · Entrée: {emp.startD||'—'}</div>
+            <div style={{height:6,background:'rgba(198,163,78,.1)',borderRadius:3,overflow:'hidden'}}>
+              <div style={{height:'100%',width:`${pct}%`,background:pct===100?'#4ade80':pct>=50?'linear-gradient(90deg,#fb923c,#c6a34e)':'#f87171',borderRadius:3,transition:'width .3s'}}/>
+            </div>
+            <div style={{fontSize:10,color:'#5e5c56',marginTop:4}}>{done}/{cl.length} étapes complétées</div>
+          </C>;
+        })}
+      </div>
+    </div>:<div>
+      <B v="outline" onClick={()=>setSel(null)} style={{marginBottom:16,fontSize:11}}>← Retour</B>
+      <C>
+        <h3 style={{fontSize:16,fontWeight:600,color:'#c6a34e',margin:'0 0 4px'}}>{sel.first} {sel.last}</h3>
+        <div style={{fontSize:11,color:'#5e5c56',marginBottom:16}}>{sel.fn} · {sel.contract} · CP {sel.cp} · Entrée: {sel.startD}</div>
+        {['Documents','ONSS','Identité','Financier','Social','Fiscal','Bien-être','IT','Rémunération','Avantages','Communication'].map(cat=>{
+          const items=getChecklist(sel).filter(c=>c.cat===cat);
+          if(!items.length)return null;
+          return <div key={cat} style={{marginBottom:12}}>
+            <div style={{fontSize:11,fontWeight:600,color:'#9e9b93',marginBottom:6,textTransform:'uppercase',letterSpacing:'.5px'}}>{cat}</div>
+            {items.map(it=><div key={it.id} style={{display:'flex',alignItems:'center',gap:8,padding:'6px 10px',marginBottom:2,borderRadius:6,background:it.done?'rgba(74,222,128,.04)':'rgba(248,113,113,.04)'}}>
+              <span style={{fontSize:14}}>{it.done?'✅':'⬜'}</span>
+              <span style={{fontSize:12,color:it.done?'#4ade80':'#d4d0c8'}}>{it.l}</span>
+            </div>)}
+          </div>;
+        })}
+      </C>
+    </div>}
+  </div>;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  WORKFLOW LICENCIEMENT — Préavis, C4, décompte final
+// ═══════════════════════════════════════════════════════════════
+function WorkflowLicenciementMod({s,d}){
+  const [sel,setSel]=useState(null);
+  const [motif,setMotif]=useState('licenciement');
+  const [dateSortie,setDateSortie]=useState(new Date().toISOString().slice(0,10));
+  const ae=s.emps.filter(e=>e.status==='active'||!e.status);
+  
+  const calcPreavis=(emp)=>{
+    if(!emp.startD)return{semaines:0,mois:0};
+    const start=new Date(emp.startD);
+    const now=new Date();
+    const years=(now-start)/(365.25*24*60*60*1000);
+    // Loi du 26/12/2013 — Statut unique
+    let semaines=0;
+    if(years<0.25)semaines=1;
+    else if(years<0.5)semaines=3;
+    else if(years<1)semaines=4;
+    else if(years<2)semaines=5;
+    else if(years<3)semaines=7;
+    else if(years<4)semaines=9;
+    else if(years<5)semaines=12;
+    else if(years<6)semaines=15;
+    else if(years<7)semaines=18;
+    else if(years<8)semaines=21;
+    else if(years<9)semaines=24;
+    else if(years<10)semaines=27;
+    else if(years<11)semaines=30;
+    else if(years<12)semaines=33;
+    else if(years<13)semaines=36;
+    else if(years<14)semaines=39;
+    else if(years<15)semaines=42;
+    else if(years<16)semaines=45;
+    else if(years<17)semaines=48;
+    else if(years<18)semaines=51;
+    else if(years<19)semaines=54;
+    else if(years<20)semaines=57;
+    else if(years<21)semaines=60;
+    else if(years<22)semaines=62;
+    else semaines=62+Math.floor((years-22))*1;
+    return{semaines,mois:Math.round(semaines/4.33),years:Math.round(years*10)/10};
+  };
+  
+  const calcIndemnite=(emp,preavis)=>{
+    const brut=parseFloat(emp.monthlySalary)||0;
+    const mensuel=brut*(1+0.0892); // + pécule vacances
+    return Math.round(mensuel*preavis.mois*100)/100;
+  };
+
+  const documents=[
+    {id:'c4',l:'C4 — Certificat de chômage',icon:'📄',auto:true},
+    {id:'c131a',l:'C131A — Attestation vacances',icon:'📋',auto:true},
+    {id:'decompte',l:'Décompte final détaillé',icon:'💰',auto:true},
+    {id:'dimona',l:'Dimona OUT',icon:'📡',auto:true},
+    {id:'attestation',l:"Attestation d'occupation",icon:'📝',auto:true},
+    {id:'fiche281',l:'Fiche 281.10 (si fin année)',icon:'🧾',auto:false},
+    {id:'email',l:'Email au travailleur',icon:'📧',auto:true},
+    {id:'notif_compta',l:'Notification au comptable',icon:'📊',auto:true},
+  ];
+
+  return <div>
+    <PH title="Workflow Licenciement" sub="Préavis automatique, C4, décompte final, Dimona OUT"/>
+    {!sel?<div>
+      <ST>Sélectionnez le travailleur à licencier</ST>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:10}}>
+        {ae.map(emp=>{
+          const pr=calcPreavis(emp);
+          return <C key={emp.id} style={{cursor:'pointer'}} onClick={()=>setSel(emp)}>
+            <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0'}}>{emp.first} {emp.last}</div>
+            <div style={{fontSize:11,color:'#5e5c56'}}>{emp.fn} · Entrée: {emp.startD} · {pr.years} ans</div>
+            <div style={{fontSize:11,color:'#fb923c',marginTop:4}}>Préavis: {pr.semaines} semaines ({pr.mois} mois)</div>
+          </C>;
+        })}
+      </div>
+    </div>:<div>
+      <B v="outline" onClick={()=>setSel(null)} style={{marginBottom:16,fontSize:11}}>← Retour</B>
+      <C>
+        <h3 style={{fontSize:16,fontWeight:600,color:'#f87171',margin:'0 0 12px'}}>Licenciement: {sel.first} {sel.last}</h3>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:16}}>
+          <I label="Motif" value={motif} onChange={setMotif} options={[
+            {v:'licenciement',l:'Licenciement classique'},{v:'fin_cdd',l:'Fin CDD'},
+            {v:'motif_grave',l:'Motif grave'},{v:'commun_accord',l:'Rupture commun accord'},
+            {v:'demission',l:'Démission'},{v:'force_majeure',l:'Force majeure médicale'},
+            {v:'transfert',l:'Transfert CCT 32bis'},{v:'pension',l:'Pension/Prépension'},
+          ]}/>
+          <I label="Date de sortie" type="date" value={dateSortie} onChange={setDateSortie}/>
+          <div style={{padding:12,background:'rgba(248,113,113,.06)',borderRadius:8,textAlign:'center'}}>
+            <div style={{fontSize:10,color:'#9e9b93'}}>Préavis</div>
+            <div style={{fontSize:20,fontWeight:700,color:'#f87171'}}>{calcPreavis(sel).semaines} sem.</div>
+            <div style={{fontSize:10,color:'#5e5c56'}}>{calcPreavis(sel).mois} mois · {calcPreavis(sel).years} ans anc.</div>
+          </div>
+        </div>
+        {motif!=='motif_grave'&&motif!=='demission'&&<div style={{padding:14,background:'rgba(198,163,78,.06)',borderRadius:10,marginBottom:16,border:'1px solid rgba(198,163,78,.15)'}}>
+          <div style={{fontSize:12,color:'#c6a34e',fontWeight:600,marginBottom:4}}>Indemnité de préavis estimée</div>
+          <div style={{fontSize:22,fontWeight:700,color:'#c6a34e'}}>{fmt(calcIndemnite(sel,calcPreavis(sel)))}</div>
+          <div style={{fontSize:10,color:'#5e5c56'}}>Brut {fmt(sel.monthlySalary)} × {calcPreavis(sel).mois} mois × 1.0892 (pécule)</div>
+        </div>}
+        {motif==='motif_grave'&&<div style={{padding:14,background:'rgba(248,113,113,.06)',borderRadius:10,marginBottom:16,border:'1px solid rgba(248,113,113,.2)'}}>
+          <div style={{fontSize:12,color:'#f87171',fontWeight:600}}>⚠️ Motif grave — Pas de préavis ni d'indemnité</div>
+          <div style={{fontSize:11,color:'#5e5c56',marginTop:4}}>Notification dans les 3 jours ouvrables. Lettre recommandée avec motifs précis.</div>
+        </div>}
+        <ST>Documents à générer</ST>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+          {documents.map(doc=><div key={doc.id} style={{display:'flex',alignItems:'center',gap:8,padding:'10px 12px',borderRadius:8,background:'rgba(198,163,78,.03)',border:'1px solid rgba(198,163,78,.08)'}}>
+            <span style={{fontSize:16}}>{doc.icon}</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:12,color:'#e8e6e0'}}>{doc.l}</div>
+              <div style={{fontSize:9,color:doc.auto?'#4ade80':'#5e5c56'}}>{doc.auto?'Auto-généré':'Manuel'}</div>
+            </div>
+          </div>)}
+        </div>
+        <B style={{width:'100%',marginTop:16}} onClick={()=>{
+          d({type:'UPD_E',d:{...sel,status:'sorti',dateSortie:dateSortie,motifSortie:motif}});
+          alert(`✅ ${sel.first} ${sel.last} — Sortie enregistrée (${motif}). Préavis: ${calcPreavis(sel).semaines} semaines.`);
+          setSel(null);
+        }}>⚡ Exécuter le licenciement</B>
+      </C>
+    </div>}
+  </div>;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  WORKFLOW MALADIE — Salaire garanti, certificat, mutuelle
+// ═══════════════════════════════════════════════════════════════
+function WorkflowMaladieMod({s,d}){
+  const [sel,setSel]=useState(null);
+  const [dateDebut,setDateDebut]=useState(new Date().toISOString().slice(0,10));
+  const [dateFin,setDateFin]=useState('');
+  const [certRecu,setCertRecu]=useState(false);
+  const ae=s.emps.filter(e=>e.status==='active'||!e.status);
+  
+  const calcGaranti=(emp,jours)=>{
+    const isEmploye=emp.statut==='employe'||emp.statut==='etudiant';
+    if(isEmploye){
+      // Employé: 30 jours à 100%
+      if(jours<=30)return{pct:100,source:'Employeur',regime:'Salaire garanti employé (30j)'};
+      return{pct:60,source:'Mutuelle',regime:'Indemnité mutuelle (60%)'};
+    }else{
+      // Ouvrier: 7j à 100%, 7j à 85.88%, 14j à 25.88% (+ mutuelle 60%)
+      if(jours<=7)return{pct:100,source:'Employeur',regime:'Salaire garanti ouvrier — Semaine 1 (100%)'};
+      if(jours<=14)return{pct:85.88,source:'Employeur',regime:'Salaire garanti ouvrier — Semaine 2 (85.88%)'};
+      if(jours<=30)return{pct:25.88,source:'Employeur + Mutuelle',regime:'Semaines 3-4: employeur 25.88% + mutuelle 60%'};
+      return{pct:60,source:'Mutuelle',regime:'Indemnité mutuelle (60%)'};
+    }
+  };
+
+  return <div>
+    <PH title="Workflow Maladie" sub="Salaire garanti, certificat médical, mutuelle, Bradford Factor"/>
+    {!sel?<div>
+      <ST>Sélectionnez le travailleur en incapacité</ST>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:10}}>
+        {ae.map(emp=><C key={emp.id} style={{cursor:'pointer'}} onClick={()=>setSel(emp)}>
+          <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0'}}>{emp.first} {emp.last}</div>
+          <div style={{fontSize:11,color:'#5e5c56'}}>{emp.fn} · {emp.statut==='ouvrier'?'Ouvrier':'Employé'} · {fmt(emp.monthlySalary)}/mois</div>
+        </C>)}
+      </div>
+    </div>:<div>
+      <B v="outline" onClick={()=>setSel(null)} style={{marginBottom:16,fontSize:11}}>← Retour</B>
+      <C>
+        <h3 style={{fontSize:16,fontWeight:600,color:'#fb923c',margin:'0 0 12px'}}>Maladie: {sel.first} {sel.last}</h3>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:16}}>
+          <I label="Date début" type="date" value={dateDebut} onChange={setDateDebut}/>
+          <I label="Date fin (si connue)" type="date" value={dateFin} onChange={setDateFin}/>
+          <I label="Certificat reçu" value={certRecu?'oui':'non'} onChange={v=>setCertRecu(v==='oui')} options={[{v:'non',l:'Non'},{v:'oui',l:'Oui'}]}/>
+        </div>
+        
+        {/* Simulation salaire garanti */}
+        <ST>Simulation salaire garanti</ST>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
+          {[7,14,21,30,60,90,180,365].map(j=>{
+            const g=calcGaranti(sel,j);
+            return <div key={j} style={{padding:10,borderRadius:8,background:'rgba(198,163,78,.03)',border:'1px solid rgba(198,163,78,.08)',textAlign:'center'}}>
+              <div style={{fontSize:10,color:'#9e9b93'}}>Jour {j}</div>
+              <div style={{fontSize:16,fontWeight:700,color:g.pct===100?'#4ade80':g.pct>60?'#fb923c':'#f87171'}}>{g.pct}%</div>
+              <div style={{fontSize:9,color:'#5e5c56'}}>{g.source}</div>
+            </div>;
+          })}
+        </div>
+        
+        <div style={{marginTop:12,padding:12,background:'rgba(96,165,250,.04)',borderRadius:8,fontSize:11,color:'#60a5fa',lineHeight:1.6}}>
+          <b>{sel.statut==='ouvrier'?'Ouvrier':'Employé'}</b>: {sel.statut==='ouvrier'
+            ?'Semaine 1: 100% employeur · Semaine 2: 85.88% employeur · Semaines 3-4: 25.88% employeur + 60% mutuelle · Après 30j: mutuelle 60%'
+            :'30 premiers jours: 100% employeur (salaire garanti) · Après 30j: mutuelle 60% du salaire plafonné'}
+        </div>
+        
+        {!certRecu&&<div style={{marginTop:12,padding:12,background:'rgba(248,113,113,.06)',borderRadius:8,border:'1px solid rgba(248,113,113,.15)'}}>
+          <div style={{fontSize:12,color:'#f87171',fontWeight:600}}>⚠️ Certificat médical manquant</div>
+          <div style={{fontSize:11,color:'#5e5c56',marginTop:4}}>Le travailleur doit fournir un certificat dans les 48h (sauf convention collective différente).</div>
+        </div>}
+        
+        {dateFin&&<div style={{marginTop:12}}>
+          <ST>Actions</ST>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+            <div style={{padding:10,borderRadius:8,background:'rgba(74,222,128,.04)',border:'1px solid rgba(74,222,128,.1)',display:'flex',alignItems:'center',gap:8}}>
+              <span>📄</span><span style={{fontSize:12,color:'#4ade80'}}>DRS pré-remplie</span>
+            </div>
+            <div style={{padding:10,borderRadius:8,background:'rgba(96,165,250,.04)',border:'1px solid rgba(96,165,250,.1)',display:'flex',alignItems:'center',gap:8}}>
+              <span>📧</span><span style={{fontSize:12,color:'#60a5fa'}}>Notification mutuelle</span>
+            </div>
+          </div>
+        </div>}
+      </C>
+    </div>}
   </div>;
 }
 
@@ -15573,4 +15897,4 @@ export default function AureusSocialPro({ supabase, user, onLogout }) {
   return <LangProvider><AppInner supabase={supabase} user={user} onLogout={onLogout}/></LangProvider>;
 }
 
-// v30d cpfix
+// v31 sprint3
