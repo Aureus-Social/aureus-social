@@ -2639,7 +2639,7 @@ function genBelcotax(co, emp, yr, ad) {
 }
 
 // ─── INITIAL STATE ───────────────────────────────────────────
-const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:"info@aureus-ia.com",version:'v35',sprint:'Sprint 7 — Écosystème'};
+const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:"info@aureus-ia.com",version:'v36',sprint:'Sprint 8 — Prédictif'};
 const CAR_MODELS={
 'Aiways':['U5',"U6"],
 'Alfa Romeo':['Giulia',"Stelvio","Tonale","Junior","Giulietta","MiTo"],
@@ -3801,6 +3801,9 @@ function AppInner({ supabase, user, onLogout }) {
       {id:"marketplace",l:"🏪 Marketplace"},
       {id:"integrations",l:"🔗 Intégrations"},
       {id:"webhooks",l:"🔔 Webhook Manager"},
+      {id:"budget_auto",l:"📊 Budget Automatique"},
+      {id:"what_if",l:"🔮 Simulateur What-If"},
+      {id:"kpi_dashboard",l:"📈 KPI Dashboard Avancé"},
       {id:"aureus_pointage",l:"⏱ Aureus Pointage"},
       {id:"aureus_paie",l:"💰 Aureus Paie"},
       {id:"aureus_titres_services",l:"🏠 Aureus Titres-Services"},
@@ -4218,6 +4221,7 @@ function Dashboard({s,d}) {
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
         {[
+          {v:'v36',title:'Sprint 8',items:['📊 Budget Auto','🔮 Simulateur What-If','📈 KPI + Equal Pay'],color:'#f472b6'},
           {v:'v35',title:'Sprint 7',items:['🏪 Marketplace 12 modules','🔗 Intégrations 25+ connecteurs','🔔 Webhook Manager'],color:'#a78bfa'},
           {v:'v34',title:'Sprint 6',items:['🌐 4 langues (FR/NL/EN/DE)','🔌 API Documentation','💱 Multi-Devises'],color:'#fb923c'},
           {v:'v33',title:'Sprint 5',items:['🧠 Prédiction Turnover','💡 Reco Salariales IA','📈 Prévision Masse','🔍 Détection Anomalies','🏥 Score Santé Dossier'],color:'#f87171'},
@@ -12233,6 +12237,279 @@ function WebhookManagerMod({s,d}){
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  SPRINT 8 — PRÉDICTIF: BUDGET AUTO + SIMULATEUR + KPI AVANCÉS
+// ═══════════════════════════════════════════════════════════════
+
+// ── BUDGET AUTOMATIQUE ──
+function BudgetAutoMod({s,d}){
+  const ae=s.emps.filter(e=>e.status==='active'||!e.status);
+  const [year,setYear]=useState(new Date().getFullYear());
+  const [indexRate,setIndexRate]=useState(2);
+  const [hiring,setHiring]=useState(0);
+  const [avgNewSalary,setAvgNewSalary]=useState(3000);
+  
+  const masseBrute=ae.reduce((a,e)=>a+(parseFloat(e.monthlySalary)||0),0);
+  const months=Array.from({length:12},(_,i)=>{
+    const m=i+1;
+    const indexFactor=1+(indexRate/100)*(m/12);
+    const hireEffect=m>=6?(hiring*avgNewSalary*(m-5)/12):0;
+    const brut=(masseBrute*indexFactor)+hireEffect;
+    const onssE=brut*0.25;
+    const onssW=brut*0.1307;
+    const pp=brut*0.22;
+    const net=brut-onssW-pp;
+    const cost=brut+onssE;
+    const cheques=ae.length*22*6.91;
+    return{m,brut:Math.round(brut),onssE:Math.round(onssE),onssW:Math.round(onssW),pp:Math.round(pp),net:Math.round(net),cost:Math.round(cost),cheques:Math.round(cheques),total:Math.round(cost+cheques)};
+  });
+  const totals=months.reduce((a,m)=>({brut:a.brut+m.brut,onssE:a.onssE+m.onssE,onssW:a.onssW+m.onssW,pp:a.pp+m.pp,net:a.net+m.net,cost:a.cost+m.cost,cheques:a.cheques+m.cheques,total:a.total+m.total}),{brut:0,onssE:0,onssW:0,pp:0,net:0,cost:0,cheques:0,total:0});
+  const pec13=masseBrute*0.92;const pecD=masseBrute;
+  const annualTotal=totals.total+pec13+pecD;
+  
+  return <div>
+    <PH title="📊 Budget Salarial Automatique" sub={`Projection ${year} — ${ae.length} travailleurs`}/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:16}}>
+      <SC label="Masse brute / an" value={fmt(totals.brut)} color="#c6a34e"/>
+      <SC label="ONSS patronal / an" value={fmt(totals.onssE)} color="#f87171"/>
+      <SC label="Chèques-repas / an" value={fmt(totals.cheques)} color="#fb923c"/>
+      <SC label="13ème mois + Pécule" value={fmt(pec13+pecD)} color="#60a5fa"/>
+      <SC label="COÛT TOTAL ANNUEL" value={fmt(annualTotal)} color="#a78bfa" sub={`${fmt(annualTotal/12)}/mois`}/>
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
+      <C>
+        <ST>Paramètres</ST>
+        <div style={{display:'grid',gap:10}}>
+          <I label="Année" type="number" value={year} onChange={v=>setYear(parseInt(v))}/>
+          <I label="Indexation annuelle (%)" type="number" value={indexRate} onChange={v=>setIndexRate(parseFloat(v)||0)}/>
+          <I label="Embauches prévues (S2)" type="number" value={hiring} onChange={v=>setHiring(parseInt(v)||0)}/>
+          {hiring>0&&<I label="Salaire moyen embauches" type="number" value={avgNewSalary} onChange={v=>setAvgNewSalary(parseFloat(v)||0)}/>}
+        </div>
+        <div style={{marginTop:14,padding:12,background:'rgba(198,163,78,.04)',borderRadius:8,fontSize:10.5,color:'#5e5c56',lineHeight:1.8}}>
+          <div><b style={{color:'#c6a34e'}}>Hypothèses:</b></div>
+          <div>• Indexation: {indexRate}% linéaire</div>
+          <div>• ONSS patronal: 25%</div>
+          <div>• Précompte moyen: 22%</div>
+          <div>• CR: 22j × 6,91€ empl.</div>
+          <div>• 13ème mois: 92% du brut</div>
+          <div>• Pécule vacances: 100% du brut</div>
+          {hiring>0&&<div>• {hiring} embauches à {fmt(avgNewSalary)} dès juillet</div>}
+        </div>
+      </C>
+      <C>
+        <ST>Budget mensuel détaillé</ST>
+        <div style={{overflowX:'auto'}}>
+          <table style={{width:'100%',borderCollapse:'collapse',fontSize:10.5}}>
+            <thead><tr style={{borderBottom:'1px solid rgba(198,163,78,.15)'}}>
+              <th style={{padding:'6px 8px',textAlign:'left',color:'#5e5c56',fontSize:9}}>MOIS</th>
+              <th style={{padding:'6px 8px',textAlign:'right',color:'#5e5c56',fontSize:9}}>BRUT</th>
+              <th style={{padding:'6px 8px',textAlign:'right',color:'#5e5c56',fontSize:9}}>ONSS PAT.</th>
+              <th style={{padding:'6px 8px',textAlign:'right',color:'#5e5c56',fontSize:9}}>PP</th>
+              <th style={{padding:'6px 8px',textAlign:'right',color:'#5e5c56',fontSize:9}}>NET</th>
+              <th style={{padding:'6px 8px',textAlign:'right',color:'#5e5c56',fontSize:9}}>CR</th>
+              <th style={{padding:'6px 8px',textAlign:'right',color:'#c6a34e',fontSize:9,fontWeight:700}}>TOTAL</th>
+            </tr></thead>
+            <tbody>
+              {months.map(m=><tr key={m.m} style={{borderBottom:'1px solid rgba(198,163,78,.04)'}}>
+                <td style={{padding:'5px 8px',color:'#e8e6e0'}}>{MN[m.m-1]}</td>
+                <td style={{padding:'5px 8px',textAlign:'right',color:'#e8e6e0',fontFamily:'monospace'}}>{fmt(m.brut)}</td>
+                <td style={{padding:'5px 8px',textAlign:'right',color:'#f87171',fontFamily:'monospace'}}>{fmt(m.onssE)}</td>
+                <td style={{padding:'5px 8px',textAlign:'right',color:'#fb923c',fontFamily:'monospace'}}>{fmt(m.pp)}</td>
+                <td style={{padding:'5px 8px',textAlign:'right',color:'#4ade80',fontFamily:'monospace'}}>{fmt(m.net)}</td>
+                <td style={{padding:'5px 8px',textAlign:'right',color:'#60a5fa',fontFamily:'monospace'}}>{fmt(m.cheques)}</td>
+                <td style={{padding:'5px 8px',textAlign:'right',color:'#c6a34e',fontWeight:700,fontFamily:'monospace'}}>{fmt(m.total)}</td>
+              </tr>)}
+              <tr style={{borderTop:'2px solid rgba(198,163,78,.3)',background:'rgba(198,163,78,.04)'}}>
+                <td style={{padding:'8px',color:'#c6a34e',fontWeight:700}}>TOTAL</td>
+                <td style={{padding:'8px',textAlign:'right',color:'#c6a34e',fontWeight:700,fontFamily:'monospace'}}>{fmt(totals.brut)}</td>
+                <td style={{padding:'8px',textAlign:'right',color:'#f87171',fontWeight:700,fontFamily:'monospace'}}>{fmt(totals.onssE)}</td>
+                <td style={{padding:'8px',textAlign:'right',color:'#fb923c',fontWeight:700,fontFamily:'monospace'}}>{fmt(totals.pp)}</td>
+                <td style={{padding:'8px',textAlign:'right',color:'#4ade80',fontWeight:700,fontFamily:'monospace'}}>{fmt(totals.net)}</td>
+                <td style={{padding:'8px',textAlign:'right',color:'#60a5fa',fontWeight:700,fontFamily:'monospace'}}>{fmt(totals.cheques)}</td>
+                <td style={{padding:'8px',textAlign:'right',color:'#c6a34e',fontWeight:700,fontFamily:'monospace',fontSize:12}}>{fmt(totals.total)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </C>
+    </div>
+  </div>;
+}
+
+// ── SIMULATEUR WHAT-IF ──
+function SimulateurWhatIfMod({s,d}){
+  const ae=s.emps.filter(e=>e.status==='active'||!e.status);
+  const masseBrute=ae.reduce((a,e)=>a+(parseFloat(e.monthlySalary)||0),0);
+  const [scenarios,setScenarios]=useState([
+    {id:1,name:'Scénario actuel',index:0,embauches:0,departs:0,augmentation:0,active:true},
+    {id:2,name:'Croissance modérée',index:2,embauches:3,departs:1,augmentation:3,active:true},
+    {id:3,name:'Croissance forte',index:2,embauches:8,departs:2,augmentation:5,active:true},
+    {id:4,name:'Restructuration',index:2,embauches:0,departs:5,augmentation:0,active:true},
+  ]);
+  
+  const calcScenario=(sc)=>{
+    const effectif=ae.length+sc.embauches-sc.departs;
+    const masseAjustee=masseBrute*(1+sc.augmentation/100)*(1+sc.index/100);
+    const masseNew=sc.embauches*2800;
+    const masseLess=sc.departs*(masseBrute/Math.max(ae.length,1));
+    const masseTotale=masseAjustee+masseNew-masseLess;
+    const annuel=masseTotale*12;
+    const cout=annuel*1.35;
+    const pec=masseTotale*1.92;
+    return{effectif,mensuel:Math.round(masseTotale),annuel:Math.round(annuel),cout:Math.round(cout),pec:Math.round(pec),totalAn:Math.round(cout+pec)};
+  };
+
+  return <div>
+    <PH title="🔮 Simulateur What-If" sub="Comparez différents scénarios d'évolution"/>
+    <div style={{display:'grid',gridTemplateColumns:`repeat(${scenarios.filter(s=>s.active).length},1fr)`,gap:14}}>
+      {scenarios.filter(sc=>sc.active).map(sc=>{
+        const r=calcScenario(sc);
+        const base=calcScenario(scenarios[0]);
+        const diff=r.totalAn-base.totalAn;
+        return <C key={sc.id} style={{border:sc.id===1?'1px solid rgba(198,163,78,.25)':'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:14,fontWeight:600,color:sc.id===1?'#c6a34e':'#e8e6e0',marginBottom:12}}>{sc.name}</div>
+          <div style={{display:'grid',gap:8,marginBottom:14}}>
+            <I label="Indexation (%)" type="number" value={sc.index} onChange={v=>setScenarios(scenarios.map(s=>s.id===sc.id?{...s,index:parseFloat(v)||0}:s))}/>
+            <I label="Embauches" type="number" value={sc.embauches} onChange={v=>setScenarios(scenarios.map(s=>s.id===sc.id?{...s,embauches:parseInt(v)||0}:s))}/>
+            <I label="Départs" type="number" value={sc.departs} onChange={v=>setScenarios(scenarios.map(s=>s.id===sc.id?{...s,departs:parseInt(v)||0}:s))}/>
+            <I label="Augmentation (%)" type="number" value={sc.augmentation} onChange={v=>setScenarios(scenarios.map(s=>s.id===sc.id?{...s,augmentation:parseFloat(v)||0}:s))}/>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:6}}>
+            <div style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(198,163,78,.06)'}}>
+              <span style={{fontSize:11,color:'#9e9b93'}}>Effectif</span>
+              <span style={{fontSize:12,fontWeight:600,color:'#e8e6e0'}}>{r.effectif}</span>
+            </div>
+            <div style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(198,163,78,.06)'}}>
+              <span style={{fontSize:11,color:'#9e9b93'}}>Masse/mois</span>
+              <span style={{fontSize:12,fontWeight:600,color:'#c6a34e'}}>{fmt(r.mensuel)}</span>
+            </div>
+            <div style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(198,163,78,.06)'}}>
+              <span style={{fontSize:11,color:'#9e9b93'}}>Coût annuel</span>
+              <span style={{fontSize:12,fontWeight:600,color:'#a78bfa'}}>{fmt(r.totalAn)}</span>
+            </div>
+            {sc.id!==1&&<div style={{padding:8,borderRadius:6,background:diff>0?'rgba(248,113,113,.06)':'rgba(74,222,128,.06)',textAlign:'center',marginTop:4}}>
+              <span style={{fontSize:13,fontWeight:700,color:diff>0?'#f87171':'#4ade80'}}>{diff>0?'+':''}{fmt(diff)}/an</span>
+              <div style={{fontSize:9,color:'#5e5c56'}}>vs scénario actuel</div>
+            </div>}
+          </div>
+        </C>;
+      })}
+    </div>
+  </div>;
+}
+
+// ── KPI DASHBOARD AVANCÉ ──
+function KPIDashboardMod({s,d}){
+  const ae=s.emps.filter(e=>e.status==='active'||!e.status);
+  const masseBrute=ae.reduce((a,e)=>a+(parseFloat(e.monthlySalary)||0),0);
+  const calcs=ae.map(e=>({e,c:calc(e,DPER,s.co)}));
+  const totalCost=calcs.reduce((a,x)=>a+x.c.costTotal,0);
+  const totalNet=calcs.reduce((a,x)=>a+x.c.net,0);
+  
+  // KPI calculations
+  const avgSalary=ae.length?masseBrute/ae.length:0;
+  const medianSalary=ae.length?[...ae].sort((a,b)=>(a.monthlySalary||0)-(b.monthlySalary||0))[Math.floor(ae.length/2)]?.monthlySalary||0:0;
+  const ratioCharges=masseBrute>0?((totalCost-masseBrute)/masseBrute*100):0;
+  const ratioNet=masseBrute>0?(totalNet/masseBrute*100):0;
+  const cdi=ae.filter(e=>e.contract==='CDI'||!e.contract).length;
+  const cdd=ae.filter(e=>e.contract==='CDD').length;
+  const students=ae.filter(e=>e.contract==='student').length;
+  const genderM=ae.filter(e=>e.sex==='M').length;
+  const genderF=ae.filter(e=>e.sex==='F').length;
+  const employes=ae.filter(e=>e.statut==='employe').length;
+  const ouvriers=ae.filter(e=>e.statut==='ouvrier').length;
+  
+  // Salary distribution
+  const brackets=[{l:'< 2.000€',min:0,max:2000},{l:'2.000-2.500€',min:2000,max:2500},{l:'2.500-3.000€',min:2500,max:3000},{l:'3.000-3.500€',min:3000,max:3500},{l:'3.500-4.000€',min:3500,max:4000},{l:'> 4.000€',min:4000,max:999999}];
+  const dist=brackets.map(b=>({...b,count:ae.filter(e=>(e.monthlySalary||0)>=b.min&&(e.monthlySalary||0)<b.max).length}));
+  const maxDist=Math.max(...dist.map(d=>d.count),1);
+
+  return <div>
+    <PH title="📊 KPI Dashboard Avancé" sub="Indicateurs clés de performance RH"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(6,1fr)',gap:10,marginBottom:16}}>
+      <SC label="Effectif total" value={ae.length} color="#c6a34e"/>
+      <SC label="Salaire moyen" value={fmt(avgSalary)} color="#60a5fa"/>
+      <SC label="Salaire médian" value={fmt(medianSalary)} color="#4ade80"/>
+      <SC label="Ratio charges" value={`${ratioCharges.toFixed(0)}%`} color="#f87171" sub="du brut"/>
+      <SC label="Ratio net/brut" value={`${ratioNet.toFixed(0)}%`} color="#a78bfa"/>
+      <SC label="Coût/employé" value={fmt(ae.length?totalCost/ae.length:0)} color="#fb923c" sub="/mois"/>
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:14}}>
+      {/* Distribution salariale */}
+      <C>
+        <ST>Distribution salariale</ST>
+        <div style={{display:'flex',flexDirection:'column',gap:6}}>
+          {dist.map((d,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:8}}>
+            <span style={{fontSize:10,color:'#5e5c56',width:80,textAlign:'right'}}>{d.l}</span>
+            <div style={{flex:1,height:18,background:'rgba(198,163,78,.06)',borderRadius:4,overflow:'hidden'}}>
+              <div style={{height:'100%',width:`${(d.count/maxDist)*100}%`,background:'linear-gradient(90deg,#c6a34e,#a78bfa)',borderRadius:4,display:'flex',alignItems:'center',paddingLeft:6}}>
+                {d.count>0&&<span style={{fontSize:9,color:'#fff',fontWeight:600}}>{d.count}</span>}
+              </div>
+            </div>
+          </div>)}
+        </div>
+      </C>
+      {/* Répartition contrats */}
+      <C>
+        <ST>Répartition</ST>
+        <div style={{display:'flex',flexDirection:'column',gap:10}}>
+          <div>
+            <div style={{fontSize:10,color:'#5e5c56',marginBottom:6}}>Par contrat</div>
+            {[{l:'CDI',v:cdi,c:'#4ade80'},{l:'CDD',v:cdd,c:'#fb923c'},{l:'Étudiants',v:students,c:'#60a5fa'}].map(x=><div key={x.l} style={{display:'flex',alignItems:'center',gap:6,marginBottom:4}}>
+              <span style={{width:10,height:10,borderRadius:'50%',background:x.c}}/>
+              <span style={{fontSize:11,color:'#9e9b93',flex:1}}>{x.l}</span>
+              <span style={{fontSize:12,fontWeight:600,color:'#e8e6e0'}}>{x.v}</span>
+              <span style={{fontSize:10,color:'#5e5c56'}}>{ae.length?Math.round(x.v/ae.length*100):0}%</span>
+            </div>)}
+          </div>
+          <div>
+            <div style={{fontSize:10,color:'#5e5c56',marginBottom:6}}>Par statut</div>
+            {[{l:'Employés',v:employes,c:'#a78bfa'},{l:'Ouvriers',v:ouvriers,c:'#c6a34e'}].map(x=><div key={x.l} style={{display:'flex',alignItems:'center',gap:6,marginBottom:4}}>
+              <span style={{width:10,height:10,borderRadius:'50%',background:x.c}}/>
+              <span style={{fontSize:11,color:'#9e9b93',flex:1}}>{x.l}</span>
+              <span style={{fontSize:12,fontWeight:600,color:'#e8e6e0'}}>{x.v}</span>
+            </div>)}
+          </div>
+          <div>
+            <div style={{fontSize:10,color:'#5e5c56',marginBottom:6}}>Par genre</div>
+            {[{l:'Hommes',v:genderM,c:'#60a5fa'},{l:'Femmes',v:genderF,c:'#f472b6'},{l:'Non renseigné',v:ae.length-genderM-genderF,c:'#5e5c56'}].map(x=><div key={x.l} style={{display:'flex',alignItems:'center',gap:6,marginBottom:4}}>
+              <span style={{width:10,height:10,borderRadius:'50%',background:x.c}}/>
+              <span style={{fontSize:11,color:'#9e9b93',flex:1}}>{x.l}</span>
+              <span style={{fontSize:12,fontWeight:600,color:'#e8e6e0'}}>{x.v}</span>
+            </div>)}
+          </div>
+        </div>
+      </C>
+      {/* Equal Pay Gap */}
+      <C>
+        <ST>Equal Pay Analysis</ST>
+        {genderM>0&&genderF>0?<div>
+          {(()=>{
+            const avgM=ae.filter(e=>e.sex==='M').reduce((a,e)=>a+(e.monthlySalary||0),0)/genderM;
+            const avgF=ae.filter(e=>e.sex==='F').reduce((a,e)=>a+(e.monthlySalary||0),0)/genderF;
+            const gap=((avgM-avgF)/avgM*100);
+            return <div style={{textAlign:'center',padding:20}}>
+              <div style={{fontSize:36,fontWeight:700,color:Math.abs(gap)<5?'#4ade80':gap>0?'#fb923c':'#60a5fa'}}>{gap.toFixed(1)}%</div>
+              <div style={{fontSize:12,color:'#9e9b93',marginTop:4}}>Gender Pay Gap</div>
+              <div style={{marginTop:12,display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+                <div style={{padding:8,borderRadius:6,background:'rgba(96,165,250,.06)'}}>
+                  <div style={{fontSize:10,color:'#60a5fa'}}>♂ Moyenne H</div>
+                  <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0'}}>{fmt(avgM)}</div>
+                </div>
+                <div style={{padding:8,borderRadius:6,background:'rgba(244,114,182,.06)'}}>
+                  <div style={{fontSize:10,color:'#f472b6'}}>♀ Moyenne F</div>
+                  <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0'}}>{fmt(avgF)}</div>
+                </div>
+              </div>
+              <div style={{fontSize:10,color:'#5e5c56',marginTop:10}}>{Math.abs(gap)<5?'✅ Écart acceptable (<5%)':gap>10?'⚠️ Écart significatif — action requise':'⚠️ Écart à surveiller'}</div>
+            </div>;
+          })()}
+        </div>:<div style={{textAlign:'center',padding:30,color:'#5e5c56',fontSize:11}}>Renseignez le genre (H/F) des travailleurs pour activer l'analyse Equal Pay</div>}
+      </C>
+    </div>
+  </div>;
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  ALERTES LÉGALES — Veille juridique et échéances
 // ═══════════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════
@@ -15479,6 +15756,9 @@ function AureusSuitePage({s,d}){
   if(sub==='marketplace')return <MarketplaceMod s={s} d={d}/>;
   if(sub==='integrations')return <IntegrationsMod s={s} d={d}/>;
   if(sub==='webhooks')return <WebhookManagerMod s={s} d={d}/>;
+  if(sub==='budget_auto')return <BudgetAutoMod s={s} d={d}/>;
+  if(sub==='what_if')return <SimulateurWhatIfMod s={s} d={d}/>;
+  if(sub==='kpi_dashboard')return <KPIDashboardMod s={s} d={d}/>;
   const products=[
     {id:"aureus_pointage",ic:'⏱',name:'Aureus Pointage',
       short:"Enregistrement des entrées et sorties",
