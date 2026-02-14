@@ -4085,26 +4085,27 @@ function Dashboard({s,d}) {
   const getAlerts=()=>{
     const alerts=[];
     const today=new Date();
+    const eName=(e)=>(e.first||e.last)?`${e.first||''} ${e.last||''}`.trim():(e.fn||`Employé ${(e.id||'').slice(-3)}`);
     // CDD fin proche (30 jours)
     ae.forEach(e=>{
       if(e.endD){
         const end=new Date(e.endD);
         const days=Math.ceil((end-today)/(1000*60*60*24));
-        if(days>0&&days<=30)alerts.push({type:'warning',icon:'⏰',msg:`CDD de ${e.first} ${e.last} expire dans ${days} jours (${e.endD})`,cat:'Contrat'});
-        if(days<=0)alerts.push({type:'error',icon:'🔴',msg:`CDD de ${e.first} ${e.last} expiré depuis ${Math.abs(days)} jours !`,cat:'Contrat'});
+        if(days>0&&days<=30)alerts.push({type:'warning',icon:'⏰',msg:`CDD de ${eName(e)} expire dans ${days} jours (${e.endD})`,cat:'Contrat'});
+        if(days<=0)alerts.push({type:'error',icon:'🔴',msg:`CDD de ${eName(e)} expiré depuis ${Math.abs(days)} jours !`,cat:'Contrat'});
       }
       // Période d'essai (si entrée < 14 jours pour étudiant)
       if(e.contract==='student'&&e.startD){
         const start=new Date(e.startD);
         const days=Math.ceil((today-start)/(1000*60*60*24));
-        if(days<=3)alerts.push({type:'info',icon:'📋',msg:`${e.first} ${e.last}: période d'essai étudiant (3 premiers jours)`,cat:'Contrat'});
+        if(days<=3)alerts.push({type:'info',icon:'📋',msg:`${eName(e)}: période d'essai étudiant (3 premiers jours)`,cat:'Contrat'});
       }
       // NISS manquant
-      if(!e.niss)alerts.push({type:'warning',icon:'🆔',msg:`NISS manquant pour ${e.first} ${e.last}`,cat:'Identité'});
+      if(!e.niss)alerts.push({type:'warning',icon:'🆔',msg:`NISS manquant pour ${eName(e)}`,cat:'Identité'});
       // IBAN manquant
-      if(!e.iban)alerts.push({type:'info',icon:'🏦',msg:`IBAN manquant pour ${e.first} ${e.last}`,cat:'Financier'});
+      if(!e.iban)alerts.push({type:'info',icon:'🏦',msg:`IBAN manquant pour ${eName(e)}`,cat:'Financier'});
       // Salaire à 0
-      if(!e.monthlySalary||e.monthlySalary<=0)alerts.push({type:'error',icon:'💰',msg:`Salaire non configuré pour ${e.first} ${e.last}`,cat:'Rémunération'});
+      if(!e.monthlySalary||e.monthlySalary<=0)alerts.push({type:'error',icon:'💰',msg:`Salaire non configuré pour ${eName(e)}`,cat:'Rémunération'});
     });
     // Indexation prévue
     const nextIndex=new Date(today.getFullYear(),0,1);
@@ -4290,7 +4291,7 @@ function Dashboard({s,d}) {
             <div style={{display:'flex',alignItems:'center',gap:10}}>
               <div style={{width:32,height:32,borderRadius:8,background:`linear-gradient(135deg,${['#c6a34e',"#60a5fa","#a78bfa","#4ade80","#fb923c","#06b6d4"][i%6]}22,${['#c6a34e',"#60a5fa","#a78bfa","#4ade80","#fb923c","#06b6d4"][i%6]}08)`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:['#c6a34e',"#60a5fa","#a78bfa","#4ade80","#fb923c","#06b6d4"][i%6]}}>{(e.first||'')[0]}{(e.last||'')[0]}</div>
               <div>
-                <div style={{fontSize:12.5,fontWeight:500,color:'#e8e6e0'}}>{e.first} {e.last}
+                <div style={{fontSize:12.5,fontWeight:500,color:'#e8e6e0'}}>{e.first||e.fn||'Employé'} {e.last||''}
                   <span style={{fontSize:8.5,padding:'1px 5px',borderRadius:3,marginLeft:6,fontWeight:600,
                     background:e.status==='sorti'?'rgba(248,113,113,.12)':e.contract==='student'?'rgba(251,146,60,.12)':e.statut==='ouvrier'?'rgba(251,146,60,.1)':'rgba(96,165,250,.08)',
                     color:e.status==='sorti'?'#f87171':e.contract==='student'?'#fb923c':e.statut==='ouvrier'?'#fb923c':'#60a5fa',
@@ -4514,7 +4515,7 @@ function Employees({s,d}) {
     if(filter==='ouvrier'&&e.statut!=='ouvrier')return false;
     if(search){
       const q=search.toLowerCase();
-      return `${e.first} ${e.last} ${e.fn} ${e.niss} ${e.dept} ${e.cp}`.toLowerCase().includes(q);
+      return `${e.first||e.fn||'Emp'} ${e.last||''} ${e.fn} ${e.niss} ${e.dept} ${e.cp}`.toLowerCase().includes(q);
     }
     return true;
   });
@@ -5009,7 +5010,7 @@ function Payslips({s,d}) {
       <C>
         <ST>Paramètres</ST>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9}}>
-          <I label="Employé" value={eid} onChange={setEid} options={s.emps.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))} span={2}/>
+          <I label="Employé" value={eid} onChange={setEid} options={s.emps.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))} span={2}/>
           <I label="Mois" value={per.month} onChange={v=>setPer({...per,month:parseInt(v)})} options={MN.map((m,i)=>({v:i+1,l:m}))}/>
           <I label="Année" type="number" value={per.year} onChange={v=>setPer({...per,year:v})}/>
           <I label="Jours prestés" type="number" value={per.days} onChange={v=>setPer({...per,days:v})}/>
@@ -5481,7 +5482,7 @@ function DimonaPage({s,d}) {
     {tab==='new'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
       <C><ST>Déclaration Dimona</ST>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9}}>
-          <I label="Travailleur" value={f.eid} onChange={v=>setF({...f,eid:v})} span={2} options={s.emps.map(e=>({v:e.id,l:`${e.first} ${e.last} ${e.niss?'':'⚠ NISS!'}`}))}/>
+          <I label="Travailleur" value={f.eid} onChange={v=>setF({...f,eid:v})} span={2} options={s.emps.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''} ${e.niss?'':'⚠ NISS!'}`}))}/>
           <I label="Action" value={f.action} onChange={v=>setF({...f,action:v})} options={[{v:"IN",l:"IN — Entrée en service"},{v:"OUT",l:"OUT — Sortie de service"},{v:"UPDATE",l:"UPDATE — Modification"},{v:"CANCEL",l:"CANCEL — Annulation"}]}/>
           <I label="Type travailleur" value={f.wtype} onChange={v=>setF({...f,wtype:v})} options={Object.entries(wtDescs).map(([k,v])=>({v:k,l:`${k} — ${v}`}))}/>
           <I label="Date début" type="date" value={f.start} onChange={v=>setF({...f,start:v})}/>
@@ -5618,7 +5619,7 @@ function DMFAPage({s,d}) {
     const acrf=genDMFATicket(ref,s.co);
     const totAll=tot.ow+tot.oe+tot.ffe+tot.ct+tot.am;
     const anomalies=[];
-    ae.forEach(e=>{if(!e.niss)anomalies.push({zone:'INSS',sev:"E",desc:`NISS manquant pour ${e.first} ${e.last}`});});
+    ae.forEach(e=>{if(!e.niss)anomalies.push({zone:'INSS',sev:"E",desc:`NISS manquant pour ${e.first||e.fn||'Emp'} ${e.last||''}`});});
     if(!s.co.onss)anomalies.push({zone:'NLOSSRegistrationNbr',sev:"E",desc:"Matricule ONSS employeur manquant"});
     const notif=genDMFANotification(acrf.ticket,s.co,q,y,ae.length,totAll.toFixed(2),anomalies);
     d({type:"ADD_DMFA",d:{q,y,cnt:ae.length,xml,ticket:acrf.ticket,ref,at:new Date().toISOString()}});
@@ -6317,8 +6318,8 @@ function BelcotaxPage({s,d}) {
   // Validation
   const warnings=[];
   ae.forEach(e=>{
-    if(!e.niss) warnings.push({emp:`${e.first} ${e.last}`,msg:'NISS manquant — fiche invalide'});
-    if(!e.addr&&!e.zip) warnings.push({emp:`${e.first} ${e.last}`,msg:'Adresse incomplète'});
+    if(!e.niss) warnings.push({emp:`${e.first||e.fn||'Emp'} ${e.last||''}`,msg:'NISS manquant — fiche invalide'});
+    if(!e.addr&&!e.zip) warnings.push({emp:`${e.first||e.fn||'Emp'} ${e.last||''}`,msg:'Adresse incomplète'});
   });
   if(!s.co.onss) warnings.push({emp:'Employeur',msg:'Matricule ONSS manquant'});
   if(!s.co.vat) warnings.push({emp:'Employeur',msg:'Numéro TVA manquant'});
@@ -6510,7 +6511,7 @@ function PrecomptePage({s,d}) {
           <div style={{display:'flex',gap:8}}>
             <B v="outline" style={{fontSize:10.5,padding:'6px 12px'}} onClick={()=>{
               const periode=mode==='mensuel'?`${String(m).padStart(2,"0")}/${y}`:`T${q}/${y}`;
-              const xml274=`<?xml version="1.0" encoding="UTF-8"?>\n<!-- Declaration Precompte Professionnel 274 -->\n<!-- SPF Finances — FINPROF -->\n<!-- Genere par: Aureus Social Pro -->\n<PP274 xmlns="urn:pp274:${y}">\n  <Declaration>\n    <Periode>${periode}</Periode>\n    <Periodicite>${mode}</Periodicite>\n    <Employeur>\n      <KBO>${(s.co.bce||s.co.vat||'').replace(/[^0-9]/g,"")}</KBO>\n      <ONSS>${(s.co.onss||'').replace(/[^0-9]/g,"")}</ONSS>\n      <Naam>${s.co.name}</Naam>\n    </Employeur>\n    <NbrTravailleurs>${ae.length}</NbrTravailleurs>\n    <TotalBrut>${det.reduce((a,r)=>a+r.gross,0).toFixed(2)}</TotalBrut>\n    <TotalPrecompte>${tot.toFixed(2)}</TotalPrecompte>\n${det.map(r=>`    <Travailleur>\n      <Naam>${r.e.last} ${r.e.first}</Naam>\n      <INSZ>${(r.e.niss||'').replace(/[\\.-\\s]/g,"")}</INSZ>\n      <Brut>${r.gross.toFixed(2)}</Brut>\n      <PP>${r.tax.toFixed(2)}</PP>\n    </Travailleur>`).join('\n')}\n  </Declaration>\n</PP274>`;
+              const xml274=`<?xml version="1.0" encoding="UTF-8"?>\n<!-- Declaration Precompte Professionnel 274 -->\n<!-- SPF Finances — FINPROF -->\n<!-- Genere par: Aureus Social Pro -->\n<PP274 xmlns="urn:pp274:${y}">\n  <Declaration>\n    <Periode>${periode}</Periode>\n    <Periodicite>${mode}</Periodicite>\n    <Employeur>\n      <KBO>${(s.co.bce||s.co.vat||'').replace(/[^0-9]/g,"")}</KBO>\n      <ONSS>${(s.co.onss||'').replace(/[^0-9]/g,"")}</ONSS>\n      <Naam>${s.co.name}</Naam>\n    </Employeur>\n    <NbrTravailleurs>${ae.length}</NbrTravailleurs>\n    <TotalBrut>${det.reduce((a,r)=>a+r.gross,0).toFixed(2)}</TotalBrut>\n    <TotalPrecompte>${tot.toFixed(2)}</TotalPrecompte>\n${det.map(r=>`    <Travailleur>\n      <Naam>${r.e.last||''} ${r.e.first||''}</Naam>\n      <INSZ>${(r.e.niss||'').replace(/[\\.-\\s]/g,"")}</INSZ>\n      <Brut>${r.gross.toFixed(2)}</Brut>\n      <PP>${r.tax.toFixed(2)}</PP>\n    </Travailleur>`).join('\n')}\n  </Declaration>\n</PP274>`;
               d({type:"MODAL",m:{w:850,c:<div>
                 <h2 style={{fontSize:17,fontWeight:600,color:'#e8e6e0',margin:'0 0 6px',fontFamily:"'Cormorant Garamond',serif"}}>Déclaration PP 274 — {periode}</h2>
                 <div style={{display:'flex',gap:8,marginBottom:12}}>
@@ -6572,7 +6573,7 @@ function DocsPage({s,d}) {
     <div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:18}}>
       <C><ST>Nouveau document</ST>
         <I label="Type" value={dt} onChange={setDt} options={Object.entries(LEGAL.SOCIAL_DOCS).map(([k,v])=>({v:k,l:v}))}/>
-        <I label="Employé" value={eid} onChange={setEid} style={{marginTop:9}} options={s.emps.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Employé" value={eid} onChange={setEid} style={{marginTop:9}} options={s.emps.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
         {dt==='C4'&&<><I label="Date sortie" type="date" value={endD} onChange={setEndD} style={{marginTop:9}}/>
           <I label="Motif" value={reason} onChange={setReason} style={{marginTop:9}} options={[{v:"Licenciement",l:"Licenciement"},{v:"Démission",l:"Démission"},{v:"Fin CDD",l:"Fin de CDD"},{v:"Commun accord",l:"Commun accord"},{v:"Faute grave",l:"Faute grave"}]}/></>}
         <B onClick={gen} style={{width:'100%',marginTop:14}}>Générer</B>
@@ -6594,7 +6595,7 @@ function DocsPage({s,d}) {
 // ═══════════════════════════════════════════════════════════════
 function ReportsPage({s,d}) {
   const ae=s.emps.filter(e=>e.status==='active');
-  const md=ae.map(e=>{const p=calc(e,DPER,s.co);return{name:`${e.first} ${e.last}`,gross:p.gross,onssW:p.onssNet,tax:p.tax,css:p.css,net:p.net,onssE:p.onssE,cost:p.costTotal};});
+  const md=ae.map(e=>{const p=calc(e,DPER,s.co);return{name:`${e.first||e.fn||'Emp'} ${e.last||''}`,gross:p.gross,onssW:p.onssNet,tax:p.tax,css:p.css,net:p.net,onssE:p.onssE,cost:p.costTotal};});
   const t=md.reduce((a,r)=>({g:a.g+r.gross,ow:a.ow+r.onssW,tx:a.tx+r.tax,cs:a.cs+r.css,n:a.n+r.net,oe:a.oe+r.onssE,co:a.co+r.cost}),{g:0,ow:0,tx:0,cs:0,n:0,oe:0,co:0});
   return <div>
     <PH title="Rapports" sub="Analyse masse salariale"/>
@@ -7361,7 +7362,7 @@ function ODMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'350px 1fr',gap:18}}>
       <C><ST>Générer document</ST>
         <I label="Type" value={f.type} onChange={v=>setF({...f,type:v})} options={types}/>
-        <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} style={{marginTop:9}} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} style={{marginTop:9}} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
         <I label="Motif / Notes" value={f.motif} onChange={v=>setF({...f,motif:v})} style={{marginTop:9}}/>
         <I label="Date" type="date" value={f.date} onChange={v=>setF({...f,date:v})} style={{marginTop:9}}/>
         <B onClick={add} style={{width:'100%',marginTop:14}}>Générer</B>
@@ -7429,7 +7430,7 @@ function CRMod({s,d}){
     </div>
     <C style={{padding:0,overflow:'hidden'}}>
       <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Détail — {MN[per.m-1]} {per.y}</div></div>
-      {gen?<Tbl cols={[{k:'r',l:"Réf",r:r=><span style={{fontFamily:'monospace',fontSize:10,color:'#c6a34e'}}>{r.ref}</span>},{k:'n',l:"Travailleur",r:r=>`${r.e.first} ${r.e.last}`},{k:'d',l:"Jours",a:'right',r:r=>r.dy},{k:'v',l:"Valeur",a:'right',r:r=>fmt(r.val)},{k:'t',l:"Total",a:'right',b:1,r:r=>fmt(r.tot)},{k:'w',l:"Trav.",a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.pW)}</span>},{k:'e',l:"Empl.",a:'right',r:r=><span style={{color:'#4ade80'}}>{fmt(r.pE)}</span>},{k:'x',l:"Exon.",a:'center',r:r=>r.exonOK?<span style={{color:'#4ade80'}}>✅</span>:<span style={{color:'#ef4444'}}>⚠</span>}]} data={gen?.ord||[]}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56',fontSize:13}}>Générez une commande</div>}
+      {gen?<Tbl cols={[{k:'r',l:"Réf",r:r=><span style={{fontFamily:'monospace',fontSize:10,color:'#c6a34e'}}>{r.ref}</span>},{k:'n',l:"Travailleur",r:r=>`${r.e.first||r.e.fn||'Emp'} ${r.e.last||''}`},{k:'d',l:"Jours",a:'right',r:r=>r.dy},{k:'v',l:"Valeur",a:'right',r:r=>fmt(r.val)},{k:'t',l:"Total",a:'right',b:1,r:r=>fmt(r.tot)},{k:'w',l:"Trav.",a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.pW)}</span>},{k:'e',l:"Empl.",a:'right',r:r=><span style={{color:'#4ade80'}}>{fmt(r.pE)}</span>},{k:'x',l:"Exon.",a:'center',r:r=>r.exonOK?<span style={{color:'#4ade80'}}>✅</span>:<span style={{color:'#ef4444'}}>⚠</span>}]} data={gen?.ord||[]}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56',fontSize:13}}>Générez une commande</div>}
     </C>
     </div>
   </div>;
@@ -7499,7 +7500,7 @@ function DRSMod({s,d}){
     </div>
     {tab==='generate'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
       <C><ST>Déclaration {sectors.find(s2=>s2.v===sector)?.l}</ST>
-        <I label="Travailleur" value="" onChange={()=>{}} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Travailleur" value="" onChange={()=>{}} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
         <I label="Date événement" type="date" value="" onChange={()=>{}} style={{marginTop:9}}/>
         {sector==='chomage'&&<I label="Scénario" value="5" onChange={()=>{}} style={{marginTop:9}} options={[{v:"1",l:"Scénario 1 — Chômage complet"},{v:"2",l:"Scénario 2 — Chômage temporaire"},{v:"3",l:"Scénario 3 — Prépension/RCC"},{v:"5",l:"Scénario 5 — Mensuel CT"},{v:"6",l:"Scénario 6 — Mensuel CT éco"}]}/>}
         {sector==='inami'&&<I label="Type" value="incap" onChange={()=>{}} style={{marginTop:9}} options={[{v:"incap",l:"Incapacité de travail"},{v:"mat",l:"Repos de maternité"},{v:"pat",l:"Congé de paternité"},{v:"adop",l:"Congé d\'adoption"}]}/>}
@@ -7553,7 +7554,7 @@ function FichesMod({s,d}){
         <B>Générer toutes les fiches</B>
       </div>
       <Tbl cols={[
-        {k:'n',l:"Travailleur",b:1,r:r=>`${r.e.first} ${r.e.last}`},
+        {k:'n',l:"Travailleur",b:1,r:r=>`${r.e.first||r.e.fn||'Emp'} ${r.e.last||''}`},
         {k:'st',l:"Statut",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:r.e.statut==='ouvrier'?'rgba(248,113,113,.1)':'rgba(96,165,250,.1)',color:r.e.statut==='ouvrier'?'#f87171':'#60a5fa'}}>{r.e.statut||'employé'}</span>},
         {k:'g',l:"Brut",a:'right',r:r=>fmt(r.p.gross)},
         {k:'o',l:"ONSS",a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.p.onssNet)}</span>},
@@ -7721,7 +7722,7 @@ function PointageMod({s,d}){
     {/* ── TAB: DÉTAIL JOURNALIER ── */}
     {tab==='daily'&&<div>
       <div style={{display:'flex',gap:12,marginBottom:14,alignItems:'center'}}>
-        <I label="" value={selEmp||''} onChange={setSelEmp} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))} style={{width:250}}/>
+        <I label="" value={selEmp||''} onChange={setSelEmp} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))} style={{width:250}}/>
         <div style={{fontSize:12,color:'#9e9b93'}}>{MN[per.m-1]} {per.y}</div>
       </div>
       <C style={{padding:0,overflow:'hidden'}}>
@@ -8117,7 +8118,7 @@ function PortailEmployeurMod({s,d,per}){
               {(()=>{
                 const [absEmp,setAbsEmp]=[ae[0]?.id||'',()=>{}]; // simplified
                 return <div>
-                  <I label="Travailleur" value={ae[0]?.id||''} onChange={()=>{}} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+                  <I label="Travailleur" value={ae[0]?.id||''} onChange={()=>{}} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
                   <I label="Type d'absence" value="conge_annuel" onChange={()=>{}} style={{marginTop:8}} options={absTypes.map(a=>({v:a.v,l:`${a.ic} ${a.l}`}))}/>
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginTop:8}}>
                     <I label="Du" type="date" value={new Date().toISOString().split('T')[0]} onChange={()=>{}}/>
@@ -8337,7 +8338,7 @@ function ONSSAPLMod({s,d}){
     <C style={{padding:0,overflow:'hidden'}}>
       <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Détail ONSS par travailleur</div></div>
       <Tbl cols={[
-        {k:'n',l:"Travailleur",b:1,r:r=>`${r.e.first} ${r.e.last}`},
+        {k:'n',l:"Travailleur",b:1,r:r=>`${r.e.first||r.e.fn||'Emp'} ${r.e.last||''}`},
         {k:'g',l:"Brut",a:'right',r:r=>fmt(r.p.gross)},
         {k:'ow',l:"ONSS trav.",a:'right',r:r=><span style={{color:'#60a5fa'}}>{fmt(r.p.onssNet)}</span>},
         {k:'oe',l:"ONSS empl.",a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.p.onssE)}</span>},
@@ -9032,7 +9033,7 @@ function ProvisionsMod({s,d}){
     const cotisSpec = doubleVac2 * 0.01;               // cotisation spéciale 1%
     // Ouvrier: cotisation patronale caisse de vacances
     const ouvrierCotis = isOuvrier ? brut * 0.1584 : 0; // 15,84% via ONSS
-    return{emp:`${e.first} ${e.last}`,brut,isOuvrier,
+    return{emp:`${e.first||e.fn||'Emp'} ${e.last||''}`,brut,isOuvrier,
       provVacS: isOuvrier ? 0 : simpleVacMens * m,
       provVacD: isOuvrier ? 0 : doubleVacMens * m,
       provVacD1: doubleVac1 * m, provVacD2: doubleVac2 * m,
@@ -9100,7 +9101,7 @@ function CumulsMod({s,d}){
       <C style={{padding:0,overflow:'hidden'}}>
         <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Cumuls {yr} — {moisEcoules} mois</div></div>
         <Tbl cols={[
-          {k:'n',l:"Travailleur",b:1,r:r=>`${r.e.first} ${r.e.last}`},
+          {k:'n',l:"Travailleur",b:1,r:r=>`${r.e.first||r.e.fn||'Emp'} ${r.e.last||''}`},
           {k:'g',l:"Brut YTD",a:'right',r:r=>fmt(r.grossY)},
           {k:'o',l:"ONSS YTD",a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.onssY)}</span>},
           {k:'t',l:"PP YTD",a:'right',r:r=><span style={{color:'#a78bfa'}}>{fmt(r.taxY)}</span>},
@@ -9201,7 +9202,7 @@ function SaisiesMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:18}}>
       <C>
         <ST>Nouvelle saisie / cession</ST>
-        <I label="Travailleur" value={f.eid} onChange={v=>setF({...f,eid:v})} options={s.emps.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Travailleur" value={f.eid} onChange={v=>setF({...f,eid:v})} options={s.emps.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
         <I label="Type" value={f.type} onChange={v=>setF({...f,type:v})} style={{marginTop:9}} options={types}/>
         <I label="Créancier / Huissier / SECAL" value={f.creancier} onChange={v=>setF({...f,creancier:v})} style={{marginTop:9}}/>
         <I label="Réf. dossier" value={f.ref} onChange={v=>setF({...f,ref:v})} style={{marginTop:9}}/>
@@ -9587,7 +9588,7 @@ function RentesMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:18}}>
       <C>
         <ST>Nouvelle rente / obligation</ST>
-        <I label="Travailleur" value={f.eid} onChange={v=>setF({...f,eid:v})} options={s.emps.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Travailleur" value={f.eid} onChange={v=>setF({...f,eid:v})} options={s.emps.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
         <I label="Type" value={f.type} onChange={v=>setF({...f,type:v})} style={{marginTop:9}} options={types.map(t=>({v:t.v,l:t.l}))}/>
         <I label="Bénéficiaire / Organisme" value={f.beneficiaire} onChange={v=>setF({...f,beneficiaire:v})} style={{marginTop:9}}/>
         <I label="Réf. dossier / jugement" value={f.ref} onChange={v=>setF({...f,ref:v})} style={{marginTop:9}}/>
@@ -9853,7 +9854,7 @@ function MedTravailMod({s,d}){
     {tab==='planning'&&<C style={{padding:0,overflow:'hidden'}}>
       <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Planning surveillance santé</div></div>
       <Tbl cols={[
-        {k:'n',l:"Travailleur",b:1,r:r=>`${r.e.first} ${r.e.last}`},
+        {k:'n',l:"Travailleur",b:1,r:r=>`${r.e.first||r.e.fn||'Emp'} ${r.e.last||''}`},
         {k:'f',l:"Fonction",r:r=><span style={{fontSize:11}}>{r.e.fn||'—'}</span>},
         {k:'r',l:"Risque",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:r.risk==='elevé'?'rgba(248,113,113,.1)':'rgba(74,222,128,.1)',color:r.risk==='elevé'?'#f87171':'#4ade80',fontWeight:600}}>{r.risk}</span>},
         {k:'fr',l:"Fréquence",r:r=><span style={{fontSize:11}}>{r.freq} mois</span>},
@@ -9989,7 +9990,7 @@ function AllocFamMod({s,d}){
         total:base+(isHandi?337.84:0)});
     }
     const totalMois=children.reduce((a,c)=>a+c.total,0);
-    return{emp:`${e.first} ${e.last}`,niss:e.niss,enfants:nKids,handi:nHandi,
+    return{emp:`${e.first||e.fn||'Emp'} ${e.last||''}`,niss:e.niss,enfants:nKids,handi:nHandi,
       children,totalMois,caisse:e.allocCaisse||AF_CAISSES_ALL.find(c=>c.reg===region)?.n||'—',startD:e.startD};
   });
   const totGlobal=data.reduce((a,r)=>a+r.totalMois,0);
@@ -13488,7 +13489,7 @@ function CO2Mod({s,d}){
             <button onClick={()=>rem(car.id)} style={{background:"rgba(248,113,113,.1)",border:'1px solid rgba(248,113,113,.2)',borderRadius:6,color:'#f87171',padding:'3px 10px',cursor:'pointer',fontSize:11,fontFamily:'inherit'}}>✕</button>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:10}}>
-            <I label="Employé" value={car.emp} onChange={v=>upd(car.id,"emp",v)} options={[{v:"",l:"— Choisir —"},...ae.map(e=>({v:`${e.first} ${e.last}`,l:`${e.first} ${e.last}`}))]}/>
+            <I label="Employé" value={car.emp} onChange={v=>upd(car.id,"emp",v)} options={[{v:"",l:"— Choisir —"},...ae.map(e=>({v:`${e.first||e.fn||'Emp'} ${e.last||''}`,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))]}/>
             <I label="Marque" value={car.marque} onChange={v=>upd(car.id,"marque",v)}/>
             <I label="Modèle" value={car.modele} onChange={v=>upd(car.id,"modele",v)}/>
             <I label="Carburant" value={car.fuel} onChange={v=>upd(car.id,"fuel",v)} options={CO2_FUEL.map(f=>({v:f.id,l:f.l}))}/>
@@ -13738,7 +13739,7 @@ function PreavisMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
       <C>
         <ST>Paramètres</ST>
-        <I label="Travailleur" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Travailleur" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
         <I label="Type" value={motif} onChange={setMotif} options={[{v:"licenciement",l:"Licenciement (par employeur)"},{v:"demission",l:"Démission (par travailleur)"}]}/>
         <I label="Date notification" type="date" value={dateNotif} onChange={setDateNotif}/>
         {r&&<div style={{marginTop:14,padding:12,background:motif==='licenciement'?'rgba(248,113,113,.08)':'rgba(96,165,250,.08)',borderRadius:8,border:`1px solid ${motif==='licenciement'?'rgba(248,113,113,.2)':'rgba(96,165,250,.2)'}`,textAlign:'center'}}>
@@ -13828,7 +13829,7 @@ function PeculeSortieMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
       <C>
         <ST>Paramètres</ST>
-        <I label="Travailleur" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Travailleur" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
         <I label="Date de sortie" type="date" value={dateSortie} onChange={setDateSortie}/>
         <I label="Motif" value={motif} onChange={setMotif} options={[{v:"licenciement",l:"Licenciement"},{v:"demission",l:"Démission"},{v:"commun",l:"Rupture d\'un commun accord"},{v:"pension",l:"Pension"},{v:"deces",l:"Décès"}]}/>
         {r&&<div style={{marginTop:14,padding:12,background:"rgba(74,222,128,.08)",borderRadius:8,textAlign:'center'}}>
@@ -13905,7 +13906,7 @@ function CreditTempsMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
       <C>
         <ST>Configuration</ST>
-        <I label="Travailleur" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Travailleur" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
         <I label="Régime" value={regime} onChange={setRegime} options={regimes.map(r=>({v:r.id,l:r.l}))}/>
         <I label="Motif" value={motif} onChange={setMotif} options={motifs.map(m=>({v:m.id,l:m.l}))}/>
         <I label="Date début" type="date" value={debut} onChange={setDebut}/>
@@ -13984,7 +13985,7 @@ function AbsencesMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
       <C>
         <ST>Travailleur</ST>
-        <I label="Employé" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Employé" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
         <div style={{marginTop:14,display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
           <div style={{padding:12,background:"rgba(198,163,78,.06)",borderRadius:8,textAlign:'center'}}>
             <div style={{fontSize:10,color:'#5e5c56'}}>Jours absence</div>
@@ -14111,7 +14112,7 @@ function IndexAutoMod({s,d}){
       <C style={{padding:0,overflow:'hidden'}}>
         <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Impact par travailleur</div></div>
         <Tbl cols={[
-          {k:'n',l:"Travailleur",b:1,r:r=>`${r.e.first} ${r.e.last}`},
+          {k:'n',l:"Travailleur",b:1,r:r=>`${r.e.first||r.e.fn||'Emp'} ${r.e.last||''}`},
           {k:'g',l:"Brut actuel",a:'right',r:r=>fmt(r.p.gross)},
           {k:'a',l:"Augmentation",a:'right',r:r=><span style={{color:'#fb923c'}}>+{fmt(r.augm)}</span>},
           {k:'ng',l:"Nouveau brut",a:'right',r:r=><span style={{fontWeight:600,color:'#4ade80'}}>{fmt(r.newGross)}</span>},
@@ -14169,7 +14170,7 @@ function CafeteriaMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
       <C>
         <ST>Configuration</ST>
-        <I label="Travailleur" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Travailleur" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
         <I label="Budget annuel (€)" type="number" value={budget} onChange={v=>setBudget(parseFloat(v)||0)}/>
         <div style={{marginTop:14,padding:12,borderRadius:8,textAlign:'center',background:reste>=0?'rgba(74,222,128,.08)':'rgba(248,113,113,.08)'}}>
           <div style={{fontSize:11,color:'#5e5c56'}}>Budget restant</div>
@@ -14268,7 +14269,7 @@ function BudgetMobiliteMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
       <C>
         <ST>Configuration</ST>
-        <I label="Travailleur" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Travailleur" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
         <I label="Budget annuel (€)" type="number" value={budgetAn} onChange={v=>setBudgetAn(parseFloat(v)||0)}/>
         <I label="Pilier 1 — Voiture éco (€/an)" type="number" value={p1} onChange={v=>setP1(parseFloat(v)||0)}/>
         <I label="Pilier 2 — Mobilité durable (€/an)" type="number" value={p2} onChange={v=>setP2(parseFloat(v)||0)}/>
@@ -14520,7 +14521,7 @@ function NoteFraisMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
       <C>
         <ST>Travailleur</ST>
-        <I label="Employé" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Employé" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
         <div style={{marginTop:14,padding:12,background:"rgba(198,163,78,.06)",borderRadius:8,fontSize:12,color:'#9e9b93',lineHeight:2}}>
           <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>Total</div>
           <div>Notes: <b style={{color:'#e8e6e0'}}>{notes.length}</b></div>
@@ -14589,7 +14590,7 @@ function HeuresSupMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
       <C>
         <ST>Travailleur</ST>
-        <I label="Employé" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Employé" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
         {emp&&<div style={{marginTop:14,padding:12,background:"rgba(198,163,78,.06)",borderRadius:8,fontSize:12,color:'#9e9b93',lineHeight:2}}>
           <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>Résumé</div>
           <div>Taux horaire: <b style={{color:'#e8e6e0'}}>{fmt(hr)}/h</b></div>
@@ -14748,7 +14749,7 @@ function TotalRewardMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
       <div>
         <C><ST>Travailleur</ST>
-          <I label="Sélection" value={sel} onChange={setSel} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+          <I label="Sélection" value={sel} onChange={setSel} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
           <div style={{marginTop:16,textAlign:'center'}}>
             <div style={{width:60,height:60,borderRadius:'50%',background:"linear-gradient(135deg,#c6a34e,#a08030)",display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto',fontSize:22,fontWeight:700,color:'#fff'}}>{(emp.first||'?')[0]}{(emp.last||'?')[0]}</div>
             <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0',marginTop:8}}>{emp.first} {emp.last}</div>
@@ -14818,7 +14819,7 @@ function ATNMod({s,d}){
     </div>
     <div style={{display:'grid',gridTemplateColumns:'350px 1fr',gap:18}}>
       <C><ST>Ajouter véhicule</ST>
-        <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+        <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:9}}>
           <I label="Marque" value={f.marque} onChange={v=>setF({...f,marque:v})}/>
           <I label="Modèle" value={f.modele} onChange={v=>setF({...f,modele:v})}/>
@@ -14893,7 +14894,7 @@ function ChomTempMod({s,d}){
     {tab==='new'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
       <C><ST>Créer dossier chômage temporaire</ST>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9}}>
-          <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} span={2} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+          <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} span={2} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
           <I label="Motif" value={f.motif} onChange={v=>setF({...f,motif:v})} span={2} options={mots}/>
           <I label="Début" type="date" value={f.debut} onChange={v=>setF({...f,debut:v})}/>
           <I label="Fin" type="date" value={f.fin} onChange={v=>setF({...f,fin:v})}/>
@@ -14975,7 +14976,7 @@ function CongeEducMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'350px 1fr',gap:18}}>
       <div>
         <C><ST>Nouveau dossier</ST>
-          <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+          <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
           <I label="Formation" value={f.formation} onChange={v=>setF({...f,formation:v})} style={{marginTop:9}}/>
           <I label="Organisme" value={f.organisme} onChange={v=>setF({...f,organisme:v})} style={{marginTop:9}}/>
           <I label="Région" value={f.region} onChange={v=>setF({...f,region:v})} style={{marginTop:9}} options={[{v:"bxl",l:"Bruxelles (120h)"},{v:"wal",l:"Wallonie (180h)"},{v:"vla",l:"Flandre (125h)"}]}/>
@@ -15037,7 +15038,7 @@ function RCCMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:18}}>
       <div>
         <C><ST>Paramètres</ST>
-          <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+          <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
           <I label="Brut réf. mensuel (€)" type="number" value={f.brut} onChange={v=>setF({...f,brut:+v})} style={{marginTop:9}}/>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:9}}>
             <I label="Âge" type="number" value={f.age} onChange={v=>setF({...f,age:+v})}/>
@@ -15119,7 +15120,7 @@ function OutplacementMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'350px 1fr',gap:18}}>
       <div>
         <C><ST>Créer dossier</ST>
-          <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+          <I label="Travailleur" value={f.emp} onChange={v=>setF({...f,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
           <I label="Type" value={f.type} onChange={v=>setF({...f,type:v})} style={{marginTop:9}} options={tps}/>
           <I label="Prestataire" value={f.prest} onChange={v=>setF({...f,prest:v})} style={{marginTop:9}}/>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:9}}>
@@ -15206,7 +15207,7 @@ function AbsenteismeMod({s,d}){
       <C style={{padding:0,overflow:'hidden'}}>
         <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Détail par travailleur</div></div>
         <Tbl cols={[
-          {k:'n',l:"Travailleur",b:1,r:r=>`${r.e.first} ${r.e.last}`},
+          {k:'n',l:"Travailleur",b:1,r:r=>`${r.e.first||r.e.fn||'Emp'} ${r.e.last||''}`},
           {k:'s',l:"Court",a:'right',r:r=><span style={{color:'#f59e0b'}}>{r.shortDays}j</span>},
           {k:'lo',l:"Long",a:'right',r:r=><span style={{color:'#f87171'}}>{r.longDays}j</span>},
           {k:'t',l:"Total",a:'right',r:r=><span style={{fontWeight:600}}>{r.totalDays}j</span>},
@@ -15931,7 +15932,7 @@ function SelfServiceMod({s,d}){
     <div style={{display:'grid',gridTemplateColumns:'260px 1fr',gap:18}}>
       <div>
         <C><ST>Travailleur</ST>
-          <I label="Simulation pour" value={sel} onChange={setSel} options={ae.map(e=>({v:e.id,l:`${e.first} ${e.last}`}))}/>
+          <I label="Simulation pour" value={sel} onChange={setSel} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
           <div style={{marginTop:14,textAlign:'center'}}>
             <div style={{width:50,height:50,borderRadius:'50%',background:"linear-gradient(135deg,#c6a34e,#a08030)",display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto',fontSize:18,fontWeight:700,color:'#fff'}}>{(emp.first||'?')[0]}{(emp.last||'?')[0]}</div>
             <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0',marginTop:6}}>{emp.first} {emp.last}</div>
