@@ -3854,7 +3854,7 @@ function AppInner({ supabase, user, onLogout }) {
     {id:"dashboard",l:t('nav.dashboard'),i:'◫'},
     {id:"employees",l:t('nav.employees'),i:'◉'},
     {id:"payslip",l:t('nav.payslip'),i:'◈'},
-    {id:"onss",l:t('nav.onss'),i:'◆',sub:[{id:"dimona",l:t('sub.dimona')},{id:"dmfa",l:t('sub.dmfa')},{id:"drs",l:t('sub.drs')},{id:"onssapl",l:t('sub.onssapl')},{id:"onss_dash",l:"Dashboard ONSS"}]},
+    {id:"onss",l:t('nav.onss'),i:'◆',sub:[{id:"dimona",l:t('sub.dimona')},{id:"dmfa",l:t('sub.dmfa')},{id:"drs",l:t('sub.drs')},{id:"onssapl",l:t('sub.onssapl')},{id:"onss_dash",l:"Dashboard ONSS"},{id:"guide_portail",l:"Guide Portail ONSS"}]},
     {id:"fiscal",l:t('nav.fiscal'),i:'◇',sub:[{id:"belcotax",l:t('sub.belcotax')},{id:"precompte",l:t('sub.precompte')},{id:"fiches_ext",l:t('sub.fiches_ext')},{id:"co2",l:t('sub.co2')},{id:"atn",l:t('sub.atn')}]},
     {id:"salaires",l:t('nav.salaires'),i:'◈',sub:[{id:"od",l:t('sub.od')},{id:"provisions",l:t('sub.provisions')},{id:"cumuls",l:t('sub.cumuls')},{id:"netbrut",l:t('sub.netbrut')},{id:"simcout",l:t('sub.simcout')},{id:"saisies",l:t('sub.saisies')},{id:"indexauto",l:t('sub.indexauto')},{id:"horsforfait",l:t('sub.horsforfait')},{id:"totalreward",l:t('sub.totalreward')}]},
     {id:"avantages",l:t('nav.avantages'),i:'★',sub:[{id:"cheques",l:t('sub.cheques')},{id:"ecocmd",l:t('sub.ecocmd')},{id:"cafeteria",l:t('sub.cafeteria')},{id:"cct90",l:t('sub.cct90')},{id:"warrants",l:t('sub.warrants')},{id:"budgetmob",l:t('sub.budgetmob')},{id:"ecocircul",l:t('sub.ecocircul')}]},
@@ -3935,7 +3935,7 @@ function AppInner({ supabase, user, onLogout }) {
       case'dashboard':return <Dashboard s={s} d={d}/>;
       case'employees':return <Employees s={s} d={d}/>;
       case'payslip':return <Payslips s={s} d={d}/>;
-      case'onss':return s.sub==='dmfa'?<DMFAPage s={s} d={d}/>:s.sub==='drs'?<DRSMod s={s} d={d}/>:s.sub==='onssapl'?<ONSSAPLMod s={s} d={d}/>:s.sub==='onss_dash'?<ONSSDashMod s={s} d={d}/>:<DimonaPage s={s} d={d}/>;
+      case'onss':return s.sub==='dmfa'?<DMFAPage s={s} d={d}/>:s.sub==='drs'?<DRSMod s={s} d={d}/>:s.sub==='onssapl'?<ONSSAPLMod s={s} d={d}/>:s.sub==='onss_dash'?<ONSSDashMod s={s} d={d}/>:s.sub==='guide_portail'?<GuidePortailMod s={s} d={d}/>:<DimonaPage s={s} d={d}/>;
       case'fiscal':return s.sub==='precompte'?<PrecomptePage s={s} d={d}/>:s.sub==='fiches_ext'?<FichesMod s={s} d={d}/>:s.sub==='co2'?<CO2Mod s={s} d={d}/>:s.sub==='atn'?<ATNMod s={s} d={d}/>:<BelcotaxPage s={s} d={d}/>;
       case'salaires':return <SalairesPage s={s} d={d}/>;
       case'avantages':return <AvantagesPage s={s} d={d}/>;
@@ -5429,6 +5429,172 @@ function DMFAPage({s,d}) {
           </div>
         </div></>}
       </C>
+    </div>
+  </div>;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  GUIDE PORTAIL ONSS — PAS A PAS
+// ═══════════════════════════════════════════════════════════════
+function GuidePortailMod({s,d}){
+  const [tab,setTab]=useState('intro');
+  const tabs=[
+    {id:'intro',l:"Vue d'ensemble",i:'📋'},
+    {id:'acces',l:'Acces au portail',i:'🔑'},
+    {id:'dimona',l:'Dimona pas a pas',i:'⬆'},
+    {id:'dmfa',l:'DmfA pas a pas',i:'◆'},
+    {id:'paiement',l:'Paiement ONSS',i:'💳'},
+    {id:'pp',l:'Precompte Pro',i:'📊'},
+    {id:'belcotax',l:'Belcotax 281',i:'📄'},
+    {id:'calendrier',l:'Calendrier annuel',i:'📅'},
+    {id:'faq',l:'FAQ',i:'❓'},
+  ];
+  const Step=({n,title,desc,link,warn})=><div style={{marginBottom:16,padding:14,background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}>
+    <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:6}}>
+      <div style={{width:28,height:28,borderRadius:'50%',background:"linear-gradient(135deg,#c6a34e,#8b6914)",display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:700,color:'#0a0e1a',flexShrink:0}}>{n}</div>
+      <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>{title}</div>
+    </div>
+    <div style={{fontSize:11.5,color:'#9e9b93',lineHeight:1.7,marginLeft:38}}>{desc}</div>
+    {link&&<div style={{marginTop:6,marginLeft:38}}><a href={link} target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:'#60a5fa',textDecoration:'underline'}}>{link}</a></div>}
+    {warn&&<div style={{marginTop:8,marginLeft:38,padding:8,background:"rgba(251,146,60,.08)",borderRadius:6,fontSize:10.5,color:'#fb923c',lineHeight:1.5}}>⚠️ {warn}</div>}
+  </div>;
+  const Info=({text})=><div style={{padding:10,background:"rgba(96,165,250,.06)",borderRadius:8,fontSize:11,color:'#60a5fa',lineHeight:1.6,marginBottom:14}}>ℹ️ {text}</div>;
+  const Warn=({text})=><div style={{padding:10,background:"rgba(248,113,113,.06)",borderRadius:8,fontSize:11,color:'#f87171',lineHeight:1.6,marginBottom:14}}>⚠️ {text}</div>;
+  return <div>
+    <div style={{padding:'18px 24px',borderBottom:'1px solid rgba(139,115,60,.15)'}}>
+      <div style={{fontSize:18,fontWeight:700,color:'#e8e6e0'}}>📘 Guide Portail ONSS & Fiscal — Pas a Pas</div>
+      <div style={{fontSize:11.5,color:'#9e9b93',marginTop:4}}>Comment envoyer vos declarations vous-meme sur socialsecurity.be et MyMinfin</div>
+    </div>
+    <div style={{display:'flex',flexWrap:'wrap',gap:6,padding:'12px 24px',borderBottom:'1px solid rgba(139,115,60,.08)'}}>
+      {tabs.map(t=><button key={t.id} onClick={()=>setTab(t.id)} style={{padding:'6px 12px',borderRadius:8,border:tab===t.id?'1px solid rgba(198,163,78,.4)':'1px solid rgba(255,255,255,.06)',background:tab===t.id?"rgba(198,163,78,.12)":"rgba(255,255,255,.02)",color:tab===t.id?'#c6a34e':'#9e9b93',fontSize:11,fontWeight:tab===t.id?600:400,cursor:'pointer'}}>{t.i} {t.l}</button>)}
+    </div>
+    <div style={{padding:24,maxHeight:'calc(100vh - 280px)',overflowY:'auto'}}>
+
+    {tab==='intro'&&<div>
+      <div style={{fontSize:14,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Comment ca fonctionne ?</div>
+      <Info text={"Aureus Social Pro calcule tout pour vous : salaires, ONSS, precompte, fiches de paie. Vous n'avez plus qu'a envoyer les declarations et payer. Ce guide vous explique comment faire, etape par etape."}/>
+      <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0',marginBottom:10}}>Repartition des taches</div>
+      {[
+        {tache:"Calcul salaires brut/net",qui:"Aureus Social Pro",icon:"✅"},
+        {tache:"Fiches de paie",qui:"Aureus Social Pro",icon:"✅"},
+        {tache:"Calcul cotisations ONSS (13,07% + patronal)",qui:"Aureus Social Pro",icon:"✅"},
+        {tache:"Calcul precompte professionnel",qui:"Aureus Social Pro",icon:"✅"},
+        {tache:"Preparation donnees DmfA",qui:"Aureus Social Pro",icon:"✅"},
+        {tache:"Generation documents (C4, contrats...)",qui:"Aureus Social Pro",icon:"✅"},
+        {tache:"Envoi Dimona IN/OUT",qui:"Vous, sur socialsecurity.be",icon:"👤"},
+        {tache:"Envoi DmfA trimestrielle",qui:"Vous, sur socialsecurity.be",icon:"👤"},
+        {tache:"Paiement cotisations ONSS",qui:"Vous, par virement bancaire",icon:"👤"},
+        {tache:"Paiement precompte professionnel",qui:"Vous, via MyMinfin",icon:"👤"},
+        {tache:"Envoi Belcotax 281 (annuel)",qui:"Vous, sur Belcotax-on-web",icon:"👤"},
+      ].map((r,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 12px',background:i%2===0?"rgba(255,255,255,.02)":"transparent",borderRadius:6,marginBottom:2}}>
+        <div style={{fontSize:14,width:24,textAlign:'center'}}>{r.icon}</div>
+        <div style={{flex:1,fontSize:11.5,color:'#e8e6e0'}}>{r.tache}</div>
+        <div style={{fontSize:10.5,color:r.icon==='✅'?'#4ade80':'#c6a34e',fontWeight:600}}>{r.qui}</div>
+      </div>)}
+      <Info text={"Vous n'avez PAS besoin d'etre affilie a un secretariat social agree. L'affiliation est facultative (source: CCI France Belgique). Vous pouvez gerer vos obligations sociales vous-meme avec l'aide de notre logiciel."}/>
+    </div>}
+
+    {tab==='acces'&&<div>
+      <div style={{fontSize:14,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Obtenir l'acces au portail de la securite sociale</div>
+      <Step n={1} title="Obtenir une carte eID ou itsme" desc="Pour acceder au portail de la securite sociale, vous devez vous identifier avec votre carte d'identite electronique (eID + lecteur de carte) ou via l'application itsme. Si vous n'avez pas encore itsme, telechargez l'application et activez-la via votre banque ou votre commune." link="https://www.itsme.be/fr"/>
+      <Step n={2} title="Se connecter a socialsecurity.be" desc="Allez sur le portail de la securite sociale. Cliquez 'Se connecter' en haut a droite. Choisissez votre methode d'identification : eID, itsme, ou token. Vous arrivez sur votre espace employeur." link="https://www.socialsecurity.be" warn="Premiere connexion ? Vous devez d'abord etre identifie comme employeur. Si ce n'est pas encore fait, allez dans 'Repertoire des employeurs (WIDE)'."/>
+      <Step n={3} title="S'inscrire comme employeur (WIDE)" desc="Si c'est votre premier travailleur, inscrivez-vous via le service WIDE (Werkgever Identificatie / Identification Employeur). Vous recevrez un numero ONSS. Ce numero est indispensable pour toutes vos declarations." link="https://www.socialsecurity.be/site_fr/employer/infos/employers_nsso.htm"/>
+      <Step n={4} title="Donner acces a vos collaborateurs (optionnel)" desc="Via le service 'Gestion des acces' (MAHIS), vous pouvez deleguer l'acces a votre comptable ou a un collaborateur. Il pourra alors faire les declarations en votre nom. Vous restez toujours responsable legalement." link="https://www.socialsecurity.be/site_fr/employer/infos/access-management.htm"/>
+      <Info text={"Conseil: installez un lecteur de carte eID sur votre PC (environ 15 EUR). C'est le moyen le plus rapide pour se connecter. Sinon, itsme fonctionne depuis votre smartphone."}/>
+    </div>}
+
+    {tab==='dimona'&&<div>
+      <div style={{fontSize:14,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Declarer une Dimona IN (embauche)</div>
+      <Warn text={"La Dimona IN doit etre faite AVANT que le travailleur commence a travailler. Amende: 2.500 a 12.500 EUR par infraction (art. 181 Code Penal Social)."}/>
+      <Step n={1} title="Preparer les informations dans Aureus Social Pro" desc="Allez dans ONSS > Dimona. Selectionnez le travailleur. Verifiez : NISS (numero national), date d'entree, type de contrat (ordinaire, etudiant, flexi...). Notez ces informations."/>
+      <Step n={2} title="Se connecter au portail" desc="Allez sur socialsecurity.be > Se connecter > Dimona Web. Identifiez-vous avec eID ou itsme." link="https://www.socialsecurity.be/site_fr/employer/applics/dimona/index.htm"/>
+      <Step n={3} title="Creer une nouvelle declaration" desc="Cliquez 'Nouvelle declaration' > Type: IN. Remplissez: Numero ONSS de votre entreprise, NISS du travailleur, date de debut, commission paritaire, type de travailleur (ouvrier/employe/etudiant)."/>
+      <Step n={4} title="Cas etudiant (STU)" desc="Pour un etudiant: selectionnez le type STU. Indiquez les dates de debut et fin + nombre d'heures prevues. Rappel: max 650h/an a cotisations reduites (2,71% + 5,43%)." warn="Depassement des 650h = cotisations ONSS normales (13,07% + ~25% patronal) !"/>
+      <Step n={5} title="Cas flexi-job (FLX)" desc="Selectionnez le type FLX. Le travailleur doit avoir un emploi d'au moins 4/5 temps chez un autre employeur (T-3). Cotisation patronale speciale: 28%."/>
+      <Step n={6} title="Valider et envoyer" desc="Verifiez toutes les donnees. Cliquez 'Envoyer'. Vous recevez un numero de reference Dimona. Conservez-le. Le statut passe a 'Accepte' si tout est correct."/>
+      <Step n={7} title="Dimona OUT (depart)" desc="Quand un travailleur quitte l'entreprise: refaites la meme procedure avec le type OUT. Indiquez la date de fin. Delai: au plus tard le premier jour ouvrable apres la fin du contrat."/>
+      <Info text={"Astuce: dans Aureus Social Pro, l'historique de vos Dimona est enregistre. Notez-y le numero de reference ONSS apres chaque declaration pour garder une trace."}/>
+    </div>}
+
+    {tab==='dmfa'&&<div>
+      <div style={{fontSize:14,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Envoyer la DmfA trimestrielle</div>
+      <Info text={"La DmfA (Declaration Multifonctionnelle) reprend TOUTES les donnees de salaires et prestations de vos travailleurs pour un trimestre. Aureus Social Pro calcule tout — vous n'avez qu'a encoder sur le portail."}/>
+      <Step n={1} title="Generer les donnees dans Aureus Social Pro" desc="Allez dans ONSS > DmfA. Selectionnez le trimestre. Cliquez 'Generer'. Le systeme prepare un recapitulatif avec: chaque travailleur, ses prestations (jours/heures), sa remuneration brute, les cotisations calculees. Imprimez ou exportez ce recapitulatif."/>
+      <Step n={2} title="Se connecter a DmfA Web" desc="Sur socialsecurity.be > Se connecter > DmfA Web. C'est l'application en ligne officielle pour encoder votre declaration trimestrielle." link="https://www.socialsecurity.be/site_fr/employer/applics/dmfa/index.htm"/>
+      <Step n={3} title="Creer une nouvelle declaration" desc="Cliquez 'Nouvelle declaration'. Selectionnez le trimestre concerne. Le systeme affiche votre numero ONSS et les travailleurs deja connus (via Dimona)."/>
+      <Step n={4} title="Encoder les donnees par travailleur" desc="Pour chaque travailleur, remplissez: la ligne travailleur (categorie, code travailleur), la ligne occupation (regime, nombre de jours, heures), la ligne remuneration (brut, cotisations). Utilisez le recapitulatif d'Aureus Social Pro comme reference." warn="Verifiez que les montants correspondent EXACTEMENT aux calculs d'Aureus Social Pro. Toute difference peut entrainer un controle ONSS."/>
+      <Step n={5} title="Verifier et envoyer" desc="DmfA Web dispose d'un outil de validation. Lancez-le avant d'envoyer. Il detecte les erreurs (anomalies A = bloquantes, anomalies W = avertissements). Corrigez les anomalies A puis envoyez."/>
+      <Step n={6} title="Telecharger l'accuse de reception" desc="Apres envoi, vous recevez un accuse de reception avec un numero unique. Telechargez-le et conservez-le dans votre GED (Aureus Social Pro > Documents)."/>
+      <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0',marginTop:16,marginBottom:10}}>Echeances DmfA</div>
+      {[{t:'T1 (jan-mars)',d:'30 avril'},{t:'T2 (avr-juin)',d:'31 juillet'},{t:'T3 (juil-sept)',d:'31 octobre'},{t:'T4 (oct-dec)',d:'31 janvier N+1'}].map((e,i)=><div key={i} style={{display:'flex',gap:10,padding:'6px 12px',background:i%2===0?"rgba(255,255,255,.02)":"transparent",borderRadius:4}}>
+        <div style={{fontSize:11.5,color:'#c6a34e',fontWeight:600,width:120}}>{e.t}</div>
+        <div style={{fontSize:11.5,color:'#e8e6e0'}}>au plus tard le <b>{e.d}</b></div>
+      </div>)}
+      <Warn text={"Retard de declaration = majorations de 0,5% par mois de retard sur les cotisations dues + interets de retard de 7% par an."}/>
+    </div>}
+
+    {tab==='paiement'&&<div>
+      <div style={{fontSize:14,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Payer les cotisations ONSS</div>
+      <Step n={1} title="Consulter le montant dans Aureus Social Pro" desc="Allez dans ONSS > Dashboard ONSS ou Salaires > Fiches de paie. Le montant total des cotisations (travailleur 13,07% + patronal ~25%) est calcule automatiquement pour chaque travailleur."/>
+      <Step n={2} title="Provisions mensuelles" desc="Chaque mois, vous devez verser une provision a l'ONSS. Le montant est communique par l'ONSS (visible dans 'Consultation factures employeurs' sur le portail). Payez le 5 du mois suivant." warn="Les provisions sont obligatoires si vos cotisations du trimestre T-2 depassent 4.000 EUR."/>
+      <Step n={3} title="Effectuer le virement" desc={<span>Faites un virement vers:<br/><b>IBAN: BE63 6790 2618 1108</b><br/><b>BIC: PCHQBEBB</b><br/>Communication structuree: votre numero ONSS + trimestre. Le format exact est indique sur votre avis de provision ONSS.</span>}/>
+      <Step n={4} title="Solde trimestriel" desc="Apres envoi de votre DmfA, l'ONSS calcule le solde (total cotisations du trimestre - provisions deja versees). Payez la difference avant la fin du mois suivant le trimestre."/>
+      <Step n={5} title="Verifier vos paiements" desc="Connectez-vous a 'Consultation factures employeurs' sur socialsecurity.be. Vous y voyez l'historique de vos paiements, les montants dus et les eventuels retards." link="https://www.socialsecurity.be/site_fr/employer/applics/epayment/index.htm"/>
+      <Info text={"Conseil: creez un ordre permanent mensuel dans votre banque pour ne jamais oublier les provisions. Ajustez le montant chaque trimestre si votre masse salariale change."}/>
+    </div>}
+
+    {tab==='pp'&&<div>
+      <div style={{fontSize:14,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Payer le precompte professionnel</div>
+      <Info text={"Le precompte professionnel (PP) est l'impot que vous retenez sur le salaire de vos travailleurs et que vous versez au SPF Finances. Aureus Social Pro calcule le montant exact avec la formule-cle 2026."}/>
+      <Step n={1} title="Consulter le montant PP" desc="Dans Aureus Social Pro, allez dans Fiscal > Precompte. Le montant du PP par travailleur est calcule automatiquement. Additionnez tous les PP pour obtenir le total a verser."/>
+      <Step n={2} title="Se connecter a MyMinfin" desc="Allez sur MyMinfin (finances.belgium.be). Connectez-vous avec eID ou itsme. Allez dans 'Precompte professionnel'." link="https://eservices.minfin.fgov.be/myMinfin"/>
+      <Step n={3} title="Remplir la declaration 274" desc="Remplissez le formulaire 274 (declaration mensuelle PP). Indiquez le montant total du precompte retenu pour le mois. Delai: le 15 du mois suivant."/>
+      <Step n={4} title="Payer le precompte" desc={<span>Effectuez le virement vers le SPF Finances. Utilisez la communication structuree fournie sur MyMinfin.<br/><b>Delai: au plus tard le 15 du mois suivant.</b></span>} warn="Retard = majorations de 10% + interets (taux mensuel 0,8%)."/>
+      <Step n={5} title="Declaration annuelle 325" desc="En fin d'annee, vous devez soumettre un recapitulatif annuel (fiche 281.10 pour les salaries). Utilisez Belcotax-on-web (voir onglet Belcotax)."/>
+    </div>}
+
+    {tab==='belcotax'&&<div>
+      <div style={{fontSize:14,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Envoyer les fiches Belcotax 281</div>
+      <Step n={1} title="Generer les fiches dans Aureus Social Pro" desc="Allez dans Fiscal > Belcotax 281. Selectionnez l'annee. Le systeme genere les fiches 281.10 (salaries), 281.20 (dirigeants d'entreprise), 281.30 (honoraires) avec tous les montants annuels."/>
+      <Step n={2} title="Se connecter a Belcotax-on-web" desc="Allez sur Belcotax-on-web via MyMinfin ou directement. Connectez-vous avec eID/itsme." link="https://eservices.minfin.fgov.be/belcotax-on-web"/>
+      <Step n={3} title="Encoder ou importer les fiches" desc="Deux options: encoder manuellement chaque fiche (petit nombre de travailleurs) ou importer un fichier XML (Aureus Social Pro peut generer ce format dans une version future). Pour chaque travailleur: NISS, adresse, remuneration brute imposable, PP retenu, ONSS, avantages."/>
+      <Step n={4} title="Valider et envoyer" desc="Belcotax valide automatiquement les donnees. Corrigez les erreurs detectees. Envoyez. Vous recevez un accuse de reception." warn="Delai: au plus tard le 1er mars de l'annee suivante. Passee cette date: amendes."/>
+      <Step n={5} title="Distribuer les fiches aux travailleurs" desc="Chaque travailleur doit recevoir une copie de sa fiche 281.10 pour sa declaration d'impots. Envoyez-la via Aureus Social Pro > Envoi Documents ou imprimez-la."/>
+    </div>}
+
+    {tab==='calendrier'&&<div>
+      <div style={{fontSize:14,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Calendrier des echeances 2026</div>
+      {[
+        {m:'Chaque mois',t:[{l:'Provisions ONSS',d:'5 du mois suivant',c:'#4ade80'},{l:'Precompte Pro 274',d:'15 du mois suivant',c:'#60a5fa'},{l:'Fiches de paie',d:'Jour du paiement',c:'#c6a34e'}]},
+        {m:'Chaque trimestre',t:[{l:'DmfA T1',d:'30 avril 2026',c:'#a78bfa'},{l:'DmfA T2',d:'31 juillet 2026',c:'#a78bfa'},{l:'DmfA T3',d:'31 octobre 2026',c:'#a78bfa'},{l:'DmfA T4',d:'31 janvier 2027',c:'#a78bfa'},{l:'Solde cotisations ONSS',d:'Fin du mois suivant le trimestre',c:'#4ade80'}]},
+        {m:'Annuel',t:[{l:'Bilan Social BNB',d:'28 fevrier 2026',c:'#fb923c'},{l:'Belcotax 281',d:'1 mars 2026',c:'#f87171'},{l:'Compte individuel',d:'1 mars 2026',c:'#fb923c'},{l:'Vacances annuelles (attestation)',d:'31 mars 2026',c:'#fb923c'}]},
+        {m:'Ponctuel',t:[{l:'Dimona IN',d:'AVANT debut travail',c:'#f87171'},{l:'Dimona OUT',d:'1er jour ouvrable apres fin',c:'#f87171'},{l:'DRS (risques sociaux)',d:'5 jours ouvrables',c:'#fb923c'}]},
+      ].map((section,si)=><div key={si} style={{marginBottom:16}}>
+        <div style={{fontSize:12,fontWeight:600,color:'#e8e6e0',marginBottom:8,padding:'6px 10px',background:"rgba(198,163,78,.08)",borderRadius:6}}>{section.m}</div>
+        {section.t.map((e,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'6px 12px',marginBottom:2}}>
+          <div style={{width:8,height:8,borderRadius:'50%',background:e.c,flexShrink:0}}/>
+          <div style={{flex:1,fontSize:11.5,color:'#e8e6e0'}}>{e.l}</div>
+          <div style={{fontSize:11,color:'#9e9b93',fontWeight:500}}>{e.d}</div>
+        </div>)}
+      </div>)}
+    </div>}
+
+    {tab==='faq'&&<div>
+      <div style={{fontSize:14,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Questions frequentes</div>
+      {[
+        {q:"Dois-je obligatoirement m'affilier a un secretariat social ?",a:"Non. L'affiliation a un secretariat social agree n'est pas une obligation legale. Vous pouvez gerer vos obligations sociales vous-meme. Aureus Social Pro fait les calculs, vous faites les declarations sur le portail officiel."},
+        {q:"Puis-je encaisser les cotisations ONSS de mes clients ?",a:"Non. Seuls les secretariats sociaux agrees par le Ministre des Affaires Sociales ont le droit exclusif de percevoir les cotisations. Aureus IA est un prestataire de services / editeur de logiciel, pas un secretariat social agree. Le client paye toujours directement a l'ONSS."},
+        {q:"Que se passe-t-il si je suis en retard pour la Dimona ?",a:"Dimona IN absente: amende de niveau 4 (2.500 a 12.500 EUR par travailleur). Dimona IN tardive: amende de niveau 2 (400 a 4.000 EUR). Faites-la TOUJOURS avant le debut du travail."},
+        {q:"Combien coute l'acces au portail socialsecurity.be ?",a:"C'est entierement GRATUIT. Le portail est un service public. Vous avez juste besoin d'une carte eID ou de l'app itsme pour vous connecter."},
+        {q:"Puis-je deleguer les declarations a mon comptable ?",a:"Oui. Via le service MAHIS (Gestion des acces) sur socialsecurity.be, vous pouvez donner procuration a votre comptable, un collaborateur, ou un prestataire de services. Vous restez legalement responsable."},
+        {q:"Les calculs d'Aureus Social Pro sont-ils certifies ?",a:"Les calculs suivent la formule-cle officielle du SPF Finances 2026 et les taux ONSS en vigueur. Toutefois, pour les cas complexes (expatries, detachements, multi-employeurs), nous recommandons de verifier avec un juriste specialise."},
+        {q:"Mon ancien secretariat social peut-il bloquer mon depart ?",a:"Non. Vous pouvez quitter votre secretariat social a tout moment moyennant un preavis de 6 mois (convention-type). Demandez le transfert de votre dossier et commencez a utiliser Aureus Social Pro."},
+      ].map((faq,i)=><div key={i} style={{marginBottom:14,padding:14,background:"rgba(255,255,255,.02)",borderRadius:10,border:"1px solid rgba(255,255,255,.04)"}}>
+        <div style={{fontSize:12,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>❓ {faq.q}</div>
+        <div style={{fontSize:11.5,color:'#9e9b93',lineHeight:1.7}}>{faq.a}</div>
+      </div>)}
+    </div>}
+
     </div>
   </div>;
 }
