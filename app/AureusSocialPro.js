@@ -4254,7 +4254,177 @@ function Employees({s,d}) {
     frontalier:false,frontalierPays:'',frontalierConvention:'',frontalierA1:false,frontalierExoPP:false,
     pensionné:false,pensionType:'none',pensionAge:0,pensionCarriere:0,pensionCumulIllimite:false,pensionMontant:0,
   };
-  const save=()=>{if(!form.first||!form.last)return alert('Nom requis');if(ed)d({type:"UPD_E",d:form});else d({type:"ADD_E",d:form});setF(null);setEd(false);};
+  // ── NISS VALIDATION ──
+  const validateNISS=(niss)=>{
+    if(!niss)return{valid:false,msg:'NISS requis'};
+    const clean=niss.replace(/[\s.\-]/g,'');
+    if(clean.length!==11||!/^\d{11}$/.test(clean))return{valid:false,msg:'NISS doit contenir 11 chiffres'};
+    // Check digit (modulo 97)
+    const base=clean.slice(0,9);
+    const check=parseInt(clean.slice(9));
+    // Born before 2000
+    let mod=97-(parseInt(base)%97);
+    if(mod===check)return{valid:true,msg:'✅ NISS valide'};
+    // Born after 2000 (prefix with 2)
+    mod=97-(parseInt('2'+base)%97);
+    if(mod===check)return{valid:true,msg:'✅ NISS valide (né(e) après 2000)'};
+    return{valid:false,msg:'❌ NISS invalide — chiffre de contrôle incorrect'};
+  };
+
+  // ── NISS DUPLICATE DETECTION ──
+  const checkNISSDuplicate=(niss,currentId)=>{
+    if(!niss)return null;
+    const clean=niss.replace(/[\s.\-]/g,'');
+    // Level 1: Same dossier
+    const dupLocal=s.emps.find(e=>e.niss&&e.niss.replace(/[\s.\-]/g,'')===clean&&e.id!==currentId);
+    if(dupLocal)return{level:'error',msg:`⛔ NISS déjà utilisé dans ce dossier: ${dupLocal.first} ${dupLocal.last}`};
+    // Level 2: Platform-wide (check all clients)
+    const allClients=s.clients||[];
+    for(const cl of allClients){
+      if(cl.id===s.activeClient)continue;
+      const dupPlatform=(cl.emps||[]).find(e=>e.niss&&e.niss.replace(/[\s.\-]/g,'')===clean);
+      if(dupPlatform)return{level:'warn',msg:`⚠️ NISS existe dans le dossier ${cl.company?.name||'autre'}: ${dupPlatform.first} ${dupPlatform.last}. Transfert?`};
+    }
+    return null;
+  };
+
+  // ── IBAN VALIDATION ──
+  const validateIBAN=(iban)=>{
+    if(!iban)return null;
+    const clean=iban.replace(/\s/g,'').toUpperCase();
+    if(clean.length<15||clean.length>34)return{valid:false,msg:'❌ Longueur IBAN incorrecte'};
+    if(!/^[A-Z]{2}\d{2}/.test(clean))return{valid:false,msg:'❌ Format IBAN invalide (doit commencer par 2 lettres + 2 chiffres)'};
+    // Belgian IBAN check
+    if(clean.startsWith('BE')&&clean.length!==16)return{valid:false,msg:'❌ IBAN belge = 16 caractères (BE + 14 chiffres)'};
+    // Modulo 97 check
+    const rearranged=clean.slice(4)+clean.slice(0,4);
+    const numeric=rearranged.split('').map(c=>/\d/.test(c)?c:(c.charCodeAt(0)-55).toString()).join('');
+    let remainder=numeric.slice(0,2);
+    for(let i=2;i<numeric.length;i++){
+      remainder=((parseInt(remainder+numeric[i]))%97).toString();
+    }
+    if(parseInt(remainder)!==1)return{valid:false,msg:'❌ IBAN invalide — chiffre de contrôle incorrect'};
+    return{valid:true,msg:`✅ IBAN valide (${clean.slice(0,2)})`};
+  };
+
+  const [nissCheck,setNissCheck]=useState(null);
+  const [nissDup,setNissDup]=useState(null);
+  const [ibanCheck,setIbanCheck]=useState(null);
+
+  const onNissChange=(v)=>{
+    setF({...form,niss:v});
+    if(v.replace(/[\s.\-]/g,'').length>=11){
+      setNissCheck(validateNISS(v));
+      setNissDup(checkNISSDuplicate(v,form.id));
+    }else{setNissCheck(null);setNissDup(null);}
+  };
+  const onIbanChange=(v)=>{
+    setF({...form,iban:v});
+    if(v.replace(/\s/g,'').length>=15)setIbanCheck(validateIBAN(v));
+    else setIbanCheck(null);
+  };
+
+  // ── IMPORT EXCEL ──
+  const [importing,setImporting]=useState(false);
+  const handleImportExcel=async(e)=>{
+    const file=e.target.files?.[0];
+    if(!file)return;
+    setImporting(true);
+    try{
+      const XLSX=await import('https://cdn.sheetjs.com/xlsx-0.20.1/package/xlsx.mjs');
+      const buf=await file.arrayBuffer();
+      const wb=XLSX.read(buf);
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws);
+      let added=0;
+      for(const r of rows){
+        const emp={
+          ...empty,
+          first:r['Prénom']||r['Prenom']||r['prenom']||r['first']||r['First']||'',
+          last:r['Nom']||r['nom']||r['last']||r['Last']||'',
+          niss:String(r['NISS']||r['niss']||r['Registre national']||''),
+          fn:r['Fonction']||r['fonction']||r['function']||'',
+          dept:r['Département']||r['Departement']||r['dept']||'',
+          contract:r['Contrat']||r['contrat']||r['Type']||'CDI',
+          cp:String(r['CP']||r['cp']||r['Commission paritaire']||'200'),
+          monthlySalary:parseFloat(r['Brut']||r['brut']||r['Salaire']||r['salaire']||0),
+          startD:r['Entrée']||r['Entree']||r['Date entrée']||r['startD']||'',
+          iban:r['IBAN']||r['iban']||'',
+          statut:r['Statut']||r['statut']||'employe',
+          sexe:r['Sexe']||r['sexe']||'M',
+          status:'active',
+        };
+        if(emp.first||emp.last){
+          d({type:'ADD_E',d:emp});
+          added++;
+        }
+      }
+      alert(`✅ ${added} travailleur(s) importé(s) depuis ${file.name}`);
+    }catch(err){
+      alert('❌ Erreur import: '+err.message);
+    }
+    setImporting(false);
+    e.target.value='';
+  };
+
+  // ── PRÉ-REMPLISSAGE INTELLIGENT PAR CP ──
+  const CP_PRESETS={
+    '100':{fn:'Ouvrier',statut:'ouvrier',monthlySalary:2100,whWeek:38},
+    '110':{fn:'Ouvrier textile',statut:'ouvrier',monthlySalary:2050,whWeek:36},
+    '118':{fn:'Boulanger',statut:'ouvrier',monthlySalary:2200,whWeek:38},
+    '124':{fn:'Ouvrier construction',statut:'ouvrier',monthlySalary:2400,whWeek:38},
+    '140':{fn:'Chauffeur',statut:'ouvrier',monthlySalary:2350,whWeek:38},
+    '200':{fn:'Employé',statut:'employe',monthlySalary:2800,whWeek:38},
+    '201':{fn:'Employé commerce détail',statut:'employe',monthlySalary:2300,whWeek:38},
+    '202':{fn:'Employé commerce alimentaire',statut:'employe',monthlySalary:2200,whWeek:38},
+    '207':{fn:'Employé chimie',statut:'employe',monthlySalary:3200,whWeek:38},
+    '209':{fn:'Employé métal',statut:'employe',monthlySalary:3000,whWeek:38},
+    '211':{fn:'Cadre',statut:'employe',monthlySalary:4500,whWeek:38},
+    '218':{fn:'Employé CNE',statut:'employe',monthlySalary:2600,whWeek:38},
+    '220':{fn:'Employé agro-alimentaire',statut:'employe',monthlySalary:2700,whWeek:38},
+    '226':{fn:'Employé commerce international',statut:'employe',monthlySalary:3100,whWeek:38},
+    '302':{fn:'Ouvrier Horeca',statut:'ouvrier',monthlySalary:2150,whWeek:38},
+    '304':{fn:'Artiste',statut:'employe',monthlySalary:2500,whWeek:38},
+    '310':{fn:'Employé banque',statut:'employe',monthlySalary:3400,whWeek:37},
+    '318':{fn:'Aide familiale',statut:'employe',monthlySalary:2400,whWeek:38},
+    '319':{fn:'Éducateur',statut:'employe',monthlySalary:2700,whWeek:38},
+    '322':{fn:'Intérimaire',statut:'employe',monthlySalary:2500,whWeek:38},
+    '329':{fn:'Travailleur socio-culturel',statut:'employe',monthlySalary:2600,whWeek:38},
+    '330':{fn:'Professionnel de santé',statut:'employe',monthlySalary:3000,whWeek:38},
+    '332':{fn:'Aide-soignant(e)',statut:'employe',monthlySalary:2500,whWeek:38},
+  };
+  const onCPChange=(v)=>{
+    const preset=CP_PRESETS[v];
+    if(preset&&!ed){
+      setF({...form,cp:v,fn:form.fn||preset.fn,statut:preset.statut,monthlySalary:form.monthlySalary||preset.monthlySalary,whWeek:preset.whWeek});
+    }else{
+      setF({...form,cp:v});
+    }
+  };
+
+  // ── ROI CALCULATOR ──
+  const [showROI,setShowROI]=useState(false);
+  const [roiData,setRoiData]=useState({nbEmps:10,prixActuel:35,prixAureus:12});
+  const roiSaving=(roiData.prixActuel-roiData.prixAureus)*roiData.nbEmps;
+  const roiSavingYear=roiSaving*12;
+  const roiPercent=roiData.prixActuel>0?Math.round((1-roiData.prixAureus/roiData.prixActuel)*100):0;
+
+  const save=()=>{
+    if(!form.first||!form.last)return alert('Nom requis');
+    // NISS validation
+    if(form.niss){
+      const nc=validateNISS(form.niss);
+      if(!nc.valid)return alert(nc.msg);
+      const dup=checkNISSDuplicate(form.niss,form.id);
+      if(dup&&dup.level==='error')return alert(dup.msg);
+    }
+    // IBAN validation
+    if(form.iban){
+      const ic=validateIBAN(form.iban);
+      if(ic&&!ic.valid)return alert(ic.msg);
+    }
+    if(ed)d({type:"UPD_E",d:form});else d({type:"ADD_E",d:form});setF(null);setEd(false);
+  };
 
   // Filter and search
   const filtered=s.emps.filter(e=>{
@@ -4285,7 +4455,15 @@ function Employees({s,d}) {
   const studentCount=s.emps.filter(e=>e.contract==='student').length;
 
   return <div>
-    <PH title="Gestion des Employés" sub={`${s.emps.length} employé(s)`} actions={<div style={{display:'flex',gap:8}}><B v="outline" onClick={exportCSV} style={{padding:'8px 14px',fontSize:11}}>⬇ CSV</B><B onClick={()=>{setF({...empty});setEd(false);}}>+ Nouvel employé</B></div>}/>
+    <PH title="Gestion des Employés" sub={`${s.emps.length} employé(s)`} actions={<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+      <label style={{padding:'8px 14px',borderRadius:8,fontSize:11,cursor:'pointer',border:'1px solid rgba(198,163,78,.25)',background:'transparent',color:'#c6a34e',fontWeight:600,display:'flex',alignItems:'center',gap:4}}>
+        📥 {importing?'Import...':'Import Excel'}
+        <input type="file" accept=".xlsx,.xls,.csv" onChange={handleImportExcel} style={{display:'none'}}/>
+      </label>
+      <B v="outline" onClick={()=>setShowROI(!showROI)} style={{padding:'8px 14px',fontSize:11}}>💰 ROI</B>
+      <B v="outline" onClick={exportCSV} style={{padding:'8px 14px',fontSize:11}}>⬇ CSV</B>
+      <B onClick={()=>{setF({...empty});setEd(false);}}>+ Nouvel employé</B>
+    </div>}/>
     {/* Search and filters bar */}
     <div style={{display:'flex',gap:10,marginBottom:16,alignItems:'center',flexWrap:'wrap'}}>
       <div style={{flex:1,minWidth:200,position:'relative'}}>
@@ -4307,20 +4485,53 @@ function Employees({s,d}) {
         <button onClick={()=>setViewMode('grid')} style={{padding:'6px 10px',border:'none',background:viewMode==='grid'?'rgba(198,163,78,.15)':'transparent',color:viewMode==='grid'?'#c6a34e':'#5e5c56',cursor:'pointer',fontSize:13}}>⊞</button>
       </div>
     </div>
+    {/* ROI Calculator */}
+    {showROI&&<C style={{marginBottom:20,border:'1px solid rgba(198,163,78,.25)'}}>
+      <h3 style={{fontSize:15,fontWeight:600,color:'#c6a34e',margin:'0 0 12px'}}>💰 Calculateur ROI — Économies vs secrétariat social</h3>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:16}}>
+        <I label="Nombre de travailleurs" type="number" value={roiData.nbEmps} onChange={v=>setRoiData({...roiData,nbEmps:parseInt(v)||0})}/>
+        <I label="Prix actuel / fiche (€)" type="number" value={roiData.prixActuel} onChange={v=>setRoiData({...roiData,prixActuel:parseFloat(v)||0})}/>
+        <I label="Prix Aureus / fiche (€)" type="number" value={roiData.prixAureus} onChange={v=>setRoiData({...roiData,prixAureus:parseFloat(v)||0})}/>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12}}>
+        <div style={{padding:16,borderRadius:10,background:'rgba(74,222,128,.06)',border:'1px solid rgba(74,222,128,.15)',textAlign:'center'}}>
+          <div style={{fontSize:10,color:'#9e9b93',marginBottom:4}}>Économie / mois</div>
+          <div style={{fontSize:22,fontWeight:700,color:'#4ade80'}}>{roiSaving.toFixed(0)} €</div>
+        </div>
+        <div style={{padding:16,borderRadius:10,background:'rgba(198,163,78,.06)',border:'1px solid rgba(198,163,78,.15)',textAlign:'center'}}>
+          <div style={{fontSize:10,color:'#9e9b93',marginBottom:4}}>Économie / an</div>
+          <div style={{fontSize:22,fontWeight:700,color:'#c6a34e'}}>{roiSavingYear.toFixed(0)} €</div>
+        </div>
+        <div style={{padding:16,borderRadius:10,background:'rgba(96,165,250,.06)',border:'1px solid rgba(96,165,250,.15)',textAlign:'center'}}>
+          <div style={{fontSize:10,color:'#9e9b93',marginBottom:4}}>Réduction</div>
+          <div style={{fontSize:22,fontWeight:700,color:'#60a5fa'}}>{roiPercent}%</div>
+        </div>
+      </div>
+      <div style={{marginTop:12,fontSize:11,color:'#5e5c56',textAlign:'center'}}>
+        Comparé à {roiData.prixActuel}€/fiche chez Securex, SD Worx, Partena — Aureus à {roiData.prixAureus}€/fiche
+      </div>
+    </C>}
     {form&&<C style={{marginBottom:20}}>
       <h2 style={{fontSize:17,fontWeight:600,color:'#e8e6e0',margin:'0 0 16px',fontFamily:"'Cormorant Garamond',serif"}}>{ed?'Modifier':'Nouvel employé'}</h2>
       <ST>Identité</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
         <I label="Prénom" value={form.first} onChange={v=>setF({...form,first:v})}/>
         <I label="Nom" value={form.last} onChange={v=>setF({...form,last:v})}/>
-        <I label="NISS" value={form.niss} onChange={v=>setF({...form,niss:v})}/>
+        <div>
+          <I label="NISS" value={form.niss} onChange={onNissChange}/>
+          {nissCheck&&<div style={{fontSize:10,marginTop:2,color:nissCheck.valid?'#4ade80':'#f87171'}}>{nissCheck.msg}</div>}
+          {nissDup&&<div style={{fontSize:10,marginTop:2,color:nissDup.level==='error'?'#f87171':'#fb923c'}}>{nissDup.msg}</div>}
+        </div>
         <I label="Naissance" type="date" value={form.birth} onChange={v=>setF({...form,birth:v})}/>
         <I label="Sexe" value={form.sexe} onChange={v=>setF({...form,sexe:v})} options={[{v:"M",l:"Homme"},{v:"F",l:"Femme"},{v:"X",l:"Non-binaire"}]}/>
         <I label="Statut" value={form.statut} onChange={v=>setF({...form,statut:v})} options={[{v:"employe",l:"Employé"},{v:"ouvrier",l:"Ouvrier"},{v:"etudiant",l:"Étudiant"},{v:"apprenti",l:"Apprenti"},{v:"dirigeant",l:"Dirigeant d\'entreprise"}]}/>
         <I label="Adresse" value={form.addr} onChange={v=>setF({...form,addr:v})} span={2}/>
         <I label="CP" value={form.zip} onChange={v=>setF({...form,zip:v})}/>
         <I label="Ville" value={form.city} onChange={v=>setF({...form,city:v})}/>
-        <I label="IBAN" value={form.iban} onChange={v=>setF({...form,iban:v})}/>
+        <div>
+          <I label="IBAN" value={form.iban} onChange={onIbanChange}/>
+          {ibanCheck&&<div style={{fontSize:10,marginTop:2,color:ibanCheck.valid?'#4ade80':'#f87171'}}>{ibanCheck.msg}</div>}
+        </div>
         <I label="Niveau d'études" value={form.niveauEtude} onChange={v=>setF({...form,niveauEtude:v})} options={[{v:"prim",l:"Primaire"},{v:"sec_inf",l:"Secondaire inférieur"},{v:"sec",l:"Secondaire supérieur"},{v:"sup",l:"Supérieur non-universitaire (bachelier)"},{v:"univ",l:"Universitaire (master/doctorat)"}]}/>
       </div>
       <ST>Contrat</ST>
@@ -4342,7 +4553,7 @@ function Employees({s,d}) {
           {v:"plateforme",l:"Économie plateforme"}
         ]}/>
         <I label="H/sem" type="number" value={form.whWeek} onChange={v=>setF({...form,whWeek:v})}/>
-        <I label="CP" value={form.cp} onChange={v=>setF({...form,cp:v})} options={Object.entries(LEGAL.CP).map(([k,v])=>({v:k,l:v}))}/>
+        <I label="CP" value={form.cp} onChange={onCPChange} options={Object.entries(LEGAL.CP).map(([k,v])=>({v:k,l:v}))}/>
         <I label="Code DMFA" value={form.dmfaCode} onChange={v=>setF({...form,dmfaCode:v})} options={Object.entries(LEGAL.DMFA_CODES).map(([k,v])=>({v:k,l:`${k} - ${v}`}))}/>
         <I label="Rang engagement" value={form.nrEngagement||0} onChange={v=>setF({...form,nrEngagement:parseInt(v)||0})} options={[{v:0,l:"— Pas de réduction —"},{v:1,l:"1er employé (exo totale)"},{v:2,l:"2è employé"},{v:3,l:"3è employé"},{v:4,l:"4è employé"},{v:5,l:"5è employé"},{v:6,l:"6è employé"}]}/>
         {form.nrEngagement>0&&<I label="Trimestre depuis eng." type="number" value={form.engagementTrimestre||1} onChange={v=>setF({...form,engagementTrimestre:parseInt(v)||1})}/>}
@@ -15227,5 +15438,4 @@ export default function AureusSocialPro({ supabase, user, onLogout }) {
   return <LangProvider><AppInner supabase={supabase} user={user} onLogout={onLogout}/></LangProvider>;
 }
 
-// v29e fix 406
- 
+// v30 sprint2
