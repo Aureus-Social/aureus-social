@@ -8,30 +8,30 @@ import { useState, useReducer, useRef, useMemo, useEffect, createContext, useCon
 //  🌐 Multilingue: FR / NL
 // ═══════════════════════════════════════════════════════════════
 
-// ── I18N — Dictionnaire FR / NL ──
+// ── I18N — Dictionnaire FR / NL / EN / DE ──
 const LangCtx = createContext({lang:'fr',t:(k)=>k,setLang:()=>{}});
 const useLang = () => useContext(LangCtx);
 
 const I18N = {
   // ── Navigation principale ──
-  'nav.dashboard': { fr:'Tableau de bord', nl:"Dashboard" },
-  'nav.employees': { fr:'Employés', nl:"Werknemers" },
-  'nav.payslip': { fr:'Fiches de paie', nl:"Loonfiches" },
-  'nav.onss': { fr:'ONSS / Déclarations', nl:"RSZ / Aangiften" },
-  'nav.fiscal': { fr:'Fiscal', nl:"Fiscaal" },
-  'nav.salaires': { fr:'Salaires & Calculs', nl:"Lonen & Berekeningen" },
-  'nav.avantages': { fr:'Avantages & Rémunération', nl:"Voordelen & Verloning" },
-  'nav.contrats': { fr:'Contrats & Documents', nl:"Contracten & Documenten" },
-  'nav.rh': { fr:'RH & Personnel', nl:"HR & Personeel" },
-  'nav.social': { fr:'Social & Assurances', nl:"Sociaal & Verzekeringen" },
-  'nav.bienetre': { fr:'Bien-être & Prévention', nl:"Welzijn & Preventie" },
-  'nav.reporting': { fr:'Reporting & Export', nl:"Rapportage & Export" },
-  'nav.legal': { fr:'Juridique & Veille', nl:"Juridisch & Monitoring" },
-  'nav.settings': { fr:'Paramètres', nl:"Instellingen" },
-  'nav.aureussuite': { fr:'Aureus Suite', nl:"Aureus Suite" },
-  'nav.back': { fr:'← Tous les dossiers', nl:"← Alle dossiers" },
-  'nav.search': { fr:'🔍 Rechercher un module... (Ctrl+K)', nl:"🔍 Module zoeken... (Ctrl+K)" },
-  'nav.noresult': { fr:'Aucun module trouvé', nl:"Geen module gevonden" },
+  'nav.dashboard': { fr:'Tableau de bord', nl:"Dashboard", en:"Dashboard", de:"Dashboard" },
+  'nav.employees': { fr:'Employés', nl:"Werknemers", en:"Employees", de:"Mitarbeiter" },
+  'nav.payslip': { fr:'Fiches de paie', nl:"Loonfiches", en:"Payslips", de:"Gehaltsabrechnungen" },
+  'nav.onss': { fr:'ONSS / Déclarations', nl:"RSZ / Aangiften", en:"Social Security", de:"Sozialversicherung" },
+  'nav.fiscal': { fr:'Fiscal', nl:"Fiscaal", en:"Tax", de:"Steuern" },
+  'nav.salaires': { fr:'Salaires & Calculs', nl:"Lonen & Berekeningen", en:"Salaries & Calculations", de:"Gehälter & Berechnungen" },
+  'nav.avantages': { fr:'Avantages & Rémunération', nl:"Voordelen & Verloning", en:"Benefits & Compensation", de:"Vorteile & Vergütung" },
+  'nav.contrats': { fr:'Contrats & Documents', nl:"Contracten & Documenten", en:"Contracts & Documents", de:"Verträge & Dokumente" },
+  'nav.rh': { fr:'RH & Personnel', nl:"HR & Personeel", en:"HR & Personnel", de:"HR & Personal" },
+  'nav.social': { fr:'Social & Assurances', nl:"Sociaal & Verzekeringen", en:"Social & Insurance", de:"Soziales & Versicherung" },
+  'nav.bienetre': { fr:'Bien-être & Prévention', nl:"Welzijn & Preventie", en:"Wellbeing & Prevention", de:"Wohlbefinden & Prävention" },
+  'nav.reporting': { fr:'Reporting & Export', nl:"Rapportage & Export", en:"Reporting & Export", de:"Berichterstattung & Export" },
+  'nav.legal': { fr:'Juridique & Veille', nl:"Juridisch & Monitoring", en:"Legal & Monitoring", de:"Recht & Überwachung" },
+  'nav.settings': { fr:'Paramètres', nl:"Instellingen", en:"Settings", de:"Einstellungen" },
+  'nav.aureussuite': { fr:'Aureus Suite', nl:"Aureus Suite", en:"Aureus Suite", de:"Aureus Suite" },
+  'nav.back': { fr:'← Tous les dossiers', nl:"← Alle dossiers", en:"← All folders", de:"← Alle Ordner" },
+  'nav.search': { fr:'🔍 Rechercher un module... (Ctrl+K)', nl:"🔍 Module zoeken... (Ctrl+K)", en:"🔍 Search module... (Ctrl+K)", de:"🔍 Modul suchen... (Ctrl+K)" },
+  'nav.noresult': { fr:'Aucun module trouvé', nl:"Geen module gevonden", en:"No module found", de:"Kein Modul gefunden" },
   
   // ── Sous-menus ──
   'sub.dimona': { fr:'Dimona', nl:"Dimona" },
@@ -331,7 +331,7 @@ function LangProvider({children}) {
 function LangSwitch() {
   const {lang, setLang} = useLang();
   return <div style={{display:'flex',gap:2,background:"rgba(198,163,78,.06)",borderRadius:6,padding:2,border:'1px solid rgba(198,163,78,.1)'}}>
-    {['fr',"nl"].map(l =>
+    {['fr',"nl","en","de"].map(l =>
       <button key={l} onClick={()=>setLang(l)} style={{
         padding:'4px 10px',borderRadius:5,border:'none',cursor:'pointer',fontSize:10.5,fontWeight:lang===l?700:400,
         background:lang===l?'rgba(198,163,78,.2)':'transparent',
@@ -2639,7 +2639,7 @@ function genBelcotax(co, emp, yr, ad) {
 }
 
 // ─── INITIAL STATE ───────────────────────────────────────────
-const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:"info@aureus-ia.com",version:'v33',sprint:'Sprint 5 — IA Prédictive'};
+const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:"info@aureus-ia.com",version:'v34',sprint:'Sprint 6 — Scale'};
 const CAR_MODELS={
 'Aiways':['U5',"U6"],
 'Alfa Romeo':['Giulia',"Stelvio","Tonale","Junior","Giulietta","MiTo"],
@@ -3796,6 +3796,8 @@ function AppInner({ supabase, user, onLogout }) {
       {id:"ia_prevision",l:"📈 Prévision Masse"},
       {id:"ia_anomalies",l:"🔍 Détection Anomalies"},
       {id:"ia_sante",l:"🏥 Score Santé Dossier"},
+      {id:"api_doc",l:"🔌 API Documentation"},
+      {id:"multi_currency",l:"💱 Multi-Devises"},
       {id:"aureus_pointage",l:"⏱ Aureus Pointage"},
       {id:"aureus_paie",l:"💰 Aureus Paie"},
       {id:"aureus_titres_services",l:"🏠 Aureus Titres-Services"},
@@ -4213,6 +4215,7 @@ function Dashboard({s,d}) {
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
         {[
+          {v:'v34',title:'Sprint 6',items:['🌐 4 langues (FR/NL/EN/DE)','🔌 API Documentation','💱 Multi-Devises'],color:'#fb923c'},
           {v:'v33',title:'Sprint 5',items:['🧠 Prédiction Turnover','💡 Reco Salariales IA','📈 Prévision Masse','🔍 Détection Anomalies','🏥 Score Santé Dossier'],color:'#f87171'},
           {v:'v32',title:'Sprint 4',items:['⚡ Batch Processing','🔔 Alertes intelligentes','🔐 2FA (TOTP)','📡 DmfA améliorée'],color:'#a78bfa'},
           {v:'v31',title:'Sprint 3',items:['⚡ Workflow Embauche','⚡ Workflow Licenciement','⚡ Workflow Maladie','📂 Export 11 formats + ClearFact'],color:'#60a5fa'},
@@ -11951,6 +11954,114 @@ function ScoreSanteMod({s,d}){
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  SPRINT 6 — SCALE: API + MULTI-CURRENCY + MULTI-TENANT
+// ═══════════════════════════════════════════════════════════════
+
+// ── API DOCUMENTATION ──
+function APIDocMod({s,d}){
+  const [activeEndpoint,setActiveEndpoint]=useState('auth');
+  const endpoints=[
+    {id:'auth',cat:'🔑 Authentication',endpoints:[
+      {method:'POST',path:'/api/v1/auth/login',desc:'Connexion utilisateur',body:'{"email":"...","password":"..."}',response:'{"token":"jwt_token","user":{...}}'},
+      {method:'POST',path:'/api/v1/auth/register',desc:'Inscription nouveau client',body:'{"email":"...","password":"...","nom":"...","societe":"..."}',response:'{"user_id":"...","message":"OK"}'},
+      {method:'POST',path:'/api/v1/auth/refresh',desc:'Rafraîchir le token',body:'{"refresh_token":"..."}',response:'{"token":"new_jwt"}'},
+    ]},
+    {id:'employees',cat:'👤 Employés',endpoints:[
+      {method:'GET',path:'/api/v1/employees',desc:'Liste des employés',body:null,response:'[{"id":"...","first":"...","last":"...","niss":"..."}]'},
+      {method:'POST',path:'/api/v1/employees',desc:'Créer un employé',body:'{"first":"Jean","last":"Dupont","niss":"85.07.15-123.45","cp":"200","monthlySalary":3000}',response:'{"id":"E-xxx","created":true}'},
+      {method:'PUT',path:'/api/v1/employees/:id',desc:'Modifier un employé',body:'{"monthlySalary":3200}',response:'{"updated":true}'},
+      {method:'DELETE',path:'/api/v1/employees/:id',desc:'Supprimer un employé',body:null,response:'{"deleted":true}'},
+    ]},
+    {id:'payroll',cat:'💰 Paie',endpoints:[
+      {method:'POST',path:'/api/v1/payroll/calculate',desc:'Calculer une fiche de paie',body:'{"employee_id":"...","month":2,"year":2026}',response:'{"gross":3000,"onss":392.1,"tax":580,"net":1950,...}'},
+      {method:'POST',path:'/api/v1/payroll/batch',desc:'Batch — Toutes les fiches',body:'{"month":2,"year":2026}',response:'{"count":15,"total_gross":45000,"total_net":29250}'},
+      {method:'GET',path:'/api/v1/payroll/history',desc:'Historique des fiches',body:null,response:'[{"period":"Jan 2026","count":15,"total":45000}]'},
+    ]},
+    {id:'declarations',cat:'📡 Déclarations',endpoints:[
+      {method:'POST',path:'/api/v1/dimona/in',desc:'Dimona IN (embauche)',body:'{"employee_id":"...","start_date":"2026-03-01"}',response:'{"dimona_id":"D-xxx","status":"accepted"}'},
+      {method:'POST',path:'/api/v1/dimona/out',desc:'Dimona OUT (sortie)',body:'{"employee_id":"...","end_date":"2026-03-31"}',response:'{"dimona_id":"D-xxx","status":"accepted"}'},
+      {method:'POST',path:'/api/v1/dmfa/generate',desc:'Générer DmfA trimestrielle',body:'{"quarter":1,"year":2026}',response:'{"xml":"...","ticket":"ONSS-xxx","anomalies":[]}'},
+    ]},
+    {id:'export',cat:'📂 Export',endpoints:[
+      {method:'GET',path:'/api/v1/export/:format',desc:'Export comptable (bob,winbooks,clearfact,exact...)',body:null,response:'CSV/XML file download'},
+      {method:'GET',path:'/api/v1/export/sepa',desc:'Fichier SEPA virements',body:null,response:'XML SEPA pain.001'},
+    ]},
+    {id:'webhooks',cat:'🔔 Webhooks',endpoints:[
+      {method:'POST',path:'/api/v1/webhooks/register',desc:'Enregistrer un webhook',body:'{"url":"https://...","events":["payroll.calculated","employee.created"]}',response:'{"webhook_id":"W-xxx"}'},
+      {method:'GET',path:'/api/v1/webhooks',desc:'Liste des webhooks actifs',body:null,response:'[{"id":"W-xxx","url":"...","events":[...]}]'},
+    ]},
+  ];
+  const methodColors={GET:'#4ade80',POST:'#60a5fa',PUT:'#fb923c',DELETE:'#f87171'};
+  const active=endpoints.find(e=>e.id===activeEndpoint)||endpoints[0];
+  
+  return <div>
+    <PH title="🔌 API Documentation" sub="REST API v1 — Intégrations & Automatisation"/>
+    <div style={{display:'grid',gridTemplateColumns:'220px 1fr',gap:18}}>
+      <C>
+        <ST>Endpoints</ST>
+        {endpoints.map(ep=><button key={ep.id} onClick={()=>setActiveEndpoint(ep.id)} style={{display:'block',width:'100%',padding:'8px 12px',marginBottom:3,borderRadius:6,border:activeEndpoint===ep.id?'1px solid rgba(198,163,78,.3)':'1px solid rgba(198,163,78,.05)',background:activeEndpoint===ep.id?'rgba(198,163,78,.1)':'transparent',color:activeEndpoint===ep.id?'#c6a34e':'#9e9b93',cursor:'pointer',fontSize:11,textAlign:'left',fontFamily:'inherit'}}>{ep.cat}</button>)}
+        <div style={{marginTop:14,padding:10,background:'rgba(198,163,78,.04)',borderRadius:8,fontSize:10,color:'#5e5c56',lineHeight:1.6}}>
+          <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>Base URL</div>
+          <code style={{color:'#e8e6e0',fontSize:9.5}}>https://api.aureussocial.be/v1</code>
+          <div style={{fontWeight:600,color:'#c6a34e',marginTop:8,marginBottom:4}}>Auth Header</div>
+          <code style={{color:'#e8e6e0',fontSize:9.5}}>Authorization: Bearer {'<token>'}</code>
+          <div style={{fontWeight:600,color:'#c6a34e',marginTop:8,marginBottom:4}}>Rate Limit</div>
+          <div>1000 req/min (standard)<br/>5000 req/min (enterprise)</div>
+        </div>
+      </C>
+      <C>
+        <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0',marginBottom:12}}>{active.cat}</div>
+        <div style={{display:'flex',flexDirection:'column',gap:10}}>
+          {active.endpoints.map((ep,i)=><div key={i} style={{padding:14,borderRadius:10,background:'rgba(198,163,78,.02)',border:'1px solid rgba(198,163,78,.08)'}}>
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
+              <span style={{fontSize:10,fontWeight:700,padding:'3px 8px',borderRadius:4,background:`${methodColors[ep.method]}22`,color:methodColors[ep.method]}}>{ep.method}</span>
+              <code style={{fontSize:12,color:'#e8e6e0',fontWeight:500}}>{ep.path}</code>
+            </div>
+            <div style={{fontSize:11,color:'#9e9b93',marginBottom:8}}>{ep.desc}</div>
+            {ep.body&&<div style={{marginBottom:6}}>
+              <div style={{fontSize:9,color:'#5e5c56',textTransform:'uppercase',marginBottom:3}}>Request Body</div>
+              <pre style={{background:'#060810',border:'1px solid rgba(139,115,60,.1)',borderRadius:6,padding:8,fontSize:9.5,color:'#4ade80',overflowX:'auto',margin:0}}>{ep.body}</pre>
+            </div>}
+            <div>
+              <div style={{fontSize:9,color:'#5e5c56',textTransform:'uppercase',marginBottom:3}}>Response</div>
+              <pre style={{background:'#060810',border:'1px solid rgba(139,115,60,.1)',borderRadius:6,padding:8,fontSize:9.5,color:'#60a5fa',overflowX:'auto',margin:0}}>{ep.response}</pre>
+            </div>
+          </div>)}
+        </div>
+      </C>
+    </div>
+  </div>;
+}
+
+// ── MULTI-CURRENCY CONVERTER ──
+function MultiCurrencyMod({s,d}){
+  const [amount,setAmount]=useState(1000);
+  const [from,setFrom]=useState('EUR');
+  const rates={EUR:1,GBP:0.856,USD:1.085,CHF:0.942,SEK:11.28,DKK:7.46,NOK:11.42,PLN:4.31,CZK:25.12,HUF:393.5,RON:4.98,BGN:1.96,HRK:7.53,TRY:34.2,MAD:10.82,XOF:655.96};
+  const currencies=Object.keys(rates);
+  
+  return <div>
+    <PH title="💱 Multi-Devises" sub="Conversion et coûts salariaux internationaux"/>
+    <C>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:16}}>
+        <I label="Montant" type="number" value={amount} onChange={v=>setAmount(parseFloat(v)||0)}/>
+        <I label="Devise source" value={from} onChange={setFrom} options={currencies.map(c=>({v:c,l:c}))}/>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
+        {currencies.filter(c=>c!==from).map(cur=>{
+          const converted=amount/rates[from]*rates[cur];
+          return <div key={cur} style={{padding:12,borderRadius:8,background:'rgba(198,163,78,.03)',border:'1px solid rgba(198,163,78,.08)',textAlign:'center'}}>
+            <div style={{fontSize:10,color:'#5e5c56'}}>{cur}</div>
+            <div style={{fontSize:16,fontWeight:700,color:'#c6a34e'}}>{converted.toFixed(2)}</div>
+            <div style={{fontSize:9,color:'#5e5c56'}}>1 {from} = {(rates[cur]/rates[from]).toFixed(4)} {cur}</div>
+          </div>;
+        })}
+      </div>
+    </C>
+  </div>;
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  ALERTES LÉGALES — Veille juridique et échéances
 // ═══════════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════
@@ -15192,6 +15303,8 @@ function AureusSuitePage({s,d}){
   if(sub==='ia_prevision')return <PrevisionMasseMod s={s} d={d}/>;
   if(sub==='ia_anomalies')return <DetectionAnomaliesMod s={s} d={d}/>;
   if(sub==='ia_sante')return <ScoreSanteMod s={s} d={d}/>;
+  if(sub==='api_doc')return <APIDocMod s={s} d={d}/>;
+  if(sub==='multi_currency')return <MultiCurrencyMod s={s} d={d}/>;
   const products=[
     {id:"aureus_pointage",ic:'⏱',name:'Aureus Pointage',
       short:"Enregistrement des entrées et sorties",
