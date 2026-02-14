@@ -16673,35 +16673,58 @@ function FloatingLegalAgent({onAction}){
     }catch(e){}
   };
 
+  // ── LOCAL KB SEARCH (no API needed) ──
+  const localKB=[
+    {q:['préavis','preavis','opzeg','notice period','licenciement','ontslag'],a:{fr:`**Préavis — Loi du 26/12/2013 (Statut unique)**\n\nPar l'employeur:\n• 0-3 mois: 1 sem\n• 3-6 mois: 3 sem\n• 6-12 mois: 4-5 sem\n• 1-2 ans: 6-9 sem\n• 2-3 ans: 12 sem\n• 3-4 ans: 13 sem\n• 4-5 ans: 15 sem\n• 5-8 ans: 18-24 sem\n• 8-10 ans: 27-30 sem\n• 10-15 ans: 33-42 sem\n• 15-20 ans: 45-57 sem\n• 20+ ans: 60+ sem\n\nPar le travailleur: environ la moitié.\n\n**Motif grave (art. 35):** Pas de préavis, notification dans les 3 jours ouvrables.\n\n📋 Base légale: Loi 26/12/2013, art. 37/2 à 37/11`,nl:`**Opzegtermijn — Wet 26/12/2013**\n\nDoor werkgever: 0-3m=1w, 3-6m=3w, 1-2j=6-9w, 5-10j=18-30w, 20+j=60+w.\nDoor werknemer: ongeveer de helft.`,en:`**Notice Period — Law 26/12/2013**\n\nBy employer: 0-3m=1w, 3-6m=3w, 1-2y=6-9w, 5-10y=18-30w, 20+y=60+w.`}},
+    {q:['dimona','déclaration','aangifte'],a:{fr:`**Dimona — Déclaration Immédiate de l'Emploi**\n\n• **Dimona IN**: AVANT le premier jour de travail (obligatoire!)\n• **Dimona OUT**: Le dernier jour de travail\n• **Dimona UPDATE**: Modification en cours de contrat\n\n**Sanction**: Amende de 400€ à 4.000€ par travailleur non déclaré (Code pénal social, art. 181).\n\n**Canal**: Portail socialsecurity.be ou batch MAHIS.\n\n📋 Base légale: AR 5/11/2002`,nl:`**Dimona — Onmiddellijke Aangifte**\n\nDimona IN: VOOR eerste werkdag. Dimona OUT: laatste werkdag.\nBoete: 400-4000€ per werknemer.`}},
+    {q:['onss','rsz','cotisation','social security','patronal'],a:{fr:`**Cotisations ONSS 2026**\n\n**Travailleur**: 13,07% du brut\n**Employeur (marchand)**: ~25% (base 19,88% + modérations)\n**Employeur (non-marchand)**: ~32,40%\n**Ouvriers**: Base = brut × 108% (pécule vacances)\n\n**Composantes patronales:**\n• Base: 19,88%\n• Modération salariale: 5,67%\n• Fonds fermeture: 0,02-0,18%\n• Chômage temporaire: 0,10%\n• Amiante: 0,01%\n\n**Paiement**: Provisions mensuelles (le 5) + solde trimestriel.\n\n📋 Base légale: Loi 27/06/1969, AR 28/11/1969`}},
+    {q:['chèques-repas','maaltijdcheque','meal voucher','repas'],a:{fr:`**Chèques-repas 2026**\n\n• **Valeur max**: 8,00€/jour presté\n• **Part employeur max**: 6,91€\n• **Part travailleur min**: 1,09€\n• **Exonération ONSS et fiscale** si conditions respectées\n\n**Conditions:**\n1. CCT ou accord individuel écrit\n2. 1 chèque par jour presté\n3. Au nom du travailleur\n4. Durée de validité: 12 mois\n5. Uniquement pour repas et alimentation\n\n📋 Base légale: AR 28/11/1969, art. 19bis §2`}},
+    {q:['étudiant','student','jobiste','650'],a:{fr:`**Travail étudiant 2026**\n\n• **Quota**: 650 heures/an à cotisations réduites\n• **ONSS réduit**: 2,71% étudiant + 5,43% employeur (total 8,14%)\n• **Au-delà de 650h**: cotisations normales (13,07% + ~25%)\n• **Dimona STU**: obligatoire avant chaque période\n• **Période d'essai**: 3 premiers jours (automatique)\n• **Contrat écrit**: Convention d'occupation étudiant (COE) obligatoire\n\n**Vérification quota**: student@work.be\n\n📋 Base légale: Loi 3/7/1978, Titre VII`}},
+    {q:['précompte','bedrijfsvoorheffing','withholding','pp 274','fiscal'],a:{fr:`**Précompte professionnel 2026**\n\n**Calcul**: Barèmes SPF Finances (annexe III AR/CIR 92)\n\n**Réductions:**\n• Charge de famille: par enfant, conjoint, etc.\n• Bonus à l'emploi: revenus < plafond\n• Heures supplémentaires: réduction 66,81% (57,75% construction)\n• Travail de nuit/équipes: dispense 22,8%\n\n**Déclaration**: PP 274 via FinProf, mensuel ou trimestriel.\n**Délai**: 15 du mois suivant (mensuel) ou du trimestre suivant.\n\n📋 Base légale: CIR 92, art. 270-275`}},
+    {q:['maladie','ziekte','sick','incapacité','garanti'],a:{fr:`**Incapacité de travail — Salaire garanti**\n\n**Employé:**\n• 30 premiers jours: 100% à charge de l'employeur\n• Après 30 jours: mutuelle (60% du salaire plafonné)\n\n**Ouvrier:**\n• Jours 1-7: 100% employeur\n• Jours 8-14: 85,88% employeur\n• Jours 15-30: 25,88% employeur + 60% mutuelle\n• Après 30 jours: mutuelle seule\n\n**Certificat médical**: dans les 48h (sauf dérogation CCT).\n**Contrôle**: médecin-contrôle possible dès le 1er jour.\n\n📋 Base légale: Loi 3/7/1978, art. 52-75`}},
+    {q:['vacances','congé','verlof','holiday','pécule'],a:{fr:`**Vacances annuelles 2026**\n\n**Employés:**\n• 20 jours/an (temps plein, 5j/sem)\n• Simple pécule: salaire normal\n• Double pécule: 92% du salaire mensuel brut\n• Payé par l'employeur\n\n**Ouvriers:**\n• 20 jours/an\n• Pécule = 15,38% des rémunérations brutes de l'année précédente\n• Payé par la Caisse de vacances (ONVA)\n\n**Jours fériés légaux**: 10 jours/an (1/1, Pâques, 1/5, Ascension, Pentecôte, 21/7, 15/8, 1/11, 11/11, 25/12)\n\n📋 Base légale: Lois coordonnées 28/06/1971`}},
+    {q:['flexijob','flexi'],a:{fr:`**Flexi-job 2026**\n\n**Conditions:**\n• Travailleur au moins 4/5 temps chez un autre employeur (T-3)\n• OU pensionné\n\n**Avantages:**\n• Pas d'ONSS travailleur\n• Pas de précompte professionnel\n• Cotisation patronale: 28%\n• Salaire min: 12,05€/h (2026)\n\n**Secteurs autorisés**: Horeca, commerce, boulangerie, grande distribution, sport, culture, agriculture, événementiel...\n\n📋 Base légale: Loi 16/11/2015`}},
+    {q:['crédit-temps','tijdskrediet','réduction'],a:{fr:`**Crédit-temps 2026**\n\n**Sans motif**: SUPPRIMÉ depuis 01/01/2023\n\n**Avec motif (max 51 mois):**\n• Soins enfant < 8 ans\n• Soins palliatifs\n• Membre du ménage gravement malade\n• Enfant handicapé < 21 ans\n• Formation reconnue\n\n**Fin de carrière (à partir de 55 ans):**\n• Mi-temps ou 4/5\n• Indemnité ONEM\n• Condition: 25 ans de carrière\n\n📋 Base légale: CCT n°103, AR 12/12/2001`}},
+    {q:['index','indexation','indexering'],a:{fr:`**Indexation salariale 2026**\n\n**Système belge**: Indexation automatique liée à l'indice santé lissé.\n\n**CP 200 (employés)**: Indexation annuelle en janvier.\n**Index 2026**: ~2% (estimation basée sur l'indice pivot).\n\n**Autres CP**: Moment variable selon la CCT sectorielle:\n• CP 124 (construction): janvier\n• CP 302 (horeca): janvier\n• CP 330 (santé): selon protocole\n\n**RMMMG 2026**: 2.029,88€/mois (21 ans, ancienneté 0)\n\n📋 Base légale: Loi 2/8/1971, AR indexation`}},
+  ];
+  
+  const searchKB=(query)=>{
+    const q=query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    for(const entry of localKB){
+      for(const keyword of entry.q){
+        if(q.includes(keyword.toLowerCase()))return entry.a[lang]||entry.a.fr;
+      }
+    }
+    return lang==='nl'?'Ik heb geen specifiek antwoord op deze vraag. Probeer trefwoorden zoals: préavis, dimona, ONSS, chèques-repas, étudiant, maladie, vacances, index, flexijob, crédit-temps.':lang==='en'?'I don\'t have a specific answer. Try keywords like: notice period, dimona, ONSS, meal vouchers, student, sick leave, holidays, indexation, flexijob.':'Je n\'ai pas de réponse spécifique à cette question. Essayez des mots-clés comme: **préavis, dimona, ONSS, chèques-repas, étudiant, maladie, vacances, index, flexijob, crédit-temps, précompte**.\n\nOu posez une question plus précise sur le droit social belge.';
+  };
+
   const send=async(text)=>{
     if(!text.trim()||loading)return;
     const dl=detectAgentLang(text);setLang(dl);
     const um={role:'user',content:text.trim()};
     const nm=[...msgs,um];setMsgs(nm);setInp('');setLoading(true);
     
-    // Log user action
     logAudit('agent_ia_query',{query:text.trim(),lang:dl});
     
     try{
+      // Try API first
       const res=await fetch('https://api.anthropic.com/v1/messages',{
         method:"POST",headers:{'Content-Type':'application/json'},
         body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:4096,system:getSys(dl),
           messages:nm.map(m=>({role:m.role,content:m.content}))})
       });
       const data=await res.json();
-      let txt=data.content?.map(i=>i.type==='text'?i.text:'').filter(Boolean).join('\n')||'Erreur. Réessayez.';
-      
-      // Parse actions and execute
+      let txt=data.content?.map(i=>i.type==='text'?i.text:'').filter(Boolean).join('\n');
+      if(!txt)throw new Error('empty');
       const cleanTxt=parseAndExecute(txt);
-      
-      // Log response
-      const hadAction=txt!==cleanTxt;
-      if(hadAction)logAudit('agent_ia_execute',{response:cleanTxt.slice(0,200)});
-      
-      setMsgs([...nm,{role:'assistant',content:cleanTxt,executed:hadAction}]);
-      if(!open)setUnread(u=>u+1);
-    }catch(e){setMsgs([...nm,{role:'assistant',content:'❌ Erreur de connexion.'}]);}
+      setMsgs([...nm,{role:'assistant',content:cleanTxt,executed:txt!==cleanTxt}]);
+    }catch(e){
+      // Fallback: local KB search
+      const kbAnswer=searchKB(text);
+      setMsgs([...nm,{role:'assistant',content:kbAnswer}]);
+    }
     finally{setLoading(false);}
+    if(!open)setUnread(u=>u+1);
   };
 
   const labels={fr:{title:'Agent Juridique IA',placeholder:'Votre question en droit social...',disclaimer:'Info juridique indicative. Cas complexes → juriste.',clear:'Effacer'},
