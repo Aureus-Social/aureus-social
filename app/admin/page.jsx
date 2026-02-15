@@ -88,7 +88,7 @@ export default function AdminPanel() {
   const ARR = MRR*12;
 
   if(loading)return <div style={S.page}><div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'80vh'}}><div style={{color:'#c9a227'}}>Chargement...</div></div></div>;
-  if(!isAdmin)return <div style={S.page}><div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'80vh',flexDirection:'column',gap:12}}><div style={{fontSize:48}}>X</div><div style={{color:'#ef4444',fontSize:18,fontWeight:700}}>Acces refuse</div><div style={{color:'#64748b'}}>Ce panel est reserve a l administrateur Aureus IA.</div></div></div>;
+  if(!isAdmin)return <div style={S.page}><div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'80vh',flexDirection:'column',gap:12}}><div style={{fontSize:48}}>X</div><div style={{color:'#ef4444',fontSize:18,fontWeight:700}}>Acces refuse</div><div style={{color:'#64748b'}}>Ce panel est reserve a l admin. Votre email: '+user?.email+'</div></div></div>;
 
   const filtered = fiduciaires.filter(f=>!search || (f.nom||'').toLowerCase().includes(search.toLowerCase()) || (f.bce||'').includes(search) || (f.email||'').toLowerCase().includes(search.toLowerCase()));
 
