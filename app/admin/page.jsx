@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL||'',process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY||'');
 
 // TON EMAIL ADMIN — change si besoin
-const ADMIN_EMAILS = ['moussati@aureus-ia.com','info@aureus-ia.com','nourdin@aureus-ia.com'];
+const ADMIN_EMAILS = ['moussati@aureus-ia.com','info@aureus-ia.com','nourdin@aureus-ia.com','moussati.nourdin@gmail.com'];
 
 export default function AdminPanel() {
   const [user,setUser]=useState(null);const [isAdmin,setIsAdmin]=useState(false);
