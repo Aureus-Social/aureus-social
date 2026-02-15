@@ -57,7 +57,7 @@ export default function LandingPage() {
           <div style={{width:36,height:36,borderRadius:8,background:'#c9a227',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,fontWeight:800,color:'#0a0e1a'}}>A</div>
           <span style={{fontWeight:700,fontSize:17,color:'#f1f5f9'}}>Aureus Social Pro</span>
         </div>
-        <div style={{display:'flex',gap:24,alignItems:'center'}}>
+        <div style={{display:'flex',gap:24,alignItems:'center'}} className='asp-nav-links'>
           <a href="#features" style={{color:'#94a3b8',textDecoration:'none',fontSize:14}}>Fonctionnalites</a>
           <a href="#pricing" style={{color:'#94a3b8',textDecoration:'none',fontSize:14}}>Tarifs</a>
           <a href="#faq" style={{color:'#94a3b8',textDecoration:'none',fontSize:14}}>FAQ</a>
@@ -69,7 +69,7 @@ export default function LandingPage() {
       {/* HERO */}
       <section style={{padding:'140px 40px 80px',textAlign:'center',maxWidth:900,margin:'0 auto'}}>
         <div style={{display:'inline-block',background:'rgba(201,162,39,0.1)',border:'1px solid rgba(201,162,39,0.3)',borderRadius:20,padding:'6px 16px',fontSize:12,color:'#c9a227',fontWeight:600,marginBottom:20}}>Nouveau — Baremes 2026 disponibles</div>
-        <h1 style={{fontSize:52,fontWeight:800,lineHeight:1.1,margin:'0 0 20px',color:'#f1f5f9'}}>La paie belge,<br/><span style={{color:'#c9a227'}}>simplifiee.</span></h1>
+        <h1 style={{fontSize:52,fontWeight:800,lineHeight:1.1,lineHeight:1.1,margin:'0 0 20px',color:'#f1f5f9'}}>La paie belge,<br/><span style={{color:'#c9a227'}}>simplifiee.</span></h1>
         <p style={{fontSize:18,color:'#94a3b8',lineHeight:1.6,maxWidth:650,margin:'0 auto 32px'}}>Le logiciel de paie cloud concu pour les fiduciaires et bureaux sociaux belges. Calculs automatiques, conformite legale, zero installation.</p>
         <div style={{display:'flex',gap:12,justifyContent:'center'}}>
           <Link href="/sprint11/onboarding"><button style={{background:'#c9a227',color:'#0a0e1a',border:'none',padding:'14px 32px',borderRadius:8,fontSize:15,fontWeight:700,cursor:'pointer'}}>Commencer gratuitement</button></Link>
@@ -95,7 +95,7 @@ export default function LandingPage() {
           <h2 style={{fontSize:32,fontWeight:700,color:'#f1f5f9',margin:'0 0 12px'}}>Tout ce qu il faut pour gerer la paie</h2>
           <p style={{color:'#64748b',fontSize:15}}>17 modules couvrant l integralite du cycle de paie belge</p>
         </div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16}} className='asp-features-grid'>
           {FEATURES.map((f,i)=>(
             <div key={i} style={{background:'#131825',border:'1px solid #1e293b',borderRadius:10,padding:24,transition:'all 0.2s',cursor:'default'}} onMouseEnter={e=>e.currentTarget.style.borderColor='#c9a227'} onMouseLeave={e=>e.currentTarget.style.borderColor='#1e293b'}>
               <div style={{width:40,height:40,borderRadius:8,background:'rgba(201,162,39,0.15)',color:'#c9a227',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:14,marginBottom:12}}>{f.icon}</div>
@@ -112,7 +112,7 @@ export default function LandingPage() {
           <h2 style={{fontSize:32,fontWeight:700,color:'#f1f5f9',margin:'0 0 12px'}}>Tarifs simples et transparents</h2>
           <p style={{color:'#64748b',fontSize:15}}>Pas de frais caches. Pas d engagement.</p>
         </div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:20}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:20}} className='asp-pricing-grid'>
           {[
             {name:'Starter',price:'49',per:'/mois',desc:'Pour les petits cabinets',features:['5 clients max','50 travailleurs max','Calcul de paie','Fiches PDF','Support email'],cta:'Commencer',popular:false},
             {name:'Pro',price:'149',per:'/mois',desc:'Pour les fiduciaires actives',features:['25 clients max','500 travailleurs max','Tous les modules','SEPA + exports','Notifications','Support prioritaire'],cta:'Essai gratuit 30j',popular:true},
@@ -144,8 +144,7 @@ export default function LandingPage() {
       {/* TESTIMONIALS */}
       <section style={{padding:'80px 40px',maxWidth:1000,margin:'0 auto'}}>
         <h2 style={{fontSize:32,fontWeight:700,color:'#f1f5f9',textAlign:'center',margin:'0 0 40px'}}>Ils nous font confiance</h2>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:20}}>
-          {TESTIMONIALS.map((t,i)=>(
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:20}} className='asp-testimonials-grid'>{TESTIMONIALS.map((t,i)=>(
             <div key={i} style={{background:'#131825',border:'1px solid #1e293b',borderRadius:10,padding:24}}>
               <div style={{fontSize:14,color:'#94a3b8',lineHeight:1.6,marginBottom:16,fontStyle:'italic'}}>"{t.text}"</div>
               <div style={{fontWeight:600,color:'#f1f5f9',fontSize:13}}>{t.name}</div>

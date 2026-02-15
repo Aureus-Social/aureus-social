@@ -1,0 +1,49 @@
+
+/* AUREUS SOCIAL PRO — Global Responsive */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* Mobile-first responsive overrides */
+@media (max-width: 768px) {
+  /* Grid layouts */
+  .asp-grid-5, .asp-grid-4, .asp-grid-3 { grid-template-columns: repeat(2, 1fr) !important; }
+  .asp-grid-2 { grid-template-columns: 1fr !important; }
+  
+  /* Tables */
+  .asp-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .asp-table-wrap table { min-width: 600px; }
+  
+  /* Padding */
+  .asp-page { padding: 16px !important; }
+  .asp-header { padding: 12px 16px !important; flex-wrap: wrap; gap: 8px; }
+  
+  /* Typography */
+  .asp-h1 { font-size: 18px !important; }
+  .asp-hero-h1 { font-size: 32px !important; }
+  
+  /* Forms */
+  .asp-form-grid { grid-template-columns: 1fr !important; }
+  .asp-form-grid-2 { grid-template-columns: 1fr !important; }
+  
+  /* Buttons row */
+  .asp-btn-row { flex-wrap: wrap; }
+  
+  /* Sidebar */
+  .asp-sidebar { display: none !important; }
+  .asp-sidebar.open { display: flex !important; position: fixed; top: 0; left: 0; bottom: 0; z-index: 200; width: 260px; }
+  
+  /* Nav */
+  .asp-nav-links { display: none !important; }
+  .asp-nav-mobile { display: flex !important; }
+  
+  /* Cards */
+  .asp-pricing-grid { grid-template-columns: 1fr !important; }
+  .asp-features-grid { grid-template-columns: 1fr !important; }
+  .asp-testimonials-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 480px) {
+  .asp-grid-5, .asp-grid-4, .asp-grid-3, .asp-grid-2 { grid-template-columns: 1fr !important; }
+  .asp-hero-h1 { font-size: 28px !important; }
+  .asp-hero-btns { flex-direction: column; }
+  .asp-hero-btns button { width: 100%; }
+}

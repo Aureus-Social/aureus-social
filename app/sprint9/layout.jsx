@@ -1,4 +1,5 @@
 'use client';
+import '../responsive.css';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
