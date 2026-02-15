@@ -1,7 +1,7 @@
 'use client';
 // app/sprint9/attestations/page.jsx — F11
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query } from '@/lib/supabase-helpers';
+import supabase, { rpc, query } from '../../lib/supabase-helpers';
 
 export default function AttestationsPage() {
   const [clients, setClients] = useState([]);

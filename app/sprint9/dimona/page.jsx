@@ -1,7 +1,7 @@
 'use client';
 // app/sprint9/dimona/page.jsx
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query, insert } from '@/lib/supabase-helpers';
+import supabase, { rpc, query, insert } from '../../lib/supabase-helpers';
 
 export default function DimonaPage() {
   const [declarations, setDeclarations] = useState([]);

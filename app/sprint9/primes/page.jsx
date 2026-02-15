@@ -1,7 +1,7 @@
 'use client';
 // app/sprint9/primes/page.jsx — F16
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query } from '@/lib/supabase-helpers';
+import supabase, { rpc, query } from '../../lib/supabase-helpers';
 
 export default function PrimesPage() {
   const [clients, setClients] = useState([]);

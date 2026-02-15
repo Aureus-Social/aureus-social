@@ -1,7 +1,7 @@
 'use client';
 // app/sprint9/enfants/page.jsx — F10
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query, insert } from '@/lib/supabase-helpers';
+import supabase, { rpc, query, insert } from '../../lib/supabase-helpers';
 
 export default function EnfantsPage() {
   const [clients, setClients] = useState([]);

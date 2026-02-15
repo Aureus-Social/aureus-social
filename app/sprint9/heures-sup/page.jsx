@@ -1,7 +1,7 @@
 'use client';
 // app/sprint9/heures-sup/page.jsx — F15
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query, insert } from '@/lib/supabase-helpers';
+import supabase, { rpc, query, insert } from '../../lib/supabase-helpers';
 
 export default function HeuresSupPage() {
   const [clients, setClients] = useState([]);

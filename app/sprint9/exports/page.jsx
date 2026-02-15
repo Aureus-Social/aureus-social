@@ -1,7 +1,7 @@
 'use client';
 // app/sprint9/exports/page.jsx — F12
 import { useState, useEffect } from 'react';
-import supabase, { query } from '@/lib/supabase-helpers';
+import supabase, { query } from '../../lib/supabase-helpers';
 
 export default function ExportsPage() {
   const [clients, setClients] = useState([]);

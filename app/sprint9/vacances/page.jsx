@@ -1,7 +1,7 @@
 'use client';
 // app/sprint9/vacances/page.jsx
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query } from '@/lib/supabase-helpers';
+import supabase, { rpc, query } from '../../lib/supabase-helpers';
 
 export default function VacancesPage() {
   const [clients, setClients] = useState([]);

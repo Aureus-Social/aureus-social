@@ -1,7 +1,7 @@
 'use client';
 // app/sprint9/provisions/page.jsx — F14
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query } from '@/lib/supabase-helpers';
+import supabase, { rpc, query } from '../../lib/supabase-helpers';
 
 export default function ProvisionsPage() {
   const [clients, setClients] = useState([]);

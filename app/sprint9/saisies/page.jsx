@@ -1,7 +1,7 @@
 'use client';
 // app/sprint9/saisies/page.jsx — F17
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query, insert } from '@/lib/supabase-helpers';
+import supabase, { rpc, query, insert } from '../../lib/supabase-helpers';
 
 export default function SaisiesPage() {
   const [clients, setClients] = useState([]);

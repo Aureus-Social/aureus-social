@@ -1,7 +1,7 @@
 'use client';
 // app/sprint9/onss/page.jsx
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query } from '@/lib/supabase-helpers';
+import supabase, { rpc, query } from '../../lib/supabase-helpers';
 
 export default function ONSSPage() {
   const [clients, setClients] = useState([]);

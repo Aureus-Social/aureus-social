@@ -1,7 +1,7 @@
 'use client';
 // app/sprint9/bilan-social/page.jsx
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query } from '@/lib/supabase-helpers';
+import supabase, { rpc, query } from '../../lib/supabase-helpers';
 
 export default function BilanSocialPage() {
   const [clients, setClients] = useState([]);

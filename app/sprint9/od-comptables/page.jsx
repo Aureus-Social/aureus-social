@@ -1,7 +1,7 @@
 'use client';
 // app/sprint9/od-comptables/page.jsx
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query } from '@/lib/supabase-helpers';
+import supabase, { rpc, query } from '../../lib/supabase-helpers';
 
 export default function ODComptablesPage() {
   const [clients, setClients] = useState([]);

@@ -1,7 +1,7 @@
 'use client';
 // app/sprint9/trilingue/page.jsx — F8
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query, update } from '@/lib/supabase-helpers';
+import supabase, { rpc, query, update } from '../../lib/supabase-helpers';
 
 export default function TrilinguePage() {
   const [traductions, setTraductions] = useState([]);

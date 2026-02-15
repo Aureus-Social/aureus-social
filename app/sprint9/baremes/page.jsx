@@ -1,7 +1,7 @@
 'use client';
 // app/sprint9/baremes/page.jsx — F13
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query } from '@/lib/supabase-helpers';
+import supabase, { rpc, query } from '../../lib/supabase-helpers';
 
 export default function BaremesPage() {
   const [cps, setCPs] = useState([]);

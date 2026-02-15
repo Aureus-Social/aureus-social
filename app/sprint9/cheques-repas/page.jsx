@@ -1,7 +1,7 @@
 'use client';
 // app/sprint9/cheques-repas/page.jsx
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query, insert, update } from '@/lib/supabase-helpers';
+import supabase, { rpc, query, insert, update } from '../../lib/supabase-helpers';
 
 export default function ChequesRepasPage() {
   const [clients, setClients] = useState([]);
