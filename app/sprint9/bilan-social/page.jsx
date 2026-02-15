@@ -1,125 +1,65 @@
 'use client';
-// app/sprint9/bilan-social/page.jsx
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query } from '../../lib/supabase-helpers';
+
+import { createClient } from '@supabase/supabase-js';
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL||'',process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY||'');
+
+function useData() {
+  const [user,setUser]=useState(null);const [fid,setFid]=useState(null);const [clients,setClients]=useState([]);const [workers,setWorkers]=useState([]);const [fiches,setFiches]=useState([]);const [loading,setLoading]=useState(true);
+  useEffect(()=>{(async()=>{
+    const {data:{user:u}}=await supabase.auth.getUser();
+    if(!u){setLoading(false);return;}
+    setUser(u);
+    const {data:f}=await supabase.from('fiduciaires').select('*').eq('user_id',u.id).single();
+    setFid(f);
+    if(f){
+      const {data:cl}=await supabase.from('sp_clients').select('*').eq('fiduciaire_id',f.id);
+      setClients(cl||[]);
+      const ids=(cl||[]).map(c=>c.id);
+      if(ids.length){
+        const {data:tr}=await supabase.from('sp_travailleurs').select('*').in('client_id',ids);
+        setWorkers(tr||[]);
+        const {data:fp}=await supabase.from('sp_fiches_paie').select('*').in('client_id',ids);
+        setFiches(fp||[]);
+      }
+    }
+    setLoading(false);
+  })();},[]);
+  return {user,fid,clients,workers,fiches,loading};
+}
+const DEMO = [
+  {id:'d1',nom:'Dupont',prenom:'Marie',salaire_brut:3500,categorie:'employe',regime:'temps_plein',type_contrat:'CDI',date_entree:'2024-03-15',niss:'85.02.15-123.45',enfants_charge:2,etat_civil:'marie',client_id:'c1',statut:'actif',fonction:'Comptable'},
+  {id:'d2',nom:'Janssen',prenom:'Pieter',salaire_brut:4200,categorie:'employe',regime:'temps_plein',type_contrat:'CDI',date_entree:'2023-01-10',niss:'92.08.22-456.78',enfants_charge:1,etat_civil:'celibataire',client_id:'c1',statut:'actif',fonction:'Analyste'},
+  {id:'d3',nom:'Martin',prenom:'Lucas',salaire_brut:2800,categorie:'ouvrier',regime:'mi_temps',type_contrat:'CDD',date_entree:'2025-09-01',niss:'88.11.30-789.01',enfants_charge:0,etat_civil:'celibataire',client_id:'c1',statut:'actif',fonction:'Technicien'},
+];
 
 export default function BilanSocialPage() {
-  const [clients, setClients] = useState([]);
-  const [clientId, setClientId] = useState('');
-  const [annee, setAnnee] = useState(2025);
-  const [bilan, setBilan] = useState(null);
-  const [etat, setEtat] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => { loadClients(); }, []);
-  useEffect(() => { if (clientId) loadBilan(); }, [clientId, annee]);
-
-  async function loadClients() {
-    const data = await query('clients');
-    setClients(data || []);
-    if (data?.length) setClientId(data[0].id);
-  }
-
-  async function loadBilan() {
-    const { data } = await supabase.from('bilan_social').select('*')
-      .eq('client_id', clientId).eq('annee', annee).single();
-    setBilan(data);
-    if (data) {
-      const { data: ep } = await supabase.from('bilan_social_etat_personnes').select('*').eq('bilan_id', data.id).single();
-      setEtat(ep);
-    } else { setEtat(null); }
-  }
-
-  async function generer() {
-    setLoading(true);
-    try { await rpc('generer_bilan_social', { p_client_id: clientId, p_annee: annee }); loadBilan(); }
-    catch (e) { alert(e.message); }
-    setLoading(false);
-  }
+  const {workers:realW} = useData();
+  const w = realW.length>0?realW:DEMO;
+  const actifs=w.filter(t=>t.statut==='actif');
+  const h=actifs.filter(t=>t.sexe!=='F').length;const f=actifs.filter(t=>t.sexe==='F').length;
+  const etp=actifs.filter(t=>t.regime==='temps_plein').length+actifs.filter(t=>t.regime!=='temps_plein').length*0.5;
+  const masseBrute=actifs.reduce((s,t)=>s+(Number(t.salaire_brut)||0)*12,0);
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">📊 Bilan Social</h1>
-          <p className="text-slate-500 text-sm">Obligation annuelle — état du personnel</p>
-        </div>
-        <div className="flex gap-3">
-          <select value={clientId} onChange={e => setClientId(e.target.value)} className="border rounded-lg px-3 py-2 text-sm bg-white">
-            {clients.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}
-          </select>
-          <select value={annee} onChange={e => setAnnee(+e.target.value)} className="border rounded-lg px-3 py-2 text-sm bg-white">
-            {[2023, 2024, 2025, 2026].map(a => <option key={a}>{a}</option>)}
-          </select>
-          <button onClick={generer} disabled={loading}
-            className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700">
-            {bilan ? 'Régénérer' : 'Générer'} Bilan {annee}
-          </button>
-        </div>
+    <div>
+      <h1>Bilan Social</h1>
+      <p>Bilan annuel BNB — {realW.length>0?'Donnees reelles':'Demo'}</p>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:24}}>
+        {[{l:'EFFECTIF',v:actifs.length,c:'#f1f5f9'},{l:'ETP',v:etp.toFixed(1),c:'#3b82f6'},{l:'HOMMES',v:h,c:'#a855f7'},{l:'FEMMES',v:f,c:'#ec4899'}].map((k,i)=>(
+          <div key={i} style={{background:'#131825',border:'1px solid #1e293b',borderRadius:8,padding:'14px 16px'}}>
+            <div style={{fontSize:10,color:'#64748b',fontWeight:600,textTransform:'uppercase'}}>{k.l}</div>
+            <div style={{fontSize:24,fontWeight:700,color:k.c,marginTop:4,fontFamily:'monospace'}}>{k.v}</div>
+          </div>
+        ))}
       </div>
-
-      {bilan ? (
-        <div className="space-y-6">
-          {/* KPIs */}
-          <div className="grid grid-cols-5 gap-4">
-            {[
-              { label: 'Modèle', val: bilan.modele === 'complet' ? 'Complet (>100)' : 'Abrégé', icon: '📋' },
-              { label: 'ETP moyen', val: bilan.effectif_moyen_etp || 0, icon: '👥' },
-              { label: 'Frais personnel', val: (bilan.frais_personnel_total || 0).toLocaleString('fr-BE') + ' €', icon: '💶' },
-              { label: 'Entrées', val: bilan.nombre_entrees || 0, icon: '📈' },
-              { label: 'Sorties', val: bilan.nombre_sorties || 0, icon: '📉' },
-            ].map(k => (
-              <div key={k.label} className="bg-white p-4 rounded-xl border">
-                <p className="text-xs text-slate-500">{k.icon} {k.label}</p>
-                <p className="text-xl font-bold mt-1">{k.val}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* État des personnes */}
-          {etat && (
-            <div className="bg-white p-6 rounded-xl border shadow-sm">
-              <h3 className="font-semibold mb-4">État des personnes occupées</h3>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-xs text-slate-500 border-b">
-                    <th className="pb-2">Catégorie</th><th className="pb-2 text-center">Hommes TP</th><th className="pb-2 text-center">Femmes TP</th><th className="pb-2 text-center">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-slate-50">
-                    <td className="py-2">CDI temps plein</td>
-                    <td className="py-2 text-center font-mono">{etat.cdi_temps_plein_h || 0}</td>
-                    <td className="py-2 text-center font-mono">{etat.cdi_temps_plein_f || 0}</td>
-                    <td className="py-2 text-center font-mono font-medium">{(etat.cdi_temps_plein_h || 0) + (etat.cdi_temps_plein_f || 0)}</td>
-                  </tr>
-                  <tr className="border-b border-slate-50">
-                    <td className="py-2">CDD temps plein</td>
-                    <td className="py-2 text-center font-mono">{etat.cdd_temps_plein_h || 0}</td>
-                    <td className="py-2 text-center font-mono">{etat.cdd_temps_plein_f || 0}</td>
-                    <td className="py-2 text-center font-mono font-medium">{(etat.cdd_temps_plein_h || 0) + (etat.cdd_temps_plein_f || 0)}</td>
-                  </tr>
-                </tbody>
-              </table>
-              <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
-                <div className="bg-slate-50 p-3 rounded-lg"><span className="text-slate-500">Heures prestées</span><p className="font-mono font-semibold">{(etat.heures_prestees || 0).toLocaleString('fr-BE')}</p></div>
-                <div className="bg-slate-50 p-3 rounded-lg"><span className="text-slate-500">Rémunérations</span><p className="font-mono font-semibold">{(etat.remuneration_avantages || 0).toLocaleString('fr-BE')} €</p></div>
-                <div className="bg-slate-50 p-3 rounded-lg"><span className="text-slate-500">Cotisations patronales</span><p className="font-mono font-semibold">{(etat.cotisations_patronales || 0).toLocaleString('fr-BE')} €</p></div>
-              </div>
-            </div>
-          )}
-
-          <div className="bg-white p-5 rounded-xl border shadow-sm">
-            <p className="text-sm text-slate-500">Statut: <span className={`font-medium ${bilan.statut === 'finalise' ? 'text-green-600' : 'text-amber-600'}`}>{bilan.statut}</span></p>
-            <p className="text-sm text-slate-500">Exercice: {bilan.exercice_debut} → {bilan.exercice_fin}</p>
-          </div>
-        </div>
-      ) : (
-        <div className="bg-white p-12 rounded-xl border text-center text-slate-400">
-          <p className="text-4xl mb-3">📊</p>
-          <p>Aucun bilan social pour {annee}. Cliquez sur "Générer" pour créer.</p>
-        </div>
-      )}
+      <h2>Etat de l emploi</h2>
+      <table><thead><tr><th>Rubrique</th><th>H</th><th>F</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr><td>Inscrits au registre</td><td style={{fontFamily:'monospace'}}>{h}</td><td style={{fontFamily:'monospace'}}>{f}</td><td style={{fontFamily:'monospace',fontWeight:700}}>{actifs.length}</td></tr>
+        <tr><td>ETP</td><td style={{fontFamily:'monospace'}}>{(etp*h/Math.max(1,actifs.length)).toFixed(1)}</td><td style={{fontFamily:'monospace'}}>{(etp*f/Math.max(1,actifs.length)).toFixed(1)}</td><td style={{fontFamily:'monospace',fontWeight:700}}>{etp.toFixed(1)}</td></tr>
+        <tr><td>Frais de personnel (EUR)</td><td style={{fontFamily:'monospace'}}>{Math.round(masseBrute*h/Math.max(1,actifs.length)).toLocaleString()}</td><td style={{fontFamily:'monospace'}}>{Math.round(masseBrute*f/Math.max(1,actifs.length)).toLocaleString()}</td><td style={{fontFamily:'monospace',fontWeight:700,color:'#c9a227'}}>{Math.round(masseBrute).toLocaleString()}</td></tr>
+      </tbody></table>
     </div>
   );
 }

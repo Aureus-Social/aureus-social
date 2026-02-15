@@ -1,122 +1,65 @@
 'use client';
-// app/sprint9/enfants/page.jsx — F10
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query, insert } from '../../lib/supabase-helpers';
+
+import { createClient } from '@supabase/supabase-js';
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL||'',process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY||'');
+
+function useData() {
+  const [user,setUser]=useState(null);const [fid,setFid]=useState(null);const [clients,setClients]=useState([]);const [workers,setWorkers]=useState([]);const [fiches,setFiches]=useState([]);const [loading,setLoading]=useState(true);
+  useEffect(()=>{(async()=>{
+    const {data:{user:u}}=await supabase.auth.getUser();
+    if(!u){setLoading(false);return;}
+    setUser(u);
+    const {data:f}=await supabase.from('fiduciaires').select('*').eq('user_id',u.id).single();
+    setFid(f);
+    if(f){
+      const {data:cl}=await supabase.from('sp_clients').select('*').eq('fiduciaire_id',f.id);
+      setClients(cl||[]);
+      const ids=(cl||[]).map(c=>c.id);
+      if(ids.length){
+        const {data:tr}=await supabase.from('sp_travailleurs').select('*').in('client_id',ids);
+        setWorkers(tr||[]);
+        const {data:fp}=await supabase.from('sp_fiches_paie').select('*').in('client_id',ids);
+        setFiches(fp||[]);
+      }
+    }
+    setLoading(false);
+  })();},[]);
+  return {user,fid,clients,workers,fiches,loading};
+}
+const DEMO = [
+  {id:'d1',nom:'Dupont',prenom:'Marie',salaire_brut:3500,categorie:'employe',regime:'temps_plein',type_contrat:'CDI',date_entree:'2024-03-15',niss:'85.02.15-123.45',enfants_charge:2,etat_civil:'marie',client_id:'c1',statut:'actif',fonction:'Comptable'},
+  {id:'d2',nom:'Janssen',prenom:'Pieter',salaire_brut:4200,categorie:'employe',regime:'temps_plein',type_contrat:'CDI',date_entree:'2023-01-10',niss:'92.08.22-456.78',enfants_charge:1,etat_civil:'celibataire',client_id:'c1',statut:'actif',fonction:'Analyste'},
+  {id:'d3',nom:'Martin',prenom:'Lucas',salaire_brut:2800,categorie:'ouvrier',regime:'mi_temps',type_contrat:'CDD',date_entree:'2025-09-01',niss:'88.11.30-789.01',enfants_charge:0,etat_civil:'celibataire',client_id:'c1',statut:'actif',fonction:'Technicien'},
+];
+const AF=[{rang:1,montant:101.31,s6:17.52,s12:26.79,s18:30.33},{rang:2,montant:187.49,s6:34.28,s12:52.44,s18:59.31},{rang:3,montant:249.41,s6:34.28,s12:52.44,s18:59.31}];
 
 export default function EnfantsPage() {
-  const [clients, setClients] = useState([]);
-  const [clientId, setClientId] = useState('');
-  const [travailleurs, setTravailleurs] = useState([]);
-  const [travId, setTravId] = useState('');
-  const [enfants, setEnfants] = useState([]);
-  const [impactPP, setImpactPP] = useState(null);
-  const [af, setAF] = useState(null);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ nom: '', prenom: '', date_naissance: '', niss: '', sexe: 'M', lien_parente: 'enfant', a_charge: true, a_charge_fiscal: true, handicap: false, type_garde: 'exclusive', etudiant: false, region_af: 'BXL', rang_enfant: 1 });
-
-  useEffect(() => { loadClients(); }, []);
-  useEffect(() => { if (clientId) loadTravailleurs(); }, [clientId]);
-  useEffect(() => { if (travId) { loadEnfants(); loadImpact(); loadAF(); } }, [travId]);
-
-  async function loadClients() { const d = await query('clients'); setClients(d || []); if (d?.length) setClientId(d[0].id); }
-  async function loadTravailleurs() { const d = await query('travailleurs', { client_id: clientId }); setTravailleurs(d || []); if (d?.length) setTravId(d[0].id); }
-  async function loadEnfants() { const d = await query('enfants_a_charge', { client_id: clientId, travailleur_id: travId }); setEnfants(d || []); }
-  async function loadImpact() { try { setImpactPP(await rpc('calculer_impact_enfants_pp', { p_client_id: clientId, p_trav_id: travId })); } catch (e) { setImpactPP(null); } }
-  async function loadAF() { try { setAF(await rpc('calculer_allocations_familiales', { p_client_id: clientId, p_trav_id: travId })); } catch (e) { setAF(null); } }
-
-  async function ajouterEnfant(e) {
-    e.preventDefault();
-    try { await insert('enfants_a_charge', { ...form, client_id: clientId, travailleur_id: travId }); setShowForm(false); loadEnfants(); loadImpact(); loadAF(); }
-    catch (err) { alert(err.message); }
-  }
-
-  function age(dn) { return dn ? Math.floor((Date.now() - new Date(dn)) / 31557600000) : '?'; }
+  const {workers:realW} = useData();
+  const w = realW.length>0?realW:DEMO;
+  const totalEnf=w.reduce((s,t)=>s+(Number(t.enfants_charge)||0),0);
+  const withKids=w.filter(t=>(Number(t.enfants_charge)||0)>0);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-2xl font-bold text-slate-800">👶 Enfants & Allocations Familiales</h1><p className="text-slate-500 text-sm">Gestion des personnes à charge et impact fiscal</p></div>
-        <div className="flex gap-2">
-          <select value={clientId} onChange={e => setClientId(e.target.value)} className="border rounded-lg px-3 py-2 text-sm bg-white">{clients.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}</select>
-          <select value={travId} onChange={e => setTravId(e.target.value)} className="border rounded-lg px-3 py-2 text-sm bg-white">{travailleurs.map(t => <option key={t.id} value={t.id}>{t.nom} {t.prenom}</option>)}</select>
-          <button onClick={() => setShowForm(true)} className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700">+ Enfant</button>
-        </div>
+    <div>
+      <h1>Enfants et Allocations Familiales</h1>
+      <p>Impact fiscal et social — {realW.length>0?'Donnees reelles':'Demo'}</p>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:24}}>
+        {[{l:'AVEC ENFANTS',v:withKids.length,c:'#f1f5f9'},{l:'TOTAL ENFANTS',v:totalEnf,c:'#3b82f6'},{l:'IMPACT PP',v:'~'+([0,48,128,340][Math.min(totalEnf,3)])+' EUR/mois',c:'#22c55e'}].map((k,i)=>(
+          <div key={i} style={{background:'#131825',border:'1px solid #1e293b',borderRadius:8,padding:'14px 16px'}}>
+            <div style={{fontSize:10,color:'#64748b',fontWeight:600,textTransform:'uppercase'}}>{k.l}</div>
+            <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4,fontFamily:'monospace'}}>{k.v}</div>
+          </div>
+        ))}
       </div>
-
-      {/* Impact fiscal + AF */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        {impactPP && (<>
-          <div className="bg-white p-4 rounded-xl border"><p className="text-xs text-slate-500">Enfants à charge</p><p className="text-3xl font-bold">{impactPP.enfants}</p></div>
-          <div className="bg-white p-4 rounded-xl border"><p className="text-xs text-slate-500">Réduction PP mensuelle</p><p className="text-2xl font-bold text-green-600 font-mono">{impactPP.reduction_pp_mensuelle?.toFixed(2)} €</p></div>
-        </>)}
-        {af && <div className="bg-white p-4 rounded-xl border"><p className="text-xs text-slate-500">Allocations familiales / mois</p><p className="text-2xl font-bold text-blue-600 font-mono">{af.total_mensuel?.toFixed(2)} €</p></div>}
-      </div>
-
-      {/* AF detail */}
-      {af?.detail?.length > 0 && (
-        <div className="bg-white p-5 rounded-xl border shadow-sm mb-6">
-          <h3 className="font-semibold mb-3 text-sm">Détail allocations familiales</h3>
-          <div className="grid grid-cols-3 gap-3">
-            {af.detail.map((d, i) => (
-              <div key={i} className="bg-slate-50 p-3 rounded-lg">
-                <p className="font-medium">{d.enfant}</p>
-                <p className="text-xs text-slate-500">{d.age} ans</p>
-                <div className="flex justify-between mt-1 text-sm"><span>Base</span><span className="font-mono">{d.base?.toFixed(2)} €</span></div>
-                {d.supplement > 0 && <div className="flex justify-between text-sm"><span>Supplément âge</span><span className="font-mono text-green-600">+{d.supplement?.toFixed(2)} €</span></div>}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Form */}
-      {showForm && (
-        <form onSubmit={ajouterEnfant} className="bg-white p-5 rounded-xl border shadow-sm mb-6">
-          <h3 className="font-semibold mb-4">Ajouter un enfant</h3>
-          <div className="grid grid-cols-4 gap-3">
-            <div><label className="block text-xs text-slate-500 mb-1">Nom</label><input required value={form.nom} onChange={e => setForm({ ...form, nom: e.target.value })} className="w-full border rounded px-3 py-2 text-sm" /></div>
-            <div><label className="block text-xs text-slate-500 mb-1">Prénom</label><input required value={form.prenom} onChange={e => setForm({ ...form, prenom: e.target.value })} className="w-full border rounded px-3 py-2 text-sm" /></div>
-            <div><label className="block text-xs text-slate-500 mb-1">Date naissance</label><input type="date" required value={form.date_naissance} onChange={e => setForm({ ...form, date_naissance: e.target.value })} className="w-full border rounded px-3 py-2 text-sm" /></div>
-            <div><label className="block text-xs text-slate-500 mb-1">Région AF</label>
-              <select value={form.region_af} onChange={e => setForm({ ...form, region_af: e.target.value })} className="w-full border rounded px-3 py-2 text-sm">
-                <option value="BXL">Bruxelles</option><option value="WAL">Wallonie</option><option value="VLA">Flandre</option>
-              </select>
-            </div>
-          </div>
-          <div className="flex gap-4 mt-3">
-            <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={form.a_charge_fiscal} onChange={e => setForm({ ...form, a_charge_fiscal: e.target.checked })} /> Charge fiscale</label>
-            <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={form.handicap} onChange={e => setForm({ ...form, handicap: e.target.checked })} /> Handicap</label>
-            <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={form.etudiant} onChange={e => setForm({ ...form, etudiant: e.target.checked })} /> Étudiant</label>
-          </div>
-          <div className="flex gap-3 mt-4">
-            <button type="submit" className="bg-purple-600 text-white px-6 py-2 rounded-lg text-sm">Ajouter</button>
-            <button type="button" onClick={() => setShowForm(false)} className="text-slate-500 text-sm">Annuler</button>
-          </div>
-        </form>
-      )}
-
-      {/* Liste enfants */}
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 border-b"><tr>{['Prénom', 'Nom', 'Âge', 'Lien', 'Charge fiscale', 'Handicap', 'Garde', 'Région'].map(h =>
-            <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-slate-500">{h}</th>)}</tr></thead>
-          <tbody className="divide-y">
-            {enfants.map(e => (
-              <tr key={e.id} className="hover:bg-slate-50">
-                <td className="px-4 py-3 font-medium">{e.prenom}</td>
-                <td className="px-4 py-3">{e.nom}</td>
-                <td className="px-4 py-3">{age(e.date_naissance)} ans</td>
-                <td className="px-4 py-3">{e.lien_parente}</td>
-                <td className="px-4 py-3">{e.a_charge_fiscal ? '✅' : '—'}</td>
-                <td className="px-4 py-3">{e.handicap ? '♿' : '—'}</td>
-                <td className="px-4 py-3">{e.type_garde}</td>
-                <td className="px-4 py-3">{e.region_af}</td>
-              </tr>
-            ))}
-            {!enfants.length && <tr><td colSpan={8} className="px-4 py-8 text-center text-slate-400">Aucun enfant enregistré</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <h2>Detail par travailleur</h2>
+      <table><thead><tr><th>Travailleur</th><th>Enfants</th><th>Reduction PP</th></tr></thead>
+      <tbody>{w.map((t,i)=>{const n=Number(t.enfants_charge)||0;return(
+        <tr key={i}><td style={{fontWeight:600}}>{t.nom} {t.prenom||''}</td><td style={{fontFamily:'monospace'}}>{n}</td>
+        <td style={{fontFamily:'monospace',color:'#22c55e'}}>{n>0?([0,48,128,340][Math.min(n,3)])+' EUR':'-'}</td></tr>);})}</tbody></table>
+      <h2>Baremes allocations familiales (Bruxelles)</h2>
+      <table><thead><tr><th>Rang</th><th>Base</th><th>+6 ans</th><th>+12 ans</th><th>+18 ans</th></tr></thead>
+      <tbody>{AF.map((a,i)=>(<tr key={i}><td style={{fontWeight:700}}>{a.rang}e</td><td style={{fontFamily:'monospace',color:'#c9a227'}}>{a.montant.toFixed(2)}</td><td style={{fontFamily:'monospace'}}>+{a.s6.toFixed(2)}</td><td style={{fontFamily:'monospace'}}>+{a.s12.toFixed(2)}</td><td style={{fontFamily:'monospace'}}>+{a.s18.toFixed(2)}</td></tr>))}</tbody></table>
     </div>
   );
 }

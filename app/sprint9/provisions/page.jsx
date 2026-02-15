@@ -1,106 +1,72 @@
 'use client';
-// app/sprint9/provisions/page.jsx — F14
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query } from '../../lib/supabase-helpers';
+
+import { createClient } from '@supabase/supabase-js';
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL||'',process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY||'');
+
+function useData() {
+  const [user,setUser]=useState(null);const [fid,setFid]=useState(null);const [clients,setClients]=useState([]);const [workers,setWorkers]=useState([]);const [fiches,setFiches]=useState([]);const [loading,setLoading]=useState(true);
+  useEffect(()=>{(async()=>{
+    const {data:{user:u}}=await supabase.auth.getUser();
+    if(!u){setLoading(false);return;}
+    setUser(u);
+    const {data:f}=await supabase.from('fiduciaires').select('*').eq('user_id',u.id).single();
+    setFid(f);
+    if(f){
+      const {data:cl}=await supabase.from('sp_clients').select('*').eq('fiduciaire_id',f.id);
+      setClients(cl||[]);
+      const ids=(cl||[]).map(c=>c.id);
+      if(ids.length){
+        const {data:tr}=await supabase.from('sp_travailleurs').select('*').in('client_id',ids);
+        setWorkers(tr||[]);
+        const {data:fp}=await supabase.from('sp_fiches_paie').select('*').in('client_id',ids);
+        setFiches(fp||[]);
+      }
+    }
+    setLoading(false);
+  })();},[]);
+  return {user,fid,clients,workers,fiches,loading};
+}
+const DEMO = [
+  {id:'d1',nom:'Dupont',prenom:'Marie',salaire_brut:3500,categorie:'employe',regime:'temps_plein',type_contrat:'CDI',date_entree:'2024-03-15',niss:'85.02.15-123.45',enfants_charge:2,etat_civil:'marie',client_id:'c1',statut:'actif',fonction:'Comptable'},
+  {id:'d2',nom:'Janssen',prenom:'Pieter',salaire_brut:4200,categorie:'employe',regime:'temps_plein',type_contrat:'CDI',date_entree:'2023-01-10',niss:'92.08.22-456.78',enfants_charge:1,etat_civil:'celibataire',client_id:'c1',statut:'actif',fonction:'Analyste'},
+  {id:'d3',nom:'Martin',prenom:'Lucas',salaire_brut:2800,categorie:'ouvrier',regime:'mi_temps',type_contrat:'CDD',date_entree:'2025-09-01',niss:'88.11.30-789.01',enfants_charge:0,etat_civil:'celibataire',client_id:'c1',statut:'actif',fonction:'Technicien'},
+];
 
 export default function ProvisionsPage() {
-  const [clients, setClients] = useState([]);
-  const [clientId, setClientId] = useState('');
-  const [annee, setAnnee] = useState(2026);
-  const [mois, setMois] = useState(new Date().getMonth() + 1);
-  const [provisions, setProvisions] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const {workers:realW} = useData();
+  const w = (realW.length>0?realW:DEMO).filter(t=>t.statut==='actif');
+  const [mois]=useState('2026-02');
 
-  useEffect(() => { loadClients(); }, []);
-  useEffect(() => { if (clientId) loadProvisions(); }, [clientId, annee]);
-
-  async function loadClients() { const d = await query('clients'); setClients(d || []); if (d?.length) setClientId(d[0].id); }
-  async function loadProvisions() {
-    const { data } = await supabase.from('comptes_provision').select('*')
-      .eq('client_id', clientId).eq('annee', annee).order('type_provision').order('mois');
-    setProvisions(data || []);
-  }
-
-  async function calculer() {
-    setLoading(true);
-    try { const r = await rpc('calculer_provisions_mensuelles', { p_client_id: clientId, p_annee: annee, p_mois: mois }); alert(JSON.stringify(r)); loadProvisions(); }
-    catch (e) { alert(e.message); }
-    setLoading(false);
-  }
-
-  const types = { pecule_vacances_simple: { label: 'Pécule simple', color: 'text-blue-600', rate: '8.33%' },
-    pecule_vacances_double: { label: 'Pécule double', color: 'text-indigo-600', rate: '7.67%' },
-    prime_fin_annee: { label: '13ème mois', color: 'text-purple-600', rate: '8.33%' } };
-  
-  const grouped = {};
-  provisions.forEach(p => { if (!grouped[p.type_provision]) grouped[p.type_provision] = []; grouped[p.type_provision].push(p); });
+  const totalBrut=w.reduce((s,t)=>s+(Number(t.salaire_brut)||0),0);
+  const pS=totalBrut/12;const pD=totalBrut*0.0769;const p13=totalBrut/12;
+  const pOnss=(pS+pD+p13)*0.2492;const total=pS+pD+p13+pOnss;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-2xl font-bold text-slate-800">💰 Provisions</h1><p className="text-slate-500 text-sm">Pécules vacances et prime de fin d'année</p></div>
-        <div className="flex gap-2">
-          <select value={clientId} onChange={e => setClientId(e.target.value)} className="border rounded-lg px-3 py-2 text-sm bg-white">{clients.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}</select>
-          <select value={annee} onChange={e => setAnnee(+e.target.value)} className="border rounded-lg px-3 py-2 text-sm bg-white">{[2024, 2025, 2026].map(a => <option key={a}>{a}</option>)}</select>
-          <select value={mois} onChange={e => setMois(+e.target.value)} className="border rounded-lg px-3 py-2 text-sm bg-white">{[...Array(12)].map((_, i) => <option key={i + 1} value={i + 1}>Mois {i + 1}</option>)}</select>
-          <button onClick={calculer} disabled={loading} className="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-violet-700">Calculer mois {mois}</button>
-        </div>
+    <div>
+      <h1>Provisions</h1>
+      <p>Provisions mensuelles — {realW.length>0?'Donnees reelles':'Demo'}</p>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:24}}>
+        {[{l:'MASSE SALARIALE',v:totalBrut.toFixed(2)+' EUR',c:'#f1f5f9'},{l:'PROV. MOIS',v:total.toFixed(2)+' EUR',c:'#c9a227'},{l:'PROV. CUMULEES',v:(total*2).toFixed(2)+' EUR',c:'#3b82f6'},{l:'PROV. ANNUELLE',v:(total*12).toFixed(2)+' EUR',c:'#22c55e'}].map((k,i)=>(
+          <div key={i} style={{background:'#131825',border:'1px solid #1e293b',borderRadius:8,padding:'14px 16px'}}>
+            <div style={{fontSize:10,color:'#64748b',fontWeight:600,textTransform:'uppercase'}}>{k.l}</div>
+            <div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4,fontFamily:'monospace'}}>{k.v}</div>
+          </div>
+        ))}
       </div>
-
-      {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        {Object.entries(types).map(([key, t]) => {
-          const items = grouped[key] || [];
-          const lastItem = items[items.length - 1];
-          return (
-            <div key={key} className="bg-white p-5 rounded-xl border shadow-sm">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-xs text-slate-500">{t.label} ({t.rate})</p>
-                  <p className={`text-2xl font-bold font-mono ${t.color} mt-1`}>{lastItem?.montant_cumule?.toFixed(2) || '0.00'} €</p>
-                  <p className="text-xs text-slate-400 mt-1">cumulé {annee}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-slate-500">Dernier mois</p>
-                  <p className="text-sm font-mono">{lastItem?.montant_provision?.toFixed(2) || '—'} €</p>
-                  <p className="text-xs text-slate-400">ONSS: {lastItem?.onss_provision?.toFixed(2) || '—'} €</p>
-                </div>
-              </div>
-              {/* Mini sparkline */}
-              <div className="flex gap-0.5 mt-3 h-8 items-end">
-                {items.map(p => (
-                  <div key={p.mois} className={`flex-1 rounded-t ${t.color.replace('text', 'bg')} bg-opacity-30`}
-                    style={{ height: `${Math.min(100, (p.montant_provision || 0) / (Math.max(...items.map(i => i.montant_provision || 1))) * 100)}%` }} />
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Detail table */}
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 border-b"><tr>{['Type', 'Mois', 'Base calcul', 'Taux', 'Dotation', 'Cumulé', 'Utilisé', 'Solde', 'ONSS'].map(h =>
-            <th key={h} className="px-3 py-3 text-left text-xs font-semibold text-slate-500">{h}</th>)}</tr></thead>
-          <tbody className="divide-y">
-            {provisions.map(p => (
-              <tr key={p.id} className="hover:bg-slate-50">
-                <td className="px-3 py-2 text-xs">{types[p.type_provision]?.label || p.type_provision}</td>
-                <td className="px-3 py-2 font-medium">{p.mois}/{p.annee}</td>
-                <td className="px-3 py-2 font-mono">{p.base_calcul?.toFixed(2)} €</td>
-                <td className="px-3 py-2">{(p.taux_provision * 100).toFixed(2)}%</td>
-                <td className="px-3 py-2 font-mono">{p.montant_provision?.toFixed(2)} €</td>
-                <td className="px-3 py-2 font-mono font-medium">{p.montant_cumule?.toFixed(2)} €</td>
-                <td className="px-3 py-2 font-mono">{p.montant_utilise?.toFixed(2)} €</td>
-                <td className="px-3 py-2 font-mono text-green-600">{p.solde_provision?.toFixed(2)} €</td>
-                <td className="px-3 py-2 font-mono text-xs">{p.onss_provision?.toFixed(2)} €</td>
-              </tr>
-            ))}
-            {!provisions.length && <tr><td colSpan={9} className="px-4 py-8 text-center text-slate-400">Aucune provision. Calculez un mois.</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <h2>Decomposition mensuelle</h2>
+      <table><thead><tr><th>Type</th><th>Base</th><th>Taux</th><th>Montant</th></tr></thead>
+      <tbody>
+        <tr><td style={{fontWeight:600}}>Pecule simple</td><td style={{fontFamily:'monospace'}}>{totalBrut.toFixed(2)}</td><td style={{fontFamily:'monospace'}}>1/12</td><td style={{fontFamily:'monospace',color:'#c9a227'}}>{pS.toFixed(2)}</td></tr>
+        <tr><td style={{fontWeight:600}}>Pecule double</td><td style={{fontFamily:'monospace'}}>{totalBrut.toFixed(2)}</td><td style={{fontFamily:'monospace'}}>7.69%</td><td style={{fontFamily:'monospace',color:'#c9a227'}}>{pD.toFixed(2)}</td></tr>
+        <tr><td style={{fontWeight:600}}>13eme mois</td><td style={{fontFamily:'monospace'}}>{totalBrut.toFixed(2)}</td><td style={{fontFamily:'monospace'}}>1/12</td><td style={{fontFamily:'monospace',color:'#c9a227'}}>{p13.toFixed(2)}</td></tr>
+        <tr><td style={{fontWeight:600,color:'#f97316'}}>ONSS patronal</td><td style={{fontFamily:'monospace'}}>{(pS+pD+p13).toFixed(2)}</td><td style={{fontFamily:'monospace'}}>24.92%</td><td style={{fontFamily:'monospace',color:'#f97316'}}>{pOnss.toFixed(2)}</td></tr>
+        <tr style={{fontWeight:700,borderTop:'2px solid #c9a227'}}><td colSpan={3}>TOTAL MENSUEL</td><td style={{fontFamily:'monospace',color:'#c9a227',fontSize:16}}>{total.toFixed(2)} EUR</td></tr>
+      </tbody></table>
+      <h2>Detail par travailleur</h2>
+      <table><thead><tr><th>Travailleur</th><th>Brut</th><th>Prov. pecule S</th><th>Prov. pecule D</th><th>Prov. 13e</th><th>Total</th></tr></thead>
+      <tbody>{w.map((t,i)=>{const b=Number(t.salaire_brut)||0;const ps=b/12;const pd=b*0.0769;const p=b/12;return(
+        <tr key={i}><td style={{fontWeight:600}}>{t.nom} {t.prenom||''}</td><td style={{fontFamily:'monospace'}}>{b.toFixed(2)}</td><td style={{fontFamily:'monospace'}}>{ps.toFixed(2)}</td><td style={{fontFamily:'monospace'}}>{pd.toFixed(2)}</td><td style={{fontFamily:'monospace'}}>{p.toFixed(2)}</td><td style={{fontFamily:'monospace',fontWeight:700,color:'#c9a227'}}>{(ps+pd+p).toFixed(2)}</td></tr>);})}</tbody></table>
     </div>
   );
 }

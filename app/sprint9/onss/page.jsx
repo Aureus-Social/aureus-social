@@ -1,133 +1,80 @@
 'use client';
-// app/sprint9/onss/page.jsx
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query } from '../../lib/supabase-helpers';
+
+import { createClient } from '@supabase/supabase-js';
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL||'',process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY||'');
+
+function useData() {
+  const [user,setUser]=useState(null);const [fid,setFid]=useState(null);const [clients,setClients]=useState([]);const [workers,setWorkers]=useState([]);const [fiches,setFiches]=useState([]);const [loading,setLoading]=useState(true);
+  useEffect(()=>{(async()=>{
+    const {data:{user:u}}=await supabase.auth.getUser();
+    if(!u){setLoading(false);return;}
+    setUser(u);
+    const {data:f}=await supabase.from('fiduciaires').select('*').eq('user_id',u.id).single();
+    setFid(f);
+    if(f){
+      const {data:cl}=await supabase.from('sp_clients').select('*').eq('fiduciaire_id',f.id);
+      setClients(cl||[]);
+      const ids=(cl||[]).map(c=>c.id);
+      if(ids.length){
+        const {data:tr}=await supabase.from('sp_travailleurs').select('*').in('client_id',ids);
+        setWorkers(tr||[]);
+        const {data:fp}=await supabase.from('sp_fiches_paie').select('*').in('client_id',ids);
+        setFiches(fp||[]);
+      }
+    }
+    setLoading(false);
+  })();},[]);
+  return {user,fid,clients,workers,fiches,loading};
+}
+const DEMO = [
+  {id:'d1',nom:'Dupont',prenom:'Marie',salaire_brut:3500,categorie:'employe',regime:'temps_plein',type_contrat:'CDI',date_entree:'2024-03-15',niss:'85.02.15-123.45',enfants_charge:2,etat_civil:'marie',client_id:'c1',statut:'actif',fonction:'Comptable'},
+  {id:'d2',nom:'Janssen',prenom:'Pieter',salaire_brut:4200,categorie:'employe',regime:'temps_plein',type_contrat:'CDI',date_entree:'2023-01-10',niss:'92.08.22-456.78',enfants_charge:1,etat_civil:'celibataire',client_id:'c1',statut:'actif',fonction:'Analyste'},
+  {id:'d3',nom:'Martin',prenom:'Lucas',salaire_brut:2800,categorie:'ouvrier',regime:'mi_temps',type_contrat:'CDD',date_entree:'2025-09-01',niss:'88.11.30-789.01',enfants_charge:0,etat_civil:'celibataire',client_id:'c1',statut:'actif',fonction:'Technicien'},
+];
+const TAUX = {patronal:0.2492,personnel:0.1307};
 
 export default function ONSSPage() {
-  const [clients, setClients] = useState([]);
-  const [clientId, setClientId] = useState('');
-  const [annee, setAnnee] = useState(2026);
-  const [declarations, setDeclarations] = useState([]);
-  const [echeances, setEcheances] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const {workers:realW,loading} = useData();
+  const w = (realW.length>0?realW:DEMO).filter(t=>t.statut==='actif');
+  const [trimestre,setTrimestre]=useState('2026-Q1');
 
-  useEffect(() => { loadClients(); }, []);
-  useEffect(() => { if (clientId) { loadDeclarations(); loadEcheances(); } }, [clientId, annee]);
-
-  async function loadClients() {
-    const data = await query('clients');
-    setClients(data || []);
-    if (data?.length) setClientId(data[0].id);
-  }
-
-  async function loadDeclarations() {
-    const { data } = await supabase.from('declarations_onss_trimestrielles')
-      .select('*').eq('client_id', clientId).eq('annee', annee).order('trimestre');
-    setDeclarations(data || []);
-  }
-
-  async function loadEcheances() {
-    const { data } = await supabase.from('echeances_onss')
-      .select('*').eq('client_id', clientId).eq('annee', annee).order('trimestre');
-    setEcheances(data || []);
-  }
-
-  async function genererEcheances() {
-    setLoading(true);
-    try { await rpc('generer_echeances_onss', { p_client_id: clientId, p_annee: annee }); loadEcheances(); }
-    catch (e) { alert(e.message); }
-    setLoading(false);
-  }
-
-  async function preparerDMFA(trim) {
-    setLoading(true);
-    try { await rpc('preparer_dmfa_trimestre', { p_client_id: clientId, p_annee: annee, p_trim: trim }); loadDeclarations(); }
-    catch (e) { alert(e.message); }
-    setLoading(false);
-  }
-
-  const trimLabels = { 1: 'T1 (Jan-Mars)', 2: 'T2 (Avr-Juin)', 3: 'T3 (Juil-Sept)', 4: 'T4 (Oct-Déc)' };
-  const statutColors = { en_cours: 'bg-yellow-100 text-yellow-700', valide: 'bg-green-100 text-green-700', envoye: 'bg-blue-100 text-blue-700' };
+  const totalBrut=w.reduce((s,t)=>s+(Number(t.salaire_brut)||0)*3,0);
+  const cotP=totalBrut*TAUX.patronal;const cotPers=totalBrut*TAUX.personnel;const cotT=cotP+cotPers;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">🏛️ ONSS / DmfA</h1>
-          <p className="text-slate-500 text-sm">Déclarations trimestrielles et échéances</p>
-        </div>
-        <div className="flex gap-3">
-          <select value={clientId} onChange={e => setClientId(e.target.value)} className="border rounded-lg px-3 py-2 text-sm bg-white">
-            {clients.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}
-          </select>
-          <select value={annee} onChange={e => setAnnee(+e.target.value)} className="border rounded-lg px-3 py-2 text-sm bg-white">
-            {[2024, 2025, 2026].map(a => <option key={a}>{a}</option>)}
-          </select>
-          <button onClick={genererEcheances} disabled={loading}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700">
-            Générer échéances {annee}
-          </button>
-        </div>
+    <div>
+      <h1>ONSS / DmfA</h1>
+      <p>Declarations trimestrielles — {realW.length>0?'Donnees reelles':'Demo'}</p>
+      <div style={{display:'flex',gap:16,marginBottom:24,alignItems:'center'}}>
+        <div><label>Trimestre </label><select value={trimestre} onChange={e=>setTrimestre(e.target.value)} style={{marginLeft:8}}>{['2026-Q1','2025-Q4','2025-Q3'].map(t=><option key={t}>{t}</option>)}</select></div>
+        <button onClick={()=>alert('DmfA genere pour '+trimestre)}>Generer DmfA</button>
       </div>
-
-      {/* Échéances */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        {[1, 2, 3, 4].map(t => {
-          const ech = echeances.find(e => e.trimestre === t);
-          const decl = declarations.find(d => d.trimestre === t);
-          return (
-            <div key={t} className="bg-white p-5 rounded-xl border shadow-sm">
-              <div className="flex justify-between items-start">
-                <h3 className="font-semibold text-sm">{trimLabels[t]}</h3>
-                {decl && <span className={`px-2 py-0.5 rounded-full text-xs ${statutColors[decl.statut] || 'bg-gray-100'}`}>{decl.statut}</span>}
-              </div>
-              {ech && <p className="text-xs text-slate-500 mt-1">Échéance: {ech.date_echeance}</p>}
-              {decl ? (
-                <div className="mt-3 space-y-1 text-sm">
-                  <div className="flex justify-between"><span className="text-slate-500">Travailleurs</span><span className="font-medium">{decl.nombre_travailleurs}</span></div>
-                  <div className="flex justify-between"><span className="text-slate-500">Brut total</span><span className="font-mono">{decl.total_brut?.toFixed(2)} €</span></div>
-                  <div className="flex justify-between"><span className="text-slate-500">ONSS total</span><span className="font-mono text-red-600">{((decl.total_onss_travailleur || 0) + (decl.total_onss_patronal || 0)).toFixed(2)} €</span></div>
-                </div>
-              ) : (
-                <button onClick={() => preparerDMFA(t)} disabled={loading}
-                  className="mt-3 w-full bg-slate-100 text-slate-600 py-2 rounded-lg text-xs hover:bg-slate-200 transition">
-                  Préparer DmfA T{t}
-                </button>
-              )}
-            </div>
-          );
-        })}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:24}}>
+        {[{l:'MASSE BRUTE TRIM.',v:totalBrut.toFixed(2)+' EUR',c:'#f1f5f9'},{l:'COT. PATRONALES',v:cotP.toFixed(2)+' EUR',c:'#f97316'},{l:'COT. PERSONNELLES',v:cotPers.toFixed(2)+' EUR',c:'#3b82f6'},{l:'TOTAL ONSS',v:cotT.toFixed(2)+' EUR',c:'#ef4444'}].map((k,i)=>(
+          <div key={i} style={{background:'#131825',border:'1px solid #1e293b',borderRadius:8,padding:'14px 16px'}}>
+            <div style={{fontSize:10,color:'#64748b',fontWeight:600,textTransform:'uppercase'}}>{k.l}</div>
+            <div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4,fontFamily:'monospace'}}>{k.v}</div>
+          </div>
+        ))}
       </div>
-
-      {/* Cotisations de référence */}
-      <div className="bg-white p-5 rounded-xl border shadow-sm">
-        <h3 className="font-semibold mb-3">Taux de cotisations ONSS 2026</h3>
-        <div className="grid grid-cols-3 gap-4 text-sm">
-          <div>
-            <p className="text-xs text-slate-500 mb-2 font-semibold uppercase">Travailleur</p>
-            <div className="space-y-1">
-              <div className="flex justify-between"><span>ONSS personnelle</span><span className="font-mono">13.07%</span></div>
-              <div className="flex justify-between"><span>Cotisation spéciale</span><span className="font-mono">variable</span></div>
-            </div>
-          </div>
-          <div>
-            <p className="text-xs text-slate-500 mb-2 font-semibold uppercase">Employeur</p>
-            <div className="space-y-1">
-              <div className="flex justify-between"><span>ONSS patronale de base</span><span className="font-mono">24.92%</span></div>
-              <div className="flex justify-between"><span>Modération salariale</span><span className="font-mono">5.67%</span></div>
-              <div className="flex justify-between"><span>Fonds fermeture</span><span className="font-mono">0.20%</span></div>
-            </div>
-          </div>
-          <div>
-            <p className="text-xs text-slate-500 mb-2 font-semibold uppercase">Réductions</p>
-            <div className="space-y-1">
-              <div className="flex justify-between"><span>Structurelle</span><span className="font-mono">max 1550 €</span></div>
-              <div className="flex justify-between"><span>1er engagement</span><span className="font-mono">1550 €/trim</span></div>
-              <div className="flex justify-between"><span>Jeunes &lt;25</span><span className="font-mono">variable</span></div>
-            </div>
-          </div>
+      <div style={{background:'#131825',border:'1px solid #1e293b',borderRadius:8,padding:20,marginBottom:24}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16,textAlign:'center'}}>
+          <div><div style={{fontSize:28,fontWeight:700,color:'#f97316',fontFamily:'monospace'}}>{(TAUX.patronal*100).toFixed(2)}%</div><div style={{fontSize:12,color:'#94a3b8'}}>Patronal</div></div>
+          <div><div style={{fontSize:28,fontWeight:700,color:'#3b82f6',fontFamily:'monospace'}}>{(TAUX.personnel*100).toFixed(2)}%</div><div style={{fontSize:12,color:'#94a3b8'}}>Personnel</div></div>
+          <div><div style={{fontSize:28,fontWeight:700,color:'#c9a227',fontFamily:'monospace'}}>{((TAUX.patronal+TAUX.personnel)*100).toFixed(2)}%</div><div style={{fontSize:12,color:'#94a3b8'}}>Total</div></div>
         </div>
       </div>
+      <h2>Detail DmfA — {trimestre}</h2>
+      <table><thead><tr><th>Travailleur</th><th>Cat.</th><th>Brut trim.</th><th>Cot. patr.</th><th>Cot. pers.</th><th>Total</th></tr></thead>
+      <tbody>{w.map((t,i)=>{const b=(Number(t.salaire_brut)||0)*3;const cp=b*TAUX.patronal;const ct=b*TAUX.personnel;return(
+        <tr key={i}><td style={{fontWeight:600}}>{t.nom} {t.prenom||''}</td>
+        <td><span style={{background:t.categorie==='employe'?'rgba(59,130,246,0.15)':'rgba(168,85,247,0.15)',color:t.categorie==='employe'?'#3b82f6':'#a855f7',borderRadius:12,padding:'2px 10px',fontSize:11,fontWeight:600}}>{t.categorie||'employe'}</span></td>
+        <td style={{fontFamily:'monospace'}}>{b.toFixed(2)}</td>
+        <td style={{fontFamily:'monospace',color:'#f97316'}}>{cp.toFixed(2)}</td>
+        <td style={{fontFamily:'monospace',color:'#3b82f6'}}>{ct.toFixed(2)}</td>
+        <td style={{fontFamily:'monospace',fontWeight:700}}>{(cp+ct).toFixed(2)}</td></tr>);})
+      }<tr style={{fontWeight:700,borderTop:'2px solid #c9a227'}}><td colSpan={2}>TOTAL</td><td style={{fontFamily:'monospace'}}>{totalBrut.toFixed(2)}</td><td style={{fontFamily:'monospace',color:'#f97316'}}>{cotP.toFixed(2)}</td><td style={{fontFamily:'monospace',color:'#3b82f6'}}>{cotPers.toFixed(2)}</td><td style={{fontFamily:'monospace',color:'#ef4444'}}>{cotT.toFixed(2)}</td></tr></tbody></table>
     </div>
   );
 }

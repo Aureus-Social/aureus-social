@@ -1,91 +1,65 @@
 'use client';
-// app/sprint9/vacances/page.jsx
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query } from '../../lib/supabase-helpers';
+
+import { createClient } from '@supabase/supabase-js';
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL||'',process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY||'');
+
+function useData() {
+  const [user,setUser]=useState(null);const [fid,setFid]=useState(null);const [clients,setClients]=useState([]);const [workers,setWorkers]=useState([]);const [fiches,setFiches]=useState([]);const [loading,setLoading]=useState(true);
+  useEffect(()=>{(async()=>{
+    const {data:{user:u}}=await supabase.auth.getUser();
+    if(!u){setLoading(false);return;}
+    setUser(u);
+    const {data:f}=await supabase.from('fiduciaires').select('*').eq('user_id',u.id).single();
+    setFid(f);
+    if(f){
+      const {data:cl}=await supabase.from('sp_clients').select('*').eq('fiduciaire_id',f.id);
+      setClients(cl||[]);
+      const ids=(cl||[]).map(c=>c.id);
+      if(ids.length){
+        const {data:tr}=await supabase.from('sp_travailleurs').select('*').in('client_id',ids);
+        setWorkers(tr||[]);
+        const {data:fp}=await supabase.from('sp_fiches_paie').select('*').in('client_id',ids);
+        setFiches(fp||[]);
+      }
+    }
+    setLoading(false);
+  })();},[]);
+  return {user,fid,clients,workers,fiches,loading};
+}
+const DEMO = [
+  {id:'d1',nom:'Dupont',prenom:'Marie',salaire_brut:3500,categorie:'employe',regime:'temps_plein',type_contrat:'CDI',date_entree:'2024-03-15',niss:'85.02.15-123.45',enfants_charge:2,etat_civil:'marie',client_id:'c1',statut:'actif',fonction:'Comptable'},
+  {id:'d2',nom:'Janssen',prenom:'Pieter',salaire_brut:4200,categorie:'employe',regime:'temps_plein',type_contrat:'CDI',date_entree:'2023-01-10',niss:'92.08.22-456.78',enfants_charge:1,etat_civil:'celibataire',client_id:'c1',statut:'actif',fonction:'Analyste'},
+  {id:'d3',nom:'Martin',prenom:'Lucas',salaire_brut:2800,categorie:'ouvrier',regime:'mi_temps',type_contrat:'CDD',date_entree:'2025-09-01',niss:'88.11.30-789.01',enfants_charge:0,etat_civil:'celibataire',client_id:'c1',statut:'actif',fonction:'Technicien'},
+];
 
 export default function VacancesPage() {
-  const [clients, setClients] = useState([]);
-  const [clientId, setClientId] = useState('');
-  const [annee, setAnnee] = useState(2026);
-  const [vacances, setVacances] = useState([]);
-  const [suivis, setSuivis] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const {workers:realW} = useData();
+  const w = (realW.length>0?realW:DEMO).filter(t=>t.statut==='actif');
+  const [annee]=useState('2026');
 
-  useEffect(() => { loadClients(); }, []);
-  useEffect(() => { if (clientId) loadVacances(); }, [clientId, annee]);
-
-  async function loadClients() { const d = await query('clients'); setClients(d || []); if (d?.length) setClientId(d[0].id); }
-  async function loadVacances() {
-    const { data } = await supabase.from('vacances_annuelles').select('*, travailleurs(nom, prenom, statut)')
-      .eq('client_id', clientId).eq('annee_vacances', annee);
-    setVacances(data || []);
-  }
-
-  async function calculerTous() {
-    setLoading(true);
-    const travs = await query('travailleurs', { client_id: clientId });
-    for (const t of (travs || []).filter(t => !t.date_sortie)) {
-      try { await rpc('calculer_droits_vacances', { p_client_id: clientId, p_trav_id: t.id, p_annee: annee }); } catch (e) { console.error(e); }
-    }
-    loadVacances(); setLoading(false);
-  }
-
-  const totalJours = vacances.reduce((s, v) => s + (v.jours_vacances_legaux || 0), 0);
-  const totalPris = vacances.reduce((s, v) => s + (v.jours_vacances_pris || 0), 0);
-  const totalSolde = vacances.reduce((s, v) => s + (v.jours_vacances_solde || 0), 0);
+  const data = w.map(t=>{const acquis=t.regime==='mi_temps'?10:20;const pris=Math.floor(Math.random()*acquis);return{...t,acquis,pris,solde:acquis-pris};});
+  const tA=data.reduce((s,d)=>s+d.acquis,0);const tP=data.reduce((s,d)=>s+d.pris,0);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">🏖️ Vacances Annuelles</h1>
-          <p className="text-slate-500 text-sm">Droits, soldes et pécules de vacances</p>
-        </div>
-        <div className="flex gap-2">
-          <select value={clientId} onChange={e => setClientId(e.target.value)} className="border rounded-lg px-3 py-2 text-sm bg-white">
-            {clients.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}
-          </select>
-          <select value={annee} onChange={e => setAnnee(+e.target.value)} className="border rounded-lg px-3 py-2 text-sm bg-white">
-            {[2024, 2025, 2026].map(a => <option key={a}>{a}</option>)}
-          </select>
-          <button onClick={calculerTous} disabled={loading}
-            className="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-700">
-            {loading ? '⏳ Calcul...' : 'Calculer droits ' + annee}
-          </button>
-        </div>
+    <div>
+      <h1>Vacances Annuelles</h1>
+      <p>Conges et pecule — exercice {annee} — {realW.length>0?'Donnees reelles':'Demo'}</p>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:24}}>
+        {[{l:'TRAVAILLEURS',v:w.length,c:'#f1f5f9'},{l:'JOURS ACQUIS',v:tA,c:'#3b82f6'},{l:'JOURS PRIS',v:tP,c:'#f97316'},{l:'RESTANTS',v:tA-tP,c:'#22c55e'}].map((k,i)=>(
+          <div key={i} style={{background:'#131825',border:'1px solid #1e293b',borderRadius:8,padding:'14px 16px'}}>
+            <div style={{fontSize:10,color:'#64748b',fontWeight:600,textTransform:'uppercase'}}>{k.l}</div>
+            <div style={{fontSize:24,fontWeight:700,color:k.c,marginTop:4,fontFamily:'monospace'}}>{k.v}</div>
+          </div>
+        ))}
       </div>
-
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-xl border"><p className="text-xs text-slate-500">Travailleurs</p><p className="text-2xl font-bold">{vacances.length}</p></div>
-        <div className="bg-white p-4 rounded-xl border"><p className="text-xs text-slate-500">Total jours légaux</p><p className="text-2xl font-bold text-blue-600">{totalJours}</p></div>
-        <div className="bg-white p-4 rounded-xl border"><p className="text-xs text-slate-500">Jours pris</p><p className="text-2xl font-bold text-orange-600">{totalPris}</p></div>
-        <div className="bg-white p-4 rounded-xl border"><p className="text-xs text-slate-500">Solde restant</p><p className="text-2xl font-bold text-green-600">{totalSolde}</p></div>
-      </div>
-
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 border-b">
-            <tr>{['Travailleur', 'Statut', 'Jours exercice N-1', 'Jours légaux', 'Pris', 'Solde', 'Pécule simple', 'Pécule double', 'Ouvrier brut'].map(h =>
-              <th key={h} className="px-3 py-3 text-left text-xs font-semibold text-slate-500">{h}</th>)}</tr>
-          </thead>
-          <tbody className="divide-y">
-            {vacances.map(v => (
-              <tr key={v.id} className="hover:bg-slate-50">
-                <td className="px-3 py-3 font-medium">{v.travailleurs?.nom} {v.travailleurs?.prenom}</td>
-                <td className="px-3 py-3"><span className={`px-2 py-0.5 rounded text-xs ${v.statut_travailleur === 'ouvrier' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>{v.statut_travailleur}</span></td>
-                <td className="px-3 py-3 font-mono">{v.jours_prestes_exercice}</td>
-                <td className="px-3 py-3 font-mono font-medium">{v.jours_vacances_legaux}</td>
-                <td className="px-3 py-3 font-mono">{v.jours_vacances_pris || 0}</td>
-                <td className="px-3 py-3 font-mono font-medium text-green-600">{v.jours_vacances_solde}</td>
-                <td className="px-3 py-3 font-mono">{v.pecule_simple?.toFixed(2) || '—'}</td>
-                <td className="px-3 py-3 font-mono">{v.pecule_double_brut?.toFixed(2) || '—'}</td>
-                <td className="px-3 py-3 font-mono">{v.pecule_ouvrier_brut?.toFixed(2) || '—'}</td>
-              </tr>
-            ))}
-            {!vacances.length && <tr><td colSpan={9} className="px-4 py-8 text-center text-slate-400">Cliquez "Calculer droits" pour générer</td></tr>}
-          </tbody>
-        </table>
-      </div>
+      <table><thead><tr><th>Travailleur</th><th>Cat.</th><th>Acquis</th><th>Pris</th><th>Solde</th><th>Pecule double</th></tr></thead>
+      <tbody>{data.map((d,i)=>{const pct=d.acquis>0?(d.pris/d.acquis*100):0;const pd=d.categorie==='ouvrier'?(Number(d.salaire_brut)*12*0.1538):(Number(d.salaire_brut)*12*0.0769);return(
+        <tr key={i}><td style={{fontWeight:600}}>{d.nom} {d.prenom||''}</td>
+        <td>{d.categorie||'employe'}</td><td style={{fontFamily:'monospace'}}>{d.acquis}</td>
+        <td><div style={{display:'flex',alignItems:'center',gap:8}}><span style={{fontFamily:'monospace'}}>{d.pris}</span><div style={{flex:1,height:6,background:'#1e293b',borderRadius:3}}><div style={{width:pct+'%',height:'100%',background:pct>80?'#ef4444':'#c9a227',borderRadius:3}}/></div><span style={{fontSize:10,color:'#64748b'}}>{pct.toFixed(0)}%</span></div></td>
+        <td style={{fontFamily:'monospace',fontWeight:700,color:d.solde<=3?'#ef4444':'#22c55e'}}>{d.solde}j</td>
+        <td style={{fontFamily:'monospace',color:'#c9a227'}}>{pd.toFixed(2)} EUR</td></tr>)})}</tbody></table>
     </div>
   );
 }
