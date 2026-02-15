@@ -1,82 +1,49 @@
 'use client';
-// app/sprint9/trilingue/page.jsx — F8
-import { useState, useEffect } from 'react';
-import supabase, { rpc, query, update } from '../../lib/supabase-helpers';
+import { useState } from 'react';
+
+const TERMS = {
+  salaire_brut:{fr:'Salaire brut',nl:'Brutoloon',de:'Bruttogehalt',en:'Gross salary'},
+  salaire_net:{fr:'Salaire net',nl:'Nettoloon',de:'Nettogehalt',en:'Net salary'},
+  onss:{fr:'ONSS',nl:'RSZ',de:'LSS',en:'NSSO'},
+  precompte:{fr:'Precompte professionnel',nl:'Bedrijfsvoorheffing',de:'Berufssteuervorabzug',en:'Professional withholding tax'},
+  cotisation:{fr:'Cotisation sociale',nl:'Sociale bijdrage',de:'Sozialbeitrag',en:'Social contribution'},
+  employeur:{fr:'Employeur',nl:'Werkgever',de:'Arbeitgeber',en:'Employer'},
+  travailleur:{fr:'Travailleur',nl:'Werknemer',de:'Arbeitnehmer',en:'Employee'},
+  contrat:{fr:'Contrat de travail',nl:'Arbeidsovereenkomst',de:'Arbeitsvertrag',en:'Employment contract'},
+  dimona:{fr:'Declaration Dimona',nl:'Dimona-aangifte',de:'Dimona-Meldung',en:'Dimona declaration'},
+  dmfa:{fr:'Declaration DmfA',nl:'DmfA-aangifte',de:'DmfA-Meldung',en:'DmfA declaration'},
+  pecule:{fr:'Pecule de vacances',nl:'Vakantiegeld',de:'Urlaubsgeld',en:'Holiday pay'},
+  preavis:{fr:'Preavis',nl:'Opzegging',de:'Kundigung',en:'Notice period'},
+  licenciement:{fr:'Licenciement',nl:'Ontslag',de:'Entlassung',en:'Dismissal'},
+  commission:{fr:'Commission paritaire',nl:'Paritair comite',de:'Paritatisches Komitee',en:'Joint committee'},
+  fiche_paie:{fr:'Fiche de paie',nl:'Loonfiche',de:'Gehaltsabrechnung',en:'Payslip'},
+  jours_feries:{fr:'Jours feries',nl:'Feestdagen',de:'Feiertage',en:'Public holidays'},
+  conge:{fr:'Conge',nl:'Verlof',de:'Urlaub',en:'Leave'},
+  maladie:{fr:'Maladie',nl:'Ziekte',de:'Krankheit',en:'Illness'},
+  accident:{fr:'Accident de travail',nl:'Arbeidsongeval',de:'Arbeitsunfall',en:'Work accident'},
+  indexation:{fr:'Indexation',nl:'Indexering',de:'Indexierung',en:'Indexation'},
+};
 
 export default function TrilinguePage() {
-  const [traductions, setTraductions] = useState([]);
-  const [filter, setFilter] = useState('');
-  const [contexte, setContexte] = useState('');
-  const [editId, setEditId] = useState(null);
-  const [editForm, setEditForm] = useState({});
-
-  useEffect(() => { loadTraductions(); }, [contexte]);
-
-  async function loadTraductions() {
-    let q = supabase.from('traductions').select('*').order('contexte').order('cle');
-    if (contexte) q = q.eq('contexte', contexte);
-    const { data } = await q;
-    setTraductions(data || []);
-  }
-
-  async function saveEdit() {
-    try { await update('traductions', editId, editForm); setEditId(null); loadTraductions(); }
-    catch (e) { alert(e.message); }
-  }
-
-  const filtered = traductions.filter(t => !filter || t.cle.includes(filter) || t.fr?.includes(filter) || t.nl?.includes(filter));
-  const contextes = ['', 'general', 'fiche_paie', 'contrat', 'dimona', 'onss', 'attestation', 'document', 'menu', 'erreur'];
+  const [search,setSearch]=useState('');const [lang,setLang]=useState('nl');
+  const filtered=Object.entries(TERMS).filter(([k,v])=>!search||Object.values(v).some(t=>t.toLowerCase().includes(search.toLowerCase())));
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">🌍 Trilingue FR/NL/DE</h1>
-          <p className="text-slate-500 text-sm">Gestion des traductions officielles</p>
-        </div>
-        <div className="flex gap-2">
-          <input type="text" placeholder="Rechercher..." value={filter} onChange={e => setFilter(e.target.value)}
-            className="border rounded-lg px-3 py-2 text-sm w-60" />
-          <select value={contexte} onChange={e => setContexte(e.target.value)} className="border rounded-lg px-3 py-2 text-sm">
-            {contextes.map(c => <option key={c} value={c}>{c || 'Tous contextes'}</option>)}
-          </select>
+    <div>
+      <h1>Glossaire Trilingue</h1>
+      <p>Terminologie sociale en FR / NL / DE / EN — {Object.keys(TERMS).length} termes</p>
+      <div style={{display:'flex',gap:16,marginBottom:24}}>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher un terme..." style={{width:400}}/>
+        <div style={{display:'flex',gap:4}}>
+          {[{k:'nl',l:'NL'},{k:'de',l:'DE'},{k:'en',l:'EN'}].map(l=>(
+            <button key={l.k} onClick={()=>setLang(l.k)} style={{background:lang===l.k?'#c9a227':'#1e293b',color:lang===l.k?'#0a0e1a':'#94a3b8',border:'none',padding:'8px 16px',borderRadius:6,fontWeight:600,cursor:'pointer'}}>{l.l}</button>
+          ))}
         </div>
       </div>
-
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 border-b">
-            <tr>{['Clé', 'Contexte', '🇫🇷 Français', '🇳🇱 Néerlandais', '🇩🇪 Allemand', 'Officiel', ''].map(h =>
-              <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-slate-500">{h}</th>)}</tr>
-          </thead>
-          <tbody className="divide-y">
-            {filtered.map(t => (
-              <tr key={t.id} className="hover:bg-slate-50">
-                <td className="px-4 py-2 font-mono text-xs">{t.cle}</td>
-                <td className="px-4 py-2"><span className="px-2 py-0.5 bg-slate-100 rounded text-xs">{t.contexte}</span></td>
-                {editId === t.id ? (
-                  <>
-                    <td className="px-2 py-1"><input className="w-full border rounded px-2 py-1 text-xs" value={editForm.fr || ''} onChange={e => setEditForm({ ...editForm, fr: e.target.value })} /></td>
-                    <td className="px-2 py-1"><input className="w-full border rounded px-2 py-1 text-xs" value={editForm.nl || ''} onChange={e => setEditForm({ ...editForm, nl: e.target.value })} /></td>
-                    <td className="px-2 py-1"><input className="w-full border rounded px-2 py-1 text-xs" value={editForm.de || ''} onChange={e => setEditForm({ ...editForm, de: e.target.value })} /></td>
-                    <td className="px-2 py-1">{t.est_officiel ? '✅' : '—'}</td>
-                    <td className="px-2 py-1"><button onClick={saveEdit} className="text-green-600 text-xs font-medium">💾</button></td>
-                  </>
-                ) : (
-                  <>
-                    <td className="px-4 py-2">{t.fr}</td>
-                    <td className="px-4 py-2 text-slate-600">{t.nl || <span className="text-red-400 text-xs">manquant</span>}</td>
-                    <td className="px-4 py-2 text-slate-600">{t.de || <span className="text-red-400 text-xs">manquant</span>}</td>
-                    <td className="px-4 py-2">{t.est_officiel ? '✅' : '—'}</td>
-                    <td className="px-4 py-2"><button onClick={() => { setEditId(t.id); setEditForm({ fr: t.fr, nl: t.nl, de: t.de }); }} className="text-blue-600 text-xs">✏️</button></td>
-                  </>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p className="text-xs text-slate-400 mt-3">{filtered.length} traductions affichées</p>
+      <table><thead><tr><th>Francais</th><th>{lang==='nl'?'Nederlands':lang==='de'?'Deutsch':'English'}</th></tr></thead>
+      <tbody>{filtered.map(([k,v])=>(
+        <tr key={k}><td style={{fontWeight:600,color:'#c9a227'}}>{v.fr}</td><td>{v[lang]}</td></tr>
+      ))}</tbody></table>
     </div>
   );
 }

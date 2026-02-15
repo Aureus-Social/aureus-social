@@ -1,106 +1,73 @@
 'use client';
-// app/sprint9/primes/page.jsx — F16
 import { useState, useEffect } from 'react';
-import supabase, { rpc, query } from '../../lib/supabase-helpers';
+
+import { createClient } from '@supabase/supabase-js';
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL||'',process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY||'');
+function useData() {
+  const [fid,setFid]=useState(null);const [clients,setClients]=useState([]);const [workers,setWorkers]=useState([]);const [fiches,setFiches]=useState([]);const [loading,setLoading]=useState(true);
+  useEffect(()=>{(async()=>{
+    const {data:{user}}=await supabase.auth.getUser();
+    if(!user){setLoading(false);return;}
+    const {data:f}=await supabase.from('fiduciaires').select('*').eq('user_id',user.id).single();
+    setFid(f);if(f){
+      const {data:cl}=await supabase.from('sp_clients').select('*').eq('fiduciaire_id',f.id);setClients(cl||[]);
+      const ids=(cl||[]).map(c=>c.id);
+      if(ids.length){const {data:tr}=await supabase.from('sp_travailleurs').select('*').in('client_id',ids);setWorkers(tr||[]);
+        const {data:fp}=await supabase.from('sp_fiches_paie').select('*').in('client_id',ids);setFiches(fp||[]);}
+    }setLoading(false);
+  })();},[]);
+  return {fid,clients,workers,fiches,loading};
+}
+const DEMO = [
+  {id:'d1',nom:'Dupont',prenom:'Marie',salaire_brut:3500,categorie:'employe',regime:'temps_plein',type_contrat:'CDI',date_entree:'2024-03-15',niss:'85.02.15-123.45',enfants_charge:2,etat_civil:'marie',client_id:'c1',statut:'actif',fonction:'Comptable',heures_semaine:38},
+  {id:'d2',nom:'Janssen',prenom:'Pieter',salaire_brut:4200,categorie:'employe',regime:'temps_plein',type_contrat:'CDI',date_entree:'2023-01-10',niss:'92.08.22-456.78',enfants_charge:1,etat_civil:'celibataire',client_id:'c1',statut:'actif',fonction:'Analyste',heures_semaine:38},
+  {id:'d3',nom:'Martin',prenom:'Lucas',salaire_brut:2800,categorie:'ouvrier',regime:'mi_temps',type_contrat:'CDD',date_entree:'2025-09-01',niss:'88.11.30-789.01',enfants_charge:0,etat_civil:'celibataire',client_id:'c1',statut:'actif',fonction:'Technicien',heures_semaine:19},
+];
+
+const TYPES_PRIMES = [
+  {id:'13e',nom:'13eme mois',taux:1/12,desc:'Prime de fin d annee - 1/12 du salaire annuel',imposable:true},
+  {id:'vacances',nom:'Double pecule vacances',taux:0.0769,desc:'92% du salaire mensuel (employes)',imposable:true},
+  {id:'anciennete',nom:'Prime d anciennete',taux:0.02,desc:'2% par 5 ans d anciennete',imposable:true},
+  {id:'resultat',nom:'Prime de resultat (CCT90)',taux:0,desc:'Max 3.948 EUR/an - avantage social et fiscal',imposable:false},
+  {id:'naissance',nom:'Prime de naissance',taux:0,desc:'Forfait entreprise',imposable:false},
+];
 
 export default function PrimesPage() {
-  const [clients, setClients] = useState([]);
-  const [clientId, setClientId] = useState('');
-  const [annee, setAnnee] = useState(2026);
-  const [mois, setMois] = useState(new Date().getMonth() + 1);
-  const [primesSect, setPrimesSect] = useState([]);
-  const [primesAttr, setPrimesAttr] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const {workers:realW} = useData();
+  const w = (realW.length>0?realW:DEMO).filter(t=>t.statut==='actif');
 
-  useEffect(() => { loadClients(); loadPrimesSectorielles(); }, []);
-  useEffect(() => { if (clientId) loadAttribuees(); }, [clientId, annee, mois]);
-
-  async function loadClients() { const d = await query('clients'); setClients(d || []); if (d?.length) setClientId(d[0].id); }
-  async function loadPrimesSectorielles() {
-    const { data } = await supabase.from('primes_sectorielles').select('*').eq('actif', true).order('numero_cp');
-    setPrimesSect(data || []);
-  }
-  async function loadAttribuees() {
-    const { data } = await supabase.from('primes_attribuees').select('*, travailleurs(nom, prenom)')
-      .eq('client_id', clientId).eq('annee', annee).eq('mois', mois).order('created_at', { ascending: false });
-    setPrimesAttr(data || []);
-  }
-
-  async function attribuerMois() {
-    setLoading(true);
-    try { const r = await rpc('attribuer_primes_mensuelles', { p_client_id: clientId, p_annee: annee, p_mois: mois }); alert(`${r.primes_attribuees} primes attribuées, total: ${r.total_brut}€`); loadAttribuees(); }
-    catch (e) { alert(e.message); }
-    setLoading(false);
-  }
-
-  const totalBrut = primesAttr.reduce((s, p) => s + (p.montant_brut || 0), 0);
-  const totalNet = primesAttr.reduce((s, p) => s + (p.montant_net || 0), 0);
+  const masseBrute = w.reduce((s,t)=>s+(Number(t.salaire_brut)||0),0);
+  const p13 = masseBrute/12;
+  const pVac = masseBrute*0.0769;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-2xl font-bold text-slate-800">🎁 Primes Sectorielles</h1><p className="text-slate-500 text-sm">Attribution des primes par CP — fin d'année, éco-chèques, ancienneté</p></div>
-        <div className="flex gap-2">
-          <select value={clientId} onChange={e => setClientId(e.target.value)} className="border rounded-lg px-3 py-2 text-sm bg-white">{clients.map(c => <option key={c.id} value={c.id}>{c.nom}</option>)}</select>
-          <select value={mois} onChange={e => setMois(+e.target.value)} className="border rounded-lg px-3 py-2 text-sm bg-white">{[...Array(12)].map((_, i) => <option key={i + 1} value={i + 1}>Mois {i + 1}</option>)}</select>
-          <select value={annee} onChange={e => setAnnee(+e.target.value)} className="border rounded-lg px-3 py-2 text-sm bg-white">{[2025, 2026].map(a => <option key={a}>{a}</option>)}</select>
-          <button onClick={attribuerMois} disabled={loading} className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-emerald-700">Attribuer primes mois {mois}</button>
-        </div>
+    <div>
+      <h1>Primes et Avantages</h1>
+      <p>Gestion des primes — {realW.length>0?'Donnees reelles':'Demo'}</p>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:24}}>
+        {[{l:'TRAVAILLEURS',v:w.length,c:'#f1f5f9'},{l:'13E MOIS',v:p13.toFixed(2)+' EUR',c:'#c9a227'},{l:'PECULE DOUBLE',v:pVac.toFixed(2)+' EUR',c:'#3b82f6'},{l:'TOTAL PRIMES',v:(p13+pVac).toFixed(2)+' EUR',c:'#22c55e'}].map((k,i)=>(
+          <div key={i} style={{background:'#131825',border:'1px solid #1e293b',borderRadius:8,padding:'14px 16px'}}>
+            <div style={{fontSize:10,color:'#64748b',fontWeight:600,textTransform:'uppercase'}}>{k.l}</div>
+            <div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4,fontFamily:'monospace'}}>{k.v}</div>
+          </div>
+        ))}
       </div>
-
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-xl border"><p className="text-xs text-slate-500">Primes attribuées</p><p className="text-2xl font-bold">{primesAttr.length}</p></div>
-        <div className="bg-white p-4 rounded-xl border"><p className="text-xs text-slate-500">Total brut</p><p className="text-2xl font-bold font-mono text-emerald-600">{totalBrut.toFixed(2)} €</p></div>
-        <div className="bg-white p-4 rounded-xl border"><p className="text-xs text-slate-500">Total net</p><p className="text-2xl font-bold font-mono text-green-600">{totalNet.toFixed(2)} €</p></div>
-      </div>
-
-      {/* Primes attribuées */}
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden mb-6">
-        <div className="p-3 bg-slate-50 border-b"><h3 className="font-semibold text-sm">Primes attribuées — {mois}/{annee}</h3></div>
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 border-b"><tr>{['Travailleur', 'Code', 'Prime', 'Brut', 'ONSS', 'PP', 'Net', 'Intégrée'].map(h =>
-            <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-slate-500">{h}</th>)}</tr></thead>
-          <tbody className="divide-y">
-            {primesAttr.map(p => (
-              <tr key={p.id} className="hover:bg-slate-50">
-                <td className="px-4 py-2 font-medium">{p.travailleurs?.nom} {p.travailleurs?.prenom}</td>
-                <td className="px-4 py-2 font-mono text-xs">{p.code_prime}</td>
-                <td className="px-4 py-2">{p.libelle}</td>
-                <td className="px-4 py-2 font-mono">{p.montant_brut?.toFixed(2)} €</td>
-                <td className="px-4 py-2 font-mono text-xs">{p.montant_onss?.toFixed(2)} €</td>
-                <td className="px-4 py-2 font-mono text-xs">{p.montant_pp?.toFixed(2)} €</td>
-                <td className="px-4 py-2 font-mono font-medium text-green-600">{p.montant_net?.toFixed(2)} €</td>
-                <td className="px-4 py-2">{p.integre_paie ? '✅' : '—'}</td>
-              </tr>
-            ))}
-            {!primesAttr.length && <tr><td colSpan={8} className="px-4 py-8 text-center text-slate-400">Aucune prime ce mois. Cliquez "Attribuer"</td></tr>}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Catalogue primes sectorielles */}
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-        <div className="p-3 bg-slate-50 border-b"><h3 className="font-semibold text-sm">Catalogue primes sectorielles ({primesSect.length})</h3></div>
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 border-b"><tr>{['CP', 'Code', 'Nom', 'Type', 'Mode', 'Montant/Taux', 'Fréquence', 'ONSS', 'PP'].map(h =>
-            <th key={h} className="px-3 py-2 text-left text-xs font-semibold text-slate-500">{h}</th>)}</tr></thead>
-          <tbody className="divide-y">
-            {primesSect.map(p => (
-              <tr key={p.id} className="hover:bg-slate-50 text-xs">
-                <td className="px-3 py-2 font-mono">{p.numero_cp}</td>
-                <td className="px-3 py-2 font-mono">{p.code_prime}</td>
-                <td className="px-3 py-2">{p.nom_fr}</td>
-                <td className="px-3 py-2">{p.type_prime}</td>
-                <td className="px-3 py-2">{p.mode_calcul}</td>
-                <td className="px-3 py-2 font-mono">{p.montant_fixe ? `${p.montant_fixe}€` : p.pourcentage ? `${p.pourcentage}%` : '—'}</td>
-                <td className="px-3 py-2">{p.frequence}</td>
-                <td className="px-3 py-2">{p.soumis_onss ? '✅' : '—'}</td>
-                <td className="px-3 py-2">{p.soumis_pp ? '✅' : '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <h2>Types de primes</h2>
+      <table><thead><tr><th>Prime</th><th>Calcul</th><th>Description</th><th>Imposable</th></tr></thead>
+      <tbody>{TYPES_PRIMES.map((p,i)=>(
+        <tr key={i}><td style={{fontWeight:600,color:'#c9a227'}}>{p.nom}</td>
+        <td style={{fontFamily:'monospace'}}>{p.taux?(p.taux*100).toFixed(2)+'%':'Forfait'}</td>
+        <td style={{fontSize:12,color:'#94a3b8'}}>{p.desc}</td>
+        <td><span style={{background:p.imposable?'rgba(239,68,68,0.15)':'rgba(34,197,94,0.15)',color:p.imposable?'#ef4444':'#22c55e',borderRadius:12,padding:'2px 10px',fontSize:11,fontWeight:700}}>{p.imposable?'Oui':'Non'}</span></td></tr>
+      ))}</tbody></table>
+      <h2>Simulation par travailleur</h2>
+      <table><thead><tr><th>Travailleur</th><th>Brut</th><th>13e mois</th><th>Pecule double</th><th>Total annuel</th></tr></thead>
+      <tbody>{w.map((t,i)=>{const b=Number(t.salaire_brut)||0;return(
+        <tr key={i}><td style={{fontWeight:600}}>{t.nom} {t.prenom||''}</td>
+        <td style={{fontFamily:'monospace'}}>{b.toFixed(2)}</td>
+        <td style={{fontFamily:'monospace',color:'#c9a227'}}>{(b/12).toFixed(2)}</td>
+        <td style={{fontFamily:'monospace',color:'#3b82f6'}}>{(b*0.0769).toFixed(2)}</td>
+        <td style={{fontFamily:'monospace',fontWeight:700,color:'#22c55e'}}>{(b/12+b*0.0769).toFixed(2)} EUR</td></tr>);})}</tbody></table>
     </div>
   );
 }
