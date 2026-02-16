@@ -17372,7 +17372,7 @@ function AureusSuitePage({s,d}){
 
 function BienetrePage({s,d}){
   const [sub,setSub]=useState('dashboard');
-  const mods={dashboard:"Dashboard",planglobal:"Plan Global",paa:'Plan Annuel',risques:'Risques Psychosociaux',alcool:"Politique Alcool/Drogues",organes:'Organes de concertation'};
+  const mods={dashboard:"Dashboard",planglobal:"Plan Global",paa:'Plan Annuel',risques:'Risques Psychosociaux',alcool:"Politique Alcool/Drogues",organes:'Organes de concertation',elections:'Elections sociales'};
   return <div>
     <div style={{display:'flex',gap:6,marginBottom:16,flexWrap:'wrap'}}>
       {Object.entries(mods).map(([k,l])=>
@@ -17386,6 +17386,7 @@ function BienetrePage({s,d}){
     {sub==='risques'&&<RisquesPsychoMod s={s} d={d}/>}
     {sub==='alcool'&&<AlcoolMod s={s} d={d}/>}
     {sub==='organes'&&<OrganesMod s={s} d={d}/>}
+    {sub==='elections'&&<ElectionsMod s={s} d={d}/>}
   </div>;
 }
 
@@ -17556,6 +17557,106 @@ function OrganesMod({s,d}){
     </div>
   </div>;
 }
+// =====================================================
+//  ELECTIONS SOCIALES
+// =====================================================
+function ElectionsMod({s,d}){
+  const ae=s.emps||[];const n=ae.length;
+  const [tab,setTab]=useState('calendar');
+  const needCE=n>=100;const needCPPT=n>=50;
+  const nextElection=2028; // elections sociales tous les 4 ans
+  
+  // Calendrier electoral 2028 (X = jour elections, Y = jour de reference)
+  const calendar=[
+    {jour:'X-60',date:'Decembre 2027',action:'Annonce date elections (X). Affichage avis',obligatoire:true},
+    {jour:'X-35',date:'Janvier 2028',action:'Listes electorales provisoires. Debut protection candidats',obligatoire:true},
+    {jour:'X-28',date:'Janvier 2028',action:'Reclamations listes electorales',obligatoire:true},
+    {jour:'X-13',date:'Fevrier 2028',action:'Cloture listes de candidats syndicaux',obligatoire:true},
+    {jour:'X-5',date:'Fevrier 2028',action:'Convocations electorales envoyees',obligatoire:true},
+    {jour:'X',date:'Mai 2028',action:'JOUR DES ELECTIONS — Vote secret',obligatoire:true},
+    {jour:'X+2',date:'Mai 2028',action:'Proces-verbal des resultats',obligatoire:true},
+    {jour:'X+86',date:'Aout 2028',action:'Installation des organes elus',obligatoire:true},
+  ];
+
+  return <div>
+    <PH title="Elections Sociales" sub="Tous les 4 ans - Prochaines: 2028 - CPPT (50+) et CE (100+)"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:"Effectif actuel",v:n,c:'#c6a34e'},{l:"Seuil CPPT (50)",v:needCPPT?'Atteint':'Non atteint',c:needCPPT?'#4ade80':'#5e5c56'},{l:"Seuil CE (100)",v:needCE?'Atteint':'Non atteint',c:needCE?'#4ade80':'#5e5c56'},{l:"Prochaines elections",v:nextElection,c:'#60a5fa'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'calendar',l:'Calendrier electoral'},{v:'protection',l:'Protection candidats'},{v:'procedure',l:'Procedure de vote'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    {tab==='calendar'&&<C><ST>Calendrier electoral {nextElection}</ST>
+      {calendar.map((r,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:14,padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+        <div style={{width:50,textAlign:'center'}}><span style={{fontSize:12,fontWeight:700,color:r.jour==='X'?'#f87171':'#c6a34e',fontFamily:'monospace'}}>{r.jour}</span></div>
+        <div style={{width:120,fontSize:11,color:'#5e5c56'}}>{r.date}</div>
+        <div style={{flex:1,fontSize:12,color:r.jour==='X'?'#f87171':'#e8e6e0',fontWeight:r.jour==='X'?700:400}}>{r.action}</div>
+        {r.obligatoire&&<span style={{fontSize:9,padding:'2px 6px',borderRadius:4,background:'rgba(248,113,113,.1)',color:'#f87171'}}>Obligatoire</span>}
+      </div>)}
+    </C>}
+    {tab==='protection'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Protection contre le licenciement</ST>
+        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
+          <div><b style={{color:'#f87171'}}>Debut:</b> X-30 (depot listes de candidats)</div>
+          <div><b style={{color:'#f87171'}}>Fin:</b> Installation des elus suivants (4 ans plus tard)</div>
+          <div><b style={{color:'#f87171'}}>Candidats non elus:</b> Meme protection</div>
+          <div><b style={{color:'#f87171'}}>Motif grave:</b> Seul motif possible (procedure judiciaire prealable)</div>
+          <div><b style={{color:'#f87171'}}>Indemnite protection:</b> 2 a 8 ans de remuneration brute</div>
+        </div>
+        <div style={{marginTop:10,padding:10,background:'rgba(248,113,113,.06)',borderRadius:8,fontSize:11,color:'#f87171'}}>
+          <b>Attention:</b> Le licenciement d'un candidat/elu sans respect de la procedure = indemnite de protection pouvant atteindre 8 ans de salaire brut.
+        </div>
+      </C>
+      <C><ST>Calcul indemnite de protection</ST>
+        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
+          <div><b style={{color:'#c6a34e'}}>Partie fixe:</b> 2 ans de remuneration brute</div>
+          <div><b style={{color:'#c6a34e'}}>Partie variable:</b> 2 a 4 ans selon anciennete</div>
+          <div style={{marginTop:6,fontSize:11,color:'#9e9b93'}}>Anciennete &lt; 10 ans: +2 ans</div>
+          <div style={{fontSize:11,color:'#9e9b93'}}>Anciennete 10-20 ans: +3 ans</div>
+          <div style={{fontSize:11,color:'#9e9b93'}}>Anciennete &gt; 20 ans: +4 ans</div>
+          <div style={{marginTop:6}}><b style={{color:'#c6a34e'}}>= Total: 4 a 8 ans de salaire brut</b></div>
+        </div>
+      </C>
+    </div>}
+    {tab==='procedure'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Conditions de vote</ST>
+        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
+          <div><b style={{color:'#60a5fa'}}>Electeurs:</b> Tous les travailleurs avec min. 3 mois d'anciennete</div>
+          <div><b style={{color:'#60a5fa'}}>Candidats:</b> Min. 6 mois anciennete, 18-65 ans</div>
+          <div><b style={{color:'#60a5fa'}}>Mode:</b> Vote secret, sur le lieu de travail</div>
+          <div><b style={{color:'#60a5fa'}}>Colleges:</b> Ouvriers / Employes / Cadres (CE) / Jeunes</div>
+          <div><b style={{color:'#60a5fa'}}>Duree mandat:</b> 4 ans</div>
+          <div><b style={{color:'#60a5fa'}}>Vote electronique:</b> Possible si accord syndical</div>
+        </div>
+      </C>
+      <C><ST>Organes a elire selon effectif</ST>
+        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
+          <div style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <span><b style={{color:'#c6a34e'}}>50+</b> travailleurs</span>
+            <span style={{color:needCPPT?'#4ade80':'#5e5c56',fontWeight:600}}>CPPT {needCPPT?'- OBLIGATOIRE':'- Non requis'}</span>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <span><b style={{color:'#c6a34e'}}>100+</b> travailleurs</span>
+            <span style={{color:needCE?'#4ade80':'#5e5c56',fontWeight:600}}>CE {needCE?'- OBLIGATOIRE':'- Non requis'}</span>
+          </div>
+        </div>
+        <div style={{marginTop:12,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:11,color:'#60a5fa'}}>
+          <b>SPF ETCS:</b> emploisocial.belgique.be - Elections sociales<br/>
+          <b>Application web:</b> webdev.socialeverkiezingen.be
+        </div>
+      </C>
+    </div>}
+  </div>;
+}
+
 function SelfServiceMod({s,d}){
   const ae=s.emps||[];const [sel,setSel]=useState(ae[0]?.id||'');const [tab,setTab]=useState('fiches');
   const emp=ae.find(e=>e.id===sel)||ae[0]||{};
