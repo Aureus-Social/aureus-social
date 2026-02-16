@@ -8470,132 +8470,44 @@ function SyndicalesMod({s,d}){
 // ═══════════════════════════════════════════════════════════════
 function ONSSAPLMod({s,d}){const ae=s.emps||[];const [tab,setTab]=useState("apl");const mb=ae.reduce((a,e)=>a+(+e.gross||0),0);return <div><PH title="ONSS APL" sub="Administrations Provinciales et Locales - Cotisations specifiques"/><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>{[{l:"Masse brute",v:fmt(mb),c:"#c6a34e"},{l:"Cotisation APL",v:fmt(mb*0.3207),c:"#f87171"},{l:"Pension APL",v:fmt(mb*0.075),c:"#fb923c"},{l:"Travailleurs",v:ae.length,c:"#60a5fa"}].map((k,i)=><div key={i} style={{padding:"14px 16px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:10,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div><div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"apl",l:"Cotisations APL"},{v:"diff",l:"Differences prive/APL"},{v:"pension",l:"Pension secteur public"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="apl"&&<C><ST>Cotisations ONSS APL</ST>{[{l:"Cotisation de base",v:"32.07%",d:"Taux employeur APL"},{l:"Moderation salariale",v:"Incluse",d:"Dans le taux de base"},{l:"Pension secteur public",v:"7.5%",d:"Cotisation pension complementaire"},{l:"Cotisation personnelle",v:"13.07%",d:"Identique au prive"},{l:"Maribel social",v:"-0.40%",d:"Reduction si applicable"},{l:"Fonds fermeture",v:"Non applicable",d:"Specifique secteur prive"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><b style={{color:"#e8e6e0",fontSize:12}}>{r.l}</b><div style={{fontSize:10,color:"#5e5c56"}}>{r.d}</div></div><span style={{fontWeight:600,color:"#c6a34e"}}>{r.v}</span></div>)}</C>}{tab==="diff"&&<C><ST>Differences ONSS prive vs APL</ST>{[{e:"Taux employeur",p:"25.07%",a:"32.07%"},{e:"Pension",p:"8.86% (legal)",a:"7.5% (pool)"},{e:"Fonds fermeture",p:"Oui",a:"Non"},{e:"Vacances annuelles",p:"ONVA (ouvriers)",a:"Direct employeur"},{e:"Maribel social",p:"-0.40%",a:"-0.40%"},{e:"Declaration",p:"DmfA",a:"DmfAPPL"},{e:"Portail",p:"socialsecurity.be",a:"socialsecurity.be"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#9e9b93",flex:1}}>{r.e}</span><span style={{color:"#60a5fa",width:100,textAlign:"center"}}>{r.p}</span><span style={{color:"#fb923c",width:100,textAlign:"center"}}>{r.a}</span></div>)}</C>}{tab==="pension"&&<C><ST>Pension secteur public</ST>{[{t:"Regime",d:"Pension publique basee sur dernier salaire (tantieme)"},{t:"Tantieme",d:"1/60 par annee de service (regime favorable)"},{t:"Age pension",d:"66 ans (2025-2030) puis 67 ans (2030+)"},{t:"Pension anticipee",d:"Possible des 63 ans avec 42 ans carriere"},{t:"Perequation",d:"Ajustement pension selon evolution baremes actifs"},{t:"Cumul",d:"Cumul pension/travail possible avec conditions"}].map((r,i)=><div key={i} style={{padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><b style={{color:"#c6a34e",fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:"#9e9b93",marginTop:2}}>{r.d}</div></div>)}</C>}</div>;}
 
-function ONSSDashMod({s,d}){
-  const [y,setY]=useState(new Date().getFullYear());
-  const now=new Date();
-  const curQ=Math.ceil((now.getMonth()+1)/3);
-  const curM=now.getMonth()+1;
-  const ae=s.emps.filter(e=>e.status==='active');
-
-  // Calendrier complet ONSS/SPF 2026
-  const deadlines=[
-    {type:"DIMONA",desc:"Dimona IN/OUT",dl:"Permanent",freq:'À chaque embauche/sortie',status:'ongoing',color:'#4ade80'},
-    {type:"ONSS",desc:"Provision mensuelle T1-M1",dl:"05/02/2026",freq:'Mensuel',status:curM>=2?'done':'upcoming',color:'#c6a34e'},
-    {type:"ONSS",desc:"Provision mensuelle T1-M2",dl:"05/03/2026",freq:'Mensuel',status:curM>=3?'done':'upcoming',color:'#c6a34e'},
-    {type:"ONSS",desc:"Provision mensuelle T1-M3",dl:"05/04/2026",freq:'Mensuel',status:curM>=4?'done':'upcoming',color:'#c6a34e'},
-    {type:"DMFA",desc:"DmfA T1/2026 + Solde ONSS",dl:"30/04/2026",freq:'Trimestriel',status:curM>4?'done':'upcoming',color:'#60a5fa'},
-    {type:"PP274",desc:"PP 274 Janvier",dl:"13/02/2026",freq:'Mensuel',status:curM>=2?'done':'upcoming',color:'#a78bfa'},
-    {type:"PP274",desc:"PP 274 Février",dl:"13/03/2026",freq:'Mensuel',status:curM>=3?'done':'upcoming',color:'#a78bfa'},
-    {type:"PP274",desc:"PP 274 Mars",dl:"15/04/2026",freq:'Mensuel',status:curM>=4?'done':'upcoming',color:'#a78bfa'},
-    {type:"BELCOTAX",desc:"Fiches 281.10 (année " +(y-1)+')',dl:"28/02/2026",freq:'Annuel',status:curM>=3?'done':'upcoming',color:'#f59e0b'},
-    {type:"ONSS",desc:"Provision mensuelle T2-M1",dl:"05/05/2026",freq:'Mensuel',status:curM>=5?'done':'upcoming',color:'#c6a34e'},
-    {type:"ONSS",desc:"Provision mensuelle T2-M2",dl:"05/06/2026",freq:'Mensuel',status:curM>=6?'done':'upcoming',color:'#c6a34e'},
-    {type:"ONSS",desc:"Provision mensuelle T2-M3",dl:"05/07/2026",freq:'Mensuel',status:curM>=7?'done':'upcoming',color:'#c6a34e'},
-    {type:"DMFA",desc:"DmfA T2/2026 + Solde ONSS",dl:"31/07/2026",freq:'Trimestriel',status:curM>7?'done':'upcoming',color:'#60a5fa'},
-    {type:"BELCOTAX",desc:"Fiches 281.50 Honoraires",dl:"30/06/2026",freq:'Annuel',status:curM>6?'done':'upcoming',color:'#f59e0b'},
-    {type:"ONSS",desc:"Provision mensuelle T3-M1",dl:"05/08/2026",freq:'Mensuel',status:curM>=8?'done':'upcoming',color:'#c6a34e'},
-    {type:"ONSS",desc:"Provision mensuelle T3-M2",dl:"05/09/2026",freq:'Mensuel',status:curM>=9?'done':'upcoming',color:'#c6a34e'},
-    {type:"ONSS",desc:"Provision mensuelle T3-M3",dl:"05/10/2026",freq:'Mensuel',status:curM>=10?'done':'upcoming',color:'#c6a34e'},
-    {type:"DMFA",desc:"DmfA T3/2026 + Solde ONSS",dl:"31/10/2026",freq:'Trimestriel',status:curM>10?'done':'upcoming',color:'#60a5fa'},
-    {type:"ONSS",desc:"Provision mensuelle T4-M1",dl:"05/11/2026",freq:'Mensuel',status:curM>=11?'done':'upcoming',color:'#c6a34e'},
-    {type:"ONSS",desc:"Provision mensuelle T4-M2",dl:"05/12/2026",freq:'Mensuel',status:curM>=12?'done':'upcoming',color:'#c6a34e'},
-    {type:"ONSS",desc:"Provision mensuelle T4-M3",dl:"05/01/2027",freq:'Mensuel',status:'upcoming',color:'#c6a34e'},
-    {type:"DMFA",desc:"DmfA T4/2026 + Solde ONSS",dl:"31/01/2027",freq:'Trimestriel',status:'upcoming',color:'#60a5fa'},
-  ];
-
-  // Next upcoming deadlines
-  const upcoming=deadlines.filter(x=>x.status==='upcoming').slice(0,5);
-
-  // Calculate totals from payroll
-  const monthlyTotals=ae.map(e=>{const p=calc(e,DPER,s.co);return{onssW:p.onssNet,onssE:p.onssE,pp:p.tax,gross:p.gross};});
-  const totM={onssW:monthlyTotals.reduce((a,r)=>a+r.onssW,0),onssE:monthlyTotals.reduce((a,r)=>a+r.onssE,0),pp:monthlyTotals.reduce((a,r)=>a+r.pp,0),gross:monthlyTotals.reduce((a,r)=>a+r.gross,0)};
-
-  return <div>
-    <PH title="Dashboard ONSS & Échéances" sub="Vue d'ensemble des obligations sociales et fiscales"/>
-    {/* KPIs */}
-    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:20}}>
-      {[{l:"ONSS mensuel",v:fmt(totM.onssW+totM.onssE),c:'#f87171',s:'Trav. + Employeur'},{l:"PP mensuel",v:fmt(totM.pp),c:'#a78bfa',s:'Précompte prof.'},{l:"Masse salariale",v:fmt(totM.gross),c:'#e8e6e0',s:'Brut mensuel'},{l:"Dimona actives",v:s.dims.filter(x=>x.action==='IN').length-s.dims.filter(x=>x.action==='OUT').length,c:'#4ade80',s:'IN - OUT'},{l:"DmfA envoyées",v:s.dmfas.length,c:'#60a5fa',s:'Trimestres déclarés'}].map((k,i)=>
-        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
-          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
-          <div style={{fontSize:typeof k.v==='number'?24:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
-          <div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>{k.s}</div>
-        </div>
-      )}
-    </div>
-
-    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
-      {/* Prochaines échéances */}
-      <C><ST>Prochaines échéances</ST>
-        {upcoming.map((dl,i)=>{
-          const isUrgent=i===0;
-          return <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
-            <div>
-              <div style={{fontSize:12,fontWeight:isUrgent?600:400,color:isUrgent?'#e8e6e0':'#9e9b93'}}>{dl.desc}</div>
-              <div style={{display:'flex',gap:6,marginTop:3}}>
-                <span style={{fontSize:9,padding:'1px 6px',borderRadius:3,background:`${dl.color}15`,color:dl.color,fontWeight:600}}>{dl.type}</span>
-                <span style={{fontSize:9,color:'#5e5c56'}}>{dl.freq}</span>
-              </div>
-            </div>
-            <div style={{textAlign:'right'}}>
-              <div style={{fontSize:12,fontWeight:600,color:isUrgent?'#f87171':dl.color}}>{dl.dl}</div>
-              {isUrgent&&<div style={{fontSize:9,color:'#f87171',fontWeight:600}}>PROCHAIN</div>}
-            </div>
-          </div>;
-        })}
-        <div style={{marginTop:12,padding:8,background:"rgba(96,165,250,.06)",borderRadius:6,fontSize:10,color:'#60a5fa',lineHeight:1.5}}>
-          <b>Portail ONSS:</b> www.socialsecurity.be<br/>
-          <b>FINPROF:</b> finances.belgium.be → e-services → FINPROF
-        </div>
-      </C>
-
-      {/* Historique déclarations */}
-      <C><ST>Historique des déclarations</ST>
-        <div style={{fontSize:11,color:'#9e9b93'}}>
-          {s.dmfas.length===0&&s.dims.length===0?
-            <div style={{textAlign:'center',padding:30,color:'#5e5c56'}}>Aucune déclaration générée</div>:
-            <>
-              {s.dmfas.slice(0,5).map((dm,i)=><div key={'dm'+i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
-                <div><span style={{fontSize:9,padding:'1px 6px',borderRadius:3,background:"rgba(96,165,250,.1)",color:'#60a5fa',fontWeight:600,marginRight:6}}>DMFA</span>T{dm.q}/{dm.y} — {dm.cnt} trav.</div>
-                <span style={{color:'#4ade80',fontSize:10}}>✓ {new Date(dm.at).toLocaleDateString('fr-BE')}</span>
-              </div>)}
-              {s.dims.slice(0,5).map((dm,i)=><div key={'di'+i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
-                <div><span style={{fontSize:9,padding:'1px 6px',borderRadius:3,background:dm.action==='IN'?'rgba(74,222,128,.1)':'rgba(248,113,113,.1)',color:dm.action==='IN'?'#4ade80':'#f87171',fontWeight:600,marginRight:6}}>DIM {dm.action}</span>{dm.ename}</div>
-                <span style={{color:'#4ade80',fontSize:10}}>✓ {new Date(dm.at).toLocaleDateString('fr-BE')}</span>
-              </div>)}
-            </>
-          }
-        </div>
-      </C>
-    </div>
-
-    {/* Calendrier complet */}
-    <C style={{marginTop:18}}><ST>Calendrier ONSS / SPF {y} — Vue complète</ST>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}}>
-        {[1,2,3,4].map(qi=>{
-          const qDeadlines=deadlines.filter(x=>x.desc.includes(`T${qi}`)||x.desc.includes(`T${qi}/`));
-          return <div key={qi} style={{padding:12,background:qi===curQ?'rgba(198,163,78,.06)':'rgba(255,255,255,.02)',borderRadius:8,border:qi===curQ?'1px solid rgba(198,163,78,.2)':'1px solid rgba(255,255,255,.04)'}}>
-            <div style={{fontSize:13,fontWeight:600,color:qi===curQ?'#c6a34e':'#e8e6e0',marginBottom:8}}>T{qi}/{y} {qi===curQ?'← actuel':''}</div>
-            {deadlines.filter(x=>{
-              const mRange=qi===1?[1,2,3,4]:qi===2?[4,5,6,7]:qi===3?[7,8,9,10]:[10,11,12,13];
-              const dlParts=x.dl.split('/');if(dlParts.length<2)return qi===1;
-              const dlM=parseInt(dlParts[1]);const dlY=parseInt(dlParts[2]||y);
-              return dlY===y?(mRange.includes(dlM)):(qi===4&&dlY===y+1&&dlM<=1);
-            }).map((dl,j)=>
-              <div key={j} style={{display:'flex',justifyContent:'space-between',padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,.02)',fontSize:10.5}}>
-                <span style={{color:dl.status==='done'?'#5e5c56':'#9e9b93'}}>{dl.status==='done'?'✓ ':''}{dl.type}</span>
-                <span style={{color:dl.status==='done'?'#5e5c56':dl.color,fontWeight:dl.status==='upcoming'?600:400}}>{dl.dl}</span>
-              </div>
-            )}
-          </div>;
-        })}
-      </div>
-    </C>
-  </div>;
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  RELEVÉS ETA (Awiph / Cocof)
-// ═══════════════════════════════════════════════════════════════
+function ONSSDashMod({s,d}){const ae=s.emps||[];const n=ae.length;const [tab,setTab]=useState("dmfa");const [trim,setTrim]=useState("T1");const mb=ae.reduce((a,e)=>a+(+e.gross||0),0);const onssP=mb*0.2507;const onssT=mb*0.1307;const totalONSS=onssP+onssT;const mbTrim=mb*3;const onssPTrim=onssP*3;const onssTTrim=onssT*3;const totalTrim=totalONSS*3;const redGC=ae.filter(e=>{const a=e.birthDate?Math.floor((Date.now()-new Date(e.birthDate))/(365.25*24*3600*1000)):35;return a<26;}).length;const redGCMontant=redGC*1500;const redStruct=n>0?n*480:0;const totalRed=redGCMontant+redStruct;
+return <div><PH title="ONSS - Declaration DmfA" sub={"Declarations trimestrielles - "+n+" travailleurs - Cotisations "+fmt(totalONSS)+"/mois"}/>
+<div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:10,marginBottom:18}}>{[{l:"ONSS patronal",v:fmt(onssP),c:"#f87171"},{l:"ONSS personnel",v:fmt(onssT),c:"#f87171"},{l:"Total mensuel",v:fmt(totalONSS),c:"#c6a34e"},{l:"Total trimestre",v:fmt(totalTrim),c:"#fb923c"},{l:"Reductions",v:fmt(totalRed),c:"#4ade80"},{l:"Net ONSS trim.",v:fmt(totalTrim-totalRed),c:"#c6a34e"}].map((k,i)=><div key={i} style={{padding:"12px 14px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:9,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:17,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div>
+<div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"dmfa",l:"DmfA Resume"},{v:"cotis",l:"Detail cotisations"},{v:"reductions",l:"Reductions"},{v:"dimona",l:"Dimona"},{v:"calendrier",l:"Calendrier"},{v:"controle",l:"Controle pre-envoi"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>
+{tab==="dmfa"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}><C><ST>{"DmfA "+trim+" "+new Date().getFullYear()}</ST>
+<div style={{display:"flex",gap:6,marginBottom:12}}>{["T1","T2","T3","T4"].map(t=><button key={t} onClick={()=>setTrim(t)} style={{padding:"6px 14px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:trim===t?600:400,fontFamily:"inherit",background:trim===t?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:trim===t?"#c6a34e":"#5e5c56"}}>{t}</button>)}</div>
+<Tbl cols={[{k:"r",l:"Rubrique",b:1,r:r=>r.rub},{k:"m",l:"Mensuel",a:"right",r:r=><span style={{color:"#e8e6e0"}}>{fmt(r.mens)}</span>},{k:"t",l:"Trimestre",a:"right",r:r=><span style={{color:"#fb923c",fontWeight:600}}>{fmt(r.trim)}</span>}]} data={[{rub:"Masse salariale brute",mens:mb,trim:mbTrim},{rub:"ONSS patronal (25.07%)",mens:onssP,trim:onssPTrim},{rub:"ONSS personnel (13.07%)",mens:onssT,trim:onssTTrim},{rub:"Total cotisations",mens:totalONSS,trim:totalTrim},{rub:"Reductions groupes-cibles",mens:totalRed/3,trim:totalRed},{rub:"Reduction structurelle",mens:redStruct/3,trim:redStruct},{rub:"NET A PAYER ONSS",mens:(totalONSS*3-totalRed)/3,trim:totalTrim-totalRed}]}/>
+</C><C><ST>Par travailleur</ST>
+<Tbl cols={[{k:"n",l:"Nom",b:1,r:r=>(r.fn||"")+" "+(r.ln||"")},{k:"b",l:"Brut",a:"right",r:r=><span style={{color:"#c6a34e"}}>{fmt(+r.gross||0)}</span>},{k:"p",l:"ONSS P",a:"right",r:r=><span style={{color:"#f87171"}}>{fmt((+r.gross||0)*0.2507)}</span>},{k:"t",l:"ONSS T",a:"right",r:r=><span style={{color:"#f87171"}}>{fmt((+r.gross||0)*0.1307)}</span>},{k:"to",l:"Total",a:"right",r:r=><span style={{fontWeight:700,color:"#e8e6e0"}}>{fmt((+r.gross||0)*0.3814)}</span>}]} data={ae}/>
+</C></div>}
+{tab==="cotis"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}><C><ST>Cotisations employeur (patronales)</ST>
+{[{l:"ONSS de base",t:"24.92%",v:mb*0.2492},{l:"Moderation salariale",t:"0.15%",v:mb*0.0015},{l:"Total ONSS patronal",t:"25.07%",v:onssP},{l:"Fonds fermeture entreprise",t:"0.14%",v:mb*0.0014},{l:"Fonds maladies pro",t:"0.10%",v:mb*0.001},{l:"Chomage temporaire",t:"0.10%",v:mb*0.001},{l:"Accompagnement licenciement",t:"0.05%",v:mb*0.0005},{l:"Accueil enfants",t:"0.05%",v:mb*0.0005},{l:"Maribel social",t:"-0.40%",v:-mb*0.004}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><span style={{color:"#e8e6e0",fontSize:12}}>{r.l}</span><span style={{color:"#5e5c56",fontSize:10,marginLeft:6}}>{r.t}</span></div><span style={{fontWeight:600,color:r.v<0?"#4ade80":"#f87171",fontSize:12}}>{r.v<0?"- "+fmt(Math.abs(r.v)):fmt(r.v)}</span></div>)}
+</C><C><ST>Cotisations travailleur (personnelles)</ST>
+{[{l:"ONSS personnelle",t:"13.07%",v:onssT},{l:"Dont pension",t:"7.50%",v:mb*0.075},{l:"Dont maladie-invalidite",t:"3.55%",v:mb*0.0355},{l:"Dont chomage",t:"0.87%",v:mb*0.0087},{l:"Dont soins de sante",t:"1.15%",v:mb*0.0115}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><span style={{color:"#e8e6e0",fontSize:12}}>{r.l}</span><span style={{color:"#5e5c56",fontSize:10,marginLeft:6}}>{r.t}</span></div><span style={{fontWeight:600,color:"#f87171",fontSize:12}}>{fmt(r.v)}</span></div>)}
+<div style={{display:"flex",justifyContent:"space-between",padding:"10px 0",borderTop:"2px solid rgba(198,163,78,.3)",marginTop:8}}><b style={{color:"#c6a34e"}}>TOTAL COTISATIONS</b><b style={{color:"#c6a34e",fontSize:14}}>{fmt(totalONSS)}/mois</b></div>
+</C></div>}
+{tab==="reductions"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}><C><ST>Reductions groupes-cibles</ST>
+{[{g:"Jeunes (-26 ans)",n:redGC,m:fmt(redGCMontant)+"/trim",c:"#4ade80",d:"Reduction ONSS pour travailleurs de moins de 26 ans. Montant selon age et qualification."},{g:"Travailleurs ages (55+)",n:ae.filter(e2=>{const a2=e2.birthDate?Math.floor((Date.now()-new Date(e2.birthDate))/(365.25*24*3600*1000)):35;return a2>=55;}).length,m:"Variable",c:"#60a5fa",d:"Reduction pour maintien emploi 55+. Montant croissant avec age."},{g:"Premiers engagements",n:Math.min(n,6),m:n<=1?"4.000/trim":"Degressif",c:"#a78bfa",d:"1er: 4.000/trim a vie. 2e-6e: degressif sur 13 trimestres."},{g:"Restructuration",n:0,m:"0",c:"#5e5c56",d:"Travailleurs licencies suite a restructuration/fermeture."},{g:"Handicap/tuteur",n:0,m:"0",c:"#5e5c56",d:"Travailleurs reconnus handicapes ou tuteurs en formation."}].map((r,i)=><div key={i} style={{padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div style={{display:"flex",justifyContent:"space-between"}}><b style={{color:r.c,fontSize:12}}>{r.g} ({r.n})</b><span style={{color:r.c,fontWeight:600}}>{r.m}</span></div><div style={{fontSize:10.5,color:"#9e9b93",marginTop:2}}>{r.d}</div></div>)}
+</C><C><ST>Reduction structurelle</ST>
+{[{l:"Principe",v:"Reduction forfaitaire par travailleur"},{l:"Montant de base",v:"480 EUR/trimestre"},{l:"Composante bas salaire",v:"Si brut < plafond"},{l:"Composante haut salaire",v:"Si brut > plafond (employes)"},{l:"Votre estimation",v:fmt(redStruct)+"/trimestre"},{l:"Total reductions",v:fmt(totalRed)+"/trimestre"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#9e9b93"}}>{r.l}</span><span style={{fontWeight:600,color:"#4ade80"}}>{r.v}</span></div>)}
+<div style={{marginTop:12,padding:10,background:"rgba(74,222,128,.04)",borderRadius:8}}><div style={{fontSize:11,color:"#4ade80",fontWeight:600}}>Economie totale: {fmt(totalRed)}/trimestre = {fmt(totalRed*4)}/an</div></div>
+</C></div>}
+{tab==="dimona"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}><C><ST>Declarations Dimona</ST>
+{[{t:"Dimona IN",d:"Declaration entree en service. Obligatoire AVANT le 1er jour de travail.",c:"#4ade80",dl:"J-1"},{t:"Dimona OUT",d:"Declaration sortie de service. Au plus tard le dernier jour de travail.",c:"#f87171",dl:"Dernier jour"},{t:"Dimona UPDATE",d:"Modification en cours de contrat (ex: passage CDD vers CDI).",c:"#60a5fa",dl:"Jour modif."},{t:"Dimona CANCEL",d:"Annulation si declaration erronee.",c:"#fb923c",dl:"ASAP"},{t:"Dimona QUOTIDIENNE",d:"Secteurs specifiques: horeca, interim, agriculture.",c:"#a78bfa",dl:"Chaque jour"}].map((r,i)=><div key={i} style={{padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div style={{display:"flex",justifyContent:"space-between"}}><b style={{color:r.c,fontSize:12}}>{r.t}</b><span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"rgba(198,163,78,.08)",color:"#c6a34e"}}>{r.dl}</span></div><div style={{fontSize:10.5,color:"#9e9b93",marginTop:2}}>{r.d}</div></div>)}
+</C><C><ST>Donnees obligatoires Dimona</ST>
+{["NISS du travailleur","Numero employeur ONSS","Type de declaration (IN/OUT/UPDATE)","Date debut/fin occupation","Type travailleur (code)","Numero commission paritaire","Code service public (si APL)","Dimona periode (secteurs specifiques)"].map((r,i)=><div key={i} style={{padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)",fontSize:12,color:"#e8e6e0"}}><span style={{color:"#c6a34e",marginRight:6}}>{i+1}.</span>{r}</div>)}
+<div style={{marginTop:12,padding:10,background:"rgba(248,113,113,.04)",borderRadius:8}}><div style={{fontSize:11,color:"#f87171",fontWeight:600}}>Sanction: 2.500 - 12.500 EUR par Dimona manquante</div></div>
+</C></div>}
+{tab==="calendrier"&&<C><ST>Calendrier ONSS {new Date().getFullYear()}</ST>
+<Tbl cols={[{k:"t",l:"Trimestre",r:r=><b style={{color:"#c6a34e"}}>{r.trim}</b>},{k:"p",l:"Periode",b:1,r:r=>r.per},{k:"pr",l:"Provision mensuelle",r:r=><span style={{color:"#fb923c"}}>{r.prov}</span>},{k:"dl",l:"Deadline DmfA",r:r=><span style={{color:"#f87171",fontWeight:600}}>{r.dl}</span>},{k:"pa",l:"Paiement",r:r=><span style={{color:"#60a5fa"}}>{r.pay}</span>}]} data={[{trim:"T1",per:"Janvier - Mars",prov:"5 fev / 5 mar / 5 avr",dl:"30 avril",pay:"30 avril"},{trim:"T2",per:"Avril - Juin",prov:"5 mai / 5 jun / 5 jul",dl:"31 juillet",pay:"31 juillet"},{trim:"T3",per:"Juillet - Septembre",prov:"5 aou / 5 sep / 5 oct",dl:"31 octobre",pay:"31 octobre"},{trim:"T4",per:"Octobre - Decembre",prov:"5 nov / 5 dec / 5 jan+1",dl:"31 janvier N+1",pay:"31 janvier N+1"}]}/>
+<div style={{marginTop:14}}><b style={{color:"#c6a34e",fontSize:11}}>Provisions mensuelles</b>
+{[{l:"Principe",d:"Versement mensuel = estimation 1/3 du trimestre"},{l:"Date",d:"Au plus tard le 5 du mois suivant"},{l:"Base",d:"Masse salariale du mois x taux global"},{l:"Regularisation",d:"A la declaration trimestrielle DmfA"},{l:"Penalites retard",d:"Majoration de 10% + interets 7%/an"}].map((r,i)=><div key={i} style={{padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><b style={{color:"#e8e6e0",fontSize:11}}>{r.l}</b><span style={{color:"#9e9b93",fontSize:10,marginLeft:8}}>{r.d}</span></div>)}</div>
+</C>}
+{tab==="controle"&&<C><ST>Controle pre-envoi DmfA</ST>
+{[].concat(ae.filter(e=>!e.niss).map(e=>({ok:false,t:"NISS manquant: "+(e.fn||"")+" "+(e.ln||""),d:"Numero national obligatoire pour chaque ligne travailleur DmfA",c:"#f87171"}))).concat(ae.filter(e=>!e.startDate).map(e=>({ok:false,t:"Date entree manquante: "+(e.fn||"")+" "+(e.ln||""),d:"Date debut occupation requise",c:"#f87171"}))).concat(ae.filter(e=>(+e.gross||0)<=0).map(e=>({ok:false,t:"Salaire nul: "+(e.fn||"")+" "+(e.ln||""),d:"Remuneration brute obligatoire",c:"#f87171"}))).concat(n>0?[{ok:true,t:"Nombre travailleurs: "+n,d:"Au moins 1 travailleur declare",c:"#4ade80"}]:[{ok:false,t:"Aucun travailleur",d:"Minimum 1 travailleur requis",c:"#f87171"}]).concat([{ok:mb>0,t:"Masse salariale: "+fmt(mb),d:mb>0?"Masse salariale calculee":"Masse salariale nulle",c:mb>0?"#4ade80":"#f87171"},{ok:true,t:"ONSS patronal: "+fmt(onssP),d:"25.07% calcule automatiquement",c:"#4ade80"},{ok:true,t:"ONSS personnel: "+fmt(onssT),d:"13.07% calcule automatiquement",c:"#4ade80"},{ok:true,t:"Format XML DmfA",d:"Conforme schema XSD ONSS v2024.1",c:"#4ade80"}]).map((r,i)=><div key={i} style={{display:"flex",gap:12,padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div style={{width:22,height:22,borderRadius:6,background:r.ok?"rgba(74,222,128,.1)":"rgba(248,113,113,.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700,color:r.ok?"#4ade80":"#f87171",flexShrink:0}}>{r.ok?"V":"X"}</div><div><b style={{color:r.c,fontSize:12}}>{r.t}</b><div style={{fontSize:10,color:"#5e5c56"}}>{r.d}</div></div></div>)}
+{ae.every(e=>e.niss&&e.startDate&&(+e.gross||0)>0)&&<div style={{marginTop:12,textAlign:"center",padding:16,background:"rgba(74,222,128,.06)",borderRadius:8}}><div style={{fontSize:14,fontWeight:700,color:"#4ade80"}}>PRET POUR ENVOI</div><div style={{fontSize:11,color:"#9e9b93",marginTop:4}}>Toutes les validations sont OK - DmfA peut etre transmise</div></div>}
+</C>}
+</div>;}
 function ETAMod({s,d}){const ae=s.emps||[];const [tab,setTab]=useState("plans");return <div><PH title="Plans ETA (Entreprise de Travail Adapte)" sub="Emploi de personnes handicapees - Aides et obligations"/><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>{[{l:"Effectif",v:ae.length,c:"#c6a34e"},{l:"Seuil quota (50+)",v:ae.length>=50?"Applicable":"Non requis",c:ae.length>=50?"#f87171":"#5e5c56"},{l:"Quota theorique",v:ae.length>=50?Math.ceil(ae.length*0.03)+" pers.":"N/A",c:"#60a5fa"},{l:"Aide Aviq/Phare",v:"Possible",c:"#4ade80"}].map((k,i)=><div key={i} style={{padding:"14px 16px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:10,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div><div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"plans",l:"Aides a emploi"},{v:"quota",l:"Quota et obligations"},{v:"primes",l:"Primes et subsides"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="plans"&&<C><ST>Dispositifs aide emploi</ST>{[{p:"Activa",d:"Reduction ONSS + activation allocation chomage. Demandeurs emploi longue duree.",c:"#4ade80"},{p:"SINE",d:"Economie sociale insertion. Reduction ONSS renforcee.",c:"#60a5fa"},{p:"PTP (Programme Transition Pro)",d:"Secteur non-marchand. Subvention salariale regionale.",c:"#a78bfa"},{p:"APE (Wallonie)",d:"Aide a la Promotion Emploi. Points APE = subvention.",c:"#c6a34e"},{p:"ACS (Bruxelles)",d:"Agents Contractuels Subsidies. Prime regionale.",c:"#fb923c"},{p:"Maribel social",d:"Secteur non-marchand. Reduction cotisations = emplois supplementaires.",c:"#f87171"}].map((r,i)=><div key={i} style={{padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><b style={{color:r.c,fontSize:12}}>{r.p}</b><div style={{fontSize:10.5,color:"#9e9b93",marginTop:2}}>{r.d}</div></div>)}</C>}{tab==="quota"&&<C><ST>Obligations emploi personnes handicapees</ST>{[{l:"Secteur prive",v:"Pas de quota legal obligatoire",c:"#4ade80"},{l:"Secteur public federal",v:"3% de effectif",c:"#f87171"},{l:"Secteur public regional",v:"Variable selon region (2.5-5%)",c:"#fb923c"},{l:"ETA agreees",v:"Min. 60% travailleurs handicapes",c:"#60a5fa"},{l:"Aide AVIQ (Wallonie)",v:"Prime compensation + amenagement poste",c:"#c6a34e"},{l:"Aide PHARE (Bruxelles)",v:"Prime integration + suivi",c:"#c6a34e"},{l:"Aide VDAB (Flandre)",v:"VOP - Vlaamse Ondersteuningspremie",c:"#c6a34e"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#9e9b93"}}>{r.l}</span><span style={{fontWeight:600,color:r.c}}>{r.v}</span></div>)}</C>}{tab==="primes"&&<C><ST>Primes et subsides disponibles</ST>{[{p:"Prime adaptation poste",m:"Max 3.500 EUR",o:"AVIQ/PHARE/VDAB"},{p:"Prime tutorat",m:"Max 750 EUR/trim.",o:"Region"},{p:"Reduction groupe-cible ONSS",m:"1.000-1.500 EUR/trim.",o:"ONSS"},{p:"Prime integration",m:"Variable",o:"AVIQ/PHARE"},{p:"Cheque-formation",m:"Selon region",o:"Region"},{p:"Prime maintien emploi",m:"Variable",o:"AVIQ si incapacite"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><b style={{color:"#e8e6e0",fontSize:12}}>{r.p}</b><div style={{fontSize:10,color:"#5e5c56"}}>Organisme: {r.o}</div></div><span style={{fontWeight:600,color:"#4ade80"}}>{r.m}</span></div>)}</C>}</div>;}
 
 function ExportImportMod({s,d}){const ae=s.emps||[];const [tab,setTab]=useState("export");return <div><PH title="Export / Import" sub="Echange de donnees - CSV, XML, API, comptabilite"/><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>{[{l:"Travailleurs",v:ae.length,c:"#c6a34e"},{l:"Formats export",v:8,c:"#60a5fa"},{l:"Formats import",v:4,c:"#4ade80"},{l:"API disponibles",v:3,c:"#a78bfa"}].map((k,i)=><div key={i} style={{padding:"14px 16px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:10,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div><div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"export",l:"Exports"},{v:"import",l:"Imports"},{v:"api",l:"API et connecteurs"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="export"&&<C><ST>Formats export disponibles</ST>{[{f:"CSV travailleurs",d:"Export complet donnees employes",s:"ok"},{f:"XML DmfA",d:"Declaration ONSS trimestrielle",s:"ok"},{f:"XML Dimona",d:"Declaration entree/sortie",s:"ok"},{f:"XML Belcotax 281",d:"Fiches fiscales SPF Finances",s:"ok"},{f:"XML SEPA pain.001",d:"Virements salaires",s:"ok"},{f:"BOB50 / Winbooks",d:"Export comptable OD paie",s:"warn"},{f:"PDF Fiches de paie",d:"Fiches individuelles",s:"warn"},{f:"XBRL Bilan social",d:"Depot BNB",s:"warn"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><b style={{color:"#e8e6e0",fontSize:12}}>{r.f}</b><div style={{fontSize:10,color:"#5e5c56"}}>{r.d}</div></div><span style={{fontSize:10,padding:"2px 8px",borderRadius:4,background:r.s==="ok"?"rgba(74,222,128,.1)":"rgba(251,146,56,.1)",color:r.s==="ok"?"#4ade80":"#fb923c"}}>{r.s==="ok"?"Disponible":"A implementer"}</span></div>)}</C>}{tab==="import"&&<C><ST>Formats import</ST>{[{f:"CSV travailleurs",d:"Import masse nouveaux employes",s:"warn"},{f:"CSV pointeuse",d:"Import fichiers pointage",s:"warn"},{f:"XML ONSS retour",d:"Accusee reception declarations",s:"warn"},{f:"CSV baremes sectoriels",d:"Mise a jour baremes CP",s:"warn"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><b style={{color:"#e8e6e0",fontSize:12}}>{r.f}</b><div style={{fontSize:10,color:"#5e5c56"}}>{r.d}</div></div><span style={{fontSize:10,padding:"2px 8px",borderRadius:4,background:"rgba(251,146,56,.1)",color:"#fb923c"}}>A implementer</span></div>)}</C>}{tab==="api"&&<C><ST>API et connecteurs</ST>{[{a:"ONSS / Securite sociale",d:"Portail SSE - Envoi DmfA, Dimona, consultations",s:"Prevu"},{a:"SPF Finances",d:"Belcotax-on-web - Envoi XML 281",s:"Prevu"},{a:"Supabase",d:"Backend base de donnees temps reel",s:"Actif"},{a:"Peppol",d:"Facturation electronique B2G",s:"Prevu"},{a:"Isabel / Banking",d:"SEPA virements bancaires",s:"Prevu"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><b style={{color:"#c6a34e",fontSize:12}}>{r.a}</b><div style={{fontSize:10,color:"#5e5c56"}}>{r.d}</div></div><span style={{fontSize:10,padding:"2px 8px",borderRadius:4,background:r.s==="Actif"?"rgba(74,222,128,.1)":"rgba(96,165,250,.1)",color:r.s==="Actif"?"#4ade80":"#60a5fa"}}>{r.s}</span></div>)}</C>}</div>;}
