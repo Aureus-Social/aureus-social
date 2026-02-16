@@ -71,6 +71,10 @@ const I18N = {
   'sub.pecsortie': { fr:'Pécule de sortie', nl:"Vertrekvakantiegeld" },
   'sub.certpme': { fr:'Certificat PME', nl:"KMO-certificaat" },
   'sub.absences': { fr:'Gestion absences', nl:"Afwezigheidsbeheer" },
+  'sub.onboarding': { fr:'Onboarding', nl:"Onboarding" },
+  'sub.offboarding': { fr:'Offboarding', nl:"Offboarding" },
+  'sub.registre': { fr:'Registre du personnel', nl:"Personeelsregister" },
+  'sub.totalreward': { fr:'Total Reward', nl:"Total Reward" },
   'sub.absenteisme': { fr:'📊 Analyse absentéisme', nl:"📊 Absenteïsme-analyse" },
   'sub.credittemps': { fr:'Crédit-temps', nl:"Tijdskrediet" },
   'sub.chomtemp': { fr:'⚠ Chômage temporaire', nl:"⚠ Tijdelijke werkloosheid" },
@@ -3972,7 +3976,7 @@ function AppInner({ supabase, user, onLogout }) {
     {id:"salaires",l:t('nav.salaires'),i:'◈',sub:[{id:"od",l:t('sub.od')},{id:"provisions",l:t('sub.provisions')},{id:"cumuls",l:t('sub.cumuls')},{id:"netbrut",l:t('sub.netbrut')},{id:"simcout",l:t('sub.simcout')},{id:"saisies",l:t('sub.saisies')},{id:"indexauto",l:t('sub.indexauto')},{id:"horsforfait",l:t('sub.horsforfait')},{id:"totalreward",l:t('sub.totalreward')},{id:"transport",l:t('sub.transport')},{id:"treizieme",l:t('sub.treizieme')},{id:"css",l:t('sub.css')},{id:"bonusemploi",l:t('sub.bonusemploi')}]},
     {id:"avantages",l:t('nav.avantages'),i:'★',sub:[{id:"cheques",l:t('sub.cheques')},{id:"ecocmd",l:t('sub.ecocmd')},{id:"cafeteria",l:t('sub.cafeteria')},{id:"cct90",l:t('sub.cct90')},{id:"warrants",l:t('sub.warrants')},{id:"budgetmob",l:t('sub.budgetmob')},{id:"ecocircul",l:t('sub.ecocircul')}]},
     {id:"contratsmenu",l:t('nav.contrats'),i:'▣',sub:[{id:"contrats",l:t('sub.contrats2')},{id:"reglement",l:t('sub.reglement')},{id:"compteindiv",l:t('sub.compteindiv')},{id:"preavis",l:t('sub.preavis')},{id:"pecsortie",l:t('sub.pecsortie')},{id:"certpme",l:t('sub.certpme')}]},
-    {id:"rh",l:t('nav.rh'),i:'◉',sub:[{id:"wf_embauche",l:"⚡ Workflow Embauche"},{id:"wf_licenciement",l:"⚡ Workflow Licenciement"},{id:"wf_maladie",l:"⚡ Workflow Maladie"},{id:"absences",l:t('sub.absences')},{id:"absenteisme",l:t('sub.absenteisme')},{id:"credittemps",l:t('sub.credittemps')},{id:"chomtemp",l:t('sub.chomtemp')},{id:"congeduc",l:t('sub.congeduc')},{id:"rcc",l:t('sub.rcc')},{id:"outplacement",l:t('sub.outplacement')},{id:"pointage",l:t('sub.pointage')},{id:"planform",l:t('sub.planform')},{id:"medtravail",l:t('sub.medtravail')},{id:"selfservice",l:t('sub.selfservice')}]},
+    {id:"rh",l:t('nav.rh'),i:'◉',sub:[{id:"wf_embauche",l:"⚡ Workflow Embauche"},{id:"wf_licenciement",l:"⚡ Workflow Licenciement"},{id:"wf_maladie",l:"⚡ Workflow Maladie"},{id:"absences",l:t('sub.absences')},{id:"absenteisme",l:t('sub.absenteisme')},{id:"credittemps",l:t('sub.credittemps')},{id:"chomtemp",l:t('sub.chomtemp')},{id:"congeduc",l:t('sub.congeduc')},{id:"rcc",l:t('sub.rcc')},{id:"outplacement",l:t('sub.outplacement')},{id:"pointage",l:t('sub.pointage')},{id:"planform",l:t('sub.planform')},{id:"medtravail",l:t('sub.medtravail')},{id:"selfservice",l:t('sub.selfservice')},{id:"onboarding",l:t('sub.onboarding')},{id:"offboarding",l:t('sub.offboarding')},{id:"registre",l:t('sub.registre')},{id:"totalreward",l:t('sub.totalreward')}]},
     {id:"social",l:t('nav.social'),i:'◆',sub:[{id:"assloi",l:t('sub.assloi')},{id:"assgroupe",l:t('sub.assgroupe')},{id:"syndicales",l:t('sub.syndicales')},{id:"allocfam",l:t('sub.allocfam')},{id:"caissevac",l:t('sub.caissevac')},{id:"rentes",l:t('sub.rentes')},{id:"decava",l:t('sub.decava')},{id:"aidesemploi",l:t('sub.aidesemploi')}]},
     {id:"bienetre",l:t('nav.bienetre'),i:'♥',sub:[{id:"planglobal",l:t('sub.planglobal')},{id:"paa",l:t('sub.paa')},{id:"risquespsycho",l:t('sub.risquespsycho')},{id:"alcool",l:t('sub.alcool')},{id:"elections",l:t('sub.elections')},{id:"organes",l:t('sub.organes')}]},
     {id:"sprint9",l:"Sprint 9 - Modules",i:"S9",href:"/sprint9"},
@@ -7458,6 +7462,10 @@ function RHPage({s,d}){const sub=s.sub||'absences';return <div>
   {sub==='outplacement'&&<OutplacementMod s={s} d={d}/>}{sub==='pointage'&&<PointageMod s={s} d={d}/>}
   {sub==='planform'&&<PlanFormationMod s={s} d={d}/>}{sub==='medtravail'&&<MedTravailMod s={s} d={d}/>}
   {sub==='selfservice'&&<SelfServiceMod s={s} d={d}/>}
+  {sub==='onboarding'&&<OnboardingMod s={s} d={d}/>}
+  {sub==='offboarding'&&<OffboardingMod s={s} d={d}/>}
+  {sub==='registre'&&<RegistrePersonnelMod s={s} d={d}/>}
+  {sub==='totalreward'&&<TotalRewardMod s={s} d={d}/>}
 </div>;}
 
 function SocialPage({s,d}){const sub=s.sub||'assloi';return <div>
@@ -16457,6 +16465,329 @@ function OutplacementMod({s,d}){
   </div>;
 }
 
+
+// =====================================================
+//  ONBOARDING — Workflow digital embauche
+// =====================================================
+function OnboardingMod({s,d}){
+  const ae=s.emps||[];
+  const [dossiers,setDossiers]=useState([]);
+  const [selEmp,setSelEmp]=useState(ae[0]?.id||'');
+  const [tab,setTab]=useState('checklist');
+
+  const STEPS=[
+    {id:'contrat',cat:'Juridique',l:'Contrat de travail signe',dl:'Avant jour 1',obligatoire:true},
+    {id:'dimona',cat:'Juridique',l:'Dimona IN declaree',dl:'Au plus tard jour 1',obligatoire:true},
+    {id:'reglement',cat:'Juridique',l:'Reglement de travail remis + accuse',dl:'Jour 1',obligatoire:true},
+    {id:'niss',cat:'Admin',l:'NISS / carte identite copie',dl:'Avant jour 1',obligatoire:true},
+    {id:'iban',cat:'Admin',l:'Coordonnees bancaires (IBAN)',dl:'Avant 1ere paie',obligatoire:true},
+    {id:'fiscal',cat:'Admin',l:'Fiche fiscale (situation familiale)',dl:'Jour 1',obligatoire:true},
+    {id:'medtrav',cat:'Securite',l:'Visite medicale prealable',dl:'Avant jour 1 (si poste a risque)',obligatoire:false},
+    {id:'assurance',cat:'Securite',l:'Inscription assurance AT + groupe',dl:'Jour 1',obligatoire:true},
+    {id:'badge',cat:'Logistique',l:'Badge acces / cles',dl:'Jour 1',obligatoire:false},
+    {id:'it',cat:'Logistique',l:'PC / email / acces IT',dl:'Jour 1',obligatoire:false},
+    {id:'accueil',cat:'Integration',l:'Journee accueil + presentation equipe',dl:'Jour 1',obligatoire:false},
+    {id:'parrain',cat:'Integration',l:'Parrain/tuteur designe',dl:'Semaine 1',obligatoire:false},
+    {id:'formation',cat:'Integration',l:'Plan formation initiale',dl:'Mois 1',obligatoire:false},
+    {id:'evaluation',cat:'Suivi',l:'Evaluation fin periode essai',dl:'Avant fin essai',obligatoire:false},
+  ];
+
+  const startOnboarding=()=>{
+    const emp=ae.find(e=>e.id===selEmp);if(!emp)return;
+    const existing=dossiers.find(d2=>d2.empId===selEmp);if(existing)return alert('Dossier deja ouvert');
+    setDossiers(prev=>[{empId:selEmp,name:`${emp.first} ${emp.last}`,startDate:new Date().toISOString().split('T')[0],steps:STEPS.map(s2=>({...s2,done:false,doneDate:null})),status:'en_cours'},...prev]);
+  };
+
+  const toggleStep=(dIdx,sIdx)=>{
+    setDossiers(prev=>prev.map((d2,i)=>i===dIdx?{...d2,steps:d2.steps.map((st,j)=>j===sIdx?{...st,done:!st.done,doneDate:!st.done?new Date().toISOString().split('T')[0]:null}:st)}:d2));
+  };
+
+  const cats=['Juridique','Admin','Securite','Logistique','Integration','Suivi'];
+
+  return <div>
+    <PH title="Onboarding" sub="Checklist embauche digitale - Documents, declarations, integration"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:"Dossiers actifs",v:dossiers.filter(x=>x.status==='en_cours').length,c:'#fb923c'},{l:"Termines",v:dossiers.filter(x=>x.steps.every(s2=>s2.done)).length,c:'#4ade80'},{l:"Etapes totales",v:STEPS.length,c:'#60a5fa'},{l:"Obligatoires",v:STEPS.filter(x=>x.obligatoire).length,c:'#f87171'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'checklist',l:'Nouveau'},{v:'dossiers',l:'Dossiers ('+dossiers.length+')'},{v:'template',l:'Template checklist'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    {tab==='checklist'&&<div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
+      <C><ST>Demarrer onboarding</ST>
+        <I label="Travailleur" value={selEmp} onChange={setSelEmp} options={ae.map(e=>({v:e.id,l:`${e.first||''} ${e.last||''}`}))}/>
+        <B onClick={startOnboarding} style={{width:'100%',marginTop:14}}>Creer dossier onboarding</B>
+        <div style={{marginTop:16,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:11,color:'#60a5fa',lineHeight:1.6}}>
+          <b>Rappel legal:</b><br/>
+          - Dimona IN: obligatoire AVANT debut prestations<br/>
+          - Contrat ecrit: jour 1 au plus tard<br/>
+          - Reglement travail: remise + accuse reception<br/>
+          - Visite medicale: prealable si poste de securite
+        </div>
+      </C>
+      {dossiers.length>0?<C><ST>Dossier: {dossiers[0]?.name}</ST>
+        {cats.map(cat=>{const catSteps=dossiers[0].steps.filter(s2=>s2.cat===cat);if(!catSteps.length)return null;
+          const done=catSteps.filter(x=>x.done).length;
+          return <div key={cat} style={{marginBottom:14}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+              <span style={{fontSize:11,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'.5px'}}>{cat}</span>
+              <span style={{fontSize:10,color:done===catSteps.length?'#4ade80':'#9e9b93'}}>{done}/{catSteps.length}</span>
+            </div>
+            {catSteps.map((st,si)=>{const realIdx=dossiers[0].steps.indexOf(st);return <div key={si} onClick={()=>toggleStep(0,realIdx)} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 10px',marginBottom:3,background:st.done?'rgba(74,222,128,.06)':'rgba(198,163,78,.03)',borderRadius:6,cursor:'pointer',border:st.obligatoire&&!st.done?'1px solid rgba(248,113,113,.2)':'1px solid transparent'}}>
+              <div style={{width:18,height:18,borderRadius:4,border:st.done?'2px solid #4ade80':'2px solid #5e5c56',background:st.done?'rgba(74,222,128,.15)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,color:'#4ade80'}}>{st.done?'V':''}</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:12,color:st.done?'#4ade80':'#e8e6e0',textDecoration:st.done?'line-through':'none'}}>{st.l}{st.obligatoire?<span style={{color:'#f87171',fontSize:9,marginLeft:4}}>*</span>:null}</div>
+                <div style={{fontSize:9,color:'#5e5c56'}}>{st.dl}</div>
+              </div>
+            </div>;})}
+          </div>;
+        })}
+      </C>:<C style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:300,color:'#5e5c56'}}><div style={{textAlign:'center'}}><div style={{fontSize:40,marginBottom:10}}>👋</div>Selectionnez un travailleur et creez un dossier</div></C>}
+    </div>}
+    {tab==='dossiers'&&<C>
+      {dossiers.length>0?<Tbl cols={[
+        {k:'n',l:"Travailleur",b:1,r:r=>r.name},
+        {k:'d',l:"Date debut",r:r=>r.startDate},
+        {k:'p',l:"Progression",r:r=>{const done=r.steps.filter(x=>x.done).length;const pct=Math.round(done/r.steps.length*100);return <div style={{display:'flex',alignItems:'center',gap:8}}><div style={{flex:1,height:6,background:'rgba(198,163,78,.08)',borderRadius:3,overflow:'hidden'}}><div style={{height:'100%',width:pct+'%',background:pct===100?'#4ade80':'#c6a34e',borderRadius:3}}/></div><span style={{fontSize:11,fontWeight:600,color:pct===100?'#4ade80':'#c6a34e'}}>{pct}%</span></div>}},
+        {k:'o',l:"Obligatoires",r:r=>{const obl=r.steps.filter(x=>x.obligatoire);const done=obl.filter(x=>x.done).length;return <span style={{color:done===obl.length?'#4ade80':'#f87171',fontWeight:600}}>{done}/{obl.length}</span>}},
+        {k:'s',l:"Statut",r:r=>{const done=r.steps.every(x=>x.done);return <span style={{fontSize:10,padding:'2px 8px',borderRadius:4,background:done?'rgba(74,222,128,.1)':'rgba(251,146,56,.1)',color:done?'#4ade80':'#fb923c'}}>{done?'Termine':'En cours'}</span>}},
+      ]} data={dossiers}/>:<div style={{padding:30,textAlign:'center',color:'#5e5c56'}}>Aucun dossier</div>}
+    </C>}
+    {tab==='template'&&<C><ST>Template checklist onboarding ({STEPS.length} etapes)</ST>
+      {cats.map(cat=><div key={cat} style={{marginBottom:16}}>
+        <div style={{fontSize:11,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:6}}>{cat}</div>
+        {STEPS.filter(s2=>s2.cat===cat).map((st,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
+          <span style={{color:'#e8e6e0'}}>{st.l}{st.obligatoire?<span style={{color:'#f87171',fontSize:10,marginLeft:4}}>* obligatoire</span>:''}</span>
+          <span style={{fontSize:10,color:'#5e5c56'}}>{st.dl}</span>
+        </div>)}
+      </div>)}
+    </C>}
+  </div>;
+}
+
+// =====================================================
+//  OFFBOARDING — Workflow sortie de service
+// =====================================================
+function OffboardingMod({s,d}){
+  const ae=s.emps||[];
+  const [dossiers,setDossiers]=useState([]);
+  const [selEmp,setSelEmp]=useState(ae[0]?.id||'');
+  const [motif,setMotif]=useState('licenciement');
+  const [dateOut,setDateOut]=useState(new Date().toISOString().split('T')[0]);
+  const [tab,setTab]=useState('checklist');
+
+  const STEPS=[
+    {id:'notif',cat:'Juridique',l:'Lettre de licenciement / demission signee',obligatoire:true},
+    {id:'preavis',cat:'Juridique',l:'Calcul et notification du preavis',obligatoire:true},
+    {id:'c4',cat:'Documents',l:'C4 - Certificat de chomage',obligatoire:true},
+    {id:'dimona_out',cat:'Declarations',l:'Dimona OUT declaree',obligatoire:true},
+    {id:'fiche_paie',cat:'Documents',l:'Derniere fiche de paie',obligatoire:true},
+    {id:'pecule_sortie',cat:'Paiements',l:'Pecule de vacances de sortie calcule',obligatoire:true},
+    {id:'solde_tout',cat:'Paiements',l:'Solde de tout compte prepare',obligatoire:true},
+    {id:'attestation',cat:'Documents',l:'Attestation de travail / certificat',obligatoire:false},
+    {id:'fisc',cat:'Documents',l:'Fiche fiscale 281.10 (si annee terminee)',obligatoire:false},
+    {id:'outplacement',cat:'Juridique',l:'Offre outplacement (si >= 45 ans)',obligatoire:false},
+    {id:'badge_ret',cat:'Logistique',l:'Retour badge / cles / materiel',obligatoire:false},
+    {id:'it_ret',cat:'Logistique',l:'Retour PC / telephone / desactivation acces',obligatoire:false},
+    {id:'assurance',cat:'Admin',l:'Radiation assurance groupe + AT',obligatoire:true},
+    {id:'entretien',cat:'RH',l:'Entretien de sortie realise',obligatoire:false},
+  ];
+
+  const startOffboarding=()=>{
+    const emp=ae.find(e=>e.id===selEmp);if(!emp)return;
+    const p=calc(emp,DPER,s.co);
+    // Calcul preavis simplifie
+    const anc=emp.startD?Math.max(1,Math.round((new Date()-new Date(emp.startD))/(365.25*24*60*60*1000))):1;
+    const preavisSem=anc<=1?2:anc<=2?7:anc<=3?9:anc<=4?12:anc<=5?15:anc<=6?18:anc<=7?21:anc<=8?24:anc<=9?27:Math.min(62,27+Math.floor((anc-9)/1)*3);
+    setDossiers(prev=>[{empId:selEmp,name:`${emp.first} ${emp.last}`,dateOut,motif,brut:p.gross,anc,preavisSem,pecule:Math.round((p.gross+p.gross*0.92)*(anc>11?1:anc/12)*100)/100,steps:STEPS.map(s2=>({...s2,done:false})),status:'en_cours'},...prev]);
+  };
+
+  const toggleStep=(dIdx,sIdx)=>{
+    setDossiers(prev=>prev.map((d2,i)=>i===dIdx?{...d2,steps:d2.steps.map((st,j)=>j===sIdx?{...st,done:!st.done}:st)}:d2));
+  };
+
+  const cats=['Juridique','Declarations','Documents','Paiements','Admin','Logistique','RH'];
+
+  return <div>
+    <PH title="Offboarding" sub="Checklist sortie de service - C4, Dimona OUT, solde tout compte"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:"Dossiers actifs",v:dossiers.filter(x=>x.status==='en_cours').length,c:'#fb923c'},{l:"Termines",v:dossiers.filter(x=>x.steps.every(s2=>s2.done)).length,c:'#4ade80'},{l:"Etapes",v:STEPS.length,c:'#60a5fa'},{l:"Obligatoires",v:STEPS.filter(x=>x.obligatoire).length,c:'#f87171'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'checklist',l:'Nouveau'},{v:'dossiers',l:'Dossiers ('+dossiers.length+')'},{v:'guide',l:'Guide sortie'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    {tab==='checklist'&&<div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
+      <div>
+        <C><ST>Demarrer offboarding</ST>
+          <I label="Travailleur" value={selEmp} onChange={setSelEmp} options={ae.map(e=>({v:e.id,l:`${e.first||''} ${e.last||''}`}))}/>
+          <I label="Motif" value={motif} onChange={setMotif} style={{marginTop:9}} options={[{v:'licenciement',l:'Licenciement'},{v:'demission',l:'Demission'},{v:'commun_accord',l:'Rupture amiable'},{v:'retraite',l:'Pension/Retraite'},{v:'fin_cdd',l:'Fin CDD'},{v:'fm',l:'Force majeure medicale'}]}/>
+          <I label="Date sortie" type="date" value={dateOut} onChange={setDateOut} style={{marginTop:9}}/>
+          <B onClick={startOffboarding} style={{width:'100%',marginTop:14}}>Creer dossier sortie</B>
+        </C>
+        {dossiers.length>0&&<C style={{marginTop:12}}><ST>Resume financier</ST>
+          <div style={{fontSize:11,color:'#9e9b93',lineHeight:2}}>
+            <div>Anciennete: <b style={{color:'#e8e6e0'}}>{dossiers[0].anc} ans</b></div>
+            <div>Preavis: <b style={{color:'#c6a34e'}}>{dossiers[0].preavisSem} semaines</b></div>
+            <div>Indemnite preavis: <b style={{color:'#fb923c'}}>{fmt(dossiers[0].brut*dossiers[0].preavisSem/4.33)}</b></div>
+            <div>Pecule sortie estime: <b style={{color:'#4ade80'}}>{fmt(dossiers[0].pecule)}</b></div>
+          </div>
+        </C>}
+      </div>
+      {dossiers.length>0?<C><ST>Dossier: {dossiers[0]?.name} — Sortie {dossiers[0]?.dateOut}</ST>
+        {cats.map(cat=>{const catSteps=dossiers[0].steps.filter(s2=>s2.cat===cat);if(!catSteps.length)return null;
+          return <div key={cat} style={{marginBottom:12}}>
+            <div style={{fontSize:11,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:4}}>{cat}</div>
+            {catSteps.map((st,si)=>{const realIdx=dossiers[0].steps.indexOf(st);return <div key={si} onClick={()=>toggleStep(0,realIdx)} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 10px',marginBottom:3,background:st.done?'rgba(74,222,128,.06)':'rgba(198,163,78,.03)',borderRadius:6,cursor:'pointer',border:st.obligatoire&&!st.done?'1px solid rgba(248,113,113,.2)':'1px solid transparent'}}>
+              <div style={{width:18,height:18,borderRadius:4,border:st.done?'2px solid #4ade80':'2px solid #5e5c56',background:st.done?'rgba(74,222,128,.15)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,color:'#4ade80'}}>{st.done?'V':''}</div>
+              <div style={{fontSize:12,color:st.done?'#4ade80':'#e8e6e0',textDecoration:st.done?'line-through':'none'}}>{st.l}{st.obligatoire?<span style={{color:'#f87171',fontSize:9,marginLeft:4}}>*</span>:null}</div>
+            </div>;})}
+          </div>;
+        })}
+      </C>:<C style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:300,color:'#5e5c56'}}><div style={{textAlign:'center'}}><div style={{fontSize:40,marginBottom:10}}>📦</div>Selectionnez un travailleur pour demarrer la sortie</div></C>}
+    </div>}
+    {tab==='dossiers'&&<C>
+      {dossiers.length>0?<Tbl cols={[
+        {k:'n',l:"Travailleur",b:1,r:r=>r.name},
+        {k:'m',l:"Motif",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:'rgba(251,146,56,.1)',color:'#fb923c'}}>{r.motif}</span>},
+        {k:'d',l:"Date sortie",r:r=>r.dateOut},
+        {k:'pr',l:"Preavis",r:r=>`${r.preavisSem} sem.`},
+        {k:'p',l:"Progression",r:r=>{const done=r.steps.filter(x=>x.done).length;const pct=Math.round(done/r.steps.length*100);return <span style={{fontWeight:600,color:pct===100?'#4ade80':'#c6a34e'}}>{pct}%</span>}},
+      ]} data={dossiers}/>:<div style={{padding:30,textAlign:'center',color:'#5e5c56'}}>Aucun dossier</div>}
+    </C>}
+    {tab==='guide'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Documents obligatoires sortie</ST>
+        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
+          <div><b style={{color:'#f87171'}}>C4:</b> Dans les 5 jours ouvrables apres fin contrat</div>
+          <div><b style={{color:'#f87171'}}>Dimona OUT:</b> Jour de sortie effectif</div>
+          <div><b style={{color:'#f87171'}}>Derniere fiche de paie:</b> Mois de sortie</div>
+          <div><b style={{color:'#f87171'}}>Pecule de sortie:</b> Avec dernier paiement</div>
+          <div><b style={{color:'#f87171'}}>Compte individuel:</b> Annee en cours</div>
+          <div><b style={{color:'#f87171'}}>Attestation travail:</b> A la demande</div>
+        </div>
+      </C>
+      <C><ST>Calcul solde de tout compte</ST>
+        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
+          <div><b style={{color:'#4ade80'}}>+</b> Salaire jours prestes (prorata mois)</div>
+          <div><b style={{color:'#4ade80'}}>+</b> Pecule vacances sortie (simple + double prorata)</div>
+          <div><b style={{color:'#4ade80'}}>+</b> 13eme mois prorata (si applicable CP)</div>
+          <div><b style={{color:'#4ade80'}}>+</b> Indemnite compensatoire preavis (si non preste)</div>
+          <div><b style={{color:'#f87171'}}>-</b> ONSS travailleur</div>
+          <div><b style={{color:'#f87171'}}>-</b> Precompte professionnel</div>
+          <div><b style={{color:'#f87171'}}>-</b> Recuperation avances / prets</div>
+        </div>
+      </C>
+    </div>}
+  </div>;
+}
+
+// =====================================================
+//  REGISTRE DU PERSONNEL — Obligation legale
+// =====================================================
+function RegistrePersonnelMod({s,d}){
+  const ae=s.emps||[];
+  const [tab,setTab]=useState('registre');
+
+  const registre=ae.map((emp,idx)=>{
+    const num=String(idx+1).padStart(4,'0');
+    const anc=emp.startD?Math.max(0,Math.round((new Date()-new Date(emp.startD))/(365.25*24*60*60*1000))):0;
+    return{num,emp,name:`${emp.last||''} ${emp.first||''}`,niss:emp.niss||'MANQUANT',startD:emp.startD||'—',endD:emp.endD||'',fn:emp.fn||'—',cp:emp.cp||'200',statut:emp.statut==='ouvrier'?'Ouvrier':'Employe',regime:`${emp.whWeek||38}h/sem`,status:emp.status==='inactive'?'Sorti':'Actif',anc,nat:emp.nat||'BE'};
+  }).sort((a,b)=>a.num.localeCompare(b.num));
+
+  const actifs=registre.filter(r=>r.status==='Actif').length;
+  const sortis=registre.filter(r=>r.status==='Sorti').length;
+  const ouvriers=registre.filter(r=>r.statut==='Ouvrier').length;
+  const employes=registre.filter(r=>r.statut==='Employe').length;
+
+  // Validation
+  const anomalies=registre.filter(r=>r.niss==='MANQUANT'||r.startD==='—');
+
+  return <div>
+    <PH title="Registre du Personnel" sub="Obligation legale AR 08/08/1980 - Registre general"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:18}}>
+      {[{l:"Total inscrits",v:registre.length,c:'#c6a34e'},{l:"Actifs",v:actifs,c:'#4ade80'},{l:"Sortis",v:sortis,c:'#f87171'},{l:"Employes",v:employes,c:'#60a5fa'},{l:"Ouvriers",v:ouvriers,c:'#fb923c'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'registre',l:'Registre'},{v:'anomalies',l:'Anomalies ('+anomalies.length+')'},{v:'regles',l:'Obligations legales'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    {tab==='registre'&&<C style={{padding:0,overflow:'hidden'}}>
+      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Registre general du personnel — {s.co.name}</div>
+        <span style={{fontSize:10,color:'#5e5c56'}}>N ONSS: {s.co.onss||'—'} · BCE: {s.co.bce||s.co.vat||'—'}</span>
+      </div>
+      <Tbl cols={[
+        {k:'num',l:"N",r:r=><span style={{fontFamily:'monospace',fontSize:11,color:'#c6a34e'}}>{r.num}</span>},
+        {k:'n',l:"Nom, Prenom",b:1,r:r=>r.name},
+        {k:'niss',l:"NISS",r:r=><span style={{fontFamily:'monospace',fontSize:10,color:r.niss==='MANQUANT'?'#f87171':'#9e9b93'}}>{r.niss}</span>},
+        {k:'st',l:"Statut",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:r.statut==='Ouvrier'?'rgba(248,113,113,.1)':'rgba(96,165,250,.1)',color:r.statut==='Ouvrier'?'#f87171':'#60a5fa'}}>{r.statut}</span>},
+        {k:'fn',l:"Fonction",r:r=>r.fn},
+        {k:'cp',l:"CP",r:r=>r.cp},
+        {k:'e',l:"Entree",r:r=>r.startD},
+        {k:'s',l:"Sortie",r:r=>r.endD||'—'},
+        {k:'r',l:"Regime",r:r=><span style={{fontSize:10}}>{r.regime}</span>},
+        {k:'x',l:"",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:r.status==='Actif'?'rgba(74,222,128,.1)':'rgba(248,113,113,.1)',color:r.status==='Actif'?'#4ade80':'#f87171'}}>{r.status}</span>},
+      ]} data={registre}/>
+    </C>}
+    {tab==='anomalies'&&<C>
+      {anomalies.length>0?<Tbl cols={[
+        {k:'num',l:"N",r:r=><span style={{fontFamily:'monospace',color:'#c6a34e'}}>{r.num}</span>},
+        {k:'n',l:"Nom",b:1,r:r=>r.name},
+        {k:'p',l:"Probleme",r:r=><span style={{color:'#f87171',fontSize:11}}>{r.niss==='MANQUANT'?'NISS manquant':''}{r.startD==='—'?' Date entree manquante':''}</span>},
+      ]} data={anomalies}/>:<div style={{padding:30,textAlign:'center',color:'#4ade80'}}>Aucune anomalie detectee</div>}
+    </C>}
+    {tab==='regles'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Mentions obligatoires (AR 08/08/1980)</ST>
+        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
+          <div>1. Numero d'ordre (sequentiel, jamais reutilise)</div>
+          <div>2. Nom et prenom</div>
+          <div>3. Date et lieu de naissance</div>
+          <div>4. Sexe</div>
+          <div>5. Domicile</div>
+          <div>6. Nationalite</div>
+          <div>7. NISS (numero registre national)</div>
+          <div>8. Nature du contrat (CDI/CDD/Interim)</div>
+          <div>9. Date d'entree en service</div>
+          <div>10. Date de sortie de service</div>
+        </div>
+      </C>
+      <C><ST>Regles de tenue</ST>
+        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
+          <div><b style={{color:'#c6a34e'}}>Conservation:</b> 5 ans apres la derniere inscription</div>
+          <div><b style={{color:'#c6a34e'}}>Format:</b> Papier ou electronique (conditions ONSS)</div>
+          <div><b style={{color:'#c6a34e'}}>Lieu:</b> Au siege ou lieu d'occupation</div>
+          <div><b style={{color:'#c6a34e'}}>Delai inscription:</b> Au plus tard le jour d'entree</div>
+          <div><b style={{color:'#c6a34e'}}>Correction:</b> Ratures autorisees si lisible</div>
+          <div><b style={{color:'#c6a34e'}}>Controle:</b> Inspection sociale peut exiger presentation</div>
+        </div>
+        <div style={{marginTop:10,padding:10,background:'rgba(248,113,113,.06)',borderRadius:8,fontSize:11,color:'#f87171'}}>
+          <b>Sanction:</b> Amende administrative 400 a 4.000 EUR ou penale 800 a 8.000 EUR par travailleur non inscrit.
+        </div>
+      </C>
+    </div>}
+  </div>;
+}
 
 function AbsenteismeMod({s,d}){
   const ae=s.emps||[];const n=ae.length||1;
