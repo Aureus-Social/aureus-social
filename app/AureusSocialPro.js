@@ -14768,59 +14768,71 @@ function IndexAutoMod({s,d}){
 //  PLAN CAFÉTÉRIA / FLEXIBLE REWARD
 // ═══════════════════════════════════════════════════════════════
 function CafeteriaMod({s,d}){
-  const [eid,setEid]=useState(s.emps[0]?.id||'');
-  const [budget,setBudget]=useState(3000);
-  const [choix,setChoix]=useState({});
-  const ae=s.emps.filter(e=>e.status==='active');
-  const emp=ae.find(e=>e.id===eid);
-  
+  const [tab,setTab]=useState('sim');const [budget,setBudget]=useState(5000);
+  const [choix,setChoix]=useState({mobilite:0,it:0,formation:0,pension:0,sante:0,conge:0});
+  const update=(k,v)=>{const nv=Math.max(0,+v);const rest=budget-Object.entries({...choix,[k]:nv}).filter(([k2])=>k2!==k).reduce((a,[,v2])=>a+v2,0);setChoix({...choix,[k]:Math.min(nv,Math.max(0,rest))});};
+  const used=Object.values(choix).reduce((a,c)=>a+c,0);const reste=budget-used;
   const options=[
-    {id:"pc",l:"📱 PC/Tablet/GSM",fiscal:"ATN forfaitaire (72€/an PC, 36€/an GSM, 36€/an internet)",max:2000},
-    {id:"pension",l:"💰 Pension complémentaire",fiscal:"Exonéré si < 80% rule (LPC). ONSS 8,86% employeur",max:5000},
-    {id:"epargne",l:"🏦 Épargne long terme",fiscal:"Réduction impôt 30% (max 2.450€/an)",max:2450},
-    {id:"velo",l:"🚲 Vélo (leasing)",fiscal:"Exonéré ONSS et IPP. Indemnité vélo 0,27€/km",max:3000},
-    {id:"formation",l:"📚 Formation",fiscal:"Déductible 120% pour l\'employeur",max:5000},
-    {id:"garde",l:"👶 Garde d\'enfants",fiscal:"Réduction impôt (max 15,70€/jour/enfant < 14 ans)",max:3000},
-    {id:"multimedia",l:"📺 Multimédia",fiscal:"ATN si usage privé. Déductible employeur.",max:1500},
-    {id:"mobilite",l:"🚗 Budget mobilité",fiscal:"Voir module Budget Mobilité (3 piliers)",max:10000},
-    {id:"conges_extra",l:"🌴 Jours de congé extra",fiscal:"Conversion brut → jours. Neutre ONSS.",max:0},
-    {id:"warrants",l:"📈 Warrants",fiscal:"ONSS 13,07% sur valeur. Pas de PP si >1 an.",max:5000},
+    {k:'mobilite',l:'Mobilite',ex:'Velo, abonnement, parking',icon:'🚲',c:'#4ade80',avFisc:'Exonere (velo) / partiel'},
+    {k:'it',l:'IT & Multimedia',ex:'Smartphone, laptop, tablette',icon:'💻',c:'#60a5fa',avFisc:'ATN forfaitaire reduit'},
+    {k:'formation',l:'Formation',ex:'Cours, certifications, coaching',icon:'📚',c:'#a78bfa',avFisc:'Deductible 100%'},
+    {k:'pension',l:'Pension compl.',ex:'Assurance groupe extra',icon:'🏦',c:'#c6a34e',avFisc:'Taxe 4.4% (vs 50%+ ONSS)'},
+    {k:'sante',l:'Sante & Bien-etre',ex:'Sport, soins, assurance hospi',icon:'🏥',c:'#f87171',avFisc:'Variable selon avantage'},
+    {k:'conge',l:'Conges extra',ex:'Jours conge supplementaires',icon:'🌴',c:'#fb923c',avFisc:'Cout salarial'},
   ];
-  
-  const totalChoisi=Object.values(choix).reduce((a,v)=>a+(parseFloat(v)||0),0);
-  const reste=budget-totalChoisi;
-  
   return <div>
-    <PH title="Plan Cafétéria — Flexible Reward" sub="Optimisation salariale sur mesure"/>
-    <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:18}}>
-      <C>
-        <ST>Configuration</ST>
-        <I label="Travailleur" value={eid} onChange={setEid} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
-        <I label="Budget annuel (€)" type="number" value={budget} onChange={v=>setBudget(parseFloat(v)||0)}/>
-        <div style={{marginTop:14,padding:12,borderRadius:8,textAlign:'center',background:reste>=0?'rgba(74,222,128,.08)':'rgba(248,113,113,.08)'}}>
-          <div style={{fontSize:11,color:'#5e5c56'}}>Budget restant</div>
-          <div style={{fontSize:24,fontWeight:700,color:reste>=0?'#4ade80':'#f87171'}}>{fmt(reste)}</div>
-          <div style={{fontSize:11,color:'#9e9b93'}}>sur {fmt(budget)} alloué</div>
-        </div>
+    <PH title="Plan Cafeteria" sub="Remuneration flexible - Budget a repartir selon choix du travailleur"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:"Budget annuel",v:fmt(budget),c:'#c6a34e'},{l:"Alloue",v:fmt(used),c:'#60a5fa'},{l:"Disponible",v:fmt(reste),c:reste>0?'#4ade80':'#f87171'},{l:"Utilisation",v:Math.round(used/budget*100)+'%',c:'#fb923c'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>)}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'sim',l:'Simulateur choix'},{v:'avantages',l:'Avantages fiscaux'},{v:'regles',l:'Regles juridiques'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}
+    </div>
+    {tab==='sim'&&<div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:18}}>
+      <C><ST>Budget</ST>
+        <I label="Budget annuel total" type="number" value={budget} onChange={setBudget}/>
+        <div style={{marginTop:12,height:8,background:'rgba(198,163,78,.08)',borderRadius:4,overflow:'hidden'}}><div style={{height:'100%',width:Math.round(used/budget*100)+'%',background:reste>0?'#c6a34e':'#f87171',borderRadius:4}}/></div>
+        <div style={{fontSize:10,color:'#5e5c56',marginTop:4,textAlign:'right'}}>{fmt(reste)} disponible</div>
       </C>
-      <C style={{padding:'14px 18px',maxHeight:650,overflowY:'auto'}}>
-        <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0',marginBottom:16}}>Choix des avantages</div>
-        {options.map(opt=><div key={opt.id} style={{padding:14,marginBottom:8,background:"rgba(198,163,78,.03)",border:'1px solid rgba(198,163,78,.08)',borderRadius:10}}>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
-            <span style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>{opt.l}</span>
-            <div style={{width:120}}><I label="" type="number" value={choix[opt.id]||0} onChange={v=>setChoix(p=>({...p,[opt.id]:Math.min(parseFloat(v)||0,opt.max||99999)}))}/></div>
+      <C><ST>Repartition</ST>
+        {options.map(o=><div key={o.k} style={{marginBottom:12}}>
+          <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+            <span style={{fontSize:12,color:'#e8e6e0'}}>{o.icon} {o.l}</span>
+            <span style={{fontSize:12,fontWeight:600,color:o.c}}>{fmt(choix[o.k])}</span>
           </div>
-          <div style={{fontSize:10.5,color:'#9e9b93'}}>{opt.fiscal}</div>
-          {opt.max>0&&<div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>Max: {fmt(opt.max)}/an</div>}
+          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <input type="range" min="0" max={budget} step="100" value={choix[o.k]} onChange={e=>update(o.k,e.target.value)} style={{flex:1,accentColor:o.c}}/>
+            <input type="number" value={choix[o.k]} onChange={e=>update(o.k,e.target.value)} style={{width:80,padding:'4px 8px',background:'rgba(255,255,255,.03)',border:'1px solid rgba(198,163,78,.15)',borderRadius:6,color:'#e8e6e0',fontSize:12,fontFamily:'inherit',textAlign:'right'}}/>
+          </div>
+          <div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>{o.ex}</div>
         </div>)}
       </C>
-    </div>
+    </div>}
+    {tab==='avantages'&&<C><ST>Comparatif fiscal</ST>
+      <Tbl cols={[
+        {k:'c',l:"Categorie",b:1,r:r=><span>{r.icon} {r.l}</span>},
+        {k:'a',l:"Avantage fiscal",r:r=><span style={{color:'#4ade80'}}>{r.avFisc}</span>},
+        {k:'o',l:"ONSS",r:r=><span style={{color:r.k==='pension'?'#4ade80':'#fb923c'}}>{r.k==='pension'?'4.4% taxe':'25.07% si ATN'}</span>},
+        {k:'p',l:"PP travailleur",r:r=><span style={{color:r.k==='mobilite'?'#4ade80':'#fb923c'}}>{r.k==='mobilite'?'Exonere':r.k==='pension'?'Differe':'Baremes normaux'}</span>},
+      ]} data={options}/>
+    </C>}
+    {tab==='regles'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Principes juridiques</ST>
+        {[{r:'Budget-neutre pour employeur',d:'Le cout total ne peut depasser le package classique'},{r:'Pas de reduction salaire de base',d:'Le salaire brut de reference reste identique'},{r:'Reversibilite annuelle',d:'Le travailleur peut modifier ses choix chaque annee'},{r:'Egalite de traitement',d:'Meme budget pour meme fonction/categorie'},{r:'Information prealable',d:'Policy ecrite + accord individuel signe'}].map((r,i)=>
+          <div key={i} style={{padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}><b style={{color:'#c6a34e',fontSize:12}}>{r.r}</b><div style={{fontSize:10.5,color:'#9e9b93',marginTop:2}}>{r.d}</div></div>)}
+      </C>
+      <C><ST>Base legale</ST>
+        {[{l:'Ruling fiscal',v:'Demande au SDA recommandee'},{l:'ONSS',v:'Position administrative par avantage'},{l:'Contrat',v:'Avenant au contrat de travail'},{l:'CPPT/CE',v:'Information prealable obligatoire'},{l:'Egalite H/F',v:'Meme acces pour tous'}].map((r,i)=>
+          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}><span style={{color:'#9e9b93'}}>{r.l}</span><span style={{fontWeight:600,color:'#e8e6e0'}}>{r.v}</span></div>)}
+      </C>
+    </div>}
   </div>;
 }
-
-// ═══════════════════════════════════════════════════════════════
-//  BONUS CCT 90 — Prime non récurrente liée aux résultats
-// ═══════════════════════════════════════════════════════════════
 function CCT90Mod({s,d}){
   const ae=s.emps||[];const [montant,setMontant]=useState(2000);const [type,setType]=useState('collectif');
   const n=ae.length;const totBrut=montant*n;
