@@ -15057,71 +15057,69 @@ function WarrantsMod({s,d}){
 //  PLAN DE FORMATION — Obligation légale (Loi 3/10/2022)
 // ═══════════════════════════════════════════════════════════════
 function PlanFormationMod({s,d}){
-  const ae=s.emps||[];const [formations,setFormations]=useState([]);
-  const [f,setF]=useState({titre:"",type:"interne",duree:8,emps:[],budget:500,date:'',formateur:''});
-  const n=ae.length;
-  // Obligation: 5 jours/an/ETP (loi 3/10/2022)
-  const obligMin=n*5;const hRealisees=formations.reduce((a,c)=>a+(+c.duree||0)*(c.emps?.length||0),0);
-  const budgetTotal=formations.reduce((a,c)=>a+(+c.budget||0),0);
-  
-  const add=()=>{if(!f.titre)return;setFormations(p=>[{...f,id:"FORM-"+Date.now()},...p]);setF({titre:"",type:"interne",duree:8,emps:[],budget:500,date:'',formateur:''});};
-  
+  const ae=s.emps||[];const n=ae.length;
+  const [tab,setTab]=useState('plan');
+  const [formations,setFormations]=useState([
+    {id:1,titre:'Securite incendie + evacuation',type:'Obligatoire',domaine:'Securite',duree:4,budget:400,trim:'T1',status:'done',part:n},
+    {id:2,titre:'Premiers secours (recyclage)',type:'Obligatoire',domaine:'Securite',duree:8,budget:600,trim:'T1',status:'done',part:Math.ceil(n/20)||1},
+    {id:3,titre:'Harcelement - Ligne hierarchique',type:'Obligatoire',domaine:'Psychosocial',duree:4,budget:500,trim:'T2',status:'progress',part:Math.ceil(n*0.2)||1},
+    {id:4,titre:'RGPD - Protection des donnees',type:'Obligatoire',domaine:'Legal',duree:2,budget:300,trim:'T2',status:'todo',part:n},
+    {id:5,titre:'Ergonomie poste ecran',type:'Recommande',domaine:'Ergonomie',duree:2,budget:250,trim:'T3',status:'todo',part:n},
+    {id:6,titre:'Excel avance / Power BI',type:'Dev',domaine:'Technique',duree:16,budget:1200,trim:'T3',status:'todo',part:5},
+    {id:7,titre:'Leadership et management',type:'Dev',domaine:'Soft skills',duree:16,budget:2000,trim:'T4',status:'todo',part:4},
+    {id:8,titre:'Langues - Neerlandais pro',type:'Dev',domaine:'Langues',duree:40,budget:1500,trim:'T1-T4',status:'progress',part:6},
+  ]);
+  const toggleF=(id)=>setFormations(p=>p.map(x=>x.id===id?{...x,status:x.status==='done'?'todo':x.status==='progress'?'done':'progress'}:x));
+  const done=formations.filter(x=>x.status==='done').length;
+  const totH=formations.reduce((a,c)=>a+c.duree*c.part,0);
+  const doneH=formations.filter(x=>x.status==='done').reduce((a,c)=>a+c.duree*c.part,0);
+  const totB=formations.reduce((a,c)=>a+c.budget,0);const spentB=formations.filter(x=>x.status==='done').reduce((a,c)=>a+c.budget,0);
   return <div>
-    <PH title="Plan de Formation" sub="Obligation 5 jours/an/ETP — Loi du 3/10/2022"/>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,marginBottom:18}}>
-      {[{l:"Formations",v:formations.length,c:'#60a5fa'},{l:"Heures réalisées",v:hRealisees,c:'#a78bfa'},{l:"Objectif (jours)",v:obligMin,c:'#c6a34e',s:n+' ETP × 5j'},{l:"Budget consommé",v:fmt(budgetTotal),c:'#f87171'},{l:"Taux réalisation",v:obligMin?(Math.round(hRealisees/8/obligMin*100))+'%':'0%',c:hRealisees/8>=obligMin?'#4ade80':'#fb923c'}].map((k,i)=>
-        <div key={i} style={{padding:'12px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)',textAlign:'center'}}>
-          <div style={{fontSize:9,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
-          <div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
-          {k.s&&<div style={{fontSize:9,color:'#5e5c56',marginTop:1}}>{k.s}</div>}
-        </div>
-      )}
+    <PH title="Plan de Formation" sub={"Loi 05/03/2017 - Min. 4 jours/ETP/an (20+ trav.) - Effectif: "+n}/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:18}}>
+      {[{l:"Formations",v:formations.length,c:'#c6a34e'},{l:"Heures plan.",v:totH+'h',c:'#60a5fa'},{l:"Heures faites",v:doneH+'h',c:'#4ade80'},{l:"Budget total",v:fmt(totB),c:'#fb923c'},{l:"Budget depense",v:fmt(spentB),c:'#f87171'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>)}
     </div>
-    <div style={{display:'grid',gridTemplateColumns:'350px 1fr',gap:18}}>
-      <div>
-        <C><ST>Nouvelle formation</ST>
-          <I label="Titre" value={f.titre} onChange={v=>setF({...f,titre:v})}/>
-          <I label="Type" value={f.type} onChange={v=>setF({...f,type:v})} style={{marginTop:9}} options={[{v:"interne",l:"Formation interne"},{v:"externe",l:"Formation externe"},{v:"elearning",l:"E-learning"},{v:"conference",l:"Conférence/Séminaire"},{v:"coaching",l:"Coaching individuel"}]}/>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:9}}>
-            <I label="Durée (heures)" type="number" value={f.duree} onChange={v=>setF({...f,duree:+v})}/>
-            <I label="Budget (€)" type="number" value={f.budget} onChange={v=>setF({...f,budget:+v})}/>
-          </div>
-          <I label="Formateur" value={f.formateur} onChange={v=>setF({...f,formateur:v})} style={{marginTop:9}}/>
-          <I label="Date" type="date" value={f.date} onChange={v=>setF({...f,date:v})} style={{marginTop:9}}/>
-          <B onClick={add} style={{width:'100%',marginTop:14}}>Ajouter formation</B>
-        </C>
-        <C style={{marginTop:12}}><ST>Obligation légale</ST>
-          <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
-            <div>Minimum: <b style={{color:'#c6a34e'}}>5 jours/an/ETP</b></div>
-            <div>Base: <b style={{color:'#e8e6e0'}}>Loi 3/10/2022 (deal emploi)</b></div>
-            <div>Entreprises ≥20: <b style={{color:'#e8e6e0'}}>Plan obligatoire (30/09)</b></div>
-            <div>Entreprises 10-19: <b style={{color:'#e8e6e0'}}>Crédit individuel 1j/an</b></div>
-            <div>Droit individuel: <b style={{color:'#e8e6e0'}}>Pas de report sur N+1</b></div>
-          </div>
-          <div style={{marginTop:8,padding:8,background:"rgba(248,113,113,.06)",borderRadius:6,fontSize:10.5,color:'#f87171'}}>
-            <b>CCT sectorielle:</b> Vérifier si le secteur prévoit des obligations supérieures.
-          </div>
-        </C>
-      </div>
-      <C style={{padding:0,overflow:'hidden'}}>
-        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Formations planifiées ({formations.length})</div></div>
-        {formations.length>0?<Tbl cols={[
-          {k:'t',l:"Formation",b:1,r:r=>r.titre},
-          {k:'tp',l:"Type",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:"rgba(96,165,250,.1)",color:'#60a5fa'}}>{r.type}</span>},
-          {k:'d',l:"Durée",a:'right',r:r=>`${r.duree}h`},
-          {k:'f',l:"Formateur",r:r=>r.formateur||'—'},
-          {k:'dt',l:"Date",r:r=>r.date||'À planifier'},
-          {k:'b',l:"Budget",a:'right',r:r=><span style={{fontWeight:600,color:'#c6a34e'}}>{fmt(r.budget)}</span>},
-        ]} data={formations}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Aucune formation planifiée</div>}
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'plan',l:'Plan formations'},{v:'legal',l:'Obligations legales'},{v:'domaines',l:'Par domaine'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}
+    </div>
+    {tab==='plan'&&<C style={{padding:0,overflow:'hidden'}}>
+      <Tbl cols={[
+        {k:'s',l:"",w:40,r:r=><div onClick={(e)=>{e.stopPropagation();toggleF(r.id)}} style={{width:20,height:20,borderRadius:5,border:r.status==='done'?'2px solid #4ade80':r.status==='progress'?'2px solid #fb923c':'2px solid #5e5c56',background:r.status==='done'?'rgba(74,222,128,.15)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,color:r.status==='done'?'#4ade80':'#fb923c',cursor:'pointer'}}>{r.status==='done'?'V':r.status==='progress'?'~':''}</div>},
+        {k:'t',l:"Formation",b:1,r:r=><span style={{textDecoration:r.status==='done'?'line-through':'none',color:r.status==='done'?'#4ade80':'#e8e6e0'}}>{r.titre}</span>},
+        {k:'y',l:"Type",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:r.type==='Obligatoire'?'rgba(248,113,113,.1)':'rgba(96,165,250,.1)',color:r.type==='Obligatoire'?'#f87171':'#60a5fa'}}>{r.type}</span>},
+        {k:'d',l:"Duree",a:'right',r:r=><span style={{color:'#60a5fa'}}>{r.duree}h</span>},
+        {k:'p',l:"Part.",a:'right',r:r=>r.part},
+        {k:'tr',l:"Trim.",r:r=><span style={{color:'#c6a34e'}}>{r.trim}</span>},
+        {k:'b',l:"Budget",a:'right',r:r=><span style={{color:'#fb923c'}}>{fmt(r.budget)}</span>},
+      ]} data={formations}/>
+    </C>}
+    {tab==='legal'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Obligations legales</ST>
+        {[{l:'Droit individuel',v:n>=20?'4 jours/ETP/an':'Moins de 20 trav.',c:n>=20?'#f87171':'#5e5c56'},{l:'Plan formation',v:n>=20?'Obligatoire':'Recommande',c:n>=20?'#f87171':'#60a5fa'},{l:'Federal Learning Account',v:'Compte individuel obligatoire',c:'#60a5fa'},{l:'Conge-education paye',v:'Max 80-120h/an',c:'#60a5fa'}].map((r,i)=>
+          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}><span style={{fontSize:12,color:'#9e9b93'}}>{r.l}</span><span style={{fontSize:11,fontWeight:600,color:r.c}}>{r.v}</span></div>)}
       </C>
-    </div>
+      <C><ST>Formations obligatoires</ST>
+        {[{f:'Securite incendie + evacuation',base:'Code bien-etre',freq:'Annuel'},{f:'Premiers secours',base:'AR 15/12/2010',freq:'Recyclage annuel'},{f:'Harcelement',base:'Loi 28/2/2014',freq:'A la designation'},{f:'RGPD',base:'GDPR Art. 39',freq:'Annuel'},{f:'VCA/SCC (chantiers)',base:'Selon secteur',freq:'10 ans'}].map((r,i)=>
+          <div key={i} style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}><div style={{fontSize:12,color:'#e8e6e0'}}>{r.f}</div><div style={{fontSize:10,color:'#5e5c56'}}>{r.base} - {r.freq}</div></div>)}
+      </C>
+    </div>}
+    {tab==='domaines'&&<div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:14}}>
+      {['Securite','Psychosocial','Legal','Ergonomie','Technique','Soft skills','Langues'].map(dom=>{
+        const items=formations.filter(x=>x.domaine===dom);if(!items.length)return null;
+        const dD=items.filter(x=>x.status==='done').length;
+        return <C key={dom}>
+          <div style={{textAlign:'center',marginBottom:10}}><div style={{fontSize:14,fontWeight:700,color:'#c6a34e'}}>{dom}</div><div style={{fontSize:10,color:'#5e5c56'}}>{dD}/{items.length} terminees</div></div>
+          {items.map((x,i)=><div key={i} style={{display:'flex',gap:8,alignItems:'center',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}><div style={{width:8,height:8,borderRadius:'50%',background:x.status==='done'?'#4ade80':x.status==='progress'?'#fb923c':'#5e5c56'}}/><span style={{fontSize:11,color:x.status==='done'?'#4ade80':'#e8e6e0'}}>{x.titre}</span></div>)}
+        </C>;
+      })}
+    </div>}
   </div>;
 }
-
-
-// ═══════════════════════════════════════════════════════════════
-//  NOTES DE FRAIS — Remboursement frais propres employeur
-// ═══════════════════════════════════════════════════════════════
 function NoteFraisMod({s,d}){
   const [eid,setEid]=useState(s.emps[0]?.id||'');
   const [notes,setNotes]=useState([]);
