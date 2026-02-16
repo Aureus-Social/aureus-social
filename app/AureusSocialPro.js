@@ -17371,19 +17371,14 @@ function AureusSuitePage({s,d}){
 }
 
 function BienetrePage({s,d}){
-  const [sub,setSub]=useState('dashboard');
-  const mods={dashboard:"Dashboard",planglobal:"Plan Global",paa:'Plan Annuel',risques:'Risques Psychosociaux',alcool:"Politique Alcool/Drogues",organes:'Organes de concertation',elections:'Elections sociales'};
+  const sub=s.sub||'dashboard';
+  const mods={dashboard:"Dashboard",planglobal:"Plan Global",paa:'Plan Annuel',risquespsycho:'Risques Psychosociaux',alcool:"Politique Alcool/Drogues",organes:'Organes de concertation',elections:'Elections sociales'};
   return <div>
-    <div style={{display:'flex',gap:6,marginBottom:16,flexWrap:'wrap'}}>
-      {Object.entries(mods).map(([k,l])=>
-        <button key={k} onClick={()=>setSub(k)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:sub===k?600:400,fontFamily:'inherit',
-          background:sub===k?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:sub===k?'#c6a34e':'#9e9b93'}}>{l}</button>
-      )}
-    </div>
+    <PH title="Bien-etre au Travail" sub={`Module: ${mods[sub]||sub}`}/>
     {sub==='dashboard'&&<BienEtreDash s={s}/>}
     {sub==='planglobal'&&<PlanGlobalMod s={s} d={d}/>}
     {sub==='paa'&&<PAAMod s={s} d={d}/>}
-    {sub==='risques'&&<RisquesPsychoMod s={s} d={d}/>}
+    {sub==='risquespsycho'&&<RisquesPsychoMod s={s} d={d}/>}
     {sub==='alcool'&&<AlcoolMod s={s} d={d}/>}
     {sub==='organes'&&<OrganesMod s={s} d={d}/>}
     {sub==='elections'&&<ElectionsMod s={s} d={d}/>}
