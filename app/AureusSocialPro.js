@@ -11186,48 +11186,34 @@ function PredictionTurnoverMod({s,d}){
 }
 
 // ── RECOMMANDATIONS SALARIALES ──
-function RecoSalaireMod({s,d}){
-  const ae=s.emps.filter(e=>e.status==='active'||!e.status);
-  return <div>
-    <PH title="💡 Recommandations Salariales IA" sub="Comparaison au marché par CP"/>
-    <C>
-      <div style={{display:'flex',flexDirection:'column',gap:6}}>
-        {ae.map((emp,i)=>{
-          const preset=CP_PRESETS_GLOBAL[emp.cp];
-          const market=preset?.monthlySalary||0;
-          const actual=parseFloat(emp.monthlySalary)||0;
-          const diff=market>0?Math.round((actual/market-1)*100):null;
-          const status=diff===null?'unknown':diff<-15?'underpaid':diff<-5?'slightly_under':diff>15?'overpaid':diff>5?'slightly_over':'market';
-          const colors={underpaid:'#f87171',slightly_under:'#fb923c',market:'#4ade80',slightly_over:'#60a5fa',overpaid:'#a78bfa',unknown:'#5e5c56'};
-          const labels={underpaid:'Sous-payé',slightly_under:'Légèrement sous',market:'Dans le marché',slightly_over:'Légèrement au-dessus',overpaid:'Au-dessus',unknown:'Pas de référence'};
-          return <div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',borderRadius:10,background:'rgba(198,163,78,.02)',border:'1px solid rgba(198,163,78,.06)'}}>
-            <div style={{flex:1}}>
-              <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>{emp.first} {emp.last}</div>
-              <div style={{fontSize:10.5,color:'#5e5c56'}}>{emp.fn||'—'} · CP {emp.cp} ({preset?.fn||'—'})</div>
-            </div>
-            <div style={{textAlign:'right',minWidth:100}}>
-              <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>{fmt(actual)}</div>
-              <div style={{fontSize:10,color:'#5e5c56'}}>actuel</div>
-            </div>
-            <div style={{textAlign:'right',minWidth:100}}>
-              <div style={{fontSize:13,fontWeight:600,color:'#c6a34e'}}>{market>0?fmt(market):'—'}</div>
-              <div style={{fontSize:10,color:'#5e5c56'}}>marché</div>
-            </div>
-            <div style={{minWidth:120,textAlign:'center'}}>
-              {diff!==null&&<div style={{height:6,background:'rgba(198,163,78,.1)',borderRadius:3,position:'relative',overflow:'hidden',marginBottom:4}}>
-                <div style={{position:'absolute',left:'50%',top:0,height:'100%',width:2,background:'rgba(198,163,78,.3)'}}/>
-                <div style={{position:'absolute',left:`${Math.min(Math.max(50+diff,5),95)}%`,top:-2,width:10,height:10,borderRadius:'50%',background:colors[status],transform:'translateX(-50%)'}}/>
-              </div>}
-              <span style={{fontSize:10,fontWeight:600,color:colors[status]}}>{diff!==null?`${diff>0?'+':''}${diff}%`:''} {labels[status]}</span>
-            </div>
-          </div>;
-        })}
-      </div>
-    </C>
-  </div>;
-}
-
-// ── PRÉVISION MASSE SALARIALE ──
+function RecoSalaireMod({s,d}){const ae=s.emps||[];const n=ae.length;const [tab,setTab]=useState("analyse");const [poste,setPoste]=useState("admin");const mb=ae.reduce((a,e)=>a+(+e.gross||0),0);const moyBrut=n>0?mb/n:0;
+const baremes={admin:{min:2200,med:2800,max:3600,p25:2450,p75:3200},compta:{min:2500,med:3200,max:4200,p25:2800,p75:3700},rh:{min:2600,med:3400,max:4500,p25:2900,p75:3900},dev:{min:2800,med:3800,max:5500,p25:3200,p75:4600},manager:{min:3500,med:4500,max:6500,p25:3900,p75:5500},directeur:{min:4500,med:6000,max:9000,p25:5000,p75:7500},ouvrier:{min:1958,med:2400,max:3000,p25:2100,p75:2700},logistique:{min:2100,med:2600,max:3200,p25:2300,p75:2900}};
+const bar=baremes[poste]||baremes.admin;const sousMin=ae.filter(e=>(+e.gross||0)<1958.88);const sousMed=ae.filter(e=>(+e.gross||0)<bar.med);const surP75=ae.filter(e=>(+e.gross||0)>bar.p75);
+return <div><PH title="Recommandation Salariale" sub="Benchmark marche belge - Baremes sectoriels - Analyse positionnement"/>
+<div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:10,marginBottom:18}}>{[{l:"Brut moyen",v:fmt(moyBrut),c:"#c6a34e"},{l:"Mediane marche",v:fmt(bar.med),c:"#60a5fa"},{l:"Min marche",v:fmt(bar.min),c:"#f87171"},{l:"Max marche",v:fmt(bar.max),c:"#4ade80"},{l:"Sous RMMMG",v:sousMin.length,c:sousMin.length>0?"#f87171":"#4ade80"},{l:"Ecart mediane",v:moyBrut>0?((moyBrut/bar.med*100)-100).toFixed(1)+"%":"N/A",c:moyBrut>=bar.med?"#4ade80":"#f87171"}].map((k,i)=><div key={i} style={{padding:"12px 14px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:9,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:17,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div>
+<div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"analyse",l:"Analyse equipe"},{v:"baremes",l:"Baremes marche"},{v:"positionnement",l:"Positionnement"},{v:"simhausse",l:"Simuler hausse"},{v:"equite",l:"Equite H/F"},{v:"legal",l:"Obligations legales"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>
+{tab==="analyse"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}><C><ST>Analyse salariale equipe</ST>
+<Tbl cols={[{k:"n",l:"Travailleur",b:1,r:r=>(r.fn||"")+" "+(r.ln||"")},{k:"g",l:"Brut",a:"right",r:r=><span style={{color:"#c6a34e",fontWeight:600}}>{fmt(+r.gross||0)}</span>},{k:"p",l:"vs Mediane",a:"right",r:r=>{const d=((+r.gross||0)/bar.med*100-100);return <span style={{color:d>=0?"#4ade80":"#f87171"}}>{d>=0?"+":""}{d.toFixed(0)}%</span>}},{k:"z",l:"Zone",r:r=>{const g2=+r.gross||0;return <span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:g2<bar.p25?"rgba(248,113,113,.1)":g2>bar.p75?"rgba(74,222,128,.1)":"rgba(96,165,250,.1)",color:g2<bar.p25?"#f87171":g2>bar.p75?"#4ade80":"#60a5fa"}}>{g2<bar.p25?"Sous P25":g2>bar.p75?"Au-dessus P75":"Dans norme"}</span>}}]} data={ae}/>
+</C><C><ST>Distribution</ST>
+{[{l:"Sous RMMMG (1.958,88)",v:sousMin.length,c:"#f87171"},{l:"Sous P25 ("+fmt(bar.p25)+")",v:ae.filter(e2=>(+e2.gross||0)<bar.p25).length,c:"#fb923c"},{l:"P25 - Mediane",v:ae.filter(e2=>(+e2.gross||0)>=bar.p25&&(+e2.gross||0)<bar.med).length,c:"#60a5fa"},{l:"Mediane - P75",v:ae.filter(e2=>(+e2.gross||0)>=bar.med&&(+e2.gross||0)<=bar.p75).length,c:"#4ade80"},{l:"Au-dessus P75 ("+fmt(bar.p75)+")",v:surP75.length,c:"#a78bfa"}].map((r,i)=><div key={i} style={{padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{color:"#e8e6e0",fontSize:12}}>{r.l}</span><span style={{color:r.c,fontWeight:700}}>{r.v}</span></div><div style={{height:8,background:"rgba(198,163,78,.06)",borderRadius:4,overflow:"hidden"}}><div style={{height:"100%",width:Math.max(3,(r.v/Math.max(n,1)*100))+"%",background:r.c,borderRadius:4}}/></div></div>)}
+</C></div>}
+{tab==="baremes"&&<C><ST>Baremes marche belge par poste</ST>
+<div style={{marginBottom:12}}><div style={{fontSize:10,color:"#5e5c56",marginBottom:3}}>Poste de reference</div><select value={poste} onChange={e=>setPoste(e.target.value)} style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid rgba(198,163,78,.15)",background:"rgba(198,163,78,.04)",color:"#e8e6e0",fontSize:12,fontFamily:"inherit"}}>{Object.keys(baremes).map(k2=><option key={k2} value={k2}>{k2.charAt(0).toUpperCase()+k2.slice(1)}</option>)}</select></div>
+<Tbl cols={[{k:"p",l:"Poste",b:1,r:r=><b style={{color:r.p===poste?"#c6a34e":"#e8e6e0"}}>{r.p}</b>},{k:"mi",l:"Min",a:"right",r:r=>fmt(r.mi)},{k:"p25",l:"P25",a:"right",r:r=><span style={{color:"#60a5fa"}}>{fmt(r.p25)}</span>},{k:"med",l:"Mediane",a:"right",r:r=><span style={{color:"#c6a34e",fontWeight:700}}>{fmt(r.med)}</span>},{k:"p75",l:"P75",a:"right",r:r=><span style={{color:"#4ade80"}}>{fmt(r.p75)}</span>},{k:"ma",l:"Max",a:"right",r:r=>fmt(r.ma)}]} data={Object.entries(baremes).map(([k2,v2])=>({p:k2,mi:v2.min,p25:v2.p25,med:v2.med,p75:v2.p75,ma:v2.max}))}/>
+</C>}
+{tab==="positionnement"&&<C><ST>Positionnement sur le marche</ST>
+{ae.map((e,i)=>{const g2=+e.gross||0;const pct=bar.max>bar.min?((g2-bar.min)/(bar.max-bar.min)*100):50;return <div key={i} style={{padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.05)"}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><b style={{color:"#e8e6e0",fontSize:12}}>{(e.fn||"")+" "+(e.ln||"")}</b><span style={{color:"#c6a34e",fontWeight:700}}>{fmt(g2)}</span></div><div style={{position:"relative",height:16,background:"rgba(198,163,78,.06)",borderRadius:8}}><div style={{position:"absolute",left:((bar.p25-bar.min)/(bar.max-bar.min)*100)+"%",width:((bar.p75-bar.p25)/(bar.max-bar.min)*100)+"%",height:"100%",background:"rgba(96,165,250,.15)",borderRadius:4}}/><div style={{position:"absolute",left:((bar.med-bar.min)/(bar.max-bar.min)*100)+"%",width:2,height:"100%",background:"#60a5fa"}}/><div style={{position:"absolute",left:Math.max(0,Math.min(100,pct))+"%",top:-2,width:12,height:12,borderRadius:"50%",background:g2<bar.p25?"#f87171":g2>bar.p75?"#a78bfa":"#4ade80",border:"2px solid #1a1918",transform:"translateX(-6px)"}}/></div><div style={{display:"flex",justifyContent:"space-between",fontSize:9,color:"#5e5c56",marginTop:2}}><span>{fmt(bar.min)}</span><span>P25</span><span>Med</span><span>P75</span><span>{fmt(bar.max)}</span></div></div>})}
+</C>}
+{tab==="simhausse"&&<C><ST>Simulation augmentation collective</ST>
+{[1,2,3,5,8,10].map((pct,i)=>{const nouvMasse=mb*(1+pct/100);const diff=nouvMasse-mb;const coutDiff=diff*1.2507;return <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#c6a34e",fontWeight:700,width:50}}>+{pct}%</span><span style={{color:"#e8e6e0"}}>{fmt(nouvMasse)}/mois</span><span style={{color:"#f87171"}}>+{fmt(diff)}/mois</span><span style={{color:"#f87171"}}>Cout: +{fmt(coutDiff)}/mois</span><span style={{color:"#fb923c"}}>+{fmt(coutDiff*12)}/an</span></div>})}
+</C>}
+{tab==="equite"&&<C><ST>Analyse equite salariale H/F</ST>
+{(()=>{const h=ae.filter(e2=>(e2.gender||"").toLowerCase()!=="f");const f2=ae.filter(e2=>(e2.gender||"").toLowerCase()==="f");const mH=h.length>0?h.reduce((a2,e2)=>a2+(+e2.gross||0),0)/h.length:0;const mF=f2.length>0?f2.reduce((a2,e2)=>a2+(+e2.gross||0),0)/f2.length:0;const ecart=mH>0?((mH-mF)/mH*100):0;return [<div key="stats" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:16}}>{[{l:"Brut moyen H",v:fmt(mH),c:"#60a5fa"},{l:"Brut moyen F",v:fmt(mF),c:"#f87171"},{l:"Ecart",v:ecart.toFixed(1)+"%",c:Math.abs(ecart)<5?"#4ade80":"#f87171"}].map((k2,j)=><div key={j} style={{padding:12,background:"rgba(198,163,78,.04)",borderRadius:8,textAlign:"center"}}><div style={{fontSize:10,color:"#5e5c56"}}>{k2.l}</div><div style={{fontSize:18,fontWeight:700,color:k2.c,marginTop:4}}>{k2.v}</div></div>)}</div>,<div key="legal" style={{padding:10,background:Math.abs(ecart)<5?"rgba(74,222,128,.04)":"rgba(248,113,113,.04)",borderRadius:8}}><div style={{fontSize:11,color:Math.abs(ecart)<5?"#4ade80":"#f87171",fontWeight:600}}>{Math.abs(ecart)<5?"Ecart acceptable (<5%)":"ATTENTION: Ecart significatif - Rapport bisannuel obligatoire (Loi 22/04/2012)"}</div></div>];})()}
+</C>}
+{tab==="legal"&&<C><ST>Obligations legales remuneration</ST>
+{[{t:"RMMMG 2026",d:"Revenu minimum mensuel moyen garanti: 1.958,88 EUR brut pour 21+ ans, temps plein.",c:"#f87171"},{t:"Baremes sectoriels",d:"Chaque CP fixe des baremes minimums par fonction et anciennete. Verifier via les CCT.",c:"#c6a34e"},{t:"Indexation automatique",d:"Les salaires suivent indice-sante lisse. Application selon CP (janvier, pivot, etc.).",c:"#fb923c"},{t:"Egalite H/F",d:"Loi 22/04/2012: rapport ecart salarial bisannuel obligatoire. Sanctions si discriminations.",c:"#a78bfa"},{t:"Classification fonctions",d:"CCT 35bis: obligation classification analytique des fonctions (si 50+ travailleurs).",c:"#60a5fa"},{t:"Transparence salariale",d:"Directive EU 2023/970: transparence salariale des 2026. Fourchettes dans offres emploi.",c:"#4ade80"},{t:"Fiche de paie",d:"AR 27/09/1966: remise obligatoire fiche de paie detaillee chaque mois.",c:"#e8e6e0"}].map((r,i)=><div key={i} style={{padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><b style={{color:r.c,fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:"#9e9b93",marginTop:2}}>{r.d}</div></div>)}
+</C>}
+</div>;}
 function PrevisionMasseMod({s,d}){
   const ae=s.emps.filter(e=>e.status==='active'||!e.status);
   const masseBrute=ae.reduce((a,e)=>a+(parseFloat(e.monthlySalary)||0),0);
@@ -15655,235 +15641,64 @@ function OutplacementMod({s,d}){
 // =====================================================
 //  ONBOARDING — Workflow digital embauche
 // =====================================================
-function OnboardingMod({s,d}){
-  const ae=s.emps||[];
-  const [dossiers,setDossiers]=useState([]);
-  const [selEmp,setSelEmp]=useState(ae[0]?.id||'');
-  const [tab,setTab]=useState('checklist');
-
-  const STEPS=[
-    {id:'contrat',cat:'Juridique',l:'Contrat de travail signe',dl:'Avant jour 1',obligatoire:true},
-    {id:'dimona',cat:'Juridique',l:'Dimona IN declaree',dl:'Au plus tard jour 1',obligatoire:true},
-    {id:'reglement',cat:'Juridique',l:'Reglement de travail remis + accuse',dl:'Jour 1',obligatoire:true},
-    {id:'niss',cat:'Admin',l:'NISS / carte identite copie',dl:'Avant jour 1',obligatoire:true},
-    {id:'iban',cat:'Admin',l:'Coordonnees bancaires (IBAN)',dl:'Avant 1ere paie',obligatoire:true},
-    {id:'fiscal',cat:'Admin',l:'Fiche fiscale (situation familiale)',dl:'Jour 1',obligatoire:true},
-    {id:'medtrav',cat:'Securite',l:'Visite medicale prealable',dl:'Avant jour 1 (si poste a risque)',obligatoire:false},
-    {id:'assurance',cat:'Securite',l:'Inscription assurance AT + groupe',dl:'Jour 1',obligatoire:true},
-    {id:'badge',cat:'Logistique',l:'Badge acces / cles',dl:'Jour 1',obligatoire:false},
-    {id:'it',cat:'Logistique',l:'PC / email / acces IT',dl:'Jour 1',obligatoire:false},
-    {id:'accueil',cat:'Integration',l:'Journee accueil + presentation equipe',dl:'Jour 1',obligatoire:false},
-    {id:'parrain',cat:'Integration',l:'Parrain/tuteur designe',dl:'Semaine 1',obligatoire:false},
-    {id:'formation',cat:'Integration',l:'Plan formation initiale',dl:'Mois 1',obligatoire:false},
-    {id:'evaluation',cat:'Suivi',l:'Evaluation fin periode essai',dl:'Avant fin essai',obligatoire:false},
-  ];
-
-  const startOnboarding=()=>{
-    const emp=ae.find(e=>e.id===selEmp);if(!emp)return;
-    const existing=dossiers.find(d2=>d2.empId===selEmp);if(existing)return alert('Dossier deja ouvert');
-    setDossiers(prev=>[{empId:selEmp,name:`${emp.first} ${emp.last}`,startDate:new Date().toISOString().split('T')[0],steps:STEPS.map(s2=>({...s2,done:false,doneDate:null})),status:'en_cours'},...prev]);
-  };
-
-  const toggleStep=(dIdx,sIdx)=>{
-    setDossiers(prev=>prev.map((d2,i)=>i===dIdx?{...d2,steps:d2.steps.map((st,j)=>j===sIdx?{...st,done:!st.done,doneDate:!st.done?new Date().toISOString().split('T')[0]:null}:st)}:d2));
-  };
-
-  const cats=['Juridique','Admin','Securite','Logistique','Integration','Suivi'];
-
-  return <div>
-    <PH title="Onboarding" sub="Checklist embauche digitale - Documents, declarations, integration"/>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
-      {[{l:"Dossiers actifs",v:dossiers.filter(x=>x.status==='en_cours').length,c:'#fb923c'},{l:"Termines",v:dossiers.filter(x=>x.steps.every(s2=>s2.done)).length,c:'#4ade80'},{l:"Etapes totales",v:STEPS.length,c:'#60a5fa'},{l:"Obligatoires",v:STEPS.filter(x=>x.obligatoire).length,c:'#f87171'}].map((k,i)=>
-        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
-          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
-          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
-        </div>
-      )}
-    </div>
-    <div style={{display:'flex',gap:6,marginBottom:16}}>
-      {[{v:'checklist',l:'Nouveau'},{v:'dossiers',l:'Dossiers ('+dossiers.length+')'},{v:'template',l:'Template checklist'}].map(t=>
-        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
-          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
-      )}
-    </div>
-    {tab==='checklist'&&<div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
-      <C><ST>Demarrer onboarding</ST>
-        <I label="Travailleur" value={selEmp} onChange={setSelEmp} options={ae.map(e=>({v:e.id,l:`${e.first||''} ${e.last||''}`}))}/>
-        <B onClick={startOnboarding} style={{width:'100%',marginTop:14}}>Creer dossier onboarding</B>
-        <div style={{marginTop:16,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:11,color:'#60a5fa',lineHeight:1.6}}>
-          <b>Rappel legal:</b><br/>
-          - Dimona IN: obligatoire AVANT debut prestations<br/>
-          - Contrat ecrit: jour 1 au plus tard<br/>
-          - Reglement travail: remise + accuse reception<br/>
-          - Visite medicale: prealable si poste de securite
-        </div>
-      </C>
-      {dossiers.length>0?<C><ST>Dossier: {dossiers[0]?.name}</ST>
-        {cats.map(cat=>{const catSteps=dossiers[0].steps.filter(s2=>s2.cat===cat);if(!catSteps.length)return null;
-          const done=catSteps.filter(x=>x.done).length;
-          return <div key={cat} style={{marginBottom:14}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
-              <span style={{fontSize:11,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'.5px'}}>{cat}</span>
-              <span style={{fontSize:10,color:done===catSteps.length?'#4ade80':'#9e9b93'}}>{done}/{catSteps.length}</span>
-            </div>
-            {catSteps.map((st,si)=>{const realIdx=dossiers[0].steps.indexOf(st);return <div key={si} onClick={()=>toggleStep(0,realIdx)} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 10px',marginBottom:3,background:st.done?'rgba(74,222,128,.06)':'rgba(198,163,78,.03)',borderRadius:6,cursor:'pointer',border:st.obligatoire&&!st.done?'1px solid rgba(248,113,113,.2)':'1px solid transparent'}}>
-              <div style={{width:18,height:18,borderRadius:4,border:st.done?'2px solid #4ade80':'2px solid #5e5c56',background:st.done?'rgba(74,222,128,.15)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,color:'#4ade80'}}>{st.done?'V':''}</div>
-              <div style={{flex:1}}>
-                <div style={{fontSize:12,color:st.done?'#4ade80':'#e8e6e0',textDecoration:st.done?'line-through':'none'}}>{st.l}{st.obligatoire?<span style={{color:'#f87171',fontSize:9,marginLeft:4}}>*</span>:null}</div>
-                <div style={{fontSize:9,color:'#5e5c56'}}>{st.dl}</div>
-              </div>
-            </div>;})}
-          </div>;
-        })}
-      </C>:<C style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:300,color:'#5e5c56'}}><div style={{textAlign:'center'}}><div style={{fontSize:40,marginBottom:10}}>👋</div>Selectionnez un travailleur et creez un dossier</div></C>}
-    </div>}
-    {tab==='dossiers'&&<C>
-      {dossiers.length>0?<Tbl cols={[
-        {k:'n',l:"Travailleur",b:1,r:r=>r.name},
-        {k:'d',l:"Date debut",r:r=>r.startDate},
-        {k:'p',l:"Progression",r:r=>{const done=r.steps.filter(x=>x.done).length;const pct=Math.round(done/r.steps.length*100);return <div style={{display:'flex',alignItems:'center',gap:8}}><div style={{flex:1,height:6,background:'rgba(198,163,78,.08)',borderRadius:3,overflow:'hidden'}}><div style={{height:'100%',width:pct+'%',background:pct===100?'#4ade80':'#c6a34e',borderRadius:3}}/></div><span style={{fontSize:11,fontWeight:600,color:pct===100?'#4ade80':'#c6a34e'}}>{pct}%</span></div>}},
-        {k:'o',l:"Obligatoires",r:r=>{const obl=r.steps.filter(x=>x.obligatoire);const done=obl.filter(x=>x.done).length;return <span style={{color:done===obl.length?'#4ade80':'#f87171',fontWeight:600}}>{done}/{obl.length}</span>}},
-        {k:'s',l:"Statut",r:r=>{const done=r.steps.every(x=>x.done);return <span style={{fontSize:10,padding:'2px 8px',borderRadius:4,background:done?'rgba(74,222,128,.1)':'rgba(251,146,56,.1)',color:done?'#4ade80':'#fb923c'}}>{done?'Termine':'En cours'}</span>}},
-      ]} data={dossiers}/>:<div style={{padding:30,textAlign:'center',color:'#5e5c56'}}>Aucun dossier</div>}
-    </C>}
-    {tab==='template'&&<C><ST>Template checklist onboarding ({STEPS.length} etapes)</ST>
-      {cats.map(cat=><div key={cat} style={{marginBottom:16}}>
-        <div style={{fontSize:11,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:6}}>{cat}</div>
-        {STEPS.filter(s2=>s2.cat===cat).map((st,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
-          <span style={{color:'#e8e6e0'}}>{st.l}{st.obligatoire?<span style={{color:'#f87171',fontSize:10,marginLeft:4}}>* obligatoire</span>:''}</span>
-          <span style={{fontSize:10,color:'#5e5c56'}}>{st.dl}</span>
-        </div>)}
-      </div>)}
-    </C>}
-  </div>;
-}
-
-// =====================================================
-//  OFFBOARDING — Workflow sortie de service
-// =====================================================
-function OffboardingMod({s,d}){
-  const ae=s.emps||[];
-  const [dossiers,setDossiers]=useState([]);
-  const [selEmp,setSelEmp]=useState(ae[0]?.id||'');
-  const [motif,setMotif]=useState('licenciement');
-  const [dateOut,setDateOut]=useState(new Date().toISOString().split('T')[0]);
-  const [tab,setTab]=useState('checklist');
-
-  const STEPS=[
-    {id:'notif',cat:'Juridique',l:'Lettre de licenciement / demission signee',obligatoire:true},
-    {id:'preavis',cat:'Juridique',l:'Calcul et notification du preavis',obligatoire:true},
-    {id:'c4',cat:'Documents',l:'C4 - Certificat de chomage',obligatoire:true},
-    {id:'dimona_out',cat:'Declarations',l:'Dimona OUT declaree',obligatoire:true},
-    {id:'fiche_paie',cat:'Documents',l:'Derniere fiche de paie',obligatoire:true},
-    {id:'pecule_sortie',cat:'Paiements',l:'Pecule de vacances de sortie calcule',obligatoire:true},
-    {id:'solde_tout',cat:'Paiements',l:'Solde de tout compte prepare',obligatoire:true},
-    {id:'attestation',cat:'Documents',l:'Attestation de travail / certificat',obligatoire:false},
-    {id:'fisc',cat:'Documents',l:'Fiche fiscale 281.10 (si annee terminee)',obligatoire:false},
-    {id:'outplacement',cat:'Juridique',l:'Offre outplacement (si >= 45 ans)',obligatoire:false},
-    {id:'badge_ret',cat:'Logistique',l:'Retour badge / cles / materiel',obligatoire:false},
-    {id:'it_ret',cat:'Logistique',l:'Retour PC / telephone / desactivation acces',obligatoire:false},
-    {id:'assurance',cat:'Admin',l:'Radiation assurance groupe + AT',obligatoire:true},
-    {id:'entretien',cat:'RH',l:'Entretien de sortie realise',obligatoire:false},
-  ];
-
-  const startOffboarding=()=>{
-    const emp=ae.find(e=>e.id===selEmp);if(!emp)return;
-    const p=calc(emp,DPER,s.co);
-    // Calcul preavis simplifie
-    const anc=emp.startD?Math.max(1,Math.round((new Date()-new Date(emp.startD))/(365.25*24*60*60*1000))):1;
-    const preavisSem=anc<=1?2:anc<=2?7:anc<=3?9:anc<=4?12:anc<=5?15:anc<=6?18:anc<=7?21:anc<=8?24:anc<=9?27:Math.min(62,27+Math.floor((anc-9)/1)*3);
-    setDossiers(prev=>[{empId:selEmp,name:`${emp.first} ${emp.last}`,dateOut,motif,brut:p.gross,anc,preavisSem,pecule:Math.round((p.gross+p.gross*0.92)*(anc>11?1:anc/12)*100)/100,steps:STEPS.map(s2=>({...s2,done:false})),status:'en_cours'},...prev]);
-  };
-
-  const toggleStep=(dIdx,sIdx)=>{
-    setDossiers(prev=>prev.map((d2,i)=>i===dIdx?{...d2,steps:d2.steps.map((st,j)=>j===sIdx?{...st,done:!st.done}:st)}:d2));
-  };
-
-  const cats=['Juridique','Declarations','Documents','Paiements','Admin','Logistique','RH'];
-
-  return <div>
-    <PH title="Offboarding" sub="Checklist sortie de service - C4, Dimona OUT, solde tout compte"/>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
-      {[{l:"Dossiers actifs",v:dossiers.filter(x=>x.status==='en_cours').length,c:'#fb923c'},{l:"Termines",v:dossiers.filter(x=>x.steps.every(s2=>s2.done)).length,c:'#4ade80'},{l:"Etapes",v:STEPS.length,c:'#60a5fa'},{l:"Obligatoires",v:STEPS.filter(x=>x.obligatoire).length,c:'#f87171'}].map((k,i)=>
-        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
-          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
-          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
-        </div>
-      )}
-    </div>
-    <div style={{display:'flex',gap:6,marginBottom:16}}>
-      {[{v:'checklist',l:'Nouveau'},{v:'dossiers',l:'Dossiers ('+dossiers.length+')'},{v:'guide',l:'Guide sortie'}].map(t=>
-        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
-          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
-      )}
-    </div>
-    {tab==='checklist'&&<div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
-      <div>
-        <C><ST>Demarrer offboarding</ST>
-          <I label="Travailleur" value={selEmp} onChange={setSelEmp} options={ae.map(e=>({v:e.id,l:`${e.first||''} ${e.last||''}`}))}/>
-          <I label="Motif" value={motif} onChange={setMotif} style={{marginTop:9}} options={[{v:'licenciement',l:'Licenciement'},{v:'demission',l:'Demission'},{v:'commun_accord',l:'Rupture amiable'},{v:'retraite',l:'Pension/Retraite'},{v:'fin_cdd',l:'Fin CDD'},{v:'fm',l:'Force majeure medicale'}]}/>
-          <I label="Date sortie" type="date" value={dateOut} onChange={setDateOut} style={{marginTop:9}}/>
-          <B onClick={startOffboarding} style={{width:'100%',marginTop:14}}>Creer dossier sortie</B>
-        </C>
-        {dossiers.length>0&&<C style={{marginTop:12}}><ST>Resume financier</ST>
-          <div style={{fontSize:11,color:'#9e9b93',lineHeight:2}}>
-            <div>Anciennete: <b style={{color:'#e8e6e0'}}>{dossiers[0].anc} ans</b></div>
-            <div>Preavis: <b style={{color:'#c6a34e'}}>{dossiers[0].preavisSem} semaines</b></div>
-            <div>Indemnite preavis: <b style={{color:'#fb923c'}}>{fmt(dossiers[0].brut*dossiers[0].preavisSem/4.33)}</b></div>
-            <div>Pecule sortie estime: <b style={{color:'#4ade80'}}>{fmt(dossiers[0].pecule)}</b></div>
-          </div>
-        </C>}
-      </div>
-      {dossiers.length>0?<C><ST>Dossier: {dossiers[0]?.name} — Sortie {dossiers[0]?.dateOut}</ST>
-        {cats.map(cat=>{const catSteps=dossiers[0].steps.filter(s2=>s2.cat===cat);if(!catSteps.length)return null;
-          return <div key={cat} style={{marginBottom:12}}>
-            <div style={{fontSize:11,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:4}}>{cat}</div>
-            {catSteps.map((st,si)=>{const realIdx=dossiers[0].steps.indexOf(st);return <div key={si} onClick={()=>toggleStep(0,realIdx)} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 10px',marginBottom:3,background:st.done?'rgba(74,222,128,.06)':'rgba(198,163,78,.03)',borderRadius:6,cursor:'pointer',border:st.obligatoire&&!st.done?'1px solid rgba(248,113,113,.2)':'1px solid transparent'}}>
-              <div style={{width:18,height:18,borderRadius:4,border:st.done?'2px solid #4ade80':'2px solid #5e5c56',background:st.done?'rgba(74,222,128,.15)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,color:'#4ade80'}}>{st.done?'V':''}</div>
-              <div style={{fontSize:12,color:st.done?'#4ade80':'#e8e6e0',textDecoration:st.done?'line-through':'none'}}>{st.l}{st.obligatoire?<span style={{color:'#f87171',fontSize:9,marginLeft:4}}>*</span>:null}</div>
-            </div>;})}
-          </div>;
-        })}
-      </C>:<C style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:300,color:'#5e5c56'}}><div style={{textAlign:'center'}}><div style={{fontSize:40,marginBottom:10}}>📦</div>Selectionnez un travailleur pour demarrer la sortie</div></C>}
-    </div>}
-    {tab==='dossiers'&&<C>
-      {dossiers.length>0?<Tbl cols={[
-        {k:'n',l:"Travailleur",b:1,r:r=>r.name},
-        {k:'m',l:"Motif",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:'rgba(251,146,56,.1)',color:'#fb923c'}}>{r.motif}</span>},
-        {k:'d',l:"Date sortie",r:r=>r.dateOut},
-        {k:'pr',l:"Preavis",r:r=>`${r.preavisSem} sem.`},
-        {k:'p',l:"Progression",r:r=>{const done=r.steps.filter(x=>x.done).length;const pct=Math.round(done/r.steps.length*100);return <span style={{fontWeight:600,color:pct===100?'#4ade80':'#c6a34e'}}>{pct}%</span>}},
-      ]} data={dossiers}/>:<div style={{padding:30,textAlign:'center',color:'#5e5c56'}}>Aucun dossier</div>}
-    </C>}
-    {tab==='guide'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
-      <C><ST>Documents obligatoires sortie</ST>
-        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
-          <div><b style={{color:'#f87171'}}>C4:</b> Dans les 5 jours ouvrables apres fin contrat</div>
-          <div><b style={{color:'#f87171'}}>Dimona OUT:</b> Jour de sortie effectif</div>
-          <div><b style={{color:'#f87171'}}>Derniere fiche de paie:</b> Mois de sortie</div>
-          <div><b style={{color:'#f87171'}}>Pecule de sortie:</b> Avec dernier paiement</div>
-          <div><b style={{color:'#f87171'}}>Compte individuel:</b> Annee en cours</div>
-          <div><b style={{color:'#f87171'}}>Attestation travail:</b> A la demande</div>
-        </div>
-      </C>
-      <C><ST>Calcul solde de tout compte</ST>
-        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
-          <div><b style={{color:'#4ade80'}}>+</b> Salaire jours prestes (prorata mois)</div>
-          <div><b style={{color:'#4ade80'}}>+</b> Pecule vacances sortie (simple + double prorata)</div>
-          <div><b style={{color:'#4ade80'}}>+</b> 13eme mois prorata (si applicable CP)</div>
-          <div><b style={{color:'#4ade80'}}>+</b> Indemnite compensatoire preavis (si non preste)</div>
-          <div><b style={{color:'#f87171'}}>-</b> ONSS travailleur</div>
-          <div><b style={{color:'#f87171'}}>-</b> Precompte professionnel</div>
-          <div><b style={{color:'#f87171'}}>-</b> Recuperation avances / prets</div>
-        </div>
-      </C>
-    </div>}
-  </div>;
-}
-
-// =====================================================
-//  REGISTRE DU PERSONNEL — Obligation legale
-// =====================================================
+function OnboardingMod({s,d}){const ae=s.emps||[];const [tab,setTab]=useState("process");
+const [checks,setChecks]=useState({contrat:false,dimona:false,medecine:false,reglement:false,badge:false,it:false,formation:false,mentor:false,onss:false,fiscal:false});
+const toggleCheck=(k2)=>setChecks(p=>({...p,[k2]:!p[k2]}));const doneCount=Object.values(checks).filter(Boolean).length;
+const recent=ae.filter(e=>{if(!e.startDate)return false;const d2=(Date.now()-new Date(e.startDate))/(86400000);return d2>=0&&d2<90;});
+return <div><PH title="Onboarding" sub="Processus integration - Checklist administrative et operationnelle"/>
+<div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:18}}>{[{l:"Checklist",v:doneCount+"/10",c:doneCount===10?"#4ade80":"#fb923c"},{l:"Nouveaux (<90j)",v:recent.length,c:"#60a5fa"},{l:"Total effectif",v:ae.length,c:"#c6a34e"},{l:"En cours",v:10-doneCount,c:"#f87171"},{l:"Progression",v:Math.round(doneCount/10*100)+"%",c:"#4ade80"}].map((k,i)=><div key={i} style={{padding:"12px 14px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:9,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:17,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div>
+<div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"process",l:"Processus"},{v:"checklist",l:"Checklist"},{v:"docs",l:"Documents requis"},{v:"timeline",l:"Timeline J-30 a J+90"},{v:"legal",l:"Obligations legales"},{v:"nouveaux",l:"Nouveaux entrants"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>
+{tab==="process"&&<C><ST>Processus onboarding en 10 etapes</ST>
+{[{n:1,t:"Signature contrat de travail",d:"CDI/CDD. Exemplaire signe par les 2 parties. Clauses specifiques (non-concurrence, ecolage).",c:"#c6a34e"},{n:2,t:"Declaration Dimona IN",d:"AVANT le premier jour de travail. Via portail securite sociale.",c:"#f87171"},{n:3,t:"Visite medicale prealable",d:"Obligatoire si poste a risque (securite, sante). Dans les 30 jours sinon.",c:"#60a5fa"},{n:4,t:"Remise reglement de travail",d:"Contre recu de reception. Obligatoire selon Loi 08/04/1965.",c:"#a78bfa"},{n:5,t:"Badge et acces",d:"Badge entree, cles, parking. Activation acces systemes.",c:"#4ade80"},{n:6,t:"Setup IT",d:"PC, email, VPN, logiciels, telephone. Preparation poste de travail.",c:"#fb923c"},{n:7,t:"Formation accueil",d:"Securite, incendie, premiers secours. Presentation equipe et locaux.",c:"#c6a34e"},{n:8,t:"Mentor / Parrain",d:"Designation mentor pour les 3 premiers mois. Suivi integration.",c:"#60a5fa"},{n:9,t:"Inscription ONSS",d:"Verification numero employeur, CP, code travailleur.",c:"#f87171"},{n:10,t:"Donnees fiscales",d:"Etat civil, situation familiale, compte bancaire, NISS.",c:"#a78bfa"}].map((r,i)=><div key={i} style={{display:"flex",gap:12,alignItems:"center",padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div style={{width:32,height:32,borderRadius:"50%",background:r.c+"20",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:700,color:r.c,flexShrink:0}}>{r.n}</div><div><b style={{color:r.c,fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:"#9e9b93",marginTop:2}}>{r.d}</div></div></div>)}
+</C>}
+{tab==="checklist"&&<C><ST>Checklist integration ({doneCount}/10)</ST>
+<div style={{height:6,background:"rgba(198,163,78,.1)",borderRadius:3,marginBottom:16,overflow:"hidden"}}><div style={{height:"100%",width:(doneCount/10*100)+"%",background:doneCount===10?"#4ade80":"#c6a34e",borderRadius:3,transition:"width .3s"}}/></div>
+{[{k:"contrat",l:"Contrat de travail signe"},{k:"dimona",l:"Dimona IN declaree"},{k:"medecine",l:"Visite medicale planifiee/faite"},{k:"reglement",l:"Reglement de travail remis"},{k:"badge",l:"Badge et acces fournis"},{k:"it",l:"Setup IT complet"},{k:"formation",l:"Formation accueil securite"},{k:"mentor",l:"Mentor designe"},{k:"onss",l:"Inscription ONSS verifiee"},{k:"fiscal",l:"Donnees fiscales collectees"}].map((r,i)=><div key={i} onClick={()=>toggleCheck(r.k)} style={{display:"flex",gap:10,alignItems:"center",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)",cursor:"pointer"}}><div style={{width:20,height:20,borderRadius:5,border:"2px solid "+(checks[r.k]?"#4ade80":"#5e5c56"),background:checks[r.k]?"rgba(74,222,128,.15)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#4ade80"}}>{checks[r.k]?"V":""}</div><span style={{color:checks[r.k]?"#4ade80":"#e8e6e0",fontSize:12}}>{r.l}</span></div>)}
+</C>}
+{tab==="docs"&&<C><ST>Documents a collecter</ST>
+{[{d:"Carte identite / titre sejour",ob:true},{d:"Numero NISS (carte SIS)",ob:true},{d:"Composition de menage",ob:true},{d:"Numero compte bancaire (IBAN)",ob:true},{d:"Photo identite",ob:false},{d:"Diplomes et certificats",ob:false},{d:"Permis de conduire (si requis)",ob:false},{d:"Extrait casier judiciaire (si requis)",ob:false},{d:"Certificat medical aptitude",ob:true},{d:"Attestation employeur precedent",ob:false},{d:"Attestation vacances precedent employeur",ob:true},{d:"Fiche fiscale 281 precedent employeur",ob:false}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#e8e6e0",fontSize:12}}>{r.d}</span><span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:r.ob?"rgba(248,113,113,.1)":"rgba(96,165,250,.1)",color:r.ob?"#f87171":"#60a5fa"}}>{r.ob?"Obligatoire":"Recommande"}</span></div>)}
+</C>}
+{tab==="timeline"&&<C><ST>Timeline integration</ST>
+{[{j:"J-30",t:"Preparation administrative",items:["Redaction contrat","Commande materiel IT","Preparation poste"],c:"#a78bfa"},{j:"J-7",t:"Finalisation",items:["Dimona IN","Setup email/VPN","Info equipe"],c:"#60a5fa"},{j:"J-1",t:"Veille entree",items:["Verification complete","Accueil prepare","Welcome pack"],c:"#c6a34e"},{j:"J+1",t:"Premier jour",items:["Accueil + visite","Remise reglement","Presentation equipe","Setup poste"],c:"#4ade80"},{j:"J+7",t:"Premiere semaine",items:["Formation securite","Prise en main outils","Premier feedback"],c:"#4ade80"},{j:"J+30",t:"Premier mois",items:["Point integration","Visite medicale","Evaluation initiale"],c:"#fb923c"},{j:"J+90",t:"Fin periode essai",items:["Evaluation complete","Confirmation ou fin","Plan developpement"],c:"#f87171"}].map((r,i)=><div key={i} style={{display:"flex",gap:14,padding:"12px 0",borderBottom:"1px solid rgba(255,255,255,.05)"}}><div style={{width:50,textAlign:"center",flexShrink:0}}><div style={{fontSize:14,fontWeight:700,color:r.c}}>{r.j}</div></div><div><b style={{color:r.c,fontSize:12}}>{r.t}</b><div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:4}}>{r.items.map((it,j)=><span key={j} style={{fontSize:10,padding:"2px 8px",borderRadius:4,background:r.c+"15",color:r.c}}>{it}</span>)}</div></div></div>)}
+</C>}
+{tab==="legal"&&<C><ST>Obligations legales employeur</ST>
+{[{t:"Contrat ecrit",d:"CDI: pas obligatoire mais fortement recommande. CDD/temps partiel: OBLIGATOIRE ecrit."},{t:"Dimona IN",d:"AVANT le premier jour. Sanction: 2.500 - 12.500 EUR par declaration manquante."},{t:"Reglement de travail",d:"Loi 08/04/1965. Remise contre recu. Contenu: horaires, remuneration, sanctions, etc."},{t:"Visite medicale",d:"Obligatoire poste securite. Recommandee dans les 30 jours pour autres postes."},{t:"Assurance accidents travail",d:"Obligatoire des le 1er jour. Souscription aupres assureur agree."},{t:"Formation securite",d:"AR 25/01/2001 postes de travail. Information risques specifiques."},{t:"RGPD",d:"Information traitement donnees personnelles. Base legale = execution contrat."},{t:"Accueil CCT 22",d:"CCT 22: obligation accueil par employeur. Parrainage recommande."}].map((r,i)=><div key={i} style={{padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><b style={{color:"#c6a34e",fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:"#9e9b93",marginTop:2}}>{r.d}</div></div>)}
+</C>}
+{tab==="nouveaux"&&<C><ST>Nouveaux entrants (moins de 90 jours)</ST>
+{recent.length===0?<div style={{color:"#5e5c56",textAlign:"center",padding:40}}>Aucun nouveau travailleur</div>:
+<Tbl cols={[{k:"n",l:"Nom",b:1,r:r=>(r.fn||"")+" "+(r.ln||"")},{k:"d",l:"Date entree",r:r=><span style={{color:"#60a5fa"}}>{r.startDate}</span>},{k:"j",l:"Jours",a:"right",r:r=><span style={{color:"#c6a34e"}}>{Math.floor((Date.now()-new Date(r.startDate))/86400000)}j</span>},{k:"t",l:"Contrat",r:r=><span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:(r.contractType||"CDI")==="CDI"?"rgba(74,222,128,.1)":"rgba(251,146,56,.1)",color:(r.contractType||"CDI")==="CDI"?"#4ade80":"#fb923c"}}>{r.contractType||"CDI"}</span>},{k:"g",l:"Brut",a:"right",r:r=><span style={{color:"#c6a34e",fontWeight:600}}>{fmt(+r.gross||0)}</span>}]} data={recent}/>}
+</C>}
+</div>;}
+function OffboardingMod({s,d}){const ae=s.emps||[];const [tab,setTab]=useState("process");const [selEmp,setSelEmp]=useState(ae[0]?.id||"");const emp=ae.find(e=>e.id===selEmp)||ae[0]||{};const anc=emp.startDate?Math.max(0.25,((Date.now()-new Date(emp.startDate))/(365.25*24*3600*1000))):1;const brut=+emp.gross||3000;
+const calcPreavis=(a,stat)=>{if(stat==="ouvrier"){if(a<0.25)return {sem:1,j:7};if(a<0.5)return {sem:2,j:14};if(a<1)return {sem:4,j:28};return {sem:Math.ceil(a*4),j:Math.ceil(a*4)*7};}if(a<0.25)return {sem:1,j:7};if(a<0.5)return {sem:3,j:21};if(a<1)return {sem:5,j:35};if(a<2)return {sem:7,j:49};if(a<3)return {sem:9,j:63};if(a<4)return {sem:12,j:84};if(a<5)return {sem:13,j:91};return {sem:Math.min(62,13+Math.ceil((a-5)*3)),j:Math.min(62,13+Math.ceil((a-5)*3))*7};};
+const preavis=calcPreavis(anc,emp.statut||"employe");const indemnite=brut*preavis.sem/4.33;const coutLic=indemnite*1.35;
+const [checks,setChecks]=useState({dimona:false,c4:false,soldeTout:false,attestation:false,vacances:false,materiel:false,access:false,exit:false});
+const toggleCheck=(k2)=>setChecks(p=>({...p,[k2]:!p[k2]}));const doneCount=Object.values(checks).filter(Boolean).length;
+return <div><PH title="Offboarding" sub="Processus de sortie - Preavis - Solde de tout compte"/>
+<div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:18}}>{[{l:"Anciennete",v:anc.toFixed(1)+" ans",c:"#60a5fa"},{l:"Preavis",v:preavis.sem+" sem.",c:"#c6a34e"},{l:"Indemnite",v:fmt(indemnite),c:"#f87171"},{l:"Cout licenciement",v:fmt(coutLic),c:"#f87171"},{l:"Checklist",v:doneCount+"/8",c:doneCount===8?"#4ade80":"#fb923c"}].map((k,i)=><div key={i} style={{padding:"12px 14px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:9,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:17,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div>
+<div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"process",l:"Processus"},{v:"preavis",l:"Calcul preavis"},{v:"solde",l:"Solde tout compte"},{v:"docs",l:"Documents"},{v:"checklist",l:"Checklist sortie"},{v:"legal",l:"Base legale"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>
+{tab==="process"&&<C><ST>Processus de sortie en 8 etapes</ST>
+{[{n:1,t:"Notification",d:"Lettre recommandee ou remise en main propre contre recu. Date = J0.",c:"#f87171"},{n:2,t:"Dimona OUT",d:"Declaration sortie via portail ONSS. Au plus tard le dernier jour.",c:"#60a5fa"},{n:3,t:"Certificat C4",d:"Formulaire chomage. Obligatoire dans les 2 mois apres fin contrat.",c:"#fb923c"},{n:4,t:"Solde de tout compte",d:"Calcul: salaire restant + preavis + vacances + 13e prorata.",c:"#c6a34e"},{n:5,t:"Attestation vacances",d:"Nombre jours pris/restants. Pecule vacances de sortie.",c:"#a78bfa"},{n:6,t:"Recuperation materiel",d:"PC, GSM, voiture, badge, cles, cartes. Inventaire signe.",c:"#4ade80"},{n:7,t:"Coupure acces",d:"Email, VPN, logiciels, badges. Desactivation jour J.",c:"#f87171"},{n:8,t:"Entretien de sortie",d:"Exit interview. Feedback, raisons depart, transfert connaissances.",c:"#60a5fa"}].map((r,i)=><div key={i} style={{display:"flex",gap:12,alignItems:"center",padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div style={{width:32,height:32,borderRadius:"50%",background:r.c+"20",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:700,color:r.c,flexShrink:0}}>{r.n}</div><div><b style={{color:r.c,fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:"#9e9b93",marginTop:2}}>{r.d}</div></div></div>)}
+</C>}
+{tab==="preavis"&&<C><ST>Calcul delai de preavis (Loi Statut Unique)</ST>
+<div style={{marginBottom:12}}><div style={{fontSize:10,color:"#5e5c56",marginBottom:3}}>Travailleur</div><select value={selEmp} onChange={e2=>setSelEmp(e2.target.value)} style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid rgba(198,163,78,.15)",background:"rgba(198,163,78,.04)",color:"#e8e6e0",fontSize:12,fontFamily:"inherit"}}>{ae.map(e2=><option key={e2.id} value={e2.id}>{(e2.fn||"")+" "+(e2.ln||"")}</option>)}</select></div>
+{[{l:"Nom",v:(emp.fn||"")+" "+(emp.ln||"")},{l:"Anciennete",v:anc.toFixed(1)+" ans"},{l:"Statut",v:emp.statut||"Employe"},{l:"Brut mensuel",v:fmt(brut)},{l:"Preavis employeur",v:preavis.sem+" semaines ("+preavis.j+" jours)"},{l:"Indemnite compensatoire",v:fmt(indemnite)},{l:"ONSS sur indemnite",v:fmt(indemnite*0.2507)},{l:"Cout total licenciement",v:fmt(coutLic)}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#9e9b93"}}>{r.l}</span><span style={{fontWeight:600,color:"#e8e6e0"}}>{r.v}</span></div>)}
+<Tbl cols={[{k:"a",l:"Anciennete",b:1,r:r=>r.anc},{k:"e",l:"Preavis empl.",a:"right",r:r=><span style={{color:"#f87171"}}>{r.emp}</span>},{k:"t",l:"Preavis trav.",a:"right",r:r=><span style={{color:"#4ade80"}}>{r.trav}</span>}]} data={[{anc:"0-3 mois",emp:"1 sem.",trav:"1 sem."},{anc:"3-6 mois",emp:"3 sem.",trav:"2 sem."},{anc:"6-12 mois",emp:"5 sem.",trav:"3 sem."},{anc:"1-2 ans",emp:"7 sem.",trav:"4 sem."},{anc:"3-4 ans",emp:"12 sem.",trav:"6 sem."},{anc:"5-10 ans",emp:"13-27 sem.",trav:"7-13 sem."},{anc:"10-20 ans",emp:"27-62 sem.",trav:"13 sem. max"},{anc:"20+ ans",emp:"62+ sem.",trav:"13 sem. max"}]}/>
+</C>}
+{tab==="solde"&&<C><ST>Solde de tout compte</ST>
+{[{l:"Salaire restant (prorata)",v:brut*0.5,c:"#4ade80"},{l:"Indemnite compensatoire preavis",v:indemnite,c:"#fb923c"},{l:"Pecule vacances sortie (simple)",v:brut*0.0764*(12-new Date().getMonth()),c:"#4ade80"},{l:"Pecule vacances sortie (double)",v:brut*0.0608*(12-new Date().getMonth()),c:"#4ade80"},{l:"13eme mois prorata",v:brut*(new Date().getMonth()+1)/12,c:"#4ade80"},{l:"Prime fin annee prorata",v:brut*(new Date().getMonth()+1)/12,c:"#4ade80"},{l:"Eco-cheques prorata",v:250*(new Date().getMonth()+1)/12,c:"#4ade80"},{l:"Retenue ONSS personnelle",v:-(brut*0.5+indemnite)*0.1307,c:"#f87171"},{l:"Retenue precompte",v:-(brut*0.5+indemnite)*0.22,c:"#f87171"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#9e9b93"}}>{r.l}</span><span style={{fontWeight:600,color:r.c}}>{r.v<0?"- "+fmt(Math.abs(r.v)):fmt(r.v)}</span></div>)}
+</C>}
+{tab==="docs"&&<C><ST>Documents obligatoires sortie</ST>
+{[{d:"Certificat C4 (chomage)",dl:"2 mois",ob:true,desc:"Formulaire ONEM. Motif de sortie. Base calcul allocations."},{d:"Attestation de vacances",dl:"Dernier jour",ob:true,desc:"Jours pris, solde, pecule verse."},{d:"Fiche de paie finale",dl:"Dernier jour",ob:true,desc:"Solde de tout compte detaille."},{d:"Fiche 281.10 annuelle",dl:"28 fevrier N+1",ob:true,desc:"Revenus de annee de sortie."},{d:"Attestation employeur",dl:"Sur demande",ob:false,desc:"Fonction, periode, description poste."},{d:"Certificat medical sortie",dl:"Si requis",ob:false,desc:"Surveillance sante prolongee selon risques."},{d:"Clause non-concurrence",dl:"Selon contrat",ob:false,desc:"Activation eventuelle si prevue au contrat (> 38.665 EUR/an)."}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><b style={{color:"#e8e6e0",fontSize:12}}>{r.d}</b><div style={{fontSize:10,color:"#5e5c56"}}>{r.desc}</div></div><div style={{textAlign:"right"}}><span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:r.ob?"rgba(248,113,113,.1)":"rgba(96,165,250,.1)",color:r.ob?"#f87171":"#60a5fa"}}>{r.ob?"Obligatoire":"Facultatif"}</span><div style={{fontSize:10,color:"#9e9b93",marginTop:2}}>{r.dl}</div></div></div>)}
+</C>}
+{tab==="checklist"&&<C><ST>Checklist de sortie ({doneCount}/8)</ST>
+<div style={{height:6,background:"rgba(198,163,78,.1)",borderRadius:3,marginBottom:16,overflow:"hidden"}}><div style={{height:"100%",width:(doneCount/8*100)+"%",background:doneCount===8?"#4ade80":"#c6a34e",borderRadius:3,transition:"width .3s"}}/></div>
+{[{k:"dimona",l:"Dimona OUT envoyee"},{k:"c4",l:"Certificat C4 remis"},{k:"soldeTout",l:"Solde tout compte calcule et verse"},{k:"attestation",l:"Attestation vacances remise"},{k:"vacances",l:"Pecule vacances de sortie verse"},{k:"materiel",l:"Materiel recupere (PC, GSM, cles)"},{k:"access",l:"Acces coupes (email, VPN, badge)"},{k:"exit",l:"Entretien de sortie realise"}].map((r,i)=><div key={i} onClick={()=>toggleCheck(r.k)} style={{display:"flex",gap:10,alignItems:"center",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)",cursor:"pointer"}}><div style={{width:20,height:20,borderRadius:5,border:"2px solid "+(checks[r.k]?"#4ade80":"#5e5c56"),background:checks[r.k]?"rgba(74,222,128,.15)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#4ade80"}}>{checks[r.k]?"V":""}</div><span style={{color:checks[r.k]?"#4ade80":"#e8e6e0",fontSize:12}}>{r.l}</span></div>)}
+</C>}
+{tab==="legal"&&<C><ST>Base legale licenciement</ST>
+{[{t:"Loi Statut Unique (01/01/2014)",d:"Harmonisation ouvriers/employes. Preavis unique base sur anciennete."},{t:"Motif grave (art. 35)",d:"Licenciement immediat sans preavis. Notification 3 jours ouvrables. Charge de la preuve employeur."},{t:"Licenciement manifestement deraisonnable",d:"CCT 109: si pas de lien avec aptitude/conduite/necessites entreprise. Indemnite 3-17 semaines."},{t:"Protection speciale",d:"Delegue syndical, femme enceinte, credit-temps, maladie. Preavis interdit pendant protection."},{t:"Outplacement",d:"Obligatoire si preavis 30+ semaines ou 45+ ans. 60h sur 12 mois. Cout 1.800 EUR min."},{t:"Clause non-concurrence",d:"Valable si brut > 38.665 EUR/an. Max 12 mois. Compensation = 50% du brut * duree."},{t:"Rupture de commun accord",d:"Convention signee. Pas de C4 chomage. Indemnite libre negociee."}].map((r,i)=><div key={i} style={{padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><b style={{color:"#c6a34e",fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:"#9e9b93",marginTop:2}}>{r.d}</div></div>)}
+</C>}
+</div>;}
 function RegistrePersonnelMod({s,d}){
   const ae=s.emps||[];
   const [tab,setTab]=useState('registre');
