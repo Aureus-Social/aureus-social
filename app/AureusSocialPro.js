@@ -1,4 +1,4 @@
-// Aureus Social Pro v20.1 — Build 1771257420
+// Aureus Social Pro v20.2
 "use client";
 import { useState, useReducer, useRef, useMemo, useEffect, createContext, useContext } from "react";
 
@@ -6602,7 +6602,7 @@ function BelcotaxPage({s,d}) {
     {tab==='deadlines'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
       <C><ST>Échéances BelcotaxOnWeb</ST>
         <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
-          {[{l:"281.10 Rémunérations",dl:"28/02 (N+1)",note:"Obligatoire pour tous les employeurs"},{l:"281.20 Dirigeants",dl:"28/02 (N+1)",note:"Administrateurs, gérants"},{l:"281.50 Honoraires/Commissions",dl:"30/06 (N+1)",note:"> 250€/an/bénéficiaire"},{l:"281.30 Jetons présence",dl:"28/02 (N+1)",note:"Membres CA, ASBL"},{l:"Rectificative",dl:"Pas de deadline fixe",note:"Via BelcotaxOnWeb portail SPF"}].map((r,i)=>
+          {[{l:"281.10 Rémunérations",dl:"28/02 (N+1)",note:"Obligatoire pour tous les employeurs"},{l:"281.20 Dirigeants",dl:"28/02 (N+1)",note:"Administrateurs, gérants"},{l:"281.50 Honoraires/Commissions",dl:"30/06 (N+1)",note:"plus de 250 EUR/an/bénéficiaire"},{l:"281.30 Jetons présence",dl:"28/02 (N+1)",note:"Membres CA, ASBL"},{l:"Rectificative",dl:"Pas de deadline fixe",note:"Via BelcotaxOnWeb portail SPF"}].map((r,i)=>
             <div key={i} style={{padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
               <div style={{display:'flex',justifyContent:'space-between'}}><b style={{color:'#e8e6e0'}}>{r.l}</b><span style={{color:'#c6a34e',fontWeight:600}}>{r.dl}</span></div>
               <div style={{fontSize:10,color:'#5e5c56'}}>{r.note}</div>
@@ -7788,10 +7788,10 @@ function DRSMod({s,d}){
       </C>
       <C><ST>Informations {sectors.find(s2=>s2.v===sector)?.l}</ST>
         <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
-          {sector==='chomage'?[{l:"Canal",v:"Batch ou portail securite sociale"},{l:"Document C4",v:"Obligatoire pour scenario 1"},{l:"Delai",v:"Dans les 2 mois de la fin de contrat"},{l:"Mensuel (S5/S6)",v:"Avant le 5 du mois suivant"},{l:"Rectification",v:"Annulation + nouvelle declaration"}]
+          {(sector==='chomage'?[{l:"Canal",v:"Batch ou portail securite sociale"},{l:"Document C4",v:"Obligatoire pour scenario 1"},{l:"Delai",v:"Dans les 2 mois de la fin de contrat"},{l:"Mensuel (S5/S6)",v:"Avant le 5 du mois suivant"},{l:"Rectification",v:"Annulation + nouvelle declaration"}]
           :sector==='inami'?[{l:"Type L1",v:"Declaration electronique INAMI"},{l:"Delai incapacite",v:"14 jours calendrier"},{l:"Delai maternite",v:"8 semaines avant date presumee"},{l:"Salaire garanti",v:"30 jours (employes) / 14j+14j (ouvriers)"},{l:"Mutuelle",v:"Prend le relais apres salaire garanti"}]
-          :sector==='pension'?[{l:"Type P1",v:"Carriere et droits pension"},{l:"Pension legale",v:"66 ans (2026) ou 45 ans carriere"},{l:"Delai",v:"12 mois avant la prise de pension"},{l:"Bonus pension",v:"Si carriere > 45 ans (supprime depuis 2015)"},{l:"2eme pilier",v:"Pension complementaire employeur"}]
-          :[{l:"Canal",v:"Batch ou portail securite sociale"},{l:"Format",v:"XML structure (schema ONSS)"},{l:"Delai",v:"Dans les 5 jours ouvrables"},{l:"Accuse",v:"Ticket de reception automatique"},{l:"Correction",v:"Annulation + nouvelle declaration"}]}.map((r,i)=>
+          :sector==='pension'?[{l:"Type P1",v:"Carriere et droits pension"},{l:"Pension legale",v:"66 ans (2026) ou 45 ans carriere"},{l:"Delai",v:"12 mois avant la prise de pension"},{l:"Bonus pension",v:"Si carriere plus de 45 ans (supprime depuis 2015)"},{l:"2eme pilier",v:"Pension complementaire employeur"}]
+          :[{l:"Canal",v:"Batch ou portail securite sociale"},{l:"Format",v:"XML structure (schema ONSS)"},{l:"Delai",v:"Dans les 5 jours ouvrables"},{l:"Accuse",v:"Ticket de reception automatique"},{l:"Correction",v:"Annulation + nouvelle declaration"}]).map((r,i)=>
             <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
               <span>{r.l}</span><span style={{fontWeight:600,color:'#e8e6e0'}}>{r.v}</span>
             </div>
@@ -7814,7 +7814,7 @@ function DRSMod({s,d}){
       ]} data={drsHistory}/>:<div style={{padding:30,textAlign:'center',color:'#5e5c56'}}>Aucune DRS generee. Utilisez l'onglet "Generer DRS".</div>}
     </C>}
     {tab==='scenarios'&&<C><ST>Scenarios ASR (Application Sociale Risque)</ST>
-      {[{s:'Scenario 1',d:"Debut chomage complet apres fin de contrat",t:'C4 obligatoire',dl:'2 mois',color:'#f87171'},{s:'Scenario 2',d:"Chomage temporaire - declaration initiale",t:'Notification ONEM',dl:'Le jour meme',color:'#fb923c'},{s:'Scenario 3',d:"RCC/Prepension - debut periode",t:'C4-RCC',dl:'2 mois',color:'#f87171'},{s:'Scenario 5',d:"Declaration mensuelle chomage temporaire",t:'Mensuel',dl:'5 du mois suivant',color:'#c6a34e'},{s:'Scenario 6',d:"Declaration mensuelle CT economique",t:'Mensuel',dl:'5 du mois suivant',color:'#c6a34e'},{s:'Scenario 10',d:"Incapacite de travail > 28 jours",t:'Mutuelle/INAMI',dl:'14 jours',color:'#60a5fa'},{s:'Scenario 12',d:"Repos de maternite",t:'INAMI',dl:'8 sem. avant',color:'#a78bfa'},{s:'Scenario 50',d:"Vacances annuelles ouvriers",t:'ONVA',dl:'Annuel',color:'#4ade80'}].map((r,i)=>
+      {[{s:'Scenario 1',d:"Debut chomage complet apres fin de contrat",t:'C4 obligatoire',dl:'2 mois',color:'#f87171'},{s:'Scenario 2',d:"Chomage temporaire - declaration initiale",t:'Notification ONEM',dl:'Le jour meme',color:'#fb923c'},{s:'Scenario 3',d:"RCC/Prepension - debut periode",t:'C4-RCC',dl:'2 mois',color:'#f87171'},{s:'Scenario 5',d:"Declaration mensuelle chomage temporaire",t:'Mensuel',dl:'5 du mois suivant',color:'#c6a34e'},{s:'Scenario 6',d:"Declaration mensuelle CT economique",t:'Mensuel',dl:'5 du mois suivant',color:'#c6a34e'},{s:'Scenario 10',d:"Incapacite de travail de plus de 28 jours",t:'Mutuelle/INAMI',dl:'14 jours',color:'#60a5fa'},{s:'Scenario 12',d:"Repos de maternite",t:'INAMI',dl:'8 sem. avant',color:'#a78bfa'},{s:'Scenario 50',d:"Vacances annuelles ouvriers",t:'ONVA',dl:'Annuel',color:'#4ade80'}].map((r,i)=>
         <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
           <div style={{flex:1}}><b style={{color:'#c6a34e'}}>{r.s}</b><div style={{fontSize:10.5,color:'#9e9b93'}}>{r.d}</div></div>
           <div style={{display:'flex',gap:8,alignItems:'center'}}>
@@ -18599,5 +18599,3 @@ export default function AureusSocialPro({ supabase, user, onLogout }) {
   return <LangProvider><AppInner supabase={supabase} user={user} onLogout={onLogout}/></LangProvider>;
 }
 
-/ /   v 2 0 . 2   f i x  
- 
