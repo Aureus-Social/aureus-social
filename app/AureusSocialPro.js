@@ -7550,46 +7550,7 @@ function ODMod({s,d}){const ae=s.emps||[];const [tab,setTab]=useState("ops");con
 
 function CRMod({s,d}){const ae=s.emps||[];const [tab,setTab]=useState("cr");const masseBrute=ae.reduce((a,e)=>a+(+e.gross||0),0);const onssP=masseBrute*0.2507;const onssT=masseBrute*0.1307;const pp=masseBrute*0.22;const nets=masseBrute-onssT-pp;const coutTotal=masseBrute+onssP;const ratioNet=masseBrute>0?((nets/coutTotal)*100).toFixed(1):"0";return <div><PH title="Cout de la Remuneration" sub="Analyse cout employeur vs net travailleur - Masse salariale"/><div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:12,marginBottom:18}}>{[{l:"Masse brute",v:fmt(masseBrute),c:"#c6a34e"},{l:"ONSS patronal",v:fmt(onssP),c:"#f87171"},{l:"Cout total empl.",v:fmt(coutTotal),c:"#f87171"},{l:"Net total trav.",v:fmt(nets),c:"#4ade80"},{l:"Ratio net/cout",v:ratioNet+"%",c:"#fb923c"}].map((k,i)=><div key={i} style={{padding:"14px 16px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:10,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div><div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"cr",l:"Vue globale"},{v:"detail",l:"Par travailleur"},{v:"charges",l:"Detail charges"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="cr"&&<C><ST>Decomposition masse salariale mensuelle</ST>{[{l:"Salaires bruts",v:masseBrute,c:"#e8e6e0"},{l:"ONSS patronal (25.07%)",v:onssP,c:"#f87171"},{l:"Cout total employeur",v:coutTotal,c:"#f87171"},{l:"ONSS personnel (-13.07%)",v:-onssT,c:"#f87171"},{l:"Precompte prof. (~22%)",v:-pp,c:"#f87171"},{l:"Net total travailleurs",v:nets,c:"#4ade80"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#9e9b93"}}>{r.l}</span><span style={{fontWeight:600,color:r.c}}>{r.v<0?"- "+fmt(Math.abs(r.v)):fmt(r.v)}</span></div>)}</C>}{tab==="detail"&&<C><Tbl cols={[{k:"n",l:"Travailleur",b:1,r:r=>(r.fn||"")+" "+(r.ln||"")},{k:"g",l:"Brut",a:"right",r:r=><span style={{color:"#e8e6e0"}}>{fmt(+r.gross||0)}</span>},{k:"o",l:"ONSS empl.",a:"right",r:r=><span style={{color:"#f87171"}}>{fmt((+r.gross||0)*0.2507)}</span>},{k:"c",l:"Cout empl.",a:"right",r:r=><span style={{color:"#f87171",fontWeight:700}}>{fmt((+r.gross||0)*1.2507)}</span>},{k:"ne",l:"Net estim.",a:"right",r:r=><span style={{color:"#4ade80"}}>{fmt((+r.gross||0)*0.5645)}</span>}]} data={ae}/></C>}{tab==="charges"&&<C><ST>Detail charges patronales</ST>{[{l:"ONSS de base",v:"24.92%",d:"Cotisation principale"},{l:"Moderation salariale",v:"0.15%",d:"Depuis 2024"},{l:"Total ONSS patronal",v:"25.07%",d:"Taux global"},{l:"Assurance accidents travail",v:"~1%",d:"Selon secteur et sinistralite"},{l:"Medecine du travail",v:"91.50 EUR/an",d:"Par travailleur soumis"},{l:"Cheques-repas (part patronale)",v:"Max 6.91 EUR/j",d:"220 jours = 1.520 EUR/an"},{l:"Eco-cheques",v:"Max 250 EUR/an",d:"Si prevu par CCT sectorielle"},{l:"13eme mois",v:"~8.33%",d:"1/12 du salaire annuel"},{l:"Pecule vacances double",v:"~15.38%",d:"Ouvriers via ONVA / Employes direct"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><span style={{color:"#e8e6e0"}}>{r.l}</span><div style={{fontSize:10,color:"#5e5c56"}}>{r.d}</div></div><span style={{fontWeight:600,color:"#c6a34e"}}>{r.v}</span></div>)}</C>}</div>;}
 
-function EnvoiMod({s,d}){
-  const ae=s.emps||[];const [envois,setEnvois]=useState([]);
-  const [f,setF]=useState({type:"fiche",mois:MN[new Date().getMonth()],annee:new Date().getFullYear(),mode:'email'});
-  const add=()=>{const ts=Date.now();setEnvois(p=>[{...f,id:"ENV-"+ts,date:new Date().toISOString().split('T')[0],count:ae.length,status:'sent'},...p]);};
-  
-  return <div>
-    <PH title="Envoi Documents" sub="Fiches de paie, attestations — Email, portail, courrier"/>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
-      {[{l:"Envois ce mois",v:envois.length,c:'#60a5fa'},{l:"Travailleurs",v:ae.length,c:'#c6a34e'},{l:"Mode principal",v:"Email",c:'#4ade80'},{l:"Taux délivré",v:"100%",c:'#a78bfa'}].map((k,i)=>
-        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
-          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
-          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
-        </div>
-      )}
-    </div>
-    <div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:18}}>
-      <C><ST>Nouvel envoi</ST>
-        <I label="Type" value={f.type} onChange={v=>setF({...f,type:v})} options={[{v:"fiche",l:"Fiches de paie"},{v:"fiscal",l:"Fiches fiscales 281.10"},{v:"attestation",l:"Attestations"},{v:"info",l:"Communication RH"}]}/>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginTop:9}}>
-          <I label="Mois" value={f.mois} onChange={v=>setF({...f,mois:v})} options={MN.map(m=>({v:m,l:m}))}/>
-          <I label="Année" type="number" value={f.annee} onChange={v=>setF({...f,annee:+v})}/>
-        </div>
-        <I label="Mode" value={f.mode} onChange={v=>setF({...f,mode:v})} style={{marginTop:9}} options={[{v:"email",l:"Email individuel"},{v:"portail",l:"Portail self-service"},{v:"courrier",l:"Courrier postal"}]}/>
-        <B onClick={add} style={{width:'100%',marginTop:14}}>Envoyer à {ae.length} travailleurs</B>
-      </C>
-      <C style={{padding:0,overflow:'hidden'}}>
-        <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Historique envois</div></div>
-        {envois.length>0?<Tbl cols={[
-          {k:'t',l:"Type",b:1,r:r=>r.type},
-          {k:'p',l:"Période",r:r=>`${r.mois} ${r.annee}`},
-          {k:'m',l:"Mode",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:"rgba(74,222,128,.1)",color:'#4ade80'}}>{r.mode}</span>},
-          {k:'n',l:"Destinataires",a:'right',r:r=>r.count},
-          {k:'d',l:"Date",r:r=>r.date},
-          {k:'s',l:"Statut",r:r=><span style={{color:'#4ade80'}}>✓ Envoyé</span>},
-        ]} data={envois}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Aucun envoi</div>}
-      </C>
-    </div>
-  </div>;
-}
-
+function EnvoiMod({s,d}){const [tab,setTab]=useState("envois");const envois=[{id:1,date:"2026-01-05",type:"Dimona IN",dest:"ONSS",statut:"Envoye",ref:"DIM-2026-001"},{id:2,date:"2026-01-31",type:"DmfA T4 2025",dest:"ONSS",statut:"Envoye",ref:"DMFA-2025-Q4"},{id:3,date:"2026-02-28",type:"Belcotax 2025",dest:"SPF Finances",statut:"En attente",ref:"BLX-2025-001"},{id:4,date:"2026-03-31",type:"DmfA T1 2026",dest:"ONSS",statut:"Planifie",ref:"DMFA-2026-Q1"},{id:5,date:"2026-01-15",type:"SEPA Salaires",dest:"Banque",statut:"Envoye",ref:"SEPA-2026-001"},{id:6,date:"2026-06-30",type:"Bilan social",dest:"BNB",statut:"Planifie",ref:"BS-2025"}];const done=envois.filter(e=>e.statut==="Envoye").length;const pending=envois.filter(e=>e.statut==="En attente").length;return <div><PH title="Envois et Transmissions" sub="Suivi des declarations electroniques - ONSS, SPF, BNB"/><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>{[{l:"Total envois",v:envois.length,c:"#c6a34e"},{l:"Envoyes",v:done,c:"#4ade80"},{l:"En attente",v:pending,c:"#fb923c"},{l:"Planifies",v:envois.length-done-pending,c:"#60a5fa"}].map((k,i)=><div key={i} style={{padding:"14px 16px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:10,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div><div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"envois",l:"Tous les envois"},{v:"calendrier",l:"Calendrier"},{v:"canaux",l:"Canaux"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="envois"&&<C><Tbl cols={[{k:"d",l:"Date",r:r=>r.date},{k:"t",l:"Type",b:1,r:r=>r.type},{k:"de",l:"Destinataire",r:r=><span style={{color:"#60a5fa"}}>{r.dest}</span>},{k:"r",l:"Reference",r:r=><span style={{fontFamily:"monospace",fontSize:10,color:"#9e9b93"}}>{r.ref}</span>},{k:"s",l:"Statut",r:r=><span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:r.statut==="Envoye"?"rgba(74,222,128,.1)":r.statut==="En attente"?"rgba(251,146,56,.1)":"rgba(96,165,250,.1)",color:r.statut==="Envoye"?"#4ade80":r.statut==="En attente"?"#fb923c":"#60a5fa"}}>{r.statut}</span>}]} data={envois}/></C>}{tab==="calendrier"&&<C><ST>Calendrier declarations 2026</ST>{[{m:"Janvier",items:["Dimona IN/OUT","SEPA salaires"]},{m:"Fevrier",items:["Belcotax XML 281"]},{m:"Mars",items:["DmfA T1"]},{m:"Avril",items:["Bilan social provisoire"]},{m:"Juin",items:["DmfA T2","Bilan social BNB"]},{m:"Septembre",items:["DmfA T3"]},{m:"Decembre",items:["DmfA T4","Fiches 281 preparation"]}].map((r,i)=><div key={i} style={{display:"flex",gap:12,padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{width:80,color:"#c6a34e",fontWeight:600,fontSize:12}}>{r.m}</span><span style={{color:"#e8e6e0",fontSize:11}}>{r.items.join(" / ")}</span></div>)}</C>}{tab==="canaux"&&<C><ST>Canaux de transmission</ST>{[{c:"ONSS (DmfA/Dimona)",url:"www.socialsecurity.be",proto:"Batch XML via portail SSE"},{c:"SPF Finances (Belcotax)",url:"www.belcotaxonweb.be",proto:"XML 281 via Belcotax-on-web"},{c:"BNB (Bilan social)",url:"www.nbb.be",proto:"XBRL via Filing"},{c:"Banque (SEPA)",url:"Isabel / portail banque",proto:"XML pain.001.001.03"},{c:"Assureur AT",url:"Portail assureur",proto:"Declarations sinistres online"}].map((r,i)=><div key={i} style={{padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><b style={{color:"#c6a34e",fontSize:12}}>{r.c}</b><div style={{fontSize:10.5,color:"#9e9b93"}}>{r.proto} - {r.url}</div></div>)}</C>}</div>;}
 
 function DRSMod({s,d}){
   const ae=s.emps||[];const [tab,setTab]=useState('generate');
@@ -7763,51 +7724,8 @@ function DRSMod({s,d}){
 }
 
 
-function FichesMod({s,d}){
-  const ae=s.emps||[];const [mois,setMois]=useState(new Date().getMonth());const [yr,setYr]=useState(new Date().getFullYear());
-  const data=ae.map(e=>{const p=calc(e,DPER,s.co);return{e,p};});
-  const totGross=data.reduce((a,r)=>a+r.p.gross,0);const totNet=data.reduce((a,r)=>a+r.p.net,0);
-  
-  return <div>
-    <PH title="Fiches de Paie" sub="Génération mensuelle — Consultation et envoi"/>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
-      {[{l:"Fiches à générer",v:ae.length,c:'#60a5fa'},{l:"Brut total",v:fmt(totGross),c:'#e8e6e0'},{l:"Net total",v:fmt(totNet),c:'#4ade80'},{l:"Période",v:MN[mois]+' '+yr,c:'#c6a34e'}].map((k,i)=>
-        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
-          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
-          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
-        </div>
-      )}
-    </div>
-    <div style={{display:'flex',gap:9,marginBottom:16}}>
-      <I label="Mois" value={mois} onChange={v=>setMois(+v)} options={MN.map((m,i)=>({v:i,l:m}))}/>
-      <I label="Année" type="number" value={yr} onChange={v=>setYr(+v)}/>
-    </div>
-    <C style={{padding:0,overflow:'hidden'}}>
-      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)',display:'flex',justifyContent:'space-between'}}>
-        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Fiches {MN[mois]} {yr}</div>
-        <B>Générer toutes les fiches</B>
-      </div>
-      <Tbl cols={[
-        {k:'n',l:"Travailleur",b:1,r:r=>`${r.e.first||r.e.fn||'Emp'} ${r.e.last||''}`},
-        {k:'st',l:"Statut",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:r.e.statut==='ouvrier'?'rgba(248,113,113,.1)':'rgba(96,165,250,.1)',color:r.e.statut==='ouvrier'?'#f87171':'#60a5fa'}}>{r.e.statut||'employé'}</span>},
-        {k:'g',l:"Brut",a:'right',r:r=>fmt(r.p.gross)},
-        {k:'o',l:"ONSS",a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.p.onssNet)}</span>},
-        {k:'t',l:"PP",a:'right',r:r=><span style={{color:'#a78bfa'}}>{fmt(r.p.tax)}</span>},
-        {k:'ne',l:"Net",a:'right',r:r=><span style={{fontWeight:600,color:'#4ade80'}}>{fmt(r.p.net)}</span>},
-        {k:'a',l:"",r:r=><span style={{color:'#60a5fa',cursor:'pointer',fontSize:10}}>📄</span>},
-      ]} data={data}/>
-      <div style={{padding:'12px 18px',borderTop:'1px solid rgba(139,115,60,.1)',display:'flex',justifyContent:'flex-end',gap:16,fontSize:12}}>
-        <span>Total brut: <b style={{color:'#e8e6e0'}}>{fmt(totGross)}</b></span>
-        <span>Total net: <b style={{color:'#4ade80'}}>{fmt(totNet)}</b></span>
-      </div>
-    </C>
-  </div>;
-}
+function FichesMod({s,d}){const ae=s.emps||[];const [tab,setTab]=useState("fiches");const [annee,setAnnee]=useState("2026");return <div><PH title="Fiches Fiscales" sub="281.10 / 281.20 / 281.30 - Generation et suivi"/><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>{[{l:"Travailleurs",v:ae.length,c:"#c6a34e"},{l:"281.10 (salaries)",v:ae.filter(e=>e.statut!=="independant").length,c:"#60a5fa"},{l:"281.20 (dirigeants)",v:ae.filter(e=>e.statut==="dirigeant").length||0,c:"#a78bfa"},{l:"Annee fiscale",v:annee,c:"#fb923c"}].map((k,i)=><div key={i} style={{padding:"14px 16px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:10,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div><div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"fiches",l:"Fiches a generer"},{v:"contenu",l:"Contenu 281.10"},{v:"deadlines",l:"Deadlines"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="fiches"&&<C><Tbl cols={[{k:"n",l:"Travailleur",b:1,r:r=>(r.fn||"")+" "+(r.ln||"")},{k:"ni",l:"NISS",r:r=><span style={{fontFamily:"monospace",color:"#60a5fa"}}>{r.niss||"MANQUANT"}</span>},{k:"t",l:"Type",r:r=><span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:"rgba(198,163,78,.08)",color:"#c6a34e"}}>281.10</span>},{k:"b",l:"Brut annuel",a:"right",r:r=><span style={{color:"#e8e6e0"}}>{fmt((+r.gross||0)*12)}</span>},{k:"s",l:"Statut",r:r=><span style={{fontSize:10,padding:"2px 6px",borderRadius:4,background:r.niss?"rgba(74,222,128,.1)":"rgba(248,113,113,.1)",color:r.niss?"#4ade80":"#f87171"}}>{r.niss?"Pret":"NISS manquant"}</span>}]} data={ae}/></C>}{tab==="contenu"&&<C><ST>Contenu fiche 281.10</ST>{["Remunerations brutes imposables","Cotisations personnelles ONSS retenues","Precompte professionnel retenu","Avantages de toute nature (ATN)","Frais propres employeur","Cheques-repas (intervention patronale)","Cotisation speciale securite sociale","Bonus CCT 90 (si applicable)","Eco-cheques (exoneres - mention)","Voiture societe - ATN CO2","Assurance groupe - cotisations personnelles","Retenues syndicales","Pensions complementaires Loi Vandenbroucke"].map((r,i)=><div key={i} style={{padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)",fontSize:12,color:"#e8e6e0"}}><span style={{color:"#c6a34e",marginRight:6}}>{i+1}.</span>{r}</div>)}</C>}{tab==="deadlines"&&<C><ST>Deadlines fiscales</ST>{[{d:"28 fevrier N+1",t:"Remise fiches 281.10 aux travailleurs",s:"warn"},{d:"1er mars N+1",t:"Envoi Belcotax XML au SPF Finances",s:"warn"},{d:"30 juin N+1",t:"Declaration impot personnes physiques",s:"ok"},{d:"31 decembre N",t:"Cloture annee fiscale",s:"ok"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:r.s==="warn"?"#fb923c":"#9e9b93",fontWeight:600}}>{r.d}</span><span style={{color:"#e8e6e0"}}>{r.t}</span></div>)}</C>}</div>;}
 
-
-// ═══════════════════════════════════════════════════════════════
-//  INTERFACE POINTAGE
-// ═══════════════════════════════════════════════════════════════
 function PointageMod({s,d}){
   const [tab,setTab]=useState('pointage');
   const [source,setSource]=useState('aureus_pointage');
@@ -8550,57 +8468,8 @@ function SyndicalesMod({s,d}){
 // ═══════════════════════════════════════════════════════════════
 //  ONSS-APL (DMFAPPL)
 // ═══════════════════════════════════════════════════════════════
-function ONSSAPLMod({s,d}){
-  const ae=s.emps||[];
-  const data=ae.map(e=>{const p=calc(e,DPER,s.co);return{e,p};});
-  const totGross=data.reduce((a,r)=>a+r.p.gross,0);
-  const totOnssW=data.reduce((a,r)=>a+r.p.onssNet,0);
-  const totOnssE=data.reduce((a,r)=>a+r.p.onssE,0);
-  const totOnss=totOnssW+totOnssE;
-  
-  return <div>
-    <PH title="ONSS — Avis de Provisions Mensuelles" sub="Provision mensuelle sur base DmfA trimestrielle"/>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
-      {[{l:"ONSS travailleur",v:fmt(totOnssW),c:'#60a5fa',s:'13,07%'},{l:"ONSS employeur",v:fmt(totOnssE),c:'#f87171',s:'~25%'},{l:"ONSS total",v:fmt(totOnss),c:'#c6a34e',s:'mensuel'},{l:"Provision trim.",v:fmt(totOnss*3),c:'#a78bfa',s:'×3 mois'}].map((k,i)=>
-        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
-          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
-          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
-          <div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>{k.s}</div>
-        </div>
-      )}
-    </div>
-    <C style={{padding:0,overflow:'hidden'}}>
-      <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)'}}><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Détail ONSS par travailleur</div></div>
-      <Tbl cols={[
-        {k:'n',l:"Travailleur",b:1,r:r=>`${r.e.first||r.e.fn||'Emp'} ${r.e.last||''}`},
-        {k:'g',l:"Brut",a:'right',r:r=>fmt(r.p.gross)},
-        {k:'ow',l:"ONSS trav.",a:'right',r:r=><span style={{color:'#60a5fa'}}>{fmt(r.p.onssNet)}</span>},
-        {k:'oe',l:"ONSS empl.",a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.p.onssE)}</span>},
-        {k:'css',l:"CSS",a:'right',r:r=>fmt(r.p.css)},
-        {k:'t',l:"Total ONSS",a:'right',r:r=><span style={{fontWeight:600,color:'#c6a34e'}}>{fmt(r.p.onssNet+r.p.onssE)}</span>},
-      ]} data={data}/>
-      <div style={{padding:'12px 18px',borderTop:'1px solid rgba(139,115,60,.1)',display:'flex',justifyContent:'flex-end',gap:16,fontSize:12}}>
-        <span>Trav: <b style={{color:'#60a5fa'}}>{fmt(totOnssW)}</b></span>
-        <span>Empl: <b style={{color:'#f87171'}}>{fmt(totOnssE)}</b></span>
-        <span>Total: <b style={{color:'#c6a34e'}}>{fmt(totOnss)}</b></span>
-      </div>
-    </C>
-    <C style={{marginTop:12}}><ST>Échéances provisions</ST>
-      <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
-        {[{l:"Provision mensuelle",v:"5 du mois suivant",c:'#fb923c'},{l:"DmfA T1",v:"30 avril",c:'#60a5fa'},{l:"DmfA T2",v:"31 juillet",c:'#60a5fa'},{l:"DmfA T3",v:"31 octobre",c:'#60a5fa'},{l:"DmfA T4",v:"31 janvier N+1",c:'#60a5fa'},{l:"Régularisation",v:"Avec la DmfA trimestrielle",c:'#a78bfa'}].map((r,i)=>
-          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
-            <span>{r.l}</span><span style={{fontWeight:600,color:r.c}}>{r.v}</span>
-          </div>
-        )}
-      </div>
-    </C>
-  </div>;
-}
+function ONSSAPLMod({s,d}){const ae=s.emps||[];const [tab,setTab]=useState("apl");const mb=ae.reduce((a,e)=>a+(+e.gross||0),0);return <div><PH title="ONSS APL" sub="Administrations Provinciales et Locales - Cotisations specifiques"/><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>{[{l:"Masse brute",v:fmt(mb),c:"#c6a34e"},{l:"Cotisation APL",v:fmt(mb*0.3207),c:"#f87171"},{l:"Pension APL",v:fmt(mb*0.075),c:"#fb923c"},{l:"Travailleurs",v:ae.length,c:"#60a5fa"}].map((k,i)=><div key={i} style={{padding:"14px 16px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:10,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div><div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"apl",l:"Cotisations APL"},{v:"diff",l:"Differences prive/APL"},{v:"pension",l:"Pension secteur public"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="apl"&&<C><ST>Cotisations ONSS APL</ST>{[{l:"Cotisation de base",v:"32.07%",d:"Taux employeur APL"},{l:"Moderation salariale",v:"Incluse",d:"Dans le taux de base"},{l:"Pension secteur public",v:"7.5%",d:"Cotisation pension complementaire"},{l:"Cotisation personnelle",v:"13.07%",d:"Identique au prive"},{l:"Maribel social",v:"-0.40%",d:"Reduction si applicable"},{l:"Fonds fermeture",v:"Non applicable",d:"Specifique secteur prive"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><b style={{color:"#e8e6e0",fontSize:12}}>{r.l}</b><div style={{fontSize:10,color:"#5e5c56"}}>{r.d}</div></div><span style={{fontWeight:600,color:"#c6a34e"}}>{r.v}</span></div>)}</C>}{tab==="diff"&&<C><ST>Differences ONSS prive vs APL</ST>{[{e:"Taux employeur",p:"25.07%",a:"32.07%"},{e:"Pension",p:"8.86% (legal)",a:"7.5% (pool)"},{e:"Fonds fermeture",p:"Oui",a:"Non"},{e:"Vacances annuelles",p:"ONVA (ouvriers)",a:"Direct employeur"},{e:"Maribel social",p:"-0.40%",a:"-0.40%"},{e:"Declaration",p:"DmfA",a:"DmfAPPL"},{e:"Portail",p:"socialsecurity.be",a:"socialsecurity.be"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#9e9b93",flex:1}}>{r.e}</span><span style={{color:"#60a5fa",width:100,textAlign:"center"}}>{r.p}</span><span style={{color:"#fb923c",width:100,textAlign:"center"}}>{r.a}</span></div>)}</C>}{tab==="pension"&&<C><ST>Pension secteur public</ST>{[{t:"Regime",d:"Pension publique basee sur dernier salaire (tantieme)"},{t:"Tantieme",d:"1/60 par annee de service (regime favorable)"},{t:"Age pension",d:"66 ans (2025-2030) puis 67 ans (2030+)"},{t:"Pension anticipee",d:"Possible des 63 ans avec 42 ans carriere"},{t:"Perequation",d:"Ajustement pension selon evolution baremes actifs"},{t:"Cumul",d:"Cumul pension/travail possible avec conditions"}].map((r,i)=><div key={i} style={{padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><b style={{color:"#c6a34e",fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:"#9e9b93",marginTop:2}}>{r.d}</div></div>)}</C>}</div>;}
 
-
-// ═══════════════════════════════════════════════════════════════
-//  DASHBOARD ONSS — Échéances, historique, alertes
-// ═══════════════════════════════════════════════════════════════
 function ONSSDashMod({s,d}){
   const [y,setY]=useState(new Date().getFullYear());
   const now=new Date();
@@ -8727,126 +8596,10 @@ function ONSSDashMod({s,d}){
 // ═══════════════════════════════════════════════════════════════
 //  RELEVÉS ETA (Awiph / Cocof)
 // ═══════════════════════════════════════════════════════════════
-function ETAMod({s,d}){
-  const ae=s.emps||[];const n=ae.length;
-  const [tab,setTab]=useState('overview');
-  const etpTotal=ae.reduce((a,e)=>a+(e.regime==='full'||!e.regime?1:e.regime==='4_5'?0.8:0.5),0);
-  
-  return <div>
-    <PH title="ETA — Effectif des Travailleurs en ETP" sub="Comptage ONSS — Seuils sociaux et obligations"/>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
-      {[{l:"Headcount",v:n,c:'#60a5fa',s:'personnes physiques'},{l:"ETP",v:etpTotal.toFixed(1),c:'#c6a34e',s:'équivalents temps plein'},{l:"Seuil CPPT",v:n>=50?'✓':'✗',c:n>=50?'#4ade80':'#9e9b93',s:'≥ 50'},{l:"Seuil CE",v:n>=100?'✓':'✗',c:n>=100?'#4ade80':'#9e9b93',s:'≥ 100'}].map((k,i)=>
-        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
-          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
-          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
-          <div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>{k.s}</div>
-        </div>
-      )}
-    </div>
-    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
-      <C><ST>Seuils sociaux belges</ST>
-        {[{s:20,o:"Service interne prévention (SIPPT)",a:n>=20},{s:50,o:"CPPT — Comité prévention/protection",a:n>=50},{s:50,o:"Plan pour l'emploi travailleurs âgés (CCT 104)",a:n>=50},{s:50,o:"Bonus salarial (CCT 90) — plan obligatoire",a:n>=50},{s:100,o:"Conseil d'entreprise (CE)",a:n>=100},{s:100,o:"Bilan social BNB (schéma complet)",a:n>=100},{s:150,o:"Outplacement (cellule emploi restructuration)",a:n>=150},{s:1000,o:"Service interne sans service externe",a:n>=1000}].map((r,i)=>
-          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
-            <div><span style={{color:r.a?'#4ade80':'#5e5c56',fontWeight:600}}>{r.a?'✓':'✗'}</span> <span style={{color:'#9e9b93'}}>{r.o}</span></div>
-            <span style={{fontWeight:600,color:'#c6a34e'}}>≥{r.s}</span>
-          </div>
-        )}
-      </C>
-      <C><ST>Méthode de calcul ETP</ST>
-        <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
-          {[{l:"Temps plein",v:"1,0 ETP",n:ae.filter(e=>!e.regime||e.regime==='full').length},{l:"4/5ème",v:"0,8 ETP",n:ae.filter(e=>e.regime==='4_5').length},{l:"Mi-temps",v:"0,5 ETP",n:ae.filter(e=>e.regime==='half').length}].map((r,i)=>
-            <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
-              <span>{r.l} ({r.n} pers.)</span><span style={{fontWeight:600,color:'#e8e6e0'}}>{r.v}</span>
-            </div>
-          )}
-          <div style={{marginTop:10,padding:10,background:"rgba(198,163,78,.06)",borderRadius:6,textAlign:'center'}}>
-            <div style={{fontSize:10,color:'#5e5c56'}}>ETP TOTAL</div>
-            <div style={{fontSize:24,fontWeight:700,color:'#c6a34e'}}>{etpTotal.toFixed(1)}</div>
-          </div>
-        </div>
-      </C>
-    </div>
-  </div>;
-}
+function ETAMod({s,d}){const ae=s.emps||[];const [tab,setTab]=useState("plans");return <div><PH title="Plans ETA (Entreprise de Travail Adapte)" sub="Emploi de personnes handicapees - Aides et obligations"/><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>{[{l:"Effectif",v:ae.length,c:"#c6a34e"},{l:"Seuil quota (50+)",v:ae.length>=50?"Applicable":"Non requis",c:ae.length>=50?"#f87171":"#5e5c56"},{l:"Quota theorique",v:ae.length>=50?Math.ceil(ae.length*0.03)+" pers.":"N/A",c:"#60a5fa"},{l:"Aide Aviq/Phare",v:"Possible",c:"#4ade80"}].map((k,i)=><div key={i} style={{padding:"14px 16px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:10,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div><div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"plans",l:"Aides a emploi"},{v:"quota",l:"Quota et obligations"},{v:"primes",l:"Primes et subsides"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="plans"&&<C><ST>Dispositifs aide emploi</ST>{[{p:"Activa",d:"Reduction ONSS + activation allocation chomage. Demandeurs emploi longue duree.",c:"#4ade80"},{p:"SINE",d:"Economie sociale insertion. Reduction ONSS renforcee.",c:"#60a5fa"},{p:"PTP (Programme Transition Pro)",d:"Secteur non-marchand. Subvention salariale regionale.",c:"#a78bfa"},{p:"APE (Wallonie)",d:"Aide a la Promotion Emploi. Points APE = subvention.",c:"#c6a34e"},{p:"ACS (Bruxelles)",d:"Agents Contractuels Subsidies. Prime regionale.",c:"#fb923c"},{p:"Maribel social",d:"Secteur non-marchand. Reduction cotisations = emplois supplementaires.",c:"#f87171"}].map((r,i)=><div key={i} style={{padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><b style={{color:r.c,fontSize:12}}>{r.p}</b><div style={{fontSize:10.5,color:"#9e9b93",marginTop:2}}>{r.d}</div></div>)}</C>}{tab==="quota"&&<C><ST>Obligations emploi personnes handicapees</ST>{[{l:"Secteur prive",v:"Pas de quota legal obligatoire",c:"#4ade80"},{l:"Secteur public federal",v:"3% de effectif",c:"#f87171"},{l:"Secteur public regional",v:"Variable selon region (2.5-5%)",c:"#fb923c"},{l:"ETA agreees",v:"Min. 60% travailleurs handicapes",c:"#60a5fa"},{l:"Aide AVIQ (Wallonie)",v:"Prime compensation + amenagement poste",c:"#c6a34e"},{l:"Aide PHARE (Bruxelles)",v:"Prime integration + suivi",c:"#c6a34e"},{l:"Aide VDAB (Flandre)",v:"VOP - Vlaamse Ondersteuningspremie",c:"#c6a34e"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#9e9b93"}}>{r.l}</span><span style={{fontWeight:600,color:r.c}}>{r.v}</span></div>)}</C>}{tab==="primes"&&<C><ST>Primes et subsides disponibles</ST>{[{p:"Prime adaptation poste",m:"Max 3.500 EUR",o:"AVIQ/PHARE/VDAB"},{p:"Prime tutorat",m:"Max 750 EUR/trim.",o:"Region"},{p:"Reduction groupe-cible ONSS",m:"1.000-1.500 EUR/trim.",o:"ONSS"},{p:"Prime integration",m:"Variable",o:"AVIQ/PHARE"},{p:"Cheque-formation",m:"Selon region",o:"Region"},{p:"Prime maintien emploi",m:"Variable",o:"AVIQ si incapacite"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><b style={{color:"#e8e6e0",fontSize:12}}>{r.p}</b><div style={{fontSize:10,color:"#5e5c56"}}>Organisme: {r.o}</div></div><span style={{fontWeight:600,color:"#4ade80"}}>{r.m}</span></div>)}</C>}</div>;}
 
+function ExportImportMod({s,d}){const ae=s.emps||[];const [tab,setTab]=useState("export");return <div><PH title="Export / Import" sub="Echange de donnees - CSV, XML, API, comptabilite"/><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>{[{l:"Travailleurs",v:ae.length,c:"#c6a34e"},{l:"Formats export",v:8,c:"#60a5fa"},{l:"Formats import",v:4,c:"#4ade80"},{l:"API disponibles",v:3,c:"#a78bfa"}].map((k,i)=><div key={i} style={{padding:"14px 16px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:10,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div><div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"export",l:"Exports"},{v:"import",l:"Imports"},{v:"api",l:"API et connecteurs"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="export"&&<C><ST>Formats export disponibles</ST>{[{f:"CSV travailleurs",d:"Export complet donnees employes",s:"ok"},{f:"XML DmfA",d:"Declaration ONSS trimestrielle",s:"ok"},{f:"XML Dimona",d:"Declaration entree/sortie",s:"ok"},{f:"XML Belcotax 281",d:"Fiches fiscales SPF Finances",s:"ok"},{f:"XML SEPA pain.001",d:"Virements salaires",s:"ok"},{f:"BOB50 / Winbooks",d:"Export comptable OD paie",s:"warn"},{f:"PDF Fiches de paie",d:"Fiches individuelles",s:"warn"},{f:"XBRL Bilan social",d:"Depot BNB",s:"warn"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><b style={{color:"#e8e6e0",fontSize:12}}>{r.f}</b><div style={{fontSize:10,color:"#5e5c56"}}>{r.d}</div></div><span style={{fontSize:10,padding:"2px 8px",borderRadius:4,background:r.s==="ok"?"rgba(74,222,128,.1)":"rgba(251,146,56,.1)",color:r.s==="ok"?"#4ade80":"#fb923c"}}>{r.s==="ok"?"Disponible":"A implementer"}</span></div>)}</C>}{tab==="import"&&<C><ST>Formats import</ST>{[{f:"CSV travailleurs",d:"Import masse nouveaux employes",s:"warn"},{f:"CSV pointeuse",d:"Import fichiers pointage",s:"warn"},{f:"XML ONSS retour",d:"Accusee reception declarations",s:"warn"},{f:"CSV baremes sectoriels",d:"Mise a jour baremes CP",s:"warn"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><b style={{color:"#e8e6e0",fontSize:12}}>{r.f}</b><div style={{fontSize:10,color:"#5e5c56"}}>{r.d}</div></div><span style={{fontSize:10,padding:"2px 8px",borderRadius:4,background:"rgba(251,146,56,.1)",color:"#fb923c"}}>A implementer</span></div>)}</C>}{tab==="api"&&<C><ST>API et connecteurs</ST>{[{a:"ONSS / Securite sociale",d:"Portail SSE - Envoi DmfA, Dimona, consultations",s:"Prevu"},{a:"SPF Finances",d:"Belcotax-on-web - Envoi XML 281",s:"Prevu"},{a:"Supabase",d:"Backend base de donnees temps reel",s:"Actif"},{a:"Peppol",d:"Facturation electronique B2G",s:"Prevu"},{a:"Isabel / Banking",d:"SEPA virements bancaires",s:"Prevu"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><b style={{color:"#c6a34e",fontSize:12}}>{r.a}</b><div style={{fontSize:10,color:"#5e5c56"}}>{r.d}</div></div><span style={{fontSize:10,padding:"2px 8px",borderRadius:4,background:r.s==="Actif"?"rgba(74,222,128,.1)":"rgba(96,165,250,.1)",color:r.s==="Actif"?"#4ade80":"#60a5fa"}}>{r.s}</span></div>)}</C>}</div>;}
 
-// ═══════════════════════════════════════════════════════════════
-//  EXPORT / IMPORT
-// ═══════════════════════════════════════════════════════════════
-function ExportImportMod({s,d}){
-  const ae=s.emps||[];const [tab,setTab]=useState('export');const [format,setFormat]=useState('csv');const [scope,setScope]=useState('all');
-  const n=ae.length;
-  
-  const doExport=(type)=>{
-    let data='';let filename='';
-    if(type==='emps'){
-      const headers='Nom;Prénom;NISS;Statut;CP;Brut;Entrée;Fonction';
-      const rows=ae.map(e=>`${e.last};${e.first};${e.niss||''};${e.statut||'employé'};${e.cp||200};${e.brut||0};${e.startD||''};${e.fn||''}`);
-      data=headers+'\n'+rows.join('\n');
-      filename='export_travailleurs_'+new Date().toISOString().split('T')[0];
-    }else if(type==='paie'){
-      const headers='Nom;Brut;ONSS;PP;Net;ONSS Empl.';
-      const rows=ae.map(e=>{const p=calc(e,DPER,s.co);return `${e.last} ${e.first};${p.gross.toFixed(2)};${p.onssNet.toFixed(2)};${p.tax.toFixed(2)};${p.net.toFixed(2)};${p.onssE.toFixed(2)}`});
-      data=headers+'\n'+rows.join('\n');
-      filename='export_paie_'+new Date().toISOString().split('T')[0];
-    }else if(type==='onss'){
-      const headers='Nom;NISS;Brut;ONSS Trav.;ONSS Empl.;CSS';
-      const rows=ae.map(e=>{const p=calc(e,DPER,s.co);return `${e.last} ${e.first};${e.niss||''};${p.gross.toFixed(2)};${p.onssNet.toFixed(2)};${p.onssE.toFixed(2)};${p.css.toFixed(2)}`});
-      data=headers+'\n'+rows.join('\n');
-      filename='export_onss_'+new Date().toISOString().split('T')[0];
-    }
-    if(data){const blob=new Blob([data],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename+'.csv';a.click();}
-  };
-  
-  return <div>
-    <PH title="Export / Import Données" sub="CSV, Excel — Travailleurs, paie, ONSS, comptabilité"/>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:18}}>
-      {[{l:"Travailleurs",v:n,c:'#60a5fa'},{l:"Formats disponibles",v:"CSV, XLSX",c:'#c6a34e'},{l:"Dernière export",v:"—",c:'#9e9b93'}].map((k,i)=>
-        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
-          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
-          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
-        </div>
-      )}
-    </div>
-    <div style={{display:'flex',gap:6,marginBottom:16}}>
-      {[{v:"export",l:"Exports"},{v:"import",l:"Import"},{v:"historique",l:"Historique"}].map(t=>
-        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
-          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
-      )}
-    </div>
-    {tab==='export'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:14}}>
-      {[{t:'Travailleurs',d:"Signalétique complète — nom, NISS, statut, CP, brut",ic:'👥',type:"emps"},
-        {t:'Fiches de paie',d:"Brut, ONSS, PP, net — mois en cours",ic:'💰',type:"paie"},
-        {t:'Déclarations ONSS',d:"ONSS travailleur + employeur, CSS, base",ic:'🏛',type:"onss"},
-      ].map((ex,i)=><C key={i} style={{cursor:'pointer'}} onClick={()=>doExport(ex.type)}>
-        <div style={{textAlign:'center',padding:'10px 0'}}>
-          <div style={{fontSize:32}}>{ex.ic}</div>
-          <div style={{fontSize:14,fontWeight:600,color:'#e8e6e0',marginTop:8}}>{ex.t}</div>
-          <div style={{fontSize:11,color:'#9e9b93',marginTop:4}}>{ex.d}</div>
-          <div style={{marginTop:10,padding:'6px 16px',display:'inline-block',background:"linear-gradient(135deg,#c6a34e,#e8c547)",borderRadius:6,fontSize:11,fontWeight:600,color:'#000'}}>Exporter CSV</div>
-        </div>
-      </C>)}
-    </div>}
-    {tab==='import'&&<C>
-      <ST>Import fichier</ST>
-      <div style={{padding:30,textAlign:'center',border:'2px dashed rgba(198,163,78,.2)',borderRadius:10,marginTop:10}}>
-        <div style={{fontSize:32,marginBottom:8}}>📁</div>
-        <div style={{fontSize:13,color:'#e8e6e0',fontWeight:600}}>Glissez un fichier CSV ici</div>
-        <div style={{fontSize:11,color:'#9e9b93',marginTop:4}}>Format: CSV séparateur point-virgule (;) — Encodage UTF-8</div>
-        <div style={{marginTop:12,fontSize:10.5,color:'#60a5fa'}}>Colonnes attendues: Nom, Prénom, NISS, Statut, CP, Brut, Date entrée</div>
-      </div>
-    </C>}
-    {tab==='historique'&&<C>
-      <ST>Historique des exports</ST>
-      <div style={{padding:20,textAlign:'center',color:'#5e5c56',fontSize:12}}>Aucun export enregistré dans cette session</div>
-    </C>}
-  </div>;
-}
-
-
-// ═══════════════════════════════════════════════════════════════
-//  NET AU BRUT
-// ═══════════════════════════════════════════════════════════════
 function NetBrutMod({s,d}){
   const [mode,setMode]=useState('net2brut'); // net2brut | brut2net | compare
   const [amount,setAmount]=useState(2500);
