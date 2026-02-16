@@ -10314,63 +10314,157 @@ function AllocFamMod({s,d}){
 // ═══════════════════════════════════════════════════════════════
 function CaisseVacMod({s,d}){
   const ae=s.emps||[];
+  const [tab,setTab]=useState('overview');
+  const [simBrut,setSimBrut]=useState(3000);
+  const [simMois,setSimMois]=useState(12);
+  const [simStatut,setSimStatut]=useState('employe');
   const ouvriers=ae.filter(e=>e.statut==='ouvrier');
   const employes=ae.filter(e=>e.statut!=='ouvrier');
   
-  // Ouvriers: caisse de vacances (ONVA) — 15,84% sur brut 108%
   const masseOuv=ouvriers.reduce((a,e)=>{const p=calc(e,DPER,s.co);return a+p.gross*12*1.08},0);
   const cotOuv=masseOuv*0.1584;
-  // Employés: pécule vacances payé par employeur
   const masseEmp=employes.reduce((a,e)=>{const p=calc(e,DPER,s.co);return a+p.gross*12},0);
-  const pecSimple=masseEmp*0.0769;// 7,69% pour simple pécule
-  const pecDouble=masseEmp*0.0769;// 7,69% pour double pécule
-  
+  const pecSimple=masseEmp*0.0769;
+  const pecDouble=masseEmp*0.0769;
+  const totalPec=pecSimple+pecDouble+cotOuv;
+
+  // Detail par employe
+  const empDetail=ae.map(emp=>{
+    const p=calc(emp,DPER,s.co);const isO=emp.statut==='ouvrier';const brut=p.gross;
+    const brutAn=brut*12;const base108=isO?brutAn*1.08:0;
+    const simple=isO?0:brut; // employe: simple pecule = 1 mois brut
+    const double_=isO?0:brut*0.92; // employe: double pecule = 92% brut
+    const dp2=isO?0:double_*(7/92); // 2eme partie
+    const onssDp2=dp2*0.1307; // ONSS sur 2eme partie
+    const cotSpec1=dp2*0.01; // cotisation speciale 1%
+    const cotONVA=isO?base108*0.1584:0;
+    const totalEmpl=isO?cotONVA:(simple+double_);
+    return{...emp,name:(emp.first||'')+' '+(emp.last||''),isO,brut,brutAn,base108,simple,double_,dp2,onssDp2,cotSpec1,cotONVA,totalEmpl:Math.round(totalEmpl*100)/100};
+  });
+
+  // Simulateur pecule de sortie
+  const simSortie=()=>{
+    const brut=simBrut;const prorata=simMois/12;const isO=simStatut==='ouvrier';
+    if(isO){
+      const base=brut*simMois*1.08;const cot=base*0.1584;
+      return{type:'ouvrier',base,cot:Math.round(cot*100)/100,simple:0,double_:0,total:Math.round(cot*100)/100,note:'Ouvrier: pecule verse par ONVA. La cotisation patronale couvre le pecule.'};
+    }else{
+      const simple=Math.round(brut*prorata*100)/100;
+      const double_=Math.round(brut*0.92*prorata*100)/100;
+      const dp2=double_*(7/92);
+      const onssDp2=Math.round(dp2*0.1307*100)/100;
+      const cotSpec=Math.round(dp2*0.01*100)/100;
+      const netDouble=Math.round((double_-onssDp2-cotSpec)*100)/100;
+      const ppDouble=Math.round(double_*0.2660*100)/100; // taux exceptionnel
+      const total=simple+double_;
+      return{type:'employe',simple,double_,dp2:Math.round(dp2*100)/100,onssDp2,cotSpec,netDouble,ppDouble,total:Math.round(total*100)/100,prorata:Math.round(prorata*100),note:'Employe: pecule de sortie = simple + double, prorata des mois prestes.'};
+    }
+  };
+
   return <div>
-    <PH title="Caisse de Vacances / Pécule" sub="ONVA (ouvriers) — Employeur (employés) — Calcul annuel"/>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
-      {[{l:"Ouvriers",v:ouvriers.length,c:'#f87171',s:'Via ONVA'},{l:"Employés",v:employes.length,c:'#60a5fa',s:'Via employeur'},{l:"Cotisation ONVA",v:fmt(cotOuv),c:'#fb923c',s:'15,84% sur 108%'},{l:"Pécule employés",v:fmt(pecSimple+pecDouble),c:'#c6a34e',s:'Simple + double'}].map((k,i)=>
+    <PH title="Pecule de Vacances" sub="Simple + Double pecule, ONVA (ouvriers), Employeur (employes), Pecule de sortie"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:18}}>
+      {[{l:"Ouvriers",v:ouvriers.length,c:'#f87171',s:'Via ONVA'},{l:"Employes",v:employes.length,c:'#60a5fa',s:'Via employeur'},{l:"Cotis. ONVA/an",v:fmt(cotOuv),c:'#fb923c',s:'15,84% sur 108%'},{l:"Pecule employes/an",v:fmt(pecSimple+pecDouble),c:'#c6a34e',s:'Simple + double'},{l:"Provision/mois",v:fmt(totalPec/12),c:'#a78bfa',s:'A constituer'}].map((k,i)=>
         <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
           <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
-          <div style={{fontSize:22,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
           <div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>{k.s}</div>
         </div>
       )}
     </div>
-    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
-      <C><ST>Ouvriers — Caisse ONVA</ST>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'overview',l:'Vue globale'},{v:'detail',l:'Detail par employe'},{v:'sortie',l:'Simulateur sortie'},{v:'regles',l:'Regles legales'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    {tab==='overview'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Ouvriers - Caisse ONVA</ST>
         <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
-          {[{l:"Masse salariale (×108%)",v:fmt(masseOuv)},{l:"Taux cotisation",v:"15,84%"},{l:"Cotisation annuelle",v:fmt(cotOuv)},{l:"Paiement",v:"Par ONVA au travailleur"},{l:"Période",v:"Mai-Juin (année N pour N-1)"}].map((r,i)=>
+          {[{l:"Masse salariale brute (x108%)",v:fmt(masseOuv)},{l:"Taux cotisation patronale",v:"15,84%"},{l:"Cotisation annuelle ONVA",v:fmt(cotOuv)},{l:"Cotisation mensuelle (provision)",v:fmt(cotOuv/12)},{l:"Paiement pecule",v:"Par ONVA au travailleur"},{l:"Periode",v:"Mai-Juin (annee N pour N-1)"}].map((r,i)=>
             <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
               <span>{r.l}</span><span style={{fontWeight:600,color:'#e8e6e0'}}>{r.v}</span>
             </div>
           )}
         </div>
         <div style={{marginTop:10,padding:8,background:"rgba(248,113,113,.06)",borderRadius:6,fontSize:10.5,color:'#f87171'}}>
-          <b>ONVA:</b> L'employeur paie la cotisation via ONSS. L'ONVA verse directement le pécule aux ouvriers.
+          <b>ONVA:</b> L'employeur verse 15,84% via ONSS. L'ONVA paie directement simple + double pecule aux ouvriers.
         </div>
       </C>
-      <C><ST>Employés — Pécule employeur</ST>
+      <C><ST>Employes - Pecule employeur</ST>
         <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
-          {[{l:"Simple pécule (7,69%)",v:fmt(pecSimple)},{l:"Double pécule (7,69%)",v:fmt(pecDouble)},{l:"Total provision",v:fmt(pecSimple+pecDouble)},{l:"Paiement simple",v:"Avec salaire du mois de vacances"},{l:"Paiement double",v:"Mai-Juin (avant vacances principales)"}].map((r,i)=>
+          {[{l:"Simple pecule (salaire mois vacances)",v:fmt(pecSimple)},{l:"Double pecule (92% brut mensuel)",v:fmt(pecDouble)},{l:"Total provision annuelle",v:fmt(pecSimple+pecDouble)},{l:"Provision mensuelle",v:fmt((pecSimple+pecDouble)/12)},{l:"ONSS sur 2eme partie (13,07%)",v:"Sur 7/92 du double pecule"},{l:"Cotisation speciale 1%",v:"Sur 2eme partie uniquement"}].map((r,i)=>
             <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
               <span>{r.l}</span><span style={{fontWeight:600,color:'#e8e6e0'}}>{r.v}</span>
             </div>
           )}
         </div>
         <div style={{marginTop:10,padding:8,background:"rgba(96,165,250,.06)",borderRadius:6,fontSize:10.5,color:'#60a5fa'}}>
-          <b>Provision:</b> Constituer une provision mensuelle de {fmt((pecSimple+pecDouble)/12)} pour couvrir le double pécule.
+          <b>Double pecule:</b> Compose de 2 parties: 85% (1ere, pas ONSS trav.) + 7% (2eme, soumise ONSS 13,07% + cot. spec. 1%).
         </div>
       </C>
-    </div>
-    <C style={{marginTop:12}}><ST>Détail par travailleur</ST>
+    </div>}
+    {tab==='detail'&&<C>
       <Tbl cols={[
-        {k:'n',l:"Travailleur",b:1,r:r=>`${r.first} ${r.last}`},
-        {k:'st',l:"Statut",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:r.statut==='ouvrier'?'rgba(248,113,113,.1)':'rgba(96,165,250,.1)',color:r.statut==='ouvrier'?'#f87171':'#60a5fa'}}>{r.statut==='ouvrier'?'Ouvrier':'Employé'}</span>},
-        {k:'b',l:"Brut annuel",a:'right',r:r=>{const p=calc(r,DPER,s.co);return fmt(p.gross*12)}},
-        {k:'p',l:"Pécule/Cotis.",a:'right',r:r=>{const p=calc(r,DPER,s.co);const isO=r.statut==='ouvrier';return <span style={{fontWeight:600,color:'#c6a34e'}}>{fmt(isO?p.gross*12*1.08*0.1584:p.gross*12*0.1538)}</span>}},
-        {k:'v',l:"Via",r:r=>r.statut==='ouvrier'?'ONVA':'Employeur'},
-      ]} data={ae}/>
-    </C>
+        {k:'n',l:"Travailleur",b:1,r:r=>r.name},
+        {k:'st',l:"Statut",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:r.isO?'rgba(248,113,113,.1)':'rgba(96,165,250,.1)',color:r.isO?'#f87171':'#60a5fa'}}>{r.isO?'Ouvrier':'Employe'}</span>},
+        {k:'b',l:"Brut/mois",a:'right',r:r=>fmt(r.brut)},
+        {k:'s',l:"Simple",a:'right',r:r=>r.isO?<span style={{color:'#5e5c56'}}>Via ONVA</span>:<span style={{color:'#4ade80'}}>{fmt(r.simple)}</span>},
+        {k:'d',l:"Double",a:'right',r:r=>r.isO?<span style={{color:'#5e5c56'}}>Via ONVA</span>:<span style={{color:'#c6a34e'}}>{fmt(r.double_)}</span>},
+        {k:'o',l:"ONSS 2e part.",a:'right',r:r=>r.isO?'—':<span style={{color:'#f87171'}}>{fmt(r.onssDp2)}</span>},
+        {k:'t',l:"Total/Cotis.",a:'right',r:r=><span style={{fontWeight:700,color:'#c6a34e'}}>{fmt(r.totalEmpl)}</span>},
+        {k:'v',l:"Via",r:r=>r.isO?'ONVA':'Employeur'},
+      ]} data={empDetail}/>
+    </C>}
+    {tab==='sortie'&&<div style={{display:'grid',gridTemplateColumns:'350px 1fr',gap:18}}>
+      <C><ST>Simulateur Pecule de Sortie</ST>
+        <I label="Brut mensuel (EUR)" type="number" value={simBrut} onChange={v=>setSimBrut(+v)}/>
+        <I label="Mois prestes dans l'annee" type="number" value={simMois} onChange={v=>setSimMois(Math.min(12,Math.max(1,+v)))}/>
+        <I label="Statut" value={simStatut} onChange={setSimStatut} options={[{v:'employe',l:'Employe'},{v:'ouvrier',l:'Ouvrier'}]}/>
+      </C>
+      <C><ST>Resultat Pecule de Sortie</ST>
+        {(()=>{const r=simSortie();return <div>
+          <div style={{padding:16,background:'rgba(198,163,78,.08)',borderRadius:10,textAlign:'center',marginBottom:14}}>
+            <div style={{fontSize:10,color:'#5e5c56'}}>PECULE DE SORTIE BRUT</div>
+            <div style={{fontSize:28,fontWeight:700,color:'#c6a34e'}}>{fmt(r.total)}</div>
+            <div style={{fontSize:11,color:'#9e9b93'}}>Prorata: {r.prorata||100}% ({simMois}/12 mois)</div>
+          </div>
+          {r.type==='employe'?<div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
+            {[{l:'Simple pecule (prorata)',v:fmt(r.simple),c:'#4ade80'},{l:'Double pecule 92% (prorata)',v:fmt(r.double_),c:'#c6a34e'},{l:'2eme partie (7/92)',v:fmt(r.dp2),c:'#9e9b93'},{l:'ONSS trav. 2e partie (13,07%)',v:'-'+fmt(r.onssDp2),c:'#f87171'},{l:'Cotis. speciale 1%',v:'-'+fmt(r.cotSpec),c:'#f87171'},{l:'PP double pecule (26,60%)',v:'-'+fmt(r.ppDouble),c:'#fb923c'}].map((it,i)=>
+              <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'4px 0',borderBottom:'1px solid rgba(139,115,60,.06)'}}>
+                <span>{it.l}</span><span style={{fontWeight:600,color:it.c}}>{it.v}</span>
+              </div>
+            )}
+          </div>:<div style={{padding:12,background:'rgba(248,113,113,.06)',borderRadius:8,fontSize:12,color:'#f87171'}}>{r.note}</div>}
+        </div>;})()}
+      </C>
+    </div>}
+    {tab==='regles'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Ouvriers - Regime ONVA</ST>
+        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
+          <div><b style={{color:'#f87171'}}>Base:</b> Remuneration brute x 108%</div>
+          <div><b style={{color:'#f87171'}}>Cotisation patronale:</b> 15,84% via ONSS</div>
+          <div><b style={{color:'#f87171'}}>Paiement:</b> ONVA verse au travailleur</div>
+          <div><b style={{color:'#f87171'}}>Simple pecule:</b> Salaire normal pendant vacances</div>
+          <div><b style={{color:'#f87171'}}>Double pecule:</b> 92% du brut mensuel moyen</div>
+          <div><b style={{color:'#f87171'}}>Timing:</b> Mai-Juin pour exercice N-1</div>
+          <div><b style={{color:'#f87171'}}>Jours:</b> 20 jours (regime 5j/sem) ou 24 jours (6j/sem)</div>
+        </div>
+      </C>
+      <C><ST>Employes - Regime employeur</ST>
+        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
+          <div><b style={{color:'#60a5fa'}}>Simple pecule:</b> Salaire mensuel normal</div>
+          <div><b style={{color:'#60a5fa'}}>Double pecule:</b> 92% du brut mensuel</div>
+          <div><b style={{color:'#60a5fa'}}>1ere partie (85%):</b> Pas de retenue ONSS travailleur</div>
+          <div><b style={{color:'#60a5fa'}}>2eme partie (7%):</b> ONSS 13,07% + cotis. speciale 1%</div>
+          <div><b style={{color:'#60a5fa'}}>PP:</b> Taux exceptionnel 26,60% sur double pecule</div>
+          <div><b style={{color:'#60a5fa'}}>Sortie:</b> Pecule anticipe = simple + double prorata</div>
+        </div>
+        <div style={{marginTop:8,padding:10,background:'rgba(198,163,78,.06)',borderRadius:8,fontSize:11,color:'#c6a34e'}}>
+          <b>Attention:</b> En cas de changement d'employeur, le nouveau employeur deduit le pecule de sortie deja verse par l'ancien employeur.
+        </div>
+      </C>
+    </div>}
   </div>;
 }
 
