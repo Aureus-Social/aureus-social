@@ -4012,7 +4012,7 @@ function AppInner({ supabase, user, onLogout }) {
     {id:"legal",l:t('nav.legal'),i:'⚖',sub:[{id:"docsjuridiques",l:t('sub.docsjuridiques')},{id:"alertes",l:t('sub.alertes')},{id:"secteurs",l:t('sub.secteurs')},{id:"eta",l:t('sub.eta')}]},
     {id:"sprint10",l:"Espace Pro (Login)",i:">>",href:"/sprint10/auth"},
     {id:"settings",l:t('nav.settings'),i:'⚙',sub:[{id:"config",l:t('sub.config')},{id:"fraisgestion",l:t('sub.fraisgestion')}]},
-    {id:"admin",l:"Administration",i:'👑',sub:[{id:"admin_users",l:"Utilisateurs"},{id:"admin_clients",l:"Dossiers Clients"},{id:"admin_stats",l:"Statistiques"},{id:"admin_audit",l:"Journal d'Audit"},{id:"admin_billing",l:"Facturation"}]},
+    {id:"admin",l:"Administration",i:'👑',sub:[{id:"audit",l:"Audit Complet"},{id:"admin_users",l:"Utilisateurs"},{id:"admin_clients",l:"Dossiers Clients"},{id:"admin_stats",l:"Statistiques"},{id:"admin_audit",l:"Journal d'Audit"},{id:"admin_billing",l:"Facturation"}]},
   ];
 
   // ── Spotlight / Recherche globale (ALL HOOKS BEFORE EARLY RETURNS) ──
@@ -4087,7 +4087,7 @@ function AppInner({ supabase, user, onLogout }) {
       case'documents':return <DocsPage s={s} d={d}/>;
       case'reports':return <ReportsPage s={s} d={d}/>;
       case'settings':return s.sub==='fraisgestion'?<FraisGestionMod s={s} d={d}/>:<SettingsPage s={s} d={d}/>;
-      case'admin':return <AdminDashboard s={s} d={d}/>;
+      case'admin':if(s.sub==='audit')return <AuditMod s={s} d={d}/>;return <AdminDashboard s={s} d={d}/>;
       case'modules':return <ModulesProPage s={s} d={d}/>;
       default:return <Dashboard s={s} d={d}/>;
     }
@@ -18844,3 +18844,5 @@ export default function AureusSocialPro({ supabase, user, onLogout }) {
   return <LangProvider><AppInner supabase={supabase} user={user} onLogout={onLogout}/></LangProvider>;
 }
 
+/ /   a u d i t  
+ 
