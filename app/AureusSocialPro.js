@@ -55,6 +55,8 @@ const I18N = {
   'sub.totalreward': { fr:'🏆 Total Reward', nl:"🏆 Total Reward" },
   'sub.transport': { fr:'🚇 Transport domicile', nl:"🚇 Woon-werkverkeer" },
   'sub.treizieme': { fr:'🎄 13ème mois', nl:"🎄 13de maand" },
+  'sub.css': { fr:'💎 Cotisation spéc. SS', nl:"💎 Bijzondere SS" },
+  'sub.bonusemploi': { fr:'🎯 Bonus emploi', nl:"🎯 Werkbonus" },
   'sub.cheques': { fr:'Chèques-Repas', nl:"Maaltijdcheques" },
   'sub.ecocmd': { fr:'Éco-chèques', nl:"Ecocheques" },
   'sub.cafeteria': { fr:'Plan cafétéria', nl:"Cafetariaplan" },
@@ -3967,7 +3969,7 @@ function AppInner({ supabase, user, onLogout }) {
     {id:"payslip",l:t('nav.payslip'),i:'◈'},
     {id:"onss",l:t('nav.onss'),i:'◆',sub:[{id:"dimona",l:t('sub.dimona')},{id:"dmfa",l:t('sub.dmfa')},{id:"drs",l:t('sub.drs')},{id:"onssapl",l:t('sub.onssapl')},{id:"onss_dash",l:"Dashboard ONSS"},{id:"guide_portail",l:"Guide Portail ONSS"}]},
     {id:"fiscal",l:t('nav.fiscal'),i:'◇',sub:[{id:"belcotax",l:t('sub.belcotax')},{id:"precompte",l:t('sub.precompte')},{id:"fiches_ext",l:t('sub.fiches_ext')},{id:"co2",l:t('sub.co2')},{id:"atn",l:t('sub.atn')}]},
-    {id:"salaires",l:t('nav.salaires'),i:'◈',sub:[{id:"od",l:t('sub.od')},{id:"provisions",l:t('sub.provisions')},{id:"cumuls",l:t('sub.cumuls')},{id:"netbrut",l:t('sub.netbrut')},{id:"simcout",l:t('sub.simcout')},{id:"saisies",l:t('sub.saisies')},{id:"indexauto",l:t('sub.indexauto')},{id:"horsforfait",l:t('sub.horsforfait')},{id:"totalreward",l:t('sub.totalreward')},{id:"transport",l:t('sub.transport')},{id:"treizieme",l:t('sub.treizieme')}]},
+    {id:"salaires",l:t('nav.salaires'),i:'◈',sub:[{id:"od",l:t('sub.od')},{id:"provisions",l:t('sub.provisions')},{id:"cumuls",l:t('sub.cumuls')},{id:"netbrut",l:t('sub.netbrut')},{id:"simcout",l:t('sub.simcout')},{id:"saisies",l:t('sub.saisies')},{id:"indexauto",l:t('sub.indexauto')},{id:"horsforfait",l:t('sub.horsforfait')},{id:"totalreward",l:t('sub.totalreward')},{id:"transport",l:t('sub.transport')},{id:"treizieme",l:t('sub.treizieme')},{id:"css",l:t('sub.css')},{id:"bonusemploi",l:t('sub.bonusemploi')}]},
     {id:"avantages",l:t('nav.avantages'),i:'★',sub:[{id:"cheques",l:t('sub.cheques')},{id:"ecocmd",l:t('sub.ecocmd')},{id:"cafeteria",l:t('sub.cafeteria')},{id:"cct90",l:t('sub.cct90')},{id:"warrants",l:t('sub.warrants')},{id:"budgetmob",l:t('sub.budgetmob')},{id:"ecocircul",l:t('sub.ecocircul')}]},
     {id:"contratsmenu",l:t('nav.contrats'),i:'▣',sub:[{id:"contrats",l:t('sub.contrats2')},{id:"reglement",l:t('sub.reglement')},{id:"compteindiv",l:t('sub.compteindiv')},{id:"preavis",l:t('sub.preavis')},{id:"pecsortie",l:t('sub.pecsortie')},{id:"certpme",l:t('sub.certpme')}]},
     {id:"rh",l:t('nav.rh'),i:'◉',sub:[{id:"wf_embauche",l:"⚡ Workflow Embauche"},{id:"wf_licenciement",l:"⚡ Workflow Licenciement"},{id:"wf_maladie",l:"⚡ Workflow Maladie"},{id:"absences",l:t('sub.absences')},{id:"absenteisme",l:t('sub.absenteisme')},{id:"credittemps",l:t('sub.credittemps')},{id:"chomtemp",l:t('sub.chomtemp')},{id:"congeduc",l:t('sub.congeduc')},{id:"rcc",l:t('sub.rcc')},{id:"outplacement",l:t('sub.outplacement')},{id:"pointage",l:t('sub.pointage')},{id:"planform",l:t('sub.planform')},{id:"medtravail",l:t('sub.medtravail')},{id:"selfservice",l:t('sub.selfservice')}]},
@@ -7420,7 +7422,7 @@ const CR_PROV=[{id:"pluxee",n:'Pluxee (ex-Sodexo)',ic:'🟠'},{id:"edenred",n:'E
 //  CATEGORY ROUTER PAGES
 // ═══════════════════════════════════════════════════════════════
 function SalairesPage({s,d}){const sub=s.sub||'od';return <div>
-  <PH title="Salaires & Calculs" sub={`Module: ${{'od':'O.D. Comptables',"provisions":'Provisions',"cumuls":'Cumuls annuels',"netbrut":'Net → Brut',"simcout":'Simulation coût salarial',"saisies":'Saisies-Cessions',"indexauto":'Index automatique',"horsforfait":'Heures supplémentaires',"totalreward":'Total Reward Statement',"transport":'Transport domicile-travail',"treizieme":'13ème mois'}[sub]||sub}`}/>
+  <PH title="Salaires & Calculs" sub={`Module: ${{'od':'O.D. Comptables',"provisions":'Provisions',"cumuls":'Cumuls annuels',"netbrut":'Net → Brut',"simcout":'Simulation coût salarial',"saisies":'Saisies-Cessions',"indexauto":'Index automatique',"horsforfait":'Heures supplémentaires',"totalreward":'Total Reward Statement',"transport":'Transport domicile-travail',"treizieme":'13ème mois',"css":'Cotisation spéciale SS',"bonusemploi":'Bonus à l\'emploi'}[sub]||sub}`}/>
   {sub==='od'&&<ODMod s={s} d={d}/>}{sub==='provisions'&&<ProvisionsMod s={s} d={d}/>}
   {sub==='cumuls'&&<CumulsMod s={s} d={d}/>}{sub==='netbrut'&&<NetBrutMod s={s} d={d}/>}
   {sub==='simcout'&&<SimCoutMod s={s} d={d}/>}{sub==='totalreward'&&<TotalRewardMod s={s} d={d}/>}
@@ -7428,6 +7430,8 @@ function SalairesPage({s,d}){const sub=s.sub||'od';return <div>
   {sub==='horsforfait'&&<HeuresSupMod s={s} d={d}/>}
   {sub==='transport'&&<TransportDomTravMod s={s} d={d}/>}
   {sub==='treizieme'&&<TreizMoisMod s={s} d={d}/>}
+  {sub==='css'&&<CSSMod s={s} d={d}/>}
+  {sub==='bonusemploi'&&<BonusEmploiMod s={s} d={d}/>}
 </div>;}
 
 function AvantagesPage({s,d}){const sub=s.sub||'cheques';return <div>
@@ -15337,6 +15341,246 @@ function TreizMoisMod({s,d}){
         <b>Prorata:</b> En cas d'entree/sortie en cours d'annee, le 13eme mois est calcule au prorata des mois prestes.
       </div>
     </C>}
+  </div>;
+}
+
+// =====================================================
+//  COTISATION SPECIALE SECURITE SOCIALE — AR 1994
+// =====================================================
+function CSSMod({s,d}){
+  const ae=s.emps.filter(e=>e.status==='active'||!e.status);
+  const [tab,setTab]=useState('calc');
+  const [simBrut,setSimBrut]=useState(3000);
+  const [simCivil,setSimCivil]=useState('single');
+  // Baremes CSS 2026
+  const CSS_S=[{min:0,max:1945.38,css:0,note:'Pas de CSS'},{min:1945.38,max:2190.18,css:'variable',pct:7.6,note:'(brut trim. - 5836.14) x 7,6% / 3'},{min:2190.18,max:6038.82,css:'variable',max_css:51.64,note:'18,60 + (brut trim. - 6570.54) x 1,1% / 3, max 51,64/trim'},{min:6038.82,max:99999,css:17.21,note:'Plafond: 51,64 EUR/trim = 17,21/mois'}];
+  const CSS_M=[{min:0,max:1945.38,css:0,note:'Pas de CSS'},{min:1945.38,max:2190.18,css:'variable',pct:7.6,note:'(brut trim. - 5836.14) x 7,6% / 3'},{min:2190.18,max:6038.82,css:'variable',max_css:60.94,note:'18,60 + (brut trim. - 6570.54) x 1,1% / 3, max 60,94/trim'},{min:6038.82,max:99999,css:20.31,note:'Plafond: 60,94 EUR/trim = 20,31/mois'}];
+
+  const empCalc=ae.map(emp=>{
+    const p=calc(emp,DPER,s.co);
+    return{...emp,name:(emp.first||'')+' '+(emp.last||''),brut:p.gross,css:p.css,cssAn:p.css*12,civil:emp.civil||'single'};
+  });
+  const totCSS=empCalc.reduce((a,e)=>a+e.css,0);
+  const totCSSAn=empCalc.reduce((a,e)=>a+e.cssAn,0);
+
+  // Simulation
+  const simCSS=()=>{
+    const grossTrim=simBrut*3;
+    const grossTrimOuv=grossTrim; // simplified
+    let css=0;
+    if(simCivil==='single'){
+      if(grossTrimOuv<=5836.14)css=0;
+      else if(grossTrimOuv<=6570.54)css=Math.max(9.30,(grossTrimOuv-5836.14)*0.076)/3;
+      else if(grossTrimOuv<=18116.46)css=Math.min(51.64,18.60+(grossTrimOuv-6570.54)*0.011)/3;
+      else css=51.64/3;
+    }else{
+      if(grossTrimOuv<=5836.14)css=0;
+      else if(grossTrimOuv<=6570.54)css=(grossTrimOuv-5836.14)*0.076/3;
+      else if(grossTrimOuv<=18116.46)css=Math.min(60.94,18.60+(grossTrimOuv-6570.54)*0.011)/3;
+      else css=60.94/3;
+    }
+    return Math.round(css*100)/100;
+  };
+
+  return <div>
+    <PH title="Cotisation Speciale Securite Sociale" sub="AR 30/03/1994 - Retenue mensuelle sur salaire par tranche de revenus"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:18}}>
+      {[{l:"Travailleurs",v:ae.length,c:'#60a5fa'},{l:"CSS total/mois",v:fmt(totCSS),c:'#c6a34e'},{l:"CSS total/an",v:fmt(totCSSAn),c:'#f87171'},{l:"CSS moyen/mois",v:ae.length?fmt(totCSS/ae.length):'—',c:'#a78bfa'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'calc',l:'Par employe'},{v:'sim',l:'Simulateur'},{v:'baremes',l:'Baremes 2026'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    {tab==='calc'&&<C>
+      {empCalc.length>0?<Tbl cols={[
+        {k:'n',l:"Travailleur",b:1,r:r=>r.name},
+        {k:'c',l:"Situation",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:'rgba(198,163,78,.1)',color:'#c6a34e'}}>{r.civil==='single'?'Isole':'Menage'}</span>},
+        {k:'b',l:"Brut mensuel",a:'right',r:r=>fmt(r.brut)},
+        {k:'s',l:"CSS/mois",a:'right',r:r=><span style={{fontWeight:600,color:'#f87171'}}>{fmt(r.css)}</span>},
+        {k:'a',l:"CSS/an",a:'right',r:r=><span style={{color:'#fb923c'}}>{fmt(r.cssAn)}</span>},
+      ]} data={empCalc}/>:<div style={{padding:30,textAlign:'center',color:'#5e5c56'}}>Aucun travailleur actif</div>}
+    </C>}
+    {tab==='sim'&&<div style={{display:'grid',gridTemplateColumns:'350px 1fr',gap:18}}>
+      <C><ST>Simulateur CSS</ST>
+        <I label="Brut mensuel (EUR)" type="number" value={simBrut} onChange={v=>setSimBrut(+v)}/>
+        <I label="Situation familiale" value={simCivil} onChange={setSimCivil} options={[{v:'single',l:'Isole / Conjoint sans revenu'},{v:'married',l:'Menage 2 revenus'}]}/>
+        <div style={{marginTop:14,padding:16,background:'rgba(198,163,78,.08)',borderRadius:10,textAlign:'center'}}>
+          <div style={{fontSize:10,color:'#5e5c56'}}>CSS mensuelle</div>
+          <div style={{fontSize:28,fontWeight:700,color:'#f87171'}}>{fmt(simCSS())}</div>
+          <div style={{fontSize:11,color:'#9e9b93',marginTop:4}}>soit {fmt(simCSS()*12)}/an</div>
+        </div>
+      </C>
+      <C><ST>Impact selon le brut</ST>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
+          {[1500,2000,2500,3000,3500,4000,4500,5000,5500,6000,6500,7000].map(b=>{
+            const gt=b*3;let c=0;
+            if(gt<=5836.14)c=0;else if(gt<=6570.54)c=Math.max(9.30,(gt-5836.14)*0.076)/3;
+            else if(gt<=18116.46)c=Math.min(51.64,18.60+(gt-6570.54)*0.011)/3;else c=51.64/3;
+            return <div key={b} style={{padding:8,background:'rgba(198,163,78,.04)',borderRadius:6,textAlign:'center',border:'1px solid rgba(198,163,78,.06)'}}>
+              <div style={{fontSize:10,color:'#5e5c56'}}>{fmt(b)} brut</div>
+              <div style={{fontSize:14,fontWeight:700,color:c>0?'#f87171':'#4ade80'}}>{c>0?fmt(Math.round(c*100)/100):'0 EUR'}</div>
+            </div>;
+          })}
+        </div>
+      </C>
+    </div>}
+    {tab==='baremes'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Isole / Conjoint sans revenu professionnel</ST>
+        {CSS_S.map((t,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'10px 12px',marginBottom:4,background:'rgba(198,163,78,.03)',borderRadius:6}}>
+          <span style={{fontSize:12,color:'#e8e6e0'}}>{fmt(t.min)} - {t.max<99999?fmt(t.max):'...'}</span>
+          <span style={{fontSize:12,fontWeight:600,color:t.css===0?'#4ade80':'#f87171'}}>{t.note}</span>
+        </div>)}
+        <div style={{marginTop:8,padding:10,background:'rgba(198,163,78,.06)',borderRadius:6,fontSize:11,color:'#c6a34e'}}>
+          <b>Plafond trimestriel:</b> 51,64 EUR/trimestre = 17,21 EUR/mois<br/>
+          <b>Plafond annuel:</b> 731,28 EUR/an
+        </div>
+      </C>
+      <C><ST>Menage a 2 revenus professionnels</ST>
+        {CSS_M.map((t,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'10px 12px',marginBottom:4,background:'rgba(198,163,78,.03)',borderRadius:6}}>
+          <span style={{fontSize:12,color:'#e8e6e0'}}>{fmt(t.min)} - {t.max<99999?fmt(t.max):'...'}</span>
+          <span style={{fontSize:12,fontWeight:600,color:t.css===0?'#4ade80':'#f87171'}}>{t.note}</span>
+        </div>)}
+        <div style={{marginTop:8,padding:10,background:'rgba(248,113,113,.06)',borderRadius:6,fontSize:11,color:'#f87171'}}>
+          <b>Plafond trimestriel:</b> 60,94 EUR/trimestre = 20,31 EUR/mois<br/>
+          <b>Plafond annuel:</b> 731,28 EUR/an
+        </div>
+      </C>
+    </div>}
+  </div>;
+}
+
+// =====================================================
+//  BONUS A L'EMPLOI (WERKBONUS) — AR 2000 / Loi-programme
+// =====================================================
+function BonusEmploiMod({s,d}){
+  const ae=s.emps.filter(e=>e.status==='active'||!e.status);
+  const [tab,setTab]=useState('calc');
+  const [simBrut,setSimBrut]=useState(2500);
+  const [simStatut,setSimStatut]=useState('employe');
+  const BE=LEGAL.BONUS_2026;
+
+  const empCalc=ae.map(emp=>{
+    const p=calc(emp,DPER,s.co);
+    return{...emp,name:(emp.first||'')+' '+(emp.last||''),brut:p.gross,
+      bonusA:p.empBonusA,bonusB:p.empBonusB,bonusTotal:p.empBonus,
+      bonusFiscA:p.empBonusFiscA||0,bonusFiscB:p.empBonusFiscB||0,bonusFisc:p.empBonusFisc||0,
+      onssAvant:p.onssW,onssApres:p.onssNet,gain:p.empBonus+(p.empBonusFisc||0)};
+  });
+  const totBonus=empCalc.reduce((a,e)=>a+e.bonusTotal,0);
+  const totFisc=empCalc.reduce((a,e)=>a+e.bonusFisc,0);
+  const totGain=empCalc.reduce((a,e)=>a+e.gain,0);
+  const beneficiaires=empCalc.filter(e=>e.bonusTotal>0).length;
+
+  // Simulation
+  const simBonus=()=>{
+    const brut=simBrut;let bA=0,bB=0;
+    if(simStatut==='ouvrier'){
+      const ref=brut*1.08;
+      if(ref<=BE.O_A_S2)bA=BE.O_A_MAX;else if(ref<=BE.O_A_S1)bA=Math.max(0,BE.O_A_MAX-BE.O_A_COEFF*(ref-BE.O_A_S2));
+      if(ref<=BE.O_B_S2)bB=BE.O_B_MAX;else if(ref<=BE.O_B_S1)bB=Math.max(0,BE.O_B_MAX-BE.O_B_COEFF*(ref-BE.O_B_S2));
+    }else{
+      if(brut<=BE.A_S2)bA=BE.A_MAX;else if(brut<=BE.A_S1)bA=Math.max(0,BE.A_MAX-BE.A_COEFF*(brut-BE.A_S2));
+      if(brut<=BE.B_S2)bB=BE.B_MAX;else if(brut<=BE.B_S1)bB=Math.max(0,BE.B_MAX-BE.B_COEFF*(brut-BE.B_S2));
+    }
+    const onss=brut*(simStatut==='ouvrier'?1.08:1)*0.1307;
+    const total=Math.min(bA+bB,onss);
+    const fiscA=bA*0.3314;const fiscB=bB*0.5254;
+    return{bA:Math.round(bA*100)/100,bB:Math.round(bB*100)/100,total:Math.round(total*100)/100,fiscA:Math.round(fiscA*100)/100,fiscB:Math.round(fiscB*100)/100,fisc:Math.round((fiscA+fiscB)*100)/100,gain:Math.round((total+fiscA+fiscB)*100)/100};
+  };
+
+  return <div>
+    <PH title="Bonus a l'Emploi (Werkbonus)" sub="Reduction cotisations personnelles pour bas salaires - Volets A + B + Fiscal"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:18}}>
+      {[{l:"Beneficiaires",v:beneficiaires+'/'+ae.length,c:'#60a5fa'},{l:"Bonus ONSS/mois",v:fmt(totBonus),c:'#c6a34e'},{l:"Bonus fiscal/mois",v:fmt(totFisc),c:'#a78bfa'},{l:"Gain total/mois",v:fmt(totGain),c:'#4ade80'},{l:"Gain total/an",v:fmt(totGain*12),c:'#fb923c'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'calc',l:'Par employe'},{v:'sim',l:'Simulateur'},{v:'regles',l:'Baremes 2026'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    {tab==='calc'&&<C>
+      {empCalc.length>0?<Tbl cols={[
+        {k:'n',l:"Travailleur",b:1,r:r=>r.name},
+        {k:'b',l:"Brut",a:'right',r:r=>fmt(r.brut)},
+        {k:'a',l:"Volet A",a:'right',r:r=>r.bonusA>0?<span style={{color:'#c6a34e'}}>{fmt(r.bonusA)}</span>:'—'},
+        {k:'bb',l:"Volet B",a:'right',r:r=>r.bonusB>0?<span style={{color:'#a78bfa'}}>{fmt(r.bonusB)}</span>:'—'},
+        {k:'t',l:"Total ONSS",a:'right',r:r=>r.bonusTotal>0?<span style={{fontWeight:600,color:'#4ade80'}}>{fmt(r.bonusTotal)}</span>:'—'},
+        {k:'f',l:"Bonus fiscal",a:'right',r:r=>r.bonusFisc>0?<span style={{color:'#60a5fa'}}>{fmt(r.bonusFisc)}</span>:'—'},
+        {k:'g',l:"Gain total",a:'right',r:r=>r.gain>0?<span style={{fontWeight:700,color:'#4ade80'}}>{fmt(r.gain)}</span>:'—'},
+      ]} data={empCalc}/>:<div style={{padding:30,textAlign:'center',color:'#5e5c56'}}>Aucun travailleur actif</div>}
+    </C>}
+    {tab==='sim'&&<div style={{display:'grid',gridTemplateColumns:'350px 1fr',gap:18}}>
+      <C><ST>Simulateur Bonus Emploi</ST>
+        <I label="Brut mensuel (EUR)" type="number" value={simBrut} onChange={v=>setSimBrut(+v)}/>
+        <I label="Statut" value={simStatut} onChange={setSimStatut} options={[{v:'employe',l:'Employe'},{v:'ouvrier',l:'Ouvrier'}]}/>
+        {(()=>{const r=simBonus();return <div style={{marginTop:14}}>
+          <div style={{padding:16,background:'rgba(74,222,128,.08)',borderRadius:10,textAlign:'center',marginBottom:10}}>
+            <div style={{fontSize:10,color:'#5e5c56'}}>GAIN NET TOTAL / MOIS</div>
+            <div style={{fontSize:28,fontWeight:700,color:'#4ade80'}}>{fmt(r.gain)}</div>
+            <div style={{fontSize:11,color:'#9e9b93'}}>soit {fmt(r.gain*12)}/an</div>
+          </div>
+          {[{l:'Volet A (bas salaires)',v:r.bA,c:'#c6a34e'},{l:'Volet B (tres bas salaires)',v:r.bB,c:'#a78bfa'},{l:'Total reduction ONSS',v:r.total,c:'#4ade80'},{l:'Bonus fiscal A (33,14%)',v:r.fiscA,c:'#60a5fa'},{l:'Bonus fiscal B (52,54%)',v:r.fiscB,c:'#60a5fa'},{l:'Total bonus fiscal',v:r.fisc,c:'#60a5fa'}].map((it,i)=>
+            <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(139,115,60,.06)'}}>
+              <span style={{fontSize:12,color:'#9e9b93'}}>{it.l}</span>
+              <span style={{fontSize:12,fontWeight:600,color:it.v>0?it.c:'#5e5c56'}}>{it.v>0?fmt(it.v):'—'}</span>
+            </div>
+          )}
+        </div>;})()}
+      </C>
+      <C><ST>Courbe bonus selon le brut</ST>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
+          {[1800,2000,2200,2400,2600,2800,3000,3200,3400,3600,3800,4000].map(b=>{
+            let bA=0;if(b<=BE.A_S2)bA=BE.A_MAX;else if(b<=BE.A_S1)bA=Math.max(0,BE.A_MAX-BE.A_COEFF*(b-BE.A_S2));
+            let bB=0;if(b<=BE.B_S2)bB=BE.B_MAX;else if(b<=BE.B_S1)bB=Math.max(0,BE.B_MAX-BE.B_COEFF*(b-BE.B_S2));
+            const tot=bA+bB;
+            return <div key={b} style={{padding:8,background:'rgba(198,163,78,.04)',borderRadius:6,textAlign:'center',border:'1px solid rgba(198,163,78,.06)'}}>
+              <div style={{fontSize:10,color:'#5e5c56'}}>{fmt(b)}</div>
+              <div style={{fontSize:14,fontWeight:700,color:tot>0?'#4ade80':'#5e5c56'}}>{tot>0?fmt(Math.round(tot*100)/100):'0'}</div>
+              <div style={{fontSize:9,color:'#5e5c56'}}>{tot>0?'A:'+Math.round(bA)+' B:'+Math.round(bB):''}</div>
+            </div>;
+          })}
+        </div>
+      </C>
+    </div>}
+    {tab==='regles'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Volet A - Reduction cotisations personnelles</ST>
+        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
+          <div><b style={{color:'#c6a34e'}}>Employes:</b></div>
+          <div>Salaire reference &le; {fmt(BE.A_S2)}: bonus max = {fmt(BE.A_MAX)}</div>
+          <div>Salaire reference &le; {fmt(BE.A_S1)}: degressif (coeff. {BE.A_COEFF})</div>
+          <div>Salaire reference &gt; {fmt(BE.A_S1)}: pas de bonus</div>
+          <div style={{marginTop:8}}><b style={{color:'#c6a34e'}}>Ouvriers (brut x 108%):</b></div>
+          <div>Salaire reference &le; {fmt(BE.O_A_S2)}: bonus max = {fmt(BE.O_A_MAX)}</div>
+          <div>Salaire reference &le; {fmt(BE.O_A_S1)}: degressif (coeff. {BE.O_A_COEFF})</div>
+        </div>
+      </C>
+      <C><ST>Volet B + Bonus Fiscal</ST>
+        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
+          <div><b style={{color:'#a78bfa'}}>Volet B (tres bas salaires):</b></div>
+          <div>Plafond plus bas, montants supplementaires</div>
+          <div>Cumul A+B ne peut depasser la cotisation ONSS perso</div>
+          <div style={{marginTop:8}}><b style={{color:'#60a5fa'}}>Bonus fiscal:</b></div>
+          <div>Volet A: reduction PP de 33,14% du montant A</div>
+          <div>Volet B: reduction PP de 52,54% du montant B</div>
+          <div style={{marginTop:8,padding:10,background:'rgba(74,222,128,.06)',borderRadius:8,color:'#4ade80',fontSize:11}}>
+            Le bonus a l'emploi augmente le net du travailleur SANS cout supplementaire pour l'employeur. C'est un mecanisme federal pour soutenir le pouvoir d'achat des bas salaires.
+          </div>
+        </div>
+      </C>
+    </div>}
   </div>;
 }
 
