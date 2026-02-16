@@ -4618,7 +4618,7 @@ function Employees({s,d}) {
     if(!file)return;
     setImporting(true);
     try{
-      const XLSX=await import('https://cdn.sheetjs.com/xlsx-0.20.1/package/xlsx.mjs');
+      const XLSX=await new Promise((resolve,reject)=>{if(window.XLSX)return resolve(window.XLSX);const s=document.createElement('script');s.src='https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js';s.onload=()=>resolve(window.XLSX);s.onerror=reject;document.head.appendChild(s);});
       const buf=await file.arrayBuffer();
       const wb=XLSX.read(buf);
       const ws=wb.Sheets[wb.SheetNames[0]];
