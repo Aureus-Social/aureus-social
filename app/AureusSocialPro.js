@@ -1,3 +1,4 @@
+// Aureus Social Pro v20.1 — Build 1771257420
 "use client";
 import { useState, useReducer, useRef, useMemo, useEffect, createContext, useContext } from "react";
 
@@ -17371,11 +17372,10 @@ function AureusSuitePage({s,d}){
 }
 
 function BienetrePage({s,d}){
-  const sub=s.sub||'dashboard';
-  const mods={dashboard:"Dashboard",planglobal:"Plan Global",paa:'Plan Annuel',risquespsycho:'Risques Psychosociaux',alcool:"Politique Alcool/Drogues",organes:'Organes de concertation',elections:'Elections sociales'};
+  const sub=s.sub||'planglobal';
   return <div>
-    <PH title="Bien-etre au Travail" sub={`Module: ${mods[sub]||sub}`}/>
-    {sub==='dashboard'&&<BienEtreDash s={s}/>}
+    <PH title="Bien-etre au Travail" sub="Code du bien-etre - Loi du 4/8/1996"/>
+    {(!sub||sub==='dashboard')&&<BienEtreDash s={s}/>}
     {sub==='planglobal'&&<PlanGlobalMod s={s} d={d}/>}
     {sub==='paa'&&<PAAMod s={s} d={d}/>}
     {sub==='risquespsycho'&&<RisquesPsychoMod s={s} d={d}/>}
