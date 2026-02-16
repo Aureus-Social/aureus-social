@@ -53,6 +53,8 @@ const I18N = {
   'sub.indexauto': { fr:'Index automatique', nl:"Automatische index" },
   'sub.horsforfait': { fr:'Heures supplémentaires', nl:"Overuren" },
   'sub.totalreward': { fr:'🏆 Total Reward', nl:"🏆 Total Reward" },
+  'sub.transport': { fr:'🚇 Transport domicile', nl:"🚇 Woon-werkverkeer" },
+  'sub.treizieme': { fr:'🎄 13ème mois', nl:"🎄 13de maand" },
   'sub.cheques': { fr:'Chèques-Repas', nl:"Maaltijdcheques" },
   'sub.ecocmd': { fr:'Éco-chèques', nl:"Ecocheques" },
   'sub.cafeteria': { fr:'Plan cafétéria', nl:"Cafetariaplan" },
@@ -3965,7 +3967,7 @@ function AppInner({ supabase, user, onLogout }) {
     {id:"payslip",l:t('nav.payslip'),i:'◈'},
     {id:"onss",l:t('nav.onss'),i:'◆',sub:[{id:"dimona",l:t('sub.dimona')},{id:"dmfa",l:t('sub.dmfa')},{id:"drs",l:t('sub.drs')},{id:"onssapl",l:t('sub.onssapl')},{id:"onss_dash",l:"Dashboard ONSS"},{id:"guide_portail",l:"Guide Portail ONSS"}]},
     {id:"fiscal",l:t('nav.fiscal'),i:'◇',sub:[{id:"belcotax",l:t('sub.belcotax')},{id:"precompte",l:t('sub.precompte')},{id:"fiches_ext",l:t('sub.fiches_ext')},{id:"co2",l:t('sub.co2')},{id:"atn",l:t('sub.atn')}]},
-    {id:"salaires",l:t('nav.salaires'),i:'◈',sub:[{id:"od",l:t('sub.od')},{id:"provisions",l:t('sub.provisions')},{id:"cumuls",l:t('sub.cumuls')},{id:"netbrut",l:t('sub.netbrut')},{id:"simcout",l:t('sub.simcout')},{id:"saisies",l:t('sub.saisies')},{id:"indexauto",l:t('sub.indexauto')},{id:"horsforfait",l:t('sub.horsforfait')},{id:"totalreward",l:t('sub.totalreward')}]},
+    {id:"salaires",l:t('nav.salaires'),i:'◈',sub:[{id:"od",l:t('sub.od')},{id:"provisions",l:t('sub.provisions')},{id:"cumuls",l:t('sub.cumuls')},{id:"netbrut",l:t('sub.netbrut')},{id:"simcout",l:t('sub.simcout')},{id:"saisies",l:t('sub.saisies')},{id:"indexauto",l:t('sub.indexauto')},{id:"horsforfait",l:t('sub.horsforfait')},{id:"totalreward",l:t('sub.totalreward')},{id:"transport",l:t('sub.transport')},{id:"treizieme",l:t('sub.treizieme')}]},
     {id:"avantages",l:t('nav.avantages'),i:'★',sub:[{id:"cheques",l:t('sub.cheques')},{id:"ecocmd",l:t('sub.ecocmd')},{id:"cafeteria",l:t('sub.cafeteria')},{id:"cct90",l:t('sub.cct90')},{id:"warrants",l:t('sub.warrants')},{id:"budgetmob",l:t('sub.budgetmob')},{id:"ecocircul",l:t('sub.ecocircul')}]},
     {id:"contratsmenu",l:t('nav.contrats'),i:'▣',sub:[{id:"contrats",l:t('sub.contrats2')},{id:"reglement",l:t('sub.reglement')},{id:"compteindiv",l:t('sub.compteindiv')},{id:"preavis",l:t('sub.preavis')},{id:"pecsortie",l:t('sub.pecsortie')},{id:"certpme",l:t('sub.certpme')}]},
     {id:"rh",l:t('nav.rh'),i:'◉',sub:[{id:"wf_embauche",l:"⚡ Workflow Embauche"},{id:"wf_licenciement",l:"⚡ Workflow Licenciement"},{id:"wf_maladie",l:"⚡ Workflow Maladie"},{id:"absences",l:t('sub.absences')},{id:"absenteisme",l:t('sub.absenteisme')},{id:"credittemps",l:t('sub.credittemps')},{id:"chomtemp",l:t('sub.chomtemp')},{id:"congeduc",l:t('sub.congeduc')},{id:"rcc",l:t('sub.rcc')},{id:"outplacement",l:t('sub.outplacement')},{id:"pointage",l:t('sub.pointage')},{id:"planform",l:t('sub.planform')},{id:"medtravail",l:t('sub.medtravail')},{id:"selfservice",l:t('sub.selfservice')}]},
@@ -7418,12 +7420,14 @@ const CR_PROV=[{id:"pluxee",n:'Pluxee (ex-Sodexo)',ic:'🟠'},{id:"edenred",n:'E
 //  CATEGORY ROUTER PAGES
 // ═══════════════════════════════════════════════════════════════
 function SalairesPage({s,d}){const sub=s.sub||'od';return <div>
-  <PH title="Salaires & Calculs" sub={`Module: ${{'od':'O.D. Comptables',"provisions":'Provisions',"cumuls":'Cumuls annuels',"netbrut":'Net → Brut',"simcout":'Simulation coût salarial',"saisies":'Saisies-Cessions',"indexauto":'Index automatique',"horsforfait":'Heures supplémentaires',"totalreward":'Total Reward Statement'}[sub]||sub}`}/>
+  <PH title="Salaires & Calculs" sub={`Module: ${{'od':'O.D. Comptables',"provisions":'Provisions',"cumuls":'Cumuls annuels',"netbrut":'Net → Brut',"simcout":'Simulation coût salarial',"saisies":'Saisies-Cessions',"indexauto":'Index automatique',"horsforfait":'Heures supplémentaires',"totalreward":'Total Reward Statement',"transport":'Transport domicile-travail',"treizieme":'13ème mois'}[sub]||sub}`}/>
   {sub==='od'&&<ODMod s={s} d={d}/>}{sub==='provisions'&&<ProvisionsMod s={s} d={d}/>}
   {sub==='cumuls'&&<CumulsMod s={s} d={d}/>}{sub==='netbrut'&&<NetBrutMod s={s} d={d}/>}
   {sub==='simcout'&&<SimCoutMod s={s} d={d}/>}{sub==='totalreward'&&<TotalRewardMod s={s} d={d}/>}
   {sub==='saisies'&&<SaisiesMod s={s} d={d}/>}{sub==='indexauto'&&<IndexAutoMod s={s} d={d}/>}
   {sub==='horsforfait'&&<HeuresSupMod s={s} d={d}/>}
+  {sub==='transport'&&<TransportDomTravMod s={s} d={d}/>}
+  {sub==='treizieme'&&<TreizMoisMod s={s} d={d}/>}
 </div>;}
 
 function AvantagesPage({s,d}){const sub=s.sub||'cheques';return <div>
@@ -15099,6 +15103,242 @@ function HeuresSupMod({s,d}){
 // ═══════════════════════════════════════════════════════════════
 //  NOUVEAUX MODULES — Benchmark Securex/Partena/UCM
 // ═══════════════════════════════════════════════════════════════
+
+// =====================================================
+//  TRANSPORT DOMICILE-TRAVAIL — CCT 19/9, SNCB, Velo
+// =====================================================
+function TransportDomTravMod({s,d}){
+  const ae=s.emps.filter(e=>e.status==='active'||!e.status);
+  const [tab,setTab]=useState('overview');
+  // SNCB baremes 2026 (prix abo mensuel par tranche km)
+  const SNCB=[{km:3,prix:41},{km:5,prix:49},{km:10,prix:62},{km:15,prix:76},{km:20,prix:89},{km:25,prix:102},{km:30,prix:116},{km:35,prix:128},{km:40,prix:141},{km:45,prix:152},{km:50,prix:163},{km:60,prix:184},{km:70,prix:206},{km:80,prix:225},{km:90,prix:244},{km:100,prix:263},{km:120,prix:298},{km:150,prix:348}];
+  const getSNCB=(km)=>{const t=SNCB.find(s=>km<=s.km);return t?t.prix:SNCB[SNCB.length-1].prix;};
+  const VELO_KM=0.35; // indemnite velo 2026 (max 0,35 EUR/km)
+  const VELO_MAX_KM=40; // aller simple max pour calcul
+  const EXON_TRANSPORT=490; // exoneration annuelle forfaitaire transport prive
+
+  const empData=ae.map(emp=>{
+    const dist=parseFloat(emp.commDist)||0;
+    const type=emp.commType||'none';
+    let interv=0,exonere=0,methode='',detail='';
+    if(type==='train'){
+      interv=getSNCB(dist);methode='SNCB (CCT 19/9)';detail=dist+'km = '+interv+' EUR/mois abo';exonere=interv;
+    }else if(type==='bus'){
+      interv=getSNCB(dist)*0.71;methode='Bus/Tram/Metro (71% prix SNCB)';detail='71% du prix SNCB '+dist+'km';exonere=interv;
+    }else if(type==='bike'){
+      const jours=20;const km2=Math.min(dist,VELO_MAX_KM)*2;
+      interv=km2*VELO_KM*jours;methode='Velo (0,35 EUR/km A/R)';detail=km2+'km A/R x '+jours+'j x 0,35 EUR';exonere=interv;
+    }else if(type==='car'){
+      interv=getSNCB(dist)*0.75;methode='Voiture privee (75% prix SNCB si CCT)';detail='75% SNCB pour '+dist+'km';exonere=Math.min(interv,EXON_TRANSPORT/12);
+    }else if(type==='mixed'){
+      const train=getSNCB(dist);const velo=Math.min(10,dist)*2*VELO_KM*20;
+      interv=train+velo;methode='Combine (train+velo)';detail='Train '+dist+'km + velo 10km';exonere=interv;
+    }
+    interv=Math.round(interv*100)/100;
+    return{...emp,dist,type,interv,exonere:Math.round(exonere*100)/100,methode,detail,name:(emp.first||'')+' '+(emp.last||'')};
+  }).filter(e=>e.type!=='none'&&e.type!=='company_car');
+  const totInterv=empData.reduce((a,e)=>a+e.interv,0);
+  const totExon=empData.reduce((a,e)=>a+e.exonere,0);
+  const avgDist=empData.length?Math.round(empData.reduce((a,e)=>a+e.dist,0)/empData.length):0;
+  const byType={};empData.forEach(e=>{if(!byType[e.type])byType[e.type]={count:0,cost:0};byType[e.type].count++;byType[e.type].cost+=e.interv;});
+
+  return <div>
+    <PH title="Transport Domicile-Travail" sub="CCT 19/9, SNCB, STIB/TEC/De Lijn, Velo, Voiture - Interventions 2026"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:18}}>
+      {[{l:"Travailleurs",v:empData.length+'/'+ae.length,c:'#60a5fa'},{l:"Intervention/mois",v:fmt(totInterv),c:'#c6a34e'},{l:"Intervention/an",v:fmt(totInterv*12),c:'#fb923c'},{l:"Exonere/mois",v:fmt(totExon),c:'#4ade80'},{l:"Distance moy.",v:avgDist+'km',c:'#a78bfa'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>
+      {[{v:'overview',l:'Liste travailleurs'},{v:'type',l:'Par mode transport'},{v:'bareme',l:'Bareme SNCB 2026'},{v:'regles',l:'Regles legales'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+    </div>
+    {tab==='overview'&&<C>
+      {empData.length>0?<Tbl cols={[
+        {k:'n',l:"Travailleur",b:1,r:r=>r.name},
+        {k:'d',l:"Distance",a:'right',r:r=>r.dist+'km'},
+        {k:'t',l:"Mode",r:r=><span style={{fontSize:10,padding:'2px 8px',borderRadius:4,background:r.type==='bike'?'rgba(74,222,128,.1)':r.type==='train'?'rgba(96,165,250,.1)':'rgba(198,163,78,.1)',color:r.type==='bike'?'#4ade80':r.type==='train'?'#60a5fa':'#c6a34e'}}>{r.methode.split('(')[0]}</span>},
+        {k:'i',l:"Interv./mois",a:'right',r:r=><span style={{fontWeight:600,color:'#c6a34e'}}>{fmt(r.interv)}</span>},
+        {k:'e',l:"Exonere/mois",a:'right',r:r=><span style={{color:'#4ade80'}}>{fmt(r.exonere)}</span>},
+        {k:'a',l:"Interv./an",a:'right',r:r=><span style={{fontWeight:600}}>{fmt(r.interv*12)}</span>},
+      ]} data={empData}/>:<div style={{padding:30,textAlign:'center',color:'#5e5c56'}}>Aucun travailleur avec transport configure. Configurez le mode de transport dans la fiche employe.</div>}
+    </C>}
+    {tab==='type'&&<div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:14}}>
+      {[{id:'train',l:'Train (SNCB)',i:'🚆',desc:'100% prix abo SNCB (CCT 19/9)'},{id:'bus',l:'Bus/Tram/Metro',i:'🚌',desc:'71% du prix abo SNCB meme distance'},{id:'bike',l:'Velo',i:'🚲',desc:'0,35 EUR/km A/R, exonere fiscalement'},{id:'car',l:'Voiture privee',i:'🚗',desc:'75% prix SNCB (si CCT applicable)'},{id:'mixed',l:'Combine',i:'🔄',desc:'Train + velo cumul possible'},{id:'carpool',l:'Covoiturage',i:'🤝',desc:'Comme voiture privee'}].map(tp=>
+        <C key={tp.id} style={{padding:16}}>
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+            <span style={{fontSize:24}}>{tp.i}</span>
+            <div><div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>{tp.l}</div><div style={{fontSize:10,color:'#9e9b93'}}>{tp.desc}</div></div>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderTop:'1px solid rgba(139,115,60,.08)'}}>
+            <span style={{fontSize:12,color:'#9e9b93'}}>Travailleurs</span>
+            <span style={{fontSize:14,fontWeight:700,color:'#c6a34e'}}>{(byType[tp.id]||{count:0}).count}</span>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',padding:'8px 0'}}>
+            <span style={{fontSize:12,color:'#9e9b93'}}>Cout/mois</span>
+            <span style={{fontSize:14,fontWeight:700,color:'#fb923c'}}>{fmt((byType[tp.id]||{cost:0}).cost)}</span>
+          </div>
+        </C>
+      )}
+    </div>}
+    {tab==='bareme'&&<C>
+      <ST>Bareme SNCB 2026 - Prix abonnement mensuel</ST>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(6,1fr)',gap:8}}>
+        {SNCB.map((s,i)=><div key={i} style={{padding:10,background:'rgba(198,163,78,.04)',borderRadius:8,textAlign:'center',border:'1px solid rgba(198,163,78,.06)'}}>
+          <div style={{fontSize:11,color:'#9e9b93'}}>0-{s.km} km</div>
+          <div style={{fontSize:16,fontWeight:700,color:'#c6a34e',marginTop:2}}>{s.prix} EUR</div>
+        </div>)}
+      </div>
+      <div style={{marginTop:14,padding:10,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:11,color:'#60a5fa'}}>
+        <b>CCT 19/9:</b> L'employeur intervient a hauteur du prix de l'abonnement SNCB pour la distance correspondante, quel que soit le moyen de transport en commun utilise.
+      </div>
+    </C>}
+    {tab==='regles'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+      <C><ST>Obligations legales</ST>
+        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
+          <div><b style={{color:'#c6a34e'}}>Train (SNCB):</b> Intervention obligatoire = prix abo (CCT 19/9)</div>
+          <div><b style={{color:'#c6a34e'}}>Bus/Tram/Metro:</b> 71,8% du prix abo SNCB meme distance</div>
+          <div><b style={{color:'#c6a34e'}}>Velo:</b> 0,35 EUR/km A/R (max 40km simple), 100% exonere</div>
+          <div><b style={{color:'#c6a34e'}}>Voiture:</b> Pas d'obligation legale (sauf CCT sectorielle)</div>
+          <div><b style={{color:'#c6a34e'}}>Combine:</b> Cumul possible train + velo</div>
+          <div><b style={{color:'#c6a34e'}}>Teletravail:</b> Pas d'intervention transport les jours de TT</div>
+        </div>
+      </C>
+      <C><ST>Exonerations fiscales 2026</ST>
+        <div style={{fontSize:12,color:'#c8c5bb',lineHeight:2}}>
+          <div><b style={{color:'#4ade80'}}>Transport en commun:</b> 100% exonere (illimite)</div>
+          <div><b style={{color:'#4ade80'}}>Velo:</b> 100% exonere (0,35 EUR/km)</div>
+          <div><b style={{color:'#4ade80'}}>Voiture:</b> Exonere max 490 EUR/an (forfait)</div>
+          <div><b style={{color:'#4ade80'}}>Transport collectif:</b> 100% exonere si organise par employeur</div>
+          <div style={{marginTop:8,padding:10,background:'rgba(74,222,128,.06)',borderRadius:8,color:'#4ade80',fontSize:11}}>
+            Le velo est le mode le plus avantageux fiscalement: 100% exonere pour le travailleur ET deductible a 120% pour l'employeur.
+          </div>
+        </div>
+      </C>
+    </div>}
+  </div>;
+}
+
+// =====================================================
+//  13EME MOIS — Calcul par Commission Paritaire
+// =====================================================
+function TreizMoisMod({s,d}){
+  const ae=s.emps.filter(e=>e.status==='active'||!e.status);
+  const [tab,setTab]=useState('calc');
+  const [moisRef,setMoisRef]=useState(12); // mois de reference pour prorata
+  // Regles 13eme mois par CP
+  const REGLES_13={
+    '200':{methode:'1 mois brut',taux:1,base:'salaire mensuel',timing:'Decembre',onss:true,pp:true,note:'CP 200 - Prime de fin annee = 1 mois brut (CCT sectorielle)'},
+    '124':{methode:'8,33% brut annuel',taux:0.0833,base:'masse salariale annuelle',timing:'Decembre',onss:true,pp:true,note:'CP 124 Construction - Verse via Fonds social FBTP'},
+    '302':{methode:'Fonds social Horeca',taux:1,base:'salaire mensuel',timing:'Decembre',onss:true,pp:true,note:'CP 302 Horeca - Prime de fin annee via Fonds social'},
+    '140':{methode:'1 mois brut',taux:1,base:'salaire mensuel',timing:'Decembre',onss:true,pp:true,note:'CP 140 Transport - Prime de fin annee'},
+    '111':{methode:'1 mois brut + prime',taux:1,base:'salaire mensuel',timing:'Decembre',onss:true,pp:true,note:'CP 111 Metal - 13eme mois + prime supplementaire possible'},
+    '330':{methode:'1 mois brut',taux:1,base:'salaire mensuel',timing:'Decembre',onss:true,pp:true,note:'CP 330 Sante - Prime de fin annee conventionnelle'},
+    '322':{methode:'1 mois brut prorata',taux:1,base:'salaire mensuel',timing:'Decembre',onss:true,pp:true,note:'CP 322 Interim - Prime de fin annee prorata'},
+    '216':{methode:'1 mois brut',taux:1,base:'salaire mensuel',timing:'Decembre',onss:true,pp:true,note:'CP 216 Notariat - Prime de fin annee = 13eme mois'},
+    '310':{methode:'1 mois brut',taux:1,base:'salaire mensuel',timing:'Decembre',onss:true,pp:true,note:'CP 310 Banques - Prime conventionnelle'},
+  };
+  const getRegle=(cp)=>REGLES_13[cp]||REGLES_13['200']; // default CP 200
+
+  const empCalc=ae.map(emp=>{
+    const cp=emp.cp||'200';
+    const regle=getRegle(cp);
+    const brut=emp.monthlySalary||0;
+    const start=new Date(emp.startD||'2026-01-01');
+    const now=new Date();
+    const moisPreste=Math.min(moisRef, now.getMonth()>=start.getMonth()? moisRef : Math.max(0, moisRef - (start.getMonth())));
+    const prorata=moisPreste/12;
+    let montant13=0;
+    if(regle.base==='masse salariale annuelle'){
+      montant13=brut*12*regle.taux*prorata;
+    }else{
+      montant13=brut*regle.taux*prorata;
+    }
+    const onss13=montant13*0.1307;
+    const pp13=Math.max(0,(montant13-onss13)*0.2660); // taux exceptionnel 26,60%
+    const net13=montant13-onss13-pp13;
+    const onssPatr=montant13*0.2516; // cotis patronale approximative
+    return{...emp,name:(emp.first||'')+' '+(emp.last||''),cp,regle,brut,moisPreste,prorata,montant13:Math.round(montant13*100)/100,onss13:Math.round(onss13*100)/100,pp13:Math.round(pp13*100)/100,net13:Math.round(net13*100)/100,onssPatr:Math.round(onssPatr*100)/100,coutTotal:Math.round((montant13+onssPatr)*100)/100};
+  });
+  const tot13=empCalc.reduce((a,e)=>a+e.montant13,0);
+  const totNet=empCalc.reduce((a,e)=>a+e.net13,0);
+  const totCout=empCalc.reduce((a,e)=>a+e.coutTotal,0);
+  const totONSS=empCalc.reduce((a,e)=>a+e.onss13+e.onssPatr,0);
+
+  return <div>
+    <PH title="13eme Mois / Prime de Fin d'Annee" sub="Calcul par Commission Paritaire - Prorata, ONSS, precompte"/>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:12,marginBottom:18}}>
+      {[{l:"Travailleurs",v:ae.length,c:'#60a5fa'},{l:"Total 13eme brut",v:fmt(tot13),c:'#c6a34e'},{l:"Total net",v:fmt(totNet),c:'#4ade80'},{l:"Cout total empl.",v:fmt(totCout),c:'#f87171'},{l:"ONSS total",v:fmt(totONSS),c:'#fb923c'}].map((k,i)=>
+        <div key={i} style={{padding:'14px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16,alignItems:'center'}}>
+      {[{v:'calc',l:'Calcul par employe'},{v:'provision',l:'Provision mensuelle'},{v:'reglescp',l:'Regles par CP'}].map(t=>
+        <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
+          background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
+      )}
+      <div style={{marginLeft:'auto',display:'flex',alignItems:'center',gap:8}}>
+        <span style={{fontSize:11,color:'#5e5c56'}}>Mois prestes:</span>
+        <select value={moisRef} onChange={e=>setMoisRef(parseInt(e.target.value))} style={{background:'rgba(255,255,255,.05)',border:'1px solid rgba(198,163,78,.15)',borderRadius:6,padding:'4px 8px',color:'#e8e6e0',fontSize:12,fontFamily:'inherit'}}>
+          {[1,2,3,4,5,6,7,8,9,10,11,12].map(m=><option key={m} value={m}>{m} mois</option>)}
+        </select>
+      </div>
+    </div>
+    {tab==='calc'&&<C>
+      {empCalc.length>0?<Tbl cols={[
+        {k:'n',l:"Travailleur",b:1,r:r=>r.name},
+        {k:'cp',l:"CP",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:'rgba(198,163,78,.1)',color:'#c6a34e'}}>CP {r.cp}</span>},
+        {k:'b',l:"Brut mensuel",a:'right',r:r=>fmt(r.brut)},
+        {k:'p',l:"Prorata",a:'right',r:r=><span style={{color:'#a78bfa'}}>{Math.round(r.prorata*100)}%</span>},
+        {k:'m',l:"13eme brut",a:'right',r:r=><span style={{fontWeight:600,color:'#c6a34e'}}>{fmt(r.montant13)}</span>},
+        {k:'o',l:"ONSS 13,07%",a:'right',r:r=><span style={{color:'#f87171'}}>-{fmt(r.onss13)}</span>},
+        {k:'pp',l:"PP 26,60%",a:'right',r:r=><span style={{color:'#f87171'}}>-{fmt(r.pp13)}</span>},
+        {k:'ne',l:"Net 13eme",a:'right',r:r=><span style={{fontWeight:700,color:'#4ade80'}}>{fmt(r.net13)}</span>},
+        {k:'co',l:"Cout empl.",a:'right',r:r=><span style={{color:'#fb923c'}}>{fmt(r.coutTotal)}</span>},
+      ]} data={empCalc}/>:<div style={{padding:30,textAlign:'center',color:'#5e5c56'}}>Aucun travailleur actif</div>}
+    </C>}
+    {tab==='provision'&&<C>
+      <ST>Provision mensuelle pour 13eme mois</ST>
+      <div style={{marginBottom:14,padding:14,background:'rgba(198,163,78,.06)',borderRadius:10,display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:14}}>
+        <div style={{textAlign:'center'}}><div style={{fontSize:10,color:'#5e5c56'}}>Provision/mois</div><div style={{fontSize:22,fontWeight:700,color:'#c6a34e'}}>{fmt(totCout/12)}</div></div>
+        <div style={{textAlign:'center'}}><div style={{fontSize:10,color:'#5e5c56'}}>Provision cumulee</div><div style={{fontSize:22,fontWeight:700,color:'#fb923c'}}>{fmt(totCout/12*moisRef)}</div></div>
+        <div style={{textAlign:'center'}}><div style={{fontSize:10,color:'#5e5c56'}}>A verser en dec.</div><div style={{fontSize:22,fontWeight:700,color:'#f87171'}}>{fmt(totCout)}</div></div>
+      </div>
+      {empCalc.map(e=><div key={e.id} style={{display:'flex',justifyContent:'space-between',padding:'10px 14px',marginBottom:4,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.06)'}}>
+        <span style={{fontSize:12,color:'#e8e6e0'}}>{e.name} <span style={{fontSize:10,color:'#5e5c56'}}>(CP {e.cp})</span></span>
+        <div style={{display:'flex',gap:16}}>
+          <span style={{fontSize:11,color:'#9e9b93'}}>Provision/mois: <b style={{color:'#c6a34e'}}>{fmt(e.coutTotal/12)}</b></span>
+          <span style={{fontSize:11,color:'#9e9b93'}}>Total: <b style={{color:'#f87171'}}>{fmt(e.coutTotal)}</b></span>
+        </div>
+      </div>)}
+    </C>}
+    {tab==='reglescp'&&<C>
+      <ST>Regles 13eme mois par Commission Paritaire</ST>
+      <div style={{display:'grid',gridTemplateColumns:'1fr',gap:8}}>
+        {Object.entries(REGLES_13).map(([cp,r])=>
+          <div key={cp} style={{padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.06)',display:'grid',gridTemplateColumns:'80px 1fr 150px',gap:12,alignItems:'center'}}>
+            <span style={{fontSize:14,fontWeight:700,color:'#c6a34e',textAlign:'center'}}>CP {cp}</span>
+            <div><div style={{fontSize:12,color:'#e8e6e0',fontWeight:500}}>{r.methode}</div><div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>{r.note}</div></div>
+            <div style={{textAlign:'right'}}><span style={{fontSize:10,padding:'3px 8px',borderRadius:4,background:'rgba(74,222,128,.08)',color:'#4ade80'}}>Timing: {r.timing}</span></div>
+          </div>
+        )}
+      </div>
+      <div style={{marginTop:14,padding:12,background:'rgba(96,165,250,.06)',borderRadius:8,fontSize:11,color:'#60a5fa',lineHeight:1.7}}>
+        <b>Precompte professionnel:</b> Le 13eme mois est soumis a un taux de PP exceptionnel de 26,60% (annexe III AR).<br/>
+        <b>ONSS:</b> Cotisations normales (13,07% travailleur + ~25% employeur).<br/>
+        <b>Prorata:</b> En cas d'entree/sortie en cours d'annee, le 13eme mois est calcule au prorata des mois prestes.
+      </div>
+    </C>}
+  </div>;
+}
 
 function SimCoutMod({s,d}){
   const [brut,setBrut]=useState(3500);const [statut,setStatut]=useState('employe');const [regime,setRegime]=useState('full');
