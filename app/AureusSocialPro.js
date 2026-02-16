@@ -15317,7 +15317,7 @@ function ATNMod({s,d}){
       )}
     </div>
     <div style={{display:'flex',gap:6,marginBottom:16}}>
-      {[{v:'vehicule',l:'\u{1F697} Véhicule de société'},{v:'autres',l:'\u{1F4F1} GSM / PC / Logement'},{v:'resume',l:'\u{1F4CA} Résumé par employé'},{v:'info',l:'\u{2139}\u{FE0F} Barèmes 2026'}].map(t=>
+      {[{v:'vehicule',l:'🚗 Véhicule de société'},{v:'autres',l:'📱 GSM / PC / Logement'},{v:'resume',l:'📊 Résumé par employé'},{v:'info',l:'ℹ️ Barèmes 2026'}].map(t=>
         <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
           background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
       )}
@@ -15329,15 +15329,15 @@ function ATNMod({s,d}){
           <I label="Marque" value={f.marque} onChange={v=>setF({...f,marque:v})}/>
           <I label="Modèle" value={f.modele} onChange={v=>setF({...f,modele:v})}/>
           <I label="Carburant" value={f.carburant} onChange={v=>setF({...f,carburant:v})} options={[{v:"essence",l:"Essence"},{v:"diesel",l:"Diesel"},{v:"electrique",l:"Électrique"},{v:"hybride",l:"Hybride PHEV"}]}/>
-          <I label="CO\u{2082} (g/km)" type="number" value={f.co2} onChange={v=>setF({...f,co2:+v})}/>
-          <I label="Val. catalogue (\u{20AC})" type="number" value={f.catalogue} onChange={v=>setF({...f,catalogue:+v})}/>
+          <I label="CO₂ (g/km)" type="number" value={f.co2} onChange={v=>setF({...f,co2:+v})}/>
+          <I label="Val. catalogue (€)" type="number" value={f.catalogue} onChange={v=>setF({...f,catalogue:+v})}/>
           <I label="Année 1ère immat." type="number" value={f.annee} onChange={v=>setF({...f,annee:+v})}/>
         </div>
         <B onClick={addVeh} style={{width:'100%',marginTop:14}}>Calculer ATN véhicule</B>
         <div style={{marginTop:12,padding:10,background:"rgba(96,165,250,.06)",borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>
-          <b>Formule:</b> ATN = catalogue \u{00D7} 6/7 \u{00D7} CO\u{2082}% (min \u{20AC}1.600)<br/>
+          <b>Formule:</b> ATN = catalogue × 6/7 × CO₂% (min €1.600)<br/>
           <b>Décote:</b> 6%/an depuis 1ère immat. (max 30%)<br/>
-          <b>Électrique:</b> CO\u{2082}% fixe = 4% (min)
+          <b>Électrique:</b> CO₂% fixe = 4% (min)
         </div>
       </C>
       <C style={{padding:0,overflow:'hidden'}}>
@@ -15346,12 +15346,12 @@ function ATNMod({s,d}){
           {k:'e',l:"Travailleur",b:1,r:r=>r.empName},
           {k:'v',l:"Véhicule",r:r=>`${r.marque} ${r.modele}`},
           {k:'c',l:"Carburant",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:r.carburant==='electrique'?'rgba(74,222,128,.1)':'rgba(198,163,78,.1)',color:r.carburant==='electrique'?'#4ade80':'#c6a34e'}}>{r.carburant}</span>},
-          {k:'co',l:"CO\u{2082}",a:'right',r:r=>`${r.co2}g`},
+          {k:'co',l:"CO₂",a:'right',r:r=>`${r.co2}g`},
           {k:'p',l:"%",a:'right',r:r=><span style={{color:'#c6a34e'}}>{r.pct.toFixed(1)}%</span>},
           {k:'a',l:"ATN/an",a:'right',r:r=><span style={{fontWeight:600,color:'#f87171'}}>{fmt(r.atn)}</span>},
           {k:'m',l:"ATN/mois",a:'right',r:r=>fmt(r.atnMens)},
-          {k:'co2c',l:"CO\u{2082}/mois",a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.co2Cotis)}</span>},
-          {k:'x',l:"",a:'right',r:r=><button onClick={()=>delVeh(r.id)} style={{background:'none',border:'none',color:'#f87171',cursor:'pointer',fontSize:14}}>\u{2715}</button>},
+          {k:'co2c',l:"CO₂/mois",a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.co2Cotis)}</span>},
+          {k:'x',l:"",a:'right',r:r=><button onClick={()=>delVeh(r.id)} style={{background:'none',border:'none',color:'#f87171',cursor:'pointer',fontSize:14}}>✕</button>},
         ]} data={vehs}/>:<div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Ajoutez un véhicule pour calculer l\'ATN</div>}
       </C>
     </div>}
@@ -15359,7 +15359,7 @@ function ATNMod({s,d}){
       <C><ST>Avantages non-véhicule</ST>
         <I label="Travailleur" value={fa.emp} onChange={v=>setFa({...fa,emp:v})} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
         <div style={{marginTop:14,display:'flex',flexDirection:'column',gap:10}}>
-          {[{k:'gsm',l:'\u{1F4F1} GSM/Smartphone',v:'36\u{20AC}/an (3\u{20AC}/mois)'},{k:'pc',l:'\u{1F4BB} PC/Tablette',v:'72\u{20AC}/an (6\u{20AC}/mois)'},{k:'internet',l:'\u{1F310} Internet privé',v:'60\u{20AC}/an (5\u{20AC}/mois)'}].map(it=>
+          {[{k:'gsm',l:'📱 GSM/Smartphone',v:'36€/an (3€/mois)'},{k:'pc',l:'💻 PC/Tablette',v:'72€/an (6€/mois)'},{k:'internet',l:'🌐 Internet privé',v:'60€/an (5€/mois)'}].map(it=>
             <label key={it.k} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',borderRadius:8,background:fa[it.k]?'rgba(198,163,78,.1)':'rgba(255,255,255,.02)',border:'1px solid '+(fa[it.k]?'rgba(198,163,78,.25)':'rgba(139,115,60,.08)'),cursor:'pointer',transition:'all .2s'}}>
               <input type="checkbox" checked={fa[it.k]} onChange={e=>setFa({...fa,[it.k]:e.target.checked})} style={{accentColor:'#c6a34e'}}/>
               <div><div style={{fontSize:12,color:'#e8e6e0',fontWeight:500}}>{it.l}</div><div style={{fontSize:10,color:'#9e9b93'}}>{it.v}</div></div>
@@ -15367,16 +15367,16 @@ function ATNMod({s,d}){
           )}
           <label style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',borderRadius:8,background:fa.logement?'rgba(198,163,78,.1)':'rgba(255,255,255,.02)',border:'1px solid '+(fa.logement?'rgba(198,163,78,.25)':'rgba(139,115,60,.08)'),cursor:'pointer'}}>
             <input type="checkbox" checked={fa.logement} onChange={e=>setFa({...fa,logement:e.target.checked})} style={{accentColor:'#c6a34e'}}/>
-            <div><div style={{fontSize:12,color:'#e8e6e0',fontWeight:500}}>\u{1F3E0} Logement gratuit</div><div style={{fontSize:10,color:'#9e9b93'}}>RC \u{00D7} 100/60 \u{00D7} 3,87 (meublé: \u{00D7} 5/3)</div></div>
+            <div><div style={{fontSize:12,color:'#e8e6e0',fontWeight:500}}>🏠 Logement gratuit</div><div style={{fontSize:10,color:'#9e9b93'}}>RC × 100/60 × 3,87 (meublé: × 5/3)</div></div>
           </label>
           {fa.logement&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,paddingLeft:10}}>
-            <I label="RC logement (\u{20AC})" type="number" value={fa.logementRC} onChange={v=>setFa({...fa,logementRC:+v})}/>
-            <I label="Type" value={fa.logFourniGratuit?'meuble':'non_meuble'} onChange={v=>setFa({...fa,logFourniGratuit:v==='meuble'})} options={[{v:'meuble',l:'Meublé (\u{00D7}5/3)'},{v:'non_meuble',l:'Non meublé'}]}/>
+            <I label="RC logement (€)" type="number" value={fa.logementRC} onChange={v=>setFa({...fa,logementRC:+v})}/>
+            <I label="Type" value={fa.logFourniGratuit?'meuble':'non_meuble'} onChange={v=>setFa({...fa,logFourniGratuit:v==='meuble'})} options={[{v:'meuble',l:'Meublé (×5/3)'},{v:'non_meuble',l:'Non meublé'}]}/>
             {fa.logementRC>0&&<div style={{gridColumn:'span 2',padding:8,background:'rgba(198,163,78,.06)',borderRadius:6,fontSize:11,color:'#c6a34e'}}>
               ATN Logement: {fmt(calcLogement(fa.logementRC,fa.logFourniGratuit))}/an = {fmt(calcLogement(fa.logementRC,fa.logFourniGratuit)/12)}/mois
             </div>}
           </div>}
-          {[{k:'chauffage',l:'\u{1F525} Chauffage gratuit',v:'2.130\u{20AC}/an (177,50\u{20AC}/mois)'},{k:'electricite',l:'\u{26A1} Électricité gratuite',v:'1.060\u{20AC}/an (88,33\u{20AC}/mois)'}].map(it=>
+          {[{k:'chauffage',l:'🔥 Chauffage gratuit',v:'2.130€/an (177,50€/mois)'},{k:'electricite',l:'⚡ Électricité gratuite',v:'1.060€/an (88,33€/mois)'}].map(it=>
             <label key={it.k} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',borderRadius:8,background:fa[it.k]?'rgba(198,163,78,.1)':'rgba(255,255,255,.02)',border:'1px solid '+(fa[it.k]?'rgba(198,163,78,.25)':'rgba(139,115,60,.08)'),cursor:'pointer'}}>
               <input type="checkbox" checked={fa[it.k]} onChange={e=>setFa({...fa,[it.k]:e.target.checked})} style={{accentColor:'#c6a34e'}}/>
               <div><div style={{fontSize:12,color:'#e8e6e0',fontWeight:500}}>{it.l}</div><div style={{fontSize:10,color:'#9e9b93'}}>{it.v}</div></div>
@@ -15392,7 +15392,7 @@ function ATNMod({s,d}){
             <span style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>{a.empName}</span>
             <div style={{display:'flex',alignItems:'center',gap:10}}>
               <span style={{fontSize:14,fontWeight:700,color:'#c6a34e'}}>{fmt(a.totalAn)}/an ({fmt(a.totalMois)}/mois)</span>
-              <button onClick={()=>delAutre(a.id)} style={{background:'none',border:'none',color:'#f87171',cursor:'pointer',fontSize:14}}>\u{2715}</button>
+              <button onClick={()=>delAutre(a.id)} style={{background:'none',border:'none',color:'#f87171',cursor:'pointer',fontSize:14}}>✕</button>
             </div>
           </div>
           <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>{a.details.map((dt,i)=>
@@ -15405,8 +15405,8 @@ function ATNMod({s,d}){
       <ST>Résumé ATN par employé</ST>
       {empSummary().length>0?<Tbl cols={[
         {k:'n',l:"Employé",b:1,r:r=>r.name},
-        {k:'v',l:"ATN Véhicule/an",a:'right',r:r=>r.veh>0?<span style={{color:'#60a5fa'}}>{fmt(r.veh)}</span>:'\u{2014}'},
-        {k:'a',l:"ATN Autres/an",a:'right',r:r=>r.autres>0?<span style={{color:'#a78bfa'}}>{fmt(r.autres)}</span>:'\u{2014}'},
+        {k:'v',l:"ATN Véhicule/an",a:'right',r:r=>r.veh>0?<span style={{color:'#60a5fa'}}>{fmt(r.veh)}</span>:'—'},
+        {k:'a',l:"ATN Autres/an",a:'right',r:r=>r.autres>0?<span style={{color:'#a78bfa'}}>{fmt(r.autres)}</span>:'—'},
         {k:'t',l:"TOTAL/an",a:'right',r:r=><span style={{fontWeight:700,color:'#f87171'}}>{fmt(r.total)}</span>},
         {k:'m',l:"TOTAL/mois",a:'right',r:r=><span style={{fontWeight:600,color:'#c6a34e'}}>{fmt(r.mois)}</span>},
       ]} data={empSummary()}/>:<div style={{padding:30,textAlign:'center',color:'#5e5c56'}}>Ajoutez des ATN dans les onglets Véhicule ou GSM/PC/Logement</div>}
@@ -15427,25 +15427,25 @@ function ATNMod({s,d}){
             </tr>)}
             <tr style={{borderBottom:'1px solid rgba(139,115,60,.06)'}}>
               <td style={{padding:'8px 0',color:'#e8e6e0'}}>Logement (non meublé)</td>
-              <td colSpan={2} style={{textAlign:'right',padding:'8px 0',color:'#9e9b93',fontSize:11}}>RC \u{00D7} 100/60 \u{00D7} 3,87</td>
+              <td colSpan={2} style={{textAlign:'right',padding:'8px 0',color:'#9e9b93',fontSize:11}}>RC × 100/60 × 3,87</td>
             </tr>
             <tr><td style={{padding:'8px 0',color:'#e8e6e0'}}>Logement (meublé)</td>
-              <td colSpan={2} style={{textAlign:'right',padding:'8px 0',color:'#9e9b93',fontSize:11}}>RC \u{00D7} 100/60 \u{00D7} 3,87 \u{00D7} 5/3</td>
+              <td colSpan={2} style={{textAlign:'right',padding:'8px 0',color:'#9e9b93',fontSize:11}}>RC × 100/60 × 3,87 × 5/3</td>
             </tr>
           </tbody>
         </table>
       </C>
       <C><ST>ATN Véhicule — Formule 2026</ST>
         <div style={{fontSize:12,color:'#c8c5bb',lineHeight:1.8}}>
-          <div><b style={{color:'#c6a34e'}}>Valeur catalogue:</b> Prix catalogue TVAC \u{2013} décote 6%/an (max 30%)</div>
-          <div><b style={{color:'#c6a34e'}}>% CO\u{2082}:</b> 5,5% + (CO\u{2082} réel \u{2013} référence) \u{00D7} 0,1%</div>
-          <div><b style={{color:'#c6a34e'}}>Référence CO\u{2082} 2026:</b> Essence/LPG = 82 g | Diesel = 67 g</div>
-          <div><b style={{color:'#c6a34e'}}>Min/Max:</b> 4% minimum \u{2014} 18% maximum</div>
+          <div><b style={{color:'#c6a34e'}}>Valeur catalogue:</b> Prix catalogue TVAC – décote 6%/an (max 30%)</div>
+          <div><b style={{color:'#c6a34e'}}>% CO₂:</b> 5,5% + (CO₂ réel – référence) × 0,1%</div>
+          <div><b style={{color:'#c6a34e'}}>Référence CO₂ 2026:</b> Essence/LPG = 82 g | Diesel = 67 g</div>
+          <div><b style={{color:'#c6a34e'}}>Min/Max:</b> 4% minimum — 18% maximum</div>
           <div><b style={{color:'#c6a34e'}}>Électrique:</b> 4% fixe (minimum)</div>
-          <div><b style={{color:'#c6a34e'}}>ATN min:</b> \u{20AC}1.600/an</div>
-          <div><b style={{color:'#c6a34e'}}>Formule:</b> ATN = Val.cat \u{00D7} 6/7 \u{00D7} CO\u{2082}%</div>
+          <div><b style={{color:'#c6a34e'}}>ATN min:</b> €1.600/an</div>
+          <div><b style={{color:'#c6a34e'}}>Formule:</b> ATN = Val.cat × 6/7 × CO₂%</div>
           <div style={{marginTop:12,padding:10,background:'rgba(248,113,113,.06)',borderRadius:8,color:'#f87171',fontSize:11}}>
-            <b>Cotisation CO\u{2082} employeur:</b> (CO\u{2082} \u{00D7} 9 + 768) / 12 par mois. Électrique: min 31,99\u{20AC}/mois.
+            <b>Cotisation CO₂ employeur:</b> (CO₂ × 9 + 768) / 12 par mois. Électrique: min 31,99€/mois.
           </div>
         </div>
       </C>
