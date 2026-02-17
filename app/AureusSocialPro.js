@@ -9114,7 +9114,7 @@ function generateDimonaXML(emp,type,co){
     <TotalDeclarations>1</TotalDeclarations>
   </Footer>
 </DIMONAMessage>`;
-  const blob=new Blob([xml],{type:'application/xml;charset=utf-8'});
+  const blob=new Blob([xml],{type:'application/octet-stream'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
