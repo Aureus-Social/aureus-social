@@ -5652,7 +5652,7 @@ function DimonaPage({s,d}) {
 
   return <div>
     <PH title="Déclarations Dimona" sub="Déclaration immédiate de l'emploi — ONSS / Portail sécurité sociale"/><div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap"}}>{s.emps.filter(e=>e.status==="active"||!e.status).map(e=><div key={e.id} style={{display:"flex",gap:4}}><button onClick={()=>generateDimonaXML(e,"IN",s.co)} style={{padding:"6px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:600,background:"rgba(74,222,128,.15)",color:"#4ade80"}}>IN {e.first||e.fn} {e.last||e.ln}</button><button onClick={()=>generateDimonaXML(e,"OUT",s.co)} style={{padding:"6px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:600,background:"rgba(248,113,113,.15)",color:"#f87171"}}>OUT {e.first||e.fn} {e.last||e.ln}</button></div>)}</div>
-    {/* Stats bar */}
+    <div style={{marginBottom:12}}><button onClick={()=>generateSEPAXML(s.emps,per,s.co)} style={{padding:"8px 16px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,background:"rgba(96,165,250,.15)",color:"#60a5fa"}}>Generer SEPA XML (virements)</button></div>{/* Stats bar */}
     <div style={{display:'flex',gap:12,marginBottom:18}}>
       {[{l:"Total",v:s.dims.length,c:'#c6a34e'},{l:"IN",v:statsIN,c:'#4ade80'},{l:"OUT",v:statsOUT,c:'#f87171'},{l:"UPDATE",v:statsUPD,c:'#60a5fa'}].map((st,i)=>
         <div key={i} style={{flex:1,padding:'12px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
@@ -9061,6 +9061,67 @@ function WorkflowEmbaucheMod({s,d}){
 //  WORKFLOW LICENCIEMENT — Préavis, C4, décompte final
 // ═══════════════════════════════════════════════════════════════
 function WorkflowLicenciementMod({s,d}){const [tab,setTab]=useState("workflow");return <div><PH title="Workflow Licenciement" sub="Processus complet - De la decision a la sortie"/><div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"workflow",l:"Etapes"},{v:"motif",l:"Motif et motivation"},{v:"docs",l:"Documents"},{v:"couts",l:"Couts"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="workflow"&&<C><ST>Workflow licenciement</ST>{[{n:1,t:"Verification protections",d:"Enceinte? Credit-temps? Delegue? Maladie? Si oui: procedure speciale.",c:"#f87171"},{n:2,t:"Choix modalite",d:"Preavis preste ou indemnite compensatoire. Calcul semaines.",c:"#fb923c"},{n:3,t:"Notification",d:"Lettre recommandee (J+3 = notification) ou remise main propre (immediate).",c:"#c6a34e"},{n:4,t:"Dimona OUT",d:"Declaration sortie ONSS. Au plus tard dernier jour.",c:"#60a5fa"},{n:5,t:"C4 + Solde tout compte",d:"Formulaire chomage + decompte final dans les 2 mois.",c:"#a78bfa"},{n:6,t:"Outplacement si applicable",d:"Offre dans les 15 jours si preavis 30+ semaines.",c:"#4ade80"}].map((r,i)=><div key={i} style={{display:"flex",gap:12,padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div style={{width:28,height:28,borderRadius:"50%",background:r.c+"20",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,color:r.c,flexShrink:0}}>{r.n}</div><div><b style={{color:r.c,fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:"#9e9b93",marginTop:2}}>{r.d}</div></div></div>)}</C>}{tab==="motif"&&<C><ST>Motivation licenciement</ST>{[{t:"CCT 109",d:"Tout licenciement doit pouvoir etre motive. Demande possible travailleur dans les 2 mois."},{t:"Reponse",d:"Employeur doit repondre dans les 2 mois. Par recommande."},{t:"Manifestement deraisonnable",d:"Si aucun lien avec aptitude, conduite ou necessite entreprise."},{t:"Indemnite",d:"3 a 17 semaines de remuneration si licenciement manifestement deraisonnable."},{t:"Motif grave (Art. 35)",d:"Faute grave rendant collaboration definitivement impossible. Notification 3 jours. Congedie 3 jours."}].map((r,i)=><div key={i} style={{padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><b style={{color:"#c6a34e",fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:"#9e9b93",marginTop:2}}>{r.d}</div></div>)}</C>}{tab==="docs"&&<C><ST>Documents sortie</ST>{["Lettre licenciement (recommandee)","AccusÃ© reception (si main propre)","C4 (formulaire chomage ONEM)","Solde de tout compte","Attestation vacances","Fiche de paie finale","Attestation employeur (sur demande)","Offre outplacement (si applicable)"].map((r,i)=><div key={i} style={{padding:"4px 0",borderBottom:"1px solid rgba(255,255,255,.03)",fontSize:12,color:"#e8e6e0"}}><span style={{color:"#c6a34e",marginRight:6}}>{i+1}.</span>{r}</div>)}</C>}{tab==="couts"&&<C><ST>Couts licenciement</ST>{[{c:"Indemnite preavis",d:"Brut x semaines / 4,33. Soumis ONSS.",v:"Variable"},{c:"ONSS sur indemnite",d:"25.07% employeur + 13.07% travailleur",v:"38.14%"},{c:"Outplacement",d:"Si 30+ semaines. Min 1.800 EUR.",v:"1.800-6.000"},{c:"CCT 109",d:"Si manifestement deraisonnable: 3-17 semaines.",v:"3-17 sem."},{c:"Solde vacances",d:"Pecule prorata + double prorata.",v:"~14.47%"},{c:"13eme prorata",d:"Prorata mois prestes.",v:"Prorata"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><b style={{color:"#c6a34e",fontSize:12}}>{r.c}</b><div style={{fontSize:10,color:"#5e5c56"}}>{r.d}</div></div><span style={{color:"#f87171",fontWeight:600}}>{r.v}</span></div>)}</C>}</div>;}
+function generateSEPAXML(emps,period,co){
+  const coName=co?.name||'Aureus IA SPRL';
+  const coIBAN=co?.iban||'BE00000000000000';
+  const coBIC=co?.bic||'GEBABEBB';
+  const coVAT=(co?.vat||'BE1028230781').replace(/[^A-Z0-9]/g,'');
+  const now=new Date();
+  const msgId='SEPA-'+now.toISOString().replace(/[^0-9]/g,'').slice(0,14);
+  const pmtId='PAY-'+(period?.month||now.getMonth()+1)+'-'+(period?.year||now.getFullYear());
+  const mois=["Janvier","Fevrier","Mars","Avril","Mai","Juin","Juillet","Aout","Septembre","Octobre","Novembre","Decembre"];
+  const periodeStr=(mois[(period?.month||1)-1]||"")+" "+(period?.year||2026);
+  const ae=emps.filter(e=>(e.status==='active'||!e.status)&&e.iban);
+  const payments=ae.map(e=>{
+    const brut=+(e.monthlySalary||e.gross||0);
+    const onss=Math.round(brut*0.1307*100)/100;
+    const imp=brut-onss;
+    const pp=Math.round(imp*0.22*100)/100;
+    const net=Math.round((brut-onss-pp)*100)/100;
+    return{name:(e.first||e.fn||'')+' '+(e.last||e.ln||''),iban:(e.iban||'').replace(/\s/g,''),bic:e.bic||'GEBABEBB',amount:net,ref:'SAL/'+pmtId+'/'+(e.id||'').slice(0,8)};
+  }).filter(p=>p.amount>0);
+  const totalAmount=payments.reduce((a,p)=>a+p.amount,0);
+  const f2=v=>(Math.round(v*100)/100).toFixed(2);
+  const xml=`<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <CstmrCdtTrfInitn>
+    <GrpHdr>
+      <MsgId>${msgId}</MsgId>
+      <CreDtTm>${now.toISOString()}</CreDtTm>
+      <NbOfTxs>${payments.length}</NbOfTxs>
+      <CtrlSum>${f2(totalAmount)}</CtrlSum>
+      <InitgPty><Nm>${coName}</Nm><Id><OrgId><Othr><Id>${coVAT}</Id></Othr></OrgId></Id></InitgPty>
+    </GrpHdr>
+    <PmtInf>
+      <PmtInfId>${pmtId}</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>${payments.length}</NbOfTxs>
+      <CtrlSum>${f2(totalAmount)}</CtrlSum>
+      <PmtTpInf><SvcLvl><Cd>SEPA</Cd></SvcLvl></PmtTpInf>
+      <ReqdExctnDt>${now.toISOString().slice(0,10)}</ReqdExctnDt>
+      <Dbtr><Nm>${coName}</Nm></Dbtr>
+      <DbtrAcct><Id><IBAN>${coIBAN}</IBAN></Id></DbtrAcct>
+      <DbtrAgt><FinInstnId><BIC>${coBIC}</BIC></FinInstnId></DbtrAgt>
+      <ChrgBr>SLEV</ChrgBr>
+${payments.map(p=>`      <CdtTrfTxInf>
+        <PmtId><EndToEndId>${p.ref}</EndToEndId></PmtId>
+        <Amt><InstdAmt Ccy="EUR">${f2(p.amount)}</InstdAmt></Amt>
+        <CdtrAgt><FinInstnId><BIC>${p.bic}</BIC></FinInstnId></CdtrAgt>
+        <Cdtr><Nm>${p.name}</Nm></Cdtr>
+        <CdtrAcct><Id><IBAN>${p.iban}</IBAN></Id></CdtrAcct>
+        <RmtInf><Ustrd>Salaire ${periodeStr}</Ustrd></RmtInf>
+      </CdtTrfTxInf>`).join('\n')}
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>`;
+  const blob=new Blob([xml],{type:'application/octet-stream'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='SEPA_Salaires_'+periodeStr.replace(/ /g,'_')+'.xml';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 function generateDimonaXML(emp,type,co){
   const coVAT=(co?.vat||'1028230781').replace(/[^0-9]/g,'');
   const empName=(emp.first||emp.fn||'')+" "+(emp.last||emp.ln||'');
