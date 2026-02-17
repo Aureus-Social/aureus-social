@@ -9168,7 +9168,81 @@ ${ae.map(e=>{const brut3=(+(e.monthlySalary||e.gross||0))*3;const onss=Math.roun
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
-function generateC4PDF(emp,co){
+function generateAttestationEmploi(emp,co){
+  const coName=co?.name||'Aureus IA SPRL';const coVAT=co?.vat||'BE 1028.230.781';
+  const name=(emp.first||emp.fn||'')+" "+(emp.last||emp.ln||'');
+  const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Attestation - ${name}</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:12px;padding:40px;max-width:800px;margin:auto;line-height:1.6}
+.header{text-align:center;margin-bottom:30px}.title{font-size:18px;font-weight:700;text-decoration:underline;margin-bottom:20px}
+.content{margin:20px 0}.signature{margin-top:60px;display:flex;justify-content:space-between}
+.sig-box{width:40%;text-align:center;padding-top:40px;border-top:1px solid #000;font-size:10px}
+@media print{button{display:none!important}}</style></head><body>
+<div style="text-align:right;margin-bottom:20px">${co?.address||'Bruxelles'}, le ${new Date().toLocaleDateString('fr-BE')}</div>
+<div class="header"><div class="title">ATTESTATION D'EMPLOI</div></div>
+<div class="content">
+<p>Je soussigne, representant legal de <b>${coName}</b>, numero d'entreprise <b>${coVAT}</b>, atteste par la presente que:</p>
+<br>
+<p><b>${name}</b></p>
+<p>Numero NISS: <b>${emp.niss||'N/A'}</b></p>
+<br>
+<p>est employe(e) au sein de notre entreprise depuis le <b>${emp.startDate||emp.start||'N/A'}</b> en qualite de <b>${emp.function||emp.job||'employe(e)'}</b>.</p>
+<br>
+<p>Son contrat est de type <b>${emp.contractType||'CDI'}</b> a raison de <b>${emp.whWeek||38} heures</b> par semaine.</p>
+<br>
+<p>Sa remuneration mensuelle brute s'eleve a <b>${f2(+(emp.monthlySalary||emp.gross||0))} EUR</b>.</p>
+<br>
+<p>La presente attestation est delivree a la demande de l'interesse(e) pour servir et valoir ce que de droit.</p>
+</div>
+<div class="signature"><div class="sig-box">Signature et cachet de l'employeur<br>${coName}</div><div class="sig-box">Fait a ${co?.city||'Bruxelles'}<br>Le ${new Date().toLocaleDateString('fr-BE')}</div></div>
+<div style="text-align:center;margin-top:30px"><button onclick="window.print()" style="background:#333;color:#fff;border:none;padding:10px 30px;border-radius:6px;cursor:pointer">Imprimer</button></div>
+</body></html>`;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Attestation_emploi_'+name.replace(/ /g,'_')+'.html';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+function generateAttestationSalaire(emp,co){
+  const coName=co?.name||'Aureus IA SPRL';const coVAT=co?.vat||'BE 1028.230.781';
+  const name=(emp.first||emp.fn||'')+" "+(emp.last||emp.ln||'');
+  const brut=+(emp.monthlySalary||emp.gross||0);const onss=Math.round(brut*0.1307*100)/100;const imp=brut-onss;const pp=Math.round(imp*0.22*100)/100;const net=Math.round((brut-onss-pp)*100)/100;
+  const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Attestation salaire - ${name}</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:12px;padding:40px;max-width:800px;margin:auto;line-height:1.6}
+.title{font-size:18px;font-weight:700;text-decoration:underline;text-align:center;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;margin:15px 0}th,td{padding:6px 10px;border:1px solid #ccc;font-size:11px}th{background:#f5f5f5;text-align:left}
+td.right{text-align:right;font-family:monospace}.signature{margin-top:60px;display:flex;justify-content:space-between}
+.sig-box{width:40%;text-align:center;padding-top:40px;border-top:1px solid #000;font-size:10px}
+@media print{button{display:none!important}}</style></head><body>
+<div style="text-align:right;margin-bottom:20px">${co?.address||'Bruxelles'}, le ${new Date().toLocaleDateString('fr-BE')}</div>
+<div class="title">ATTESTATION DE REMUNERATION</div>
+<p>Je soussigne, representant legal de <b>${coName}</b> (${coVAT}), certifie que <b>${name}</b> (NISS: ${emp.niss||'N/A'}) percoit la remuneration suivante:</p>
+<table>
+<tr><th>Element</th><th>Montant mensuel</th><th>Montant annuel</th></tr>
+<tr><td>Salaire brut</td><td class="right">${f2(brut)}</td><td class="right">${f2(brut*12)}</td></tr>
+<tr><td>ONSS personnel (13,07%)</td><td class="right">-${f2(onss)}</td><td class="right">-${f2(onss*12)}</td></tr>
+<tr><td>Precompte professionnel</td><td class="right">-${f2(pp)}</td><td class="right">-${f2(pp*12)}</td></tr>
+<tr style="font-weight:700;background:#f0f0f0"><td>Salaire net</td><td class="right">${f2(net)}</td><td class="right">${f2(net*12)}</td></tr>
+</table>
+${emp.mealVoucher?`<p>Cheques-repas: ${emp.mealVoucher} EUR/jour (${22} jours/mois)</p>`:''}
+<p style="margin-top:15px">Cette attestation est delivree pour servir et valoir ce que de droit.</p>
+<div class="signature"><div class="sig-box">Signature employeur<br>${coName}</div><div class="sig-box">Fait le ${new Date().toLocaleDateString('fr-BE')}</div></div>
+<div style="text-align:center;margin-top:30px"><button onclick="window.print()" style="background:#333;color:#fff;border:none;padding:10px 30px;border-radius:6px;cursor:pointer">Imprimer</button></div>
+</body></html>`;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Attestation_salaire_'+name.replace(/ /g,'_')+'.html';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+function generateSoldeCompte(emp,co){
+  const coName=co?.name||'Aureus IA SPRL';const coVAT=co?.vat||'BE 1028.230.781';
+  const name=(emp.first||emp.fn||'')+" "+(emp.last||emp.ln||'');
+  const brut=+(emp.monthlySalary||emp.gross||0);const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+  const prorata=Math.round(brut*15/22*100)/100;
+  const peculeSort=Math.round(brut*0.0764*100)/100;
+  const preavis=brut;
+  const total=prorata+peculeSort+preavis;
+  const onss=Math.round(total*0.1307*100)/100;
+  const pp=Math.round((total-onss)*0.22*100)/100;
+  const net=Math.round((total-onss-pp)*100)/100;
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Solde de tout compte - ${name}</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:12px;padding:40px;max-width:800px;margin:auto;line-height:1.6}
+.title{font-size:18px;font-weight:700;text-decoration:underline;text-align:center;margin-bottom:20px}
+table{width:100%;border-cfunction generateC4PDF(emp,co){
   const coName=co?.name||'Aureus IA SPRL';
   const coVAT=co?.vat||'BE 1028.230.781';
   const name=(emp.first||emp.fn||'')+" "+(emp.last||emp.ln||'');
