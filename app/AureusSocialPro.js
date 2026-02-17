@@ -3972,7 +3972,7 @@ function AppInner({ supabase, user, onLogout }) {
     {id:"dashboard",l:t('nav.dashboard'),i:'◫'},
     {id:"employees",l:t('nav.employees'),i:'◉'},
     {id:"payslip",l:t('nav.payslip'),i:'◈'},
-    {id:"onss",l:t('nav.onss'),i:'◆',sub:[{id:"dimona",l:t('sub.dimona')},{id:"dmfa",l:t('sub.dmfa')},{id:"drs",l:t('sub.drs')},{id:"onssapl",l:t('sub.onssapl')},{id:"onss_dash",l:"Dashboard ONSS"},{id:"guide_portail",l:"Guide Portail ONSS"}]},
+    {id:"onss",l:t('nav.onss'),i:'◆',sub:[{id:"dimona",l:t('sub.dimona')},{id:"dmfa",l:t('sub.dmfa')},{id:"drs",l:t('sub.drs')},{id:"onssapl",l:t('sub.onssapl')},{id:"onss_dash",l:"Dashboard ONSS"},{id:"guide_portail",l:"Guide Portail ONSS"},{id:"portail_employeur",l:"Portail Employeur"}]},
     {id:"fiscal",l:t('nav.fiscal'),i:'◇',sub:[{id:"belcotax",l:t('sub.belcotax')},{id:"precompte",l:t('sub.precompte')},{id:"fiches_ext",l:t('sub.fiches_ext')},{id:"co2",l:t('sub.co2')},{id:"atn",l:t('sub.atn')}]},
     {id:"salaires",l:t('nav.salaires'),i:'◈',sub:[{id:"od",l:t('sub.od')},{id:"provisions",l:t('sub.provisions')},{id:"cumuls",l:t('sub.cumuls')},{id:"netbrut",l:t('sub.netbrut')},{id:"simcout",l:t('sub.simcout')},{id:"saisies",l:t('sub.saisies')},{id:"indexauto",l:t('sub.indexauto')},{id:"horsforfait",l:t('sub.horsforfait')},{id:"totalreward",l:t('sub.totalreward')},{id:"transport",l:t('sub.transport')},{id:"treizieme",l:t('sub.treizieme')},{id:"css",l:t('sub.css')},{id:"bonusemploi",l:t('sub.bonusemploi')}]},
     {id:"avantages",l:t('nav.avantages'),i:'★',sub:[{id:"cheques",l:t('sub.cheques')},{id:"ecocmd",l:t('sub.ecocmd')},{id:"cafeteria",l:t('sub.cafeteria')},{id:"cct90",l:t('sub.cct90')},{id:"warrants",l:t('sub.warrants')},{id:"budgetmob",l:t('sub.budgetmob')},{id:"ecocircul",l:t('sub.ecocircul')}]},
@@ -4073,7 +4073,7 @@ function AppInner({ supabase, user, onLogout }) {
       case'dashboard':return <Dashboard s={s} d={d}/>;
       case'employees':return <Employees s={s} d={d}/>;
       case'payslip':return <Payslips s={s} d={d}/>;
-      case'onss':return s.sub==='dmfa'?<DMFAPage s={s} d={d}/>:s.sub==='drs'?<DRSMod s={s} d={d}/>:s.sub==='onssapl'?<ONSSAPLMod s={s} d={d}/>:s.sub==='onss_dash'?<ONSSDashMod s={s} d={d}/>:s.sub==='guide_portail'?<GuidePortailMod s={s} d={d}/>:<DimonaPage s={s} d={d}/>;
+      case'onss':return s.sub==='dmfa'?<DMFAPage s={s} d={d}/>:s.sub==='drs'?<DRSMod s={s} d={d}/>:s.sub==='onssapl'?<ONSSAPLMod s={s} d={d}/>:s.sub==='onss_dash'?<ONSSDashMod s={s} d={d}/>:s.sub==='guide_portail'?<GuidePortailMod s={s} d={d}/>:s.sub==='portail_employeur'?<PortailEmployeurMod s={s} d={d}/>:<DimonaPage s={s} d={d}/>;
       case'fiscal':return s.sub==='precompte'?<PrecomptePage s={s} d={d}/>:s.sub==='fiches_ext'?<FichesMod s={s} d={d}/>:s.sub==='co2'?<CO2Mod s={s} d={d}/>:s.sub==='atn'?<ATNMod s={s} d={d}/>:<BelcotaxPage s={s} d={d}/>;
       case'salaires':return <SalairesPage s={s} d={d}/>;
       case'avantages':return <AvantagesPage s={s} d={d}/>;
