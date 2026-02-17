@@ -5552,12 +5552,7 @@ function Payslips({s,d}) {
         {/* BOUTON EXPORT PDF */}
         <div style={{marginTop:14,display:'flex',gap:10,justifyContent:'center'}} className="no-print">
           <button onClick={()=>{
-            const el=document.querySelector('[data-payslip]');
-            if(el){const w=window.open('',"","width=900,height=1200");
-            w.document.write('<html><head><title>Fiche de paie — '+emp.first+' '+emp.last+' — '+MN[per.month-1]+' '+per.year+'</title><style>@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap");*{margin:0;padding:0;box-sizing:border-box}body{font-family:Outfit,sans-serif;color:#1a1a18;background:#fff}.no-print{display:none!important}@media print{.no-print{display:none!important}@page{margin:10mm;size:A4}}</style></head><body>');
-            w.document.write(el.outerHTML);w.document.write('</body></html>');w.document.close();
-            setTimeout(()=>{w.print();},500);}
-          }} style={{padding:'12px 28px',background:"#c6a34e",color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer',letterSpacing:'.5px'}}>🖨 Imprimer / PDF</button>
+            generatePayslipPDF(emp,res,per,s.co) style={{padding:'12px 28px',background:"#c6a34e",color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer',letterSpacing:'.5px'}}>🖨 Imprimer / PDF</button>
           <button onClick={()=>{
             const el=document.querySelector('[data-payslip]');
             if(el){const b=new Blob(['<html><head><meta charset="utf-8"><style>*{font-family:Outfit,sans-serif;color:#1a1a18}</style></head><body>'+el.outerHTML+'</body></html>'],{type:"text/html"});
