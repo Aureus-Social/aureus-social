@@ -12291,6 +12291,7 @@ function FloatingLegalAgent({onAction}){
   </>;
 }
 
+const CP_PRESETS_GLOBAL=[{id:"cp200",label:"CP 200 - CPNAE",sector:"Employes",barMin:2029.88},{id:"cp100",label:"CP 100 - Commission nationale complementaire",sector:"Ouvriers",barMin:1958.88},{id:"cp110",label:"CP 110 - Entretien textile",sector:"Ouvriers",barMin:1958.88},{id:"cp124",label:"CP 124 - Construction",sector:"Ouvriers",barMin:2100},{id:"cp140",label:"CP 140 - Transport",sector:"Ouvriers/Employes",barMin:2050},{id:"cp149",label:"CP 149.01 - Electriciens",sector:"Ouvriers",barMin:2000},{id:"cp201",label:"CP 201 - Commerce independant",sector:"Employes",barMin:1958.88},{id:"cp209",label:"CP 209 - Employes metal",sector:"Employes",barMin:2100},{id:"cp218",label:"CP 218 - CPNAE (ancien)",sector:"Employes",barMin:2029.88},{id:"cp226",label:"CP 226 - Commerce international",sector:"Employes",barMin:2029.88},{id:"cp302",label:"CP 302 - Horeca",sector:"Mixte",barMin:1958.88},{id:"cp330",label:"CP 330 - Soins de sante",sector:"Mixte",barMin:2029.88}];
 export default function AureusSocialPro({ supabase, user, onLogout }) {
   return <LangProvider><AppInner supabase={supabase} user={user} onLogout={onLogout}/></LangProvider>;
 }// clean
