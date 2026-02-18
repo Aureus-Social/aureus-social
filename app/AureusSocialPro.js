@@ -2768,6 +2768,120 @@ let _supabaseRef = null;
 let _userIdRef = null;
 let _saveTimer = null;
 function setSupabaseRefs(sb, uid) { _supabaseRef = sb; _userIdRef = uid; }
+
+// ── Sprint 18: Multi-User Realtime System ──
+let _realtimeChannel = null;
+let _presenceChannel = null;
+const ROLES = { admin:'Admin', gestionnaire:'Gestionnaire', readonly:'Lecture seule' };
+
+function setupRealtime(supabase, userId, userEmail, onDataChange) {
+  if (!supabase || _realtimeChannel) return;
+  try {
+    // Subscribe to data changes
+    _realtimeChannel = supabase.channel('app_state_changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'app_state',
+        filter: 'state_key=eq.main'
+      }, (payload) => {
+        // Someone else saved - reload data
+        if (payload.new && payload.new.user_id !== userId) {
+          if (onDataChange) onDataChange(payload.new.state_data);
+        }
+      })
+      .subscribe();
+
+    // Presence channel - who's online
+    _presenceChannel = supabase.channel('online_users', {
+      config: { presence: { key: userId } }
+    });
+    _presenceChannel.on('presence', { event: 'sync' }, () => {
+      const state = _presenceChannel.presenceState();
+      if (typeof window !== 'undefined') {
+        window._onlineUsers = Object.entries(state).map(([k, v]) => ({
+          id: k,
+          email: v[0]?.email || 'Inconnu',
+          role: v[0]?.role || 'admin',
+          lastSeen: v[0]?.online_at || new Date().toISOString()
+        }));
+        window.dispatchEvent(new Event('presence_update'));
+      }
+    });
+    _presenceChannel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await _presenceChannel.track({
+          email: userEmail || 'Admin',
+          role: 'admin',
+          online_at: new Date().toISOString(),
+          page: 'dashboard'
+        });
+      }
+    });
+  } catch(e) { console.log('Realtime setup failed:', e); }
+}
+
+function updatePresencePage(page) {
+  if (_presenceChannel) {
+    _presenceChannel.track({
+      email: _userIdRef || 'Admin',
+      role: 'admin',
+      online_at: new Date().toISOString(),
+      page: page
+    }).catch(() => {});
+  }
+}
+
+function cleanupRealtime() {
+  if (_realtimeChannel) { _realtimeChannel.unsubscribe(); _realtimeChannel = null; }
+  if (_presenceChannel) { _presenceChannel.unsubscribe(); _presenceChannel = null; }
+}
+
+// Save user role to Supabase
+async function saveUserRole(supabase, targetUserId, role) {
+  if (!supabase) return false;
+  try {
+    const { error } = await supabase.from('user_roles').upsert({
+      user_id: targetUserId,
+      role: role,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+    return !error;
+  } catch(e) { return false; }
+}
+
+async function getUserRoles(supabase) {
+  if (!supabase) return [];
+  try {
+    const { data } = await supabase.from('user_roles').select('*').order('updated_at', { ascending: false });
+    return data || [];
+  } catch(e) { return []; }
+}
+
+// Activity log
+async function logActivity(supabase, userId, action, details) {
+  if (!supabase || !userId) return;
+  try {
+    await supabase.from('activity_log').insert({
+      user_id: userId,
+      action: action,
+      details: details,
+      created_at: new Date().toISOString()
+    });
+  } catch(e) {}
+}
+
+async function getActivityLog(supabase) {
+  if (!supabase) return [];
+  try {
+    const { data } = await supabase.from('activity_log')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    return data || [];
+  } catch(e) { return []; }
+}
+
 async function saveData(data){
   try{
     if (typeof window === 'undefined') return;
@@ -3701,6 +3815,11 @@ function ClientsPage({s,d,user,onLogout,veilleNotif,setVeilleNotif}){
           <div style={{textAlign:'right',marginRight:10}}>
             <div style={{fontSize:11,color:'#9e9b93'}}>{stats.total} dossier{stats.total>1?'s':''} · {stats.emps} travailleur{stats.emps>1?'s':''}</div>
             {user&&<div style={{fontSize:10,color:'#5e5c56'}}>{user.email}</div>}
+
+            {onlineUsers.length>0&&<div style={{display:'flex',alignItems:'center',gap:4,marginTop:4}}>
+              <span style={{width:6,height:6,borderRadius:'50%',background:'#22c55e',display:'inline-block',animation:'blink 2s infinite'}}/>
+              <span style={{fontSize:9,color:'#22c55e'}}>{onlineUsers.length} en ligne</span>
+            </div>}
           </div>
           {onLogout&&<button onClick={onLogout} style={{padding:'8px 14px',background:"rgba(248,113,113,0.08)",border:'1px solid rgba(248,113,113,0.2)',borderRadius:8,color:'#fb923c',fontSize:11,cursor:'pointer',fontFamily:'inherit',fontWeight:600}}>Déconnexion</button>}
           <B onClick={()=>setShowWizard(!showWizard)}>{showWizard?'✕ Annuler':'+ Nouveau dossier'}</B>
@@ -3927,6 +4046,37 @@ function AppInner({ supabase, user, onLogout }) {
   useEffect(()=>{
     if(supabase && user?.id) setSupabaseRefs(supabase, user.id);
   },[supabase, user]);
+
+  // Realtime sync setup
+  useEffect(() => {
+    if (supabase && user?.id) {
+      setupRealtime(supabase, user.id, user.email, (newData) => {
+        // Another user saved data - update our state
+        if (newData && newData.clients) {
+          d({ type: 'SET_CLIENTS', data: newData.clients });
+        }
+        if (newData && newData.emps) {
+          d({ type: 'SET_EMPS', data: newData.emps });
+        }
+        if (typeof addToast === 'function') addToast('🔄 Données mises à jour par un autre utilisateur', 'info');
+      });
+    }
+    return () => cleanupRealtime();
+  }, [supabase, user]);
+
+  // Track page changes for presence
+  useEffect(() => {
+    updatePresencePage(s.page);
+  }, [s.page]);
+
+  // Online users state
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  useEffect(() => {
+    const handler = () => setOnlineUsers(window._onlineUsers || []);
+    window.addEventListener('presence_update', handler);
+    return () => window.removeEventListener('presence_update', handler);
+  }, []);
+
 
   // Load data from Supabase first, then localStorage fallback
   useEffect(()=>{
@@ -4207,6 +4357,7 @@ function AppInner({ supabase, user, onLogout }) {
       {id:'conformite',l:'✅ Conformité',count:complianceScore+'%'},
       {id:'batch',l:'🚀 Batch',count:emps.length},
       {id:'backup',l:'💾 Backup',count:'JSON'},
+      {id:'multiuser',l:'👥 Multi-User',count:(typeof window!=='undefined'&&window._onlineUsers?window._onlineUsers.length:0)},
     ];
 
     return <div style={{padding:24}}>
@@ -4488,7 +4639,82 @@ function AppInner({ supabase, user, onLogout }) {
         </div>
       </div>}
 
-      {/* Footer */}
+      
+      {/* TAB: Multi-User */}
+      {autoTab==='multiuser'&&<div>
+        <h3 style={{fontSize:16,fontWeight:600,color:'#e5e5e5',marginBottom:14}}>👥 Gestion Multi-Utilisateur</h3>
+        
+        {/* Online Now */}
+        <div style={{marginBottom:20,padding:16,background:'linear-gradient(135deg,rgba(34,197,94,.06),rgba(34,197,94,.02))',border:'1px solid rgba(34,197,94,.15)',borderRadius:12}}>
+          <div style={{fontSize:13,fontWeight:600,color:'#22c55e',marginBottom:10}}>🟢 Utilisateurs en Ligne</div>
+          {(window._onlineUsers||[]).length===0?
+            <div style={{fontSize:12,color:'#888',padding:10}}>Vous êtes le seul utilisateur connecté</div>:
+            <div style={{display:'grid',gap:8}}>
+              {(window._onlineUsers||[]).map((u,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 14px',background:'rgba(255,255,255,.02)',borderRadius:10}}>
+                <div style={{width:36,height:36,borderRadius:'50%',background:'linear-gradient(135deg,#c6a34e,#d4af37)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:700,color:'#000'}}>{(u.email||'?')[0].toUpperCase()}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:12,fontWeight:500,color:'#e5e5e5'}}>{u.email}</div>
+                  <div style={{fontSize:10,color:'#888'}}>Page: {u.page||'dashboard'} • {ROLES[u.role]||'Admin'}</div>
+                </div>
+                <span style={{width:8,height:8,borderRadius:'50%',background:'#22c55e'}}/>
+              </div>)}
+            </div>}
+        </div>
+
+        {/* Roles */}
+        <div style={{marginBottom:20}}>
+          <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:10}}>🔐 Rôles & Permissions</div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
+            {[
+              {role:'admin',label:'Admin',icon:'👑',color:'#c6a34e',perms:['Tout voir','Tout modifier','Gérer utilisateurs','Supprimer données','Export/Import','Paramètres']},
+              {role:'gestionnaire',label:'Gestionnaire',icon:'📋',color:'#3b82f6',perms:['Voir employés','Modifier fiches','Générer documents','Export PDF/XML','Pas de suppression']},
+              {role:'readonly',label:'Lecture seule',icon:'👁',color:'#888',perms:['Voir tableau de bord','Voir employés','Voir fiches','Pas de modification','Pas d\'export']}
+            ].map((r,i)=><div key={i} style={{padding:16,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid '+r.color+'30',borderRadius:14}}>
+              <div style={{fontSize:24,textAlign:'center',marginBottom:6}}>{r.icon}</div>
+              <div style={{fontSize:14,fontWeight:600,color:r.color,textAlign:'center',marginBottom:8}}>{r.label}</div>
+              {r.perms.map((p,j)=><div key={j} style={{fontSize:10,color:'#888',padding:'3px 0',display:'flex',alignItems:'center',gap:6}}>
+                <span style={{color:p.startsWith('Pas')?'#ef4444':'#22c55e',fontSize:8}}>●</span>{p}
+              </div>)}
+            </div>)}
+          </div>
+        </div>
+
+        {/* Sync Status */}
+        <div style={{marginBottom:20,padding:16,background:'rgba(168,85,247,.04)',border:'1px solid rgba(168,85,247,.15)',borderRadius:12}}>
+          <div style={{fontSize:13,fontWeight:600,color:'#a855f7',marginBottom:10}}>🔄 Synchronisation Temps Réel</div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
+            <div style={{padding:12,background:'rgba(34,197,94,.06)',borderRadius:10,textAlign:'center'}}>
+              <div style={{fontSize:16,fontWeight:700,color:_supabaseRef?'#22c55e':'#ef4444'}}>{_supabaseRef?'✅':'❌'}</div>
+              <div style={{fontSize:10,color:'#888',marginTop:2}}>Supabase</div>
+            </div>
+            <div style={{padding:12,background:'rgba(59,130,246,.06)',borderRadius:10,textAlign:'center'}}>
+              <div style={{fontSize:16,fontWeight:700,color:_realtimeChannel?'#3b82f6':'#666'}}>{_realtimeChannel?'✅':'⏳'}</div>
+              <div style={{fontSize:10,color:'#888',marginTop:2}}>Realtime</div>
+            </div>
+            <div style={{padding:12,background:'rgba(198,163,78,.06)',borderRadius:10,textAlign:'center'}}>
+              <div style={{fontSize:16,fontWeight:700,color:_presenceChannel?'#c6a34e':'#666'}}>{_presenceChannel?'✅':'⏳'}</div>
+              <div style={{fontSize:10,color:'#888',marginTop:2}}>Presence</div>
+            </div>
+          </div>
+          <div style={{marginTop:10,fontSize:11,color:'#888'}}>
+            Quand un autre utilisateur modifie des données, vous recevez automatiquement la mise à jour. Pas besoin de rafraîchir la page.
+          </div>
+        </div>
+
+        {/* How to invite */}
+        <div style={{padding:16,background:'rgba(198,163,78,.04)',border:'1px solid rgba(198,163,78,.1)',borderRadius:12}}>
+          <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:8}}>📨 Inviter un Collaborateur</div>
+          <div style={{fontSize:11,color:'#888',lineHeight:1.6}}>
+            Pour ajouter un collaborateur :<br/>
+            1. Il crée un compte sur aureussocial.be (même page de login)<br/>
+            2. Les données sont synchronisées automatiquement via Supabase<br/>
+            3. Tous les changements sont visibles en temps réel<br/>
+            4. Le backup cloud est partagé entre tous les utilisateurs
+          </div>
+        </div>
+      </div>}
+
+{/* Footer */}
       <div style={{marginTop:32,textAlign:'center',padding:16,borderTop:'1px solid rgba(198,163,78,.1)'}}>
         <div style={{fontSize:11,color:'#666'}}>Aureus Social Pro v38 — Sprint 17c Automatisation — {emps.length} employé(s) • {curMonth} {curYear}</div>
         <div style={{fontSize:10,color:'#444',marginTop:4}}>Tous les documents sont générés localement. Aucune donnée n'est envoyée à un serveur externe.</div>
