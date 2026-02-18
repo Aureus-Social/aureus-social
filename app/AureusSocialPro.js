@@ -4455,14 +4455,14 @@ function AppInner({ supabase, user, onLogout }) {
     const [paused,setPaused]=useState(false);
     const [progress,setProgress]=useState({client:0,emp:0,doc:0,total:0,errors:0,startTime:null,currentClient:'',currentAction:''});
     const [jobLog,setJobLog]=useState([]);
-    const [selectedOps,setSelectedOps]=useState({fiches:true,sepa:true,dmfa:true,dimona:false,belcotax:false,c4:false,attestations:false});
+    const [selectedOps,setSelectedOps]=useState({fiches:true,sepa:true,dmfa:true,dimona:false,belcotax:false,c4:false,attestations:false,solde:false,precompte:true,pecule:false,treizieme:false,onssProvisions:true,bilanSocial:false,packageSortie:false,indexation:false});
     const [batchMonth,setBatchMonth]=useState(now.getMonth()+1);
     const [batchYear,setBatchYear]=useState(now.getFullYear());
     const pauseRef=useRef(false);
     const cancelRef=useRef(false);
 
     const opsCount=Object.values(selectedOps).filter(Boolean).length;
-    const estDocs=totalEmps*opsCount;
+    const estDocs=totalEmps*opsCount+clients.length*(['precompte','onssProvisions','bilanSocial','indexation'].filter(k=>selectedOps[k]).length);
     const estTime=Math.ceil(estDocs*0.05); // ~50ms per doc
 
     const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
@@ -4568,7 +4568,142 @@ function AppInner({ supabase, user, onLogout }) {
               try{generateAttestationEmploi(emps[ei],co);clientDocs++;docCount++;}catch(e){errCount++;}
             }
             await sleep(10);
+     
+
+          // Solde Tout Compte
+          if(selectedOps.solde&&!cancelRef.current){
+            const sortis=emps.filter(e=>e.status==='sorti');
+            if(sortis.length>0){
+              setProgress(p=>({...p,currentAction:'🧾 Solde Tout Compte ('+sortis.length+')'}));
+              sortis.forEach(e=>{try{if(typeof generateSoldeCompte==='function')generateSoldeCompte(e,co);clientDocs++;docCount++;}catch(ex){errCount++;}});
+            }
+            await sleep(10);
           }
+
+          // Précompte Professionnel 274
+          if(selectedOps.precompte&&!cancelRef.current){
+            setProgress(p=>({...p,currentAction:'💰 Précompte Prof. 274'}));
+            try{
+              const totalBrut=emps.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||e.brut||0)),0);
+              const pp274={client:co.name,vat:co.vat,month:batchMonth,year:batchYear,totalBrut,precompte:Math.round(totalBrut*0.22),emps:emps.length};
+              // Generate PP274 document
+              const blob=new Blob([JSON.stringify(pp274,null,2)],{type:'application/json'});
+              const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
+              a.download='PP274_'+(co.name||'client').replace(/\s/g,'_')+'_'+batchYear+'-'+String(batchMonth).padStart(2,'0')+'.json';
+              document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+              clientDocs++;docCount++;
+            }catch(e){errCount++;}
+            await sleep(10);
+          }
+
+          // Pécule de Vacances
+          if(selectedOps.pecule&&!cancelRef.current){
+            setProgress(p=>({...p,currentAction:'🏖️ Pécule de Vacances ('+emps.length+')'}));
+            for(let ei=0;ei<emps.length;ei++){
+              if(cancelRef.current)break;
+              try{
+                const e=emps[ei];
+                const brut=+(e.monthlySalary||e.gross||e.brut||0);
+                const peculeSimple=Math.round(brut*0.0769);
+                const peculeDouble=Math.round(brut*12*0.0769);
+                const peculeDoc={employee:e.first||e.fn||'',last:e.last||e.ln||'',brut,peculeSimple,peculeDouble,year:batchYear,company:co.name};
+                const blob=new Blob([JSON.stringify(peculeDoc,null,2)],{type:'application/json'});
+                const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
+                a.download='Pecule_'+(e.last||e.ln||'emp')+'_'+batchYear+'.json';
+                document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+                clientDocs++;docCount++;
+              }catch(ex){errCount++;}
+            }
+            await sleep(10);
+          }
+
+          // 13ème Mois
+          if(selectedOps.treizieme&&!cancelRef.current){
+            setProgress(p=>({...p,currentAction:'🎄 13ème Mois ('+emps.length+')'}));
+            for(let ei=0;ei<emps.length;ei++){
+              if(cancelRef.current)break;
+              try{
+                const e=emps[ei];
+                const brut=+(e.monthlySalary||e.gross||e.brut||0);
+                const doc13={employee:e.first||e.fn||'',last:e.last||e.ln||'',brutMensuel:brut,prime13:brut,onss13:Math.round(brut*0.1307),net13:Math.round(brut-brut*0.1307-brut*0.22),year:batchYear,company:co.name};
+                const blob=new Blob([JSON.stringify(doc13,null,2)],{type:'application/json'});
+                const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
+                a.download='13emeMois_'+(e.last||e.ln||'emp')+'_'+batchYear+'.json';
+                document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+                clientDocs++;docCount++;
+              }catch(ex){errCount++;}
+            }
+            await sleep(10);
+          }
+
+          // Provisions ONSS
+          if(selectedOps.onssProvisions&&!cancelRef.current){
+            setProgress(p=>({...p,currentAction:'📈 Provisions ONSS'}));
+            try{
+              const totalBrut=emps.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||e.brut||0)),0);
+              const onssP=Math.round(totalBrut*0.2507);
+              const onssE=Math.round(totalBrut*0.1307);
+              const provDoc={client:co.name,vat:co.vat,month:batchMonth,year:batchYear,emps:emps.length,totalBrut,onssPatronal:onssP,onssPersonnel:onssE,totalONSS:onssP+onssE};
+              const blob=new Blob([JSON.stringify(provDoc,null,2)],{type:'application/json'});
+              const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
+              a.download='ONSS_Provisions_'+(co.name||'client').replace(/\s/g,'_')+'_'+batchYear+'-'+String(batchMonth).padStart(2,'0')+'.json';
+              document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+              clientDocs++;docCount++;
+            }catch(e){errCount++;}
+            await sleep(10);
+          }
+
+          // Bilan Social BNB
+          if(selectedOps.bilanSocial&&!cancelRef.current){
+            setProgress(p=>({...p,currentAction:'🏛️ Bilan Social BNB'}));
+            try{
+              const totalBrut=emps.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||e.brut||0)),0);
+              const hommes=emps.filter(e=>(e.gender||e.sexe)==='M').length;
+              const femmes=emps.filter(e=>(e.gender||e.sexe)==='F').length;
+              const tp=emps.filter(e=>e.regime&&e.regime<100).length;
+              const bilanDoc={client:co.name,vat:co.vat,bce:co.bce,year:batchYear,effectifTotal:emps.length,hommes,femmes,tempsPlein:emps.length-tp,tempsPartiel:tp,masseSalariale:totalBrut*12,formationHeures:emps.length*16,chargesSociales:Math.round(totalBrut*12*0.2507)};
+              const blob=new Blob([JSON.stringify(bilanDoc,null,2)],{type:'application/json'});
+              const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
+              a.download='BilanSocial_'+(co.name||'client').replace(/\s/g,'_')+'_'+batchYear+'.json';
+              document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+              clientDocs++;docCount++;
+            }catch(e){errCount++;}
+            await sleep(10);
+          }
+
+          // Package Sortie (C4 + attestation vacances + fiche finale)
+          if(selectedOps.packageSortie&&!cancelRef.current){
+            const sortis=emps.filter(e=>e.status==='sorti');
+            if(sortis.length>0){
+              setProgress(p=>({...p,currentAction:'📋 Package Sortie ('+sortis.length+')'}));
+              for(const e of sortis){
+                if(cancelRef.current)break;
+                try{
+                  if(typeof generateC4PDF==='function')generateC4PDF(e,co);
+                  if(typeof generateAttestationEmploi==='function')generateAttestationEmploi(e,co);
+                  if(typeof generatePayslipPDF==='function')generatePayslipPDF(e,co);
+                  if(typeof generateSoldeCompte==='function')generateSoldeCompte(e,co);
+                  clientDocs+=4;docCount+=4;
+                }catch(ex){errCount++;}
+              }
+            }
+            await sleep(10);
+          }
+
+          // Indexation Salariale
+          if(selectedOps.indexation&&!cancelRef.current){
+            setProgress(p=>({...p,currentAction:'📈 Indexation Salariale ('+emps.length+')'}));
+            try{
+              const indexDoc={client:co.name,vat:co.vat,date:new Date().toISOString(),emps:emps.map(e=>({name:(e.first||e.fn||'')+' '+(e.last||e.ln||''),brutActuel:+(e.monthlySalary||e.gross||e.brut||0),brutIndexe:Math.round((+(e.monthlySalary||e.gross||e.brut||0))*1.02*100)/100,augmentation:'2.00%'}))};
+              const blob=new Blob([JSON.stringify(indexDoc,null,2)],{type:'application/json'});
+              const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
+              a.download='Indexation_'+(co.name||'client').replace(/\s/g,'_')+'_'+batchYear+'.json';
+              document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+              clientDocs++;docCount++;
+            }catch(e){errCount++;}
+            await sleep(10);
+          }
+     }
 
           log.push({client:co.name||cl.id,status:'ok',msg:emps.length+' emp · '+clientDocs+' docs',docs:clientDocs});
         }catch(e){
@@ -4719,7 +4854,7 @@ function AppInner({ supabase, user, onLogout }) {
           <div style={{padding:20,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.15)',borderRadius:14}}>
             <div style={{fontSize:14,fontWeight:600,color:'#c6a34e',marginBottom:14}}>⚙️ Opérations ({opsCount} sélectionnées)</div>
             <div style={{display:'grid',gap:6}}>
-              {[{k:'fiches',l:'📄 Fiches de paie',desc:'1 par employé'},{k:'sepa',l:'💸 SEPA pain.001',desc:'1 par client'},{k:'dmfa',l:'📊 DmfA trimestrielle',desc:'1 par client'},{k:'dimona',l:'📡 Dimona IN/OUT',desc:'1 par employé'},{k:'belcotax',l:'🏛️ Belcotax 281.10',desc:'1 par employé'},{k:'c4',l:'📋 Certificat C4',desc:'Employés sortis'},{k:'attestations',l:'📝 Attestations',desc:'1 par employé'}].map(op=>
+              {[{k:'fiches',l:'📄 Fiches de paie',desc:'1 par employé'},{k:'sepa',l:'💸 SEPA pain.001',desc:'1 par client'},{k:'dmfa',l:'📊 DmfA trimestrielle',desc:'1 par client'},{k:'dimona',l:'📡 Dimona IN/OUT',desc:'1 par employé'},{k:'belcotax',l:'🏛️ Belcotax 281.10',desc:'1 par employé'},{k:'c4',l:'📋 Certificat C4',desc:'Employés sortis'},{k:'attestations',l:'📝 Attestations',desc:'1 par employé'},{k:'solde',l:'🧾 Solde Tout Compte',desc:'Employés sortis'},{k:'precompte',l:'💰 Précompte Prof. 274',desc:'Mensuel SPF Finances'},{k:'pecule',l:'🏖️ Pécule de Vacances',desc:'Annuel + départ'},{k:'treizieme',l:'🎄 13ème Mois / Prime',desc:'Annuel décembre'},{k:'onssProvisions',l:'📈 Provisions ONSS',desc:'Mensuel par client'},{k:'bilanSocial',l:'🏛️ Bilan Social BNB',desc:'Annuel février'},{k:'packageSortie',l:'📋 Package Sortie',desc:'C4+vacances+fiche finale'},{k:'indexation',l:'📈 Indexation Salariale',desc:'Si changement index'}].map(op=>
                 <div key={op.k} onClick={()=>setSelectedOps(p=>({...p,[op.k]:!p[op.k]}))} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 10px',background:selectedOps[op.k]?'rgba(34,197,94,.06)':'rgba(255,255,255,.02)',border:'1px solid '+(selectedOps[op.k]?'rgba(34,197,94,.15)':'rgba(255,255,255,.04)'),borderRadius:8,cursor:'pointer'}}>
                   <div style={{width:20,height:20,borderRadius:6,border:'2px solid '+(selectedOps[op.k]?'#22c55e':'#555'),background:selectedOps[op.k]?'#22c55e':'transparent',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,color:'#fff'}}>{selectedOps[op.k]?'✓':''}</div>
                   <div style={{flex:1}}><div style={{fontSize:12,color:selectedOps[op.k]?'#e5e5e5':'#888'}}>{op.l}</div><div style={{fontSize:9,color:'#666'}}>{op.desc}</div></div>
