@@ -4038,7 +4038,7 @@ function AppInner({ supabase, user, onLogout }) {
     </div>)}
   </div>:null;
   // Auto-backup every 5min
-  useEffect(()=>{const iv=setInterval(()=>{try{localStorage.setItem("aureus_autobackup",JSON.stringify({co:s.co,emps:s.emps,pays:s.pays,clients:s.clients,activeClient:s.activeClient}));localStorage.setItem("aureus_autobackup_date",new Date().toISOString());}catch(e){}},300000);return()=>clearInterval(iv);},[s.co,s.emps,s.pays,s.clients]);
+  useEffect(()=>{const iv=setInterval(()=>{try{localStorage.setItem("aureus_autobackup",JSON.stringify({co:s.co,emps:s.emps,pays:s.pays,clients:s.clients,activeClient:s.activeClient}));localStorage.setItem("aureus_autobackup_date",new Date().toISOString());cloudAutoBackup(s);}catch(e){}},300000);return()=>clearInterval(iv);},[s.co,s.emps,s.pays,s.clients]);
 
   const spotRef=useRef(null);
   const spotIndex=useMemo(()=>{
@@ -4420,40 +4420,62 @@ function AppInner({ supabase, user, onLogout }) {
       {/* TAB: Backup */}
       {autoTab==='backup'&&<div>
         <h3 style={{fontSize:16,fontWeight:600,color:'#e5e5e5',marginBottom:14}}>💾 Sauvegarde & Restauration</h3>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:16,marginBottom:20}}>
-          <div style={{padding:20,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(34,197,94,.2)',borderRadius:14,textAlign:'center'}}>
-            <div style={{fontSize:40,marginBottom:10}}>📥</div>
-            <div style={{fontSize:14,fontWeight:600,color:'#22c55e',marginBottom:4}}>Exporter Backup</div>
-            <div style={{fontSize:11,color:'#888',marginBottom:14}}>Télécharger un fichier JSON avec toutes les données</div>
-            <button onClick={()=>{const name=exportBackup(s);logAction('Backup Export',name,1);if(typeof addToast==='function')addToast('Backup exporté: '+name);}} style={{padding:'10px 24px',borderRadius:10,border:'none',background:'#22c55e',color:'#fff',fontWeight:600,fontSize:12,cursor:'pointer'}}>📥 Télécharger</button>
-          </div>
-          <div style={{padding:20,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(59,130,246,.2)',borderRadius:14,textAlign:'center'}}>
-            <div style={{fontSize:40,marginBottom:10}}>📤</div>
-            <div style={{fontSize:14,fontWeight:600,color:'#3b82f6',marginBottom:4}}>Importer Backup</div>
-            <div style={{fontSize:11,color:'#888',marginBottom:14}}>Restaurer depuis un fichier JSON précédemment exporté</div>
-            <label style={{padding:'10px 24px',borderRadius:10,border:'none',background:'#3b82f6',color:'#fff',fontWeight:600,fontSize:12,cursor:'pointer',display:'inline-block'}}>📤 Sélectionner fichier
-              <input type="file" accept=".json" style={{display:'none'}} onChange={async(e)=>{
-                const file=e.target.files[0];if(!file)return;
-                try{const r=await importBackup(file,d);logAction('Backup Import','Restauration: '+r.emps+' emp, '+r.pays+' fiches',r.emps);if(typeof addToast==='function')addToast('Restauration réussie: '+r.emps+' employés');}
-                catch(err){alert('❌ '+err);}
-                e.target.value='';
-              }}/>
-            </label>
-          </div>
-          <div style={{padding:20,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(234,179,8,.2)',borderRadius:14,textAlign:'center'}}>
-            <div style={{fontSize:40,marginBottom:10}}>🔄</div>
-            <div style={{fontSize:14,fontWeight:600,color:'#eab308',marginBottom:4}}>Auto-Backup</div>
-            <div style={{fontSize:11,color:'#888',marginBottom:6}}>Sauvegarde automatique toutes les 5 minutes</div>
-            <div style={{fontSize:10,color:'#666',marginBottom:14}}>Dernier: {localStorage.getItem('aureus_autobackup_date')?new Date(localStorage.getItem('aureus_autobackup_date')).toLocaleString('fr-BE'):'Aucun'}</div>
-            <button onClick={()=>{
-              const ab=localStorage.getItem('aureus_autobackup');
-              if(!ab){alert('Aucun auto-backup trouvé');return;}
-              if(confirm('Restaurer auto-backup du '+new Date(localStorage.getItem('aureus_autobackup_date')).toLocaleString('fr-BE')+' ?')){
-                try{const b=JSON.parse(ab);if(b.co)d({type:'SET_COMPANY',data:b.co});if(b.emps)d({type:'SET_EMPS',data:b.emps});if(b.pays)d({type:'SET_PAYS',data:b.pays});logAction('Auto-backup Restore','Restauration auto-backup',1);if(typeof addToast==='function')addToast('Auto-backup restauré');}catch(err){alert('❌ '+err);}
-              }
-            }} style={{padding:'10px 24px',borderRadius:10,border:'none',background:'#eab308',color:'#000',fontWeight:600,fontSize:12,cursor:'pointer'}}>🔄 Restaurer</button>
+        
+        {/* Cloud Status */}
+        <div style={{marginBottom:16,padding:14,background:_supabaseRef?'rgba(34,197,94,.06)':'rgba(239,68,68,.06)',border:'1px solid '+(_supabaseRef?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)'),borderRadius:12,display:'flex',alignItems:'center',gap:10}}>
+          <span style={{fontSize:16}}>{_supabaseRef?'☁️':'⚠️'}</span>
+          <div>
+            <div style={{fontSize:12,fontWeight:600,color:_supabaseRef?'#22c55e':'#ef4444'}}>{_supabaseRef?'Supabase connecté — Backup cloud actif':'Supabase non connecté — Backup local uniquement'}</div>
+            <div style={{fontSize:10,color:'#888'}}>Auto-backup toutes les 5 minutes {_supabaseRef?'(local + cloud)':'(local uniquement)'}</div>
           </div>
         </div>
+
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:20}}>
+          {/* Local */}
+          <div style={{padding:20,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(34,197,94,.2)',borderRadius:14}}>
+            <div style={{fontSize:15,fontWeight:600,color:'#22c55e',marginBottom:4}}>📥 Backup Local (JSON)</div>
+            <div style={{fontSize:11,color:'#888',marginBottom:14}}>Télécharge un fichier sur ton PC</div>
+            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              <button onClick={()=>{const name=exportBackup(s);logAction('Backup Local',name,1);if(typeof addToast==='function')addToast('Backup local: '+name);}} style={{padding:'10px 16px',borderRadius:10,border:'none',background:'#22c55e',color:'#fff',fontWeight:600,fontSize:11,cursor:'pointer'}}>📥 Exporter</button>
+              <label style={{padding:'10px 16px',borderRadius:10,border:'none',background:'#3b82f6',color:'#fff',fontWeight:600,fontSize:11,cursor:'pointer',display:'inline-block'}}>📤 Importer
+                <input type="file" accept=".json" style={{display:'none'}} onChange={async(e)=>{
+                  const file=e.target.files[0];if(!file)return;
+                  try{const r=await importBackup(file,d);logAction('Restore Local',r.emps+' employés',r.emps);if(typeof addToast==='function')addToast('Restauré: '+r.emps+' employés');}
+                  catch(err){alert('❌ '+err);}e.target.value='';
+                }}/>
+              </label>
+            </div>
+          </div>
+          {/* Cloud */}
+          <div style={{padding:20,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(168,85,247,.2)',borderRadius:14}}>
+            <div style={{fontSize:15,fontWeight:600,color:'#a855f7',marginBottom:4}}>☁️ Backup Cloud (Supabase)</div>
+            <div style={{fontSize:11,color:'#888',marginBottom:14}}>{_supabaseRef?'Sauvegarde sécurisée en ligne':'Connectez Supabase pour activer'}</div>
+            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              <button onClick={async()=>{const r=await cloudBackupSave(s);if(r.ok){logAction('Backup Cloud','Sauvegarde Supabase',emps.length);if(typeof addToast==='function')addToast('☁️ '+r.msg);}else{alert('❌ '+r.msg);}}} style={{padding:'10px 16px',borderRadius:10,border:'none',background:_supabaseRef?'#a855f7':'#555',color:'#fff',fontWeight:600,fontSize:11,cursor:_supabaseRef?'pointer':'not-allowed',opacity:_supabaseRef?1:.5}}>☁️ Sauvegarder</button>
+              <button onClick={async()=>{const list=await cloudBackupList();if(list.length===0){alert('Aucun backup cloud trouvé');return;}const msg=list.slice(0,5).map((b,i)=>(i+1)+'. '+new Date(b.created_at).toLocaleString('fr-BE')+' ('+b.emps_count+' emp)').join('\n');const idx=prompt('Quel backup restaurer ?\n\n'+msg+'\n\nEntrez le numéro (1-'+Math.min(list.length,5)+'):');if(!idx)return;const bi=parseInt(idx)-1;if(bi>=0&&bi<list.length){const r=await cloudBackupRestore(list[bi].id,d);if(r.ok){logAction('Restore Cloud',r.emps+' employés',r.emps);if(typeof addToast==='function')addToast('☁️ Restauré: '+r.emps+' employés');}else{alert('❌ '+r.msg);}}}} style={{padding:'10px 16px',borderRadius:10,border:'none',background:_supabaseRef?'#6366f1':'#555',color:'#fff',fontWeight:600,fontSize:11,cursor:_supabaseRef?'pointer':'not-allowed',opacity:_supabaseRef?1:.5}}>🔄 Restaurer</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Auto-backup Status */}
+        <div style={{padding:16,background:'rgba(198,163,78,.04)',border:'1px solid rgba(198,163,78,.1)',borderRadius:12,marginBottom:16}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+            <h4 style={{fontSize:13,fontWeight:600,color:'#c6a34e'}}>🔄 Auto-Backup Status</h4>
+            <span style={{fontSize:10,color:'#22c55e',fontWeight:600}}>● Actif (5 min)</span>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+            <div style={{padding:12,background:'rgba(34,197,94,.06)',borderRadius:10}}>
+              <div style={{fontSize:11,color:'#888',marginBottom:2}}>Local (navigateur)</div>
+              <div style={{fontSize:12,fontWeight:600,color:'#22c55e'}}>{localStorage.getItem('aureus_autobackup_date')?new Date(localStorage.getItem('aureus_autobackup_date')).toLocaleString('fr-BE'):'Aucun'}</div>
+            </div>
+            <div style={{padding:12,background:'rgba(168,85,247,.06)',borderRadius:10}}>
+              <div style={{fontSize:11,color:'#888',marginBottom:2}}>Cloud (Supabase)</div>
+              <div style={{fontSize:12,fontWeight:600,color:_supabaseRef?'#a855f7':'#666'}}>{_supabaseRef?'Synchronisé':'Non connecté'}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Data Summary */}
         <div style={{padding:16,background:'rgba(198,163,78,.04)',border:'1px solid rgba(198,163,78,.1)',borderRadius:12}}>
           <h4 style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:10}}>📊 Données actuelles</h4>
           <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10}}>
@@ -4466,7 +4488,7 @@ function AppInner({ supabase, user, onLogout }) {
         </div>
       </div>}
 
-{/* Footer */}
+      {/* Footer */}
       <div style={{marginTop:32,textAlign:'center',padding:16,borderTop:'1px solid rgba(198,163,78,.1)'}}>
         <div style={{fontSize:11,color:'#666'}}>Aureus Social Pro v38 — Sprint 17c Automatisation — {emps.length} employé(s) • {curMonth} {curYear}</div>
         <div style={{fontSize:10,color:'#444',marginTop:4}}>Tous les documents sont générés localement. Aucune donnée n'est envoyée à un serveur externe.</div>
@@ -7608,6 +7630,114 @@ function importBackup(file,dispatch){
     reader.readAsText(file);
   });
 }
+
+// ── Cloud Backup via Supabase ──
+async function cloudBackupSave(state){
+  if(!_supabaseRef||!_userIdRef)return{ok:false,msg:'Supabase non connecté'};
+  try{
+    const backup={
+      version:'v38',
+      date:new Date().toISOString(),
+      company:state.co||{},
+      employees:state.emps||[],
+      payslips:state.pays||[],
+      clients:state.clients||[],
+      activeClient:state.activeClient||null,
+      emps_count:(state.emps||[]).length,
+      pays_count:(state.pays||[]).length,
+      clients_count:(state.clients||[]).length
+    };
+    const{error}=await _supabaseRef.from('backups').insert({
+      user_id:_userIdRef,
+      backup_data:backup,
+      backup_type:'manual',
+      label:'Backup '+new Date().toLocaleString('fr-BE'),
+      emps_count:backup.emps_count,
+      pays_count:backup.pays_count,
+      created_at:new Date().toISOString()
+    });
+    if(error){
+      // Table might not exist - try upsert to app_state as fallback
+      const{error:e2}=await _supabaseRef.from('app_state').upsert({
+        user_id:_userIdRef,
+        state_key:'backup_'+Date.now(),
+        state_data:backup,
+        updated_at:new Date().toISOString()
+      },{onConflict:'user_id,state_key'});
+      if(e2)return{ok:false,msg:'Erreur: '+e2.message};
+    }
+    return{ok:true,msg:'Backup cloud sauvegardé',date:backup.date,emps:backup.emps_count};
+  }catch(e){return{ok:false,msg:'Erreur: '+e.message};}
+}
+
+async function cloudBackupList(){
+  if(!_supabaseRef||!_userIdRef)return[];
+  try{
+    // Try backups table first
+    const{data,error}=await _supabaseRef.from('backups')
+      .select('id,label,emps_count,pays_count,created_at,backup_type')
+      .eq('user_id',_userIdRef)
+      .order('created_at',{ascending:false})
+      .limit(20);
+    if(!error&&data)return data;
+    // Fallback: list from app_state
+    const{data:d2}=await _supabaseRef.from('app_state')
+      .select('state_key,updated_at,state_data')
+      .eq('user_id',_userIdRef)
+      .like('state_key','backup_%')
+      .order('updated_at',{ascending:false})
+      .limit(20);
+    if(d2)return d2.map(r=>({id:r.state_key,label:r.state_key,created_at:r.updated_at,emps_count:r.state_data?.emps_count||0,pays_count:r.state_data?.pays_count||0}));
+    return[];
+  }catch(e){return[];}
+}
+
+async function cloudBackupRestore(backupId,dispatch){
+  if(!_supabaseRef||!_userIdRef)return{ok:false,msg:'Supabase non connecté'};
+  try{
+    // Try backups table
+    let backup=null;
+    const{data,error}=await _supabaseRef.from('backups')
+      .select('backup_data')
+      .eq('id',backupId)
+      .eq('user_id',_userIdRef)
+      .maybeSingle();
+    if(!error&&data)backup=data.backup_data;
+    else{
+      // Fallback app_state
+      const{data:d2}=await _supabaseRef.from('app_state')
+        .select('state_data')
+        .eq('user_id',_userIdRef)
+        .eq('state_key',backupId)
+        .maybeSingle();
+      if(d2)backup=d2.state_data;
+    }
+    if(!backup)return{ok:false,msg:'Backup introuvable'};
+    if(backup.company)dispatch({type:'SET_COMPANY',data:backup.company});
+    if(backup.employees)dispatch({type:'SET_EMPS',data:backup.employees});
+    if(backup.payslips)dispatch({type:'SET_PAYS',data:backup.payslips});
+    if(backup.clients)dispatch({type:'SET_CLIENTS',data:backup.clients});
+    return{ok:true,msg:'Restauration cloud réussie',emps:backup.employees?.length||0};
+  }catch(e){return{ok:false,msg:'Erreur: '+e.message};}
+}
+
+async function cloudAutoBackup(state){
+  if(!_supabaseRef||!_userIdRef)return;
+  try{
+    await _supabaseRef.from('app_state').upsert({
+      user_id:_userIdRef,
+      state_key:'autobackup',
+      state_data:{
+        co:state.co,emps:state.emps,pays:state.pays,
+        clients:state.clients,activeClient:state.activeClient,
+        date:new Date().toISOString(),
+        emps_count:(state.emps||[]).length
+      },
+      updated_at:new Date().toISOString()
+    },{onConflict:'user_id,state_key'});
+  }catch(e){}
+}
+
 
 // Auto-backup to localStorage every 5 minutes
 function setupAutoBackup(getState){
