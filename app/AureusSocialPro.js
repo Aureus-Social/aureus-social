@@ -30,6 +30,7 @@ const I18N = {
   'nav.legal': { fr:'Juridique & Veille', nl:"Juridisch & Monitoring", en:"Legal & Monitoring", de:"Recht & Überwachung" },
   'nav.sprint9': { fr:'Sprint 9 - Modules', nl:'Sprint 9 - Modules', en:'Sprint 9 - Modules', de:'Sprint 9 - Module' },
   'nav.automatisation': { fr:'⚡ Automatisation',nl:'⚡ Automatisering',en:'⚡ Automation',de:'⚡ Automatisierung' },
+    'nav.team': { fr:'Équipe',nl:'Team',en:'Team',de:'Team' },
   'nav.settings': { fr:'Paramètres', nl:"Instellingen", en:"Settings", de:"Einstellungen" },
   'nav.aureussuite': { fr:'Aureus Suite', nl:"Aureus Suite", en:"Aureus Suite", de:"Aureus Suite" },
   'nav.back': { fr:'← Tous les dossiers', nl:"← Alle dossiers", en:"← All folders", de:"← Alle Ordner" },
@@ -2935,7 +2936,7 @@ function reducer(s,a){
     // Multi-sociétés
     case'ADD_CLIENT':ns={...s,clients:[...s.clients,{...a.d,id:"CL-"+uid(),createdAt:new Date().toISOString()}]};break;
     case'UPD_CLIENT':ns={...s,clients:s.clients.map(c=>c.id===a.d.id?{...c,...a.d}:c)};break;
-    case'DEL_CLIENT':ns={...s,clients:s.clients.filter(c=>c.id!==a.id)};break;
+    case'DEL_CLIENT':if(a.role==='readonly'){ns=s;break;}ns={...s,clients:s.clients.filter(c=>c.id!==a.id)};break;
     case'SELECT_CLIENT':{
       const cl=s.clients.find(c=>c.id===a.id);
       ns={...s,activeClient:a.id,co:cl?.company||COMPANY,emps:cl?.emps||[],pays:cl?.pays||[],dims:cl?.dims||[],dmfas:cl?.dmfas||[],fiches:cl?.fiches||[],docs:cl?.docs||[],page:'dashboard',sub:null};
@@ -2958,6 +2959,212 @@ function reducer(s,a){
   }
   return ns;
 }
+
+
+// ── Sprint 19: Role-Based Access Control ──
+const PERMISSIONS = {
+  admin: { 
+    label: 'Administrateur', icon: '👑', color: '#c6a34e',
+    canView: true, canEdit: true, canDelete: true, canExport: true, 
+    canManageUsers: true, canSettings: true, canBackup: true, canBatch: true
+  },
+  gestionnaire: { 
+    label: 'Gestionnaire', icon: '📋', color: '#3b82f6',
+    canView: true, canEdit: true, canDelete: false, canExport: true, 
+    canManageUsers: false, canSettings: false, canBackup: false, canBatch: true
+  },
+  comptable: { 
+    label: 'Comptable', icon: '🧮', color: '#a855f7',
+    canView: true, canEdit: true, canDelete: false, canExport: true, 
+    canManageUsers: false, canSettings: false, canBackup: false, canBatch: false
+  },
+  readonly: { 
+    label: 'Lecture seule', icon: '👁', color: '#888',
+    canView: true, canEdit: false, canDelete: false, canExport: false, 
+    canManageUsers: false, canSettings: false, canBackup: false, canBatch: false
+  }
+};
+
+async function loadUserRole(supabase, userId) {
+  if (!supabase || !userId) return 'admin'; // Default admin for first user
+  try {
+    const { data } = await supabase.from('user_roles')
+      .select('role').eq('user_id', userId).maybeSingle();
+    return data?.role || 'admin';
+  } catch(e) { return 'admin'; }
+}
+
+async function saveUserRole(supabase, userId, role, email) {
+  if (!supabase) return false;
+  try {
+    const { error } = await supabase.from('user_roles').upsert({
+      user_id: userId, role: role, email: email || '',
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+    return !error;
+  } catch(e) { return false; }
+}
+
+async function getTeamMembers(supabase) {
+  if (!supabase) return [];
+  try {
+    const { data } = await supabase.from('user_roles')
+      .select('*').order('updated_at', { ascending: false });
+    return data || [];
+  } catch(e) { return []; }
+}
+
+async function removeTeamMember(supabase, userId) {
+  if (!supabase) return false;
+  try {
+    const { error } = await supabase.from('user_roles').delete().eq('user_id', userId);
+    return !error;
+  } catch(e) { return false; }
+}
+
+// Permission check helper
+function can(userRole, permission) {
+  const perms = PERMISSIONS[userRole] || PERMISSIONS.readonly;
+  return perms[permission] || false;
+}
+
+// Team management component
+function TeamManagement({ supabase, user, userRole }) {
+  const [members, setMembers] = useState([]);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('gestionnaire');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (supabase) {
+      getTeamMembers(supabase).then(m => { setMembers(m); setLoading(false); });
+    }
+  }, [supabase]);
+
+  const handleInvite = async () => {
+    if (!inviteEmail || !inviteEmail.includes('@')) { alert('Email invalide'); return; }
+    // Create a pending invite
+    try {
+      const { error } = await supabase.from('user_roles').insert({
+        user_id: 'pending_' + Date.now(),
+        role: inviteRole,
+        email: inviteEmail,
+        status: 'invited',
+        invited_by: user?.id,
+        updated_at: new Date().toISOString()
+      });
+      if (!error) {
+        alert('✅ Invitation envoyée à ' + inviteEmail + ' en tant que ' + PERMISSIONS[inviteRole].label);
+        setInviteEmail('');
+        getTeamMembers(supabase).then(setMembers);
+      } else {
+        alert('Erreur: ' + error.message);
+      }
+    } catch(e) { alert('Erreur: ' + e.message); }
+  };
+
+  const changeRole = async (memberId, newRole) => {
+    const ok = await saveUserRole(supabase, memberId, newRole);
+    if (ok) getTeamMembers(supabase).then(setMembers);
+  };
+
+  const removeMember = async (memberId) => {
+    if (!confirm('Supprimer cet utilisateur de l\'équipe ?')) return;
+    const ok = await removeTeamMember(supabase, memberId);
+    if (ok) getTeamMembers(supabase).then(setMembers);
+  };
+
+  return <div>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+      <div>
+        <h2 style={{fontSize:20,fontWeight:700,color:'#c6a34e',margin:0}}>👥 Gestion de l'Équipe</h2>
+        <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Gérez les accès et les rôles de vos collaborateurs</p>
+      </div>
+      <div style={{padding:'8px 16px',borderRadius:10,background:'rgba(198,163,78,.1)',border:'1px solid rgba(198,163,78,.2)'}}>
+        <div style={{fontSize:10,color:'#888'}}>Votre rôle</div>
+        <div style={{fontSize:13,fontWeight:600,color:'#c6a34e'}}>{PERMISSIONS[userRole]?.icon} {PERMISSIONS[userRole]?.label}</div>
+      </div>
+    </div>
+
+    {/* Invite */}
+    {can(userRole, 'canManageUsers') && <div style={{marginBottom:20,padding:18,background:'linear-gradient(135deg,rgba(34,197,94,.06),rgba(34,197,94,.02))',border:'1px solid rgba(34,197,94,.15)',borderRadius:14}}>
+      <div style={{fontSize:14,fontWeight:600,color:'#22c55e',marginBottom:12}}>📨 Inviter un Collaborateur</div>
+      <div style={{display:'flex',gap:8,alignItems:'flex-end',flexWrap:'wrap'}}>
+        <div style={{flex:1,minWidth:200}}>
+          <label style={{fontSize:10,color:'#888',display:'block',marginBottom:4}}>Email</label>
+          <input type="email" value={inviteEmail} onChange={e=>setInviteEmail(e.target.value)} placeholder="collaborateur@example.com"
+            style={{width:'100%',padding:'10px 14px',background:'#090c16',border:'1px solid rgba(139,115,60,.2)',borderRadius:8,color:'#e5e5e5',fontSize:13,fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+        </div>
+        <div style={{minWidth:160}}>
+          <label style={{fontSize:10,color:'#888',display:'block',marginBottom:4}}>Rôle</label>
+          <select value={inviteRole} onChange={e=>setInviteRole(e.target.value)}
+            style={{width:'100%',padding:'10px 14px',background:'#090c16',border:'1px solid rgba(139,115,60,.2)',borderRadius:8,color:'#e5e5e5',fontSize:13,fontFamily:'inherit',cursor:'pointer',outline:'none'}}>
+            <option value="gestionnaire">📋 Gestionnaire</option>
+            <option value="comptable">🧮 Comptable</option>
+            <option value="readonly">👁 Lecture seule</option>
+          </select>
+        </div>
+        <button onClick={handleInvite} style={{padding:'10px 20px',borderRadius:8,border:'none',background:'#22c55e',color:'#fff',fontWeight:600,fontSize:12,cursor:'pointer',whiteSpace:'nowrap'}}>📨 Inviter</button>
+      </div>
+    </div>}
+
+    {/* Roles Overview */}
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:20}}>
+      {Object.entries(PERMISSIONS).map(([key, p]) => <div key={key} style={{padding:14,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid '+p.color+'25',borderRadius:12,textAlign:'center'}}>
+        <div style={{fontSize:22,marginBottom:4}}>{p.icon}</div>
+        <div style={{fontSize:12,fontWeight:600,color:p.color}}>{p.label}</div>
+        <div style={{marginTop:8,fontSize:9,color:'#888',lineHeight:1.6}}>
+          {p.canEdit?'✅':'❌'} Modifier<br/>
+          {p.canDelete?'✅':'❌'} Supprimer<br/>
+          {p.canExport?'✅':'❌'} Exporter<br/>
+          {p.canSettings?'✅':'❌'} Paramètres<br/>
+          {p.canManageUsers?'✅':'❌'} Gérer équipe
+        </div>
+      </div>)}
+    </div>
+
+    {/* Members list */}
+    <div style={{border:'1px solid rgba(198,163,78,.1)',borderRadius:12,overflow:'hidden'}}>
+      <div style={{padding:'12px 16px',background:'rgba(198,163,78,.06)',display:'grid',gridTemplateColumns:'1fr 160px 120px 80px',fontSize:10,fontWeight:600,color:'#c6a34e'}}>
+        <div>Utilisateur</div><div>Rôle</div><div>Statut</div><div>Actions</div>
+      </div>
+      {loading ? <div style={{padding:20,textAlign:'center',color:'#888',fontSize:12}}>Chargement...</div> :
+       members.length === 0 ? <div style={{padding:20,textAlign:'center',color:'#888',fontSize:12}}>Aucun membre. Invitez votre premier collaborateur !</div> :
+       members.map((m, i) => <div key={i} style={{padding:'12px 16px',display:'grid',gridTemplateColumns:'1fr 160px 120px 80px',alignItems:'center',borderTop:'1px solid rgba(255,255,255,.03)',fontSize:12}}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <div style={{width:32,height:32,borderRadius:'50%',background:'linear-gradient(135deg,'+( PERMISSIONS[m.role]?.color||'#888')+','+( PERMISSIONS[m.role]?.color||'#888')+'aa)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:'#fff'}}>{(m.email||'?')[0].toUpperCase()}</div>
+          <div>
+            <div style={{color:'#e5e5e5',fontWeight:500}}>{m.email || m.user_id}</div>
+            <div style={{fontSize:9,color:'#666'}}>{m.user_id === user?.id ? 'Vous' : ''}</div>
+          </div>
+        </div>
+        <div>
+          {can(userRole, 'canManageUsers') && m.user_id !== user?.id ?
+            <select value={m.role} onChange={e=>changeRole(m.user_id, e.target.value)}
+              style={{padding:'4px 8px',background:'#090c16',border:'1px solid rgba(139,115,60,.2)',borderRadius:6,color:PERMISSIONS[m.role]?.color||'#888',fontSize:11,fontFamily:'inherit',cursor:'pointer',outline:'none'}}>
+              {Object.entries(PERMISSIONS).map(([k,p])=><option key={k} value={k}>{p.icon} {p.label}</option>)}
+            </select> :
+            <span style={{color:PERMISSIONS[m.role]?.color||'#888'}}>{PERMISSIONS[m.role]?.icon} {PERMISSIONS[m.role]?.label}</span>
+          }
+        </div>
+        <div>
+          <span style={{fontSize:10,padding:'3px 10px',borderRadius:10,background:m.status==='invited'?'rgba(234,179,8,.12)':'rgba(34,197,94,.12)',color:m.status==='invited'?'#eab308':'#22c55e'}}>{m.status==='invited'?'Invité':'Actif'}</span>
+        </div>
+        <div>
+          {can(userRole, 'canManageUsers') && m.user_id !== user?.id &&
+            <button onClick={()=>removeMember(m.user_id)} style={{padding:'4px 8px',borderRadius:6,border:'none',background:'rgba(239,68,68,.1)',color:'#ef4444',fontSize:10,cursor:'pointer'}}>✕</button>
+          }
+        </div>
+      </div>)}
+    </div>
+  </div>;
+}
+
+// Permission Gate - wraps actions that require specific permissions
+const PermGate=({userRole,need,children,fallback})=>{
+  if(can(userRole||'admin',need))return children;
+  return fallback||<span style={{opacity:.4,cursor:'not-allowed',pointerEvents:'none'}}>{children}</span>;
+};
 
 // ─── SHARED COMPONENTS ───────────────────────────────────────
 const C=({children,style,...p})=><div style={{background:"linear-gradient(145deg,#0e1220,#131829)",border:'1px solid rgba(139,115,60,.12)',borderRadius:14,padding:24,...style}} {...p}>{children}</div>;
@@ -4034,6 +4241,7 @@ function ClientsPage({s,d,user,onLogout,veilleNotif,setVeilleNotif}){
 // ═══════════════════════════════════════════════════════════════
 function AppInner({ supabase, user, onLogout }) {
   const [loggedIn,setLoggedIn]=useState(true);
+  const [userRole,setUserRole]=useState('admin');
   const [loading,setLoading]=useState(true);
   const [saved,setSaved]=useState(null);
   
@@ -4044,7 +4252,7 @@ function AppInner({ supabase, user, onLogout }) {
 
   // Set Supabase refs for persistence layer
   useEffect(()=>{
-    if(supabase && user?.id) setSupabaseRefs(supabase, user.id);
+    if(supabase && user?.id) { setSupabaseRefs(supabase, user.id); loadUserRole(supabase, user.id).then(r=>setUserRole(r)); }
   },[supabase, user]);
 
   // Realtime sync setup
@@ -4137,6 +4345,7 @@ function AppInner({ supabase, user, onLogout }) {
     {id:"bienetre",l:t('nav.bienetre'),i:'♥',sub:[{id:"planglobal",l:t('sub.planglobal')},{id:"paa",l:t('sub.paa')},{id:"risquespsycho",l:t('sub.risquespsycho')},{id:"alcool",l:t('sub.alcool')},{id:"elections",l:t('sub.elections')},{id:"organes",l:t('sub.organes')}]},
     {id:"sprint9",l:"Sprint 9 - Modules",i:"S9"},
     {id:"automatisation",l:t('nav.automatisation'),i:'⚡'},
+    {id:"team",l:'👥 '+t('nav.team'),i:'👥'},
     {id:"reporting",l:t('nav.reporting'),i:'▤',sub:[{id:"accounting",l:t('sub.accounting')},{id:"bilanbnb",l:t('sub.bilanbnb')},{id:"bilan",l:t('sub.bilan')},{id:"statsins",l:t('sub.statsins')},{id:"sepa",l:t('sub.sepa')},{id:"peppol",l:t('sub.peppol')},{id:"envoi",l:t('sub.envoi')},{id:"exportimport",l:t('sub.exportimport')},{id:"ged",l:t('sub.ged')}]},
     {id:"aureussuite",l:t('nav.aureussuite'),i:'🔷',sub:[
       {id:"ia_turnover",l:"🧠 Prédiction Turnover"},
@@ -4727,7 +4936,7 @@ function AppInner({ supabase, user, onLogout }) {
 
   const pg=()=>{
     switch(s.page){
-      case'dashboard':return <Dashboard s={s} d={d}/>;
+      case'dashboard':return <Dashboard s={s} d={d} userRole={userRole}/>;
       case'employees':return <Employees s={s} d={d}/>;
       case'payslip':return <Payslips s={s} d={d}/>;
       case'onss':return s.sub==='dmfa'?<DMFAPage s={s} d={d}/>:s.sub==='drs'?<DRSMod s={s} d={d}/>:s.sub==='onssapl'?<ONSSAPLMod s={s} d={d}/>:s.sub==='onss_dash'?<ONSSDashMod s={s} d={d}/>:s.sub==='guide_portail'?<GuidePortailMod s={s} d={d}/>:s.sub==='portail_employeur'?<PortailEmployeurMod s={s} d={d}/>:<DimonaPage s={s} d={d}/>;
@@ -4748,6 +4957,7 @@ function AppInner({ supabase, user, onLogout }) {
       case'modules':return <ModulesProPage s={s} d={d}/>;
       case'sprint9':return <ModulesProPage s={s} d={d}/>;
       case'automatisation':return <AutomationHub s={s} d={d}/>;
+      case'team':return <TeamManagement supabase={supabase} user={user} userRole={userRole}/>;
       default:return <Dashboard s={s} d={d}/>;
     }
   };
