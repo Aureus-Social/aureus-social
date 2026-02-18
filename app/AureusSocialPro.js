@@ -2803,6 +2803,10 @@ async function loadData(supabase, userId){
 function reducer(s,a){
   let ns;
   switch(a.type){
+    case'SET_COMPANY':return{...s,co:{...s.co,...a.data}};
+    case'SET_EMPS':return{...s,emps:a.data};
+    case'SET_PAYS':return{...s,pays:a.data};
+    case'SET_CLIENTS':return{...s,clients:a.data||[]};
     case'NAV':if(a.page==='sprint10'){window.location.href='/sprint10/auth';return s;}const s9map={s9_dimona:'/sprint9/dimona',s9_precompte:'/sprint9/precompte',s9_onss:'/sprint9/onss',s9_bilan:'/sprint9/bilan-social',s9_netbrut:'/sprint9/net-brut',s9_od:'/sprint9/od-comptables',s9_cheques:'/sprint9/cheques-repas',s9_trilingue:'/sprint9/trilingue',s9_vacances:'/sprint9/vacances',s9_enfants:'/sprint9/enfants',s9_attestations:'/sprint9/attestations',s9_exports:'/sprint9/exports',s9_baremes:'/sprint9/baremes',s9_provisions:'/sprint9/provisions',s9_heures:'/sprint9/heures-sup',s9_primes:'/sprint9/primes',s9_saisies:'/sprint9/saisies'};ns={...s,page:a.page,sub:a.sub||null};break;
     case'ADD_E':ns={...s,emps:[...s.emps,{...a.d,id:"E-"+uid()}]};break;
     case'UPD_E':ns={...s,emps:s.emps.map(e=>e.id===a.d.id?a.d:e)};break;
@@ -4033,6 +4037,9 @@ function AppInner({ supabase, user, onLogout }) {
       <span>{t.msg}</span>
     </div>)}
   </div>:null;
+  // Auto-backup every 5min
+  useEffect(()=>{const iv=setInterval(()=>{try{localStorage.setItem("aureus_autobackup",JSON.stringify({co:s.co,emps:s.emps,pays:s.pays,clients:s.clients,activeClient:s.activeClient}));localStorage.setItem("aureus_autobackup_date",new Date().toISOString());}catch(e){}},300000);return()=>clearInterval(iv);},[s.co,s.emps,s.pays,s.clients]);
+
   const spotRef=useRef(null);
   const spotIndex=useMemo(()=>{
     const items=[];
@@ -4199,6 +4206,7 @@ function AppInner({ supabase, user, onLogout }) {
       {id:'regles',l:'🔧 Règles',count:rules.length},
       {id:'conformite',l:'✅ Conformité',count:complianceScore+'%'},
       {id:'batch',l:'🚀 Batch',count:emps.length},
+      {id:'backup',l:'💾 Backup',count:'JSON'},
     ];
 
     return <div style={{padding:24}}>
@@ -4408,7 +4416,57 @@ function AppInner({ supabase, user, onLogout }) {
         </div>
       </div>}
 
-      {/* Footer */}
+      
+      {/* TAB: Backup */}
+      {autoTab==='backup'&&<div>
+        <h3 style={{fontSize:16,fontWeight:600,color:'#e5e5e5',marginBottom:14}}>💾 Sauvegarde & Restauration</h3>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:16,marginBottom:20}}>
+          <div style={{padding:20,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(34,197,94,.2)',borderRadius:14,textAlign:'center'}}>
+            <div style={{fontSize:40,marginBottom:10}}>📥</div>
+            <div style={{fontSize:14,fontWeight:600,color:'#22c55e',marginBottom:4}}>Exporter Backup</div>
+            <div style={{fontSize:11,color:'#888',marginBottom:14}}>Télécharger un fichier JSON avec toutes les données</div>
+            <button onClick={()=>{const name=exportBackup(s);logAction('Backup Export',name,1);if(typeof addToast==='function')addToast('Backup exporté: '+name);}} style={{padding:'10px 24px',borderRadius:10,border:'none',background:'#22c55e',color:'#fff',fontWeight:600,fontSize:12,cursor:'pointer'}}>📥 Télécharger</button>
+          </div>
+          <div style={{padding:20,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(59,130,246,.2)',borderRadius:14,textAlign:'center'}}>
+            <div style={{fontSize:40,marginBottom:10}}>📤</div>
+            <div style={{fontSize:14,fontWeight:600,color:'#3b82f6',marginBottom:4}}>Importer Backup</div>
+            <div style={{fontSize:11,color:'#888',marginBottom:14}}>Restaurer depuis un fichier JSON précédemment exporté</div>
+            <label style={{padding:'10px 24px',borderRadius:10,border:'none',background:'#3b82f6',color:'#fff',fontWeight:600,fontSize:12,cursor:'pointer',display:'inline-block'}}>📤 Sélectionner fichier
+              <input type="file" accept=".json" style={{display:'none'}} onChange={async(e)=>{
+                const file=e.target.files[0];if(!file)return;
+                try{const r=await importBackup(file,d);logAction('Backup Import','Restauration: '+r.emps+' emp, '+r.pays+' fiches',r.emps);if(typeof addToast==='function')addToast('Restauration réussie: '+r.emps+' employés');}
+                catch(err){alert('❌ '+err);}
+                e.target.value='';
+              }}/>
+            </label>
+          </div>
+          <div style={{padding:20,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(234,179,8,.2)',borderRadius:14,textAlign:'center'}}>
+            <div style={{fontSize:40,marginBottom:10}}>🔄</div>
+            <div style={{fontSize:14,fontWeight:600,color:'#eab308',marginBottom:4}}>Auto-Backup</div>
+            <div style={{fontSize:11,color:'#888',marginBottom:6}}>Sauvegarde automatique toutes les 5 minutes</div>
+            <div style={{fontSize:10,color:'#666',marginBottom:14}}>Dernier: {localStorage.getItem('aureus_autobackup_date')?new Date(localStorage.getItem('aureus_autobackup_date')).toLocaleString('fr-BE'):'Aucun'}</div>
+            <button onClick={()=>{
+              const ab=localStorage.getItem('aureus_autobackup');
+              if(!ab){alert('Aucun auto-backup trouvé');return;}
+              if(confirm('Restaurer auto-backup du '+new Date(localStorage.getItem('aureus_autobackup_date')).toLocaleString('fr-BE')+' ?')){
+                try{const b=JSON.parse(ab);if(b.co)d({type:'SET_COMPANY',data:b.co});if(b.emps)d({type:'SET_EMPS',data:b.emps});if(b.pays)d({type:'SET_PAYS',data:b.pays});logAction('Auto-backup Restore','Restauration auto-backup',1);if(typeof addToast==='function')addToast('Auto-backup restauré');}catch(err){alert('❌ '+err);}
+              }
+            }} style={{padding:'10px 24px',borderRadius:10,border:'none',background:'#eab308',color:'#000',fontWeight:600,fontSize:12,cursor:'pointer'}}>🔄 Restaurer</button>
+          </div>
+        </div>
+        <div style={{padding:16,background:'rgba(198,163,78,.04)',border:'1px solid rgba(198,163,78,.1)',borderRadius:12}}>
+          <h4 style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:10}}>📊 Données actuelles</h4>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10}}>
+            {[{l:'Employés',v:emps.length,c:'#c6a34e'},{l:'Fiches paie',v:(s.pays||[]).length,c:'#3b82f6'},{l:'Clients',v:(s.clients||[]).length,c:'#a855f7'},{l:'Société',v:co.name?'✅':'❌',c:co.name?'#22c55e':'#ef4444'},{l:'Taille',v:Math.round(JSON.stringify(s).length/1024)+' KB',c:'#888'}].map((k,i)=>
+              <div key={i} style={{textAlign:'center',padding:10,background:'rgba(255,255,255,.02)',borderRadius:10}}>
+                <div style={{fontSize:18,fontWeight:700,color:k.c}}>{k.v}</div>
+                <div style={{fontSize:9,color:'#888'}}>{k.l}</div>
+              </div>)}
+          </div>
+        </div>
+      </div>}
+
+{/* Footer */}
       <div style={{marginTop:32,textAlign:'center',padding:16,borderTop:'1px solid rgba(198,163,78,.1)'}}>
         <div style={{fontSize:11,color:'#666'}}>Aureus Social Pro v38 — Sprint 17c Automatisation — {emps.length} employé(s) • {curMonth} {curYear}</div>
         <div style={{fontSize:10,color:'#444',marginTop:4}}>Tous les documents sont générés localement. Aucune donnée n'est envoyée à un serveur externe.</div>
@@ -7497,10 +7555,113 @@ function FraisGestionMod({s,d}){
   </div>;
 }
 
+
+// ── Sprint 17d: Backup & Restore System ──
+function exportBackup(state){
+  const backup={
+    version:'v38',
+    date:new Date().toISOString(),
+    app:'Aureus Social Pro',
+    data:{
+      company:state.co||{},
+      employees:state.emps||[],
+      payslips:state.pays||[],
+      clients:state.clients||[],
+      activeClient:state.activeClient||null,
+      settings:state.settings||{}
+    }
+  };
+  const json=JSON.stringify(backup,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const d=new Date();
+  a.href=url;
+  a.download='AureusSocial_Backup_'+d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0')+'_'+d.getHours().toString().padStart(2,'0')+'h'+d.getMinutes().toString().padStart(2,'0')+'.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  return a.download;
+}
+
+function importBackup(file,dispatch){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        const backup=JSON.parse(e.target.result);
+        if(!backup.data||!backup.app){reject('Fichier invalide');return;}
+        if(backup.data.company)dispatch({type:'SET_COMPANY',data:backup.data.company});
+        if(backup.data.employees)dispatch({type:'SET_EMPS',data:backup.data.employees});
+        if(backup.data.payslips)dispatch({type:'SET_PAYS',data:backup.data.payslips});
+        if(backup.data.clients)dispatch({type:'SET_CLIENTS',data:backup.data.clients});
+        resolve({
+          date:backup.date,
+          emps:backup.data.employees?.length||0,
+          pays:backup.data.payslips?.length||0,
+          clients:backup.data.clients?.length||0
+        });
+      }catch(err){reject('Erreur lecture: '+err.message);}
+    };
+    reader.onerror=()=>reject('Erreur lecture fichier');
+    reader.readAsText(file);
+  });
+}
+
+// Auto-backup to localStorage every 5 minutes
+function setupAutoBackup(getState){
+  setInterval(()=>{
+    try{
+      const state=getState();
+      const backup={
+        date:new Date().toISOString(),
+        co:state.co,
+        emps:state.emps,
+        pays:state.pays,
+        clients:state.clients,
+        activeClient:state.activeClient
+      };
+      localStorage.setItem('aureus_autobackup',JSON.stringify(backup));
+      localStorage.setItem('aureus_autobackup_date',new Date().toISOString());
+    }catch(e){console.log('Auto-backup failed:',e);}
+  },300000); // 5 minutes
+}
+
 function SettingsPage({s,d}) {
   const [f,setF]=useState({...s.co});
   return <div>
     <PH title="Paramètres" sub="Configuration société"/>
+    {/* Backup & Restore */}
+    <div style={{marginBottom:18,padding:16,background:'linear-gradient(135deg,rgba(34,197,94,.06),rgba(34,197,94,.02))',border:'1px solid rgba(34,197,94,.15)',borderRadius:12}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+        <div><div style={{fontSize:14,fontWeight:600,color:'#22c55e'}}>💾 Sauvegarde & Restauration</div><div style={{fontSize:10,color:'#888',marginTop:2}}>Dernière sauvegarde auto: {localStorage.getItem('aureus_autobackup_date')?new Date(localStorage.getItem('aureus_autobackup_date')).toLocaleString('fr-BE'):'Aucune'}</div></div>
+        <div style={{display:'flex',gap:8}}>
+          <button onClick={()=>{const name=exportBackup(s);alert('✅ Backup téléchargé: '+name)}} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'#22c55e',color:'#fff',fontSize:11,fontWeight:600,cursor:'pointer'}}>📥 Exporter Backup</button>
+          <label style={{padding:'8px 16px',borderRadius:8,border:'1px solid rgba(59,130,246,.3)',background:'rgba(59,130,246,.1)',color:'#3b82f6',fontSize:11,fontWeight:600,cursor:'pointer'}}> Importer
+            <input type="file" accept=".json" style={{display:'none'}} onChange={async(e)=>{
+              const file=e.target.files[0];if(!file)return;
+              try{const r=await importBackup(file,d);alert('✅ Restauration réussie!\n\n'+r.emps+' employés\n'+r.pays+' fiches de paie\n'+r.clients+' clients\n\nDate backup: '+new Date(r.date).toLocaleString('fr-BE'));}
+              catch(err){alert('❌ Erreur: '+err);}
+              e.target.value='';
+            }}/>
+          </label>
+          <button onClick={()=>{
+            const autoBackup=localStorage.getItem('aureus_autobackup');
+            if(!autoBackup){alert('Aucune sauvegarde automatique trouvée');return;}
+            if(confirm('Restaurer la dernière sauvegarde automatique ?\n\nDate: '+new Date(localStorage.getItem('aureus_autobackup_date')).toLocaleString('fr-BE'))){
+              try{const b=JSON.parse(autoBackup);if(b.co)d({type:'SET_COMPANY',data:b.co});if(b.emps)d({type:'SET_EMPS',data:b.emps});if(b.pays)d({type:'SET_PAYS',data:b.pays});alert('✅ Restauration auto-backup réussie');}catch(err){alert('❌ Erreur: '+err);}
+            }
+          }} style={{padding:'8px 16px',borderRadius:8,border:'1px solid rgba(234,179,8,.3)',background:'rgba(234,179,8,.1)',color:'#eab308',fontSize:11,fontWeight:600,cursor:'pointer'}}>🔄 Auto-backup</button>
+        </div>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
+        <div style={{padding:8,background:'rgba(198,163,78,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#c6a34e'}}>{(s.emps||[]).length}</div><div style={{fontSize:9,color:'#888'}}>Employés</div></div>
+        <div style={{padding:8,background:'rgba(59,130,246,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#3b82f6'}}>{(s.pays||[]).length}</div><div style={{fontSize:9,color:'#888'}}>Fiches paie</div></div>
+        <div style={{padding:8,background:'rgba(168,85,247,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#a855f7'}}>{(s.clients||[]).length}</div><div style={{fontSize:9,color:'#888'}}>Clients</div></div>
+        <div style={{padding:8,background:'rgba(34,197,94,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#22c55e'}}>{Math.round(JSON.stringify(s).length/1024)} KB</div><div style={{fontSize:9,color:'#888'}}>Taille données</div></div>
+      </div>
+    </div>
     <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
       <C><ST>Identification</ST><div style={{display:'grid',gap:9}}>
         <I label="Société" value={f.name} onChange={v=>setF({...f,name:v})}/>
