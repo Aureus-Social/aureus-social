@@ -29,6 +29,7 @@ const I18N = {
   'nav.reporting': { fr:'Reporting & Export', nl:"Rapportage & Export", en:"Reporting & Export", de:"Berichterstattung & Export" },
   'nav.legal': { fr:'Juridique & Veille', nl:"Juridisch & Monitoring", en:"Legal & Monitoring", de:"Recht & Überwachung" },
   'nav.sprint9': { fr:'Sprint 9 - Modules', nl:'Sprint 9 - Modules', en:'Sprint 9 - Modules', de:'Sprint 9 - Module' },
+  'nav.automatisation': { fr:'⚡ Automatisation',nl:'⚡ Automatisering',en:'⚡ Automation',de:'⚡ Automatisierung' },
   'nav.settings': { fr:'Paramètres', nl:"Instellingen", en:"Settings", de:"Einstellungen" },
   'nav.aureussuite': { fr:'Aureus Suite', nl:"Aureus Suite", en:"Aureus Suite", de:"Aureus Suite" },
   'nav.back': { fr:'← Tous les dossiers', nl:"← Alle dossiers", en:"← All folders", de:"← Alle Ordner" },
@@ -3980,7 +3981,8 @@ function AppInner({ supabase, user, onLogout }) {
     {id:"rh",l:t('nav.rh'),i:'◉',sub:[{id:"wf_embauche",l:"⚡ Workflow Embauche"},{id:"wf_licenciement",l:"⚡ Workflow Licenciement"},{id:"wf_maladie",l:"⚡ Workflow Maladie"},{id:"absences",l:t('sub.absences')},{id:"absenteisme",l:t('sub.absenteisme')},{id:"credittemps",l:t('sub.credittemps')},{id:"chomtemp",l:t('sub.chomtemp')},{id:"congeduc",l:t('sub.congeduc')},{id:"rcc",l:t('sub.rcc')},{id:"outplacement",l:t('sub.outplacement')},{id:"pointage",l:t('sub.pointage')},{id:"planform",l:t('sub.planform')},{id:"medtravail",l:t('sub.medtravail')},{id:"selfservice",l:t('sub.selfservice')},{id:"onboarding",l:t('sub.onboarding')},{id:"offboarding",l:t('sub.offboarding')},{id:"registre",l:t('sub.registre')},{id:"totalreward",l:t('sub.totalreward')}]},
     {id:"social",l:t('nav.social'),i:'◆',sub:[{id:"assloi",l:t('sub.assloi')},{id:"assgroupe",l:t('sub.assgroupe')},{id:"syndicales",l:t('sub.syndicales')},{id:"allocfam",l:t('sub.allocfam')},{id:"caissevac",l:t('sub.caissevac')},{id:"rentes",l:t('sub.rentes')},{id:"decava",l:t('sub.decava')},{id:"aidesemploi",l:t('sub.aidesemploi')}]},
     {id:"bienetre",l:t('nav.bienetre'),i:'♥',sub:[{id:"planglobal",l:t('sub.planglobal')},{id:"paa",l:t('sub.paa')},{id:"risquespsycho",l:t('sub.risquespsycho')},{id:"alcool",l:t('sub.alcool')},{id:"elections",l:t('sub.elections')},{id:"organes",l:t('sub.organes')}]},
-    {id:"sprint9",l:"Sprint 9 - Modules",i:"S9",href:"/sprint9"},
+    {id:"sprint9",l:"Sprint 9 - Modules",i:"S9"},
+    {id:"automatisation",l:t('nav.automatisation'),i:'⚡'},
     {id:"reporting",l:t('nav.reporting'),i:'▤',sub:[{id:"accounting",l:t('sub.accounting')},{id:"bilanbnb",l:t('sub.bilanbnb')},{id:"bilan",l:t('sub.bilan')},{id:"statsins",l:t('sub.statsins')},{id:"sepa",l:t('sub.sepa')},{id:"peppol",l:t('sub.peppol')},{id:"envoi",l:t('sub.envoi')},{id:"exportimport",l:t('sub.exportimport')},{id:"ged",l:t('sub.ged')}]},
     {id:"aureussuite",l:t('nav.aureussuite'),i:'🔷',sub:[
       {id:"ia_turnover",l:"🧠 Prédiction Turnover"},
@@ -4068,6 +4070,144 @@ function AppInner({ supabase, user, onLogout }) {
   if(!loggedIn)return <LoginPage onLogin={handleLogin}/>;
   if(!s.activeClient)return <ClientsPage s={s} d={d} user={user} onLogout={onLogout} veilleNotif={veilleNotif} setVeilleNotif={setVeilleNotif}/>;
 
+  // ── Sprint 17: Automation Hub ──
+  const AutomationHub=({s,d})=>{
+    const emps=s.emps||[];
+    const co=s.co||{};
+    const now=new Date();
+    const mois=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+    const curMonth=mois[now.getMonth()];
+    const curQ='Q'+Math.ceil((now.getMonth()+1)/3);
+    const nextPayday=new Date(now.getFullYear(),now.getMonth(),25);
+    if(nextPayday<now)nextPayday.setMonth(nextPayday.getMonth()+1);
+    const daysToPayday=Math.ceil((nextPayday-now)/(1000*60*60*24));
+    
+    const alerts=typeof getAlertes==='function'?getAlertes(emps,co):[];
+    const totalBrut=emps.reduce((a,e)=>a+(+(e.brut||e.salaireBrut||e.monthlySalary||e.gross||0)),0);
+    const totalOnssP=Math.round(totalBrut*0.2507);
+    const totalOnssE=Math.round(totalBrut*0.1307);
+    const totalNet=Math.round(totalBrut-totalOnssE-((totalBrut-totalOnssE*1)*0.22));
+    const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+
+    const workflows=[
+      {t:'Fiches de Paie',ic:'📄',desc:'Génération automatique le 25 de chaque mois pour '+emps.length+' employé(s)',col:'#c6a34e',stat1:emps.length+' fiches',stat2:daysToPayday+'j avant paie',page:'payslip',
+       fn:()=>{if(confirm('Générer toutes les fiches de paie pour '+curMonth+' ?\n\n'+emps.length+' employé(s) concerné(s)')){emps.forEach(e=>generatePayslipPDF(e,co));alert('✅ '+emps.length+' fiches générées avec succès !')}}},
+      {t:'Dimona IN/OUT',ic:'📡',desc:'Déclaration automatique à chaque embauche ou fin de contrat',col:'#3b82f6',stat1:emps.filter(e=>e.contractType==='CDD'||e.contrat?.type==='CDD').length+' CDD',stat2:'0 en attente',page:'onss',
+       fn:()=>{if(confirm('Générer les déclarations Dimona IN pour tous les employés ?')){emps.forEach(e=>generateDimonaXML(e,'IN'));alert('✅ Dimona générées')}}},
+      {t:'DmfA '+curQ,ic:'📊',desc:'Déclaration ONSS trimestrielle - '+curQ+' '+now.getFullYear(),col:'#a855f7',stat1:curQ+' '+now.getFullYear(),stat2:emps.length+' travailleurs',page:'onss',
+       fn:()=>{if(confirm('Générer la DmfA trimestrielle '+curQ+' ?\n\n'+emps.length+' travailleurs déclarés')){generateDmfAXML(emps,co);alert('✅ DmfA '+curQ+' générée')}}},
+      {t:'Belcotax 281.10',ic:'🏛️',desc:'Fiches fiscales annuelles pour le SPF Finances',col:'#ef4444',stat1:now.getFullYear()+' fiscal',stat2:emps.length+' fiches',page:'fiscal',
+       fn:()=>{if(confirm('Générer les fiches Belcotax 281.10 pour '+now.getFullYear()+' ?')){emps.forEach(e=>generateBelcotaxXML(e,co));alert('✅ Belcotax générées')}}},
+      {t:'SEPA Virements',ic:'💸',desc:'Fichier pain.001 pour envoi bancaire le jour de paie',col:'#22c55e',stat1:emps.length+' virements',stat2:'pain.001 XML',page:'reporting',
+       fn:()=>{if(confirm('Générer le fichier SEPA pain.001 ?\n\n'+emps.length+' virements salariaux')){generateSEPAXML(emps,co);alert('✅ SEPA XML généré')}}},
+      {t:'Certificat C4',ic:'📋',desc:'Auto-généré à chaque fin de contrat détectée',col:'#f97316',stat1:'0 en attente',stat2:'0 ce mois',page:'contratsmenu',
+       fn:()=>{var e=emps[0];if(!e){alert('Aucun employé');return}if(confirm('Générer C4 pour '+(e.first||e.fn||'')+' '+(e.last||e.ln||'')+'?')){generateC4PDF(e,co);alert('✅ C4 généré')}}},
+      {t:'Attestation Emploi',ic:'📝',desc:'Attestation officielle pour les employés',col:'#06b6d4',stat1:'Sur demande',stat2:'1 clic',page:null,
+       fn:()=>{var e=emps[0];if(!e){alert('Aucun employé');return}if(confirm('Attestation emploi pour '+(e.first||e.fn||'')+' '+(e.last||e.ln||'')+'?')){generateAttestationEmploi(e,co);alert('✅ Attestation générée')}}},
+      {t:'Attestation Salaire',ic:'💼',desc:'Détail de rémunération pour banque/bailleur',col:'#8b5cf6',stat1:'Sur demande',stat2:'1 clic',page:null,
+       fn:()=>{var e=emps[0];if(!e){alert('Aucun employé');return}if(confirm('Attestation salaire pour '+(e.first||e.fn||'')+' '+(e.last||e.ln||'')+'?')){generateAttestationSalaire(e,co);alert('✅ Attestation générée')}}},
+      {t:'Solde Tout Compte',ic:'🧾',desc:'Calcul automatique à la sortie du travailleur',col:'#ec4899',stat1:'Sur demande',stat2:'Brut→Net',page:null,
+       fn:()=>{var e=emps[0];if(!e){alert('Aucun employé');return}if(confirm('Solde de tout compte pour '+(e.first||e.fn||'')+' '+(e.last||e.ln||'')+'?')){generateSoldeCompte(e,co);alert('✅ Solde généré')}}}
+    ];
+
+    return <div style={{padding:24}}>
+      {/* Header */}
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
+        <div>
+          <h2 style={{fontSize:24,fontWeight:700,color:'#c6a34e',marginBottom:4,display:'flex',alignItems:'center',gap:10}}>⚡ Centre d'Automatisation</h2>
+          <p style={{fontSize:13,color:'#999'}}>100% automatique • Confirmation humaine requise • {curMonth} {now.getFullYear()}</p>
+        </div>
+        <div style={{display:'flex',gap:8}}>
+          <div style={{background:'rgba(34,197,94,.1)',border:'1px solid rgba(34,197,94,.2)',borderRadius:10,padding:'8px 16px',textAlign:'center'}}>
+            <div style={{fontSize:18,fontWeight:700,color:'#22c55e'}}>{emps.length}</div>
+            <div style={{fontSize:9,color:'#999'}}>Employés</div>
+          </div>
+          <div style={{background:'rgba(198,163,78,.1)',border:'1px solid rgba(198,163,78,.2)',borderRadius:10,padding:'8px 16px',textAlign:'center'}}>
+            <div style={{fontSize:18,fontWeight:700,color:'#c6a34e'}}>{alerts.length}</div>
+            <div style={{fontSize:9,color:'#999'}}>Alertes</div>
+          </div>
+          <div style={{background:'rgba(59,130,246,.1)',border:'1px solid rgba(59,130,246,.2)',borderRadius:10,padding:'8px 16px',textAlign:'center'}}>
+            <div style={{fontSize:18,fontWeight:700,color:'#3b82f6'}}>{daysToPayday}j</div>
+            <div style={{fontSize:9,color:'#999'}}>Prochaine paie</div>
+          </div>
+        </div>
+      </div>
+
+      {/* KPIs ONSS temps réel */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:24}}>
+        <div style={{background:'linear-gradient(135deg,rgba(198,163,78,.12),rgba(198,163,78,.04))',border:'1px solid rgba(198,163,78,.2)',borderRadius:12,padding:16,textAlign:'center'}}>
+          <div style={{fontSize:11,color:'#999',marginBottom:4}}>Masse Brute</div>
+          <div style={{fontSize:18,fontWeight:700,color:'#c6a34e'}}>{f2(totalBrut)} €</div>
+        </div>
+        <div style={{background:'linear-gradient(135deg,rgba(239,68,68,.12),rgba(239,68,68,.04))',border:'1px solid rgba(239,68,68,.2)',borderRadius:12,padding:16,textAlign:'center'}}>
+          <div style={{fontSize:11,color:'#999',marginBottom:4}}>ONSS Patronal</div>
+          <div style={{fontSize:18,fontWeight:700,color:'#ef4444'}}>{f2(totalOnssP)} €</div>
+        </div>
+        <div style={{background:'linear-gradient(135deg,rgba(59,130,246,.12),rgba(59,130,246,.04))',border:'1px solid rgba(59,130,246,.2)',borderRadius:12,padding:16,textAlign:'center'}}>
+          <div style={{fontSize:11,color:'#999',marginBottom:4}}>ONSS Personnel</div>
+          <div style={{fontSize:18,fontWeight:700,color:'#3b82f6'}}>{f2(totalOnssE)} €</div>
+        </div>
+        <div style={{background:'linear-gradient(135deg,rgba(34,197,94,.12),rgba(34,197,94,.04))',border:'1px solid rgba(34,197,94,.2)',borderRadius:12,padding:16,textAlign:'center'}}>
+          <div style={{fontSize:11,color:'#999',marginBottom:4}}>Net Total Estimé</div>
+          <div style={{fontSize:18,fontWeight:700,color:'#22c55e'}}>{f2(totalNet)} €</div>
+        </div>
+      </div>
+
+      {/* Lancement Rapide */}
+      <div style={{marginBottom:24,padding:20,background:'linear-gradient(135deg,rgba(198,163,78,.1),rgba(198,163,78,.03))',border:'1px solid rgba(198,163,78,.25)',borderRadius:14,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12}}>
+        <div>
+          <div style={{fontSize:16,fontWeight:700,color:'#c6a34e',marginBottom:4}}>🚀 Lancement Rapide — Paie Complète</div>
+          <div style={{fontSize:11,color:'#999'}}>Fiches de paie + SEPA virements + DmfA en 1 clic</div>
+        </div>
+        <button onClick={()=>{if(confirm('GÉNÉRER LA PAIE COMPLÈTE ?\n\n✅ '+emps.length+' fiches de paie\n✅ Fichier SEPA pain.001\n✅ DmfA '+curQ+'\n\nConfirmer ?')){emps.forEach(e=>generatePayslipPDF(e,co));generateSEPAXML(emps,co);generateDmfAXML(emps,co);alert('🎉 Paie complète générée !\n\n• '+emps.length+' fiches\n• SEPA XML\n• DmfA '+curQ)}}} style={{padding:'14px 32px',borderRadius:12,border:'none',background:'linear-gradient(135deg,#c6a34e,#d4af37)',color:'#000',fontWeight:700,fontSize:14,cursor:'pointer',boxShadow:'0 4px 20px rgba(198,163,78,.35)',transition:'transform .15s',whiteSpace:'nowrap'}}>⚡ Paie Complète du Mois</button>
+      </div>
+
+      {/* Alertes IA */}
+      {alerts.length>0&&<div style={{marginBottom:24,padding:16,background:'linear-gradient(135deg,rgba(239,68,68,.08),rgba(239,68,68,.02))',border:'1px solid rgba(239,68,68,.2)',borderRadius:12}}>
+        <div style={{fontSize:13,fontWeight:700,color:'#ef4444',marginBottom:8}}>🤖 Alertes IA — {alerts.length} action(s) requise(s)</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:8}}>
+          {alerts.slice(0,6).map((al,i)=><div key={i} style={{fontSize:11,color:al.type==='urgent'?'#ef4444':'#eab308',padding:'8px 12px',background:'rgba(0,0,0,.2)',borderRadius:8,display:'flex',alignItems:'center',gap:6}}><span>{al.icon||'⚠️'}</span><span>{al.msg}</span></div>)}
+        </div>
+      </div>}
+
+      {/* Grille des 9 workflows */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))',gap:16}}>
+        {workflows.map((w,i)=><div key={i} style={{background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.12)',borderRadius:14,padding:20,transition:'border-color .2s',cursor:'default'}}
+          onMouseEnter={e=>e.currentTarget.style.borderColor='rgba(198,163,78,.35)'}
+          onMouseLeave={e=>e.currentTarget.style.borderColor='rgba(198,163,78,.12)'}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <span style={{fontSize:22}}>{w.ic}</span>
+              <span style={{fontSize:14,fontWeight:600,color:'#e5e5e5'}}>{w.t}</span>
+            </div>
+            <span style={{fontSize:9,padding:'3px 10px',borderRadius:20,background:'rgba(34,197,94,.12)',color:'#22c55e',fontWeight:600,letterSpacing:'.5px'}}>AUTO</span>
+          </div>
+          <div style={{fontSize:11,color:'#888',marginBottom:14,lineHeight:1.4}}>{w.desc}</div>
+          <div style={{display:'flex',gap:8,marginBottom:14}}>
+            <div style={{flex:1,background:w.col+'12',borderRadius:10,padding:'10px 8px',textAlign:'center'}}>
+              <div style={{fontSize:14,fontWeight:700,color:w.col}}>{w.stat1}</div>
+            </div>
+            <div style={{flex:1,background:'rgba(255,255,255,.03)',borderRadius:10,padding:'10px 8px',textAlign:'center'}}>
+              <div style={{fontSize:14,fontWeight:600,color:'#888'}}>{w.stat2}</div>
+            </div>
+          </div>
+          <div style={{display:'flex',gap:8}}>
+            {w.fn&&<button onClick={w.fn} style={{flex:1,padding:'10px',borderRadius:10,border:'none',background:w.col,color:'#fff',fontWeight:600,fontSize:12,cursor:'pointer',transition:'opacity .15s'}}
+              onMouseEnter={e=>e.target.style.opacity='0.85'}
+              onMouseLeave={e=>e.target.style.opacity='1'}>✓ Confirmer</button>}
+            {w.page&&<button onClick={()=>d({type:'NAV',page:w.page})} style={{padding:'10px 14px',borderRadius:10,border:'1px solid '+w.col+'40',background:'transparent',color:w.col,fontSize:11,cursor:'pointer',fontWeight:500}}>Voir →</button>}
+          </div>
+        </div>)}
+      </div>
+
+      {/* Footer */}
+      <div style={{marginTop:32,textAlign:'center',padding:16,borderTop:'1px solid rgba(198,163,78,.1)'}}>
+        <div style={{fontSize:11,color:'#666'}}>Aureus Social Pro — Sprint 17 Automatisation — {emps.length} employé(s) • {curMonth} {now.getFullYear()}</div>
+        <div style={{fontSize:10,color:'#444',marginTop:4}}>Tous les documents sont générés localement. Aucune donnée n'est envoyée à un serveur externe.</div>
+      </div>
+    </div>;
+  };
+
   const pg=()=>{
     switch(s.page){
       case'dashboard':return <Dashboard s={s} d={d}/>;
@@ -4090,7 +4230,7 @@ function AppInner({ supabase, user, onLogout }) {
       case'admin':if(s.sub==='audit')return <AuditMod s={s} d={d}/>;return <AdminDashboard s={s} d={d}/>;
       case'modules':return <ModulesProPage s={s} d={d}/>;
       case'sprint9':return <ModulesProPage s={s} d={d}/>;
-      case'automatisation':return <div style={{padding:24}}><div style={{marginBottom:24}}><h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',marginBottom:4}}>Centre d Automatisation</h2><p style={{fontSize:12,color:'#999'}}>100% automatique. Vous ne faites que confirmer.</p></div><div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(340px,1fr))',gap:16}}>{[{t:'Fiches de Paie',ic:'📄',desc:'Generation auto le 25 du mois',col:'#c6a34e',fn:()=>{if(confirm('Generer toutes les fiches?')){(s.emps||[]).forEach(e=>generatePayslipPDF(e,s.co));alert('OK')}}},{t:'Dimona IN/OUT',ic:'📡',desc:'Declaration auto embauche/fin contrat',col:'#3b82f6',fn:()=>{if(confirm('Generer Dimona?')){(s.emps||[]).forEach(e=>generateDimonaXML(e,'IN'));alert('OK')}}},{t:'DmfA Trimestrielle',ic:'📊',desc:'Declaration ONSS fin trimestre',col:'#a855f7',fn:()=>{if(confirm('Generer DmfA?')){generateDmfAXML(s.emps||[],s.co);alert('OK')}}},{t:'Belcotax 281.10',ic:'🏛',desc:'Fiches fiscales annuelles SPF Finances',col:'#ef4444',fn:()=>{if(confirm('Generer Belcotax?')){(s.emps||[]).forEach(e=>generateBelcotaxXML(e,s.co));alert('OK')}}},{t:'SEPA Virements',ic:'💸',desc:'pain.001 auto jour de paie',col:'#22c55e',fn:()=>{if(confirm('Generer SEPA?')){generateSEPAXML(s.emps||[],s.co);alert('OK')}}},{t:'Certificat C4',ic:'📋',desc:'Auto-genere a chaque fin contrat',col:'#f97316',fn:()=>{if(confirm('Generer C4?')){var e=s.emps&&s.emps[0];if(e)generateC4PDF(e,s.co);alert('OK')}}},{t:'Attestations',ic:'📝',desc:'Emploi, salaire, solde tout compte',col:'#06b6d4',fn:()=>{if(confirm('Generer attestations?')){var e=s.emps&&s.emps[0];if(e)generateAttestationEmploi(e,s.co);alert('OK')}}},{t:'Alertes IA',ic:'🤖',desc:'Scan CDD, medical, NISS, IBAN',col:'#eab308',fn:null},{t:'ONSS Temps Reel',ic:'💰',desc:'Cotisations patronales/personnelles live',col:'#c6a34e',fn:null}].map((w,i)=><div key={i} style={{background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.15)',borderRadius:12,padding:20}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}><div style={{display:'flex',alignItems:'center',gap:8}}><span style={{fontSize:20}}>{w.ic}</span><span style={{fontSize:14,fontWeight:600,color:'#e5e5e5'}}>{w.t}</span></div><span style={{fontSize:10,padding:'3px 8px',borderRadius:6,background:'rgba(34,197,94,.15)',color:'#22c55e',fontWeight:600}}>AUTO</span></div><div style={{fontSize:11,color:'#999',marginBottom:12}}>{w.desc}</div><div style={{display:'flex',gap:8,marginBottom:12}}><div style={{flex:1,background:w.col+'15',borderRadius:8,padding:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:w.col}}>{s.emps?s.emps.length:0}</div><div style={{fontSize:9,color:'#999'}}>Employes</div></div></div>{w.fn&&<button onClick={w.fn} style={{width:'100%',padding:8,borderRadius:8,border:'none',background:w.col,color:'#fff',fontWeight:600,fontSize:11,cursor:'pointer'}}>Confirmer</button>}</div>)}</div><div style={{marginTop:24,padding:20,background:'linear-gradient(135deg,rgba(198,163,78,.08),rgba(198,163,78,.02))',border:'1px solid rgba(198,163,78,.2)',borderRadius:12}}><div style={{fontSize:14,fontWeight:700,color:'#c6a34e',marginBottom:12}}>Lancement Rapide</div><button onClick={()=>{if(confirm('GENERER TOUT?\\nFiches+SEPA+DmfA')){(s.emps||[]).forEach(e=>generatePayslipPDF(e,s.co));generateSEPAXML(s.emps||[],s.co);generateDmfAXML(s.emps||[],s.co);alert('Tout genere!')}}} style={{padding:'12px 24px',borderRadius:10,border:'none',background:'linear-gradient(135deg,#c6a34e,#d4af37)',color:'#000',fontWeight:700,fontSize:13,cursor:'pointer'}}>Paie Complete du Mois</button></div></div>;
+      case'automatisation':return <AutomationHub s={s} d={d}/>;
       default:return <Dashboard s={s} d={d}/>;
     }
   };
@@ -4110,7 +4250,7 @@ function AppInner({ supabase, user, onLogout }) {
       `}</style>
       
       {/* SIDEBAR */}
-      <style dangerouslySetInnerHTML={{__html:"@media print{#sb{display:none!important}div{margin-left:0!important}[style]{position:static!important}}"}}/><style dangerouslySetInnerHTML={{__html:"@media print{#sb{display:none!important}div{margin-left:0!important}[style]{position:static!important}}"}}/><aside style={{width:268,background:"linear-gradient(180deg,#080b14,#060810)",borderRight:'1px solid rgba(139,115,60,.1)',position:'fixed',top:0,left:0,bottom:0,display:'flex',flexDirection:'column',zIndex:100,boxShadow:'4px 0 30px rgba(0,0,0,.4)'}}>
+      <aside style={{width:268,background:"linear-gradient(180deg,#080b14,#060810)",borderRight:'1px solid rgba(139,115,60,.1)',position:'fixed',top:0,left:0,bottom:0,display:'flex',flexDirection:'column',zIndex:100,boxShadow:'4px 0 30px rgba(0,0,0,.4)'}}>
         <div style={{padding:'24px 20px 16px',borderBottom:'1px solid rgba(139,115,60,.1)'}}>
           <div style={{display:'flex',alignItems:'center',gap:10}}>
             <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#c6a34e,#a68a3c)",display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,fontWeight:800,color:'#060810',fontFamily:"'Cormorant Garamond',serif"}}>A</div>
