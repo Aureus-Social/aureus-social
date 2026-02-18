@@ -4020,6 +4020,19 @@ function AppInner({ supabase, user, onLogout }) {
   // ── Spotlight / Recherche globale (ALL HOOKS BEFORE EARLY RETURNS) ──
   const [spotQ,setSpotQ]=useState('');
   const [spotOpen,setSpotOpen]=useState(false);
+  // ── Sprint 17b: Toast Notification System ──
+  const [toasts,setToasts]=useState([]);
+  const addToast=(msg,type='success')=>{
+    const id=Date.now();
+    setToasts(prev=>[...prev,{id,msg,type}]);
+    setTimeout(()=>setToasts(prev=>prev.filter(t=>t.id!==id)),4000);
+  };
+  const ToastContainer=()=>toasts.length>0?<div style={{position:'fixed',top:20,right:20,zIndex:9999,display:'flex',flexDirection:'column',gap:8}}>
+    {toasts.map(t=><div key={t.id} style={{padding:'14px 20px',borderRadius:12,background:t.type==='success'?'linear-gradient(135deg,#166534,#15803d)':t.type==='error'?'linear-gradient(135deg,#991b1b,#b91c1c)':'linear-gradient(135deg,#92400e,#b45309)',color:'#fff',fontSize:12,fontWeight:600,boxShadow:'0 8px 30px rgba(0,0,0,.4)',animation:'slideInRight .3s ease',maxWidth:360,display:'flex',alignItems:'center',gap:10}}>
+      <span style={{fontSize:16}}>{t.type==='success'?'✅':t.type==='error'?'❌':'⚠️'}</span>
+      <span>{t.msg}</span>
+    </div>)}
+  </div>:null;
   const spotRef=useRef(null);
   const spotIndex=useMemo(()=>{
     const items=[];
@@ -4209,19 +4222,7 @@ function AppInner({ supabase, user, onLogout }) {
     </div>;
   };
 
-  // ── Sprint 17b: Toast Notification System ──
-  const [toasts,setToasts]=React.useState([]);
-  const addToast=(msg,type='success')=>{
-    const id=Date.now();
-    setToasts(prev=>[...prev,{id,msg,type}]);
-    setTimeout(()=>setToasts(prev=>prev.filter(t=>t.id!==id)),4000);
-  };
-  const ToastContainer=()=>toasts.length>0?<div style={{position:'fixed',top:20,right:20,zIndex:9999,display:'flex',flexDirection:'column',gap:8}}>
-    {toasts.map(t=><div key={t.id} style={{padding:'14px 20px',borderRadius:12,background:t.type==='success'?'linear-gradient(135deg,#166534,#15803d)':t.type==='error'?'linear-gradient(135deg,#991b1b,#b91c1c)':'linear-gradient(135deg,#92400e,#b45309)',color:'#fff',fontSize:12,fontWeight:600,boxShadow:'0 8px 30px rgba(0,0,0,.4)',animation:'slideInRight .3s ease',maxWidth:360,display:'flex',alignItems:'center',gap:10}}>
-      <span style={{fontSize:16}}>{t.type==='success'?'✅':t.type==='error'?'❌':'⚠️'}</span>
-      <span>{t.msg}</span>
-    </div>)}
-  </div>:null;
+  
 
 
   const pg=()=>{
