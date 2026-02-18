@@ -3816,9 +3816,9 @@ function ClientsPage({s,d,user,onLogout,veilleNotif,setVeilleNotif}){
             <div style={{fontSize:11,color:'#9e9b93'}}>{stats.total} dossier{stats.total>1?'s':''} · {stats.emps} travailleur{stats.emps>1?'s':''}</div>
             {user&&<div style={{fontSize:10,color:'#5e5c56'}}>{user.email}</div>}
 
-            {onlineUsers.length>0&&<div style={{display:'flex',alignItems:'center',gap:4,marginTop:4}}>
-              <span style={{width:6,height:6,borderRadius:'50%',background:'#22c55e',display:'inline-block',animation:'blink 2s infinite'}}/>
-              <span style={{fontSize:9,color:'#22c55e'}}>{onlineUsers.length} en ligne</span>
+            {(typeof window!=="undefined"&&window._onlineUsers&&window._onlineUsers.length>0)&&<div style={{display:"flex",alignItems:"center",gap:4,marginTop:4}}>
+              <span style={{width:6,height:6,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"blink 2s infinite"}}/>
+              <span style={{fontSize:9,color:"#22c55e"}}>{(window._onlineUsers||[]).length} en ligne</span>
             </div>}
           </div>
           {onLogout&&<button onClick={onLogout} style={{padding:'8px 14px',background:"rgba(248,113,113,0.08)",border:'1px solid rgba(248,113,113,0.2)',borderRadius:8,color:'#fb923c',fontSize:11,cursor:'pointer',fontFamily:'inherit',fontWeight:600}}>Déconnexion</button>}
