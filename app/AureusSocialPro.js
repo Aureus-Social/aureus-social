@@ -2991,16 +2991,24 @@ const PERMISSIONS = {
 async function loadUserRole(supabase, userId) {
   if (!supabase || !userId) return 'admin';
   try {
-    const { data } = await supabase.from('user_roles')
+    const { data, error } = await supabase.from('user_roles')
       .select('role').eq('user_id', userId).maybeSingle();
+    if (error) return 'admin'; // Table issue = assume admin (owner)
     if (data?.role) return data.role;
-    // No role found — check if this is the FIRST user (owner = admin)
-    const { count } = await supabase.from('user_roles').select('*', { count: 'exact', head: true });
-    const defaultRole = (count === 0) ? 'admin' : 'client';
-    // Auto-save the default role
-    try { await supabase.from('user_roles').upsert({ user_id: userId, role: defaultRole, updated_at: new Date().toISOString() }, { onConflict: 'user_id' }); } catch(e2) {}
-    return defaultRole;
-  } catch(e) { return 'client'; }
+    // No role saved — check if user is old (existing=admin) or new (signup=client)
+    let isNewUser = false;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.created_at) {
+        const created = new Date(user.created_at);
+        const now = new Date();
+        isNewUser = (now - created) < 3600000; // Less than 1 hour = new signup
+      }
+    } catch(e3) {}
+    const role = isNewUser ? 'client' : 'admin';
+    try { await supabase.from('user_roles').upsert({ user_id: userId, role, updated_at: new Date().toISOString() }, { onConflict: 'user_id' }); } catch(e2) {}
+    return role;
+  } catch(e) { return 'admin'; }
 }
 
 async function saveUserRole(supabase, userId, role, email) {
@@ -4452,7 +4460,7 @@ function AppInner({ supabase, user, onLogout }) {
   },[spotOpen]);
 
   // ── Early returns (AFTER all hooks) ──
-  if(!loading && userRole==='client') return <ClientPortal s={s} d={d} supabase={supabase} user={user} clientData={s.clients?.find(c=>c.company?.email===user?.email)||s.clients?.[0]||{}}/>;
+  // Client portal detection moved after component definition (see below)
   if(loading)return <div style={{minHeight:'100vh',background:"#060810",display:'flex',alignItems:'center',justifyContent:'center'}}>
     <div style={{textAlign:'center'}}>
       <div style={{width:56,height:56,borderRadius:14,background:"linear-gradient(135deg,#c6a34e,#a68a3c)",display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,fontWeight:800,color:'#060810',fontFamily:"'Cormorant Garamond',serif",margin:'0 auto 16px',animation:'pulse 2s ease infinite'}}>A</div>
@@ -7321,6 +7329,9 @@ const AutomationHub=({s,d})=>{
       default:return <Dashboard s={s} d={d}/>;
     }
   };
+
+  // Client Portal - show dedicated UI for client role
+  if(userRole==='client') return <ClientPortal s={s} d={d} supabase={supabase} user={user} clientData={s.clients?.find(c=>c.company?.email===user?.email)||s.clients?.[0]||{}}/>;
 
   return (
     <div style={{minHeight:'100vh',background:"#060810",color:'#d4d0c8',fontFamily:`'Outfit','DM Sans',system-ui,sans-serif`,display:'flex'}}>
