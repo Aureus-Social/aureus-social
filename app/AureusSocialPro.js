@@ -2993,20 +2993,30 @@ async function loadUserRole(supabase, userId) {
   try {
     const { data, error } = await supabase.from('user_roles')
       .select('role').eq('user_id', userId).maybeSingle();
-    if (error) return 'admin'; // Table issue = assume admin (owner)
+    if (error) return 'admin';
     if (data?.role) return data.role;
-    // No role saved — check if user is old (existing=admin) or new (signup=client)
-    let isNewUser = false;
+    // No role by user_id — check for pending invite by email
+    let role = 'admin';
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.created_at) {
-        const created = new Date(user.created_at);
-        const now = new Date();
-        isNewUser = (now - created) < 3600000; // Less than 1 hour = new signup
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser?.email) {
+        const { data: invite } = await supabase.from('user_roles')
+          .select('role,user_id').eq('email', authUser.email).maybeSingle();
+        if (invite?.role) {
+          role = invite.role;
+          // Convert pending invite to real user_id
+          if (invite.user_id?.startsWith('pending_')) {
+            await supabase.from('user_roles').delete().eq('user_id', invite.user_id);
+          }
+        } else {
+          // No invite either — new signup = client, old account = admin
+          const created = new Date(authUser.created_at);
+          role = (Date.now() - created < 86400000) ? 'client' : 'admin'; // < 24h = client
+        }
       }
     } catch(e3) {}
-    const role = isNewUser ? 'client' : 'admin';
-    try { await supabase.from('user_roles').upsert({ user_id: userId, role, updated_at: new Date().toISOString() }, { onConflict: 'user_id' }); } catch(e2) {}
+    // Save real role with real user_id
+    try { await supabase.from('user_roles').upsert({ user_id: userId, role, email: (await supabase.auth.getUser()).data?.user?.email || '', updated_at: new Date().toISOString() }, { onConflict: 'user_id' }); } catch(e2) {}
     return role;
   } catch(e) { return 'admin'; }
 }
@@ -3060,23 +3070,30 @@ function TeamManagement({ supabase, user, userRole }) {
 
   const handleInvite = async () => {
     if (!inviteEmail || !inviteEmail.includes('@')) { alert('Email invalide'); return; }
-    // Create a pending invite
     try {
-      const { error } = await supabase.from('user_roles').insert({
-        user_id: 'pending_' + Date.now(),
-        role: inviteRole,
-        email: inviteEmail,
-        status: 'invited',
-        invited_by: user?.id,
-        updated_at: new Date().toISOString()
-      });
-      if (!error) {
-        alert('✅ Invitation envoyée à ' + inviteEmail + ' en tant que ' + PERMISSIONS[inviteRole].label);
-        setInviteEmail('');
-        getTeamMembers(supabase).then(setMembers);
+      // First check if user already exists in user_roles by email
+      const { data: existing } = await supabase.from('user_roles')
+        .select('user_id,role').eq('email', inviteEmail).maybeSingle();
+      if (existing && !existing.user_id?.startsWith('pending_')) {
+        // User exists — update their role directly
+        await supabase.from('user_roles').update({ role: inviteRole, updated_at: new Date().toISOString() }).eq('user_id', existing.user_id);
+        alert('✅ Rôle de ' + inviteEmail + ' changé en ' + PERMISSIONS[inviteRole].label);
       } else {
-        alert('Erreur: ' + error.message);
+        // Clean old pending invites for same email
+        if (existing) await supabase.from('user_roles').delete().eq('user_id', existing.user_id);
+        // Create pending invite
+        await supabase.from('user_roles').insert({
+          user_id: 'pending_' + Date.now(),
+          role: inviteRole,
+          email: inviteEmail,
+          status: 'invited',
+          invited_by: user?.id,
+          updated_at: new Date().toISOString()
+        });
+        alert('✅ Invitation créée pour ' + inviteEmail + ' en tant que ' + PERMISSIONS[inviteRole].label + '\nLe client doit créer son compte sur aureussocial.be');
       }
+      setInviteEmail('');
+      getTeamMembers(supabase).then(setMembers);
     } catch(e) { alert('Erreur: ' + e.message); }
   };
 
