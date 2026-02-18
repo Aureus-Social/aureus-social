@@ -4108,7 +4108,7 @@ function AppInner({ supabase, user, onLogout }) {
       `}</style>
       
       {/* SIDEBAR */}
-      <style>{`@media print{aside{display:none!important}div[style*="margin-left"]{margin-left:0!important;width:100%!important}div[style*="fixed"]{display:none!important}}`}</style><aside style={{width:268,background:"linear-gradient(180deg,#080b14,#060810)",borderRight:'1px solid rgba(139,115,60,.1)',position:'fixed',top:0,left:0,bottom:0,display:'flex',flexDirection:'column',zIndex:100,boxShadow:'4px 0 30px rgba(0,0,0,.4)'}}>
+      <style>{`@media print{aside{display:none!important}div[style*="margin-left"]{margin-left:0!important;width:100%!important}div[style*="fixed"]{display:none!important}}`}</style><style>{`@media print{aside{display:none!important}div[style*="margin-left"]{margin-left:0!important;width:100%!important}div[style*="fixed"]{display:none!important}}`}</style><aside style={{width:268,background:"linear-gradient(180deg,#080b14,#060810)",borderRight:'1px solid rgba(139,115,60,.1)',position:'fixed',top:0,left:0,bottom:0,display:'flex',flexDirection:'column',zIndex:100,boxShadow:'4px 0 30px rgba(0,0,0,.4)'}}>
         <div style={{padding:'24px 20px 16px',borderBottom:'1px solid rgba(139,115,60,.1)'}}>
           <div style={{display:'flex',alignItems:'center',gap:10}}>
             <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#c6a34e,#a68a3c)",display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,fontWeight:800,color:'#060810',fontFamily:"'Cormorant Garamond',serif"}}>A</div>
