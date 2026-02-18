@@ -2650,7 +2650,7 @@ function genBelcotax(co, emp, yr, ad) {
 }
 
 // ─── INITIAL STATE ───────────────────────────────────────────
-const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:"info@aureus-ia.com",version:'v37',sprint:'Sprint 9 — Automatisation'};
+const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:"info@aureus-ia.com",version:'v38',sprint:'Sprint 17 — Automatisation 100%'};
 const CAR_MODELS={
 'Aiways':['U5',"U6"],
 'Alfa Romeo':['Giulia',"Stelvio","Tonale","Junior","Giulietta","MiTo"],
@@ -4064,7 +4064,8 @@ function AppInner({ supabase, user, onLogout }) {
       <div style={{marginTop:20,width:120,height:2,background:"rgba(198,163,78,.1)",borderRadius:1,margin:'0 auto',overflow:'hidden'}}>
         <div style={{width:'40%',height:'100%',background:"linear-gradient(90deg,#c6a34e,#e2c878)",borderRadius:1,animation:'loadbar 1.5s ease infinite'}}/>
       </div>
-      <style>{`@keyframes loadbar{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}`}</style>
+      <style>{`@keyframes loadbar{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}`}
+      <style>{`@keyframes slideInRight{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}`}</style></style>
     </div>
   </div>;
   if(!loggedIn)return <LoginPage onLogin={handleLogin}/>;
@@ -4208,6 +4209,21 @@ function AppInner({ supabase, user, onLogout }) {
     </div>;
   };
 
+  // ── Sprint 17b: Toast Notification System ──
+  const [toasts,setToasts]=React.useState([]);
+  const addToast=(msg,type='success')=>{
+    const id=Date.now();
+    setToasts(prev=>[...prev,{id,msg,type}]);
+    setTimeout(()=>setToasts(prev=>prev.filter(t=>t.id!==id)),4000);
+  };
+  const ToastContainer=()=>toasts.length>0?<div style={{position:'fixed',top:20,right:20,zIndex:9999,display:'flex',flexDirection:'column',gap:8}}>
+    {toasts.map(t=><div key={t.id} style={{padding:'14px 20px',borderRadius:12,background:t.type==='success'?'linear-gradient(135deg,#166534,#15803d)':t.type==='error'?'linear-gradient(135deg,#991b1b,#b91c1c)':'linear-gradient(135deg,#92400e,#b45309)',color:'#fff',fontSize:12,fontWeight:600,boxShadow:'0 8px 30px rgba(0,0,0,.4)',animation:'slideInRight .3s ease',maxWidth:360,display:'flex',alignItems:'center',gap:10}}>
+      <span style={{fontSize:16}}>{t.type==='success'?'✅':t.type==='error'?'❌':'⚠️'}</span>
+      <span>{t.msg}</span>
+    </div>)}
+  </div>:null;
+
+
   const pg=()=>{
     switch(s.page){
       case'dashboard':return <Dashboard s={s} d={d}/>;
@@ -4317,6 +4333,7 @@ function AppInner({ supabase, user, onLogout }) {
 
       <main style={{marginLeft:268,flex:1,padding:'26px 34px',minHeight:'100vh',animation:'fadeInPage .3s ease'}}>{pg()}</main>
 
+      <ToastContainer/>
       {s.modal&&<div style={{position:'fixed',inset:0,background:"rgba(0,0,0,.75)",backdropFilter:'blur(6px)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000}} onClick={()=>d({type:"MODAL",m:null})}>
         <div onClick={e=>e.stopPropagation()} style={{background:"#0c0f1a",border:'1px solid rgba(139,115,60,.15)',borderRadius:16,padding:28,width:s.modal.w||700,maxHeight:'85vh',overflowY:'auto'}}>{s.modal.c}</div>
       </div>}
@@ -4474,8 +4491,22 @@ function Dashboard({s,d}) {
     </div>
     
 
-    {(()=>{const al=getAlertes(s.emps||[],s.co);return al.length>0?<div style={{marginBottom:16,borderRadius:10,border:"1px solid rgba(198,163,78,.15)",padding:12,background:"rgba(198,163,78,.03)"}}><div style={{fontSize:12,fontWeight:700,color:"#c6a34e",marginBottom:8}}>Alertes ({al.length})</div>{al.slice(0,8).map((a,i)=><div key={i} style={{padding:"6px 8px",marginBottom:4,borderRadius:6,fontSize:11,background:a.level==="danger"?"rgba(248,113,113,.08)":a.level==="warning"?"rgba(251,146,60,.08)":"rgba(96,165,250,.08)",color:a.level==="danger"?"#f87171":a.level==="warning"?"#fb923c":"#60a5fa"}}>{a.icon} {a.msg}</div>)}{al.length>8?<div style={{fontSize:10,color:"#9e9b93",marginTop:4}}>+{al.length-8} autres alertes</div>:null}</div>:null})()}
-    {(()=>{const al=getAlertes(s.emps||[],s.co);return al.length>0?<div style={{marginBottom:16,borderRadius:10,border:"1px solid rgba(198,163,78,.15)",padding:12,background:"rgba(198,163,78,.03)"}}><div style={{fontSize:12,fontWeight:700,color:"#c6a34e",marginBottom:8}}>Alertes ({al.length})</div>{al.slice(0,8).map((a,i)=><div key={i} style={{padding:"6px 8px",marginBottom:4,borderRadius:6,fontSize:11,background:a.level==="danger"?"rgba(248,113,113,.08)":a.level==="warning"?"rgba(251,146,60,.08)":"rgba(96,165,250,.08)",color:a.level==="danger"?"#f87171":a.level==="warning"?"#fb923c":"#60a5fa"}}>{a.icon} {a.msg}</div>)}{al.length>8?<div style={{fontSize:10,color:"#9e9b93",marginTop:4}}>+{al.length-8} autres alertes</div>:null}</div>:null})()}
+    
+    {/* ⚡ Automation Shortcuts */}
+    <div style={{marginBottom:20,padding:16,background:'linear-gradient(135deg,rgba(198,163,78,.06),rgba(198,163,78,.02))',border:'1px solid rgba(198,163,78,.15)',borderRadius:12,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
+      <div style={{display:'flex',alignItems:'center',gap:10}}>
+        <span style={{fontSize:18}}>⚡</span>
+        <div><div style={{fontSize:13,fontWeight:600,color:'#c6a34e'}}>Automatisation</div><div style={{fontSize:10,color:'#888'}}>Actions rapides</div></div>
+      </div>
+      <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+        <button onClick={()=>{if(confirm('Générer toutes les fiches de paie ?')){(s.emps||[]).forEach(e=>generatePayslipPDF(e,s.co));addToast(s.emps.length+' fiches de paie générées')}}} style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(198,163,78,.15)',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:600}}>📄 Fiches</button>
+        <button onClick={()=>{if(confirm('Générer SEPA ?')){generateSEPAXML(s.emps||[],s.co);addToast('Fichier SEPA pain.001 généré')}}} style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(34,197,94,.12)',color:'#22c55e',fontSize:11,cursor:'pointer',fontWeight:600}}>💸 SEPA</button>
+        <button onClick={()=>{if(confirm('Générer DmfA ?')){generateDmfAXML(s.emps||[],s.co);addToast('DmfA trimestrielle générée')}}} style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(168,85,247,.12)',color:'#a855f7',fontSize:11,cursor:'pointer',fontWeight:600}}>📊 DmfA</button>
+        <button onClick={()=>d({type:'NAV',page:'automatisation'})} style={{padding:'7px 14px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:500}}>Voir tout →</button>
+      </div>
+    </div>
+{(()=>{const al=getAlertes(s.emps||[],s.co);return al.length>0?<div style={{marginBottom:16,borderRadius:10,border:"1px solid rgba(198,163,78,.15)",padding:12,background:"rgba(198,163,78,.03)"}}><div style={{fontSize:12,fontWeight:700,color:"#c6a34e",marginBottom:8}}>Alertes ({al.length})</div>{al.slice(0,8).map((a,i)=><div key={i} style={{padding:"6px 8px",marginBottom:4,borderRadius:6,fontSize:11,background:a.level==="danger"?"rgba(248,113,113,.08)":a.level==="warning"?"rgba(251,146,60,.08)":"rgba(96,165,250,.08)",color:a.level==="danger"?"#f87171":a.level==="warning"?"#fb923c":"#60a5fa"}}>{a.icon} {a.msg}</div>)}{al.length>8?<div style={{fontSize:10,color:"#9e9b93",marginTop:4}}>+{al.length-8} autres alertes</div>:null}</div>:null})()}
+    
     {/* KPI ROW */}
     <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:14,marginBottom:22}}>
       {[
@@ -5311,6 +5342,10 @@ function Payslips({s,d}) {
     <PH title="Fiches de Paie" sub="Formule-clé SPF Finances" actions={<div style={{display:'flex',gap:8}}>
       <B v={batchMode?'gold':'outline'} onClick={()=>setBatchMode(!batchMode)} style={{fontSize:11,padding:'8px 14px'}}>{batchMode?'⚡ Mode Batch ON':'⚡ Batch'}</B>
     </div>}/>
+    <div style={{marginBottom:14,padding:'10px 14px',background:'linear-gradient(135deg,rgba(198,163,78,.06),rgba(198,163,78,.02))',border:'1px solid rgba(198,163,78,.1)',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+      <div style={{fontSize:11,color:'#888'}}>⚡ Auto-génération disponible</div>
+      <button onClick={()=>{if(confirm('Générer les fiches de paie pour tous les employés ?')){(s.emps||[]).forEach(e=>generatePayslipPDF(e,s.co));alert('✅ Fiches générées')}}} style={{padding:'6px 14px',borderRadius:8,border:'none',background:'#c6a34e',color:'#fff',fontSize:11,cursor:'pointer',fontWeight:600}}>⚡ Générer tout</button>
+    </div>
     {/* Batch Mode */}
     {batchMode&&<C style={{marginBottom:18,border:'1px solid rgba(198,163,78,.25)'}}>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
@@ -5795,7 +5830,8 @@ function DimonaPage({s,d}) {
   const filtered=filter==='all'?s.dims:s.dims.filter(x=>x.action===filter);
 
   return <div>
-    <PH title="Déclarations Dimona" sub="Déclaration immédiate de l'emploi — ONSS / Portail sécurité sociale"/><div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap"}}>{s.emps.filter(e=>e.status==="active"||!e.status).map(e=><div key={e.id} style={{display:"flex",gap:4}}><button onClick={()=>generateDimonaXML(e,"IN",s.co)} style={{padding:"6px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:600,background:"rgba(74,222,128,.15)",color:"#4ade80"}}>IN {e.first||e.fn} {e.last||e.ln}</button><button onClick={()=>generateDimonaXML(e,"OUT",s.co)} style={{padding:"6px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:600,background:"rgba(248,113,113,.15)",color:"#f87171"}}>OUT {e.first||e.fn} {e.last||e.ln}</button></div>)}</div>
+    <PH title="Déclarations Dimona" sub="Déclaration immédiate de l'emploi — ONSS / Portail sécurité sociale"/>
+    <div style={{marginBottom:14,padding:"10px 14px",background:"linear-gradient(135deg,rgba(59,130,246,.06),rgba(59,130,246,.02))",border:"1px solid rgba(59,130,246,.1)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}><div style={{fontSize:11,color:"#888"}}>⚡ Dimona automatique à chaque embauche/sortie</div><button onClick={()=>{if(confirm("Générer Dimona IN pour tous ?")){(s.emps||[]).forEach(e=>generateDimonaXML(e,"IN",s.co));alert("✅ Dimona générées")}}} style={{padding:"6px 14px",borderRadius:8,border:"none",background:"#3b82f6",color:"#fff",fontSize:11,cursor:"pointer",fontWeight:600}}>⚡ Générer tout</button></div><div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap"}}>{s.emps.filter(e=>e.status==="active"||!e.status).map(e=><div key={e.id} style={{display:"flex",gap:4}}><button onClick={()=>generateDimonaXML(e,"IN",s.co)} style={{padding:"6px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:600,background:"rgba(74,222,128,.15)",color:"#4ade80"}}>IN {e.first||e.fn} {e.last||e.ln}</button><button onClick={()=>generateDimonaXML(e,"OUT",s.co)} style={{padding:"6px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:600,background:"rgba(248,113,113,.15)",color:"#f87171"}}>OUT {e.first||e.fn} {e.last||e.ln}</button></div>)}</div>
     <div style={{marginBottom:12}}><button onClick={()=>generateSEPAXML(s.emps,per,s.co)} style={{padding:"8px 16px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,background:"rgba(96,165,250,.15)",color:"#60a5fa"}}>Generer SEPA XML (virements)</button></div>{/* Stats bar */}
     <div style={{display:'flex',gap:12,marginBottom:18}}>
       {[{l:"Total",v:s.dims.length,c:'#c6a34e'},{l:"IN",v:statsIN,c:'#4ade80'},{l:"OUT",v:statsOUT,c:'#f87171'},{l:"UPDATE",v:statsUPD,c:'#60a5fa'}].map((st,i)=>
@@ -6679,6 +6715,7 @@ function BelcotaxPage({s,d}) {
 
   return <div>
     <PH title="Fiches Fiscales BELCOTAX" sub="BelcotaxOnWeb — SPF Finances"/>
+    <div style={{marginBottom:14,padding:"10px 14px",background:"linear-gradient(135deg,rgba(239,68,68,.06),rgba(239,68,68,.02))",border:"1px solid rgba(239,68,68,.1)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}><div style={{fontSize:11,color:"#888"}}>⚡ Belcotax 281.10 auto-générées en janvier</div><button onClick={()=>{if(confirm("Générer Belcotax ?")){ (s.emps||[]).forEach(e=>generateBelcotaxXML(e,s.co));alert("✅ Belcotax générées")}}} style={{padding:"6px 14px",borderRadius:8,border:"none",background:"#ef4444",color:"#fff",fontSize:11,cursor:"pointer",fontWeight:600}}>⚡ Générer tout</button></div>
     {/* Stats */}
     <div style={{display:'flex',gap:12,marginBottom:18}}>
       {[{l:"Fiches générées",v:fichesYr.length,c:'#c6a34e'},{l:"Brut total",v:fmt(totBrut),c:'#e8e6e0'},{l:"Net total",v:fmt(totNet),c:'#4ade80'},{l:"Travailleurs actifs",v:ae.length,c:'#60a5fa'}].map((st,i)=>
@@ -7567,6 +7604,13 @@ const CR_PROV=[{id:"pluxee",n:'Pluxee (ex-Sodexo)',ic:'🟠'},{id:"edenred",n:'E
 // ═══════════════════════════════════════════════════════════════
 function SalairesPage({s,d}){const sub=s.sub||'od';return <div>
   <PH title="Salaires & Calculs" sub={`Module: ${{'od':'O.D. Comptables',"provisions":'Provisions',"cumuls":'Cumuls annuels',"netbrut":'Net → Brut',"simcout":'Simulation coût salarial',"saisies":'Saisies-Cessions',"indexauto":'Index automatique',"horsforfait":'Heures supplémentaires',"totalreward":'Total Reward Statement',"transport":'Transport domicile-travail',"treizieme":'13ème mois',"css":'Cotisation spéciale SS',"bonusemploi":'Bonus à l\'emploi'}[sub]||sub}`}/>
+    <div style={{marginBottom:14,padding:'10px 14px',background:'linear-gradient(135deg,rgba(198,163,78,.06),rgba(198,163,78,.02))',border:'1px solid rgba(198,163,78,.1)',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+      <div style={{fontSize:11,color:'#888'}}>⚡ SEPA + Fiches auto-générés le jour de paie</div>
+      <div style={{display:'flex',gap:6}}>
+        <button onClick={()=>{if(confirm('Générer SEPA ?')){generateSEPAXML(s.emps||[],s.co);alert('✅ SEPA généré')}}} style={{padding:'6px 12px',borderRadius:8,border:'none',background:'#22c55e',color:'#fff',fontSize:11,cursor:'pointer',fontWeight:600}}>💸 SEPA</button>
+        <button onClick={()=>{if(confirm('Générer fiches ?')){(s.emps||[]).forEach(e=>generatePayslipPDF(e,s.co));alert('✅ Fiches générées')}}} style={{padding:'6px 12px',borderRadius:8,border:'none',background:'#c6a34e',color:'#fff',fontSize:11,cursor:'pointer',fontWeight:600}}>📄 Fiches</button>
+      </div>
+    </div>
   {sub==='od'&&<ODMod s={s} d={d}/>}{sub==='provisions'&&<ProvisionsMod s={s} d={d}/>}
   {sub==='cumuls'&&<CumulsMod s={s} d={d}/>}{sub==='netbrut'&&<NetBrutMod s={s} d={d}/>}
   {sub==='simcout'&&<SimCoutMod s={s} d={d}/>}{sub==='totalreward'&&<TotalRewardMod s={s} d={d}/>}
@@ -7618,6 +7662,13 @@ function SocialPage({s,d}){const sub=s.sub||'assloi';return <div>
 
 function ReportingPage({s,d}){const sub=s.sub||'accounting';return <div>
   <PH title="Reporting & Export" sub={`Module: ${{'accounting':'Accounting Output',"bilanbnb":'Bilan Social BNB',"bilan":'Bilan Social',"statsins":'Statistiques INS',"sepa":'SEPA / Virements',"peppol":'PEPPOL e-Invoicing',"envoi":'Envoi documents',"exportimport":'Export / Import',"ged":'GED / Archivage'}[sub]||sub}`}/>
+    <div style={{marginBottom:14,padding:'10px 14px',background:'linear-gradient(135deg,rgba(168,85,247,.06),rgba(168,85,247,.02))',border:'1px solid rgba(168,85,247,.1)',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+      <div style={{fontSize:11,color:'#888'}}>⚡ Exports auto: DmfA + SEPA + Belcotax en 1 clic</div>
+      <div style={{display:'flex',gap:6}}>
+        <button onClick={()=>{if(confirm('Générer DmfA ?')){generateDmfAXML(s.emps||[],s.co);alert('✅ DmfA générée')}}} style={{padding:'6px 12px',borderRadius:8,border:'none',background:'#a855f7',color:'#fff',fontSize:11,cursor:'pointer',fontWeight:600}}>📊 DmfA</button>
+        <button onClick={()=>{if(confirm('Générer SEPA ?')){generateSEPAXML(s.emps||[],s.co);alert('✅ SEPA généré')}}} style={{padding:'6px 12px',borderRadius:8,border:'none',background:'#22c55e',color:'#fff',fontSize:11,cursor:'pointer',fontWeight:600}}>💸 SEPA</button>
+      </div>
+    </div>
   {sub==='accounting'&&<AccountingOutputMod s={s} d={d}/>}{sub==='bilanbnb'&&<BilanSocialBNBMod s={s} d={d}/>}
   {sub==='bilan'&&<BilanSocialMod s={s} d={d}/>}{sub==='statsins'&&<StatsINSMod s={s} d={d}/>}
   {sub==='sepa'&&<SEPAMod s={s} d={d}/>}{sub==='peppol'&&<PeppolMod s={s} d={d}/>}{sub==='envoi'&&<EnvoiMod s={s} d={d}/>}
