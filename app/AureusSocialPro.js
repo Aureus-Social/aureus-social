@@ -29,7 +29,9 @@ const I18N = {
   'nav.reporting': { fr:'Reporting & Export', nl:"Rapportage & Export", en:"Reporting & Export", de:"Berichterstattung & Export" },
   'nav.legal': { fr:'Juridique & Veille', nl:"Juridisch & Monitoring", en:"Legal & Monitoring", de:"Recht & Überwachung" },
   'nav.sprint9': { fr:'Sprint 9 - Modules', nl:'Sprint 9 - Modules', en:'Sprint 9 - Modules', de:'Sprint 9 - Module' },
-  'nav.commandcenter': { fr:'Command Center',nl:'Command Center',en:'Command Center',de:'Command Center' },
+  'nav.queue': { fr:'File traitement',nl:'Wachtrij',en:'Queue',de:'Warteschlange' },
+    'nav.onboarding': { fr:'Onboarding',nl:'Onboarding',en:'Onboarding',de:'Onboarding' },
+    'nav.commandcenter': { fr:'Command Center',nl:'Command Center',en:'Command Center',de:'Command Center' },
     'nav.autopilot': { fr:'Autopilot',nl:'Autopilot',en:'Autopilot',de:'Autopilot' },
     'nav.smartauto': { fr:'Smart Auto',nl:'Smart Auto',en:'Smart Auto',de:'Smart Auto' },
     'nav.massengine': { fr:'Mass Engine',nl:'Mass Engine',en:'Mass Engine',de:'Mass Engine' },
@@ -4338,6 +4340,8 @@ function AppInner({ supabase, user, onLogout }) {
     {id:"social",l:t('nav.social'),i:'◆',sub:[{id:"assloi",l:t('sub.assloi')},{id:"assgroupe",l:t('sub.assgroupe')},{id:"syndicales",l:t('sub.syndicales')},{id:"allocfam",l:t('sub.allocfam')},{id:"caissevac",l:t('sub.caissevac')},{id:"rentes",l:t('sub.rentes')},{id:"decava",l:t('sub.decava')},{id:"aidesemploi",l:t('sub.aidesemploi')}]},
     {id:"bienetre",l:t('nav.bienetre'),i:'♥',sub:[{id:"planglobal",l:t('sub.planglobal')},{id:"paa",l:t('sub.paa')},{id:"risquespsycho",l:t('sub.risquespsycho')},{id:"alcool",l:t('sub.alcool')},{id:"elections",l:t('sub.elections')},{id:"organes",l:t('sub.organes')}]},
     {id:"sprint9",l:"Sprint 9 - Modules",i:"S9"},
+    {id:"queue",l:"📋 "+t("nav.queue"),i:"📋"},
+    {id:"onboarding",l:"🆕 "+t("nav.onboarding"),i:"🆕"},
     {id:"commandcenter",l:"🎯 "+t("nav.commandcenter"),i:"🎯"},
     {id:"autopilot",l:"🤖 "+t("nav.autopilot"),i:"🤖"},
     {id:"smartauto",l:"🤖 "+t("nav.smartauto"),i:"🤖"},
@@ -4455,7 +4459,352 @@ function AppInner({ supabase, user, onLogout }) {
   // ── Sprint 20c: Smart Autopilot + CSV Import + ZIP Export ──
   
   // ── Sprint 21: Command Center — Mega Automation ──
-  const CommandCenter=({s,d})=>{
+  
+  // ── Sprint 22: Processing Queue + Onboarding + Scheduler + Notifications ──
+  
+  // ═══ PROCESSING QUEUE — Tasks auto-queue, you just approve ═══
+  const ProcessingQueue=({s,d})=>{
+    const clients=s.clients||[];
+    const allEmps=clients.reduce((a,c)=>[...a,...(c.emps||[]).map(e=>({...e,clientName:c.company?.name||c.id,clientId:c.id,company:c.company||{}}))],[]);
+    const now=new Date();
+    const day=now.getDate();
+    const month=now.getMonth()+1;
+    const mois=['','Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+    const [qTab,setQTab]=useState('pending');
+    const [queue,setQueue]=useState([]);
+    const [processed,setProcessed]=useState([]);
+    const [selectedAll,setSelectedAll]=useState(true);
+
+    // Auto-build queue based on date
+    useEffect(()=>{
+      const q=[];
+      const id=()=>'Q'+Date.now()+Math.random().toString(36).substr(2,4);
+      
+      // Monthly tasks (every month)
+      if(day>=20){
+        clients.filter(c=>(c.emps?.length||0)>0).forEach(cl=>{
+          q.push({id:id(),type:'fiches',icon:'📄',priority:1,client:cl.company?.name||cl.id,clientId:cl.id,task:'Fiches de paie '+mois[month],detail:(cl.emps?.length||0)+' employés',count:cl.emps?.length||0,status:'pending',
+            fn:()=>{(cl.emps||[]).forEach(e=>generatePayslipPDF(e,cl.company||{}));}});
+        });
+      }
+      if(day>=23){
+        clients.filter(c=>(c.emps?.length||0)>0).forEach(cl=>{
+          q.push({id:id(),type:'sepa',icon:'💸',priority:1,client:cl.company?.name||cl.id,clientId:cl.id,task:'SEPA pain.001',detail:'Virements salariaux',count:1,status:'pending',
+            fn:()=>generateSEPAXML(cl.emps||[],cl.company||{})});
+        });
+      }
+      if(day<=15){
+        clients.filter(c=>(c.emps?.length||0)>0).forEach(cl=>{
+          const brut=(cl.emps||[]).reduce((a,e)=>a+(+(e.monthlySalary||e.gross||e.brut||0)),0);
+          q.push({id:id(),type:'precompte',icon:'💰',priority:2,client:cl.company?.name||cl.id,clientId:cl.id,task:'Précompte 274',detail:new Intl.NumberFormat('fr-BE').format(Math.round(brut*0.22))+'€',count:1,status:'pending',fn:()=>{}});
+        });
+      }
+      // Quarterly DmfA
+      if((month%3===0&&day>=15)||(month%3===1&&day<=10)){
+        clients.filter(c=>(c.emps?.length||0)>0).forEach(cl=>{
+          q.push({id:id(),type:'dmfa',icon:'📊',priority:2,client:cl.company?.name||cl.id,clientId:cl.id,task:'DmfA Q'+Math.ceil(month/3),detail:(cl.emps?.length||0)+' travailleurs',count:1,status:'pending',
+            fn:()=>generateDmfAXML(cl.emps||[],cl.company||{})});
+        });
+      }
+      // Dimona for new employees (last 7 days)
+      clients.forEach(cl=>{
+        (cl.emps||[]).filter(e=>{const start=new Date(e.startDate||e.start||'2020-01-01');return Math.ceil((now-start)/(1000*60*60*24))>=0&&Math.ceil((now-start)/(1000*60*60*24))<=7;}).forEach(e=>{
+          q.push({id:id(),type:'dimona',icon:'📡',priority:0,client:cl.company?.name||cl.id,clientId:cl.id,task:'Dimona IN — '+(e.first||e.fn)+' '+(e.last||e.ln),detail:'Nouveau travailleur',count:1,status:'pending',
+            fn:()=>generateDimonaXML(e,'IN')});
+        });
+      });
+      // CDD expiring
+      clients.forEach(cl=>{
+        (cl.emps||[]).filter(e=>{if((e.contractType||e.contrat?.type)!=='CDD')return false;const end=new Date(e.endDate||e.end||'2099-12-31');return Math.ceil((end-now)/(1000*60*60*24))<=7&&Math.ceil((end-now)/(1000*60*60*24))>=0;}).forEach(e=>{
+          q.push({id:id(),type:'sortie',icon:'🚪',priority:0,client:cl.company?.name||cl.id,clientId:cl.id,task:'Package Sortie — '+(e.first||e.fn)+' '+(e.last||e.ln),detail:'CDD expire dans '+Math.ceil((new Date(e.endDate||e.end)-now)/(1000*60*60*24))+'j',count:4,status:'pending',
+            fn:()=>{generateC4PDF(e,cl.company||{});generateAttestationEmploi(e,cl.company||{});generatePayslipPDF(e,cl.company||{});generateSoldeCompte(e,cl.company||{});}});
+        });
+      });
+      // ONSS provisions (1st-5th)
+      if(day<=5){
+        clients.filter(c=>(c.emps?.length||0)>0).forEach(cl=>{
+          q.push({id:id(),type:'onss',icon:'📈',priority:3,client:cl.company?.name||cl.id,clientId:cl.id,task:'Provisions ONSS',detail:'Cotisations mensuelles',count:1,status:'pending',fn:()=>{}});
+        });
+      }
+      
+      q.sort((a,b)=>a.priority-b.priority);
+      setQueue(q);
+    },[]);
+
+    const approveSelected=()=>{
+      const sel=queue.filter(q=>q.selected!==false&&q.status==='pending');
+      if(sel.length===0){alert('Aucune tâche sélectionnée');return;}
+      if(!confirm('✅ APPROUVER '+sel.length+' tâches ?\n\n'+sel.slice(0,5).map(q=>q.icon+' '+q.task+' — '+q.client).join('\n')+(sel.length>5?'\n... et '+(sel.length-5)+' autres':'')))return;
+      
+      const results=[];
+      sel.forEach(q=>{
+        try{if(q.fn)q.fn();results.push({...q,status:'done',time:new Date().toISOString()});}
+        catch(e){results.push({...q,status:'error',error:e.message,time:new Date().toISOString()});}
+      });
+      setProcessed(p=>[...results,...p]);
+      setQueue(prev=>prev.filter(q=>!sel.find(s=>s.id===q.id)));
+      const ok=results.filter(r=>r.status==='done').length;
+      const docs=results.reduce((a,r)=>a+r.count,0);
+      if(typeof addToast==='function')addToast('✅ '+ok+'/'+sel.length+' tâches — '+docs+' documents générés');
+    };
+
+    const rejectSelected=()=>{
+      const sel=queue.filter(q=>q.selected!==false&&q.status==='pending');
+      setQueue(prev=>prev.filter(q=>!sel.find(s=>s.id===q.id)));
+      setProcessed(p=>[...sel.map(q=>({...q,status:'rejected',time:new Date().toISOString()})),...p]);
+    };
+
+    const toggleItem=(id)=>{
+      setQueue(prev=>prev.map(q=>q.id===id?{...q,selected:q.selected===false?true:false}:q));
+    };
+
+    const toggleAll=()=>{
+      const next=!selectedAll;
+      setSelectedAll(next);
+      setQueue(prev=>prev.map(q=>({...q,selected:next})));
+    };
+
+    const pending=queue.filter(q=>q.status==='pending');
+    const grouped={};
+    pending.forEach(q=>{if(!grouped[q.type])grouped[q.type]=[];grouped[q.type].push(q);});
+    const totalDocs=pending.filter(q=>q.selected!==false).reduce((a,q)=>a+q.count,0);
+
+    return <div style={{padding:24}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+        <div>
+          <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:0}}>📋 File de Traitement</h2>
+          <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Tâches auto-détectées — Approuvez ou rejetez en 1 clic</p>
+        </div>
+        <div style={{display:'flex',gap:8}}>
+          <div style={{padding:'8px 14px',background:'rgba(198,163,78,.08)',border:'1px solid rgba(198,163,78,.15)',borderRadius:10,textAlign:'center'}}>
+            <div style={{fontSize:18,fontWeight:700,color:'#c6a34e'}}>{pending.length}</div>
+            <div style={{fontSize:8,color:'#888'}}>En attente</div>
+          </div>
+          <div style={{padding:'8px 14px',background:'rgba(34,197,94,.08)',border:'1px solid rgba(34,197,94,.15)',borderRadius:10,textAlign:'center'}}>
+            <div style={{fontSize:18,fontWeight:700,color:'#22c55e'}}>{totalDocs}</div>
+            <div style={{fontSize:8,color:'#888'}}>Documents</div>
+          </div>
+          <div style={{padding:'8px 14px',background:'rgba(168,85,247,.08)',border:'1px solid rgba(168,85,247,.15)',borderRadius:10,textAlign:'center'}}>
+            <div style={{fontSize:18,fontWeight:700,color:'#a855f7'}}>{processed.filter(p=>p.status==='done').length}</div>
+            <div style={{fontSize:8,color:'#888'}}>Traités</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Bar */}
+      {pending.length>0&&<div style={{display:'flex',gap:8,marginBottom:16,padding:14,background:'rgba(198,163,78,.04)',border:'1px solid rgba(198,163,78,.1)',borderRadius:12,alignItems:'center'}}>
+        <button onClick={toggleAll} style={{padding:'8px 14px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:selectedAll?'rgba(198,163,78,.1)':'transparent',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:600}}>{selectedAll?'☑ Tout':'☐ Rien'}</button>
+        <div style={{flex:1,fontSize:11,color:'#888'}}>{pending.filter(q=>q.selected!==false).length} sélectionnées sur {pending.length}</div>
+        <button onClick={rejectSelected} style={{padding:'10px 20px',borderRadius:10,border:'1px solid rgba(239,68,68,.2)',background:'rgba(239,68,68,.08)',color:'#ef4444',fontWeight:600,fontSize:12,cursor:'pointer'}}>✕ Rejeter</button>
+        <button onClick={approveSelected} style={{padding:'10px 24px',borderRadius:10,border:'none',background:'linear-gradient(135deg,#22c55e,#16a34a)',color:'#fff',fontWeight:700,fontSize:13,cursor:'pointer',boxShadow:'0 4px 15px rgba(34,197,94,.3)'}}>✅ APPROUVER ({pending.filter(q=>q.selected!==false).length}) — {totalDocs} docs</button>
+      </div>}
+
+      {/* Tabs */}
+      <div style={{display:'flex',gap:4,marginBottom:16}}>
+        {[{id:'pending',l:'⏳ En attente ('+pending.length+')'},{id:'processed',l:'✅ Traités ('+processed.length+')'},{id:'stats',l:'📊 Statistiques'}].map(tb=>
+          <button key={tb.id} onClick={()=>setQTab(tb.id)} style={{padding:'8px 14px',borderRadius:8,border:qTab===tb.id?'1px solid rgba(198,163,78,.3)':'1px solid rgba(255,255,255,.05)',background:qTab===tb.id?'rgba(198,163,78,.12)':'rgba(255,255,255,.03)',color:qTab===tb.id?'#c6a34e':'#888',fontSize:11,fontWeight:qTab===tb.id?600:400,cursor:'pointer'}}>{tb.l}</button>)}
+      </div>
+
+      {/* TAB: Pending */}
+      {qTab==='pending'&&<div>
+        {pending.length===0?<div style={{textAlign:'center',padding:50}}><div style={{fontSize:50}}>✅</div><div style={{fontSize:16,fontWeight:600,color:'#22c55e',marginTop:8}}>File vide — Tout est traité !</div></div>:
+        Object.entries(grouped).map(([type,items])=><div key={type} style={{marginBottom:16}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
+            <span style={{fontSize:16}}>{items[0]?.icon}</span>
+            <span style={{fontSize:13,fontWeight:600,color:'#e5e5e5'}}>{items[0]?.task?.split('—')[0]||type}</span>
+            <span style={{fontSize:10,padding:'2px 8px',borderRadius:8,background:'rgba(198,163,78,.1)',color:'#c6a34e'}}>{items.length} tâches</span>
+          </div>
+          <div style={{display:'grid',gap:4}}>
+            {items.map(q=><div key={q.id} onClick={()=>toggleItem(q.id)} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 12px',background:q.selected===false?'rgba(255,255,255,.01)':'rgba(198,163,78,.03)',border:'1px solid '+(q.selected===false?'rgba(255,255,255,.03)':'rgba(198,163,78,.08)'),borderRadius:8,cursor:'pointer'}}>
+              <div style={{width:18,height:18,borderRadius:5,border:'2px solid '+(q.selected===false?'#555':'#c6a34e'),background:q.selected===false?'transparent':'#c6a34e',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,color:'#000',flexShrink:0}}>{q.selected!==false?'✓':''}</div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:11,color:'#e5e5e5',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{q.task}</div>
+                <div style={{fontSize:9,color:'#888'}}>{q.detail}</div>
+              </div>
+              <span style={{fontSize:10,color:'#888',flexShrink:0}}>{q.client}</span>
+              <span style={{fontSize:10,color:'#c6a34e',fontWeight:600,flexShrink:0}}>{q.count} doc{q.count>1?'s':''}</span>
+            </div>)}
+          </div>
+        </div>)}
+      </div>}
+
+      {/* TAB: Processed */}
+      {qTab==='processed'&&<div>
+        {processed.length===0?<div style={{textAlign:'center',padding:40,color:'#888'}}>Aucune tâche traitée</div>:
+        <div style={{border:'1px solid rgba(198,163,78,.1)',borderRadius:12,overflow:'hidden'}}>
+          <div style={{display:'grid',gridTemplateColumns:'30px 1fr 150px 80px 60px',padding:'8px 12px',background:'rgba(198,163,78,.06)',fontSize:10,fontWeight:600,color:'#c6a34e'}}>
+            <div></div><div>Tâche</div><div>Client</div><div>Statut</div><div>Docs</div>
+          </div>
+          <div style={{maxHeight:400,overflowY:'auto'}}>
+            {processed.map((p,i)=><div key={i} style={{display:'grid',gridTemplateColumns:'30px 1fr 150px 80px 60px',padding:'6px 12px',borderTop:'1px solid rgba(255,255,255,.03)',fontSize:11,alignItems:'center'}}>
+              <span>{p.icon}</span>
+              <span style={{color:'#e5e5e5'}}>{p.task}</span>
+              <span style={{color:'#888'}}>{p.client}</span>
+              <span style={{fontSize:9,padding:'2px 8px',borderRadius:6,textAlign:'center',background:p.status==='done'?'rgba(34,197,94,.12)':p.status==='rejected'?'rgba(234,179,8,.12)':'rgba(239,68,68,.12)',color:p.status==='done'?'#22c55e':p.status==='rejected'?'#eab308':'#ef4444'}}>{p.status==='done'?'✅':p.status==='rejected'?'⏭':'❌'}</span>
+              <span style={{color:'#c6a34e',textAlign:'center'}}>{p.count}</span>
+            </div>)}
+          </div>
+        </div>}
+      </div>}
+
+      {/* TAB: Stats */}
+      {qTab==='stats'&&<div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:14}}>
+          {[{l:'Total en attente',v:pending.length,c:'#c6a34e'},{l:'Documents à générer',v:totalDocs,c:'#3b82f6'},{l:'Tâches traitées',v:processed.filter(p=>p.status==='done').length,c:'#22c55e'},{l:'Rejetées',v:processed.filter(p=>p.status==='rejected').length,c:'#eab308'}].map((k,i)=>
+            <div key={i} style={{padding:20,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid '+k.c+'30',borderRadius:14,textAlign:'center'}}>
+              <div style={{fontSize:28,fontWeight:700,color:k.c}}>{k.v}</div>
+              <div style={{fontSize:10,color:'#888',marginTop:4}}>{k.l}</div>
+            </div>)}
+        </div>
+        <div style={{marginTop:20,padding:16,background:'rgba(198,163,78,.04)',borderRadius:12}}>
+          <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:10}}>📊 Par type d'opération</div>
+          {Object.entries(grouped).map(([type,items])=><div key={type} style={{display:'flex',alignItems:'center',gap:10,padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <span style={{fontSize:14}}>{items[0]?.icon}</span>
+            <span style={{flex:1,fontSize:12,color:'#e5e5e5'}}>{type}</span>
+            <span style={{fontSize:12,fontWeight:600,color:'#c6a34e'}}>{items.length}</span>
+            <div style={{width:120,height:6,background:'rgba(198,163,78,.1)',borderRadius:3,overflow:'hidden'}}>
+              <div style={{height:'100%',width:(items.length/Math.max(pending.length,1)*100)+'%',background:'#c6a34e',borderRadius:3}}/>
+            </div>
+          </div>)}
+        </div>
+      </div>}
+    </div>;
+  };
+
+  // ═══ CLIENT ONBOARDING WIZARD ═══
+  const OnboardingWizard=({s,d})=>{
+    const [step,setStep]=useState(1);
+    const [ob,setOb]=useState({companyName:'',vat:'',bce:'',addr:'',cp:'200',email:'',phone:'',iban:'',employees:[]});
+    const [empForm,setEmpForm]=useState({first:'',last:'',niss:'',brut:0,iban:'',email:'',contrat:'CDI',start:'',genre:'M',horaire:38});
+
+    const addEmp=()=>{
+      if(!empForm.last&&!empForm.first){alert('Nom requis');return;}
+      setOb(p=>({...p,employees:[...p.employees,{...empForm,id:'EMP-'+Date.now()+Math.random().toString(36).substr(2,4)}]}));
+      setEmpForm({first:'',last:'',niss:'',brut:0,iban:'',email:'',contrat:'CDI',start:'',genre:'M',horaire:38});
+    };
+
+    const finalize=()=>{
+      if(!ob.companyName){alert('Nom de société requis');return;}
+      // Create client
+      d({type:'ADD_CLIENT',d:{
+        company:{name:ob.companyName,vat:ob.vat,bce:ob.bce,addr:ob.addr,cp:ob.cp,email:ob.email,phone:ob.phone,iban:ob.iban},
+        emps:ob.employees.map(e=>({
+          id:e.id,first:e.first,last:e.last,niss:e.niss,monthlySalary:+e.brut,iban:e.iban,email:e.email,
+          contractType:e.contrat,startDate:e.start,gender:e.genre,whWeek:e.horaire,status:'active'
+        })),
+        pays:[],dims:[],dmfas:[],fiches:[],docs:[]
+      }});
+      
+      // Auto-generate initial documents
+      const co={name:ob.companyName,vat:ob.vat,bce:ob.bce,addr:ob.addr,cp:ob.cp};
+      let docs=0;
+      ob.employees.forEach(e=>{
+        const emp={first:e.first,last:e.last,niss:e.niss,monthlySalary:+e.brut,iban:e.iban,email:e.email,contractType:e.contrat,startDate:e.start,whWeek:e.horaire};
+        try{generateDimonaXML(emp,'IN');docs++;}catch(ex){}
+      });
+      
+      if(typeof addToast==='function')addToast('🎉 '+ob.companyName+' — '+ob.employees.length+' employés + '+docs+' Dimona IN');
+      alert('✅ Client créé avec succès !\n\n'+ob.companyName+'\n'+ob.employees.length+' employés ajoutés\n'+docs+' Dimona IN générées\n\nRetour à la liste des clients.');
+      d({type:'BACK_TO_CLIENTS'});
+    };
+
+    const fieldStyle={width:'100%',padding:'10px 14px',background:'#090c16',border:'1px solid rgba(139,115,60,.2)',borderRadius:8,color:'#e5e5e5',fontSize:13,fontFamily:'inherit',outline:'none',boxSizing:'border-box'};
+    const labelStyle={fontSize:10,color:'#888',display:'block',marginBottom:4,fontWeight:600};
+
+    return <div style={{padding:24,maxWidth:800,margin:'0 auto'}}>
+      <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',marginBottom:4}}>🆕 Onboarding Express</h2>
+      <p style={{fontSize:12,color:'#888',marginBottom:20}}>Créez un client complet en 3 étapes — Dimona auto-généré</p>
+
+      {/* Steps */}
+      <div style={{display:'flex',gap:4,marginBottom:24}}>
+        {[{n:1,l:'🏢 Société'},{n:2,l:'👥 Employés'},{n:3,l:'✅ Finaliser'}].map(st=>
+          <div key={st.n} style={{flex:1,padding:'10px',borderRadius:10,textAlign:'center',background:step===st.n?'rgba(198,163,78,.12)':step>st.n?'rgba(34,197,94,.08)':'rgba(255,255,255,.03)',border:'1px solid '+(step===st.n?'rgba(198,163,78,.3)':step>st.n?'rgba(34,197,94,.15)':'rgba(255,255,255,.05)'),color:step===st.n?'#c6a34e':step>st.n?'#22c55e':'#888',fontSize:12,fontWeight:step===st.n?600:400,cursor:'pointer'}} onClick={()=>setStep(st.n)}>{st.l}</div>)}
+      </div>
+
+      {/* Step 1: Company */}
+      {step===1&&<div style={{padding:24,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.15)',borderRadius:14}}>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+          <div style={{gridColumn:'span 2'}}><label style={labelStyle}>Nom de la société *</label><input value={ob.companyName} onChange={e=>setOb(p=>({...p,companyName:e.target.value}))} style={fieldStyle} placeholder="Ex: Dupont SPRL"/></div>
+          <div><label style={labelStyle}>Numéro TVA</label><input value={ob.vat} onChange={e=>setOb(p=>({...p,vat:e.target.value}))} style={fieldStyle} placeholder="BE 0xxx.xxx.xxx"/></div>
+          <div><label style={labelStyle}>Numéro BCE</label><input value={ob.bce} onChange={e=>setOb(p=>({...p,bce:e.target.value}))} style={fieldStyle} placeholder="0xxx.xxx.xxx"/></div>
+          <div style={{gridColumn:'span 2'}}><label style={labelStyle}>Adresse</label><input value={ob.addr} onChange={e=>setOb(p=>({...p,addr:e.target.value}))} style={fieldStyle} placeholder="Rue, numéro, code postal, ville"/></div>
+          <div><label style={labelStyle}>Commission paritaire</label><select value={ob.cp} onChange={e=>setOb(p=>({...p,cp:e.target.value}))} style={fieldStyle}><option value="200">200 — Employés</option><option value="100">100 — National</option><option value="124">124 — Construction</option><option value="140">140 — Transport</option><option value="302">302 — HoReCa</option><option value="218">218 — Employés National</option></select></div>
+          <div><label style={labelStyle}>Email</label><input type="email" value={ob.email} onChange={e=>setOb(p=>({...p,email:e.target.value}))} style={fieldStyle} placeholder="contact@societe.be"/></div>
+          <div><label style={labelStyle}>Téléphone</label><input value={ob.phone} onChange={e=>setOb(p=>({...p,phone:e.target.value}))} style={fieldStyle} placeholder="+32 2 xxx xx xx"/></div>
+          <div><label style={labelStyle}>IBAN société</label><input value={ob.iban} onChange={e=>setOb(p=>({...p,iban:e.target.value}))} style={fieldStyle} placeholder="BE00 0000 0000 0000"/></div>
+        </div>
+        <button onClick={()=>setStep(2)} style={{marginTop:20,padding:'12px 30px',borderRadius:10,border:'none',background:'linear-gradient(135deg,#c6a34e,#d4af37)',color:'#000',fontWeight:700,fontSize:13,cursor:'pointer'}}>Suivant → Employés</button>
+      </div>}
+
+      {/* Step 2: Employees */}
+      {step===2&&<div>
+        <div style={{padding:20,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(59,130,246,.15)',borderRadius:14,marginBottom:16}}>
+          <div style={{fontSize:13,fontWeight:600,color:'#3b82f6',marginBottom:12}}>➕ Ajouter un employé</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:10}}>
+            <div><label style={labelStyle}>Prénom</label><input value={empForm.first} onChange={e=>setEmpForm(p=>({...p,first:e.target.value}))} style={fieldStyle}/></div>
+            <div><label style={labelStyle}>Nom</label><input value={empForm.last} onChange={e=>setEmpForm(p=>({...p,last:e.target.value}))} style={fieldStyle}/></div>
+            <div><label style={labelStyle}>NISS</label><input value={empForm.niss} onChange={e=>setEmpForm(p=>({...p,niss:e.target.value}))} style={fieldStyle}/></div>
+            <div><label style={labelStyle}>Brut mensuel</label><input type="number" value={empForm.brut} onChange={e=>setEmpForm(p=>({...p,brut:e.target.value}))} style={fieldStyle}/></div>
+            <div><label style={labelStyle}>IBAN</label><input value={empForm.iban} onChange={e=>setEmpForm(p=>({...p,iban:e.target.value}))} style={fieldStyle}/></div>
+            <div><label style={labelStyle}>Email</label><input value={empForm.email} onChange={e=>setEmpForm(p=>({...p,email:e.target.value}))} style={fieldStyle}/></div>
+            <div><label style={labelStyle}>Contrat</label><select value={empForm.contrat} onChange={e=>setEmpForm(p=>({...p,contrat:e.target.value}))} style={fieldStyle}><option value="CDI">CDI</option><option value="CDD">CDD</option><option value="etudiant">Étudiant</option></select></div>
+            <div><label style={labelStyle}>Date début</label><input type="date" value={empForm.start} onChange={e=>setEmpForm(p=>({...p,start:e.target.value}))} style={fieldStyle}/></div>
+          </div>
+          <button onClick={addEmp} style={{marginTop:12,padding:'10px 24px',borderRadius:8,border:'none',background:'#3b82f6',color:'#fff',fontWeight:600,fontSize:12,cursor:'pointer'}}>➕ Ajouter</button>
+        </div>
+
+        {ob.employees.length>0&&<div style={{padding:16,background:'rgba(34,197,94,.04)',border:'1px solid rgba(34,197,94,.15)',borderRadius:12,marginBottom:16}}>
+          <div style={{fontSize:12,fontWeight:600,color:'#22c55e',marginBottom:8}}>{ob.employees.length} employé(s) ajouté(s)</div>
+          {ob.employees.map((e,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:11}}>
+            <span style={{color:'#e5e5e5'}}>{e.first} {e.last}</span>
+            <span style={{color:'#888'}}>{e.contrat} · {e.brut}€</span>
+            <button onClick={()=>setOb(p=>({...p,employees:p.employees.filter((_,j)=>j!==i)}))} style={{padding:'2px 8px',borderRadius:4,border:'none',background:'rgba(239,68,68,.1)',color:'#ef4444',fontSize:10,cursor:'pointer'}}>✕</button>
+          </div>)}
+        </div>}
+
+        <div style={{display:'flex',gap:8}}>
+          <button onClick={()=>setStep(1)} style={{padding:'10px 20px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:12,cursor:'pointer'}}>← Retour</button>
+          <button onClick={()=>setStep(3)} style={{padding:'12px 30px',borderRadius:10,border:'none',background:'linear-gradient(135deg,#c6a34e,#d4af37)',color:'#000',fontWeight:700,fontSize:13,cursor:'pointer'}}>Suivant → Finaliser</button>
+        </div>
+      </div>}
+
+      {/* Step 3: Finalize */}
+      {step===3&&<div style={{padding:24,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(34,197,94,.15)',borderRadius:14,textAlign:'center'}}>
+        <div style={{fontSize:40,marginBottom:12}}>🎉</div>
+        <div style={{fontSize:18,fontWeight:700,color:'#e5e5e5',marginBottom:4}}>{ob.companyName||'Nouvelle société'}</div>
+        <div style={{fontSize:12,color:'#888',marginBottom:20}}>{ob.vat||'TVA —'} · {ob.employees.length} employé(s)</div>
+        
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,maxWidth:400,margin:'0 auto 20px'}}>
+          <div style={{padding:12,background:'rgba(198,163,78,.06)',borderRadius:10}}>
+            <div style={{fontSize:18,fontWeight:700,color:'#c6a34e'}}>{ob.employees.length}</div>
+            <div style={{fontSize:9,color:'#888'}}>Employés</div>
+          </div>
+          <div style={{padding:12,background:'rgba(59,130,246,.06)',borderRadius:10}}>
+            <div style={{fontSize:18,fontWeight:700,color:'#3b82f6'}}>{ob.employees.length}</div>
+            <div style={{fontSize:9,color:'#888'}}>Dimona IN</div>
+          </div>
+          <div style={{padding:12,background:'rgba(34,197,94,.06)',borderRadius:10}}>
+            <div style={{fontSize:18,fontWeight:700,color:'#22c55e'}}>{ob.employees.reduce((a,e)=>a+(+e.brut||0),0).toLocaleString()}€</div>
+            <div style={{fontSize:9,color:'#888'}}>Masse brute</div>
+          </div>
+        </div>
+
+        <div style={{fontSize:11,color:'#888',marginBottom:16}}>
+          ✅ Création du dossier client<br/>
+          ✅ Ajout de {ob.employees.length} employés<br/>
+          ✅ Dimona IN auto-générées<br/>
+          ✅ Prêt pour fiches de paie
+        </div>
+        
+        <div style={{display:'flex',gap:8,justifyContent:'center'}}>
+          <button onClick={()=>setStep(2)} style={{padding:'10px 20px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:12,cursor:'pointer'}}>← Modifier</button>
+          <button onClick={finalize} style={{padding:'14px 36px',borderRadius:12,border:'none',background:'linear-gradient(135deg,#22c55e,#16a34a)',color:'#fff',fontWeight:700,fontSize:14,cursor:'pointer',boxShadow:'0 4px 20px rgba(34,197,94,.3)'}}>✅ Créer le dossier</button>
+        </div>
+      </div>}
+    </div>;
+  };
+
+const CommandCenter=({s,d})=>{
     const clients=s.clients||[];
     const allEmps=clients.reduce((a,c)=>[...a,...(c.emps||[]).map(e=>({...e,clientName:c.company?.name||c.id,clientId:c.id}))],[]);
     const now=new Date();
@@ -6356,6 +6705,8 @@ const AutomationHub=({s,d})=>{
       case'smartauto':return <SmartAutomation s={s} d={d} supabase={supabase} user={user}/>;
       case'autopilot':return <SmartAutopilot s={s} d={d}/>;
       case'commandcenter':return <CommandCenter s={s} d={d}/>;
+      case'queue':return <ProcessingQueue s={s} d={d}/>;
+      case'onboarding':return <OnboardingWizard s={s} d={d}/>;
       case'team':return <TeamManagement supabase={supabase} user={user} userRole={userRole}/>;
       default:return <Dashboard s={s} d={d}/>;
     }
