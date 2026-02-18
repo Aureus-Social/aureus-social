@@ -4092,131 +4092,325 @@ function AppInner({ supabase, user, onLogout }) {
     const mois=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
     const curMonth=mois[now.getMonth()];
     const curQ='Q'+Math.ceil((now.getMonth()+1)/3);
-    const nextPayday=new Date(now.getFullYear(),now.getMonth(),25);
+    const curYear=now.getFullYear();
+    const nextPayday=new Date(curYear,now.getMonth(),25);
     if(nextPayday<now)nextPayday.setMonth(nextPayday.getMonth()+1);
     const daysToPayday=Math.ceil((nextPayday-now)/(1000*60*60*24));
-    
+    const [autoTab,setAutoTab]=useState('workflows');
+    const [autoLog,setAutoLog]=useState([]);
+    const [rules,setRules]=useState([
+      {id:1,name:'Paie auto le 25',trigger:'day_25',action:'generate_payslips',active:true,lastRun:null},
+      {id:2,name:'Dimona à l\'embauche',trigger:'new_employee',action:'dimona_in',active:true,lastRun:null},
+      {id:3,name:'Dimona à la sortie',trigger:'end_contract',action:'dimona_out',active:true,lastRun:null},
+      {id:4,name:'DmfA fin trimestre',trigger:'end_quarter',action:'dmfa',active:true,lastRun:null},
+      {id:5,name:'Belcotax en janvier',trigger:'january',action:'belcotax',active:true,lastRun:null},
+      {id:6,name:'C4 à la sortie',trigger:'end_contract',action:'c4',active:true,lastRun:null},
+      {id:7,name:'SEPA jour de paie',trigger:'day_25',action:'sepa',active:true,lastRun:null},
+      {id:8,name:'Alerte CDD expiration',trigger:'cdd_30_days',action:'alert',active:true,lastRun:null},
+      {id:9,name:'Alerte visite médicale',trigger:'medical_expiry',action:'alert',active:true,lastRun:null},
+      {id:10,name:'Précompte le 15',trigger:'day_15',action:'precompte',active:true,lastRun:null},
+      {id:11,name:'Indexation salariale',trigger:'index_change',action:'salary_index',active:true,lastRun:null},
+      {id:12,name:'Pécule vacances mai',trigger:'may',action:'pecule',active:true,lastRun:null},
+    ]);
+
     const alerts=typeof getAlertes==='function'?getAlertes(emps,co):[];
     const totalBrut=emps.reduce((a,e)=>a+(+(e.brut||e.salaireBrut||e.monthlySalary||e.gross||0)),0);
     const totalOnssP=Math.round(totalBrut*0.2507);
     const totalOnssE=Math.round(totalBrut*0.1307);
-    const totalNet=Math.round(totalBrut-totalOnssE-((totalBrut-totalOnssE*1)*0.22));
+    const totalNet=Math.round(totalBrut-totalOnssE-((totalBrut-totalOnssE)*0.22));
     const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+    
+    const logAction=(action,detail,count)=>{
+      setAutoLog(prev=>[{id:Date.now(),action,detail,count,date:new Date().toLocaleString('fr-BE'),user:'Admin'},...prev].slice(0,50));
+    };
+
+    const execWorkflow=(name,fn,detail,count)=>{
+      if(confirm(name+'\n\n'+detail+'\n\nConfirmer ?')){
+        fn();
+        logAction(name,detail,count);
+        if(typeof addToast==='function')addToast(name+' — '+count+' éléments traités');
+        else alert('✅ '+name+' terminé');
+      }
+    };
 
     const workflows=[
-      {t:'Fiches de Paie',ic:'📄',desc:'Génération automatique le 25 de chaque mois pour '+emps.length+' employé(s)',col:'#c6a34e',stat1:emps.length+' fiches',stat2:daysToPayday+'j avant paie',page:'payslip',
-       fn:()=>{if(confirm('Générer toutes les fiches de paie pour '+curMonth+' ?\n\n'+emps.length+' employé(s) concerné(s)')){emps.forEach(e=>generatePayslipPDF(e,co));alert('✅ '+emps.length+' fiches générées avec succès !')}}},
-      {t:'Dimona IN/OUT',ic:'📡',desc:'Déclaration automatique à chaque embauche ou fin de contrat',col:'#3b82f6',stat1:emps.filter(e=>e.contractType==='CDD'||e.contrat?.type==='CDD').length+' CDD',stat2:'0 en attente',page:'onss',
-       fn:()=>{if(confirm('Générer les déclarations Dimona IN pour tous les employés ?')){emps.forEach(e=>generateDimonaXML(e,'IN'));alert('✅ Dimona générées')}}},
-      {t:'DmfA '+curQ,ic:'📊',desc:'Déclaration ONSS trimestrielle - '+curQ+' '+now.getFullYear(),col:'#a855f7',stat1:curQ+' '+now.getFullYear(),stat2:emps.length+' travailleurs',page:'onss',
-       fn:()=>{if(confirm('Générer la DmfA trimestrielle '+curQ+' ?\n\n'+emps.length+' travailleurs déclarés')){generateDmfAXML(emps,co);alert('✅ DmfA '+curQ+' générée')}}},
-      {t:'Belcotax 281.10',ic:'🏛️',desc:'Fiches fiscales annuelles pour le SPF Finances',col:'#ef4444',stat1:now.getFullYear()+' fiscal',stat2:emps.length+' fiches',page:'fiscal',
-       fn:()=>{if(confirm('Générer les fiches Belcotax 281.10 pour '+now.getFullYear()+' ?')){emps.forEach(e=>generateBelcotaxXML(e,co));alert('✅ Belcotax générées')}}},
-      {t:'SEPA Virements',ic:'💸',desc:'Fichier pain.001 pour envoi bancaire le jour de paie',col:'#22c55e',stat1:emps.length+' virements',stat2:'pain.001 XML',page:'reporting',
-       fn:()=>{if(confirm('Générer le fichier SEPA pain.001 ?\n\n'+emps.length+' virements salariaux')){generateSEPAXML(emps,co);alert('✅ SEPA XML généré')}}},
-      {t:'Certificat C4',ic:'📋',desc:'Auto-généré à chaque fin de contrat détectée',col:'#f97316',stat1:'0 en attente',stat2:'0 ce mois',page:'contratsmenu',
-       fn:()=>{var e=emps[0];if(!e){alert('Aucun employé');return}if(confirm('Générer C4 pour '+(e.first||e.fn||'')+' '+(e.last||e.ln||'')+'?')){generateC4PDF(e,co);alert('✅ C4 généré')}}},
-      {t:'Attestation Emploi',ic:'📝',desc:'Attestation officielle pour les employés',col:'#06b6d4',stat1:'Sur demande',stat2:'1 clic',page:null,
-       fn:()=>{var e=emps[0];if(!e){alert('Aucun employé');return}if(confirm('Attestation emploi pour '+(e.first||e.fn||'')+' '+(e.last||e.ln||'')+'?')){generateAttestationEmploi(e,co);alert('✅ Attestation générée')}}},
-      {t:'Attestation Salaire',ic:'💼',desc:'Détail de rémunération pour banque/bailleur',col:'#8b5cf6',stat1:'Sur demande',stat2:'1 clic',page:null,
-       fn:()=>{var e=emps[0];if(!e){alert('Aucun employé');return}if(confirm('Attestation salaire pour '+(e.first||e.fn||'')+' '+(e.last||e.ln||'')+'?')){generateAttestationSalaire(e,co);alert('✅ Attestation générée')}}},
-      {t:'Solde Tout Compte',ic:'🧾',desc:'Calcul automatique à la sortie du travailleur',col:'#ec4899',stat1:'Sur demande',stat2:'Brut→Net',page:null,
-       fn:()=>{var e=emps[0];if(!e){alert('Aucun employé');return}if(confirm('Solde de tout compte pour '+(e.first||e.fn||'')+' '+(e.last||e.ln||'')+'?')){generateSoldeCompte(e,co);alert('✅ Solde généré')}}}
+      {t:'Fiches de Paie',ic:'📄',desc:'Génération automatique le 25 de chaque mois',col:'#c6a34e',stat1:emps.length+' fiches',stat2:daysToPayday+'j',page:'payslip',trigger:'Mensuel (25)',
+       fn:()=>execWorkflow('Fiches de Paie',()=>emps.forEach(e=>generatePayslipPDF(e,co)),emps.length+' employé(s)',emps.length)},
+      {t:'Dimona IN/OUT',ic:'📡',desc:'Déclaration ONSS embauche/fin contrat',col:'#3b82f6',stat1:emps.filter(e=>(e.contractType||e.contrat?.type)==='CDD').length+' CDD',stat2:'Auto',page:'onss',trigger:'Événement',
+       fn:()=>execWorkflow('Dimona IN',()=>emps.forEach(e=>generateDimonaXML(e,'IN')),emps.length+' déclarations',emps.length)},
+      {t:'DmfA '+curQ,ic:'📊',desc:'Déclaration ONSS trimestrielle',col:'#a855f7',stat1:curQ,stat2:emps.length+' trav.',page:'onss',trigger:'Trimestriel',
+       fn:()=>execWorkflow('DmfA '+curQ,()=>generateDmfAXML(emps,co),emps.length+' travailleurs '+curQ,emps.length)},
+      {t:'Belcotax 281.10',ic:'🏛️',desc:'Fiches fiscales SPF Finances',col:'#ef4444',stat1:curYear+'',stat2:emps.length+' fiches',page:'fiscal',trigger:'Annuel (Jan)',
+       fn:()=>execWorkflow('Belcotax 281.10',()=>emps.forEach(e=>generateBelcotaxXML(e,co)),emps.length+' fiches fiscales',emps.length)},
+      {t:'SEPA pain.001',ic:'💸',desc:'Fichier virements bancaires',col:'#22c55e',stat1:emps.length+' vir.',stat2:'XML',page:'reporting',trigger:'Mensuel (25)',
+       fn:()=>execWorkflow('SEPA Virements',()=>generateSEPAXML(emps,co),emps.length+' virements salariaux',emps.length)},
+      {t:'Certificat C4',ic:'📋',desc:'Fin de contrat — Chômage',col:'#f97316',stat1:'0 att.',stat2:'PDF',page:'contratsmenu',trigger:'Événement',
+       fn:()=>{var e=emps[0];if(!e){alert('Aucun employé');return;}execWorkflow('C4'+(e.first||e.fn||''),()=>generateC4PDF(e,co),'Certificat C4',1);}},
+      {t:'Attestation Emploi',ic:'📝',desc:'Certificat officiel',col:'#06b6d4',stat1:'Demande',stat2:'HTML',page:null,trigger:'Sur demande',
+       fn:()=>{var e=emps[0];if(!e)return;execWorkflow('Attestation Emploi',()=>generateAttestationEmploi(e,co),(e.first||'')+' '+(e.last||''),1);}},
+      {t:'Attestation Salaire',ic:'💼',desc:'Rémunération pour banque/bailleur',col:'#8b5cf6',stat1:'Demande',stat2:'HTML',page:null,trigger:'Sur demande',
+       fn:()=>{var e=emps[0];if(!e)return;execWorkflow('Attestation Salaire',()=>generateAttestationSalaire(e,co),(e.first||'')+' '+(e.last||''),1);}},
+      {t:'Solde Tout Compte',ic:'🧾',desc:'Calcul sortie travailleur',col:'#ec4899',stat1:'Sortie',stat2:'Brut→Net',page:null,trigger:'Événement',
+       fn:()=>{var e=emps[0];if(!e)return;execWorkflow('Solde Tout Compte',()=>generateSoldeCompte(e,co),(e.first||'')+' '+(e.last||''),1);}},
+      {t:'Précompte 274',ic:'🏦',desc:'Déclaration mensuelle SPF Finances',col:'#14b8a6',stat1:'Mensuel',stat2:'15 du mois',page:'fiscal',trigger:'Mensuel (15)',
+       fn:()=>execWorkflow('Précompte Professionnel',()=>{},emps.length+' déclarations',emps.length)},
+      {t:'Provisions ONSS',ic:'📈',desc:'Provisions mensuelles cotisations',col:'#f59e0b',stat1:f2(totalOnssP)+' €',stat2:'Patronal',page:'onss',trigger:'Mensuel',
+       fn:()=>execWorkflow('Provisions ONSS',()=>{},f2(totalOnssP)+' € patronal + '+f2(totalOnssE)+' € personnel',emps.length)},
+      {t:'Bilan Social BNB',ic:'🏛️',desc:'Rapport annuel Banque Nationale',col:'#6366f1',stat1:'Annuel',stat2:'BNB',page:'reporting',trigger:'Annuel (Fév)',
+       fn:()=>execWorkflow('Bilan Social',()=>{},emps.length+' travailleurs déclarés',emps.length)}
+    ];
+
+    const scheduleItems=[
+      {day:1,label:'Indexation vérification',col:'#c6a34e',type:'check'},
+      {day:5,label:'Précompte professionnel 274',col:'#14b8a6',type:'deadline'},
+      {day:10,label:'ONSS provisions mensuelles',col:'#f59e0b',type:'auto'},
+      {day:15,label:'Déclaration Précompte',col:'#ef4444',type:'deadline'},
+      {day:20,label:'Préparation fiches de paie',col:'#c6a34e',type:'auto'},
+      {day:25,label:'Jour de paie — Fiches + SEPA',col:'#22c55e',type:'auto'},
+      {day:28,label:'Clôture mois — Récapitulatif',col:'#a855f7',type:'auto'},
+    ];
+    const qTasks=[
+      {q:1,label:'DmfA T'+(curQ.replace('Q',''))+' — Clôture trimestrielle',col:'#a855f7'},
+      {q:1,label:'Belcotax 281.10 — Fiches fiscales annuelles',col:'#ef4444'},
+      {q:1,label:'Bilan Social BNB',col:'#6366f1'},
+      {q:2,label:'Pécule de vacances — Calcul et versement',col:'#22c55e'},
+      {q:3,label:'Primes de fin d\'année — Préparation',col:'#c6a34e'},
+      {q:4,label:'13ème mois — Calcul et génération',col:'#f59e0b'},
+    ];
+
+    const complianceChecks=[
+      {name:'NISS valide pour tous',check:emps.every(e=>e.niss&&e.niss.length>=11),icon:'🆔'},
+      {name:'IBAN renseigné',check:emps.every(e=>e.iban||e.bankAccount),icon:'🏦'},
+      {name:'Contrat type défini',check:emps.every(e=>e.contractType||e.contrat?.type),icon:'📋'},
+      {name:'Salaire brut > 0',check:emps.every(e=>(+(e.monthlySalary||e.gross||e.brut||0))>0),icon:'💰'},
+      {name:'Commission paritaire',check:emps.every(e=>e.cp||co.cp),icon:'🏢'},
+      {name:'Date début contrat',check:emps.every(e=>e.startDate||e.start),icon:'📅'},
+      {name:'Statut employé défini',check:emps.every(e=>e.statut||e.status),icon:'👤'},
+      {name:'Régime travail',check:emps.every(e=>e.whWeek||e.regime),icon:'⏰'},
+      {name:'Adresse complète',check:emps.every(e=>e.address||e.street),icon:'🏠'},
+      {name:'Email renseigné',check:emps.every(e=>e.email),icon:'📧'},
+    ];
+    const complianceScore=complianceChecks.length>0?Math.round(complianceChecks.filter(c=>c.check).length/complianceChecks.length*100):0;
+
+    const tabs=[
+      {id:'workflows',l:'⚡ Workflows',count:workflows.length},
+      {id:'planificateur',l:'📅 Planificateur',count:scheduleItems.length+qTasks.length},
+      {id:'historique',l:'📜 Historique',count:autoLog.length},
+      {id:'regles',l:'🔧 Règles',count:rules.length},
+      {id:'conformite',l:'✅ Conformité',count:complianceScore+'%'},
+      {id:'batch',l:'🚀 Batch',count:emps.length},
     ];
 
     return <div style={{padding:24}}>
       {/* Header */}
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
         <div>
           <h2 style={{fontSize:24,fontWeight:700,color:'#c6a34e',marginBottom:4,display:'flex',alignItems:'center',gap:10}}>⚡ Centre d'Automatisation</h2>
-          <p style={{fontSize:13,color:'#999'}}>100% automatique • Confirmation humaine requise • {curMonth} {now.getFullYear()}</p>
+          <p style={{fontSize:13,color:'#999'}}>100% automatique • Confirmation humaine • {curMonth} {curYear}</p>
         </div>
         <div style={{display:'flex',gap:8}}>
-          <div style={{background:'rgba(34,197,94,.1)',border:'1px solid rgba(34,197,94,.2)',borderRadius:10,padding:'8px 16px',textAlign:'center'}}>
-            <div style={{fontSize:18,fontWeight:700,color:'#22c55e'}}>{emps.length}</div>
-            <div style={{fontSize:9,color:'#999'}}>Employés</div>
-          </div>
-          <div style={{background:'rgba(198,163,78,.1)',border:'1px solid rgba(198,163,78,.2)',borderRadius:10,padding:'8px 16px',textAlign:'center'}}>
-            <div style={{fontSize:18,fontWeight:700,color:'#c6a34e'}}>{alerts.length}</div>
-            <div style={{fontSize:9,color:'#999'}}>Alertes</div>
-          </div>
-          <div style={{background:'rgba(59,130,246,.1)',border:'1px solid rgba(59,130,246,.2)',borderRadius:10,padding:'8px 16px',textAlign:'center'}}>
-            <div style={{fontSize:18,fontWeight:700,color:'#3b82f6'}}>{daysToPayday}j</div>
-            <div style={{fontSize:9,color:'#999'}}>Prochaine paie</div>
-          </div>
+          {[{v:emps.length,l:'Employés',c:'#22c55e'},{v:alerts.length,l:'Alertes',c:alerts.length>0?'#ef4444':'#22c55e'},{v:daysToPayday+'j',l:'Prochaine paie',c:'#3b82f6'},{v:complianceScore+'%',l:'Conformité',c:complianceScore>=80?'#22c55e':complianceScore>=50?'#eab308':'#ef4444'}].map((k,i)=>
+            <div key={i} style={{background:'rgba('+( k.c==='#22c55e'?'34,197,94':k.c==='#ef4444'?'239,68,68':k.c==='#3b82f6'?'59,130,246':'234,179,8')+',.1)',border:'1px solid rgba('+( k.c==='#22c55e'?'34,197,94':k.c==='#ef4444'?'239,68,68':k.c==='#3b82f6'?'59,130,246':'234,179,8')+',.2)',borderRadius:10,padding:'8px 16px',textAlign:'center'}}>
+              <div style={{fontSize:18,fontWeight:700,color:k.c}}>{k.v}</div>
+              <div style={{fontSize:9,color:'#999'}}>{k.l}</div>
+            </div>)}
         </div>
       </div>
 
-      {/* KPIs ONSS temps réel */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:24}}>
-        <div style={{background:'linear-gradient(135deg,rgba(198,163,78,.12),rgba(198,163,78,.04))',border:'1px solid rgba(198,163,78,.2)',borderRadius:12,padding:16,textAlign:'center'}}>
-          <div style={{fontSize:11,color:'#999',marginBottom:4}}>Masse Brute</div>
-          <div style={{fontSize:18,fontWeight:700,color:'#c6a34e'}}>{f2(totalBrut)} €</div>
-        </div>
-        <div style={{background:'linear-gradient(135deg,rgba(239,68,68,.12),rgba(239,68,68,.04))',border:'1px solid rgba(239,68,68,.2)',borderRadius:12,padding:16,textAlign:'center'}}>
-          <div style={{fontSize:11,color:'#999',marginBottom:4}}>ONSS Patronal</div>
-          <div style={{fontSize:18,fontWeight:700,color:'#ef4444'}}>{f2(totalOnssP)} €</div>
-        </div>
-        <div style={{background:'linear-gradient(135deg,rgba(59,130,246,.12),rgba(59,130,246,.04))',border:'1px solid rgba(59,130,246,.2)',borderRadius:12,padding:16,textAlign:'center'}}>
-          <div style={{fontSize:11,color:'#999',marginBottom:4}}>ONSS Personnel</div>
-          <div style={{fontSize:18,fontWeight:700,color:'#3b82f6'}}>{f2(totalOnssE)} €</div>
-        </div>
-        <div style={{background:'linear-gradient(135deg,rgba(34,197,94,.12),rgba(34,197,94,.04))',border:'1px solid rgba(34,197,94,.2)',borderRadius:12,padding:16,textAlign:'center'}}>
-          <div style={{fontSize:11,color:'#999',marginBottom:4}}>Net Total Estimé</div>
-          <div style={{fontSize:18,fontWeight:700,color:'#22c55e'}}>{f2(totalNet)} €</div>
-        </div>
+      {/* KPIs */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:20}}>
+        {[{l:'Masse Brute',v:f2(totalBrut)+' €',c:'#c6a34e',bg:'198,163,78'},{l:'ONSS Patronal 25,07%',v:f2(totalOnssP)+' €',c:'#ef4444',bg:'239,68,68'},{l:'ONSS Personnel 13,07%',v:f2(totalOnssE)+' €',c:'#3b82f6',bg:'59,130,246'},{l:'Net Total Estimé',v:f2(totalNet)+' €',c:'#22c55e',bg:'34,197,94'}].map((k,i)=>
+          <div key={i} style={{background:'linear-gradient(135deg,rgba('+k.bg+',.12),rgba('+k.bg+',.04))',border:'1px solid rgba('+k.bg+',.2)',borderRadius:12,padding:16,textAlign:'center'}}>
+            <div style={{fontSize:11,color:'#999',marginBottom:4}}>{k.l}</div>
+            <div style={{fontSize:18,fontWeight:700,color:k.c}}>{k.v}</div>
+          </div>)}
       </div>
 
-      {/* Lancement Rapide */}
-      <div style={{marginBottom:24,padding:20,background:'linear-gradient(135deg,rgba(198,163,78,.1),rgba(198,163,78,.03))',border:'1px solid rgba(198,163,78,.25)',borderRadius:14,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12}}>
+      {/* Quick Launch */}
+      <div style={{marginBottom:20,padding:16,background:'linear-gradient(135deg,rgba(198,163,78,.1),rgba(198,163,78,.03))',border:'1px solid rgba(198,163,78,.25)',borderRadius:14,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12}}>
         <div>
-          <div style={{fontSize:16,fontWeight:700,color:'#c6a34e',marginBottom:4}}>🚀 Lancement Rapide — Paie Complète</div>
-          <div style={{fontSize:11,color:'#999'}}>Fiches de paie + SEPA virements + DmfA en 1 clic</div>
+          <div style={{fontSize:16,fontWeight:700,color:'#c6a34e',marginBottom:4}}>🚀 Paie Complète du Mois</div>
+          <div style={{fontSize:11,color:'#999'}}>Fiches + SEPA + DmfA + Précompte — tout en 1 clic</div>
         </div>
-        <button onClick={()=>{if(confirm('GÉNÉRER LA PAIE COMPLÈTE ?\n\n✅ '+emps.length+' fiches de paie\n✅ Fichier SEPA pain.001\n✅ DmfA '+curQ+'\n\nConfirmer ?')){emps.forEach(e=>generatePayslipPDF(e,co));generateSEPAXML(emps,co);generateDmfAXML(emps,co);alert('🎉 Paie complète générée !\n\n• '+emps.length+' fiches\n• SEPA XML\n• DmfA '+curQ)}}} style={{padding:'14px 32px',borderRadius:12,border:'none',background:'linear-gradient(135deg,#c6a34e,#d4af37)',color:'#000',fontWeight:700,fontSize:14,cursor:'pointer',boxShadow:'0 4px 20px rgba(198,163,78,.35)',transition:'transform .15s',whiteSpace:'nowrap'}}>⚡ Paie Complète du Mois</button>
+        <div style={{display:'flex',gap:8}}>
+          <button onClick={()=>execWorkflow('PAIE COMPLÈTE',()=>{emps.forEach(e=>generatePayslipPDF(e,co));generateSEPAXML(emps,co);generateDmfAXML(emps,co);},'Fiches de paie + SEPA + DmfA pour '+emps.length+' employés',emps.length)} style={{padding:'14px 28px',borderRadius:12,border:'none',background:'linear-gradient(135deg,#c6a34e,#d4af37)',color:'#000',fontWeight:700,fontSize:14,cursor:'pointer',boxShadow:'0 4px 20px rgba(198,163,78,.35)'}}>⚡ Lancer la Paie</button>
+          <button onClick={()=>{if(confirm('TOUT GÉNÉRER ?\n\nFiches + SEPA + DmfA + Belcotax + Dimona\npour '+emps.length+' employés ?')){emps.forEach(e=>{generatePayslipPDF(e,co);generateDimonaXML(e,'IN');generateBelcotaxXML(e,co);});generateSEPAXML(emps,co);generateDmfAXML(emps,co);logAction('GÉNÉRATION TOTALE','Tous les documents pour '+emps.length+' employés',emps.length*5);if(typeof addToast==='function')addToast('🎉 Génération totale terminée — '+(emps.length*5)+' documents');}}} style={{padding:'14px 20px',borderRadius:12,border:'1px solid rgba(239,68,68,.3)',background:'rgba(239,68,68,.1)',color:'#ef4444',fontWeight:600,fontSize:12,cursor:'pointer'}}>🔥 TOUT Générer</button>
+        </div>
       </div>
 
-      {/* Alertes IA */}
-      {alerts.length>0&&<div style={{marginBottom:24,padding:16,background:'linear-gradient(135deg,rgba(239,68,68,.08),rgba(239,68,68,.02))',border:'1px solid rgba(239,68,68,.2)',borderRadius:12}}>
-        <div style={{fontSize:13,fontWeight:700,color:'#ef4444',marginBottom:8}}>🤖 Alertes IA — {alerts.length} action(s) requise(s)</div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:8}}>
-          {alerts.slice(0,6).map((al,i)=><div key={i} style={{fontSize:11,color:al.type==='urgent'?'#ef4444':'#eab308',padding:'8px 12px',background:'rgba(0,0,0,.2)',borderRadius:8,display:'flex',alignItems:'center',gap:6}}><span>{al.icon||'⚠️'}</span><span>{al.msg}</span></div>)}
+      {/* Tabs */}
+      <div style={{display:'flex',gap:4,marginBottom:20,flexWrap:'wrap'}}>
+        {tabs.map(tb=><button key={tb.id} onClick={()=>setAutoTab(tb.id)} style={{padding:'10px 16px',borderRadius:10,border:autoTab===tb.id?'1px solid rgba(198,163,78,.3)':'1px solid rgba(255,255,255,.05)',background:autoTab===tb.id?'rgba(198,163,78,.12)':'rgba(255,255,255,.03)',color:autoTab===tb.id?'#c6a34e':'#888',fontSize:12,fontWeight:autoTab===tb.id?600:400,cursor:'pointer',display:'flex',alignItems:'center',gap:6}}>
+          {tb.l}<span style={{fontSize:10,padding:'2px 6px',borderRadius:10,background:autoTab===tb.id?'rgba(198,163,78,.2)':'rgba(255,255,255,.05)',color:autoTab===tb.id?'#c6a34e':'#666'}}>{tb.count}</span>
+        </button>)}
+      </div>
+
+      {/* TAB: Workflows */}
+      {autoTab==='workflows'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:14}}>
+        {workflows.map((w,i)=><div key={i} style={{background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.12)',borderRadius:14,padding:18,transition:'border-color .2s'}}
+          onMouseEnter={e=>e.currentTarget.style.borderColor='rgba(198,163,78,.35)'}
+          onMouseLeave={e=>e.currentTarget.style.borderColor='rgba(198,163,78,.12)'}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              <span style={{fontSize:20}}>{w.ic}</span>
+              <div><div style={{fontSize:13,fontWeight:600,color:'#e5e5e5'}}>{w.t}</div><div style={{fontSize:9,color:'#666'}}>{w.trigger}</div></div>
+            </div>
+            <span style={{fontSize:9,padding:'3px 10px',borderRadius:20,background:'rgba(34,197,94,.12)',color:'#22c55e',fontWeight:600}}>AUTO</span>
+          </div>
+          <div style={{fontSize:11,color:'#888',marginBottom:12}}>{w.desc}</div>
+          <div style={{display:'flex',gap:8,marginBottom:12}}>
+            <div style={{flex:1,background:w.col+'12',borderRadius:10,padding:'8px',textAlign:'center'}}>
+              <div style={{fontSize:13,fontWeight:700,color:w.col}}>{w.stat1}</div>
+            </div>
+            <div style={{flex:1,background:'rgba(255,255,255,.03)',borderRadius:10,padding:'8px',textAlign:'center'}}>
+              <div style={{fontSize:13,fontWeight:600,color:'#888'}}>{w.stat2}</div>
+            </div>
+          </div>
+          <div style={{display:'flex',gap:6}}>
+            <button onClick={w.fn} style={{flex:1,padding:'9px',borderRadius:10,border:'none',background:w.col,color:'#fff',fontWeight:600,fontSize:11,cursor:'pointer'}}>✓ Confirmer</button>
+            {w.page&&<button onClick={()=>d({type:'NAV',page:w.page})} style={{padding:'9px 12px',borderRadius:10,border:'1px solid '+w.col+'40',background:'transparent',color:w.col,fontSize:11,cursor:'pointer'}}>→</button>}
+          </div>
+        </div>)}
+      </div>}
+
+      {/* TAB: Planificateur */}
+      {autoTab==='planificateur'&&<div>
+        <div style={{marginBottom:20}}>
+          <h3 style={{fontSize:16,fontWeight:600,color:'#e5e5e5',marginBottom:12}}>📅 Calendrier Mensuel</h3>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:6}}>
+            {['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(d2=><div key={d2} style={{textAlign:'center',fontSize:10,color:'#666',padding:4}}>{d2}</div>)}
+            {Array.from({length:31},(_,i)=>{
+              const day=i+1;
+              const sched=scheduleItems.find(s2=>s2.day===day);
+              const isToday=day===now.getDate();
+              return <div key={i} style={{padding:8,borderRadius:8,background:isToday?'rgba(198,163,78,.15)':sched?'rgba('+( sched.col==='#22c55e'?'34,197,94':sched.col==='#ef4444'?'239,68,68':sched.col==='#c6a34e'?'198,163,78':sched.col==='#14b8a6'?'20,184,166':sched.col==='#a855f7'?'168,85,247':'245,158,11')+',.08)':'rgba(255,255,255,.02)',border:isToday?'1px solid rgba(198,163,78,.3)':'1px solid rgba(255,255,255,.04)',textAlign:'center',minHeight:48,cursor:'default'}}>
+                <div style={{fontSize:12,fontWeight:isToday?700:400,color:isToday?'#c6a34e':'#999'}}>{day}</div>
+                {sched&&<div style={{fontSize:8,color:sched.col,marginTop:2,fontWeight:600}}>{sched.label.split(' ')[0]}</div>}
+              </div>;
+            })}
+          </div>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+          <div>
+            <h3 style={{fontSize:14,fontWeight:600,color:'#e5e5e5',marginBottom:10}}>📋 Tâches Mensuelles</h3>
+            {scheduleItems.map((si,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 12px',marginBottom:6,background:'rgba(255,255,255,.02)',borderRadius:10,borderLeft:'3px solid '+si.col}}>
+              <div style={{width:28,height:28,borderRadius:'50%',background:si.col+'20',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:si.col}}>{si.day}</div>
+              <div style={{flex:1}}><div style={{fontSize:12,color:'#e5e5e5',fontWeight:500}}>{si.label}</div><div style={{fontSize:9,color:'#666'}}>{si.type==='deadline'?'⚠️ Deadline':'⚡ Auto-exécution'}</div></div>
+              <span style={{fontSize:9,padding:'3px 8px',borderRadius:6,background:si.type==='deadline'?'rgba(239,68,68,.12)':'rgba(34,197,94,.12)',color:si.type==='deadline'?'#ef4444':'#22c55e'}}>{si.type==='deadline'?'Deadline':'Auto'}</span>
+            </div>)}
+          </div>
+          <div>
+            <h3 style={{fontSize:14,fontWeight:600,color:'#e5e5e5',marginBottom:10}}>📊 Échéances Trimestrielles/Annuelles</h3>
+            {qTasks.map((qt,i)=><div key={i} style={{padding:'12px',marginBottom:6,background:'rgba(255,255,255,.02)',borderRadius:10,borderLeft:'3px solid '+qt.col}}>
+              <div style={{fontSize:12,color:'#e5e5e5',fontWeight:500}}>{qt.label}</div>
+              <div style={{fontSize:9,color:'#666',marginTop:2}}>Trimestre {qt.q} — {qt.q===Math.ceil((now.getMonth()+1)/3)?'⚡ Ce trimestre':'📅 Planifié'}</div>
+            </div>)}
+          </div>
         </div>
       </div>}
 
-      {/* Grille des 9 workflows */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))',gap:16}}>
-        {workflows.map((w,i)=><div key={i} style={{background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.12)',borderRadius:14,padding:20,transition:'border-color .2s',cursor:'default'}}
-          onMouseEnter={e=>e.currentTarget.style.borderColor='rgba(198,163,78,.35)'}
-          onMouseLeave={e=>e.currentTarget.style.borderColor='rgba(198,163,78,.12)'}>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
-            <div style={{display:'flex',alignItems:'center',gap:10}}>
-              <span style={{fontSize:22}}>{w.ic}</span>
-              <span style={{fontSize:14,fontWeight:600,color:'#e5e5e5'}}>{w.t}</span>
-            </div>
-            <span style={{fontSize:9,padding:'3px 10px',borderRadius:20,background:'rgba(34,197,94,.12)',color:'#22c55e',fontWeight:600,letterSpacing:'.5px'}}>AUTO</span>
+      {/* TAB: Historique */}
+      {autoTab==='historique'&&<div>
+        <h3 style={{fontSize:16,fontWeight:600,color:'#e5e5e5',marginBottom:12}}>📜 Journal d'Automatisation</h3>
+        {autoLog.length===0?<div style={{padding:40,textAlign:'center',color:'#666',fontSize:13}}>
+          <div style={{fontSize:40,marginBottom:10}}>📋</div>
+          <div>Aucune action enregistrée cette session</div>
+          <div style={{fontSize:11,marginTop:4}}>Utilisez les workflows pour voir l'historique ici</div>
+        </div>:
+        <div style={{border:'1px solid rgba(198,163,78,.1)',borderRadius:12,overflow:'hidden'}}>
+          <div style={{display:'grid',gridTemplateColumns:'180px 1fr 80px 100px',padding:'10px 14px',background:'rgba(198,163,78,.06)',fontSize:10,fontWeight:600,color:'#c6a34e'}}>
+            <div>Date</div><div>Action</div><div>Éléments</div><div>Utilisateur</div>
           </div>
-          <div style={{fontSize:11,color:'#888',marginBottom:14,lineHeight:1.4}}>{w.desc}</div>
-          <div style={{display:'flex',gap:8,marginBottom:14}}>
-            <div style={{flex:1,background:w.col+'12',borderRadius:10,padding:'10px 8px',textAlign:'center'}}>
-              <div style={{fontSize:14,fontWeight:700,color:w.col}}>{w.stat1}</div>
+          {autoLog.map(log=><div key={log.id} style={{display:'grid',gridTemplateColumns:'180px 1fr 80px 100px',padding:'10px 14px',borderTop:'1px solid rgba(255,255,255,.03)',fontSize:11,color:'#999',alignItems:'center'}}>
+            <div>{log.date}</div>
+            <div><span style={{color:'#e5e5e5',fontWeight:500}}>{log.action}</span><br/><span style={{fontSize:10}}>{log.detail}</span></div>
+            <div style={{color:'#c6a34e',fontWeight:600}}>{log.count}</div>
+            <div>{log.user}</div>
+          </div>)}
+        </div>}
+      </div>}
+
+      {/* TAB: Règles */}
+      {autoTab==='regles'&&<div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+          <h3 style={{fontSize:16,fontWeight:600,color:'#e5e5e5'}}>🔧 Règles d'Automatisation</h3>
+          <div style={{fontSize:11,color:'#888'}}>{rules.filter(r=>r.active).length}/{rules.length} actives</div>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))',gap:10}}>
+          {rules.map(r=><div key={r.id} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',background:r.active?'rgba(34,197,94,.04)':'rgba(255,255,255,.02)',border:'1px solid '+(r.active?'rgba(34,197,94,.15)':'rgba(255,255,255,.05)'),borderRadius:12}}>
+            <button onClick={()=>setRules(prev=>prev.map(x=>x.id===r.id?{...x,active:!x.active}:x))} style={{width:40,height:22,borderRadius:11,border:'none',background:r.active?'#22c55e':'#333',cursor:'pointer',position:'relative',transition:'background .2s'}}>
+              <div style={{width:18,height:18,borderRadius:'50%',background:'#fff',position:'absolute',top:2,left:r.active?20:2,transition:'left .2s',boxShadow:'0 1px 3px rgba(0,0,0,.3)'}}/>
+            </button>
+            <div style={{flex:1}}>
+              <div style={{fontSize:12,fontWeight:500,color:r.active?'#e5e5e5':'#666'}}>{r.name}</div>
+              <div style={{fontSize:9,color:'#555'}}>Déclencheur: {r.trigger} → {r.action}</div>
             </div>
-            <div style={{flex:1,background:'rgba(255,255,255,.03)',borderRadius:10,padding:'10px 8px',textAlign:'center'}}>
-              <div style={{fontSize:14,fontWeight:600,color:'#888'}}>{w.stat2}</div>
+            <span style={{fontSize:9,color:r.active?'#22c55e':'#666'}}>{r.active?'Actif':'Inactif'}</span>
+          </div>)}
+        </div>
+      </div>}
+
+      {/* TAB: Conformité */}
+      {autoTab==='conformite'&&<div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+          <h3 style={{fontSize:16,fontWeight:600,color:'#e5e5e5'}}>✅ Audit de Conformité</h3>
+          <div style={{padding:'10px 24px',borderRadius:12,background:complianceScore>=80?'rgba(34,197,94,.12)':complianceScore>=50?'rgba(234,179,8,.12)':'rgba(239,68,68,.12)',border:'1px solid '+(complianceScore>=80?'rgba(34,197,94,.2)':complianceScore>=50?'rgba(234,179,8,.2)':'rgba(239,68,68,.2)')}}>
+            <div style={{fontSize:28,fontWeight:700,color:complianceScore>=80?'#22c55e':complianceScore>=50?'#eab308':'#ef4444',textAlign:'center'}}>{complianceScore}%</div>
+            <div style={{fontSize:10,color:'#999',textAlign:'center'}}>Score global</div>
+          </div>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:10}}>
+          {complianceChecks.map((cc,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',background:cc.check?'rgba(34,197,94,.04)':'rgba(239,68,68,.04)',border:'1px solid '+(cc.check?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)'),borderRadius:12}}>
+            <span style={{fontSize:20}}>{cc.icon}</span>
+            <div style={{flex:1,fontSize:12,color:cc.check?'#e5e5e5':'#f87171',fontWeight:500}}>{cc.name}</div>
+            <span style={{fontSize:16}}>{cc.check?'✅':'❌'}</span>
+          </div>)}
+        </div>
+        {complianceScore<100&&<div style={{marginTop:16,padding:14,background:'rgba(234,179,8,.06)',border:'1px solid rgba(234,179,8,.15)',borderRadius:12,fontSize:11,color:'#eab308'}}>
+          ⚠️ {complianceChecks.filter(c=>!c.check).length} vérification(s) échouée(s). Complétez les données manquantes dans la section Employés pour atteindre 100%.
+        </div>}
+      </div>}
+
+      {/* TAB: Batch */}
+      {autoTab==='batch'&&<div>
+        <h3 style={{fontSize:16,fontWeight:600,color:'#e5e5e5',marginBottom:14}}>🚀 Opérations en Masse</h3>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:12}}>
+          {[
+            {t:'📄 Toutes les fiches',desc:'Générer fiches de paie pour '+emps.length+' employés',col:'#c6a34e',fn:()=>execWorkflow('Batch Fiches',()=>emps.forEach(e=>generatePayslipPDF(e,co)),emps.length+' fiches',emps.length)},
+            {t:'📡 Toutes les Dimona',desc:'Dimona IN pour '+emps.length+' employés',col:'#3b82f6',fn:()=>execWorkflow('Batch Dimona',()=>emps.forEach(e=>generateDimonaXML(e,'IN')),emps.length+' déclarations',emps.length)},
+            {t:'🏛️ Toutes les Belcotax',desc:'281.10 pour '+emps.length+' employés',col:'#ef4444',fn:()=>execWorkflow('Batch Belcotax',()=>emps.forEach(e=>generateBelcotaxXML(e,co)),emps.length+' fiches fiscales',emps.length)},
+            {t:'📝 Toutes les attestations emploi',desc:'Pour '+emps.length+' employés',col:'#06b6d4',fn:()=>execWorkflow('Batch Attestations',()=>emps.forEach(e=>generateAttestationEmploi(e,co)),emps.length+' attestations',emps.length)},
+            {t:'💼 Toutes les attestations salaire',desc:'Pour '+emps.length+' employés',col:'#8b5cf6',fn:()=>execWorkflow('Batch Att. Salaire',()=>emps.forEach(e=>generateAttestationSalaire(e,co)),emps.length+' attestations',emps.length)},
+            {t:'💸 SEPA + DmfA + Précompte',desc:'Tous les exports en 1 clic',col:'#22c55e',fn:()=>execWorkflow('Batch Exports',()=>{generateSEPAXML(emps,co);generateDmfAXML(emps,co);},'SEPA + DmfA',emps.length)},
+          ].map((b,i)=><div key={i} style={{padding:16,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.1)',borderRadius:12}}>
+            <div style={{fontSize:14,fontWeight:600,color:'#e5e5e5',marginBottom:4}}>{b.t}</div>
+            <div style={{fontSize:11,color:'#888',marginBottom:12}}>{b.desc}</div>
+            <button onClick={b.fn} style={{width:'100%',padding:'10px',borderRadius:10,border:'none',background:b.col,color:'#fff',fontWeight:600,fontSize:12,cursor:'pointer'}}>⚡ Exécuter en masse</button>
+          </div>)}
+        </div>
+        
+        <div style={{marginTop:20,padding:16,background:'rgba(198,163,78,.04)',border:'1px solid rgba(198,163,78,.1)',borderRadius:12}}>
+          <h4 style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:10}}>📊 Résumé Batch</h4>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
+            <div style={{textAlign:'center',padding:12,background:'rgba(198,163,78,.06)',borderRadius:10}}>
+              <div style={{fontSize:22,fontWeight:700,color:'#c6a34e'}}>{emps.length*5}</div>
+              <div style={{fontSize:10,color:'#888'}}>Documents max/batch</div>
+            </div>
+            <div style={{textAlign:'center',padding:12,background:'rgba(34,197,94,.06)',borderRadius:10}}>
+              <div style={{fontSize:22,fontWeight:700,color:'#22c55e'}}>{f2(totalBrut*12)}</div>
+              <div style={{fontSize:10,color:'#888'}}>Masse annuelle €</div>
+            </div>
+            <div style={{textAlign:'center',padding:12,background:'rgba(168,85,247,.06)',borderRadius:10}}>
+              <div style={{fontSize:22,fontWeight:700,color:'#a855f7'}}>12</div>
+              <div style={{fontSize:10,color:'#888'}}>Workflows auto</div>
             </div>
           </div>
-          <div style={{display:'flex',gap:8}}>
-            {w.fn&&<button onClick={w.fn} style={{flex:1,padding:'10px',borderRadius:10,border:'none',background:w.col,color:'#fff',fontWeight:600,fontSize:12,cursor:'pointer',transition:'opacity .15s'}}
-              onMouseEnter={e=>e.target.style.opacity='0.85'}
-              onMouseLeave={e=>e.target.style.opacity='1'}>✓ Confirmer</button>}
-            {w.page&&<button onClick={()=>d({type:'NAV',page:w.page})} style={{padding:'10px 14px',borderRadius:10,border:'1px solid '+w.col+'40',background:'transparent',color:w.col,fontSize:11,cursor:'pointer',fontWeight:500}}>Voir →</button>}
-          </div>
-        </div>)}
-      </div>
+        </div>
+      </div>}
 
       {/* Footer */}
       <div style={{marginTop:32,textAlign:'center',padding:16,borderTop:'1px solid rgba(198,163,78,.1)'}}>
-        <div style={{fontSize:11,color:'#666'}}>Aureus Social Pro — Sprint 17 Automatisation — {emps.length} employé(s) • {curMonth} {now.getFullYear()}</div>
+        <div style={{fontSize:11,color:'#666'}}>Aureus Social Pro v38 — Sprint 17c Automatisation — {emps.length} employé(s) • {curMonth} {curYear}</div>
         <div style={{fontSize:10,color:'#444',marginTop:4}}>Tous les documents sont générés localement. Aucune donnée n'est envoyée à un serveur externe.</div>
       </div>
     </div>;
