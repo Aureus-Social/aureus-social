@@ -1,41 +1,5 @@
 // Aureus Social Pro v20.2
 "use client"
-
-  // Sprint 33: Tabs + Absences encoding
-  const [dcTab,setDcTab]=useState('overview');
-  const [absMonth,setAbsMonth]=useState(new Date().getMonth()+1);
-  const [absYear,setAbsYear]=useState(new Date().getFullYear());
-  const [showAbsForm,setShowAbsForm]=useState(false);
-  const [absForm,setAbsForm]=useState({empId:'',type:'conge',dateDebut:'',dateFin:'',motif:''});
-  const absTypes=[{id:'conge',icon:'🏖',label:'Conge paye',c:'#22c55e'},{id:'maladie',icon:'🤒',label:'Maladie',c:'#ef4444'},{id:'formation',icon:'📚',label:'Formation',c:'#3b82f6'},{id:'teletravail',icon:'🏠',label:'Teletravail',c:'#a855f7'},{id:'recup',icon:'⏰',label:'Recuperation',c:'#eab308'},{id:'sans_solde',icon:'⚪',label:'Sans solde',c:'#888'},{id:'maternite',icon:'🤱',label:'Maternite',c:'#ec4899'},{id:'naissance',icon:'👶',label:'Conge naissance',c:'#06b6d4'}];
-
-  const addAbsence=()=>{
-    if(!absForm.empId||!absForm.dateDebut) return;
-    const absence={id:'ABS-'+Date.now(),type:absForm.type,dateDebut:absForm.dateDebut,dateFin:absForm.dateFin||absForm.dateDebut,motif:absForm.motif,createdAt:new Date().toISOString(),status:'validee'};
-    const updEmps=emps.map(e2=>e2.id===absForm.empId?{...e2,absences:[...(e2.absences||[]),absence]}:e2);
-    const updClients=(s.clients||[]).map(c2=>c2===cl?{...c2,emps:updEmps}:c2);
-    if(d) d({...s,clients:updClients});
-    setAbsForm({empId:'',type:'conge',dateDebut:'',dateFin:'',motif:''});
-    setShowAbsForm(false);
-  };
-
-  const deleteAbsence=(empId2,absId)=>{
-    const updEmps=emps.map(e2=>e2.id===empId2?{...e2,absences:(e2.absences||[]).filter(a=>a.id!==absId)}:e2);
-    const updClients=(s.clients||[]).map(c2=>c2===cl?{...c2,emps:updEmps}:c2);
-    if(d) d({...s,clients:updClients});
-  };
-
-  const getDaysInMonth2=(m,y)=>new Date(y,m,0).getDate();
-  const daysInMonth=getDaysInMonth2(absMonth,absYear);
-  const moisNoms2=['','Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
-
-  const isAbsentDay=(emp2,day)=>{
-    const dateStr=absYear+'-'+String(absMonth).padStart(2,'0')+'-'+String(day).padStart(2,'0');
-    return (emp2.absences||[]).find(a=>{const d1=a.dateDebut;const d2=a.dateFin||a.dateDebut;return dateStr>=d1&&dateStr<=d2;});
-  };
-
-  const allAbsThisMonth=emps.reduce((a,e2)=>[...a,...(e2.absences||[]).filter(ab=>{const m=parseInt(ab.dateDebut?.split('-')[1]);const y=parseInt(ab.dateDebut?.split('-')[0]);return m===absMonth&&y===absYear;}).map(ab=>({...ab,empName:(e2.first||e2.fn||'')+' '+(e2.last||e2.ln||''),empId:e2.id}))],[]);
-;
 import { useState, useReducer, useRef, useMemo, useEffect, createContext, useContext } from "react";
 
 // ═══════════════════════════════════════════════════════════════
@@ -8406,7 +8370,7 @@ const PlanAbsences=({s,d})=>{
 
     {/* Type selector */}
     <div style={{display:'flex',gap:6,marginBottom:12}}>
-      {absTypes.map(t=><button key={t.id} onClick={()=>setSelType(t.id)} style={{padding:'6px 12px',borderRadius:8,border:selType===t.id?'2px solid '+t.c:'1px solid rgba(255,255,255,.05)',background:selType===t.id?t.c+'15':'transparent',color:selType===t.id?t.c:'#888',fontSize:11,cursor:'pointer',fontFamily:'inherit',fontWeight:600}}>{t.icon} {t.label} ({byType[t.id]||0})</button>)}
+      {absTypes2.map(t=><button key={t.id} onClick={()=>setSelType(t.id)} style={{padding:'6px 12px',borderRadius:8,border:selType===t.id?'2px solid '+t.c:'1px solid rgba(255,255,255,.05)',background:selType===t.id?t.c+'15':'transparent',color:selType===t.id?t.c:'#888',fontSize:11,cursor:'pointer',fontFamily:'inherit',fontWeight:600}}>{t.icon} {t.label} ({byType[t.id]||0})</button>)}
     </div>
 
     {/* Calendar grid */}
@@ -8445,7 +8409,7 @@ const PlanAbsences=({s,d})=>{
 
     {/* Summary */}
     <div style={{display:'grid',gridTemplateColumns:'repeat('+absTypes.length+',1fr)',gap:8,marginTop:12}}>
-      {absTypes.map(t=><div key={t.id} style={{padding:8,borderRadius:8,background:t.c+'08',border:'1px solid '+t.c+'15',textAlign:'center'}}>
+      {absTypes2.map(t=><div key={t.id} style={{padding:8,borderRadius:8,background:t.c+'08',border:'1px solid '+t.c+'15',textAlign:'center'}}>
         <div style={{fontSize:16,fontWeight:700,color:t.c}}>{byType[t.id]||0}</div>
         <div style={{fontSize:9,color:'#888'}}>{t.icon} {t.label}</div>
       </div>)}
@@ -9036,6 +9000,41 @@ const DashboardClient=({s,d})=>{
   });
   health=Math.max(0,Math.min(100,health));
 
+  // Sprint 33: Tabs + Absences encoding
+  const [dcTab,setDcTab]=useState('overview');
+  const [absMonth,setAbsMonth]=useState(new Date().getMonth()+1);
+  const [absYear,setAbsYear]=useState(new Date().getFullYear());
+  const [showAbsForm,setShowAbsForm]=useState(false);
+  const [absForm,setAbsForm]=useState({empId:'',type:'conge',dateDebut:'',dateFin:'',motif:''});
+  const absTypes2=[{id:'conge',icon:'🏖',label:'Conge paye',c:'#22c55e'},{id:'maladie',icon:'🤒',label:'Maladie',c:'#ef4444'},{id:'formation',icon:'📚',label:'Formation',c:'#3b82f6'},{id:'teletravail',icon:'🏠',label:'Teletravail',c:'#a855f7'},{id:'recup',icon:'⏰',label:'Recuperation',c:'#eab308'},{id:'sans_solde',icon:'⚪',label:'Sans solde',c:'#888'},{id:'maternite',icon:'🤱',label:'Maternite',c:'#ec4899'},{id:'naissance',icon:'👶',label:'Conge naissance',c:'#06b6d4'}];
+
+  const addAbsence2=()=>{
+    if(!absForm.empId||!absForm.dateDebut) return;
+    const absence={id:'ABS-'+Date.now(),type:absForm.type,dateDebut:absForm.dateDebut,dateFin:absForm.dateFin||absForm.dateDebut,motif:absForm.motif,createdAt:new Date().toISOString(),status:'validee'};
+    const updEmps=emps.map(e2=>e2.id===absForm.empId?{...e2,absences:[...(e2.absences||[]),absence]}:e2);
+    const updClients=(s.clients||[]).map(c2=>c2===cl?{...c2,emps:updEmps}:c2);
+    if(d) d({...s,clients:updClients});
+    setAbsForm({empId:'',type:'conge',dateDebut:'',dateFin:'',motif:''});
+    setShowAbsForm(false);
+  };
+
+  const deleteAbsence2=(empId2,absId)=>{
+    const updEmps=emps.map(e2=>e2.id===empId2?{...e2,absences:(e2.absences||[]).filter(a=>a.id!==absId)}:e2);
+    const updClients=(s.clients||[]).map(c2=>c2===cl?{...c2,emps:updEmps}:c2);
+    if(d) d({...s,clients:updClients});
+  };
+
+  const getDaysInMonth3=(m,y)=>new Date(y,m,0).getDate();
+  const daysInMonth2=getDaysInMonth3(absMonth,absYear);
+  const moisN=['','Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
+
+  const isAbsentDay2=(emp2,day)=>{
+    const dateStr=absYear+'-'+String(absMonth).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+    return (emp2.absences||[]).find(a=>{const d1=a.dateDebut;const d2=a.dateFin||a.dateDebut;return dateStr>=d1&&dateStr<=d2;});
+  };
+
+  const allAbsMonth=emps.reduce((a,e2)=>[...a,...(e2.absences||[]).filter(ab=>{const m=parseInt(ab.dateDebut?.split('-')[1]);const y=parseInt(ab.dateDebut?.split('-')[0]);return m===absMonth&&y===absYear;}).map(ab=>({...ab,empName:(e2.first||e2.fn||'')+' '+(e2.last||e2.ln||''),empId:e2.id}))],[]);
+
   return <div style={{padding:24}}>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
       <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:0}}>🏢 Dashboard Client</h2>
@@ -9058,7 +9057,7 @@ const DashboardClient=({s,d})=>{
 
     {/* Tabs */}
     <div style={{display:'flex',gap:4,marginBottom:16,borderBottom:'1px solid rgba(198,163,78,.1)',paddingBottom:8}}>
-      {[{id:'overview',l:'📊 Vue d ensemble'},{id:'absences',l:'📅 Absences ('+allAbsThisMonth.length+')'},{id:'equipe',l:'👤 Equipe'},{id:'docs',l:'📄 Documents'}].map(t=>
+      {[{id:'overview',l:'📊 Vue d ensemble'},{id:'absences',l:'📅 Absences ('+allAbsMonth.length+')'},{id:'equipe',l:'👤 Equipe'},{id:'docs',l:'📄 Documents'}].map(t=>
         <button key={t.id} onClick={()=>setDcTab(t.id)} style={{padding:'8px 16px',borderRadius:8,border:'none',background:dcTab===t.id?'rgba(198,163,78,.15)':'transparent',color:dcTab===t.id?'#c6a34e':'#888',fontWeight:dcTab===t.id?600:400,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>{t.l}</button>
       )}
     </div>
@@ -9068,7 +9067,7 @@ const DashboardClient=({s,d})=>{
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
         <div style={{display:'flex',gap:6,alignItems:'center'}}>
           <button onClick={()=>{const nm=absMonth===1?12:absMonth-1;const ny=absMonth===1?absYear-1:absYear;setAbsMonth(nm);setAbsYear(ny);}} style={{padding:'4px 8px',borderRadius:6,border:'1px solid rgba(198,163,78,.15)',background:'transparent',color:'#c6a34e',cursor:'pointer',fontSize:11,fontFamily:'inherit'}}>←</button>
-          <span style={{fontSize:14,fontWeight:700,color:'#c6a34e',minWidth:140,textAlign:'center'}}>{moisNoms2[absMonth]} {absYear}</span>
+          <span style={{fontSize:14,fontWeight:700,color:'#c6a34e',minWidth:140,textAlign:'center'}}>{moisN[absMonth]} {absYear}</span>
           <button onClick={()=>{const nm=absMonth===12?1:absMonth+1;const ny=absMonth===12?absYear+1:absYear;setAbsMonth(nm);setAbsYear(ny);}} style={{padding:'4px 8px',borderRadius:6,border:'1px solid rgba(198,163,78,.15)',background:'transparent',color:'#c6a34e',cursor:'pointer',fontSize:11,fontFamily:'inherit'}}>→</button>
         </div>
         <button onClick={()=>setShowAbsForm(!showAbsForm)} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>+ Encoder une absence</button>
@@ -9088,7 +9087,7 @@ const DashboardClient=({s,d})=>{
           <div>
             <div style={{fontSize:9,color:'#888',marginBottom:3}}>Type *</div>
             <select value={absForm.type} onChange={e=>setAbsForm(p=>({...p,type:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
-              {absTypes.map(t=><option key={t.id} value={t.id}>{t.icon} {t.label}</option>)}
+              {absTypes2.map(t=><option key={t.id} value={t.id}>{t.icon} {t.label}</option>)}
             </select>
           </div>
           <div>
@@ -9104,7 +9103,7 @@ const DashboardClient=({s,d})=>{
             <input type="date" value={absForm.dateFin} onChange={e=>setAbsForm(p=>({...p,dateFin:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit',boxSizing:'border-box'}}/>
           </div>
           <div style={{display:'flex',alignItems:'flex-end'}}>
-            <button onClick={addAbsence} disabled={!absForm.empId||!absForm.dateDebut} style={{width:'100%',padding:'8px',borderRadius:6,border:'none',background:(!absForm.empId||!absForm.dateDebut)?'rgba(198,163,78,.1)':'#22c55e',color:(!absForm.empId||!absForm.dateDebut)?'#555':'#fff',fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>✅ Valider</button>
+            <button onClick={addAbsence2} disabled={!absForm.empId||!absForm.dateDebut} style={{width:'100%',padding:'8px',borderRadius:6,border:'none',background:(!absForm.empId||!absForm.dateDebut)?'rgba(198,163,78,.1)':'#22c55e',color:(!absForm.empId||!absForm.dateDebut)?'#555':'#fff',fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>✅ Valider</button>
           </div>
         </div>
       </div>}
@@ -9114,7 +9113,7 @@ const DashboardClient=({s,d})=>{
         <table style={{width:'100%',borderCollapse:'collapse',fontSize:9}}>
           <thead><tr style={{background:'rgba(198,163,78,.06)'}}>
             <th style={{padding:'8px 6px',textAlign:'left',color:'#c6a34e',fontWeight:600,fontSize:10,minWidth:120,position:'sticky',left:0,background:'#0d1117',zIndex:1}}>Employe</th>
-            {Array.from({length:daysInMonth},(_, i)=>{
+            {Array.from({length:daysInMonth2},(_, i)=>{
               const dow=new Date(absYear,absMonth-1,i+1).getDay();
               const isWE=dow===0||dow===6;
               return <th key={i} style={{padding:'4px 2px',textAlign:'center',color:isWE?'#555':'#888',fontWeight:isWE?400:500,fontSize:9,background:isWE?'rgba(255,255,255,.02)':'transparent',minWidth:22}}>{i+1}</th>;
@@ -9126,11 +9125,11 @@ const DashboardClient=({s,d})=>{
               let absDays=0;
               return <tr key={idx} style={{borderBottom:'1px solid rgba(255,255,255,.03)'}}>
                 <td style={{padding:'6px',fontWeight:500,color:'#e5e5e5',fontSize:10,position:'sticky',left:0,background:'#0d1117',zIndex:1}}>{(emp2.first||emp2.fn||'').charAt(0)+(emp2.last||emp2.ln||'').charAt(0)} {(emp2.first||emp2.fn||'')} {(emp2.last||emp2.ln||'')}</td>
-                {Array.from({length:daysInMonth},(_,i)=>{
+                {Array.from({length:daysInMonth2},(_,i)=>{
                   const day=i+1;
                   const dow=new Date(absYear,absMonth-1,day).getDay();
                   const isWE=dow===0||dow===6;
-                  const abs=isAbsentDay(emp2,day);
+                  const abs=isAbsentDay2(emp2,day);
                   if(abs&&!isWE) absDays++;
                   const absT=abs?absTypes.find(t=>t.id===abs.type):null;
                   return <td key={i} style={{padding:'2px',textAlign:'center',background:isWE?'rgba(255,255,255,.02)':abs?absT?.c+'15':'transparent',cursor:isWE?'default':'pointer',borderRadius:2}} title={abs?(absT?.label+' — '+(abs.motif||'')):(isWE?'Weekend':'Cliquez pour encoder')}>
@@ -9146,15 +9145,15 @@ const DashboardClient=({s,d})=>{
 
       {/* Legend */}
       <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:10}}>
-        {absTypes.map(t=><div key={t.id} style={{display:'flex',alignItems:'center',gap:3,fontSize:9,color:'#888'}}>
+        {absTypes2.map(t=><div key={t.id} style={{display:'flex',alignItems:'center',gap:3,fontSize:9,color:'#888'}}>
           <span>{t.icon}</span><span>{t.label}</span>
         </div>)}
       </div>
 
       {/* Recent absences list */}
-      {allAbsThisMonth.length>0&&<div style={{marginTop:14,border:'1px solid rgba(198,163,78,.1)',borderRadius:12,overflow:'hidden'}}>
-        <div style={{padding:'10px 14px',background:'rgba(198,163,78,.06)',fontSize:11,fontWeight:600,color:'#c6a34e'}}>📋 Absences du mois ({allAbsThisMonth.length})</div>
-        {allAbsThisMonth.map((a,i)=>{
+      {allAbsMonth.length>0&&<div style={{marginTop:14,border:'1px solid rgba(198,163,78,.1)',borderRadius:12,overflow:'hidden'}}>
+        <div style={{padding:'10px 14px',background:'rgba(198,163,78,.06)',fontSize:11,fontWeight:600,color:'#c6a34e'}}>📋 Absences du mois ({allAbsMonth.length})</div>
+        {allAbsMonth.map((a,i)=>{
           const at=absTypes.find(t=>t.id===a.type);
           return <div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'8px 14px',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
             <span style={{fontSize:14}}>{at?.icon||'📅'}</span>
@@ -9162,7 +9161,7 @@ const DashboardClient=({s,d})=>{
               <div style={{fontSize:11,fontWeight:500,color:'#e5e5e5'}}>{a.empName}</div>
               <div style={{fontSize:9,color:'#888'}}>{at?.label} — {a.dateDebut}{a.dateFin&&a.dateFin!==a.dateDebut?' → '+a.dateFin:''} {a.motif?'('+a.motif+')':''}</div>
             </div>
-            <span onClick={()=>deleteAbsence(a.empId,a.id)} style={{fontSize:10,color:'#ef4444',cursor:'pointer',padding:'4px 8px',borderRadius:4,background:'rgba(239,68,68,.06)'}}>✕</span>
+            <span onClick={()=>deleteAbsence2(a.empId,a.id)} style={{fontSize:10,color:'#ef4444',cursor:'pointer',padding:'4px 8px',borderRadius:4,background:'rgba(239,68,68,.06)'}}>✕</span>
           </div>;
         })}
       </div>}
@@ -17277,7 +17276,7 @@ function PortailEmployeurMod({s,d,per}){
             <table style={{width:'100%',borderCollapse:'collapse',fontSize:10}}>
               <thead><tr style={{background:"rgba(198,163,78,.05)"}}>
                 <th style={{padding:'8px 6px',textAlign:'left',fontSize:9.5,color:'#5e5c56',fontWeight:600,position:'sticky',left:0,background:"#0a0d17",zIndex:1}}>Travailleur</th>
-                {Array.from({length:daysInMonth},(_,i)=>{
+                {Array.from({length:daysInMonth2},(_,i)=>{
                   const dt=new Date(selectedYear,selectedMonth-1,i+1);
                   const dow=dt.getDay();const isWE=dow===0||dow===6;
                   return <th key={i} style={{padding:'8px 3px',textAlign:'center',fontSize:9,color:isWE?'#3a3930':'#5e5c56',fontWeight:600,minWidth:24,background:isWE?'rgba(255,255,255,.01)':'transparent'}}>
@@ -17289,7 +17288,7 @@ function PortailEmployeurMod({s,d,per}){
               <tbody>
                 {ae.map((emp,ei)=><tr key={ei} style={{borderBottom:'1px solid rgba(255,255,255,.02)'}}>
                   <td style={{padding:'6px',fontWeight:500,fontSize:11,whiteSpace:'nowrap',position:'sticky',left:0,background:"#0a0d17",zIndex:1}}>{emp.first} {emp.last.charAt(0)}.</td>
-                  {Array.from({length:daysInMonth},(_,di)=>{
+                  {Array.from({length:daysInMonth2},(_,di)=>{
                     const dt=new Date(selectedYear,selectedMonth-1,di+1);
                     const dow=dt.getDay();const isWE=dow===0||dow===6;
                     const key=`${emp.id}_${di+1}`;
@@ -17336,7 +17335,7 @@ function PortailEmployeurMod({s,d,per}){
                 const [absEmp,setAbsEmp]=[ae[0]?.id||'',()=>{}]; // simplified
                 return <div>
                   <I label="Travailleur" value={ae[0]?.id||''} onChange={()=>{}} options={ae.map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))}/>
-                  <I label="Type d'absence" value="conge_annuel" onChange={()=>{}} style={{marginTop:8}} options={absTypes.map(a=>({v:a.v,l:`${a.ic} ${a.l}`}))}/>
+                  <I label="Type d'absence" value="conge_annuel" onChange={()=>{}} style={{marginTop:8}} options={absTypes2.map(a=>({v:a.v,l:`${a.ic} ${a.l}`}))}/>
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginTop:8}}>
                     <I label="Du" type="date" value={new Date().toISOString().split('T')[0]} onChange={()=>{}}/>
                     <I label="Au" type="date" value={new Date().toISOString().split('T')[0]} onChange={()=>{}}/>
