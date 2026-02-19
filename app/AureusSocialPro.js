@@ -7886,6 +7886,434 @@ const ContratGenerator=({s,d,user})=>{
   </div>;
 };
 
+
+// ══════════════════════════════════════════════════════════════
+// ═══ SPRINT 32: IMPORT CSV/EXCEL + ONBOARDING GUIDE         ═══
+// ══════════════════════════════════════════════════════════════
+
+// ═══ 1. IMPORT CSV/EXCEL — Importer des employes en masse ═══
+const ImportCSV=({s,d})=>{
+  const [file,setFile]=useState(null);
+  const [parsed,setParsed]=useState(null);
+  const [mapping,setMapping]=useState({});
+  const [preview,setPreview]=useState([]);
+  const [step,setStep]=useState(1); // 1=upload, 2=mapping, 3=preview, 4=done
+  const [importing,setImporting]=useState(false);
+  const [results,setResults]=useState(null);
+  const [selClient,setSelClient]=useState('');
+  const [separator,setSeparator]=useState(',');
+  const [errors,setErrors]=useState([]);
+  const clients=s.clients||[];
+
+  const FIELDS=[
+    {key:'first',label:'Prenom',required:true},
+    {key:'last',label:'Nom',required:true},
+    {key:'niss',label:'NISS (Registre national)'},
+    {key:'email',label:'Email'},
+    {key:'phone',label:'Telephone'},
+    {key:'address',label:'Adresse'},
+    {key:'startDate',label:'Date d entree'},
+    {key:'contractType',label:'Type contrat (CDI/CDD)'},
+    {key:'monthlySalary',label:'Salaire brut mensuel',required:true},
+    {key:'function',label:'Fonction'},
+    {key:'whWeek',label:'Heures/semaine'},
+    {key:'statut',label:'Statut (employe/ouvrier)'},
+    {key:'civil',label:'Situation familiale'},
+    {key:'depChildren',label:'Enfants a charge'},
+    {key:'iban',label:'IBAN'},
+    {key:'nationalite',label:'Nationalite'}
+  ];
+
+  const parseCSV=(text,sep)=>{
+    const lines=text.split(/\r?\n/).filter(l=>l.trim());
+    if(lines.length<2) return null;
+    const headers=lines[0].split(sep).map(h=>h.trim().replace(/^"|"$/g,''));
+    const rows=lines.slice(1).map(line=>{
+      const vals=[];let cur='';let inQ=false;
+      for(let i=0;i<line.length;i++){
+        if(line[i]==='"'){inQ=!inQ;}
+        else if(line[i]===sep&&!inQ){vals.push(cur.trim().replace(/^"|"$/g,''));cur='';}
+        else{cur+=line[i];}
+      }
+      vals.push(cur.trim().replace(/^"|"$/g,''));
+      const obj={};headers.forEach((h,j)=>obj[h]=vals[j]||'');
+      return obj;
+    }).filter(row=>Object.values(row).some(v=>v));
+    return {headers,rows};
+  };
+
+  const handleFile=(e)=>{
+    const f2=e.target.files[0];
+    if(!f2) return;
+    setFile(f2);
+    const reader=new FileReader();
+    reader.onload=(ev)=>{
+      const text=ev.target.result;
+      // Auto-detect separator
+      const firstLine=text.split('\n')[0];
+      const semiCount=(firstLine.match(/;/g)||[]).length;
+      const commaCount=(firstLine.match(/,/g)||[]).length;
+      const tabCount=(firstLine.match(/\t/g)||[]).length;
+      const detectedSep=semiCount>commaCount?(semiCount>tabCount?';':'\t'):(commaCount>tabCount?',':'\t');
+      setSeparator(detectedSep);
+      const result=parseCSV(text,detectedSep);
+      if(result){
+        setParsed(result);
+        // Auto-map columns
+        const autoMap={};
+        result.headers.forEach(h=>{
+          const hl=h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+          if(hl.includes('prenom')||hl.includes('first')||hl==='prenom') autoMap[h]='first';
+          else if(hl.includes('nom')||hl.includes('last')||hl==='nom') autoMap[h]='last';
+          else if(hl.includes('niss')||hl.includes('registre')||hl.includes('national')) autoMap[h]='niss';
+          else if(hl.includes('email')||hl.includes('mail')) autoMap[h]='email';
+          else if(hl.includes('tel')||hl.includes('phone')||hl.includes('gsm')) autoMap[h]='phone';
+          else if(hl.includes('adresse')||hl.includes('address')||hl.includes('rue')) autoMap[h]='address';
+          else if(hl.includes('entree')||hl.includes('start')||hl.includes('debut')) autoMap[h]='startDate';
+          else if(hl.includes('contrat')||hl.includes('contract')) autoMap[h]='contractType';
+          else if(hl.includes('salaire')||hl.includes('brut')||hl.includes('salary')||hl.includes('remuneration')) autoMap[h]='monthlySalary';
+          else if(hl.includes('fonction')||hl.includes('function')||hl.includes('poste')) autoMap[h]='function';
+          else if(hl.includes('heure')||hl.includes('hours')||hl.includes('regime')) autoMap[h]='whWeek';
+          else if(hl.includes('statut')||hl.includes('status')||hl==='type') autoMap[h]='statut';
+          else if(hl.includes('civil')||hl.includes('famille')||hl.includes('marital')) autoMap[h]='civil';
+          else if(hl.includes('enfant')||hl.includes('child')) autoMap[h]='depChildren';
+          else if(hl.includes('iban')||hl.includes('compte')||hl.includes('bank')) autoMap[h]='iban';
+          else if(hl.includes('nation')) autoMap[h]='nationalite';
+        });
+        setMapping(autoMap);
+        setStep(2);
+      }
+    };
+    reader.readAsText(f2,'UTF-8');
+  };
+
+  const buildPreview=()=>{
+    if(!parsed) return;
+    const errs=[];
+    const rows=parsed.rows.map((row,idx)=>{
+      const emp={id:'IMP-'+Date.now()+'-'+idx};
+      Object.entries(mapping).forEach(([csvCol,field])=>{
+        if(field&&row[csvCol]!==undefined) emp[field]=row[csvCol];
+      });
+      // Validate
+      if(!emp.first&&!emp.last) errs.push({row:idx+2,msg:'Prenom et Nom manquants'});
+      if(!emp.monthlySalary||isNaN(+emp.monthlySalary)) errs.push({row:idx+2,msg:'Salaire brut manquant ou invalide: "'+emp.monthlySalary+'"'});
+      // Clean
+      if(emp.monthlySalary) emp.monthlySalary=parseFloat((''+emp.monthlySalary).replace(/[^0-9.,]/g,'').replace(',','.'));
+      if(emp.whWeek) emp.whWeek=parseFloat((''+emp.whWeek).replace(',','.'))||38;
+      if(emp.depChildren) emp.depChildren=parseInt(emp.depChildren)||0;
+      if(!emp.contractType) emp.contractType='CDI';
+      if(!emp.statut) emp.statut='employe';
+      if(!emp.whWeek) emp.whWeek=38;
+      return emp;
+    });
+    setPreview(rows);
+    setErrors(errs);
+    setStep(3);
+  };
+
+  const doImport=()=>{
+    if(!selClient) return;
+    setImporting(true);
+    const cl=clients.find(c=>c.id===selClient);
+    if(!cl) return;
+    const existing=cl.emps||[];
+    const newEmps=[...existing,...preview.filter(e=>e.first||e.last)];
+    cl.emps=newEmps;
+    d({...s,clients:clients.map(c=>c.id===selClient?{...c,emps:newEmps}:c)});
+    setResults({added:preview.filter(e=>e.first||e.last).length,total:newEmps.length,client:cl.company?.name});
+    setStep(4);
+    setImporting(false);
+  };
+
+  return <div style={{padding:24}}>
+    <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>📥 Import CSV / Excel</h2>
+    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>Importez vos employes depuis un fichier CSV, TSV ou Excel exporte en CSV</p>
+
+    {/* Progress */}
+    <div style={{display:'flex',gap:4,marginBottom:20}}>
+      {[{n:1,l:'Upload'},{n:2,l:'Mapping'},{n:3,l:'Verification'},{n:4,l:'Termine'}].map(st=>
+        <div key={st.n} style={{flex:1,padding:'8px',textAlign:'center',borderRadius:6,background:step>=st.n?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:step>=st.n?'#c6a34e':'#555',fontSize:11,fontWeight:step===st.n?700:400}}>
+          {st.n}. {st.l}
+        </div>
+      )}
+    </div>
+
+    {step===1&&<div style={{border:'2px dashed rgba(198,163,78,.2)',borderRadius:16,padding:40,textAlign:'center',cursor:'pointer'}} onClick={()=>document.getElementById('csv-input')?.click()}>
+      <input id="csv-input" type="file" accept=".csv,.tsv,.txt" style={{display:'none'}} onChange={handleFile}/>
+      <div style={{fontSize:40,marginBottom:12}}>📄</div>
+      <div style={{fontSize:14,color:'#c6a34e',fontWeight:600}}>Cliquez ou glissez votre fichier CSV</div>
+      <div style={{fontSize:11,color:'#888',marginTop:6}}>Formats acceptes : .csv .tsv .txt — Separateur auto-detecte (virgule, point-virgule, tabulation)</div>
+      <div style={{marginTop:16,padding:12,background:'rgba(59,130,246,.04)',borderRadius:10,textAlign:'left',maxWidth:400,margin:'16px auto 0'}}>
+        <div style={{fontSize:10,fontWeight:600,color:'#3b82f6',marginBottom:4}}>💡 Format recommande</div>
+        <div style={{fontSize:9,color:'#888',fontFamily:'monospace',lineHeight:1.8}}>
+          Prenom;Nom;Email;Salaire brut;Fonction;NISS<br/>
+          Jean;Dupont;jean@mail.be;3500;Comptable;85010112345<br/>
+          Marie;Martin;marie@mail.be;2800;Admin;90051554321
+        </div>
+      </div>
+    </div>}
+
+    {step===2&&parsed&&<div>
+      <div style={{fontSize:13,fontWeight:600,color:'#e5e5e5',marginBottom:12}}>Mappez vos colonnes ({parsed.headers.length} colonnes detectees, {parsed.rows.length} lignes)</div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 20px 1fr',gap:8,alignItems:'center'}}>
+        <div style={{fontSize:10,fontWeight:600,color:'#888'}}>COLONNE CSV</div>
+        <div></div>
+        <div style={{fontSize:10,fontWeight:600,color:'#888'}}>CHAMP AUREUS</div>
+        {parsed.headers.map((h,i)=><React.Fragment key={i}>
+          <div style={{padding:'8px 12px',background:'rgba(255,255,255,.03)',borderRadius:6,fontSize:12,color:'#e5e5e5'}}>
+            {h}
+            <div style={{fontSize:9,color:'#888'}}>ex: {parsed.rows[0]?.[h]||'-'}</div>
+          </div>
+          <div style={{textAlign:'center',color:'#888'}}>→</div>
+          <select value={mapping[h]||''} onChange={e=>setMapping(p=>({...p,[h]:e.target.value}))} style={{padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:mapping[h]?'#c6a34e':'#555',fontSize:11,fontFamily:'inherit'}}>
+            <option value="">— Ignorer —</option>
+            {FIELDS.map(fd=><option key={fd.key} value={fd.key}>{fd.label}{fd.required?' *':''}</option>)}
+          </select>
+        </React.Fragment>)}
+      </div>
+      <div style={{display:'flex',gap:10,marginTop:16}}>
+        <button onClick={()=>setStep(1)} style={{padding:'10px 20px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>← Retour</button>
+        <button onClick={buildPreview} style={{flex:1,padding:'10px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:'inherit'}}>Verifier les donnees →</button>
+      </div>
+    </div>}
+
+    {step===3&&<div>
+      {errors.length>0&&<div style={{padding:12,background:'rgba(239,68,68,.06)',border:'1px solid rgba(239,68,68,.15)',borderRadius:10,marginBottom:12}}>
+        <div style={{fontSize:11,fontWeight:600,color:'#ef4444',marginBottom:4}}>⚠ {errors.length} avertissement(s)</div>
+        {errors.slice(0,5).map((e,i)=><div key={i} style={{fontSize:10,color:'#ef4444'}}>Ligne {e.row}: {e.msg}</div>)}
+        {errors.length>5&&<div style={{fontSize:10,color:'#888'}}>... et {errors.length-5} autres</div>}
+      </div>}
+
+      <div style={{fontSize:13,fontWeight:600,color:'#e5e5e5',marginBottom:8}}>{preview.length} employe(s) a importer</div>
+      <div style={{overflowX:'auto',border:'1px solid rgba(198,163,78,.1)',borderRadius:10}}>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:10}}>
+          <thead><tr style={{background:'rgba(198,163,78,.06)'}}>
+            {['Prenom','Nom','Email','Salaire','Fonction','NISS','Contrat','Heures'].map(h=><th key={h} style={{padding:'8px 6px',textAlign:'left',color:'#c6a34e',fontWeight:600}}>{h}</th>)}
+          </tr></thead>
+          <tbody>
+            {preview.slice(0,20).map((e,i)=><tr key={i} style={{borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <td style={{padding:'6px'}}>{e.first||<span style={{color:'#ef4444'}}>-</span>}</td>
+              <td style={{padding:'6px'}}>{e.last||<span style={{color:'#ef4444'}}>-</span>}</td>
+              <td style={{padding:'6px',color:'#3b82f6'}}>{e.email||'-'}</td>
+              <td style={{padding:'6px',color:'#22c55e',fontWeight:600}}>{e.monthlySalary?new Intl.NumberFormat('fr-BE').format(e.monthlySalary)+' EUR':'-'}</td>
+              <td style={{padding:'6px'}}>{e.function||'-'}</td>
+              <td style={{padding:'6px',fontFamily:'monospace',fontSize:9}}>{e.niss||'-'}</td>
+              <td style={{padding:'6px'}}>{e.contractType||'CDI'}</td>
+              <td style={{padding:'6px'}}>{e.whWeek||38}h</td>
+            </tr>)}
+            {preview.length>20&&<tr><td colSpan={8} style={{padding:8,textAlign:'center',color:'#888'}}>... et {preview.length-20} autres</td></tr>}
+          </tbody>
+        </table>
+      </div>
+
+      <div style={{marginTop:12}}>
+        <div style={{fontSize:10,color:'#888',marginBottom:4}}>Importer dans quel client ?</div>
+        <select value={selClient} onChange={e=>setSelClient(e.target.value)} style={{width:'100%',padding:'10px',background:'#090c16',border:'1px solid rgba(139,115,60,.2)',borderRadius:8,color:'#e5e5e5',fontSize:12,fontFamily:'inherit'}}>
+          <option value="">Selectionnez le client employeur</option>
+          {clients.map((c,i)=><option key={i} value={c.id}>{c.company?.name} ({(c.emps||[]).length} emp.)</option>)}
+        </select>
+      </div>
+
+      <div style={{display:'flex',gap:10,marginTop:16}}>
+        <button onClick={()=>setStep(2)} style={{padding:'10px 20px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>← Mapping</button>
+        <button onClick={doImport} disabled={!selClient||importing} style={{flex:1,padding:'12px',borderRadius:8,border:'none',background:!selClient?'rgba(198,163,78,.1)':'linear-gradient(135deg,#22c55e,#16a34a)',color:!selClient?'#555':'#fff',fontWeight:700,fontSize:14,cursor:!selClient?'not-allowed':'pointer',fontFamily:'inherit'}}>
+          {importing?'Import en cours...':'✅ IMPORTER '+preview.length+' EMPLOYES'}
+        </button>
+      </div>
+    </div>}
+
+    {step===4&&results&&<div style={{textAlign:'center',padding:40}}>
+      <div style={{fontSize:48,marginBottom:16}}>✅</div>
+      <div style={{fontSize:18,fontWeight:700,color:'#22c55e'}}>{results.added} employes importes !</div>
+      <div style={{fontSize:12,color:'#888',marginTop:4}}>Dans {results.client} — Total: {results.total} employes</div>
+      <div style={{display:'flex',gap:10,justifyContent:'center',marginTop:20}}>
+        <button onClick={()=>{setStep(1);setFile(null);setParsed(null);setPreview([]);setResults(null);}} style={{padding:'10px 20px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>📥 Importer un autre fichier</button>
+      </div>
+    </div>}
+  </div>;
+};
+
+// ═══ 2. ONBOARDING GUIDE — Wizard premiere utilisation ═══
+const OnboardingWizard=({s,d,setPage})=>{
+  const [step,setStep]=useState(0);
+  const [companyData,setCompanyData]=useState({name:'',vat:'',address:'',email:'',phone:'',cp:'200',onss:'',representant:'',qualite:'gerant',forme:'SRL'});
+  const [empData,setEmpData]=useState([{first:'',last:'',email:'',monthlySalary:'',function:'',contractType:'CDI',niss:''}]);
+  const [creating,setCreating]=useState(false);
+  const [done,setDone]=useState(false);
+  const clients=s.clients||[];
+
+  const steps=[
+    {icon:'🏢',title:'Votre premier client',desc:'Renseignez les infos de l entreprise'},
+    {icon:'👤',title:'Les employes',desc:'Ajoutez au moins un employe'},
+    {icon:'✅',title:'Confirmation',desc:'Tout est pret !'}
+  ];
+
+  const addEmp=()=>setEmpData(p=>[...p,{first:'',last:'',email:'',monthlySalary:'',function:'',contractType:'CDI',niss:''}]);
+  const updateEmp=(idx,key,val)=>setEmpData(p=>p.map((e,i)=>i===idx?{...e,[key]:val}:e));
+
+  const createClient=()=>{
+    setCreating(true);
+    const newClient={
+      id:'CL-'+Date.now(),
+      company:{...companyData},
+      emps:empData.filter(e=>e.first&&e.last).map((e,i)=>({
+        id:'EMP-'+Date.now()+'-'+i,
+        first:e.first,last:e.last,email:e.email,
+        monthlySalary:parseFloat((''+e.monthlySalary).replace(',','.'))||0,
+        function:e.function,contractType:e.contractType,
+        niss:e.niss,whWeek:38,statut:'employe',status:'actif',
+        startDate:new Date().toISOString().split('T')[0]
+      }))
+    };
+    const updatedClients=[...clients,newClient];
+    d({...s,clients:updatedClients});
+    setDone(true);
+    setCreating(false);
+  };
+
+  const inputStyle={width:'100%',padding:'10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,color:'#e5e5e5',fontSize:12,fontFamily:'inherit',boxSizing:'border-box'};
+
+  return <div style={{padding:24,maxWidth:700,margin:'0 auto'}}>
+    <div style={{textAlign:'center',marginBottom:24}}>
+      <h2 style={{fontSize:24,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>🚀 Bienvenue sur Aureus Social Pro</h2>
+      <p style={{fontSize:13,color:'#888'}}>Configurons votre premier client en 3 etapes</p>
+    </div>
+
+    {/* Progress */}
+    <div style={{display:'flex',gap:4,marginBottom:24}}>
+      {steps.map((st,i)=><div key={i} style={{flex:1,padding:'10px',textAlign:'center',borderRadius:8,background:step>=i?'rgba(198,163,78,.12)':'rgba(255,255,255,.02)',border:'1px solid '+(step===i?'rgba(198,163,78,.3)':'transparent')}}>
+        <div style={{fontSize:20}}>{st.icon}</div>
+        <div style={{fontSize:11,fontWeight:step===i?700:400,color:step>=i?'#c6a34e':'#555'}}>{st.title}</div>
+      </div>)}
+    </div>
+
+    {/* Step 0: Company */}
+    {step===0&&!done&&<div style={{padding:20,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.1)',borderRadius:14}}>
+      <div style={{fontSize:14,fontWeight:600,color:'#c6a34e',marginBottom:16}}>🏢 Informations de l entreprise cliente</div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+        <div>
+          <div style={{fontSize:10,color:'#888',marginBottom:3}}>Denomination sociale *</div>
+          <input value={companyData.name} onChange={e=>setCompanyData(p=>({...p,name:e.target.value}))} placeholder="Ex: Dupont SPRL" style={inputStyle}/>
+        </div>
+        <div>
+          <div style={{fontSize:10,color:'#888',marginBottom:3}}>Forme juridique</div>
+          <select value={companyData.forme} onChange={e=>setCompanyData(p=>({...p,forme:e.target.value}))} style={inputStyle}>
+            {['SRL','SA','SC','ASBL','SNC','SCS','Personne physique'].map(f2=><option key={f2}>{f2}</option>)}
+          </select>
+        </div>
+        <div>
+          <div style={{fontSize:10,color:'#888',marginBottom:3}}>Numero BCE / TVA *</div>
+          <input value={companyData.vat} onChange={e=>setCompanyData(p=>({...p,vat:e.target.value}))} placeholder="BE 0XXX.XXX.XXX" style={inputStyle}/>
+        </div>
+        <div>
+          <div style={{fontSize:10,color:'#888',marginBottom:3}}>Numero ONSS</div>
+          <input value={companyData.onss} onChange={e=>setCompanyData(p=>({...p,onss:e.target.value}))} placeholder="XXX-XXXXXXX-XX" style={inputStyle}/>
+        </div>
+        <div style={{gridColumn:'1/-1'}}>
+          <div style={{fontSize:10,color:'#888',marginBottom:3}}>Adresse du siege social *</div>
+          <input value={companyData.address} onChange={e=>setCompanyData(p=>({...p,address:e.target.value}))} placeholder="Rue, numero, code postal, ville" style={inputStyle}/>
+        </div>
+        <div>
+          <div style={{fontSize:10,color:'#888',marginBottom:3}}>Email de l employeur *</div>
+          <input value={companyData.email} onChange={e=>setCompanyData(p=>({...p,email:e.target.value}))} placeholder="contact@entreprise.be" type="email" style={inputStyle}/>
+        </div>
+        <div>
+          <div style={{fontSize:10,color:'#888',marginBottom:3}}>Telephone</div>
+          <input value={companyData.phone} onChange={e=>setCompanyData(p=>({...p,phone:e.target.value}))} placeholder="+32 XXX XX XX XX" style={inputStyle}/>
+        </div>
+        <div>
+          <div style={{fontSize:10,color:'#888',marginBottom:3}}>Commission Paritaire *</div>
+          <select value={companyData.cp} onChange={e=>setCompanyData(p=>({...p,cp:e.target.value}))} style={inputStyle}>
+            <option value="200">CP 200 — Auxiliaire employes</option>
+            <option value="100">CP 100 — Auxiliaire ouvriers</option>
+            <option value="124">CP 124 — Construction</option>
+            <option value="140">CP 140 — Transport</option>
+            <option value="302">CP 302 — Horeca</option>
+            <option value="111">CP 111 — Metal</option>
+            <option value="209">CP 209 — Employes metal</option>
+            <option value="226">CP 226 — Commerce international</option>
+            <option value="330">CP 330 — Soins de sante</option>
+            <option value="110">CP 110 — Textile</option>
+          </select>
+        </div>
+        <div>
+          <div style={{fontSize:10,color:'#888',marginBottom:3}}>Representant legal</div>
+          <input value={companyData.representant} onChange={e=>setCompanyData(p=>({...p,representant:e.target.value}))} placeholder="Nom du gerant" style={inputStyle}/>
+        </div>
+      </div>
+      <button onClick={()=>setStep(1)} disabled={!companyData.name||!companyData.vat} style={{width:'100%',marginTop:16,padding:'12px',borderRadius:10,border:'none',background:(!companyData.name||!companyData.vat)?'rgba(198,163,78,.1)':'linear-gradient(135deg,#c6a34e,#a07d3e)',color:(!companyData.name||!companyData.vat)?'#555':'#060810',fontWeight:700,fontSize:14,cursor:(!companyData.name||!companyData.vat)?'not-allowed':'pointer',fontFamily:'inherit'}}>Suivant →</button>
+    </div>}
+
+    {/* Step 1: Employees */}
+    {step===1&&!done&&<div style={{padding:20,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.1)',borderRadius:14}}>
+      <div style={{fontSize:14,fontWeight:600,color:'#c6a34e',marginBottom:4}}>👤 Employes de {companyData.name}</div>
+      <div style={{fontSize:11,color:'#888',marginBottom:16}}>Ajoutez au moins un employe. Vous pourrez en ajouter d autres plus tard ou importer un fichier CSV.</div>
+      {empData.map((emp,idx)=><div key={idx} style={{padding:12,background:'rgba(255,255,255,.02)',borderRadius:10,marginBottom:8,border:'1px solid rgba(255,255,255,.03)'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+          <span style={{fontSize:11,fontWeight:600,color:'#3b82f6'}}>Employe {idx+1}</span>
+          {empData.length>1&&<span onClick={()=>setEmpData(p=>p.filter((_,i)=>i!==idx))} style={{fontSize:10,color:'#ef4444',cursor:'pointer'}}>Supprimer</span>}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>
+          <input value={emp.first} onChange={e=>updateEmp(idx,'first',e.target.value)} placeholder="Prenom *" style={{...inputStyle,padding:'8px'}}/>
+          <input value={emp.last} onChange={e=>updateEmp(idx,'last',e.target.value)} placeholder="Nom *" style={{...inputStyle,padding:'8px'}}/>
+          <input value={emp.email} onChange={e=>updateEmp(idx,'email',e.target.value)} placeholder="Email" style={{...inputStyle,padding:'8px'}}/>
+          <input value={emp.monthlySalary} onChange={e=>updateEmp(idx,'monthlySalary',e.target.value)} placeholder="Salaire brut *" style={{...inputStyle,padding:'8px'}}/>
+          <input value={emp.function} onChange={e=>updateEmp(idx,'function',e.target.value)} placeholder="Fonction" style={{...inputStyle,padding:'8px'}}/>
+          <input value={emp.niss} onChange={e=>updateEmp(idx,'niss',e.target.value)} placeholder="NISS" style={{...inputStyle,padding:'8px'}}/>
+        </div>
+      </div>)}
+      <button onClick={addEmp} style={{width:'100%',padding:'8px',borderRadius:8,border:'1px dashed rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:11,cursor:'pointer',fontFamily:'inherit',marginBottom:12}}>+ Ajouter un employe</button>
+      <div style={{display:'flex',gap:10}}>
+        <button onClick={()=>setStep(0)} style={{padding:'10px 20px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>← Retour</button>
+        <button onClick={()=>setStep(2)} disabled={!empData.some(e=>e.first&&e.last)} style={{flex:1,padding:'12px',borderRadius:10,border:'none',background:!empData.some(e=>e.first&&e.last)?'rgba(198,163,78,.1)':'linear-gradient(135deg,#c6a34e,#a07d3e)',color:!empData.some(e=>e.first&&e.last)?'#555':'#060810',fontWeight:700,fontSize:14,cursor:'pointer',fontFamily:'inherit'}}>Verifier →</button>
+      </div>
+    </div>}
+
+    {/* Step 2: Confirmation */}
+    {step===2&&!done&&<div style={{padding:20,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.1)',borderRadius:14}}>
+      <div style={{fontSize:14,fontWeight:600,color:'#c6a34e',marginBottom:16}}>✅ Verification</div>
+      <div style={{padding:14,background:'rgba(255,255,255,.02)',borderRadius:10,marginBottom:12}}>
+        <div style={{fontSize:13,fontWeight:700,color:'#e5e5e5'}}>{companyData.name}</div>
+        <div style={{fontSize:11,color:'#888',marginTop:4}}>BCE: {companyData.vat} — CP: {companyData.cp} — {companyData.forme}</div>
+        <div style={{fontSize:11,color:'#888'}}>{companyData.address}</div>
+        <div style={{fontSize:11,color:'#3b82f6'}}>{companyData.email} — {companyData.phone}</div>
+      </div>
+      <div style={{fontSize:12,fontWeight:600,color:'#e5e5e5',marginBottom:8}}>{empData.filter(e=>e.first&&e.last).length} employe(s) :</div>
+      {empData.filter(e=>e.first&&e.last).map((e,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 10px',background:'rgba(255,255,255,.02)',borderRadius:6,marginBottom:4,fontSize:11}}>
+        <span style={{color:'#e5e5e5'}}>{e.first} {e.last}</span>
+        <span style={{color:'#22c55e',fontWeight:600}}>{e.monthlySalary?new Intl.NumberFormat('fr-BE').format(parseFloat((''+e.monthlySalary).replace(',','.'))||0)+' EUR':'-'}</span>
+      </div>)}
+      <div style={{display:'flex',gap:10,marginTop:16}}>
+        <button onClick={()=>setStep(1)} style={{padding:'10px 20px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>← Modifier</button>
+        <button onClick={createClient} disabled={creating} style={{flex:1,padding:'14px',borderRadius:10,border:'none',background:'linear-gradient(135deg,#22c55e,#16a34a)',color:'#fff',fontWeight:700,fontSize:15,cursor:'pointer',fontFamily:'inherit',boxShadow:'0 4px 20px rgba(34,197,94,.3)'}}>
+          {creating?'Creation...':'🚀 CREER LE CLIENT'}
+        </button>
+      </div>
+    </div>}
+
+    {/* Done */}
+    {done&&<div style={{textAlign:'center',padding:30}}>
+      <div style={{fontSize:56,marginBottom:16}}>🎉</div>
+      <div style={{fontSize:20,fontWeight:700,color:'#22c55e'}}>Client cree avec succes !</div>
+      <div style={{fontSize:13,color:'#888',marginTop:8}}>{companyData.name} — {empData.filter(e=>e.first&&e.last).length} employe(s)</div>
+      <div style={{marginTop:20,padding:16,background:'rgba(198,163,78,.04)',borderRadius:12,textAlign:'left',maxWidth:400,margin:'20px auto 0'}}>
+        <div style={{fontSize:12,fontWeight:600,color:'#c6a34e',marginBottom:8}}>Prochaines etapes :</div>
+        {[
+          {icon:'📝',text:'Generer les contrats de travail',page:'contratgen'},
+          {icon:'🏎️',text:'Lancer le Pilote Auto (calcul paie)',page:'piloteauto'},
+          {icon:'📧',text:'Envoyer les fiches aux employes',page:'envoiMasse'},
+          {icon:'📥',text:'Importer plus d employes (CSV)',page:'importcsv'}
+        ].map((a,i)=><div key={i} onClick={()=>setPage&&setPage(a.page)} style={{display:'flex',alignItems:'center',gap:8,padding:'8px',borderRadius:6,cursor:'pointer',marginBottom:4,background:'rgba(255,255,255,.02)'}}>
+          <span style={{fontSize:16}}>{a.icon}</span>
+          <span style={{fontSize:12,color:'#e5e5e5'}}>{a.text}</span>
+          <span style={{marginLeft:'auto',color:'#c6a34e',fontSize:10}}>→</span>
+        </div>)}
+      </div>
+    </div>}
+  </div>;
+};
+
 const PlanAbsences=({s,d})=>{
   const clients=s.clients||[];
   const [selClient,setSelClient]=useState(0);
@@ -12713,6 +13141,8 @@ const AutomationHub=({s,d})=>{
       case'validation':return <ValidationEngine s={s}/>;
       case'exportbatch':return <ExportBatch s={s}/>;
       case'rgpd':return <RGPDManager s={s}/>;
+      case'importcsv':return <ImportCSV s={s} d={d}/>;
+      case'onboarding2':return <OnboardingWizard s={s} d={d} setPage={setPage}/>;
       case'contratgen':return <ContratGenerator s={s} d={d} user={user}/>;
       case'recapemployeur':return <RecapEmployeur s={s} user={user}/>;
       case'envoiMasse':return <EnvoiMasse s={s} user={user}/>;
