@@ -1,5 +1,41 @@
 // Aureus Social Pro v20.2
-"use client";
+"use client"
+
+  // Sprint 33: Tabs + Absences encoding
+  const [dcTab,setDcTab]=useState('overview');
+  const [absMonth,setAbsMonth]=useState(new Date().getMonth()+1);
+  const [absYear,setAbsYear]=useState(new Date().getFullYear());
+  const [showAbsForm,setShowAbsForm]=useState(false);
+  const [absForm,setAbsForm]=useState({empId:'',type:'conge',dateDebut:'',dateFin:'',motif:''});
+  const absTypes=[{id:'conge',icon:'🏖',label:'Conge paye',c:'#22c55e'},{id:'maladie',icon:'🤒',label:'Maladie',c:'#ef4444'},{id:'formation',icon:'📚',label:'Formation',c:'#3b82f6'},{id:'teletravail',icon:'🏠',label:'Teletravail',c:'#a855f7'},{id:'recup',icon:'⏰',label:'Recuperation',c:'#eab308'},{id:'sans_solde',icon:'⚪',label:'Sans solde',c:'#888'},{id:'maternite',icon:'🤱',label:'Maternite',c:'#ec4899'},{id:'naissance',icon:'👶',label:'Conge naissance',c:'#06b6d4'}];
+
+  const addAbsence=()=>{
+    if(!absForm.empId||!absForm.dateDebut) return;
+    const absence={id:'ABS-'+Date.now(),type:absForm.type,dateDebut:absForm.dateDebut,dateFin:absForm.dateFin||absForm.dateDebut,motif:absForm.motif,createdAt:new Date().toISOString(),status:'validee'};
+    const updEmps=emps.map(e2=>e2.id===absForm.empId?{...e2,absences:[...(e2.absences||[]),absence]}:e2);
+    const updClients=(s.clients||[]).map(c2=>c2===cl?{...c2,emps:updEmps}:c2);
+    if(d) d({...s,clients:updClients});
+    setAbsForm({empId:'',type:'conge',dateDebut:'',dateFin:'',motif:''});
+    setShowAbsForm(false);
+  };
+
+  const deleteAbsence=(empId2,absId)=>{
+    const updEmps=emps.map(e2=>e2.id===empId2?{...e2,absences:(e2.absences||[]).filter(a=>a.id!==absId)}:e2);
+    const updClients=(s.clients||[]).map(c2=>c2===cl?{...c2,emps:updEmps}:c2);
+    if(d) d({...s,clients:updClients});
+  };
+
+  const getDaysInMonth2=(m,y)=>new Date(y,m,0).getDate();
+  const daysInMonth=getDaysInMonth2(absMonth,absYear);
+  const moisNoms2=['','Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
+
+  const isAbsentDay=(emp2,day)=>{
+    const dateStr=absYear+'-'+String(absMonth).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+    return (emp2.absences||[]).find(a=>{const d1=a.dateDebut;const d2=a.dateFin||a.dateDebut;return dateStr>=d1&&dateStr<=d2;});
+  };
+
+  const allAbsThisMonth=emps.reduce((a,e2)=>[...a,...(e2.absences||[]).filter(ab=>{const m=parseInt(ab.dateDebut?.split('-')[1]);const y=parseInt(ab.dateDebut?.split('-')[0]);return m===absMonth&&y===absYear;}).map(ab=>({...ab,empName:(e2.first||e2.fn||'')+' '+(e2.last||e2.ln||''),empId:e2.id}))],[]);
+;
 import { useState, useReducer, useRef, useMemo, useEffect, createContext, useContext } from "react";
 
 // ═══════════════════════════════════════════════════════════════
@@ -8975,7 +9011,7 @@ const PortailEmploye=({s})=>{
 };
 
 // ═══ 3. DASHBOARD CLIENT — Vue par client ═══
-const DashboardClient=({s})=>{
+const DashboardClient=({s,d})=>{
   const clients=s.clients||[];
   const [sel,setSel]=useState(0);
   const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
@@ -9019,6 +9055,132 @@ const DashboardClient=({s})=>{
         <div style={{fontSize:9,color:'#888'}}>Score sante</div>
       </div>
     </div>
+
+    {/* Tabs */}
+    <div style={{display:'flex',gap:4,marginBottom:16,borderBottom:'1px solid rgba(198,163,78,.1)',paddingBottom:8}}>
+      {[{id:'overview',l:'📊 Vue d ensemble'},{id:'absences',l:'📅 Absences ('+allAbsThisMonth.length+')'},{id:'equipe',l:'👤 Equipe'},{id:'docs',l:'📄 Documents'}].map(t=>
+        <button key={t.id} onClick={()=>setDcTab(t.id)} style={{padding:'8px 16px',borderRadius:8,border:'none',background:dcTab===t.id?'rgba(198,163,78,.15)':'transparent',color:dcTab===t.id?'#c6a34e':'#888',fontWeight:dcTab===t.id?600:400,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>{t.l}</button>
+      )}
+    </div>
+
+    {dcTab==='absences'&&<div>
+      {/* Absence controls */}
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+        <div style={{display:'flex',gap:6,alignItems:'center'}}>
+          <button onClick={()=>{const nm=absMonth===1?12:absMonth-1;const ny=absMonth===1?absYear-1:absYear;setAbsMonth(nm);setAbsYear(ny);}} style={{padding:'4px 8px',borderRadius:6,border:'1px solid rgba(198,163,78,.15)',background:'transparent',color:'#c6a34e',cursor:'pointer',fontSize:11,fontFamily:'inherit'}}>←</button>
+          <span style={{fontSize:14,fontWeight:700,color:'#c6a34e',minWidth:140,textAlign:'center'}}>{moisNoms2[absMonth]} {absYear}</span>
+          <button onClick={()=>{const nm=absMonth===12?1:absMonth+1;const ny=absMonth===12?absYear+1:absYear;setAbsMonth(nm);setAbsYear(ny);}} style={{padding:'4px 8px',borderRadius:6,border:'1px solid rgba(198,163,78,.15)',background:'transparent',color:'#c6a34e',cursor:'pointer',fontSize:11,fontFamily:'inherit'}}>→</button>
+        </div>
+        <button onClick={()=>setShowAbsForm(!showAbsForm)} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>+ Encoder une absence</button>
+      </div>
+
+      {/* Absence form */}
+      {showAbsForm&&<div style={{padding:16,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.2)',borderRadius:12,marginBottom:14}}>
+        <div style={{fontSize:12,fontWeight:600,color:'#c6a34e',marginBottom:10}}>Nouvelle absence</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
+          <div>
+            <div style={{fontSize:9,color:'#888',marginBottom:3}}>Employe *</div>
+            <select value={absForm.empId} onChange={e=>setAbsForm(p=>({...p,empId:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
+              <option value="">Choisir...</option>
+              {emps.map(e2=><option key={e2.id} value={e2.id}>{(e2.first||e2.fn||'')+' '+(e2.last||e2.ln||'')}</option>)}
+            </select>
+          </div>
+          <div>
+            <div style={{fontSize:9,color:'#888',marginBottom:3}}>Type *</div>
+            <select value={absForm.type} onChange={e=>setAbsForm(p=>({...p,type:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
+              {absTypes.map(t=><option key={t.id} value={t.id}>{t.icon} {t.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <div style={{fontSize:9,color:'#888',marginBottom:3}}>Motif</div>
+            <input value={absForm.motif} onChange={e=>setAbsForm(p=>({...p,motif:e.target.value}))} placeholder="Optionnel" style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit',boxSizing:'border-box'}}/>
+          </div>
+          <div>
+            <div style={{fontSize:9,color:'#888',marginBottom:3}}>Date debut *</div>
+            <input type="date" value={absForm.dateDebut} onChange={e=>setAbsForm(p=>({...p,dateDebut:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit',boxSizing:'border-box'}}/>
+          </div>
+          <div>
+            <div style={{fontSize:9,color:'#888',marginBottom:3}}>Date fin</div>
+            <input type="date" value={absForm.dateFin} onChange={e=>setAbsForm(p=>({...p,dateFin:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit',boxSizing:'border-box'}}/>
+          </div>
+          <div style={{display:'flex',alignItems:'flex-end'}}>
+            <button onClick={addAbsence} disabled={!absForm.empId||!absForm.dateDebut} style={{width:'100%',padding:'8px',borderRadius:6,border:'none',background:(!absForm.empId||!absForm.dateDebut)?'rgba(198,163,78,.1)':'#22c55e',color:(!absForm.empId||!absForm.dateDebut)?'#555':'#fff',fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>✅ Valider</button>
+          </div>
+        </div>
+      </div>}
+
+      {/* Calendar grid */}
+      <div style={{overflowX:'auto',border:'1px solid rgba(198,163,78,.1)',borderRadius:12}}>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:9}}>
+          <thead><tr style={{background:'rgba(198,163,78,.06)'}}>
+            <th style={{padding:'8px 6px',textAlign:'left',color:'#c6a34e',fontWeight:600,fontSize:10,minWidth:120,position:'sticky',left:0,background:'#0d1117',zIndex:1}}>Employe</th>
+            {Array.from({length:daysInMonth},(_, i)=>{
+              const dow=new Date(absYear,absMonth-1,i+1).getDay();
+              const isWE=dow===0||dow===6;
+              return <th key={i} style={{padding:'4px 2px',textAlign:'center',color:isWE?'#555':'#888',fontWeight:isWE?400:500,fontSize:9,background:isWE?'rgba(255,255,255,.02)':'transparent',minWidth:22}}>{i+1}</th>;
+            })}
+            <th style={{padding:'4px 6px',textAlign:'center',color:'#c6a34e',fontWeight:600,fontSize:9}}>Total</th>
+          </tr></thead>
+          <tbody>
+            {emps.map((emp2,idx)=>{
+              let absDays=0;
+              return <tr key={idx} style={{borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+                <td style={{padding:'6px',fontWeight:500,color:'#e5e5e5',fontSize:10,position:'sticky',left:0,background:'#0d1117',zIndex:1}}>{(emp2.first||emp2.fn||'').charAt(0)+(emp2.last||emp2.ln||'').charAt(0)} {(emp2.first||emp2.fn||'')} {(emp2.last||emp2.ln||'')}</td>
+                {Array.from({length:daysInMonth},(_,i)=>{
+                  const day=i+1;
+                  const dow=new Date(absYear,absMonth-1,day).getDay();
+                  const isWE=dow===0||dow===6;
+                  const abs=isAbsentDay(emp2,day);
+                  if(abs&&!isWE) absDays++;
+                  const absT=abs?absTypes.find(t=>t.id===abs.type):null;
+                  return <td key={i} style={{padding:'2px',textAlign:'center',background:isWE?'rgba(255,255,255,.02)':abs?absT?.c+'15':'transparent',cursor:isWE?'default':'pointer',borderRadius:2}} title={abs?(absT?.label+' — '+(abs.motif||'')):(isWE?'Weekend':'Cliquez pour encoder')}>
+                    {abs?<span style={{fontSize:8}}>{absT?.icon||'•'}</span>:isWE?<span style={{color:'#333',fontSize:7}}>·</span>:''}
+                  </td>;
+                })}
+                <td style={{padding:'4px 6px',textAlign:'center',fontWeight:600,color:absDays>0?'#ef4444':'#22c55e',fontSize:10}}>{absDays}j</td>
+              </tr>;
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Legend */}
+      <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:10}}>
+        {absTypes.map(t=><div key={t.id} style={{display:'flex',alignItems:'center',gap:3,fontSize:9,color:'#888'}}>
+          <span>{t.icon}</span><span>{t.label}</span>
+        </div>)}
+      </div>
+
+      {/* Recent absences list */}
+      {allAbsThisMonth.length>0&&<div style={{marginTop:14,border:'1px solid rgba(198,163,78,.1)',borderRadius:12,overflow:'hidden'}}>
+        <div style={{padding:'10px 14px',background:'rgba(198,163,78,.06)',fontSize:11,fontWeight:600,color:'#c6a34e'}}>📋 Absences du mois ({allAbsThisMonth.length})</div>
+        {allAbsThisMonth.map((a,i)=>{
+          const at=absTypes.find(t=>t.id===a.type);
+          return <div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'8px 14px',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <span style={{fontSize:14}}>{at?.icon||'📅'}</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:11,fontWeight:500,color:'#e5e5e5'}}>{a.empName}</div>
+              <div style={{fontSize:9,color:'#888'}}>{at?.label} — {a.dateDebut}{a.dateFin&&a.dateFin!==a.dateDebut?' → '+a.dateFin:''} {a.motif?'('+a.motif+')':''}</div>
+            </div>
+            <span onClick={()=>deleteAbsence(a.empId,a.id)} style={{fontSize:10,color:'#ef4444',cursor:'pointer',padding:'4px 8px',borderRadius:4,background:'rgba(239,68,68,.06)'}}>✕</span>
+          </div>;
+        })}
+      </div>}
+
+      {/* Impact paie */}
+      <div style={{marginTop:14,padding:14,background:'rgba(59,130,246,.04)',border:'1px solid rgba(59,130,246,.1)',borderRadius:12}}>
+        <div style={{fontSize:11,fontWeight:600,color:'#3b82f6',marginBottom:6}}>💡 Impact sur la paie</div>
+        <div style={{fontSize:10,color:'#888',lineHeight:1.6}}>
+          Les absences encodees sont automatiquement prises en compte lors du calcul de paie :<br/>
+          • <strong style={{color:'#22c55e'}}>Conge paye</strong> : salaire maintenu (Lois coord. 28/6/1971)<br/>
+          • <strong style={{color:'#ef4444'}}>Maladie</strong> : salaire garanti 30j employe / 7j ouvrier, puis mutuelle (Art. 70/52 Loi 3/7/1978)<br/>
+          • <strong style={{color:'#888'}}>Sans solde</strong> : deduction au prorata des jours<br/>
+          • <strong style={{color:'#a855f7'}}>Teletravail</strong> : salaire maintenu + indemnite bureau
+        </div>
+      </div>
+    </div>}
+
+    {dcTab!=='absences'&&<React.Fragment>
 
     {/* KPIs */}
     <div style={{display:'grid',gridTemplateColumns:'repeat(6,1fr)',gap:10,marginBottom:16}}>
@@ -9075,6 +9237,7 @@ const DashboardClient=({s})=>{
         </div>
       )}
     </div>
+    </React.Fragment>}
   </div>;
 };
 
@@ -13152,7 +13315,7 @@ const AutomationHub=({s,d})=>{
       case'echeancier':return <Echeancier s={s}/>;
       case'ged':return <GedDocuments s={s} d={d}/>;
       case'portail':return <PortailEmploye s={s}/>;
-      case'dashclient':return <DashboardClient s={s}/>;
+      case'dashclient':return <DashboardClient s={s} d={d}/>;
       case'comparateur':return <ComparateurSalarial s={s}/>;
       case'analytics':return <AnalyticsDash s={s}/>;
       case'exportcompta':return <ExportCompta s={s}/>;
