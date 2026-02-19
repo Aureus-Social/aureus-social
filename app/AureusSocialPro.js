@@ -7139,6 +7139,324 @@ const RGPDManager=({s})=>{
   </div>;
 };
 
+
+// ══════════════════════════════════════════════════════════════
+// ═══ SPRINT 30: RECAP EMPLOYEUR + ENVOI MASSE              ═══
+// ══════════════════════════════════════════════════════════════
+
+// ═══ 1. RECAP EMPLOYEUR — Envoi recap mensuel au client ═══
+const RecapEmployeur=({s,user})=>{
+  const clients=s.clients||[];
+  const [selClient,setSelClient]=useState('all');
+  const [month,setMonth]=useState(new Date().getMonth()+1);
+  const [year,setYear]=useState(new Date().getFullYear());
+  const [sending,setSending]=useState(false);
+  const [results,setResults]=useState([]);
+  const [preview,setPreview]=useState(null);
+  const mois=['','Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
+  const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+
+  const targetClients=selClient==='all'?clients:clients.filter(c=>c.id===selClient);
+
+  const buildRecap=(cl)=>{
+    const co=cl.company||{};
+    const emps=cl.emps||[];
+    const totalBrut=emps.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||0)),0);
+    const totalONSS_W=Math.round(totalBrut*0.1307*100)/100;
+    const totalONSS_P=Math.round(totalBrut*0.2507*100)/100;
+    const totalImp=totalBrut-totalONSS_W;
+    const totalPP=emps.reduce((a,e)=>{const b=+(e.monthlySalary||e.gross||0);const o=Math.round(b*1307)/100;const imp=b-o;const ppR=typeof calcPrecompteExact==='function'?calcPrecompteExact(b,{situation:e.civil==='married_1'?'marie_1r':'isole',enfants:+(e.depChildren||0)}):null;return a+(ppR?ppR.pp:Math.round(imp*0.2725*100)/100);},0);
+    const totalNet=emps.reduce((a,e)=>{const b=+(e.monthlySalary||e.gross||0);const o=Math.round(b*1307)/100;const imp=b-o;const ppR=typeof calcPrecompteExact==='function'?calcPrecompteExact(b,{situation:'isole',enfants:0}):null;const pp=ppR?ppR.pp:Math.round(imp*0.2725*100)/100;const bonus=ppR?ppR.bonusEmploi:0;return a+(b-o-pp+bonus);},0);
+    const totalCout=Math.round(totalBrut*1.2507*100)/100;
+    const cdi=emps.filter(e=>(e.contractType||'CDI')==='CDI').length;
+
+    return {
+      company:co, empCount:emps.length, cdi, cdd:emps.length-cdi,
+      totalBrut, totalONSS_W, totalONSS_P, totalPP, totalNet, totalCout,
+      emps:emps.map(e=>{
+        const b=+(e.monthlySalary||e.gross||0);
+        const o=Math.round(b*1307)/100;
+        const ppR=typeof calcPrecompteExact==='function'?calcPrecompteExact(b,{situation:'isole',enfants:0}):null;
+        const pp=ppR?ppR.pp:Math.round((b-o)*0.2725*100)/100;
+        const net=ppR?ppR.net:Math.round((b-o-pp)*100)/100;
+        return {name:(e.first||e.fn||'')+' '+(e.last||e.ln||''),brut:b,onss:o,pp,net,contrat:e.contractType||'CDI'};
+      })
+    };
+  };
+
+  const generateHTML=(recap)=>{
+    const co=recap.company;
+    return '<html><head><style>body{font-family:Arial,sans-serif;color:#333;max-width:800px;margin:0 auto;padding:20px}h1{color:#b8960c;border-bottom:3px solid #b8960c;padding-bottom:10px}h2{color:#555;margin-top:24px}.kpi{display:inline-block;width:30%;padding:12px;margin:4px;background:#f8f6f0;border-radius:8px;text-align:center}.kpi .val{font-size:22px;font-weight:bold;color:#b8960c}.kpi .lab{font-size:11px;color:#888}table{width:100%;border-collapse:collapse;margin:12px 0}th{background:#b8960c;color:white;padding:8px;text-align:left;font-size:12px}td{padding:6px 8px;border-bottom:1px solid #eee;font-size:12px}.total{font-weight:bold;background:#f8f6f0}.footer{margin-top:30px;padding-top:15px;border-top:2px solid #eee;font-size:10px;color:#888}</style></head><body>'
+    +'<h1>Aureus Social Pro</h1>'
+    +'<h2>Recap Mensuel — '+mois[month]+' '+year+'</h2>'
+    +'<p><strong>'+( co.name||'Client')+'</strong> — '+(co.vat||'')+' — '+(co.address||'')+'</p>'
+    +'<div class="kpi"><div class="val">'+recap.empCount+'</div><div class="lab">Employes</div></div>'
+    +'<div class="kpi"><div class="val">'+f2(recap.totalBrut)+' EUR</div><div class="lab">Masse brute</div></div>'
+    +'<div class="kpi"><div class="val">'+f2(recap.totalNet)+' EUR</div><div class="lab">Net total</div></div>'
+    +'<h2>Detail par employe</h2>'
+    +'<table><tr><th>Employe</th><th>Contrat</th><th>Brut</th><th>ONSS</th><th>PP</th><th>Net</th></tr>'
+    +recap.emps.map(e=>'<tr><td>'+e.name+'</td><td>'+e.contrat+'</td><td>'+f2(e.brut)+'</td><td>'+f2(e.onss)+'</td><td>'+f2(e.pp)+'</td><td style="font-weight:bold;color:#2d7a2d">'+f2(e.net)+'</td></tr>').join('')
+    +'<tr class="total"><td>TOTAL</td><td>'+recap.empCount+' emp.</td><td>'+f2(recap.totalBrut)+'</td><td>'+f2(recap.totalONSS_W)+'</td><td>'+f2(recap.totalPP)+'</td><td style="color:#2d7a2d">'+f2(recap.totalNet)+'</td></tr>'
+    +'</table>'
+    +'<h2>Charges employeur</h2>'
+    +'<table><tr><th>Rubrique</th><th>Montant</th></tr>'
+    +'<tr><td>Masse brute</td><td>'+f2(recap.totalBrut)+' EUR</td></tr>'
+    +'<tr><td>ONSS patronal (25,07%)</td><td>'+f2(recap.totalONSS_P)+' EUR</td></tr>'
+    +'<tr class="total"><td>Cout total employeur</td><td style="color:#c00">'+f2(recap.totalCout)+' EUR</td></tr>'
+    +'</table>'
+    +'<h2>Echeances du mois</h2>'
+    +'<table><tr><th>Date</th><th>Obligation</th><th>Montant</th></tr>'
+    +'<tr><td>5/'+month+'</td><td>ONSS provisoire</td><td>'+f2(recap.totalBrut*0.3814)+' EUR</td></tr>'
+    +'<tr><td>15/'+month+'</td><td>Precompte professionnel</td><td>'+f2(recap.totalPP)+' EUR</td></tr>'
+    +'<tr><td>25/'+month+'</td><td>Virements salaires (SEPA)</td><td>'+f2(recap.totalNet)+' EUR</td></tr>'
+    +'</table>'
+    +'<div class="footer">Genere par Aureus Social Pro — aureussocial.be — '+(new Date().toLocaleDateString('fr-BE'))+'<br/>Ce document est confidentiel et destine uniquement au client mentionne ci-dessus.</div>'
+    +'</body></html>';
+  };
+
+  const sendRecap=async()=>{
+    setSending(true);
+    const res=[];
+    for(const cl of targetClients){
+      const email=cl.company?.email;
+      if(!email){res.push({client:cl.company?.name||'?',status:'error',error:'Pas d email employeur'});continue;}
+      const recap=buildRecap(cl);
+      const html=generateHTML(recap);
+      try{
+        const r=await sendEmailReal(email,'Recap Paie '+mois[month]+' '+year+' — '+(cl.company?.name||''),html,[]);
+        res.push({client:cl.company?.name||'?',email,status:r.success?'ok':'error',error:r.error||null,mode:r.mode});
+      }catch(e){res.push({client:cl.company?.name||'?',status:'error',error:e.message});}
+    }
+    setResults(res);
+    setSending(false);
+  };
+
+  return <div style={{padding:24}}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+      <div>
+        <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:0}}>📧 Recap Employeur</h2>
+        <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Envoi du recap mensuel de paie aux clients (employeurs)</p>
+      </div>
+      <div style={{display:'flex',gap:6}}>
+        <select value={month} onChange={e=>setMonth(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
+          {mois.slice(1).map((m,i)=><option key={i} value={i+1}>{m}</option>)}
+        </select>
+        <select value={year} onChange={e=>setYear(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
+          {[2024,2025,2026].map(y=><option key={y} value={y}>{y}</option>)}
+        </select>
+        <select value={selClient} onChange={e=>setSelClient(e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
+          <option value="all">Tous les clients ({clients.length})</option>
+          {clients.map((c,i)=><option key={i} value={c.id}>{c.company?.name}</option>)}
+        </select>
+      </div>
+    </div>
+
+    {/* Client cards */}
+    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:12,marginBottom:16}}>
+      {targetClients.map((cl,i)=>{
+        const r=buildRecap(cl);
+        const hasEmail=!!cl.company?.email;
+        const sent=results.find(x=>x.client===cl.company?.name);
+        return <div key={i} style={{padding:16,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid '+(sent?(sent.status==='ok'?'rgba(34,197,94,.3)':'rgba(239,68,68,.3)'):'rgba(198,163,78,.15)'),borderRadius:14}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+            <div style={{fontSize:14,fontWeight:700,color:'#c6a34e'}}>{cl.company?.name||'Client'}</div>
+            {sent&&<span style={{fontSize:9,padding:'2px 8px',borderRadius:4,background:sent.status==='ok'?'rgba(34,197,94,.1)':'rgba(239,68,68,.1)',color:sent.status==='ok'?'#22c55e':'#ef4444',fontWeight:600}}>{sent.status==='ok'?'ENVOYE':'ERREUR'}</span>}
+          </div>
+          <div style={{fontSize:11,color:hasEmail?'#3b82f6':'#ef4444',marginBottom:8}}>{hasEmail?'📧 '+cl.company.email:'❌ Pas d email — Ajoutez-en un dans la fiche client'}</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}}>
+            {[{l:'Employes',v:r.empCount,c:'#3b82f6'},{l:'Brut',v:f2(r.totalBrut),c:'#c6a34e'},{l:'Net',v:f2(r.totalNet),c:'#22c55e'},{l:'ONSS',v:f2(r.totalONSS_W+r.totalONSS_P),c:'#a855f7'},{l:'PP',v:f2(r.totalPP),c:'#3b82f6'},{l:'Cout',v:f2(r.totalCout),c:'#ef4444'}].map((k,j)=>
+              <div key={j} style={{padding:'4px 6px',background:'rgba(255,255,255,.02)',borderRadius:6,textAlign:'center'}}>
+                <div style={{fontSize:12,fontWeight:700,color:k.c}}>{k.v}</div>
+                <div style={{fontSize:8,color:'#888'}}>{k.l}</div>
+              </div>
+            )}
+          </div>
+          <button onClick={()=>{const recap=buildRecap(cl);const html=generateHTML(recap);const w=window.open('','_blank','width=850,height=700');if(w){w.document.write(html);w.document.close();}}} style={{width:'100%',marginTop:8,padding:'6px',borderRadius:6,border:'none',background:'rgba(59,130,246,.08)',color:'#3b82f6',fontSize:10,cursor:'pointer',fontFamily:'inherit'}}>👁 Previsualiser</button>
+          {sent?.error&&<div style={{fontSize:9,color:'#ef4444',marginTop:4}}>{sent.error}</div>}
+        </div>;
+      })}
+    </div>
+
+    {/* Actions */}
+    <div style={{display:'flex',gap:10,alignItems:'center',padding:16,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.15)',borderRadius:14}}>
+      <div style={{flex:1}}>
+        <div style={{fontSize:13,fontWeight:600,color:'#e5e5e5'}}>{targetClients.length} client(s) — {targetClients.filter(c=>c.company?.email).length} avec email</div>
+        <div style={{fontSize:10,color:'#888'}}>Les recaps seront envoyes a l adresse email de chaque client</div>
+      </div>
+      <button onClick={sendRecap} disabled={sending||targetClients.filter(c=>c.company?.email).length===0} style={{padding:'12px 28px',borderRadius:10,border:'none',background:sending?'rgba(198,163,78,.3)':'linear-gradient(135deg,#c6a34e,#a07d3e)',color:sending?'#888':'#060810',fontWeight:700,fontSize:14,cursor:sending?'wait':'pointer',fontFamily:'inherit',boxShadow:'0 4px 15px rgba(198,163,78,.3)'}}>
+        {sending?'Envoi en cours...':'📧 ENVOYER LES RECAPS'}
+      </button>
+    </div>
+
+    {/* Results */}
+    {results.length>0&&<div style={{marginTop:14,border:'1px solid rgba(198,163,78,.1)',borderRadius:14,overflow:'hidden'}}>
+      <div style={{padding:'10px 14px',background:'rgba(198,163,78,.06)',fontSize:12,fontWeight:600,color:'#c6a34e'}}>📊 Resultats d envoi</div>
+      {results.map((r,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 14px',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+        <span style={{fontSize:16}}>{r.status==='ok'?'✅':'❌'}</span>
+        <div style={{flex:1}}>
+          <div style={{fontSize:12,fontWeight:500,color:'#e5e5e5'}}>{r.client}</div>
+          {r.email&&<div style={{fontSize:9,color:'#888'}}>{r.email} — {r.mode||''}</div>}
+        </div>
+        {r.error&&<span style={{fontSize:10,color:'#ef4444'}}>{r.error}</span>}
+      </div>)}
+    </div>}
+  </div>;
+};
+
+// ═══ 2. ENVOI MASSE — Fiches employes + Recap employeur en 1 clic ═══
+const EnvoiMasse=({s,user})=>{
+  const clients=s.clients||[];
+  const [sending,setSending]=useState(false);
+  const [phase,setPhase]=useState('ready'); // ready, sending, done
+  const [logs,setLogs]=useState([]);
+  const [month]=useState(new Date().getMonth()+1);
+  const [year]=useState(new Date().getFullYear());
+  const mois=['','Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
+  const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+
+  const allEmps=clients.reduce((a,c)=>[...a,...(c.emps||[]).map(e=>({...e,clientName:c.company?.name||'',clientId:c.id,clientEmail:c.company?.email,company:c.company||{}}))],[]);
+  const empsWithEmail=allEmps.filter(e=>e.email);
+  const clientsWithEmail=clients.filter(c=>c.company?.email);
+  const totalBrut=allEmps.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||0)),0);
+
+  const addLog=(msg,type)=>setLogs(p=>[{msg,type,time:new Date().toLocaleTimeString('fr-BE')}, ...p]);
+
+  const sendAll=async()=>{
+    setPhase('sending');
+    setSending(true);
+    setLogs([]);
+    let sentEmps=0, failEmps=0, sentClients=0, failClients=0;
+
+    // Phase 1: Envoyer fiches aux employes
+    addLog('Phase 1: Envoi des fiches de paie aux employes...','info');
+    for(const e of empsWithEmail){
+      const name=(e.first||e.fn||'')+' '+(e.last||e.ln||'');
+      const brut=+(e.monthlySalary||e.gross||0);
+      const ppR=typeof calcPrecompteExact==='function'?calcPrecompteExact(brut,{situation:'isole',enfants:0}):null;
+      const onss=ppR?ppR.onss:Math.round(brut*1307)/100;
+      const pp=ppR?ppR.pp:Math.round((brut-onss)*0.2725*100)/100;
+      const net=ppR?ppR.net:Math.round((brut-onss-pp)*100)/100;
+      const bonus=ppR?ppR.bonusEmploi:0;
+
+      const html='<html><head><style>body{font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:20px}h1{color:#b8960c}table{width:100%;border-collapse:collapse}th{background:#b8960c;color:white;padding:8px;text-align:left}td{padding:6px 8px;border-bottom:1px solid #eee}.net{font-size:20px;font-weight:bold;color:#2d7a2d}</style></head><body>'
+        +'<h1>Fiche de paie — '+mois[month]+' '+year+'</h1>'
+        +'<p><strong>'+name+'</strong> — '+(e.clientName)+'</p>'
+        +'<table><tr><th>Rubrique</th><th>Montant</th></tr>'
+        +'<tr><td>Salaire brut</td><td>'+f2(brut)+' EUR</td></tr>'
+        +'<tr><td>ONSS (-13,07%)</td><td>-'+f2(onss)+' EUR</td></tr>'
+        +'<tr><td>Precompte professionnel</td><td>-'+f2(pp)+' EUR</td></tr>'
+        +(bonus>0?'<tr><td>Bonus emploi</td><td>+'+f2(bonus)+' EUR</td></tr>':'')
+        +'<tr><td><strong>NET A PAYER</strong></td><td class="net">'+f2(net)+' EUR</td></tr>'
+        +'</table>'
+        +'<p style="color:#888;font-size:11px;margin-top:20px">Genere par Aureus Social Pro — aureussocial.be</p>'
+        +'</body></html>';
+
+      try{
+        const r=await sendEmailReal(e.email,'Fiche de paie '+mois[month]+' '+year+' — '+e.clientName,html,[]);
+        if(r.success){sentEmps++;addLog('✅ '+name+' ('+e.email+')','success');}
+        else{failEmps++;addLog('❌ '+name+' — '+( r.error||'Erreur'),'error');}
+      }catch(ex){failEmps++;addLog('❌ '+name+' — '+ex.message,'error');}
+      // Small delay to respect rate limits
+      await new Promise(r=>setTimeout(r,300));
+    }
+    addLog('Phase 1 terminee: '+sentEmps+' envoyes, '+failEmps+' echecs','info');
+
+    // Phase 2: Envoyer recaps aux employeurs
+    addLog('Phase 2: Envoi des recaps mensuels aux employeurs...','info');
+    for(const cl of clientsWithEmail){
+      const co=cl.company||{};
+      const emps=cl.emps||[];
+      const tb=emps.reduce((a,e2)=>a+(+(e2.monthlySalary||e2.gross||0)),0);
+      const tn=Math.round(tb*0.5645*100)/100;
+      const tc=Math.round(tb*1.2507*100)/100;
+
+      const html='<html><head><style>body{font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:20px}h1{color:#b8960c}table{width:100%;border-collapse:collapse}th{background:#b8960c;color:white;padding:8px;text-align:left}td{padding:6px 8px;border-bottom:1px solid #eee}.big{font-size:18px;font-weight:bold}</style></head><body>'
+        +'<h1>Recap Mensuel — '+mois[month]+' '+year+'</h1>'
+        +'<p><strong>'+(co.name||'')+'</strong> — '+(co.vat||'')+'</p>'
+        +'<table><tr><th>Indicateur</th><th>Valeur</th></tr>'
+        +'<tr><td>Nombre d employes</td><td class="big">'+emps.length+'</td></tr>'
+        +'<tr><td>Masse brute</td><td class="big" style="color:#b8960c">'+f2(tb)+' EUR</td></tr>'
+        +'<tr><td>Net total</td><td class="big" style="color:#2d7a2d">'+f2(tn)+' EUR</td></tr>'
+        +'<tr><td>Cout employeur total</td><td class="big" style="color:#c00">'+f2(tc)+' EUR</td></tr>'
+        +'</table>'
+        +'<h2>Echeances</h2>'
+        +'<table><tr><th>Date</th><th>Obligation</th><th>Montant</th></tr>'
+        +'<tr><td>5/'+month+'</td><td>ONSS</td><td>'+f2(tb*0.3814)+' EUR</td></tr>'
+        +'<tr><td>15/'+month+'</td><td>Precompte prof.</td><td>'+f2(tb*0.22)+' EUR</td></tr>'
+        +'<tr><td>25/'+month+'</td><td>Virements SEPA</td><td>'+f2(tn)+' EUR</td></tr>'
+        +'</table>'
+        +'<p style="color:#888;font-size:11px;margin-top:20px">Aureus Social Pro — aureussocial.be — '+(new Date().toLocaleDateString('fr-BE'))+'</p>'
+        +'</body></html>';
+
+      try{
+        const r=await sendEmailReal(co.email,'Recap Paie '+mois[month]+' '+year+' — '+(co.name||''),html,[]);
+        if(r.success){sentClients++;addLog('✅ '+(co.name||'')+' ('+co.email+')','success');}
+        else{failClients++;addLog('❌ '+(co.name||'')+' — '+(r.error||'Erreur'),'error');}
+      }catch(ex){failClients++;addLog('❌ '+(co.name||'')+' — '+ex.message,'error');}
+      await new Promise(r=>setTimeout(r,300));
+    }
+    addLog('Phase 2 terminee: '+sentClients+' envoyes, '+failClients+' echecs','info');
+    addLog('TERMINE — Total: '+(sentEmps+sentClients)+' emails envoyes','success');
+    setPhase('done');
+    setSending(false);
+  };
+
+  return <div style={{padding:24}}>
+    <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>🚀 Envoi Masse</h2>
+    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>Fiches de paie aux employes + Recap mensuel aux employeurs — {mois[month]} {year}</p>
+
+    {/* KPIs */}
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,marginBottom:16}}>
+      {[{l:'Clients total',v:clients.length,c:'#c6a34e',i:'🏢'},{l:'Employes avec email',v:empsWithEmail.length+'/'+allEmps.length,c:'#3b82f6',i:'👤'},{l:'Clients avec email',v:clientsWithEmail.length+'/'+clients.length,c:'#22c55e',i:'📧'},{l:'Fiches a envoyer',v:empsWithEmail.length,c:'#a855f7',i:'📄'},{l:'Recaps a envoyer',v:clientsWithEmail.length,c:'#eab308',i:'📊'}].map((k,i)=>
+        <div key={i} style={{padding:14,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid '+k.c+'20',borderRadius:12,textAlign:'center'}}>
+          <div style={{fontSize:9,color:'#888'}}>{k.i} {k.l}</div>
+          <div style={{fontSize:20,fontWeight:700,color:k.c}}>{k.v}</div>
+        </div>
+      )}
+    </div>
+
+    {/* Warnings */}
+    {allEmps.filter(e=>!e.email).length>0&&<div style={{padding:12,background:'rgba(234,179,8,.06)',border:'1px solid rgba(234,179,8,.15)',borderRadius:10,marginBottom:12,fontSize:11,color:'#eab308'}}>
+      ⚠ {allEmps.filter(e=>!e.email).length} employe(s) sans email — ils ne recevront pas leur fiche. Ajoutez leur email dans la fiche employe.
+    </div>}
+    {clients.filter(c=>!c.company?.email).length>0&&<div style={{padding:12,background:'rgba(234,179,8,.06)',border:'1px solid rgba(234,179,8,.15)',borderRadius:10,marginBottom:12,fontSize:11,color:'#eab308'}}>
+      ⚠ {clients.filter(c=>!c.company?.email).length} client(s) sans email employeur — ils ne recevront pas le recap. Ajoutez l email dans la fiche client.
+    </div>}
+
+    {/* Process description */}
+    <div style={{display:'grid',gridTemplateColumns:'1fr 40px 1fr',gap:10,marginBottom:16,alignItems:'center'}}>
+      <div style={{padding:16,background:phase==='sending'||phase==='done'?'rgba(34,197,94,.06)':'rgba(198,163,78,.04)',border:'1px solid rgba(198,163,78,.15)',borderRadius:14}}>
+        <div style={{fontSize:14,fontWeight:700,color:'#3b82f6',marginBottom:6}}>Phase 1 — Fiches employes</div>
+        <div style={{fontSize:11,color:'#888'}}>Chaque employe recoit sa fiche de paie personnelle par email avec le detail brut/ONSS/PP/net.</div>
+      </div>
+      <div style={{textAlign:'center',fontSize:20,color:'#888'}}>→</div>
+      <div style={{padding:16,background:phase==='done'?'rgba(34,197,94,.06)':'rgba(198,163,78,.04)',border:'1px solid rgba(198,163,78,.15)',borderRadius:14}}>
+        <div style={{fontSize:14,fontWeight:700,color:'#c6a34e',marginBottom:6}}>Phase 2 — Recap employeurs</div>
+        <div style={{fontSize:11,color:'#888'}}>Chaque client recoit le recap mensuel: masse salariale, charges, echeances, detail par employe.</div>
+      </div>
+    </div>
+
+    {/* Send button */}
+    <div style={{textAlign:'center',marginBottom:16}}>
+      <button onClick={sendAll} disabled={sending||(empsWithEmail.length===0&&clientsWithEmail.length===0)} style={{padding:'14px 40px',borderRadius:12,border:'none',background:sending?'rgba(198,163,78,.3)':phase==='done'?'linear-gradient(135deg,#22c55e,#16a34a)':'linear-gradient(135deg,#c6a34e,#a07d3e)',color:sending?'#888':'#060810',fontWeight:800,fontSize:16,cursor:sending?'wait':'pointer',fontFamily:'inherit',boxShadow:'0 4px 20px rgba(198,163,78,.3)',letterSpacing:'.5px'}}>
+        {phase==='done'?'✅ ENVOI TERMINE':sending?'⏳ ENVOI EN COURS...':'🚀 LANCER L ENVOI COMPLET'}
+      </button>
+      {phase==='done'&&<button onClick={()=>{setPhase('ready');setLogs([]);}} style={{display:'block',margin:'8px auto 0',padding:'8px 20px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:11,cursor:'pointer',fontFamily:'inherit'}}>🔄 Relancer</button>}
+    </div>
+
+    {/* Live logs */}
+    {logs.length>0&&<div style={{border:'1px solid rgba(198,163,78,.1)',borderRadius:14,overflow:'hidden'}}>
+      <div style={{padding:'10px 14px',background:'rgba(198,163,78,.06)',fontSize:12,fontWeight:600,color:'#c6a34e'}}>📋 Journal d envoi ({logs.length})</div>
+      <div style={{maxHeight:300,overflowY:'auto'}}>
+        {logs.map((l,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'5px 14px',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:10}}>
+          <span style={{color:'#888',fontFamily:'monospace',minWidth:65}}>{l.time}</span>
+          <span style={{color:l.type==='success'?'#22c55e':l.type==='error'?'#ef4444':l.type==='info'?'#3b82f6':'#888'}}>{l.msg}</span>
+        </div>)}
+      </div>
+    </div>}
+  </div>;
+};
+
 const PlanAbsences=({s,d})=>{
   const clients=s.clients||[];
   const [selClient,setSelClient]=useState(0);
@@ -11966,6 +12284,8 @@ const AutomationHub=({s,d})=>{
       case'validation':return <ValidationEngine s={s}/>;
       case'exportbatch':return <ExportBatch s={s}/>;
       case'rgpd':return <RGPDManager s={s}/>;
+      case'recapemployeur':return <RecapEmployeur s={s} user={user}/>;
+      case'envoiMasse':return <EnvoiMasse s={s} user={user}/>;
       case'planabs':return <PlanAbsences s={s} d={d}/>;
       case'dashrh':return <DashboardRH s={s}/>;
       case'budget':return <BudgetPrev s={s}/>;
