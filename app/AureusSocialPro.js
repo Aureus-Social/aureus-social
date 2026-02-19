@@ -8135,7 +8135,7 @@ const ImportCSV=({s,d})=>{
 };
 
 // ═══ 2. ONBOARDING GUIDE — Wizard premiere utilisation ═══
-const OnboardingWizard=({s,d,setPage})=>{
+const SetupWizard=({s,d,setPage})=>{
   const [step,setStep]=useState(0);
   const [companyData,setCompanyData]=useState({name:'',vat:'',address:'',email:'',phone:'',cp:'200',onss:'',representant:'',qualite:'gerant',forme:'SRL'});
   const [empData,setEmpData]=useState([{first:'',last:'',email:'',monthlySalary:'',function:'',contractType:'CDI',niss:''}]);
@@ -13142,7 +13142,7 @@ const AutomationHub=({s,d})=>{
       case'exportbatch':return <ExportBatch s={s}/>;
       case'rgpd':return <RGPDManager s={s}/>;
       case'importcsv':return <ImportCSV s={s} d={d}/>;
-      case'onboarding2':return <OnboardingWizard s={s} d={d} setPage={setPage}/>;
+      case'onboarding2':return <SetupWizard s={s} d={d} setPage={setPage}/>;
       case'contratgen':return <ContratGenerator s={s} d={d} user={user}/>;
       case'recapemployeur':return <RecapEmployeur s={s} user={user}/>;
       case'envoiMasse':return <EnvoiMasse s={s} user={user}/>;
