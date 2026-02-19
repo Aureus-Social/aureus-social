@@ -6099,100 +6099,6 @@ const ClotureMensuelle=({s,d,supabase,user})=>{
 };
 
 // ═══ NOTIFICATION CENTER ═══
-const NotificationCenter=({s})=>{
-  const now=new Date();
-  const day=now.getDate();
-  const month=now.getMonth();
-  const mois=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-  const clients=s.clients||[];
-  const allEmps=clients.reduce((a,c)=>[...a,...(c.emps||[])],[]);
-  
-  // Generate smart notifications based on current date
-  const notifications=[];
-  
-  // Prestations reminder (1st-5th)
-  if(day<=5) notifications.push({id:1,type:'urgent',icon:'📝',title:'Encodage prestations',desc:'Date limite le 5 '+mois[month]+' — Vérifiez que tous les clients ont encodé leurs prestations',action:'prestations',deadline:'5 '+mois[month]});
-  
-  // ONSS deadline (every quarter)
-  if([2,5,8,11].includes(month)&&day<=10) notifications.push({id:2,type:'urgent',icon:'🏛',title:'Déclaration ONSS trimestrielle',desc:'DmfA T'+Math.ceil((month+1)/3)+' à soumettre avant le 10',action:'onss',deadline:'10 '+mois[month]});
-  
-  // Dimona - check for new employees without Dimona
-  const newEmps=allEmps.filter(e=>{
-    const start=new Date(e.startDate||e.start||'2020-01-01');
-    return (now-start)<30*86400000; // Last 30 days
-  });
-  if(newEmps.length>0) notifications.push({id:3,type:'warning',icon:'📋',title:'Dimona à soumettre',desc:newEmps.length+' nouvel(s) employé(s) dans les 30 derniers jours — Vérifier Dimona IN',action:'dimona',deadline:'Immédiat'});
-  
-  // Payslip distribution (25th-31st)
-  if(day>=25) notifications.push({id:4,type:'info',icon:'📄',title:'Distribution fiches de paie',desc:'Fin du mois — Préparer et distribuer les fiches de paie',action:'cloture',deadline:'Fin '+mois[month]});
-  
-  // Belcotax (January/February)
-  if(month<=1) notifications.push({id:5,type:'warning',icon:'🧾',title:'Belcotax 281.10',desc:'Fiches fiscales à soumettre avant le 1er mars',action:'belcotax',deadline:'1 Mars'});
-  
-  // Contract expirations
-  const expiringContracts=allEmps.filter(e=>{
-    if(e.contractType==='CDD'||e.contrat==='CDD'){
-      const end=new Date(e.endDate||e.end||'2099-01-01');
-      return (end-now)<60*86400000&&end>now; // Within 60 days
-    }
-    return false;
-  });
-  if(expiringContracts.length>0) notifications.push({id:6,type:'warning',icon:'📝',title:'Contrats expirant bientôt',desc:expiringContracts.length+' CDD expire(nt) dans les 60 prochains jours',action:'contrats',deadline:'Vérifier'});
-
-  // Index salary reminder (January)
-  if(month===0&&day<=15) notifications.push({id:7,type:'info',icon:'📊',title:'Indexation salariale',desc:'Vérifier l\'index santé et appliquer l\'indexation annuelle',action:'indexauto',deadline:'15 Janvier'});
-  
-  // Quarterly SEPA
-  notifications.push({id:8,type:'info',icon:'💳',title:'Virements SEPA',desc:'Générer le fichier SEPA pain.001 pour les salaires du mois',action:'sepa',deadline:'25 '+mois[month]});
-
-  // Holiday pay (May/June)
-  if(month===4||month===5) notifications.push({id:9,type:'warning',icon:'🏖',title:'Pécule de vacances',desc:'Calcul et versement du pécule de vacances — Vérifier les droits',action:'salaires',deadline:'Juin'});
-
-  // 13th month (December)
-  if(month===11) notifications.push({id:10,type:'urgent',icon:'🎄',title:'13ème mois',desc:'Calculer et verser la prime de fin d\'année',action:'treizieme',deadline:'Décembre'});
-
-  const typeColors={urgent:'#ef4444',warning:'#eab308',info:'#3b82f6'};
-  const typeBg={urgent:'rgba(239,68,68,.06)',warning:'rgba(234,179,8,.06)',info:'rgba(59,130,246,.06)'};
-  const typeBorder={urgent:'rgba(239,68,68,.15)',warning:'rgba(234,179,8,.15)',info:'rgba(59,130,246,.15)'};
-
-  return <div style={{padding:24}}>
-    <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>🔔 Centre de Notifications</h2>
-    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>Rappels automatiques basés sur le calendrier belge — {mois[month]} {now.getFullYear()}</p>
-
-    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:14,marginBottom:24}}>
-      {[{v:notifications.filter(n=>n.type==='urgent').length,l:'Urgents',c:'#ef4444',i:'🔴'},
-        {v:notifications.filter(n=>n.type==='warning').length,l:'Attention',c:'#eab308',i:'🟡'},
-        {v:notifications.filter(n=>n.type==='info').length,l:'Informatif',c:'#3b82f6',i:'🔵'}
-      ].map((k,i)=><div key={i} style={{padding:16,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid '+k.c+'20',borderRadius:14,textAlign:'center'}}>
-        <div style={{fontSize:28,fontWeight:700,color:k.c}}>{k.v}</div>
-        <div style={{fontSize:10,color:'#888'}}>{k.i} {k.l}</div>
-      </div>)}
-    </div>
-
-    {notifications.length===0?<div style={{textAlign:'center',padding:40,color:'#888'}}>✅ Aucune notification — Tout est en ordre !</div>:
-    <div style={{display:'flex',flexDirection:'column',gap:8}}>
-      {notifications.sort((a,b)=>{const ord={urgent:0,warning:1,info:2};return ord[a.type]-ord[b.type];}).map(n=>
-        <div key={n.id} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 18px',background:typeBg[n.type],border:'1px solid '+typeBorder[n.type],borderRadius:12}}>
-          <div style={{fontSize:22,flexShrink:0}}>{n.icon}</div>
-          <div style={{flex:1}}>
-            <div style={{fontSize:13,fontWeight:600,color:'#e5e5e5'}}>{n.title}</div>
-            <div style={{fontSize:11,color:'#888',marginTop:2}}>{n.desc}</div>
-          </div>
-          <div style={{textAlign:'right',flexShrink:0}}>
-            <div style={{fontSize:9,padding:'3px 8px',borderRadius:6,background:typeColors[n.type]+'20',color:typeColors[n.type],fontWeight:600,marginBottom:4}}>{n.type==='urgent'?'URGENT':n.type==='warning'?'ATTENTION':'INFO'}</div>
-            <div style={{fontSize:10,color:'#888'}}>⏰ {n.deadline}</div>
-          </div>
-        </div>
-      )}
-    </div>}
-  </div>;
-};
-
-
-// ══════════════════════════════════════════════════════════════
-// ═══ SPRINT 24c: AUTOMATISATIONS AVANCÉES                  ═══
-// ══════════════════════════════════════════════════════════════
-
 // ═══ 1. CALCUL INSTANTANÉ (Prestations → Fiche en live) ═══
 const CalcInstant=({s,d})=>{
   const clients=s.clients||[];
@@ -7352,7 +7258,7 @@ const EnvoiMasse=({s,user})=>{
         +'</body></html>';
 
       try{
-        const r=await sendEmailReal(e.email,'Fiche de paie '+mois[month]+' '+year+' — '+e.clientName,html,[]);
+        const emailPro=typeof emailFichePaie==='function'?emailFichePaie(e,mois[month]+' '+year,{gross:e.brut,onssNet:e.onss,precompte:e.pp,net:e.net,bonusEmploi:e.bonus||0}):html;const r=await sendEmailReal(e.email,'Fiche de paie '+mois[month]+' '+year+' — '+e.clientName,emailPro,[]);
         if(r.success){sentEmps++;addLog('✅ '+name+' ('+e.email+')','success');}
         else{failEmps++;addLog('❌ '+name+' — '+( r.error||'Erreur'),'error');}
       }catch(ex){failEmps++;addLog('❌ '+name+' — '+ex.message,'error');}
@@ -7389,7 +7295,7 @@ const EnvoiMasse=({s,user})=>{
         +'</body></html>';
 
       try{
-        const r=await sendEmailReal(co.email,'Recap Paie '+mois[month]+' '+year+' — '+(co.name||''),html,[]);
+        const emailPro2=typeof emailRecapEmployeur==='function'?emailRecapEmployeur(cl,mois[month]+' '+year,{nbEmps:emps.length,totalBrut,onssE:totalOnssE,onssW:totalOnssW,totalPP,totalNet,coutTotal:totalCout}):html;const r=await sendEmailReal(co.email,'Recap Paie '+mois[month]+' '+year+' — '+(co.name||''),emailPro2,[]);
         if(r.success){sentClients++;addLog('✅ '+(co.name||'')+' ('+co.email+')','success');}
         else{failClients++;addLog('❌ '+(co.name||'')+' — '+(r.error||'Erreur'),'error');}
       }catch(ex){failClients++;addLog('❌ '+(co.name||'')+' — '+ex.message,'error');}
@@ -8543,6 +8449,204 @@ const LandingPage=()=>{
     <div style={{borderTop:'1px solid rgba(198,163,78,.1)',padding:'20px',textAlign:'center',fontSize:10,color:'#555'}}>
       Aureus Social Pro — Aureus IA SPRL — BCE BE 1028.230.781 — Saint-Gilles, Bruxelles<br/>
       Logiciel de gestion de paie belge conforme RGPD — © 2026
+    </div>
+  </div>;
+};
+
+
+
+// ═══ SPRINT 35: EMAIL TEMPLATES PRO + NOTIFICATION CENTER ═══
+function emailWrap(content, footerText) {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><style>
+body{margin:0;padding:0;background:#f4f4f4;font-family:'Segoe UI',Tahoma,Geneva,sans-serif;}
+.wrapper{max-width:600px;margin:0 auto;background:#ffffff;}
+.header{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:24px 30px;text-align:center;}
+.header img{height:32px;}
+.logo-text{font-size:22px;font-weight:800;color:#c6a34e;letter-spacing:1px;}
+.logo-sub{font-size:10px;color:rgba(198,163,78,.6);margin-top:2px;letter-spacing:2px;text-transform:uppercase;}
+.content{padding:30px;}
+.content h1{font-size:20px;color:#1a1a2e;margin:0 0 8px;font-weight:700;}
+.content h2{font-size:16px;color:#c6a34e;margin:20px 0 8px;font-weight:700;}
+.content p{font-size:13px;color:#555;line-height:1.6;margin:0 0 12px;}
+.table-wrap{border:1px solid #e8e8e8;border-radius:8px;overflow:hidden;margin:16px 0;}
+.table-wrap table{width:100%;border-collapse:collapse;}
+.table-wrap th{background:#f8f6f0;color:#1a1a2e;font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:10px 14px;text-align:left;border-bottom:2px solid #c6a34e;}
+.table-wrap td{padding:10px 14px;font-size:12px;color:#333;border-bottom:1px solid #f0f0f0;}
+.table-wrap tr:last-child td{border-bottom:none;}
+.highlight{background:#f8f6f0;border-left:3px solid #c6a34e;padding:14px 18px;border-radius:0 6px 6px 0;margin:16px 0;}
+.highlight .label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1px;}
+.highlight .value{font-size:24px;font-weight:800;color:#16a34a;margin-top:2px;}
+.btn{display:inline-block;padding:12px 28px;background:#c6a34e;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:700;font-size:13px;}
+.footer{background:#1a1a2e;padding:20px 30px;text-align:center;}
+.footer p{font-size:9px;color:rgba(255,255,255,.4);margin:0;line-height:1.6;}
+.footer a{color:#c6a34e;text-decoration:none;}
+.badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;}
+.badge-green{background:#dcfce7;color:#16a34a;}
+.badge-blue{background:#dbeafe;color:#2563eb;}
+.badge-red{background:#fee2e2;color:#dc2626;}
+</style></head><body>
+<div class="wrapper">
+<div class="header">
+  <div class="logo-text">AUREUS SOCIAL PRO</div>
+  <div class="logo-sub">Secretariat Social</div>
+</div>
+<div class="content">${content}</div>
+<div class="footer">
+  <p>${footerText||'Aureus Social Pro — Aureus IA SPRL — BCE BE 1028.230.781'}<br/>
+  Saint-Gilles, Bruxelles — <a href="https://aureussocial.be">aureussocial.be</a><br/><br/>
+  Ce message est confidentiel et destine exclusivement a son destinataire.<br/>
+  Traitement conforme au RGPD (UE) 2016/679.</p>
+</div>
+</div></body></html>`;
+}
+
+function emailFichePaie(emp, period, calcData) {
+  const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+  const brut=calcData?.gross||+(emp.monthlySalary||0);
+  const onss=calcData?.onssNet||Math.round(brut*0.1307*100)/100;
+  const pp=calcData?.precompte||0;
+  const net=calcData?.net||(brut-onss-pp);
+  
+  const content=`
+<h1>Votre fiche de paie — ${period}</h1>
+<p>Bonjour ${emp.first||emp.fn||''},</p>
+<p>Veuillez trouver ci-dessous le detail de votre remuneration pour la periode <strong>${period}</strong>.</p>
+
+<div class="table-wrap">
+<table>
+  <tr><th colspan="2">Detail de la remuneration</th></tr>
+  <tr><td>Salaire mensuel brut</td><td style="text-align:right;font-weight:700;color:#1a1a2e">${f2(brut)} EUR</td></tr>
+  <tr><td>ONSS personnelle (13,07%)</td><td style="text-align:right;color:#dc2626">- ${f2(onss)} EUR</td></tr>
+  <tr><td>Precompte professionnel</td><td style="text-align:right;color:#dc2626">- ${f2(pp)} EUR</td></tr>
+  ${calcData?.bonusEmploi>0?'<tr><td>Bonus a l emploi</td><td style="text-align:right;color:#16a34a">+ '+f2(calcData.bonusEmploi)+' EUR</td></tr>':''}
+</table>
+</div>
+
+<div class="highlight">
+  <div class="label">Net a payer</div>
+  <div class="value">${f2(net)} EUR</div>
+</div>
+
+<p style="font-size:11px;color:#888;">Le virement sera effectue sur votre compte ${emp.iban||emp.IBAN||'(IBAN enregistre)'}.</p>
+<p style="font-size:11px;color:#888;">Pour toute question, contactez votre gestionnaire de paie.</p>
+`;
+  return emailWrap(content);
+}
+
+function emailRecapEmployeur(client, period, data) {
+  const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+  const co=client?.company||{};
+  
+  const content=`
+<h1>Recap mensuel — ${period}</h1>
+<p>Bonjour,</p>
+<p>Voici le recapitulatif de paie pour <strong>${co.name||'votre entreprise'}</strong> pour la periode <strong>${period}</strong>.</p>
+
+<div class="table-wrap">
+<table>
+  <tr><th>Indicateur</th><th style="text-align:right">Montant</th></tr>
+  <tr><td>Nombre d employes</td><td style="text-align:right;font-weight:700">${data.nbEmps||0}</td></tr>
+  <tr><td>Masse salariale brute</td><td style="text-align:right;font-weight:700;color:#c6a34e">${f2(data.totalBrut)} EUR</td></tr>
+  <tr><td>ONSS patronale</td><td style="text-align:right;color:#dc2626">${f2(data.onssE)} EUR</td></tr>
+  <tr><td>ONSS personnelle (retenue)</td><td style="text-align:right;color:#dc2626">${f2(data.onssW)} EUR</td></tr>
+  <tr><td>Precompte professionnel</td><td style="text-align:right;color:#dc2626">${f2(data.totalPP)} EUR</td></tr>
+  <tr><td>Net total</td><td style="text-align:right;font-weight:700;color:#16a34a">${f2(data.totalNet)} EUR</td></tr>
+  <tr style="background:#f8f6f0"><td style="font-weight:700">Cout total employeur</td><td style="text-align:right;font-weight:700;color:#dc2626;font-size:14px">${f2(data.coutTotal)} EUR</td></tr>
+</table>
+</div>
+
+<h2>Echeances a retenir</h2>
+<div class="table-wrap">
+<table>
+  <tr><td><span class="badge badge-red">5 du mois</span></td><td>ONSS — Provisions mensuelles</td><td style="text-align:right;font-weight:600">${f2(data.onssE)} EUR</td></tr>
+  <tr><td><span class="badge badge-blue">15 du mois</span></td><td>Precompte professionnel 274</td><td style="text-align:right;font-weight:600">${f2(data.totalPP)} EUR</td></tr>
+  <tr><td><span class="badge badge-green">25 du mois</span></td><td>Virements SEPA salaires</td><td style="text-align:right;font-weight:600">${f2(data.totalNet)} EUR</td></tr>
+</table>
+</div>
+
+<p style="text-align:center;margin-top:20px;"><a href="https://aureussocial.be" class="btn">Acceder au Dashboard</a></p>
+`;
+  return emailWrap(content);
+}
+
+// ═══ NOTIFICATION CENTER ═══
+const NotificationCenter=({s,d})=>{
+  const [notifs,setNotifs]=useState(()=>{
+    const n=[];
+    const now=new Date();
+    const clients=s.clients||[];
+    
+    // Generate smart notifications
+    clients.forEach(cl=>{
+      const co=cl.company||{};
+      const emps=cl.emps||[];
+      
+      // Missing NISS
+      emps.filter(e=>!e.niss&&!e.NISS).forEach(e=>n.push({id:'N-'+Math.random().toString(36).substr(2,6),type:'warning',icon:'🆔',title:'NISS manquant',desc:(e.first||'')+' '+(e.last||'')+' — '+(co.name||''),time:new Date(now-3600000).toISOString(),read:false,action:'employees'}));
+      
+      // Missing IBAN
+      emps.filter(e=>!e.iban&&!e.IBAN).forEach(e=>n.push({id:'N-'+Math.random().toString(36).substr(2,6),type:'warning',icon:'🏦',title:'IBAN manquant',desc:(e.first||'')+' '+(e.last||'')+' — '+(co.name||''),time:new Date(now-7200000).toISOString(),read:false,action:'employees'}));
+      
+      // Zero salary
+      emps.filter(e=>+(e.monthlySalary||e.gross||0)<=0).forEach(e=>n.push({id:'N-'+Math.random().toString(36).substr(2,6),type:'error',icon:'⚠️',title:'Salaire non renseigne',desc:(e.first||'')+' '+(e.last||'')+' — '+(co.name||''),time:new Date(now-1800000).toISOString(),read:false,action:'employees'}));
+    });
+    
+    // Deadline notifications
+    const day=now.getDate();
+    if(day<=5) n.push({id:'N-onss',type:'urgent',icon:'🏛',title:'ONSS — Provisions dues le 5',desc:'Provisions mensuelles ONSS a verser avant le 5 du mois',time:now.toISOString(),read:false,action:'echeancier'});
+    if(day<=15) n.push({id:'N-pp',type:'info',icon:'💰',title:'Precompte professionnel — 274',desc:'Declaration PP a soumettre avant le 15 du mois',time:now.toISOString(),read:false,action:'echeancier'});
+    if(day<=25) n.push({id:'N-sepa',type:'info',icon:'💸',title:'Virements SEPA salaires',desc:'Virements nets a effectuer avant le 25',time:now.toISOString(),read:false,action:'sepa'});
+    
+    // System notifications
+    n.push({id:'N-sprint34',type:'success',icon:'🚀',title:'Sprint 35 deploye',desc:'Emails pro + Centre de notifications',time:now.toISOString(),read:false});
+    
+    return n.sort((a,b)=>new Date(b.time)-new Date(a.time));
+  });
+  
+  const [filter,setFilter]=useState('all');
+  
+  const markRead=(id)=>setNotifs(p=>p.map(n=>n.id===id?{...n,read:true}:n));
+  const markAllRead=()=>setNotifs(p=>p.map(n=>({...n,read:true})));
+  const deleteNotif=(id)=>setNotifs(p=>p.filter(n=>n.id!==id));
+  
+  const unread=notifs.filter(n=>!n.read).length;
+  const filtered=filter==='all'?notifs:filter==='unread'?notifs.filter(n=>!n.read):notifs.filter(n=>n.type===filter);
+  
+  const typeColors={error:'#ef4444',warning:'#eab308',urgent:'#ef4444',info:'#3b82f6',success:'#22c55e'};
+  const timeAgo=(t)=>{const d=Math.floor((Date.now()-new Date(t))/60000);if(d<1)return 'A l instant';if(d<60)return d+'min';if(d<1440)return Math.floor(d/60)+'h';return Math.floor(d/1440)+'j';};
+
+  return <div style={{padding:24}}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+      <div>
+        <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>🔔 Centre de Notifications</h2>
+        <p style={{fontSize:12,color:'#888',margin:0}}>{unread} non lue(s) — {notifs.length} total</p>
+      </div>
+      {unread>0&&<button onClick={markAllRead} style={{padding:'8px 16px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:11,cursor:'pointer',fontFamily:'inherit'}}>Tout marquer comme lu</button>}
+    </div>
+    
+    <div style={{display:'flex',gap:4,marginBottom:16}}>
+      {[{id:'all',l:'Toutes ('+notifs.length+')'},{id:'unread',l:'Non lues ('+unread+')'},{id:'error',l:'Erreurs'},{id:'warning',l:'Alertes'},{id:'info',l:'Infos'}].map(f2=>
+        <button key={f2.id} onClick={()=>setFilter(f2.id)} style={{padding:'6px 14px',borderRadius:6,border:'none',background:filter===f2.id?'rgba(198,163,78,.15)':'transparent',color:filter===f2.id?'#c6a34e':'#888',fontSize:11,fontWeight:filter===f2.id?600:400,cursor:'pointer',fontFamily:'inherit'}}>{f2.l}</button>
+      )}
+    </div>
+    
+    <div style={{display:'flex',flexDirection:'column',gap:4}}>
+      {filtered.length===0&&<div style={{textAlign:'center',padding:40,color:'#555',fontSize:13}}>Aucune notification</div>}
+      {filtered.map(n=><div key={n.id} onClick={()=>markRead(n.id)} style={{display:'flex',gap:12,padding:'12px 16px',background:n.read?'transparent':'rgba(198,163,78,.03)',border:'1px solid '+(n.read?'rgba(255,255,255,.03)':'rgba(198,163,78,.1)'),borderRadius:10,cursor:'pointer',alignItems:'center'}}>
+        <div style={{fontSize:20,flexShrink:0}}>{n.icon}</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{display:'flex',alignItems:'center',gap:6}}>
+            <span style={{fontSize:12,fontWeight:n.read?400:600,color:n.read?'#888':'#e5e5e5'}}>{n.title}</span>
+            {!n.read&&<span style={{width:6,height:6,borderRadius:3,background:'#c6a34e',flexShrink:0}}></span>}
+          </div>
+          <div style={{fontSize:10,color:'#666',marginTop:2}}>{n.desc}</div>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:4,flexShrink:0}}>
+          <span style={{fontSize:9,color:'#555'}}>{timeAgo(n.time)}</span>
+          <span style={{padding:'2px 6px',borderRadius:4,fontSize:8,fontWeight:600,background:(typeColors[n.type]||'#888')+'15',color:typeColors[n.type]||'#888'}}>{n.type}</span>
+        </div>
+        <span onClick={(e)=>{e.stopPropagation();deleteNotif(n.id);}} style={{fontSize:10,color:'#555',cursor:'pointer',padding:'4px',flexShrink:0}}>✕</span>
+      </div>)}
     </div>
   </div>;
 };
@@ -13485,6 +13589,7 @@ const AutomationHub=({s,d})=>{
       case'rgpd':return <RGPDManager s={s}/>;
       case'importcsv':return <ImportCSV s={s} d={d}/>;
       case'landing':return <LandingPage/>;
+      case'notifcenter':return <NotificationCenter s={s} d={d}/>;
       case'onboarding2':return <SetupWizard s={s} d={d} setPage={setPage}/>;
       case'contratgen':return <ContratGenerator s={s} d={d} user={user}/>;
       case'recapemployeur':return <RecapEmployeur s={s} user={user}/>;
@@ -13513,7 +13618,7 @@ const AutomationHub=({s,d})=>{
       case'rapports':return <RapportMensuel s={s}/>;
       case'actionsrapides':return <ActionsRapides s={s} d={d}/>;
       case'cloture':return <ClotureMensuelle s={s} d={d} supabase={supabase} user={user}/>;
-      case'notifications':return <NotificationCenter s={s}/>;
+      case'notifications':return <NotificationCenter s={s} d={d}/>;
       case'commandcenter':return <CommandCenter s={s} d={d}/>;
       case'queue':return <ProcessingQueue s={s} d={d}/>;
       case'onboarding':return <OnboardingWizard s={s} d={d}/>;
