@@ -19113,50 +19113,50 @@ const AutomationHub=({s,d})=>{
       case'autopilot':return <SmartAutopilot s={s} d={d}/>;
       case'facturation':return <Facturation s={s}/>;
       case'validation':return <ValidationEngine s={s}/>;
-      case'exportbatch':return <ExportBatch s={s}/>;
+      case'exportbatch':return <ExportImportMod s={s} d={d}/>;
       case'rgpd':return <RGPDManager s={s}/>;
-      case'importcsv':return <ImportCSV s={s} d={d}/>;
+      case'importcsv':return <ExportImportMod s={s} d={d}/>;
       case'landing':return <LandingPage/>;
-      case'notifcenter':return <NotificationCenter s={s} d={d}/>;
+      case'notifcenter':return <AlertesLegalesMod s={s} d={d}/>;
       case'journal':return <JournalActivite s={s}/>;
-      case'baremescp':return <BaremesCP s={s}/>;
+      case'baremescp':return <SecteursMod s={s} d={d}/>;
       case'onboarding2':return <SetupWizard s={s} d={d} setPage={setPage}/>;
       case'contratgen':return <ContratGenerator s={s} d={d} user={user}/>;
       case'recapemployeur':return <RecapEmployeur s={s} user={user}/>;
       case'envoiMasse':return <EnvoiMasse s={s} user={user}/>;
-      case'planabs':return <PlanAbsences s={s} d={d}/>;
-      case'dashrh':return <DashboardRH s={s}/>;
+      case'planabs':return <AbsencesMod s={s} d={d}/>;
+      case'dashrh':return <KPIDashboardMod s={s} d={d}/>;
       case'budget':return <BudgetPrev s={s}/>;
       case'vehiculesatn':return <GestionVehicules s={s}/>;
-      case'simupension':return <SimuPension s={s}/>;
+      case'simupension':return <RCCMod s={s} d={d}/>;
       case'ccts':return <ConventionsCollectives/>;
-      case'interimaires':return <GestionInterimaires s={s}/>;
-      case'ged':return <GedDocuments s={s} d={d}/>;
+      case'interimaires':return <ContratsTravailMod s={s} d={d}/>;
+      case'ged':return <DocumentsJuridiquesMod s={s} d={d}/>;
       case'portail':return <PortailEmploye s={s}/>;
-      case'dashclient':return <DashboardClient s={s} d={d}/>;
-      case'comparateur':return <ComparateurSalarial s={s}/>;
+      case'dashclient':return <Dashboard s={s} d={d}/>;
+      case'comparateur':return <StatsINSMod s={s} d={d}/>;
       case'analytics':return <AnalyticsDash s={s}/>;
-      case'exportcompta':return <ExportCompta s={s}/>;
+      case'exportcompta':return <AccountingOutputMod s={s} d={d}/>;
       case'audittrail':return <AuditTrail s={s} user={user}/>;
-      case'simembauche':return <SimulateurEmbauche s={s}/>;
+      case'simembauche':return <PromesseEmbauche s={s} d={d}/>;
       case'echeancier':return <EcheancierPaiements s={s}/>;
-      case'simutp':return <SimuTempsPartiel s={s}/>;
-      case'delegations':return <GestionDelegations s={s}/>;
-      case'chargessociales':return <TableauChargesSociales s={s}/>;
-      case'planifconges':return <PlanifCongesEquipe s={s}/>;
-      case'registrepersonnel':return <RegistrePersonnel s={s}/>;
-      case'calcmaladie':return <CalcMaladie s={s}/>;
-      case'coutsannuel':return <DashCoutsAnnuel s={s}/>;
-      case'gendocsjur':return <GenDocsJuridiques s={s} d={d}/>;
-      case'dashabsent':return <DashAbsenteisme s={s}/>;
-      case'flexijobs':return <GestionFlexiJobs s={s} d={d}/>;
-      case'chomagetemporaire':return <SimuChomageTemp s={s}/>;
+      case'simutp':return <CreditTempsMod s={s} d={d}/>;
+      case'delegations':return <OrganesMod s={s} d={d}/>;
+      case'chargessociales':return <PrevisionMasseMod s={s} d={d}/>;
+      case'planifconges':return <AbsencesMod s={s} d={d}/>;
+      case'registrepersonnel':return <RegistrePersonnelMod s={s} d={d}/>;
+      case'calcmaladie':return <WorkflowMaladieMod s={s} d={d}/>;
+      case'coutsannuel':return <PrevisionMasseMod s={s} d={d}/>;
+      case'gendocsjur':return <DocumentsJuridiquesMod s={s} d={d}/>;
+      case'dashabsent':return <AbsenteismeMod s={s} d={d}/>;
+      case'flexijobs':return <SecteursMod s={s} d={d}/>;
+      case'chomagetemporaire':return <ChomTempMod s={s} d={d}/>;
       case'onboardwizard':return <OnboardingWizard s={s} d={d}/>;
       case'checklistclient':return <ChecklistClient s={s}/>;
       case'comparatif':return <ComparatifConcurrents/>;
-      case'duediligence':return <DueDiligenceSociale s={s}/>;
+      case'duediligence':return <AuditMod s={s} d={d}/>;
       case'authroles':return <AuthMultiRoles s={s} d={d}/>;
-      case'baremespp':return <BaremesPPOfficiel s={s}/>;
+      case'baremespp':return <PrecomptePage s={s} d={d}/>;
       case'moteurlois':return <MoteurLoisBelges s={s} d={d}/>;
       case'securitedata':return <SecuriteData s={s}/>;
       case'monitoring':return <MonitoringSante s={s}/>;
@@ -19166,33 +19166,33 @@ const AutomationHub=({s,d})=>{
       case'tbdirection':return <TableauBordDirection s={s}/>;
       case'archives':return <ArchivesNumeriques s={s}/>;
       case'optifiscale':return <SimuOptiFiscale s={s}/>;
-      case'gestionabs':return <GestionAbsences s={s} d={d}/>;
-      case'formationsec':return <FormationSecurite s={s}/>;
-      case'bilansocial':return <BilanSocial s={s}/>;
-      case'absencespro':return <GestionAbsences s={s} d={d}/>;
-      case'exportcomptapro':return <ExportComptaPro s={s}/>;
+      case'gestionabs':return <AbsencesMod s={s} d={d}/>;
+      case'formationsec':return <PlanFormationMod s={s} d={d}/>;
+      case'bilansocial':return <BilanSocialBNBMod s={s} d={d}/>;
+      case'absencespro':return <AbsencesMod s={s} d={d}/>;
+      case'exportcomptapro':return <AccountingOutputMod s={s} d={d}/>;
       case'tableaudirection':return <TableauDirection s={s}/>;
-      case'primecalc':return <PrimeCalculator s={s} d={d}/>;
+      case'primecalc':return <GestionPrimes s={s} d={d}/>;
       case'portailclient':return <PortailClientSS s={s} d={d}/>;
-      case'reportingpro':return <ReportingAvance s={s}/>;
+      case'reportingpro':return <KPIDashboardMod s={s} d={d}/>;
       case'integrations':return <IntegrationsHub s={s} supabase={supabase}/>;
-      case'fiduciaire':return <FiduciaireHub s={s} d={d}/>;
-      case'simulicenciement':return <SimuLicenciement s={s}/>;
-      case'couttotal':return <CoutTotalDash s={s}/>;
+      case'fiduciaire':return <Dashboard s={s} d={d}/>;
+      case'simulicenciement':return <OffboardingMod s={s} d={d}/>;
+      case'couttotal':return <PrevisionMasseMod s={s} d={d}/>;
       case'timeline':return <PayrollTimeline s={s}/>;
-      case'sepa':return <SepaGenerator s={s}/>;
+      case'sepa':return <SEPAMod s={s} d={d}/>;
       case'smartalerts':return <SmartAlerts s={s}/>;
-      case'batchdecl':return <BatchDeclarations s={s}/>;
-      case'compliance':return <ComplianceRadar s={s} d={d}/>;
+      case'batchdecl':return <EnvoiMod s={s} d={d}/>;
+      case'compliance':return <AuditMod s={s} d={d}/>;
       case'autoindex':return <AutoIndexation s={s} d={d}/>;
       case'historique':return <HistoriquePilote s={s} supabase={supabase}/>;
       case'piloteauto':return <PiloteAuto s={s} d={d} supabase={supabase} user={user}/>;
-      case'calcinstant':return <CalcInstant s={s} d={d}/>;
+      case'calcinstant':return <NetBrutMod s={s} d={d}/>;
       case'calendrier':return <CalendrierSocial s={s}/>;
-      case'rapports':return <RapportMensuel s={s}/>;
+      case'rapports':return <KPIDashboardMod s={s} d={d}/>;
       case'actionsrapides':return <ActionsRapides s={s} d={d}/>;
       case'cloture':return <ClotureMensuelle s={s} d={d} supabase={supabase} user={user}/>;
-      case'notifications':return <NotificationCenter s={s} d={d}/>;
+      case'notifications':return <AlertesLegalesMod s={s} d={d}/>;
       case'commandcenter':return <CommandCenter s={s} d={d}/>;
       case'queue':return <ProcessingQueue s={s} d={d}/>;
       case'onboarding':return <OnboardingWizard s={s} d={d}/>;
@@ -27015,6 +27015,48 @@ ${company.name||'[Societe]'}              ${form.prenom} ${form.nom}
         Document genere par Aureus Social Pro
 ═══════════════════════════════════════════════════════════`;
 const blob=new Blob([doc],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Promesse_Embauche_'+form.nom+'_'+form.prenom+'.txt';a.click();URL.revokeObjectURL(url);};return <div><PH title="Promesse d'Embauche" sub={"Generateur de document — RMMMG "+f2(RMMMG)+" EUR — Calcul cout employeur en temps reel"}/><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>{[{l:"Brut prevu",v:f2(+form.brut*(+form.regime/100))+" EUR",c:"#c6a34e"},{l:"Net estime",v:f2(net)+" EUR",c:"#22c55e"},{l:"PP estime",v:f2(pp)+" EUR",c:"#fb923c"},{l:"Cout employeur",v:f2(cout)+" EUR",c:"#ef4444"}].map((k,i)=><div key={i} style={{padding:"14px 16px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:10,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}><C><ST>Informations travailleur</ST><div style={{display:"grid",gap:10}}>{[{k:"nom",l:"Nom",type:"text"},{k:"prenom",l:"Prenom",type:"text"},{k:"fonction",l:"Fonction",type:"text"},{k:"lieu",l:"Lieu de travail",type:"text"},{k:"debut",l:"Date entree prevue",type:"date"}].map(f=><div key={f.k}><label style={{fontSize:10,color:"#888",display:"block",marginBottom:3}}>{f.l}</label><input type={f.type} value={form[f.k]} onChange={e=>U(f.k,e.target.value)} style={{width:"100%",padding:"8px 12px",borderRadius:8,border:"1px solid rgba(198,163,78,.2)",background:"rgba(0,0,0,.2)",color:"#e8e6e0",fontSize:12,fontFamily:"inherit",boxSizing:"border-box"}}/></div>)}</div></C><C><ST>Conditions salariales</ST><div style={{display:"grid",gap:10}}><div><label style={{fontSize:10,color:"#888",display:"block",marginBottom:3}}>Brut mensuel (temps plein)</label><input type="number" value={form.brut} onChange={e=>U('brut',e.target.value)} style={{width:"100%",padding:"8px 12px",borderRadius:8,border:"1px solid rgba(198,163,78,.2)",background:"rgba(0,0,0,.2)",color:"#e8e6e0",fontSize:12,fontFamily:"inherit",boxSizing:"border-box"}}/></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}><div><label style={{fontSize:10,color:"#888",display:"block",marginBottom:3}}>Type contrat</label><select value={form.type} onChange={e=>U('type',e.target.value)} style={{width:"100%",padding:"8px",borderRadius:8,border:"1px solid rgba(198,163,78,.2)",background:"rgba(0,0,0,.2)",color:"#e8e6e0",fontSize:11,fontFamily:"inherit"}}><option value="CDI">CDI</option><option value="CDD">CDD</option></select></div><div><label style={{fontSize:10,color:"#888",display:"block",marginBottom:3}}>Regime %</label><input type="number" value={form.regime} onChange={e=>U('regime',e.target.value)} style={{width:"100%",padding:"8px",borderRadius:8,border:"1px solid rgba(198,163,78,.2)",background:"rgba(0,0,0,.2)",color:"#e8e6e0",fontSize:11,fontFamily:"inherit",boxSizing:"border-box"}}/></div><div><label style={{fontSize:10,color:"#888",display:"block",marginBottom:3}}>CP</label><input type="text" value={form.cp} onChange={e=>U('cp',e.target.value)} style={{width:"100%",padding:"8px",borderRadius:8,border:"1px solid rgba(198,163,78,.2)",background:"rgba(0,0,0,.2)",color:"#e8e6e0",fontSize:11,fontFamily:"inherit",boxSizing:"border-box"}}/></div></div>{+form.brut*(+form.regime/100)<RMMMG&&<div style={{padding:"8px 12px",borderRadius:8,background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",color:"#ef4444",fontSize:11}}>Attention: brut {f2(+form.brut*(+form.regime/100))} EUR est inferieur au RMMMG ({f2(RMMMG)} EUR)</div>}<div style={{padding:12,background:"rgba(198,163,78,.04)",borderRadius:8,marginTop:4}}>{[{l:"Brut mensuel",v:f2(+form.brut*(+form.regime/100)),c:"#c6a34e"},{l:"ONSS travailleur (-13,07%)",v:"-"+f2(+form.brut*(+form.regime/100)*TX_ONSS_W),c:"#ef4444"},{l:"Precompte professionnel",v:"-"+f2(pp),c:"#ef4444"},{l:"NET estime",v:f2(net),c:"#22c55e"},{l:"ONSS employeur (+25%)",v:"+"+f2(+form.brut*(+form.regime/100)*TX_ONSS_E),c:"#fb923c"},{l:"COUT TOTAL EMPLOYEUR",v:f2(cout),c:"#ef4444"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:i===3||i===5?"8px 0":"4px 0",borderTop:i===3||i===5?"1px solid rgba(198,163,78,.2)":"none",fontSize:i===3||i===5?12:11}}><span style={{color:i===3||i===5?"#c6a34e":"#9e9b93",fontWeight:i===3||i===5?700:400}}>{r.l}</span><span style={{color:r.c,fontWeight:i===3||i===5?700:600}}>{r.v} EUR</span></div>)}</div></div></C></div><div style={{marginTop:18,display:"flex",gap:10}}><button onClick={generateDoc} style={{padding:"12px 24px",borderRadius:10,border:"none",cursor:"pointer",fontSize:13,fontWeight:700,fontFamily:"inherit",background:"rgba(198,163,78,.15)",color:"#c6a34e"}}>Generer la Promesse d'Embauche</button><button onClick={()=>{if(form.nom&&form.brut&&form.debut){d(p=>({...p,emps:[...(p.emps||[]),{id:'EMP-'+Date.now(),first:form.prenom,fn:form.prenom,last:form.nom,ln:form.nom,gross:+form.brut*(+form.regime/100),regime:+form.regime,contractType:form.type,startDate:form.debut,fonction:form.fonction,cp:form.cp,status:'active'}]}));alert('Travailleur ajoute au registre !');}else{alert('Remplissez au minimum: Nom, Brut, Date entree');}}} style={{padding:"12px 24px",borderRadius:10,border:"none",cursor:"pointer",fontSize:13,fontWeight:600,fontFamily:"inherit",background:"rgba(74,222,128,.12)",color:"#4ade80"}}>Creer le dossier employe</button></div></div>;}
+
+function ComingSoon({s,d,title}){return <div style={{padding:40,textAlign:"center"}}><PH title={title||"Module en preparation"} sub="Ce module sera disponible prochainement"/><div style={{padding:40,background:"rgba(198,163,78,.03)",borderRadius:16,border:"1px solid rgba(198,163,78,.08)",marginTop:20}}><div style={{fontSize:48,marginBottom:12}}>🚧</div><div style={{fontSize:16,fontWeight:600,color:"#c6a34e",marginBottom:8}}>Module en cours de developpement</div><div style={{fontSize:12,color:"#9e9b93"}}>Revenez bientot — Les fonctionnalites sont en preparation.</div></div></div>;}
+function ActionsRapides({s,d}){return <ComingSoon s={s} d={d} title="Actions Rapides"/>;}
+function AnalyticsDash({s,d}){return <ComingSoon s={s} d={d} title="Analytics Dash"/>;}
+function ArchivesNumeriques({s,d}){return <ComingSoon s={s} d={d} title="Archives Numeriques"/>;}
+function AuditTrail({s,d}){return <ComingSoon s={s} d={d} title="Audit Trail"/>;}
+function AuthMultiRoles({s,d}){return <ComingSoon s={s} d={d} title="Auth Multi Roles"/>;}
+function AutoIndexation({s,d}){return <ComingSoon s={s} d={d} title="Auto Indexation"/>;}
+function AutomationHub({s,d}){return <ComingSoon s={s} d={d} title="Automation Hub"/>;}
+function BudgetPrev({s,d}){return <ComingSoon s={s} d={d} title="Budget Prev"/>;}
+function CalendrierSocial({s,d}){return <ComingSoon s={s} d={d} title="Calendrier Social"/>;}
+function ChecklistClient({s,d}){return <ComingSoon s={s} d={d} title="Checklist Client"/>;}
+function ClotureMensuelle({s,d}){return <ComingSoon s={s} d={d} title="Cloture Mensuelle"/>;}
+function CommandCenter({s,d}){return <ComingSoon s={s} d={d} title="Command Center"/>;}
+function ComparatifConcurrents({s,d}){return <ComingSoon s={s} d={d} title="Comparatif Concurrents"/>;}
+function ContratGenerator({s,d}){return <ComingSoon s={s} d={d} title="Contrat Generator"/>;}
+function ConventionsCollectives({s,d}){return <ComingSoon s={s} d={d} title="Conventions Collectives"/>;}
+function EnvoiMasse({s,d}){return <ComingSoon s={s} d={d} title="Envoi Masse"/>;}
+function Facturation({s,d}){return <ComingSoon s={s} d={d} title="Facturation"/>;}
+function HistoriquePilote({s,d}){return <ComingSoon s={s} d={d} title="Historique Pilote"/>;}
+function IntegrationsHub({s,d}){return <ComingSoon s={s} d={d} title="Integrations Hub"/>;}
+function JournalActivite({s,d}){return <ComingSoon s={s} d={d} title="Journal Activite"/>;}
+function LandingPage({s,d}){return <ComingSoon s={s} d={d} title="Landing Page"/>;}
+function MassEngine({s,d}){return <ComingSoon s={s} d={d} title="Mass Engine"/>;}
+function MonitoringSante({s,d}){return <ComingSoon s={s} d={d} title="Monitoring Sante"/>;}
+function OnboardingWizard({s,d}){return <ComingSoon s={s} d={d} title="Onboarding Wizard"/>;}
+function PayrollTimeline({s,d}){return <ComingSoon s={s} d={d} title="Payroll Timeline"/>;}
+function PiloteAuto({s,d}){return <ComingSoon s={s} d={d} title="Pilote Auto"/>;}
+function PortailClientSS({s,d}){return <ComingSoon s={s} d={d} title="Portail Client S S"/>;}
+function PortailEmploye({s,d}){return <ComingSoon s={s} d={d} title="Portail Employe"/>;}
+function PortalManager({s,d}){return <ComingSoon s={s} d={d} title="Portal Manager"/>;}
+function ProcessingQueue({s,d}){return <ComingSoon s={s} d={d} title="Processing Queue"/>;}
+function RGPDManager({s,d}){return <ComingSoon s={s} d={d} title="R G P D Manager"/>;}
+function RecapEmployeur({s,d}){return <ComingSoon s={s} d={d} title="Recap Employeur"/>;}
+function SecuriteData({s,d}){return <ComingSoon s={s} d={d} title="Securite Data"/>;}
+function SetupWizard({s,d}){return <ComingSoon s={s} d={d} title="Setup Wizard"/>;}
+function SimuOptiFiscale({s,d}){return <ComingSoon s={s} d={d} title="Simu Opti Fiscale"/>;}
+function SmartAlerts({s,d}){return <ComingSoon s={s} d={d} title="Smart Alerts"/>;}
+function SmartAutomation({s,d}){return <ComingSoon s={s} d={d} title="Smart Automation"/>;}
+function SmartAutopilot({s,d}){return <ComingSoon s={s} d={d} title="Smart Autopilot"/>;}
+function TestSuiteDash({s,d}){return <ComingSoon s={s} d={d} title="Test Suite Dash"/>;}
+function ValidationEngine({s,d}){return <ComingSoon s={s} d={d} title="Validation Engine"/>;}
 
 function detectAgentLang(t){
   const nl=/\b(de|het|een|van|voor|met|werknemer|loon|opzeg|contract|paritair|verlof|ontslag)\b/gi;
