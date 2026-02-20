@@ -241,6 +241,7 @@ var CR_TRAV=LB.chequesRepas.partTravailleur.min; // CR_TRAV
 var PP_EST=0.22; // PP estimation moyenne (~22% de l'imposable)
 var NET_FACTOR=(1-TX_ONSS_W)*(1-PP_EST); // facteur net approx = ~0.5645
 var quickNetEst=(b)=>Math.round(b*NET_FACTOR*100)/100; // estimation rapide net
+var safeLS={get:(k)=>{try{return safeLS.get(k);}catch(e){return null;}},set:(k,v)=>{safeLS.set(k,v);},remove:(k)=>{safeLS.remove(k);}};
 var CR_MAX=LB.chequesRepas.valeurFaciale.max; // 8.00
 var CR_PAT=LB.chequesRepas.partPatronale.max; // 6.91
 var FORF_BUREAU=LB.fraisPropres.forfaitBureau.max; // FORF_BUREAU
@@ -3226,13 +3227,12 @@ async function _executeSave() {
   // 1. Always save to localStorage (instant, reliable)
   try {
     const json = JSON.stringify(data);
-    localStorage.setItem(STORE_KEY, json);
+    safeLS.set(STORE_KEY, json);
     // Also save a backup with timestamp
-    localStorage.setItem(STORE_KEY + '_backup', json);
-    localStorage.setItem(STORE_KEY + '_ts', new Date().toISOString());
+    safeLS.set(STORE_KEY + '_backup', json);safeLS.set(STORE_KEY + '_ts', new Date().toISOString());
   } catch (e) {
     console.warn('localStorage full, clearing backup:', e);
-    try { localStorage.removeItem(STORE_KEY + '_backup'); localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch (e2) {}
+    try { safeLS.remove(STORE_KEY + '_backup'); safeLS.set(STORE_KEY, JSON.stringify(data)); } catch (e2) {}
   }
 
   // 2. Save to Supabase with retry
@@ -3266,7 +3266,7 @@ async function _executeSave() {
 async function forceSave(data) {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(STORE_KEY, JSON.stringify(data));
+    safeLS.set(STORE_KEY, JSON.stringify(data));
     if (_supabaseRef && _userIdRef) {
       await saveToSupabase(_supabaseRef, _userIdRef, data);
     }
@@ -3280,12 +3280,12 @@ async function loadData(supabase, userId){
       const sbData = await loadFromSupabase(supabase, userId);
       if (sbData && sbData.clients && sbData.clients.length > 0) {
         // Sync to localStorage
-        try { localStorage.setItem(STORE_KEY, JSON.stringify(sbData)); } catch(e){}
+        try { safeLS.set(STORE_KEY, JSON.stringify(sbData)); } catch(e){}
         return sbData;
       }
     }
     // Fallback to localStorage
-    const val = localStorage.getItem(STORE_KEY);
+    let val=safeLS.get(STORE_KEY);
     if (!val) return null;
     return JSON.parse(val);
   }catch(e){return null;}
@@ -3524,7 +3524,7 @@ async function sendEmailReal(to, subject, htmlBody, attachments) {
 // ═══ Sprint 29: Payroll History Persistence ═══
 async function savePayrollRun(clientId, month, year, fiches, summary) {
   if (!_supabaseRef || !_userIdRef) {
-    try { localStorage.setItem('payroll_' + clientId + '_' + year + '_' + month, JSON.stringify({ fiches, summary, run_date: new Date().toISOString() })); } catch(e) {}
+    try { safeLS.set('payroll_' + clientId + '_' + year + '_' + month, JSON.stringify({ fiches, summary, run_date: new Date().toISOString() })); } catch(e) {}
     return true;
   }
   try {
@@ -3544,7 +3544,7 @@ async function loadPayrollHistory(clientId, limit) {
       for (let i = 0; i < 24; i++) {
         const dt = new Date(); dt.setMonth(dt.getMonth() - i);
         const key = 'payroll_' + clientId + '_' + dt.getFullYear() + '_' + (dt.getMonth()+1);
-        const val = localStorage.getItem(key);
+        let val=safeLS.get(key);
         if (val) results.push({ ...JSON.parse(val), period_month: dt.getMonth()+1, period_year: dt.getFullYear() });
         if (results.length >= lim) break;
       }
@@ -4988,7 +4988,7 @@ function AppInner({ supabase, user, onLogout }) {
   useEffect(()=>{
     const handler=(e)=>{
       const toSave={clients:s.clients,pin:s.pin};
-      try{localStorage.setItem(STORE_KEY,JSON.stringify(toSave));}catch(ex){}
+      try{safeLS.set(STORE_KEY,JSON.stringify(toSave));}catch(ex){}
       if(_supabaseRef&&_userIdRef){navigator.sendBeacon&&navigator.sendBeacon('/api/save-beacon',JSON.stringify({user_id:_userIdRef,data:toSave}));}
     };
     window.addEventListener('beforeunload',handler);
@@ -5018,7 +5018,7 @@ function AppInner({ supabase, user, onLogout }) {
   const [veilleNotif,setVeilleNotif]=useState(null);
   useEffect(()=>{
     if(loading||!s.clients?.length)return;
-    const lastVeille=typeof window!=='undefined'?localStorage.getItem('aureus_last_veille'):null;
+    let lastVeille=null;try{lastVeille=typeof window!=='undefined'?safeLS.get('aureus_last_veille'):null;}catch(e){}
     const now=new Date();
     const hoursSince=lastVeille?((now-new Date(lastVeille))/3600000):999;
     if(hoursSince>24){
@@ -5032,7 +5032,7 @@ function AppInner({ supabase, user, onLogout }) {
           ?`⚠️ ${nChanges} changement(s) détecté(s). ${data.changes?.map(c=>c.label+': '+c.current+' → '+c.detected).join('. ')||''}`
           :`✅ Veille OK — ${nSources} sources, aucun changement.${nAlerts>0?' '+nAlerts+' alerte(s).':''}`;
         setVeilleNotif({text,date:now.toLocaleDateString('fr-BE'),changed:hasChanges,data});
-        localStorage.setItem('aureus_last_veille',now.toISOString());
+        safeLS.set('aureus_last_veille',now.toISOString());
       }).catch(()=>{});
     }
   },[loading,s.clients?.length]);
@@ -5183,7 +5183,7 @@ function AppInner({ supabase, user, onLogout }) {
     </div>)}
   </div>:null;
   // Auto-backup every 5min
-  useEffect(()=>{const iv=setInterval(()=>{try{localStorage.setItem("aureus_autobackup",JSON.stringify({co:s.co,emps:s.emps,pays:s.pays,clients:s.clients,activeClient:s.activeClient}));localStorage.setItem("aureus_autobackup_date",new Date().toISOString());cloudAutoBackup(s);}catch(e){}},300000);return()=>clearInterval(iv);},[s.co,s.emps,s.pays,s.clients]);
+  useEffect(()=>{const iv=setInterval(()=>{try{safeLS.set("aureus_autobackup",JSON.stringify({co:s.co,emps:s.emps,pays:s.pays,clients:s.clients,activeClient:s.activeClient}));safeLS.set("aureus_autobackup_date",new Date().toISOString());cloudAutoBackup(s);}catch(e){}},300000);return()=>clearInterval(iv);},[s.co,s.emps,s.pays,s.clients]);
 
   const spotRef=useRef(null);
   const spotIndex=useMemo(()=>{
@@ -12661,7 +12661,7 @@ const BaremesPPOfficiel=({s})=>{
   const currentYear=new Date().getFullYear();
   const [activeYear,setActiveYear]=useState(currentYear);
   const [customBaremes,setCustomBaremes]=useState(()=>{
-    try{const saved=JSON.parse(localStorage.getItem('aureus_baremes_custom')||'{}');return saved;}catch(e){return {};}
+    try{const saved=JSON.parse(safeLS.get('aureus_baremes_custom')||'{}');return saved;}catch(e){return {};}
   });
 
   // Merge: custom overrides > DB
@@ -12678,7 +12678,7 @@ const BaremesPPOfficiel=({s})=>{
   // ===================================================================
   const [updateStatus,setUpdateStatus]=useState({checking:false,lastCheck:null,lastResult:null,history:[]});
   const [autoUpdateEnabled,setAutoUpdateEnabled]=useState(()=>{
-    try{return localStorage.getItem('aureus_autoupdate')!=='false';}catch(e){return true;}
+    try{return safeLS.get('aureus_autoupdate')!=='false';}catch(e){return true;}
   });
 
   const SPF_SOURCES=[
@@ -12694,7 +12694,7 @@ const BaremesPPOfficiel=({s})=>{
     if(!autoUpdateEnabled)return;
     const checkNeeded=()=>{
       try{
-        const last=localStorage.getItem('aureus_pp_lastcheck');
+        const last=safeLS.get('aureus_pp_lastcheck');
         if(!last)return true;
         const diff=Date.now()-parseInt(last);
         return diff>86400000; // 24h in ms
@@ -12738,16 +12738,16 @@ const BaremesPPOfficiel=({s})=>{
     }));
 
     try{
-      localStorage.setItem('aureus_pp_lastcheck',Date.now().toString());
-      localStorage.setItem('aureus_pp_history',JSON.stringify([entry,...JSON.parse(localStorage.getItem('aureus_pp_history')||'[]').slice(0,29)]));
+      safeLS.set('aureus_pp_lastcheck',Date.now().toString());
+      safeLS.set('aureus_pp_history',JSON.stringify([entry,...JSON.parse(safeLS.get('aureus_pp_history')||'[]').slice(0,29)]));
     }catch(e){}
   };
 
   // Load history from localStorage on mount
   useEffect(()=>{
     try{
-      const hist=JSON.parse(localStorage.getItem('aureus_pp_history')||'[]');
-      const last=localStorage.getItem('aureus_pp_lastcheck');
+      const hist=JSON.parse(safeLS.get('aureus_pp_history')||'[]');
+      const last=safeLS.get('aureus_pp_lastcheck');
       setUpdateStatus(p=>({...p,history:hist,lastCheck:last?new Date(parseInt(last)).toISOString():null}));
     }catch(e){}
   },[]);
@@ -12786,7 +12786,7 @@ const BaremesPPOfficiel=({s})=>{
     cleaned.tranches=cleaned.tranches.map((t,i)=>({...t,max:i===cleaned.tranches.length-1?Infinity:t.max}));
     const updated={...customBaremes,[activeYear]:cleaned};
     setCustomBaremes(updated);
-    try{localStorage.setItem('aureus_baremes_custom',JSON.stringify(updated));}catch(e){}
+    safeLS.set('aureus_baremes_custom',JSON.stringify(updated));
     setEditMode(false);
     setEditData(null);
   };
@@ -12795,7 +12795,7 @@ const BaremesPPOfficiel=({s})=>{
     const updated={...customBaremes};
     delete updated[activeYear];
     setCustomBaremes(updated);
-    try{localStorage.setItem('aureus_baremes_custom',JSON.stringify(updated));}catch(e){}
+    safeLS.set('aureus_baremes_custom',JSON.stringify(updated));
     setEditMode(false);
     setEditData(null);
   };
@@ -13083,7 +13083,7 @@ const BaremesPPOfficiel=({s})=>{
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
             <span style={{fontSize:11,color:'#22c55e',fontWeight:600}}>Auto-update actif</span>
             <label style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer'}}>
-              <input type="checkbox" checked={autoUpdateEnabled} onChange={e=>{setAutoUpdateEnabled(e.target.checked);try{localStorage.setItem('aureus_autoupdate',e.target.checked.toString());}catch(ex){}}}/>
+              <input type="checkbox" checked={autoUpdateEnabled} onChange={e=>{setAutoUpdateEnabled(e.target.checked);try{safeLS.set('aureus_autoupdate',e.target.checked.toString());}catch(ex){}}}/>
               <span style={{fontSize:10,color:'#888'}}>{autoUpdateEnabled?'Active':'Desactive'}</span>
             </label>
           </div>
@@ -17065,7 +17065,7 @@ const CommandCenter=({s,d})=>{
     };
 
     // ═══ 5. DOCUMENT ARCHIVE ═══
-    const docHistory=(JSON.parse(localStorage.getItem('aureus_doc_archive')||'[]')).slice(0,100);
+    let docHistory=[];try{docHistory=(JSON.parse(safeLS.get('aureus_doc_archive')||'[]')).slice(0,100);}catch(e){}
 
     const tabs=[
       {id:'alerts',l:'🚨 Alertes ('+alerts.length+')'},
@@ -18647,7 +18647,7 @@ const AutomationHub=({s,d})=>{
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
             <div style={{padding:12,background:'rgba(34,197,94,.06)',borderRadius:10}}>
               <div style={{fontSize:11,color:'#888',marginBottom:2}}>Local (navigateur)</div>
-              <div style={{fontSize:12,fontWeight:600,color:'#22c55e'}}>{localStorage.getItem('aureus_autobackup_date')?new Date(localStorage.getItem('aureus_autobackup_date')).toLocaleString('fr-BE'):'Aucun'}</div>
+              <div style={{fontSize:12,fontWeight:600,color:'#22c55e'}}>{safeLS.get('aureus_autobackup_date')?new Date(safeLS.get('aureus_autobackup_date')).toLocaleString('fr-BE'):'Aucun'}</div>
             </div>
             <div style={{padding:12,background:'rgba(168,85,247,.06)',borderRadius:10}}>
               <div style={{fontSize:11,color:'#888',marginBottom:2}}>Cloud (Supabase)</div>
@@ -22137,8 +22137,8 @@ function setupAutoBackup(getState){
         clients:state.clients,
         activeClient:state.activeClient
       };
-      localStorage.setItem('aureus_autobackup',JSON.stringify(backup));
-      localStorage.setItem('aureus_autobackup_date',new Date().toISOString());
+      safeLS.set('aureus_autobackup',JSON.stringify(backup));
+      safeLS.set('aureus_autobackup_date',new Date().toISOString());
     }catch(e){console.log('Auto-backup failed:',e);}
   },300000); // 5 minutes
 }
@@ -22150,7 +22150,7 @@ function SettingsPage({s,d}) {
     {/* Backup & Restore */}
     <div style={{marginBottom:18,padding:16,background:'linear-gradient(135deg,rgba(34,197,94,.06),rgba(34,197,94,.02))',border:'1px solid rgba(34,197,94,.15)',borderRadius:12}}>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
-        <div><div style={{fontSize:14,fontWeight:600,color:'#22c55e'}}>💾 Sauvegarde & Restauration</div><div style={{fontSize:10,color:'#888',marginTop:2}}>Dernière sauvegarde auto: {localStorage.getItem('aureus_autobackup_date')?new Date(localStorage.getItem('aureus_autobackup_date')).toLocaleString('fr-BE'):'Aucune'}</div></div>
+        <div><div style={{fontSize:14,fontWeight:600,color:'#22c55e'}}>💾 Sauvegarde & Restauration</div><div style={{fontSize:10,color:'#888',marginTop:2}}>Dernière sauvegarde auto: {safeLS.get('aureus_autobackup_date')?new Date(safeLS.get('aureus_autobackup_date')).toLocaleString('fr-BE'):'Aucune'}</div></div>
         <div style={{display:'flex',gap:8}}>
           <button onClick={()=>{const name=exportBackup(s);alert('✅ Backup téléchargé: '+name)}} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'#22c55e',color:'#fff',fontSize:11,fontWeight:600,cursor:'pointer'}}>📥 Exporter Backup</button>
           <label style={{padding:'8px 16px',borderRadius:8,border:'1px solid rgba(59,130,246,.3)',background:'rgba(59,130,246,.1)',color:'#3b82f6',fontSize:11,fontWeight:600,cursor:'pointer'}}> Importer
@@ -22162,9 +22162,9 @@ function SettingsPage({s,d}) {
             }}/>
           </label>
           <button onClick={()=>{
-            const autoBackup=localStorage.getItem('aureus_autobackup');
+            let autoBackup=safeLS.get('aureus_autobackup');
             if(!autoBackup){alert('Aucune sauvegarde automatique trouvée');return;}
-            if(confirm('Restaurer la dernière sauvegarde automatique ?\n\nDate: '+new Date(localStorage.getItem('aureus_autobackup_date')).toLocaleString('fr-BE'))){
+            if(confirm('Restaurer la dernière sauvegarde automatique ?\n\nDate: '+new Date(safeLS.get('aureus_autobackup_date')).toLocaleString('fr-BE'))){
               try{const b=JSON.parse(autoBackup);if(b.co)d({type:'SET_COMPANY',data:b.co});if(b.emps)d({type:'SET_EMPS',data:b.emps});if(b.pays)d({type:'SET_PAYS',data:b.pays});alert('✅ Restauration auto-backup réussie');}catch(err){alert('❌ Erreur: '+err);}
             }
           }} style={{padding:'8px 16px',borderRadius:8,border:'1px solid rgba(234,179,8,.3)',background:'rgba(234,179,8,.1)',color:'#eab308',fontSize:11,fontWeight:600,cursor:'pointer'}}>🔄 Auto-backup</button>
@@ -25458,10 +25458,10 @@ function MoteurLoisBelges({s,d}){
 const ae=s.emps||[];
 const [tab,setTab]=useState("dashboard");
 const [editMode,setEditMode]=useState(false);
-const [customLois,setCustomLois]=useState(()=>{try{return JSON.parse(localStorage.getItem('aureus_lois_custom')||'{}');}catch(e){return {};}});
-const [updateHistory,setUpdateHistory]=useState(()=>{try{return JSON.parse(localStorage.getItem('aureus_lois_history')||'[]');}catch(e){return [];}});
+const [customLois,setCustomLois]=useState(()=>{try{return JSON.parse(safeLS.get('aureus_lois_custom')||'{}');}catch(e){return {};}});
+const [updateHistory,setUpdateHistory]=useState(()=>{try{return JSON.parse(safeLS.get('aureus_lois_history')||'[]');}catch(e){return [];}});
 const [checking,setChecking]=useState(false);
-const [lastCheck,setLastCheck]=useState(()=>localStorage.getItem('aureus_lois_lastcheck')||null);
+const [lastCheck,setLastCheck]=useState(()=>safeLS.get('aureus_lois_lastcheck')||null);
 const [editValues,setEditValues]=useState({});
 const [importState,setImportState]=useState({step:'idle',data:null,validation:null,uploading:false,history:[]});
 const handleJsonImport=async(file)=>{
@@ -25513,7 +25513,7 @@ const handleRollback=async(id)=>{
   try{
     await fetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'rollback',id})});
     setCustomLois({});
-    localStorage.removeItem('aureus_lois_custom');
+    safeLS.remove('aureus_lois_custom');
     loadSupabaseHistory();
   }catch(e){}
 };
@@ -25606,15 +25606,15 @@ const doCheck=async()=>{
     const hist=[entry,...updateHistory].slice(0,30);
     setUpdateHistory(hist);
     setLastCheck(now);
-    localStorage.setItem('aureus_lois_history',JSON.stringify(hist));
-    localStorage.setItem('aureus_lois_lastcheck',now);
+    safeLS.set('aureus_lois_history',JSON.stringify(hist));
+    safeLS.set('aureus_lois_lastcheck',now);
   }catch(e){
     const entry={date:now,version:L._meta.version,status:'ERREUR',error:e.message,trigger:'manual'};
     const hist=[entry,...updateHistory].slice(0,30);
     setUpdateHistory(hist);
     setLastCheck(now);
-    localStorage.setItem('aureus_lois_history',JSON.stringify(hist));
-    localStorage.setItem('aureus_lois_lastcheck',now);
+    safeLS.set('aureus_lois_history',JSON.stringify(hist));
+    safeLS.set('aureus_lois_lastcheck',now);
   }
   setChecking(false);
 };
@@ -25623,18 +25623,18 @@ const doCheck=async()=>{
 const applyUpdate=(newValues)=>{
   const merged={...customLois,...newValues,_updated:new Date().toISOString()};
   setCustomLois(merged);
-  localStorage.setItem('aureus_lois_custom',JSON.stringify(merged));
+  safeLS.set('aureus_lois_custom',JSON.stringify(merged));
   // Log
   const histEntry={date:new Date().toISOString(),action:'UPDATE',changes:Object.keys(newValues).length,detail:newValues};
   const hist=[histEntry,...updateHistory].slice(0,50);
   setUpdateHistory(hist);
-  localStorage.setItem('aureus_lois_history',JSON.stringify(hist));
+  safeLS.set('aureus_lois_history',JSON.stringify(hist));
 };
 
 const resetAll=()=>{
   if(confirm('Reinitialiser toutes les valeurs personnalisees? Les valeurs par defaut 2026 seront restaurees.')){
     setCustomLois({});
-    localStorage.removeItem('aureus_lois_custom');
+    safeLS.remove('aureus_lois_custom');
   }
 };
 
