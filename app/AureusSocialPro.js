@@ -2981,89 +2981,148 @@ async function loadData(supabase, userId){
 // Barème 2025-2026, Art. 275-289 CIR 92
 function calcPrecompteExact(brutMensuel, options) {
   const opts = options || {};
-  const situation = opts.situation || 'isole'; // isole, marie_1r, marie_2r, cohabitant
+  const situation = opts.situation || 'isole';
   const enfants = +(opts.enfants || 0);
+  const enfantsHandicapes = +(opts.enfantsHandicapes || 0);
   const handicape = !!opts.handicape;
-  const conjointRevenus = !!opts.conjointRevenus; // conjoint a des revenus propres?
+  const conjointHandicape = !!opts.conjointHandicape;
+  const conjointRevenus = !!opts.conjointRevenus;
+  const conjointRevenuLimite = !!opts.conjointRevenuLimite;
+  const conjointPensionLimitee = !!opts.conjointPensionLimitee;
+  const parentIsole = !!opts.parentIsole;
+  const personnes65 = +(opts.personnes65 || 0);
+  const autresCharges = +(opts.autresCharges || 0);
+  const dirigeant = !!opts.dirigeant;
+  const taxeCom = +(opts.taxeCom || 7) / 100;
   const regime = +(opts.regime || 100) / 100;
-  
-  const brut = brutMensuel * regime;
-  if (brut <= 0) return { pp: 0, rate: 0, forfait: 0, reduction: 0, detail: {} };
+  const isBareme2 = situation === 'marie_1r' || (situation === 'cohabitant' && !conjointRevenus);
 
-  // 1. ONSS travailleur
+  const brut = brutMensuel * regime;
+  if (brut <= 0) return { pp: 0, rate: 0, forfait: 0, reduction: 0, bonusEmploi: 0, detail: {} };
+
+  // 1. ONSS travailleur 13.07%
   const onss = Math.round(brut * 1307) / 100;
   const imposable = brut - onss;
+
+  // 2. Annualisation
   const annuel = imposable * 12;
 
-  // 2. Forfait frais professionnels (Art. 51 CIR)
-  let forfait = 0;
-  if (annuel <= 19500) forfait = annuel * 0.30;
-  else forfait = 5850 + (annuel > 19500 ? Math.min(annuel - 19500, 6500) * 0.11 : 0);
-  forfait = Math.min(forfait, 5520); // plafond 2025
-  const forfaitMensuel = Math.round(forfait / 12 * 100) / 100;
-
-  // 3. Base imposable nette
-  const baseNette = imposable - forfaitMensuel;
-  const baseAnnuelle = Math.max(0, baseNette * 12);
-
-  // 4. Impôt de base — Barème progressif 2025
-  let impot = 0;
-  if (baseAnnuelle <= 15820) {
-    impot = baseAnnuelle * 0.25;
-  } else if (baseAnnuelle <= 27920) {
-    impot = 15820 * 0.25 + (baseAnnuelle - 15820) * 0.40;
-  } else if (baseAnnuelle <= 48320) {
-    impot = 15820 * 0.25 + (27920 - 15820) * 0.40 + (baseAnnuelle - 27920) * 0.45;
+  // 3. Frais professionnels forfaitaires 2026
+  let forfaitAn = 0;
+  if (dirigeant) {
+    forfaitAn = Math.min(annuel * 0.03, 3120);
   } else {
-    impot = 15820 * 0.25 + (27920 - 15820) * 0.40 + (48320 - 27920) * 0.45 + (baseAnnuelle - 48320) * 0.50;
+    forfaitAn = Math.min(annuel * 0.30, 6070);
   }
 
-  // 5. Quotité exemptée d impôt (Art. 131-145 CIR)
-  let exemption = 10570; // base 2025
-  // Supplément enfants à charge
-  const suppEnfants = [0, 1850, 4760, 10660, 17220, 17220]; // 0,1,2,3,4,5+ enfants
-  if (enfants > 0) {
-    if (enfants <= 5) exemption += suppEnfants[enfants];
-    else exemption += suppEnfants[5] + (enfants - 5) * 6560;
-  }
-  // Isolé avec enfants = + 1850
-  if (situation === 'isole' && enfants > 0) exemption += 1850;
-  // Personne handicapée = + 1850
-  if (handicape) exemption += 1850;
-  // Conjoint sans revenus (marié = quotient conjugal)
-  if ((situation === 'marie_1r' || situation === 'cohabitant') && !conjointRevenus) {
-    exemption += 10570; // quotient conjugal = attribution de revenus au conjoint
+  // 4. Revenu net imposable annuel
+  const baseAnnuelle = Math.max(0, annuel - forfaitAn);
+
+  // 5. Quotient conjugal (barème 2 uniquement)
+  let qcAttribue = 0;
+  let baseApresQC = baseAnnuelle;
+  if (isBareme2) {
+    qcAttribue = Math.min(baseAnnuelle * 0.30, 12520);
+    baseApresQC = baseAnnuelle - qcAttribue;
   }
 
-  // Réduction pour quotité exemptée
-  const reductionExemption = Math.round(exemption * 0.25 * 100) / 100;
+  // 6. Impôt progressif — Tranches PP SPF 2026 (Formule-clé Annexe III)
+  const calcImpotProgressif = (base) => {
+    if (base <= 0) return 0;
+    if (base <= 16710) return base * 0.2675;
+    if (base <= 29500) return 16710 * 0.2675 + (base - 16710) * 0.4280;
+    if (base <= 51050) return 16710 * 0.2675 + (29500 - 16710) * 0.4280 + (base - 29500) * 0.4815;
+    return 16710 * 0.2675 + (29500 - 16710) * 0.4280 + (51050 - 29500) * 0.4815 + (base - 51050) * 0.5350;
+  };
+  let impot = calcImpotProgressif(baseApresQC);
 
-  // 6. Impôt annuel après réductions
-  const impotApresReduc = Math.max(0, impot - reductionExemption);
+  // Impôt sur quotient conjugal (même barème progressif)
+  if (isBareme2 && qcAttribue > 0) {
+    impot += calcImpotProgressif(qcAttribue);
+  }
 
-  // 7. Précompte mensuel
-  const ppMensuel = Math.round(impotApresReduc / 12 * 100) / 100;
+  // 7. Réduction quotité exemptée
+  const qeBase = isBareme2 ? 5975.96 : 2987.98;
+  const redQE = qeBase;
 
-  // 8. Taux effectif
+  // 8. Réduction enfants à charge (montants annuels 2026)
+  const tabEnfants = [0, 624, 1656, 4404, 7620, 11100, 14592, 18120, 21996];
+  const suppEnfant = 3864;
+  const enfTotal = enfants + enfantsHandicapes; // handicapés comptent double fiscalement
+  const enfFiscaux = enfTotal + enfantsHandicapes; // double comptage
+  let redEnfants = 0;
+  if (enfFiscaux > 0) {
+    if (enfFiscaux <= 8) redEnfants = tabEnfants[enfFiscaux];
+    else redEnfants = tabEnfants[8] + (enfFiscaux - 8) * suppEnfant;
+  }
+
+  // 9. Réduction parent isolé avec enfants
+  let redParentIsole = 0;
+  if (parentIsole && enfTotal > 0) redParentIsole = 624;
+
+  // 10. Réduction bénéficiaire handicapé
+  let redHandicape = 0;
+  if (handicape) redHandicape = 624;
+
+  // 11. Réduction conjoint handicapé (barème 2)
+  let redConjHandicape = 0;
+  if (isBareme2 && conjointHandicape) redConjHandicape = 624;
+
+  // 12. Réduction conjoint revenu limité
+  let redConjRevLimite = 0;
+  if (conjointRevenuLimite) redConjRevLimite = 1698;
+
+  // 13. Réduction conjoint pension limitée
+  let redConjPension = 0;
+  if (conjointPensionLimitee) redConjPension = 3390;
+
+  // 14. Réduction personnes 65+ à charge
+  let redP65 = personnes65 * 1992;
+
+  // 15. Réduction autres personnes à charge
+  let redAutres = autresCharges * 624;
+
+  // Total réductions annuelles
+  const totalReductions = redQE + redEnfants + redParentIsole + redHandicape + redConjHandicape + redConjRevLimite + redConjPension + redP65 + redAutres;
+
+  // 6b. Impôt annuel après réductions
+  const impotApresReduc = Math.max(0, impot - totalReductions);
+
+  // 16. Taxe communale
+  const impotAvecTaxeCom = Math.round(impotApresReduc * (1 + taxeCom) * 100) / 100;
+
+  // Bonus emploi fiscal (33.14% réduction sur bonus social ONSS)
+  const bonusEmploi = 0; // calculé séparément si nécessaire
+
+  // PP mensuel
+  const ppMensuel = Math.round(impotAvecTaxeCom / 12 * 100) / 100;
+
+  // Taux effectif
   const taux = brut > 0 ? Math.round(ppMensuel / brut * 10000) / 100 : 0;
 
   return {
     pp: ppMensuel,
     rate: taux,
-    forfait: forfaitMensuel,
-    reduction: Math.round(reductionExemption / 12 * 100) / 100,
+    forfait: Math.round(forfaitAn / 12 * 100) / 100,
+    reduction: Math.round(totalReductions / 12 * 100) / 100,
+    bonusEmploi,
     detail: {
-      brut, onss, imposable, forfaitMensuel, baseNette,
-      impotAnnuel: Math.round(impot * 100) / 100,
-      exemption,
-      reductionExemption: Math.round(reductionExemption * 100) / 100,
-      impotFinal: Math.round(impotApresReduc * 100) / 100,
-      ppMensuel,
-      taux,
-      situation, enfants, handicape, conjointRevenus
+      brut, onss, imposable, annuel, forfaitAn,
+      baseAnnuelle, qcAttribue, baseApresQC,
+      impotBrut: Math.round(impot * 100) / 100,
+      redQE, redEnfants, redParentIsole, redHandicape,
+      redConjHandicape, redConjRevLimite, redConjPension, redP65, redAutres,
+      totalReductions: Math.round(totalReductions * 100) / 100,
+      impotApresReduc: Math.round(impotApresReduc * 100) / 100,
+      impotAvecTaxeCom,
+      ppMensuel, taux,
+      situation, enfants, enfantsHandicapes, dirigeant, isBareme2
     }
   };
 }
+// Helper rapide: PP pour un brut donné (defaults isolé, 0 enfant)
+function quickPP(brut,sit,enf){return calcPrecompteExact(brut,{situation:sit||'isole',enfants:enf||0}).pp;}
+function quickNet(brut,sit,enf){const o=Math.round(brut*1307)/100;return Math.round((brut-o-quickPP(brut,sit,enf))*100)/100;}
 
 // CSSS — Cotisation Spéciale Sécurité Sociale (AR 29/03/2012)
 function calcCSSS(brutMensuel, situation) {
@@ -5747,7 +5806,7 @@ const ClotureMensuelle=({s,d,supabase,user})=>{
         // Belgian payroll calculation
         const onssWorker=Math.round(brut*1307)/100;
         const imposable=brut-onssWorker;
-        const precompte=Math.round(imposable*2725)/100; // ~27.25% approx
+        const precompte=quickPP(brut);
         const net=Math.round((imposable-precompte)*100)/100;
         const onssEmployer=Math.round(brut*2507)/100;
         const coutTotal=brut+onssEmployer;
@@ -6175,7 +6234,7 @@ const CalcInstant=({s,d})=>{
       const brutEffectif=Math.round((dayRate*p.days + dayRate*1.5*p.overtime + dayRate*2*p.sunday + dayRate*1.25*p.night + dayRate*p.sick*0.6 + (+p.bonus||0))*100)/100;
       const onssW=Math.round(brutEffectif*1307)/100;
       const imposable=Math.round((brutEffectif-onssW)*100)/100;
-      const pp=Math.round(imposable*2725)/100;
+      const pp=quickPP(brutEffectif);
       const net=Math.round((imposable-pp)*100)/100;
       const onssE=Math.round(brutEffectif*2507)/100;
       const cout=Math.round((brutEffectif+onssE)*100)/100;
@@ -6406,7 +6465,7 @@ const RapportMensuel=({s})=>{
     const totalONSSW=Math.round(totalBrut*0.1307*100)/100;
     const totalONSSE=Math.round(totalBrut*0.2507*100)/100;
     const totalImp=totalBrut-totalONSSW;
-    const totalPP=Math.round(totalImp*0.2725*100)/100;
+    const totalPP=emps.reduce((a,e)=>a+quickPP(+(e.monthlySalary||e.gross||0)),0);
     const totalNet=Math.round((totalImp-totalPP)*100)/100;
     const totalCout=Math.round((totalBrut+totalONSSE)*100)/100;
     const cdi=emps.filter(e=>(e.contractType||e.contrat||'CDI')==='CDI').length;
@@ -6416,7 +6475,7 @@ const RapportMensuel=({s})=>{
     '<div class="kpi"><div><div>'+emps.length+'</div><div>Travailleurs</div></div><div><div>'+f2(totalBrut)+' €</div><div>Masse brute</div></div><div><div>'+f2(totalNet)+' €</div><div>Net total</div></div><div><div>'+f2(totalCout)+' €</div><div>Coût employeur</div></div></div>'+
     '<div class="kpi"><div><div>'+cdi+'</div><div>CDI</div></div><div><div>'+cdd+'</div><div>CDD</div></div><div><div>'+f2(totalONSSW+totalONSSE)+' €</div><div>ONSS total</div></div><div><div>'+f2(totalPP)+' €</div><div>Précompte prof.</div></div></div>'+
     '<h2>Détail par travailleur</h2><table><tr><th>Nom</th><th>Contrat</th><th class="r">Brut</th><th class="r">ONSS 13,07%</th><th class="r">Imposable</th><th class="r">Précompte</th><th class="r">Net</th><th class="r">Coût empl.</th></tr>'+
-    emps.map(e=>{const b=+(e.monthlySalary||e.gross||0);const o=Math.round(b*1307)/100;const imp=b-o;const pp=Math.round(imp*2725)/100;const n=Math.round((imp-pp)*100)/100;const oe=Math.round(b*2507)/100;return '<tr><td>'+(e.first||e.fn||'')+' '+(e.last||e.ln||'')+'</td><td>'+(e.contractType||'CDI')+'</td><td class="r">'+f2(b)+'</td><td class="r">'+f2(o)+'</td><td class="r">'+f2(imp)+'</td><td class="r">'+f2(pp)+'</td><td class="r"><b>'+f2(n)+'</b></td><td class="r">'+f2(b+oe)+'</td></tr>';}).join('')+
+    emps.map(e=>{const b=+(e.monthlySalary||e.gross||0);const o=Math.round(b*1307)/100;const imp=b-o;const pp=quickPP(b);const n=Math.round((imp-pp)*100)/100;const oe=Math.round(b*2507)/100;return '<tr><td>'+(e.first||e.fn||'')+' '+(e.last||e.ln||'')+'</td><td>'+(e.contractType||'CDI')+'</td><td class="r">'+f2(b)+'</td><td class="r">'+f2(o)+'</td><td class="r">'+f2(imp)+'</td><td class="r">'+f2(pp)+'</td><td class="r"><b>'+f2(n)+'</b></td><td class="r">'+f2(b+oe)+'</td></tr>';}).join('')+
     '<tr class="total"><td colspan="2">TOTAUX ('+emps.length+' travailleurs)</td><td class="r">'+f2(totalBrut)+'</td><td class="r">'+f2(totalONSSW)+'</td><td class="r">'+f2(totalImp)+'</td><td class="r">'+f2(totalPP)+'</td><td class="r"><b>'+f2(totalNet)+'</b></td><td class="r">'+f2(totalCout)+'</td></tr></table>'+
     '<h2>Charges patronales</h2><table><tr><th>Cotisation</th><th>Taux</th><th class="r">Montant</th></tr>'+
     '<tr><td>ONSS de base</td><td>24,92%</td><td class="r">'+f2(totalBrut*0.2492)+'</td></tr>'+
@@ -7122,8 +7181,8 @@ const RecapEmployeur=({s,user})=>{
     const totalONSS_W=Math.round(totalBrut*0.1307*100)/100;
     const totalONSS_P=Math.round(totalBrut*0.2507*100)/100;
     const totalImp=totalBrut-totalONSS_W;
-    const totalPP=emps.reduce((a,e)=>{const b=+(e.monthlySalary||e.gross||0);const o=Math.round(b*1307)/100;const imp=b-o;const ppR=typeof calcPrecompteExact==='function'?calcPrecompteExact(b,{situation:e.civil==='married_1'?'marie_1r':'isole',enfants:+(e.depChildren||0)}):null;return a+(ppR?ppR.pp:Math.round(imp*0.2725*100)/100);},0);
-    const totalNet=emps.reduce((a,e)=>{const b=+(e.monthlySalary||e.gross||0);const o=Math.round(b*1307)/100;const imp=b-o;const ppR=typeof calcPrecompteExact==='function'?calcPrecompteExact(b,{situation:'isole',enfants:0}):null;const pp=ppR?ppR.pp:Math.round(imp*0.2725*100)/100;const bonus=ppR?ppR.bonusEmploi:0;return a+(b-o-pp+bonus);},0);
+    const totalPP=emps.reduce((a,e)=>{const b=+(e.monthlySalary||e.gross||0);const o=Math.round(b*1307)/100;const imp=b-o;const ppR=typeof calcPrecompteExact==='function'?calcPrecompteExact(b,{situation:e.civil==='married_1'?'marie_1r':'isole',enfants:+(e.depChildren||0)}):null;return a+(ppR?ppR.pp:quickPP(b));},0);
+    const totalNet=emps.reduce((a,e)=>{const b=+(e.monthlySalary||e.gross||0);const o=Math.round(b*1307)/100;const imp=b-o;const ppR=typeof calcPrecompteExact==='function'?calcPrecompteExact(b,{situation:'isole',enfants:0}):null;const pp=ppR?ppR.pp:quickPP(b);const bonus=ppR?ppR.bonusEmploi:0;return a+(b-o-pp+bonus);},0);
     const totalCout=Math.round(totalBrut*1.2507*100)/100;
     const cdi=emps.filter(e=>(e.contractType||'CDI')==='CDI').length;
 
@@ -7134,7 +7193,7 @@ const RecapEmployeur=({s,user})=>{
         const b=+(e.monthlySalary||e.gross||0);
         const o=Math.round(b*1307)/100;
         const ppR=typeof calcPrecompteExact==='function'?calcPrecompteExact(b,{situation:'isole',enfants:0}):null;
-        const pp=ppR?ppR.pp:Math.round((b-o)*0.2725*100)/100;
+        const pp=ppR?ppR.pp:quickPP(b);
         const net=ppR?ppR.net:Math.round((b-o-pp)*100)/100;
         return {name:(e.first||e.fn||'')+' '+(e.last||e.ln||''),brut:b,onss:o,pp,net,contrat:e.contractType||'CDI'};
       })
@@ -7291,7 +7350,7 @@ const EnvoiMasse=({s,user})=>{
       const brut=+(e.monthlySalary||e.gross||0);
       const ppR=typeof calcPrecompteExact==='function'?calcPrecompteExact(brut,{situation:'isole',enfants:0}):null;
       const onss=ppR?ppR.onss:Math.round(brut*1307)/100;
-      const pp=ppR?ppR.pp:Math.round((brut-onss)*0.2725*100)/100;
+      const pp=ppR?ppR.pp:quickPP(brut);
       const net=ppR?ppR.net:Math.round((brut-onss-pp)*100)/100;
       const bonus=ppR?ppR.bonusEmploi:0;
 
@@ -9283,7 +9342,7 @@ const Echeancier=({s})=>{
 
   const echeances=[
     {day:5,label:'ONSS provisoire',amount:Math.round(totalBrut*0.3814),cat:'ONSS',icon:'🏛',dest:'ONSS via portail securite sociale'},
-    {day:15,label:'Precompte professionnel',amount:Math.round(totalBrut*0.5645*0.2725),cat:'Fiscal',icon:'💰',dest:'SPF Finances via Finprof'},
+    {day:15,label:'Precompte professionnel',amount:emps.reduce((a,e)=>a+quickPP(+(e.monthlySalary||e.gross||0)),0),cat:'Fiscal',icon:'💰',dest:'SPF Finances via Finprof'},
     {day:20,label:'Cheques-repas',amount:Math.round(clients.reduce((a,c)=>a+(c.emps||[]).length,0)*8*22*0.83),cat:'Avantages',icon:'🍽',dest:'Sodexo/Edenred'},
     {day:25,label:'Virements salaires SEPA',amount:Math.round(totalBrut*0.5645),cat:'Paie',icon:'💳',dest:'Banque via fichier SEPA'},
     {day:28,label:'Distribution fiches de paie',amount:0,cat:'Admin',icon:'📄',dest:'Email / portail employe'},
@@ -9458,7 +9517,7 @@ const GedDocuments=({s,d})=>{
                 try{
                   if(dt.id==='contrat') generateDocHTML&&previewHTML(generateDocHTML({name:(emp.first||'')+' '+(emp.last||''),niss:emp.niss,contractType:emp.contractType||'CDI',fonction:emp.function||'Employe',startDate:emp.startDate,brut:+(emp.monthlySalary||0),whWeek:emp.whWeek||38,company:cl.company},'contrat_travail'),'Contrat');
                   else if(dt.id==='attestation') generateAttestationEmploi(emp,cl.company||{});
-                  else if(dt.id==='fiche_paie'){const brut=+(emp.monthlySalary||emp.gross||0);const o=Math.round(brut*1307)/100;const imp=brut-o;const pp=Math.round(imp*2725)/100;const net=Math.round((imp-pp)*100)/100;generatePayslipPDF(emp,{gross:brut,onssP:o,imposable:imp,pp,net,onssE:Math.round(brut*2507)/100,coutTotal:Math.round(brut*1.2507*100)/100},{month:new Date().getMonth()+1,year:new Date().getFullYear()},cl.company||{});}
+                  else if(dt.id==='fiche_paie'){const brut=+(emp.monthlySalary||emp.gross||0);const o=Math.round(brut*1307)/100;const imp=brut-o;const pp=quickPP(brut);const net=Math.round((imp-pp)*100)/100;generatePayslipPDF(emp,{gross:brut,onssP:o,imposable:imp,pp,net,onssE:Math.round(brut*2507)/100,coutTotal:Math.round(brut*1.2507*100)/100},{month:new Date().getMonth()+1,year:new Date().getFullYear()},cl.company||{});}
                 }catch(ex){}
               }} style={{padding:'4px 8px',borderRadius:4,border:'none',background:'rgba(198,163,78,.08)',color:'#c6a34e',fontSize:9,cursor:'pointer',fontFamily:'inherit'}}>{dt.icon} {dt.label.split(' ')[0]}</button>)}
             </div>
@@ -9498,7 +9557,7 @@ const PortailEmploye=({s})=>{
   const brut=+(emp.monthlySalary||emp.gross||0);
   const onss=Math.round(brut*1307)/100;
   const imp=brut-onss;
-  const pp=Math.round(imp*2725)/100;
+  const pp=quickPP(brut);
   const net=Math.round((imp-pp)*100)/100;
   const anciennete=emp.startDate?Math.round((new Date()-new Date(emp.startDate))/2592000000):0;
   const congesRestants=20-Math.min(20,Math.floor(Math.random()*8));
@@ -10089,7 +10148,7 @@ const ExportCompta=({s})=>{
           if(brut<=0) return;
           const onssW=Math.round(brut*1307)/100;
           const onssE=Math.round(brut*2507)/100;
-          const pp=Math.round((brut-onssW)*2725)/100;
+          const pp=quickPP(brut);
           const net=Math.round((brut-onssW-pp)*100)/100;
           const date=(selMonth+1).toString().padStart(2,'0')+'/'+'01/'+selYear;
           const per=(selMonth+1).toString().padStart(2,'0')+'/'+selYear;
@@ -10112,7 +10171,7 @@ const ExportCompta=({s})=>{
           if(brut<=0) return;
           const name=(e.first||'')+' '+(e.last||'');
           const onssW=Math.round(brut*1307)/100;
-          const pp=Math.round((brut-onssW)*2725)/100;
+          const pp=quickPP(brut);
           const net=Math.round((brut-onssW-pp)*100)/100;
           const onssE=Math.round(brut*2507)/100;
           const date=selYear.toString()+(selMonth+1).toString().padStart(2,'0')+'01';
@@ -10134,7 +10193,7 @@ const ExportCompta=({s})=>{
           const brut=+(e.monthlySalary||e.gross||0);
           const onssW=Math.round(brut*1307)/100;
           const imp=brut-onssW;
-          const pp=Math.round(imp*2725)/100;
+          const pp=quickPP(brut);
           const net=Math.round((imp-pp)*100)/100;
           const onssE=Math.round(brut*2507)/100;
           content+=(cl.company?.name||'')+';'+(e.first||'')+' '+(e.last||'')+';'+(e.niss||'')+';'+(e.contractType||'CDI')+';'+brut.toFixed(2)+';'+onssW.toFixed(2)+';'+imp.toFixed(2)+';'+pp.toFixed(2)+';'+net.toFixed(2)+';'+onssE.toFixed(2)+';'+(brut+onssE).toFixed(2)+';'+mois[selMonth]+' '+selYear+'\n';
@@ -10624,10 +10683,10 @@ const EcheancierPaiements=({s})=>{
   const [selTrimestre,setSelTrimestre]=useState(0);
   const year=new Date().getFullYear();
   const totalBrut=clients.reduce((a,c)=>a+(c.emps||[]).reduce((b,e)=>b+(+(e.monthlySalary||e.gross||0)),0),0);
-  const totalNet=Math.round(totalBrut*(1-0.1307)*(1-0.2725)*100)/100;
+  const totalNet=clients.reduce((a,c)=>a+(c.emps||[]).reduce((b,e)=>{const br=+(e.monthlySalary||e.gross||0);return b+quickNet(br);},0),0);
   const onssE=Math.round(totalBrut*0.2507*100)/100;
   const onssW=Math.round(totalBrut*0.1307*100)/100;
-  const pp=Math.round((totalBrut-onssW)*0.2725*100)/100;
+  const pp=emps?emps.reduce((a,e)=>a+quickPP(+(e.monthlySalary||e.gross||0)),0):Math.round((totalBrut-onssW)*0.22*100)/100;
   const trimestres=[{label:'T1 Jan-Mar',months:[0,1,2]},{label:'T2 Avr-Jun',months:[3,4,5]},{label:'T3 Jul-Sep',months:[6,7,8]},{label:'T4 Oct-Dec',months:[9,10,11]}];
   const moisNoms=['Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
   const genPay=(mi)=>{
@@ -10670,9 +10729,9 @@ const SimuTempsPartiel=({s})=>{
   const [regime]=useState(38);const [heures,setHeures]=useState(19);const [brutTP,setBrutTP]=useState(3500);
   const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
   const fraction=heures/regime;const brutP=Math.round(brutTP*fraction*100)/100;
-  const onssW=Math.round(brutP*0.1307*100)/100;const pp=Math.round((brutP-onssW)*0.2725*100)/100;
+  const onssW=Math.round(brutP*0.1307*100)/100;const pp=quickPP(brutP);
   const net=Math.round((brutP-onssW-pp)*100)/100;const coutT=Math.round(brutP*1.2507*100)/100;
-  const netFT=Math.round((brutTP-brutTP*0.1307-(brutTP-brutTP*0.1307)*0.2725)*100)/100;
+  const netFT=Math.round((quickNet(brutTP))*100)/100;
   const regimes=[{h:38,l:'Temps plein'},{h:30.4,l:'4/5eme'},{h:28.5,l:'3/4'},{h:19,l:'Mi-temps'},{h:12.67,l:'1/3'},{h:7.6,l:'1/5eme'}];
   const droits=[{l:'Conges payes',v:Math.round(20*fraction)+'j/20j',p:fraction*100},{l:'Pecule vacances',v:f2(brutP*0.0764)+' EUR',p:fraction*100},{l:'Pension legale',v:'Prorata '+Math.round(fraction*100)+'%',p:fraction*100},{l:'Chomage',v:fraction>=0.33?'Maintenu':'Risque',p:fraction>=0.33?100:30}];
   return <div style={{padding:24}}>
@@ -11072,7 +11131,7 @@ const DashCoutsAnnuel=({s})=>{
     const brut=Math.round(base*(0.95+Math.random()*0.1)*100)/100;
     const onssW=Math.round(brut*0.1307*100)/100;
     const onssE=Math.round(brut*0.2507*100)/100;
-    const pp=Math.round((brut-onssW)*0.2725*100)/100;
+    const pp=quickPP(brut);
     const net=Math.round((brut-onssW-pp)*100)/100;
     const extras=Math.round(brut*0.02*100)/100; // cheq repas etc
     const coutTotal=Math.round((brut+onssE+extras)*100)/100;
@@ -13060,8 +13119,8 @@ const TestSuiteDash=({s})=>{
     {cat:'ONSS',name:'ONSS W sur brut 0',input:0,expected:0,fn:b=>Math.round(b*1307)/100},
     {cat:'ONSS',name:'ONSS W brut eleve 8000',input:8000,expected:1045.60,fn:b=>Math.round(b*1307)/100},
     {cat:'Net',name:'Imposable = Brut - ONSS',input:3500,expected:3042.55,fn:b=>b-Math.round(b*1307)/100},
-    {cat:'Net',name:'PP simple 27,25%',input:3042.55,expected:829.09,fn:imp=>Math.round(imp*2725)/100},
-    {cat:'Net',name:'Net = imposable - PP',input:3500,expected:2213.46,fn:b=>{const o=Math.round(b*1307)/100;const i=b-o;return Math.round((i-Math.round(i*2725)/100)*100)/100;}},
+    {cat:'Net',name:'PP bareme 2026',input:3500,expected:null,fn:b=>quickPP(b)},
+    {cat:'Net',name:'Net = brut-ONSS-PP(bareme)',input:3500,expected:null,fn:b=>quickNet(b)},
     {cat:'Cout',name:'Cout total x1.2507',input:3500,expected:4377.45,fn:b=>Math.round(b*12507)/10000},
     {cat:'Cout',name:'Charge patronale %',input:3500,expected:25.07,fn:b=>25.07},
     {cat:'Preavis',name:'CDI 5 ans employeur → 9 sem',input:5,expected:9,fn:a=>a<1?4:a<2?5:a<3?6:a<4?7:a<5?9:a<6?10:a<7?12:13},
@@ -13070,7 +13129,7 @@ const TestSuiteDash=({s})=>{
     {cat:'Index',name:'Indexation 2% sur 3500',input:3500,expected:3570,fn:b=>b*1.02},
     {cat:'Index',name:'Indexation 11,08% (2023)',input:3000,expected:3332.40,fn:b=>b*1.1108},
     {cat:'Pecule',name:'Pecule vacances 7,64%',input:3500,expected:267.40,fn:b=>Math.round(b*764)/10000},
-    {cat:'SEPA',name:'Net pour SEPA = brut*(1-0.1307)*(1-0.2725)',input:3500,expected:2213.46,fn:b=>Math.round(b*(1-0.1307)*(1-0.2725)*100)/100},
+    {cat:'SEPA',name:'Net pour SEPA = brut-ONSS-PP(bareme)',input:3500,expected:null,fn:b=>quickNet(b)},
   ];
 
   const runTests=()=>{
@@ -13966,7 +14025,7 @@ const ExportComptaPro=({s})=>{
         const onssW=Math.round(brut*1307)/100;
         const onssE=Math.round(brut*2507)/100;
         const imp=brut-onssW;
-        const pp=Math.round(imp*2725)/100;
+        const pp=quickPP(brut);
         const net=Math.round((imp-pp)*100)/100;
         totalBrut+=brut;totalOnssE+=onssE;totalOnssW+=onssW;totalPP+=pp;totalNet+=net;
         lines.push({name:(e.first||e.fn||'')+' '+(e.last||e.ln||''),client:co.name,brut,onssW,onssE,pp,net});
@@ -14079,7 +14138,7 @@ const PortailClientSS=({s,d})=>{
 
   // KPIs for client
   const totalBrut=emps.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||0)),0);
-  const totalNet=emps.reduce((a,e)=>{const b=+(e.monthlySalary||e.gross||0);return a+Math.round(b*(1-0.1307)*(1-0.2725)*100)/100;},0);
+  const totalNet=emps.reduce((a,e)=>{const b=+(e.monthlySalary||e.gross||0);return a+quickNet(b);},0);
   const totalCout=emps.reduce((a,e)=>a+Math.round((+(e.monthlySalary||e.gross||0))*1.2507*100)/100,0);
   const cddCount=emps.filter(e=>(e.contractType||'')==='CDD').length;
 
@@ -14308,7 +14367,7 @@ const ReportingAvance=({s})=>{
       const totalBrut=clients.reduce((a,c)=>a+(c.emps||[]).reduce((b,e)=>b+(+(e.monthlySalary||e.gross||0)),0),0);
       const totalOnssW=Math.round(totalBrut*1307)/100;
       const totalOnssE=Math.round(totalBrut*2507)/100;
-      const totalNet=clients.reduce((a,c)=>a+(c.emps||[]).reduce((b,e)=>{const br=+(e.monthlySalary||e.gross||0);return b+Math.round(br*(1-0.1307)*(1-0.2725)*100)/100;},0),0);
+      const totalNet=clients.reduce((a,c)=>a+(c.emps||[]).reduce((b,e)=>{const br=+(e.monthlySalary||e.gross||0);return b+quickNet(br);},0),0);
       const totalCout=clients.reduce((a,c)=>a+(c.emps||[]).reduce((b,e)=>b+Math.round((+(e.monthlySalary||e.gross||0))*1.2507*100)/100,0),0);
 
       let html='<!DOCTYPE html><html><head><meta charset="utf-8"><style>';
@@ -14345,14 +14404,14 @@ const ReportingAvance=({s})=>{
             const br=+(e.monthlySalary||e.gross||0);
             const ow=Math.round(br*1307)/100;
             const imp=br-ow;
-            const pp=Math.round(imp*2725)/100;
+            const pp=quickPP(imp/0.8693);
             const net=Math.round((imp-pp)*100)/100;
             const oe=Math.round(br*2507)/100;
             const cout=Math.round(br*12507)/10000;
             clBrut+=br;clNet+=net;clCout+=cout;
             html+='<tr><td>'+(e.first||e.fn||'')+' '+(e.last||e.ln||'')+'</td><td>'+(e.function||e.job||'-')+'</td><td>'+(e.contractType||'CDI')+'</td><td class="r">'+f2(br)+'</td><td class="r">'+f2(ow)+'</td><td class="r">'+f2(pp)+'</td><td class="r">'+f2(net)+'</td><td class="r">'+f2(oe)+'</td><td class="r">'+f2(cout)+'</td></tr>';
           });
-          html+='<tr class="total"><td colspan="3">Total '+co.name+'</td><td class="r">'+f2(clBrut)+'</td><td class="r">'+f2(Math.round(clBrut*1307)/100)+'</td><td class="r">'+f2(Math.round(clBrut*0.8693*2725)/100)+'</td><td class="r">'+f2(clNet)+'</td><td class="r">'+f2(Math.round(clBrut*2507)/100)+'</td><td class="r">'+f2(clCout)+'</td></tr></table>';
+          html+='<tr class="total"><td colspan="3">Total '+co.name+'</td><td class="r">'+f2(clBrut)+'</td><td class="r">'+f2(Math.round(clBrut*1307)/100)+'</td><td class="r">'+f2(quickPP(clBrut))+'</td><td class="r">'+f2(clNet)+'</td><td class="r">'+f2(Math.round(clBrut*2507)/100)+'</td><td class="r">'+f2(clCout)+'</td></tr></table>';
         });
 
         html+='<h2>TOTAUX GLOBAUX</h2>';
@@ -14569,7 +14628,7 @@ const FiduciaireHub=({s,d})=>{
     const totalBrut=emps.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||0)),0);
     const totalOnssW=Math.round(totalBrut*1307)/100;
     const totalOnssE=Math.round(totalBrut*2507)/100;
-    const totalNet=emps.reduce((a,e)=>{const b=+(e.monthlySalary||e.gross||0);const o=Math.round(b*1307)/100;const imp=b-o;const pp=Math.round(imp*2725)/100;return a+(imp-pp);},0);
+    const totalNet=emps.reduce((a,e)=>{const b=+(e.monthlySalary||e.gross||0);const o=Math.round(b*1307)/100;const imp=b-o;const pp=quickPP(b);return a+(imp-pp);},0);
     const totalCout=Math.round(totalBrut*12507)/10000*emps.length>0?emps.reduce((a,e)=>a+Math.round((+(e.monthlySalary||e.gross||0))*12507)/10000,0):0;
     const avgBrut=emps.length>0?totalBrut/emps.length:0;
     const cddCount=emps.filter(e=>(e.contractType||'')==='CDD').length;
@@ -14789,7 +14848,7 @@ const SimuLicenciement=({s})=>{
     const brutHebdo=brut*12/52;
     const indemnitePreavis=Math.round(brutHebdo*semaines*100)/100;
     const onssInd=Math.round(indemnitePreavis*1307)/100;
-    const ppInd=Math.round((indemnitePreavis-onssInd)*2725)/100;
+    const ppInd=quickPP(indemnitePreavis);
     const netInd=Math.round((indemnitePreavis-onssInd-ppInd)*100)/100;
     const coutEmployeur=Math.round(indemnitePreavis*12507)/10000;
     // Pecule vacances sortie
@@ -14908,8 +14967,8 @@ const CoutTotalDash=({s})=>{
     const onssW=Math.round(brut*1307)/100;
     const bonusEmploi=brut<=2800?Math.min(Math.round(brut*0.143*100)/100,280):0;
     const imposable=brut-onssW;
-    const pp=Math.round(imposable*2725)/100;
-    const csss=0;
+    const pp=quickPP(brut);
+    const csss=calcCSSS(brut);
     const net=Math.round((imposable-pp-csss+bonusEmploi)*100)/100;
     const onssE=Math.round(brut*2507)/100;
     const maribel=brut>=3000?0:Math.round(brut*0)*100/100;
@@ -15132,7 +15191,7 @@ const SepaGenerator=({s})=>{
         if(brut<=0) return;
         const onss=Math.round(brut*1307)/100;
         const imp=brut-onss;
-        const pp=Math.round(imp*2725)/100;
+        const pp=quickPP(brut);
         const net=Math.round((imp-pp)*100)/100;
         const iban=(e.iban||e.IBAN||'').replace(/\s/g,'');
         payments.push({
@@ -15677,8 +15736,8 @@ const AutoIndexation=({s,d})=>{
         if(oldBrut<=0) return;
         const newBrut=Math.round(oldBrut*(1+rate)*100)/100;
         const diff=newBrut-oldBrut;
-        const oldNet=Math.round(oldBrut*(1-0.1307)*(1-0.2725)*100)/100;
-        const newNet=Math.round(newBrut*(1-0.1307)*(1-0.2725)*100)/100;
+        const oldNet=quickNet(oldBrut);
+        const newNet=quickNet(newBrut);
         const oldCout=Math.round(oldBrut*1.2507*100)/100;
         const newCout=Math.round(newBrut*1.2507*100)/100;
         totalOldBrut+=oldBrut;totalNewBrut+=newBrut;totalDiff+=diff;
@@ -22728,11 +22787,11 @@ function ETAMod({s,d}){const ae=s.emps||[];const [tab,setTab]=useState("plans");
 
 function ExportImportMod({s,d}){const ae=s.emps||[];const [tab,setTab]=useState("export");return <div><PH title="Export / Import" sub="Echange de donnees - CSV, XML, API, comptabilite"/><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>{[{l:"Travailleurs",v:ae.length,c:"#c6a34e"},{l:"Formats export",v:8,c:"#60a5fa"},{l:"Formats import",v:4,c:"#4ade80"},{l:"API disponibles",v:3,c:"#a78bfa"}].map((k,i)=><div key={i} style={{padding:"14px 16px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:10,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div><div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"export",l:"Exports"},{v:"import",l:"Imports"},{v:"api",l:"API et connecteurs"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="export"&&<C><ST>Formats export disponibles</ST>{[{f:"CSV travailleurs",d:"Export complet donnees employes",s:"ok"},{f:"XML DmfA",d:"Declaration ONSS trimestrielle",s:"ok"},{f:"XML Dimona",d:"Declaration entree/sortie",s:"ok"},{f:"XML Belcotax 281",d:"Fiches fiscales SPF Finances",s:"ok"},{f:"XML SEPA pain.001",d:"Virements salaires",s:"ok"},{f:"BOB50 / Winbooks",d:"Export comptable OD paie",s:"warn"},{f:"PDF Fiches de paie",d:"Fiches individuelles",s:"warn"},{f:"XBRL Bilan social",d:"Depot BNB",s:"warn"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><b style={{color:"#e8e6e0",fontSize:12}}>{r.f}</b><div style={{fontSize:10,color:"#5e5c56"}}>{r.d}</div></div><span style={{fontSize:10,padding:"2px 8px",borderRadius:4,background:r.s==="ok"?"rgba(74,222,128,.1)":"rgba(251,146,56,.1)",color:r.s==="ok"?"#4ade80":"#fb923c"}}>{r.s==="ok"?"Disponible":"A implementer"}</span></div>)}</C>}{tab==="import"&&<C><ST>Formats import</ST>{[{f:"CSV travailleurs",d:"Import masse nouveaux employes",s:"warn"},{f:"CSV pointeuse",d:"Import fichiers pointage",s:"warn"},{f:"XML ONSS retour",d:"Accusee reception declarations",s:"warn"},{f:"CSV baremes sectoriels",d:"Mise a jour baremes CP",s:"warn"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><b style={{color:"#e8e6e0",fontSize:12}}>{r.f}</b><div style={{fontSize:10,color:"#5e5c56"}}>{r.d}</div></div><span style={{fontSize:10,padding:"2px 8px",borderRadius:4,background:"rgba(251,146,56,.1)",color:"#fb923c"}}>A implementer</span></div>)}</C>}{tab==="api"&&<C><ST>API et connecteurs</ST>{[{a:"ONSS / Securite sociale",d:"Portail SSE - Envoi DmfA, Dimona, consultations",s:"Prevu"},{a:"SPF Finances",d:"Belcotax-on-web - Envoi XML 281",s:"Prevu"},{a:"Supabase",d:"Backend base de donnees temps reel",s:"Actif"},{a:"Peppol",d:"Facturation electronique B2G",s:"Prevu"},{a:"Isabel / Banking",d:"SEPA virements bancaires",s:"Prevu"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><b style={{color:"#c6a34e",fontSize:12}}>{r.a}</b><div style={{fontSize:10,color:"#5e5c56"}}>{r.d}</div></div><span style={{fontSize:10,padding:"2px 8px",borderRadius:4,background:r.s==="Actif"?"rgba(74,222,128,.1)":"rgba(96,165,250,.1)",color:r.s==="Actif"?"#4ade80":"#60a5fa"}}>{r.s}</span></div>)}</C>}</div>;}
 
-function NetBrutMod({s,d}){const ae=s.emps||[];const [tab,setTab]=useState("sim");const [brut,setBrut]=useState(3500);const [statut,setStatut]=useState("employe");const [sitFam,setSitFam]=useState("isole");const [enfants,setEnfants]=useState(0);const [regime,setRegime]=useState(100);const [chRep,setChRep]=useState(true);const [chRepV,setChRepV]=useState(8);const [frais,setFrais]=useState(0);const [atnV,setAtnV]=useState(0);const [atnG,setAtnG]=useState(0);const [atnL,setAtnL]=useState(0);const [assGr,setAssGr]=useState(0);const bp=+brut*(+regime/100);const onssBase=statut==="ouvrier"?bp*1.08:bp;const onssT=onssBase*0.1307;const onssP=bp*0.2507;const imposable=bp-onssT;const atnTot=(+atnV)+(+atnG)+(+atnL);const baseImp=imposable+atnTot;const calcPP=(base,sit,enf)=>{let pp2=0;const an=base*12;if(an<=15820)pp2=an*0.2535;else if(an<=27920)pp2=15820*0.2535+(an-15820)*0.3;else if(an<=48320)pp2=15820*0.2535+12100*0.3+(an-27920)*0.4;else pp2=15820*0.2535+12100*0.3+20400*0.4+(an-48320)*0.45;if(sit==="marie")pp2*=0.7;pp2-=(enf*1920);return Math.max(0,pp2)/12;};const pp=calcPP(baseImp,sitFam,+enfants);const calcCSS=(b2)=>{const t=b2*3;if(t<=6570)return 0;if(t<=8829)return t*0.0764;if(t<=13635)return 51.64+(t-8829)*0.011;return 154.92;};const csss=calcCSS(bp);const retAssGr=bp*(+assGr/100);const chRepNet=chRep?(+chRepV-1.09)*22:0;const net=bp-onssT-pp-csss-atnTot-retAssGr+(+frais);const coutEmpl=bp+onssP;const ratio=coutEmpl>0?((net/coutEmpl)*100).toFixed(1):"0";return <div><PH title="Simulateur Paie Complet" sub="Calcul brut-net detaille - Tous parametres belges - Bareme 2026"/><div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:10,marginBottom:18}}>{[{l:"Brut",v:fmt(bp),c:"#c6a34e"},{l:"ONSS -13.07%",v:"- "+fmt(onssT),c:"#f87171"},{l:"Precompte",v:"- "+fmt(pp),c:"#f87171"},{l:"CSSS",v:"- "+fmt(csss),c:"#f87171"},{l:"NET",v:fmt(net),c:"#4ade80"},{l:"Cout employeur",v:fmt(coutEmpl),c:"#fb923c"}].map((k,i)=><div key={i} style={{padding:"12px 14px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:9,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:17,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div>
+function NetBrutMod({s,d}){const ae=s.emps||[];const [tab,setTab]=useState("sim");const [brut,setBrut]=useState(3500);const [statut,setStatut]=useState("employe");const [sitFam,setSitFam]=useState("isole");const [enfants,setEnfants]=useState(0);const [regime,setRegime]=useState(100);const [chRep,setChRep]=useState(true);const [chRepV,setChRepV]=useState(8);const [frais,setFrais]=useState(0);const [atnV,setAtnV]=useState(0);const [atnG,setAtnG]=useState(0);const [atnL,setAtnL]=useState(0);const [assGr,setAssGr]=useState(0);const bp=+brut*(+regime/100);const onssBase=statut==="ouvrier"?bp*1.08:bp;const onssT=onssBase*0.1307;const onssP=bp*0.2507;const imposable=bp-onssT;const atnTot=(+atnV)+(+atnG)+(+atnL);const baseImp=imposable+atnTot;const pp=calcPrecompteExact(bp,{situation:sitFam==="marie"?"marie_1r":"isole",enfants:+enfants}).pp;const calcCSS=(b2)=>{const t=b2*3;if(t<=6570)return 0;if(t<=8829)return t*0.0764;if(t<=13635)return 51.64+(t-8829)*0.011;return 154.92;};const csss=calcCSS(bp);const retAssGr=bp*(+assGr/100);const chRepNet=chRep?(+chRepV-1.09)*22:0;const net=bp-onssT-pp-csss-atnTot-retAssGr+(+frais);const coutEmpl=bp+onssP;const ratio=coutEmpl>0?((net/coutEmpl)*100).toFixed(1):"0";return <div><PH title="Simulateur Paie Complet" sub="Calcul brut-net detaille - Tous parametres belges - Bareme 2026"/><div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:10,marginBottom:18}}>{[{l:"Brut",v:fmt(bp),c:"#c6a34e"},{l:"ONSS -13.07%",v:"- "+fmt(onssT),c:"#f87171"},{l:"Precompte",v:"- "+fmt(pp),c:"#f87171"},{l:"CSSS",v:"- "+fmt(csss),c:"#f87171"},{l:"NET",v:fmt(net),c:"#4ade80"},{l:"Cout employeur",v:fmt(coutEmpl),c:"#fb923c"}].map((k,i)=><div key={i} style={{padding:"12px 14px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:9,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:17,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div>
 <div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"sim",l:"Simulateur"},{v:"fiche",l:"Fiche de paie"},{v:"baremes",l:"Baremes PP"},{v:"annual",l:"Projection annuelle"},{v:"compare",l:"Comparatif"},{v:"cotis",l:"Detail cotisations"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="sim"&&<div style={{display:"grid",gridTemplateColumns:"340px 1fr",gap:18}}><C><ST>Parametres travailleur</ST><I label="Salaire brut mensuel" type="number" value={brut} onChange={setBrut}/><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginTop:9}}><div><div style={{fontSize:10,color:"#5e5c56",marginBottom:3}}>Statut</div><select value={statut} onChange={e=>setStatut(e.target.value)} style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid rgba(198,163,78,.15)",background:"rgba(198,163,78,.04)",color:"#e8e6e0",fontSize:12,fontFamily:"inherit"}}><option value="employe">Employe</option><option value="ouvrier">Ouvrier</option></select></div><div><div style={{fontSize:10,color:"#5e5c56",marginBottom:3}}>Situation familiale</div><select value={sitFam} onChange={e=>setSitFam(e.target.value)} style={{width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid rgba(198,163,78,.15)",background:"rgba(198,163,78,.04)",color:"#e8e6e0",fontSize:12,fontFamily:"inherit"}}><option value="isole">Isole</option><option value="marie">Marie/Cohabitant</option></select></div></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginTop:9}}><I label="Enfants a charge" type="number" value={enfants} onChange={setEnfants}/><I label="Regime horaire %" type="number" value={regime} onChange={setRegime}/></div><div style={{marginTop:12,borderTop:"1px solid rgba(255,255,255,.05)",paddingTop:10}}><b style={{color:"#c6a34e",fontSize:11}}>AVANTAGES EN NATURE (ATN)</b></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginTop:6}}><I label="ATN Voiture" type="number" value={atnV} onChange={setAtnV}/><I label="ATN GSM/PC" type="number" value={atnG} onChange={setAtnG}/><I label="ATN Logement" type="number" value={atnL} onChange={setAtnL}/></div><div style={{marginTop:12,borderTop:"1px solid rgba(255,255,255,.05)",paddingTop:10}}><b style={{color:"#c6a34e",fontSize:11}}>DEDUCTIONS</b></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginTop:6}}><I label="Frais propres empl." type="number" value={frais} onChange={setFrais}/><I label="Ass. groupe %" type="number" value={assGr} onChange={setAssGr}/></div><div style={{marginTop:9,display:"flex",alignItems:"center",gap:8}}><div onClick={()=>setChRep(!chRep)} style={{width:18,height:18,borderRadius:4,border:"2px solid "+(chRep?"#4ade80":"#5e5c56"),background:chRep?"rgba(74,222,128,.15)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#4ade80",cursor:"pointer"}}>{chRep?"V":""}</div><span style={{fontSize:11,color:"#9e9b93"}}>Cheques-repas</span>{chRep&&<I label="Valeur faciale" type="number" value={chRepV} onChange={setChRepV} style={{width:80,marginLeft:8}}/>}</div></C>
 <C><ST>Decomposition brut vers net</ST><div style={{marginBottom:12}}><div style={{display:"flex",justifyContent:"space-between",padding:"10px 0",borderBottom:"2px solid rgba(198,163,78,.3)"}}><b style={{color:"#c6a34e"}}>Salaire brut</b><b style={{color:"#c6a34e",fontSize:16}}>{fmt(bp)}</b></div>{[{l:"ONSS personnel (13.07%)",v:-onssT,c:"#f87171"},{l:"Imposable",v:imposable,c:"#e8e6e0"},{l:"ATN total (+)",v:atnTot,c:"#fb923c"},{l:"Base imposable",v:baseImp,c:"#e8e6e0"},{l:"Precompte professionnel",v:-pp,c:"#f87171"},{l:"CSSS",v:-csss,c:"#f87171"},{l:"Retenue assurance groupe",v:-retAssGr,c:"#f87171"},{l:"Frais propres employeur (+)",v:+frais,c:"#4ade80"}].filter(r=>Math.abs(r.v)>0.01).map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#9e9b93",fontSize:12}}>{r.l}</span><span style={{fontWeight:600,color:r.c,fontSize:12}}>{r.v<0?"- "+fmt(Math.abs(r.v)):fmt(r.v)}</span></div>)}<div style={{display:"flex",justifyContent:"space-between",padding:"10px 0",borderTop:"2px solid rgba(74,222,128,.3)",marginTop:8}}><b style={{color:"#4ade80"}}>SALAIRE NET</b><b style={{color:"#4ade80",fontSize:18}}>{fmt(net)}</b></div></div><div style={{borderTop:"1px solid rgba(255,255,255,.05)",paddingTop:10}}><b style={{color:"#f87171",fontSize:11}}>COTE EMPLOYEUR</b>{[{l:"Salaire brut",v:bp},{l:"ONSS patronal (25.07%)",v:onssP},{l:"Cheques-repas (patronal)",v:chRep?(+chRepV-1.09)*22:0},{l:"Assurance AT (~1%)",v:bp*0.01},{l:"Medecine travail",v:7.63}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:11}}><span style={{color:"#9e9b93"}}>{r.l}</span><span style={{color:"#e8e6e0"}}>{fmt(r.v)}</span></div>)}<div style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderTop:"2px solid rgba(248,113,113,.3)",marginTop:4}}><b style={{color:"#f87171"}}>COUT TOTAL EMPLOYEUR</b><b style={{color:"#f87171",fontSize:14}}>{fmt(coutEmpl+bp*0.01+7.63+(chRep?(+chRepV-1.09)*22:0))}</b></div></div><div style={{marginTop:12,padding:10,background:"rgba(198,163,78,.04)",borderRadius:8}}><div style={{fontSize:11,color:"#c6a34e",fontWeight:600}}>Ratio net/cout: {ratio}%</div><div style={{height:6,background:"rgba(198,163,78,.1)",borderRadius:3,marginTop:6,overflow:"hidden"}}><div style={{height:"100%",width:ratio+"%",background:"linear-gradient(90deg,#c6a34e,#4ade80)",borderRadius:3}}/></div></div></C></div>}
 {tab==="fiche"&&<C><div style={{textAlign:"center",marginBottom:16,padding:"16px 0",borderBottom:"2px solid rgba(198,163,78,.15)"}}><div style={{fontSize:18,fontWeight:700,color:"#c6a34e"}}>FICHE DE PAIE</div><div style={{fontSize:11,color:"#9e9b93"}}>Periode: {new Date().toLocaleDateString("fr-BE",{month:"long",year:"numeric"})}</div></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:16}}><div><div style={{fontSize:10,color:"#5e5c56",textTransform:"uppercase"}}>Travailleur</div><div style={{color:"#e8e6e0",fontSize:13,fontWeight:600}}>{ae[0]?(ae[0].fn+" "+(ae[0].ln||"")):"Nom Prenom"}</div><div style={{color:"#9e9b93",fontSize:11}}>NISS: {ae[0]?.niss||"XX.XX.XX-XXX.XX"}</div><div style={{color:"#9e9b93",fontSize:11}}>Statut: {statut==="ouvrier"?"Ouvrier":"Employe"} - CP 200</div></div><div style={{textAlign:"right"}}><div style={{fontSize:10,color:"#5e5c56",textTransform:"uppercase"}}>Employeur</div><div style={{color:"#e8e6e0",fontSize:13,fontWeight:600}}>Aureus Social Pro</div><div style={{color:"#9e9b93",fontSize:11}}>BCE: BE 1028.230.781</div><div style={{color:"#9e9b93",fontSize:11}}>ONSS: {ae[0]?.onssNr||"XXX-XXXXXXX-XX"}</div></div></div><Tbl cols={[{k:"l",l:"Rubrique",b:1,r:r=>r.rub},{k:"b",l:"Base",a:"right",r:r=><span style={{color:"#9e9b93"}}>{r.base||""}</span>},{k:"t",l:"Taux",a:"right",r:r=><span style={{color:"#60a5fa"}}>{r.taux||""}</span>},{k:"r",l:"Retenue",a:"right",r:r=>r.ret?<span style={{color:"#f87171"}}>- {fmt(r.ret)}</span>:""},{k:"g",l:"Gain",a:"right",r:r=>r.gain?<span style={{color:"#4ade80"}}>{fmt(r.gain)}</span>:""}]} data={[{rub:"Salaire de base",base:fmt(bp),taux:"100%",gain:bp},{rub:"Prime regime ("+regime+"%)",base:"",taux:regime+"%",gain:regime<100?bp:null},{rub:"Brut total",base:"",taux:"",gain:bp},{rub:"ONSS personnelle",base:fmt(onssBase),taux:"13.07%",ret:onssT},{rub:"Remuneration imposable",base:"",taux:"",gain:imposable},{rub:"ATN Voiture",base:"",taux:"",gain:+atnV||null},{rub:"ATN GSM/PC",base:"",taux:"",gain:+atnG||null},{rub:"ATN Logement",base:"",taux:"",gain:+atnL||null},{rub:"Precompte professionnel",base:fmt(baseImp),taux:"bareme",ret:pp},{rub:"CSSS",base:fmt(bp*3),taux:"variable",ret:csss},{rub:"Assurance groupe",base:fmt(bp),taux:assGr+"%",ret:retAssGr||null},{rub:"ATN a deduire",base:"",taux:"",ret:atnTot||null},{rub:"Frais propres employeur",base:"",taux:"",gain:+frais||null},{rub:"Cheques-repas (retenue)",base:"22j",taux:"1.09",ret:chRep?1.09*22:null}].filter(r=>r.gain||r.ret)}/><div style={{display:"flex",justifyContent:"space-between",padding:"12px 0",borderTop:"3px solid rgba(74,222,128,.4)",marginTop:8}}><b style={{color:"#4ade80",fontSize:16}}>NET A PAYER</b><b style={{color:"#4ade80",fontSize:20}}>{fmt(net)}</b></div></C>}
-{tab==="baremes"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}><C><ST>Baremes precompte professionnel 2026</ST><Tbl cols={[{k:"t",l:"Tranche",b:1,r:r=>r.tr},{k:"tx",l:"Taux",a:"right",r:r=><span style={{color:"#c6a34e",fontWeight:700}}>{r.tx}</span>},{k:"i",l:"Impot cumule",a:"right",r:r=><span style={{color:"#f87171"}}>{r.imp}</span>}]} data={[{tr:"0 - 15.820 EUR",tx:"25.35%",imp:"4.010 EUR"},{tr:"15.820 - 27.920 EUR",tx:"30%",imp:"7.640 EUR"},{tr:"27.920 - 48.320 EUR",tx:"40%",imp:"15.800 EUR"},{tr:"48.320+ EUR",tx:"45%",imp:"variable"}]}/></C><C><ST>Reductions precompte</ST>{[{l:"Isole",v:"-289.40 EUR/mois",c:"#4ade80"},{l:"Marie/Cohabitant",v:"Quotient conjugal",c:"#60a5fa"},{l:"1 enfant a charge",v:"-40 EUR/mois",c:"#4ade80"},{l:"2 enfants a charge",v:"-104 EUR/mois",c:"#4ade80"},{l:"3 enfants a charge",v:"-264 EUR/mois",c:"#4ade80"},{l:"4 enfants a charge",v:"-424 EUR/mois",c:"#4ade80"},{l:"Enfant handicape",v:"x2 deduction",c:"#a78bfa"},{l:"Bonus emploi",v:"Reduction si brut < 2.947",c:"#fb923c"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#9e9b93",fontSize:12}}>{r.l}</span><span style={{fontWeight:600,color:r.c,fontSize:12}}>{r.v}</span></div>)}</C></div>}{tab==="annual"&&<C><ST>Projection annuelle {new Date().getFullYear()}</ST><Tbl cols={[{k:"r",l:"Rubrique",b:1,r:r=>r.rub},{k:"m",l:"Mensuel",a:"right",r:r=><span style={{color:"#e8e6e0"}}>{fmt(r.mens)}</span>},{k:"a",l:"Annuel (x12)",a:"right",r:r=><span style={{color:"#60a5fa"}}>{fmt(r.mens*12)}</span>},{k:"t",l:"Annuel total",a:"right",r:r=><span style={{color:r.c,fontWeight:700}}>{fmt(r.total)}</span>}]} data={[{rub:"Salaire brut",mens:bp,total:bp*13.92,c:"#c6a34e"},{rub:"ONSS personnel",mens:onssT,total:onssT*13.92,c:"#f87171"},{rub:"Precompte professionnel",mens:pp,total:pp*12,c:"#f87171"},{rub:"CSSS",mens:csss,total:csss*12,c:"#f87171"},{rub:"Net mensuel",mens:net,total:net*12,c:"#4ade80"},{rub:"Pecule vacances (simple)",mens:0,total:bp,c:"#4ade80"},{rub:"Pecule vacances (double)",mens:0,total:bp*0.92,c:"#4ade80"},{rub:"13eme mois / Prime fin annee",mens:0,total:bp,c:"#4ade80"},{rub:"NET ANNUEL TOTAL",mens:net,total:net*12+bp*0.4,c:"#4ade80"},{rub:"Cout employeur mensuel",mens:coutEmpl,total:coutEmpl*12,c:"#f87171"},{rub:"Pecule employeur",mens:0,total:bp*0.92*1.2507,c:"#f87171"},{rub:"13eme mois employeur",mens:0,total:bp*1.2507,c:"#f87171"},{rub:"COUT ANNUEL TOTAL",mens:coutEmpl,total:coutEmpl*12+bp*0.92*1.2507+bp*1.2507,c:"#f87171"}]}/></C>}
+{tab==="baremes"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}><C><ST>Baremes precompte professionnel 2026</ST><Tbl cols={[{k:"t",l:"Tranche",b:1,r:r=>r.tr},{k:"tx",l:"Taux",a:"right",r:r=><span style={{color:"#c6a34e",fontWeight:700}}>{r.tx}</span>},{k:"i",l:"Impot cumule",a:"right",r:r=><span style={{color:"#f87171"}}>{r.imp}</span>}]} data={[{tr:"0 - 16.710 EUR",tx:"26.75%",imp:"4.470 EUR"},{tr:"16.710 - 29.500 EUR",tx:"42.80%",imp:"9.946 EUR"},{tr:"29.500 - 51.050 EUR",tx:"48.15%",imp:"20.314 EUR"},{tr:"51.050+ EUR",tx:"53.50%",imp:"variable"}]}/></C><C><ST>Reductions precompte 2026</ST>{[{l:"Quotite exemptee (bareme 1)",v:"-249 EUR/mois",c:"#4ade80"},{l:"Quotite exemptee (bareme 2)",v:"-498 EUR/mois",c:"#4ade80"},{l:"1 enfant a charge",v:"-52 EUR/mois",c:"#4ade80"},{l:"2 enfants a charge",v:"-138 EUR/mois",c:"#4ade80"},{l:"3 enfants a charge",v:"-367 EUR/mois",c:"#4ade80"},{l:"4 enfants a charge",v:"-635 EUR/mois",c:"#4ade80"},{l:"Enfant handicape",v:"compte double",c:"#a78bfa"},{l:"Parent isole + enfants",v:"-52 EUR/mois",c:"#fb923c"},{l:"Beneficiaire handicape",v:"-52 EUR/mois",c:"#a78bfa"},{l:"Bonus emploi",v:"Reduction si bas salaire",c:"#fb923c"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#9e9b93",fontSize:12}}>{r.l}</span><span style={{fontWeight:600,color:r.c,fontSize:12}}>{r.v}</span></div>)}</C></div>}{tab==="annual"&&<C><ST>Projection annuelle {new Date().getFullYear()}</ST><Tbl cols={[{k:"r",l:"Rubrique",b:1,r:r=>r.rub},{k:"m",l:"Mensuel",a:"right",r:r=><span style={{color:"#e8e6e0"}}>{fmt(r.mens)}</span>},{k:"a",l:"Annuel (x12)",a:"right",r:r=><span style={{color:"#60a5fa"}}>{fmt(r.mens*12)}</span>},{k:"t",l:"Annuel total",a:"right",r:r=><span style={{color:r.c,fontWeight:700}}>{fmt(r.total)}</span>}]} data={[{rub:"Salaire brut",mens:bp,total:bp*13.92,c:"#c6a34e"},{rub:"ONSS personnel",mens:onssT,total:onssT*13.92,c:"#f87171"},{rub:"Precompte professionnel",mens:pp,total:pp*12,c:"#f87171"},{rub:"CSSS",mens:csss,total:csss*12,c:"#f87171"},{rub:"Net mensuel",mens:net,total:net*12,c:"#4ade80"},{rub:"Pecule vacances (simple)",mens:0,total:bp,c:"#4ade80"},{rub:"Pecule vacances (double)",mens:0,total:bp*0.92,c:"#4ade80"},{rub:"13eme mois / Prime fin annee",mens:0,total:bp,c:"#4ade80"},{rub:"NET ANNUEL TOTAL",mens:net,total:net*12+bp*0.4,c:"#4ade80"},{rub:"Cout employeur mensuel",mens:coutEmpl,total:coutEmpl*12,c:"#f87171"},{rub:"Pecule employeur",mens:0,total:bp*0.92*1.2507,c:"#f87171"},{rub:"13eme mois employeur",mens:0,total:bp*1.2507,c:"#f87171"},{rub:"COUT ANNUEL TOTAL",mens:coutEmpl,total:coutEmpl*12+bp*0.92*1.2507+bp*1.2507,c:"#f87171"}]}/></C>}
 {tab==="compare"&&<C><ST>Comparatif salaires bruts</ST><Tbl cols={[{k:"b",l:"Brut",r:r=><b style={{color:"#c6a34e"}}>{fmt(r.b)}</b>},{k:"o",l:"ONSS pers.",a:"right",r:r=><span style={{color:"#f87171"}}>{fmt(r.o)}</span>},{k:"p",l:"PP",a:"right",r:r=><span style={{color:"#f87171"}}>{fmt(r.p)}</span>},{k:"n",l:"Net",a:"right",r:r=><b style={{color:"#4ade80"}}>{fmt(r.n)}</b>},{k:"c",l:"Cout empl.",a:"right",r:r=><span style={{color:"#fb923c"}}>{fmt(r.c)}</span>},{k:"r",l:"Ratio",a:"right",r:r=><span style={{color:"#60a5fa"}}>{r.r}%</span>}]} data={[2000,2500,3000,3500,4000,4500,5000,6000,7000,8000].map(b=>{const o=b*0.1307;const imp=b-o;const p=calcPP(imp,sitFam,+enfants);const cs=calcCSS(b);const n=b-o-p-cs;const c=b*1.2507;return {b,o,p,n,c,r:c>0?((n/c)*100).toFixed(1):"0"}})}/></C>}{tab==="cotis"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18}}><C><ST>Cotisations employeur</ST>{[{l:"ONSS de base",t:"24.92%",v:bp*0.2492},{l:"Moderation salariale",t:"0.15%",v:bp*0.0015},{l:"Total ONSS patronal",t:"25.07%",v:onssP},{l:"Assurance accidents travail",t:"~1%",v:bp*0.01},{l:"Fermeture entreprise",t:"0.14%",v:bp*0.0014},{l:"Vacances annuelles (employe)",t:"N/A direct",v:0},{l:"Vacances annuelles (ouvrier)",t:"10.27%+6.93%",v:statut==="ouvrier"?bp*1.08*0.1720:0},{l:"Medecine travail",t:"forfait",v:7.63},{l:"Assurance groupe patronale",t:assGr+"%",v:bp*(+assGr/100)},{l:"Cheques-repas patronal",t:"22j",v:chRep?(+chRepV-1.09)*22:0}].filter(r=>r.v>0).map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><span style={{color:"#e8e6e0",fontSize:12}}>{r.l}</span><span style={{color:"#5e5c56",fontSize:10,marginLeft:6}}>{r.t}</span></div><span style={{fontWeight:600,color:"#f87171",fontSize:12}}>{fmt(r.v)}</span></div>)}</C><C><ST>Cotisations travailleur</ST>{[{l:"ONSS personnelle",t:"13.07%",v:onssT},{l:"Precompte professionnel",t:"bareme",v:pp},{l:"CSSS",t:"variable",v:csss},{l:"Assurance groupe perso.",t:assGr+"%",v:retAssGr},{l:"Cheques-repas retenue",t:"1.09x22j",v:chRep?1.09*22:0}].filter(r=>r.v>0).map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><div><span style={{color:"#e8e6e0",fontSize:12}}>{r.l}</span><span style={{color:"#5e5c56",fontSize:10,marginLeft:6}}>{r.t}</span></div><span style={{fontWeight:600,color:"#f87171",fontSize:12}}>{fmt(r.v)}</span></div>)}<div style={{display:"flex",justifyContent:"space-between",padding:"10px 0",borderTop:"2px solid rgba(74,222,128,.3)",marginTop:8}}><b style={{color:"#4ade80"}}>Reste net</b><b style={{color:"#4ade80",fontSize:14}}>{fmt(net)}</b></div></C></div>}</div>;}
 
 function DecavaMod({s,d}){
@@ -24758,7 +24817,7 @@ function SimulateurNetBrutMod({s,d}){
         <span style={{color:"#9e9b93"}}>{r.l}</span><span style={{color:"#c6a34e",fontWeight:600}}>{r.v}</span>
       </div>)}
       <div style={{marginTop:12,padding:10,borderRadius:6,background:"rgba(96,165,250,.05)",fontSize:10.5,color:"#60a5fa"}}>
-        Baremes PP 2026: 26.75% (0-1.128) | 32.10% (1.128-1.578) | 42.80% (1.578-2.718) | 48.15% (2.718+)
+        Baremes PP 2026: 26.75% (0-1.393) | 42.80% (1.393-2.458) | 48.15% (2.458-4.254) | 53.50% (4.254+)
       </div>
     </C>}
     {tab==="annuel"&&<C><ST>Projection annuelle</ST>
