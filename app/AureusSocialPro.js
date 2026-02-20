@@ -69,12 +69,12 @@ var LOIS_BELGES = {
 
   // ═══ RÉMUNÉRATION ═══
   remuneration: {
-    RMMMG: { montant18ans: RMMMG, montant20ans6m: RMMMG, montant21ans12m: RMMMG, source: 'CNT - CCT 43/15' },
+    RMMMG: { montant18ans: 2070.48, montant20ans6m: 2070.48, montant21ans12m: 2070.48, source: 'CNT - CCT 43/15' },
     indexSante: { coeff: 2.0399, pivot: 125.60, dateDerniereIndex: '2024-12-01', prochainPivotEstime: '2026-06-01' },
     peculeVacances: {
-      simple: { pct: PV_SIMPLE, base: 'brut annuel precedent' },
+      simple: { pct: 0.0767, base: 'brut annuel precedent' },
       double: { pct: 0.9200, base: 'brut mensuel' },
-      patronal: { pct: (PV_SIMPLE*2+0.001), base: 'brut annuel precedent' },
+      patronal: { pct: 0.1535, base: 'brut annuel precedent' },
     },
     treizieme: { obligatoire: true, cp200: true, base: 'salaire mensuel brut', onss: true },
   },
@@ -83,7 +83,7 @@ var LOIS_BELGES = {
   chequesRepas: {
     partTravailleur: { min: 1.09, max: null },
     valeurFaciale: { max: 8.00 },
-    partPatronale: { max: CR_PAT },
+    partPatronale: { max: 6.91 },
     conditions: 'Par jour effectivement preste',
     exonerationFiscale: true,
     exonerationONSS: true,
@@ -91,10 +91,10 @@ var LOIS_BELGES = {
 
   // ═══ FRAIS PROPRES EMPLOYEUR ═══
   fraisPropres: {
-    forfaitBureau: { max: FORF_BUREAU, base: 'mensuel' },
-    forfaitDeplacement: { voiture: FORF_KM, velo: 0.35, transportCommun: 1.00 },
+    forfaitBureau: { max: 154.74, base: 'mensuel' },
+    forfaitDeplacement: { voiture: 0.4415, velo: 0.35, transportCommun: 1.00 },
     forfaitRepresentation: { max: 40, base: 'mensuel sans justificatif' },
-    teletravail: { max: FORF_BUREAU, base: 'mensuel structurel' },
+    teletravail: { max: 154.74, base: 'mensuel structurel' },
   },
 
   // ═══ ATN — AVANTAGES EN NATURE ═══
@@ -179,7 +179,7 @@ var LOIS_BELGES = {
   // ═══ ASSURANCES ═══
   assurances: {
     accidentTravail: { taux: 0.01, obligatoire: true },
-    medecineTravail: { cout: COUT_MED, parTravailleur: true, annuel: false },
+    medecineTravail: { cout: 91.50, parTravailleur: true, annuel: false },
     assuranceLoi: { obligatoire: true },
     assuranceGroupe: { deductible: true, plafond80pct: true },
   },
@@ -5021,14 +5021,17 @@ function AppInner({ supabase, user, onLogout }) {
     const now=new Date();
     const hoursSince=lastVeille?((now-new Date(lastVeille))/3600000):999;
     if(hoursSince>24){
-      fetch('/api/agent',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({messages:[{role:'user',content:`Fais une veille rapide du droit social belge. Date: ${now.toLocaleDateString('fr-BE')}. Vérifie s'il y a des changements récents pour: taux ONSS, précompte professionnel, RMMMG, chèques-repas, indexation CP200, quota étudiants, flexi-jobs. Réponds en 3-5 lignes: soit "✅ Tout est à jour" soit "⚠️ Changement détecté: [détail]".`}],lang:'fr'})
-      }).then(r=>r.json()).then(data=>{
-        if(data.text){
-          setVeilleNotif({text:data.text,date:now.toLocaleDateString('fr-BE'),changed:data.text.includes('⚠️')||data.text.includes('CHANGÉ')});
-          localStorage.setItem('aureus_last_veille',now.toISOString());
-        }
+      fetch('/api/veille-juridique?manual=true')
+      .then(r=>r.json()).then(data=>{
+        const hasChanges=data.status==='CHANGES_DETECTED';
+        const nSources=data.summary?.sourcesReachable||0;
+        const nChanges=data.summary?.changesDetected||0;
+        const nAlerts=data.summary?.alertsTotal||0;
+        let text=hasChanges
+          ?`⚠️ ${nChanges} changement(s) détecté(s). ${data.changes?.map(c=>c.label+': '+c.current+' → '+c.detected).join('. ')||''}`
+          :`✅ Veille OK — ${nSources} sources, aucun changement.${nAlerts>0?' '+nAlerts+' alerte(s).':''}`;
+        setVeilleNotif({text,date:now.toLocaleDateString('fr-BE'),changed:hasChanges,data});
+        localStorage.setItem('aureus_last_veille',now.toISOString());
       }).catch(()=>{});
     }
   },[loading,s.clients?.length]);
@@ -12704,34 +12707,27 @@ const BaremesPPOfficiel=({s})=>{
   const runAutoCheck=async()=>{
     setUpdateStatus(p=>({...p,checking:true}));
     const now=new Date();
-    const results=[];
     let detectedChanges=false;
+    let results=[];
 
-    // Check each source
-    for(const src of SPF_SOURCES){
-      try{
-        const resp=await fetch(src.url,{mode:'no-cors',cache:'no-store'}).catch(()=>null);
-        // In production with a backend proxy, you'd parse the HTML and extract barème values
-        // Here we log the check attempt
-        results.push({source:src.name,url:src.url,status:resp?'reachable':'unreachable',time:now.toISOString(),type:src.type});
-      }catch(e){
-        results.push({source:src.name,url:src.url,status:'error',error:e.message,time:now.toISOString(),type:src.type});
+    try{
+      const resp=await fetch('/api/veille-juridique?manual=true');
+      const data=await resp.json();
+      detectedChanges=data.status==='CHANGES_DETECTED';
+      results=data.sources?.map(s=>({source:s.source,url:'',status:s.status,time:now.toISOString(),type:s.priority,changes:s.changesDetected,fetchTime:s.fetchTime}))||[];
+      if(data.changes?.length>0){
+        results.push({source:'⚠️ Changements',status:'CHANGES_DETECTED',message:data.changes.map(c=>c.label+': '+c.current+' → '+c.detected).join(', '),time:now.toISOString()});
       }
+      if(data.alerts?.length>0){
+        for(const a of data.alerts){
+          results.push({source:'🔔 '+a.type,status:a.severity,message:a.text,time:now.toISOString()});
+        }
+      }
+    }catch(e){
+      results=[{source:'API veille-juridique',status:'error',error:e.message,time:now.toISOString()}];
     }
 
-    // Check if year changed -> need new barème
-    const newYear=now.getFullYear();
-    if(!BAREMES_DB[newYear]&&!customBaremes[newYear]){
-      detectedChanges=true;
-      results.push({source:'System',status:'NEW_YEAR_DETECTED',message:'Annee '+newYear+' sans bareme. Mise a jour requise.',time:now.toISOString()});
-    }
-
-    // Check if we're in Dec -> watch for new AR publication
-    if(now.getMonth()===11){
-      results.push({source:'System',status:'WATCH_MODE',message:'Decembre: surveillance active publication nouvel AR au Moniteur Belge.',time:now.toISOString()});
-    }
-
-    const entry={date:now.toISOString(),results,detectedChanges,yearChecked:newYear};
+    const entry={date:now.toISOString(),results,detectedChanges,yearChecked:now.getFullYear()};
 
     setUpdateStatus(p=>({
       checking:false,
@@ -25466,6 +25462,60 @@ const [updateHistory,setUpdateHistory]=useState(()=>{try{return JSON.parse(local
 const [checking,setChecking]=useState(false);
 const [lastCheck,setLastCheck]=useState(()=>localStorage.getItem('aureus_lois_lastcheck')||null);
 const [editValues,setEditValues]=useState({});
+const [importState,setImportState]=useState({step:'idle',data:null,validation:null,uploading:false,history:[]});
+const handleJsonImport=async(file)=>{
+  setImportState(p=>({...p,step:'reading'}));
+  try{
+    const text=await file.text();
+    const json=JSON.parse(text);
+    setImportState(p=>({...p,step:'validating',data:json}));
+    const resp=await fetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'validate',payload:json})});
+    const result=await resp.json();
+    setImportState(p=>({...p,step:'validated',validation:result}));
+  }catch(e){setImportState({step:'error',data:null,validation:{valid:false,errors:[e.message]},uploading:false,history:[]});}
+};
+const handleUploadToSupabase=async()=>{
+  if(!importState.data||!importState.validation?.valid)return;
+  setImportState(p=>({...p,uploading:true}));
+  try{
+    const resp=await fetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'upload',payload:importState.data,source:'json_upload'})});
+    const result=await resp.json();
+    if(result.status==='pending'){
+      setImportState(p=>({...p,step:'uploaded',uploading:false,uploadId:result.id}));
+    }else if(result.status==='table_missing'){
+      setImportState(p=>({...p,step:'migration_needed',uploading:false,migration:result.migration}));
+    }else{
+      setImportState(p=>({...p,step:'error',uploading:false,validation:result}));
+    }
+  }catch(e){setImportState(p=>({...p,step:'error',uploading:false,validation:{errors:[e.message]}}));}
+};
+const handleApproveAndApply=async(id)=>{
+  try{
+    await fetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'approve',id})});
+    const resp=await fetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'apply',id})});
+    const result=await resp.json();
+    if(result.validated){
+      applyUpdate(result.validated);
+      setImportState(p=>({...p,step:'applied',appliedCount:result.changes_count}));
+    }
+  }catch(e){setImportState(p=>({...p,step:'error',validation:{errors:[e.message]}}));}
+};
+const loadSupabaseHistory=async()=>{
+  try{
+    const resp=await fetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list'})});
+    const result=await resp.json();
+    setImportState(p=>({...p,history:result.updates||[]}));
+  }catch(e){}
+};
+const handleRollback=async(id)=>{
+  if(!confirm('Annuler cet update et revenir aux valeurs par defaut?'))return;
+  try{
+    await fetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'rollback',id})});
+    setCustomLois({});
+    localStorage.removeItem('aureus_lois_custom');
+    loadSupabaseHistory();
+  }catch(e){}
+};
 
 const L=LOIS_BELGES;
 const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v);
@@ -25535,23 +25585,37 @@ const categories=[
 const totalParams=categories.reduce((a,c)=>a+c.params.length,0);
 
 // Vérification auto
-const doCheck=()=>{
+const doCheck=async()=>{
   setChecking(true);
   const now=new Date().toISOString();
-  const results=L.sources.map(src=>{
-    // En production: fetch réel via backend proxy
-    // Ici: vérification logique
-    const currentYear=new Date().getFullYear();
-    const hasBareme=L._meta.annee>=currentYear;
-    return {source:src.nom,url:src.url,type:src.type,status:hasBareme?'OK':'VERIFIER',reachable:true};
-  });
-  const entry={date:now,results,version:L._meta.version,status:results.every(r=>r.status==='OK')?'A_JOUR':'VERIFIER'};
-  const hist=[entry,...updateHistory].slice(0,30);
-  setUpdateHistory(hist);
-  setLastCheck(now);
-  localStorage.setItem('aureus_lois_history',JSON.stringify(hist));
-  localStorage.setItem('aureus_lois_lastcheck',now);
-  setTimeout(()=>setChecking(false),1500);
+  try{
+    const resp=await fetch('/api/veille-juridique?manual=true');
+    const data=await resp.json();
+    const entry={
+      date:now,
+      version:L._meta.version,
+      status:data.status==='UP_TO_DATE'?'A_JOUR':data.status==='CHANGES_DETECTED'?'CHANGEMENTS':'ALERTES',
+      results:data.sources||[],
+      changes:data.changes||[],
+      alerts:data.alerts||[],
+      summary:data.summary||{},
+      duration:data.duration,
+      trigger:'manual',
+    };
+    const hist=[entry,...updateHistory].slice(0,30);
+    setUpdateHistory(hist);
+    setLastCheck(now);
+    localStorage.setItem('aureus_lois_history',JSON.stringify(hist));
+    localStorage.setItem('aureus_lois_lastcheck',now);
+  }catch(e){
+    const entry={date:now,version:L._meta.version,status:'ERREUR',error:e.message,trigger:'manual'};
+    const hist=[entry,...updateHistory].slice(0,30);
+    setUpdateHistory(hist);
+    setLastCheck(now);
+    localStorage.setItem('aureus_lois_history',JSON.stringify(hist));
+    localStorage.setItem('aureus_lois_lastcheck',now);
+  }
+  setChecking(false);
 };
 
 // MAJ en 1 clic
@@ -25663,9 +25727,16 @@ return <div>
   </div>
   <span style={{fontSize:10,padding:"3px 8px",borderRadius:4,background:"rgba(96,165,250,.1)",color:"#60a5fa"}}>{src.type}</span>
 </div>)}
-<div style={{marginTop:16,padding:12,background:"rgba(198,163,78,.04)",borderRadius:8}}>
-  <div style={{fontSize:11,color:"#c6a34e",fontWeight:600}}>⚡ En production</div>
-  <div style={{fontSize:10,color:"#9e9b93",marginTop:4}}>Un service backend (cron quotidien) scrape ces sources, detecte les changements dans les AR/CCT, et notifie l administrateur pour validation avant mise a jour.</div>
+<div style={{marginTop:16,padding:12,background:"rgba(74,222,128,.04)",borderRadius:8,border:"1px solid rgba(74,222,128,.1)"}}>
+  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+    <div style={{fontSize:11,color:"#4ade80",fontWeight:600}}>✅ Backend actif — Cron quotidien 06:30 CET</div>
+    <div style={{fontSize:9,color:"#5e5c56"}}>{lastCheck?("Dernier scan: "+new Date(lastCheck).toLocaleString("fr-BE")):"Aucun scan effectue"}</div>
+  </div>
+  <div style={{fontSize:10,color:"#9e9b93",marginTop:4}}>Le service /api/veille-juridique scrape {L.sources.length} sources officielles, detecte les changements AR/CCT, et notifie l administrateur pour validation avant mise a jour.</div>
+  {updateHistory.length>0&&updateHistory[0].changes?.length>0&&<div style={{marginTop:6,padding:"6px 8px",background:"rgba(248,113,113,.06)",borderRadius:6}}>
+    <div style={{fontSize:10,color:"#f87171",fontWeight:600}}>⚠️ {updateHistory[0].changes.length} changement(s) detecte(s):</div>
+    {updateHistory[0].changes.slice(0,3).map((c,i)=><div key={i} style={{fontSize:10,color:"#fb923c",marginTop:2}}>{c.label}: {c.current} → {c.detected}</div>)}
+  </div>}
 </div>
 </C>}
 
@@ -25673,11 +25744,16 @@ return <div>
 {tab==="historique"&&<C>
 <ST>Historique des verifications et mises a jour</ST>
 {updateHistory.length===0?<div style={{textAlign:"center",padding:30,color:"#5e5c56"}}>Aucune verification effectuee. Cliquez sur "Verifier les mises a jour".</div>:
-updateHistory.map((h,i)=><div key={i} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}>
-  <div style={{width:8,height:8,borderRadius:"50%",background:h.action==='UPDATE'?"#c6a34e":h.status==='A_JOUR'?"#4ade80":"#fb923c",marginTop:5,flexShrink:0}}/>
-  <div>
-    <div style={{fontSize:11,color:"#e8e6e0",fontWeight:600}}>{h.action==='UPDATE'?'✏ Mise a jour manuelle ('+h.changes+' param.)':h.status==='A_JOUR'?'✓ Verification OK':'⚠ A verifier'}</div>
-    <div style={{fontSize:10,color:"#5e5c56"}}>{new Date(h.date).toLocaleString('fr-BE')}{h.version?' — v'+h.version:''}</div>
+updateHistory.map((h,i)=><div key={i} style={{display:"flex",gap:10,padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}>
+  <div style={{width:8,height:8,borderRadius:"50%",background:h.action==='UPDATE'?"#c6a34e":h.status==='A_JOUR'?"#4ade80":h.status==='CHANGEMENTS'?"#f87171":h.status==='ERREUR'?"#ef4444":"#fb923c",marginTop:5,flexShrink:0}}/>
+  <div style={{flex:1}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      <div style={{fontSize:11,color:"#e8e6e0",fontWeight:600}}>{h.action==='UPDATE'?'✏ MAJ manuelle ('+h.changes+' param.)':h.status==='A_JOUR'?'✓ Verification OK — Aucun changement':h.status==='CHANGEMENTS'?'⚠ '+((h.changes||[]).length)+' changement(s) detecte(s)':h.status==='ERREUR'?'❌ Erreur: '+(h.error||'inconnue'):'⚠ A verifier'}</div>
+      <span style={{fontSize:9,color:"#5e5c56"}}>{h.trigger==='manual'?'Manuel':'Auto'}{h.duration?' — '+h.duration:''}</span>
+    </div>
+    <div style={{fontSize:10,color:"#5e5c56"}}>{new Date(h.date).toLocaleString('fr-BE')}{h.version?' — v'+h.version:''}{h.summary?.sourcesReachable?' — '+h.summary.sourcesReachable+'/'+h.summary.sourcesChecked+' sources':''}</div>
+    {h.changes?.length>0&&<div style={{marginTop:4}}>{h.changes.map((c,j)=><div key={j} style={{fontSize:10,color:"#f87171",padding:"2px 0"}}>↳ {c.label}: <b>{c.current}</b> → <b style={{color:"#fb923c"}}>{c.detected}</b> ({c.severity})</div>)}</div>}
+    {h.alerts?.length>0&&<div style={{marginTop:2}}>{h.alerts.slice(0,2).map((a,j)=><div key={j} style={{fontSize:10,color:"#60a5fa",padding:"1px 0"}}>ℹ {a.text?.substring(0,100)}</div>)}</div>}
   </div>
 </div>)}
 </C>}
@@ -25735,9 +25811,103 @@ updateHistory.map((h,i)=><div key={i} style={{display:"flex",gap:10,padding:"8px
     <div style={{fontSize:24}}>📄</div><div style={{fontWeight:600,fontSize:12,marginTop:6}}>Resume texte</div><div style={{fontSize:10,color:"#9e9b93"}}>Format lisible</div>
   </button>
 </div>
-<div style={{marginTop:16,padding:12,background:"rgba(198,163,78,.04)",borderRadius:8}}>
-  <div style={{fontSize:11,color:"#c6a34e",fontWeight:600}}>💡 Import/MAJ en 1 clic</div>
-  <div style={{fontSize:10,color:"#9e9b93",marginTop:4}}>En production avec Supabase: l admin uploade un fichier JSON de nouvelles valeurs → validation → application automatique sur tous les clients en 1 clic. Rollback possible via historique.</div>
+<div style={{marginTop:16,padding:16,background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.12)"}}>
+  <div style={{fontSize:12,color:"#c6a34e",fontWeight:700,marginBottom:10}}>📥 Import / MAJ en 1 clic</div>
+
+  {/* STEP 1: Upload zone */}
+  {(importState.step==='idle'||importState.step==='error'||importState.step==='applied')&&<div>
+    <div
+      onDragOver={e=>{e.preventDefault();e.currentTarget.style.borderColor='#c6a34e';}}
+      onDragLeave={e=>{e.currentTarget.style.borderColor='rgba(198,163,78,.2)';}}
+      onDrop={e=>{e.preventDefault();e.currentTarget.style.borderColor='rgba(198,163,78,.2)';const f=e.dataTransfer.files[0];if(f&&f.name.endsWith('.json'))handleJsonImport(f);}}
+      style={{border:"2px dashed rgba(198,163,78,.2)",borderRadius:8,padding:"20px",textAlign:"center",cursor:"pointer",transition:"border-color .2s"}}
+      onClick={()=>{const inp=document.createElement('input');inp.type='file';inp.accept='.json';inp.onchange=e=>{const f=e.target.files[0];if(f)handleJsonImport(f);};inp.click();}}
+    >
+      <div style={{fontSize:28}}>📋</div>
+      <div style={{fontSize:11,color:"#c6a34e",fontWeight:600,marginTop:6}}>Glissez un fichier JSON ici</div>
+      <div style={{fontSize:10,color:"#5e5c56",marginTop:2}}>ou cliquez pour parcourir — Format: {"{\"onss.travailleur\": 0.1307, ...}"}</div>
+    </div>
+    {importState.step==='error'&&<div style={{marginTop:8,padding:8,background:"rgba(248,113,113,.06)",borderRadius:6}}>
+      <div style={{fontSize:10,color:"#f87171"}}>{importState.validation?.errors?.join(', ')||'Erreur inconnue'}</div>
+    </div>}
+    {importState.step==='applied'&&<div style={{marginTop:8,padding:8,background:"rgba(74,222,128,.06)",borderRadius:6}}>
+      <div style={{fontSize:10,color:"#4ade80",fontWeight:600}}>✅ {importState.appliedCount} parametre(s) applique(s) avec succes!</div>
+    </div>}
+  </div>}
+
+  {/* STEP 2: Validation preview */}
+  {(importState.step==='validating'||importState.step==='validated')&&importState.validation&&<div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+      <div style={{fontSize:11,fontWeight:600,color:importState.validation.valid?"#4ade80":"#f87171"}}>
+        {importState.validation.valid?"✅ Validation OK — "+importState.validation.count+" parametre(s)":"❌ Erreurs de validation"}
+      </div>
+      <button onClick={()=>setImportState({step:'idle',data:null,validation:null,uploading:false,history:[]})} style={{fontSize:10,padding:"4px 10px",borderRadius:4,border:"1px solid rgba(248,113,113,.3)",background:"transparent",color:"#f87171",cursor:"pointer",fontFamily:"inherit"}}>✕ Annuler</button>
+    </div>
+    {importState.validation.errors?.length>0&&<div style={{marginBottom:8}}>{importState.validation.errors.map((e,i)=><div key={i} style={{fontSize:10,color:"#f87171",padding:"2px 0"}}>❌ {e}</div>)}</div>}
+    {importState.validation.warnings?.length>0&&<div style={{marginBottom:8}}>{importState.validation.warnings.map((w,i)=><div key={i} style={{fontSize:10,color:"#fb923c",padding:"2px 0"}}>⚠ {w}</div>)}</div>}
+    {importState.validation.valid&&<div>
+      <div style={{fontSize:10,color:"#9e9b93",marginBottom:6}}>Parametres valides:</div>
+      <div style={{maxHeight:150,overflowY:"auto",marginBottom:8}}>{Object.entries(importState.validation.validated||{}).map(([k,v],i)=>
+        <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"3px 0",borderBottom:"1px solid rgba(255,255,255,.02)"}}>
+          <span style={{fontSize:10,color:"#9e9b93"}}>{k}</span>
+          <span style={{fontSize:10,fontWeight:600,color:"#c6a34e"}}>{v}</span>
+        </div>
+      )}</div>
+      <div style={{display:"flex",gap:8}}>
+        <button onClick={handleUploadToSupabase} disabled={importState.uploading} style={{flex:1,padding:"10px",borderRadius:8,border:"none",cursor:"pointer",fontFamily:"inherit",fontWeight:700,fontSize:12,background:importState.uploading?"rgba(198,163,78,.1)":"linear-gradient(135deg,#c6a34e,#a8892e)",color:importState.uploading?"#9e9b93":"#000"}}>
+          {importState.uploading?"⏳ Envoi vers Supabase...":"📤 Stocker dans Supabase (en attente)"}
+        </button>
+        <button onClick={()=>{applyUpdate(importState.validation.validated);setImportState(p=>({...p,step:'applied',appliedCount:importState.validation.count}));}} style={{flex:1,padding:"10px",borderRadius:8,border:"none",cursor:"pointer",fontFamily:"inherit",fontWeight:700,fontSize:12,background:"linear-gradient(135deg,#22c55e,#16a34a)",color:"#fff"}}>
+          ⚡ Appliquer directement
+        </button>
+      </div>
+    </div>}
+  </div>}
+
+  {/* STEP 3: Uploaded to Supabase */}
+  {importState.step==='uploaded'&&<div>
+    <div style={{padding:12,background:"rgba(96,165,250,.06)",borderRadius:6,marginBottom:8}}>
+      <div style={{fontSize:11,color:"#60a5fa",fontWeight:600}}>📦 Stocke dans Supabase — ID: {importState.uploadId?.substring(0,8)}...</div>
+      <div style={{fontSize:10,color:"#9e9b93",marginTop:4}}>Statut: En attente d approbation admin</div>
+    </div>
+    <div style={{display:"flex",gap:8}}>
+      <button onClick={()=>handleApproveAndApply(importState.uploadId)} style={{flex:1,padding:"10px",borderRadius:8,border:"none",cursor:"pointer",fontFamily:"inherit",fontWeight:700,fontSize:12,background:"linear-gradient(135deg,#c6a34e,#a8892e)",color:"#000"}}>
+        ✅ Approuver et appliquer
+      </button>
+      <button onClick={()=>setImportState({step:'idle',data:null,validation:null,uploading:false,history:[]})} style={{padding:"10px 16px",borderRadius:8,border:"1px solid rgba(248,113,113,.3)",cursor:"pointer",fontFamily:"inherit",fontWeight:600,fontSize:12,background:"transparent",color:"#f87171"}}>
+        ✕ Rejeter
+      </button>
+    </div>
+  </div>}
+
+  {/* Migration needed */}
+  {importState.step==='migration_needed'&&<div style={{padding:12,background:"rgba(251,146,56,.06)",borderRadius:6}}>
+    <div style={{fontSize:11,color:"#fb923c",fontWeight:600}}>⚠ Table Supabase manquante</div>
+    <div style={{fontSize:10,color:"#9e9b93",marginTop:4}}>Executez ce SQL dans Supabase Dashboard → SQL Editor:</div>
+    <pre style={{fontSize:9,color:"#60a5fa",background:"rgba(0,0,0,.3)",padding:8,borderRadius:4,marginTop:6,overflowX:"auto",maxHeight:120}}>{importState.migration}</pre>
+    <button onClick={()=>setImportState({step:'idle',data:null,validation:null,uploading:false,history:[]})} style={{marginTop:8,padding:"6px 12px",borderRadius:4,border:"1px solid rgba(198,163,78,.3)",cursor:"pointer",fontFamily:"inherit",fontSize:10,background:"transparent",color:"#c6a34e"}}>
+      OK, fait → Reessayer
+    </button>
+  </div>}
+
+  {/* Supabase history */}
+  <div style={{marginTop:12,borderTop:"1px solid rgba(255,255,255,.05)",paddingTop:10}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      <div style={{fontSize:10,color:"#5e5c56",fontWeight:600}}>Historique Supabase</div>
+      <button onClick={loadSupabaseHistory} style={{fontSize:9,padding:"3px 8px",borderRadius:4,border:"1px solid rgba(198,163,78,.2)",background:"transparent",color:"#c6a34e",cursor:"pointer",fontFamily:"inherit"}}>🔄 Charger</button>
+    </div>
+    {importState.history?.length>0&&<div style={{marginTop:6,maxHeight:120,overflowY:"auto"}}>{importState.history.map((h,i)=>
+      <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 0",borderBottom:"1px solid rgba(255,255,255,.02)"}}>
+        <div>
+          <span style={{fontSize:9,padding:"1px 5px",borderRadius:3,marginRight:4,background:h.status==='applied'?"rgba(74,222,128,.1)":h.status==='pending'?"rgba(96,165,250,.1)":h.status==='approved'?"rgba(198,163,78,.1)":"rgba(248,113,113,.1)",color:h.status==='applied'?"#4ade80":h.status==='pending'?"#60a5fa":h.status==='approved'?"#c6a34e":"#f87171"}}>{h.status}</span>
+          <span style={{fontSize:10,color:"#9e9b93"}}>{h.changes_count} params — v{h.version} — {new Date(h.created_at).toLocaleDateString('fr-BE')}</span>
+        </div>
+        {h.status==='applied'&&<button onClick={()=>handleRollback(h.id)} style={{fontSize:9,padding:"2px 6px",borderRadius:3,border:"1px solid rgba(248,113,113,.2)",background:"transparent",color:"#f87171",cursor:"pointer",fontFamily:"inherit"}}>↩ Rollback</button>}
+        {h.status==='approved'&&<button onClick={()=>handleApproveAndApply(h.id)} style={{fontSize:9,padding:"2px 6px",borderRadius:3,border:"1px solid rgba(74,222,128,.2)",background:"transparent",color:"#4ade80",cursor:"pointer",fontFamily:"inherit"}}>▶ Appliquer</button>}
+        {h.status==='pending'&&<button onClick={()=>handleApproveAndApply(h.id)} style={{fontSize:9,padding:"2px 6px",borderRadius:3,border:"1px solid rgba(198,163,78,.2)",background:"transparent",color:"#c6a34e",cursor:"pointer",fontFamily:"inherit"}}>✅ Approuver</button>}
+      </div>
+    )}</div>}
+  </div>
 </div>
 </C>}
 
