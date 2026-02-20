@@ -7,7 +7,7 @@ import { useState, useReducer, useRef, useMemo, useEffect, createContext, useCon
 // Base centralisée de TOUTES les constantes légales belges
 // Un seul endroit à modifier → propage partout automatiquement
 
-const LOIS_BELGES = {
+var LOIS_BELGES = {
   _meta: { version: '2026.1.0', dateMAJ: '2026-01-01', source: 'SPF Finances / ONSS / CNT / Moniteur Belge', annee: 2026 },
 
   // ═══ ONSS ═══
@@ -230,28 +230,28 @@ const LOIS_BELGES = {
 };
 
 // Aliases courts pour accès rapide dans tout le code
-const LB=LOIS_BELGES;
-const TX_ONSS_W=LB.onss.travailleur; // 0.1307
-const TX_ONSS_E=LB.onss.employeur.total; // 0.2507
-const TX_OUV108=LB.onss.ouvrier108; // 1.08
-const TX_AT=LB.assurances.accidentTravail.taux; // 0.01
-const COUT_MED=LB.assurances.medecineTravail.cout; // COUT_MED
-const CR_TRAV=LB.chequesRepas.partTravailleur.min; // CR_TRAV
-const PP_EST=0.22; // PP estimation moyenne (~22% de l'imposable)
-const NET_FACTOR=(1-TX_ONSS_W)*(1-PP_EST); // facteur net approx = ~0.5645
-const quickNetEst=(b)=>Math.round(b*NET_FACTOR*100)/100; // estimation rapide net
-const CR_MAX=LB.chequesRepas.valeurFaciale.max; // 8.00
-const CR_PAT=LB.chequesRepas.partPatronale.max; // 6.91
-const FORF_BUREAU=LB.fraisPropres.forfaitBureau.max; // FORF_BUREAU
-const FORF_KM=LB.fraisPropres.forfaitDeplacement.voiture; // 0.4415
-const PV_SIMPLE=LB.remuneration.peculeVacances.simple.pct; // PV_SIMPLE
-const PV_DOUBLE=LB.remuneration.peculeVacances.double.pct; // 0.92
-const RMMMG=LB.remuneration.RMMMG.montant18ans; // RMMMG
-const BONUS_MAX=LB.pp.bonusEmploi.maxMensuel; // 194.03
-const SEUIL_CPPT=LB.seuils.electionsSociales.cppt; // 50
-const SEUIL_CE=LB.seuils.electionsSociales.ce; // 100
-const HEURES_HEBDO=LB.tempsTravail.dureeHebdoLegale; // 38
-const JOURS_FERIES=LB.tempsTravail.jourFerie.nombre; // 10
+var LB=LOIS_BELGES;
+var TX_ONSS_W=LB.onss.travailleur; // 0.1307
+var TX_ONSS_E=LB.onss.employeur.total; // 0.2507
+var TX_OUV108=LB.onss.ouvrier108; // 1.08
+var TX_AT=LB.assurances.accidentTravail.taux; // 0.01
+var COUT_MED=LB.assurances.medecineTravail.cout; // COUT_MED
+var CR_TRAV=LB.chequesRepas.partTravailleur.min; // CR_TRAV
+var PP_EST=0.22; // PP estimation moyenne (~22% de l'imposable)
+var NET_FACTOR=(1-TX_ONSS_W)*(1-PP_EST); // facteur net approx = ~0.5645
+var quickNetEst=(b)=>Math.round(b*NET_FACTOR*100)/100; // estimation rapide net
+var CR_MAX=LB.chequesRepas.valeurFaciale.max; // 8.00
+var CR_PAT=LB.chequesRepas.partPatronale.max; // 6.91
+var FORF_BUREAU=LB.fraisPropres.forfaitBureau.max; // FORF_BUREAU
+var FORF_KM=LB.fraisPropres.forfaitDeplacement.voiture; // 0.4415
+var PV_SIMPLE=LB.remuneration.peculeVacances.simple.pct; // PV_SIMPLE
+var PV_DOUBLE=LB.remuneration.peculeVacances.double.pct; // 0.92
+var RMMMG=LB.remuneration.RMMMG.montant18ans; // RMMMG
+var BONUS_MAX=LB.pp.bonusEmploi.maxMensuel; // 194.03
+var SEUIL_CPPT=LB.seuils.electionsSociales.cppt; // 50
+var SEUIL_CE=LB.seuils.electionsSociales.ce; // 100
+var HEURES_HEBDO=LB.tempsTravail.dureeHebdoLegale; // 38
+var JOURS_FERIES=LB.tempsTravail.jourFerie.nombre; // 10
 
 
 // Fonction centralisée: obtenir une valeur légale
@@ -265,8 +265,8 @@ function getLoi(path, fallback) {
 
 // Aliases courts pour calculs — connectés à LOIS_BELGES
 // (voir bloc RACCOURCIS CENTRALISÉS plus bas)
-const _PVP = LOIS_BELGES.remuneration.peculeVacances.patronal.pct;
-const _HLEG = LOIS_BELGES.tempsTravail.dureeHebdoLegale;
+var _PVP = LOIS_BELGES.remuneration.peculeVacances.patronal.pct;
+var _HLEG = LOIS_BELGES.tempsTravail.dureeHebdoLegale;
 
 // Fonction centralisée: calculer PP via LOIS_BELGES
 function calcPPFromLois(brut, opts) {
@@ -300,21 +300,21 @@ function calcPPFromLois(brut, opts) {
 
 
 // ═══ RACCOURCIS CENTRALISÉS — Toute modif dans LOIS_BELGES se propage ICI ═══
-const _OW = LOIS_BELGES.onss.travailleur; // 0.1307
-const _OE = LOIS_BELGES.onss.employeur.total; // 0.2507
-const _OUV108 = LOIS_BELGES.onss.ouvrier108; // 1.08
-const _AT = LOIS_BELGES.assurances.accidentTravail.taux; // 0.01
-const _MED = LOIS_BELGES.assurances.medecineTravail.cout; // _MED
-const _CR_W = LOIS_BELGES.chequesRepas.partTravailleur.min; // _CR_W
-const _CR_VF = LOIS_BELGES.chequesRepas.valeurFaciale.max; // 8.00
-const _CR_E = LOIS_BELGES.chequesRepas.partPatronale.max; // 6.91
-const _PVS = LOIS_BELGES.remuneration.peculeVacances.simple.pct; // PV_SIMPLE
-const _PVD = LOIS_BELGES.remuneration.peculeVacances.double.pct; // 0.92
-const _PVE = LOIS_BELGES.remuneration.peculeVacances.patronal.pct; // _PVP()
-const _KM = LOIS_BELGES.fraisPropres.forfaitDeplacement.voiture; // _KM
-const _BUREAU = LOIS_BELGES.fraisPropres.forfaitBureau.max; // 154.74
-const _RMMMG = LOIS_BELGES.remuneration.RMMMG.montant18ans; // 2070.48
-const _IDX = LOIS_BELGES.remuneration.indexSante.coeff; // 2.0399
+var _OW = LOIS_BELGES.onss.travailleur; // 0.1307
+var _OE = LOIS_BELGES.onss.employeur.total; // 0.2507
+var _OUV108 = LOIS_BELGES.onss.ouvrier108; // 1.08
+var _AT = LOIS_BELGES.assurances.accidentTravail.taux; // 0.01
+var _MED = LOIS_BELGES.assurances.medecineTravail.cout; // _MED
+var _CR_W = LOIS_BELGES.chequesRepas.partTravailleur.min; // _CR_W
+var _CR_VF = LOIS_BELGES.chequesRepas.valeurFaciale.max; // 8.00
+var _CR_E = LOIS_BELGES.chequesRepas.partPatronale.max; // 6.91
+var _PVS = LOIS_BELGES.remuneration.peculeVacances.simple.pct; // PV_SIMPLE
+var _PVD = LOIS_BELGES.remuneration.peculeVacances.double.pct; // 0.92
+var _PVE = LOIS_BELGES.remuneration.peculeVacances.patronal.pct; // _PVP()
+var _KM = LOIS_BELGES.fraisPropres.forfaitDeplacement.voiture; // _KM
+var _BUREAU = LOIS_BELGES.fraisPropres.forfaitBureau.max; // 154.74
+var _RMMMG = LOIS_BELGES.remuneration.RMMMG.montant18ans; // 2070.48
+var _IDX = LOIS_BELGES.remuneration.indexSante.coeff; // 2.0399
 
 
 // ═══════════════════════════════════════════════════════════════
@@ -684,7 +684,7 @@ function LangSync() {
   return null;
 }
 
-const LEGAL={ONSS_W:_OW,ONSS_E:_OE,BONUS_2026:{
+var LEGAL={ONSS_W:_OW,ONSS_E:_OE,BONUS_2026:{
     // Bonus à l'emploi — Volet A (bas salaires) + Volet B (très bas salaires)
     // Source: Partena Professional / Instructions ONSS T1/2026 — indexé 01/01/2026
     // Employés (déclarés à 100%)
@@ -880,7 +880,7 @@ let MN=MN_FR; // Default FR — updated by LangSync component
 //  BARÈMES OFFICIELS (Source: salairesminimums.be — SPF Emploi)
 //  En vigueur au 01/01/2026
 // ═══════════════════════════════════════════════════════════════
-const BAREMES={
+var BAREMES={
   '200':{type:"monthly",indexDate:'01/01/2026',indexPct:2.21,regime:38,
     classes:{A:'Fonctions exécutives',B:'Fonctions de support',C:'Fonctions de gestion',D:'Fonctions consultatives'},
     grid:{
