@@ -230,88 +230,165 @@ var LOIS_BELGES = {
 };
 
 // ═══════════════════════════════════════════════════════════════════
-// MOTEUR DE VEILLE LÉGALE AUTOMATIQUE — Historique + Auto-détection
+// MOTEUR DE VEILLE LÉGALE AUTOMATIQUE — Timeline par date effective
+// Chaque entrée = une date effective + les constantes qui changent CE JOUR-LÀ
+// Le moteur applique toutes les entrées <= date du jour, dans l'ordre chronologique
 // ═══════════════════════════════════════════════════════════════════
-var LOIS_BELGES_HISTORIQUE = {
-  2024: {
+
+var LOIS_BELGES_TIMELINE = [
+  // ─── 2024 ────────────────────────────────────────────────────────
+  { date: '2024-01-01', source: 'MB — Index salaires conv. / SPF Finances',
     cct90: { plafondONSS: 4020, plafondFiscal: 3496, cotisationPatronale: 0.33, cotisationTravailleur: 0.1307 },
     chequesRepas: { valeurMax: 8.00, partPatronaleMax: 6.91, partTravailleurMin: 1.09, deductibilite: 2.00 },
     seuils: { ecolage: 39353, nonConcurrenceBas: 39353, nonConcurrenceHaut: 78606, arbitrage: 78606, supplementChomTemp: 3946 },
     teletravail: { forfaitBureau: 148.73, internet: 20, pc: 20, ecran: 5 },
     rmmmg: { montant18: 1994.18 },
     indemKm: { voiture: 0.4269, velo: 0.35 },
-    indexSante: { coeff: 2.0399 },
     pp: { fraisProMax: 5520, quotiteExemptee1: 2887.55 },
-    source: 'MB 2023/2024 — SPF Finances / ONSS'
   },
-  2025: {
-    cct90: { plafondONSS: 4164, plafondFiscal: 3622, cotisationPatronale: 0.33, cotisationTravailleur: 0.1307 },
-    chequesRepas: { valeurMax: 8.00, partPatronaleMax: 6.91, partTravailleurMin: 1.09, deductibilite: 2.00 },
+  { date: '2024-06-01', source: 'ONSS Instructions 2024/2',
+    teletravail: { forfaitBureau: 151.70 },
+  },
+  { date: '2024-07-01', source: 'AR indem. km 2024-2025',
+    indemKm: { voiture: 0.4269, velo: 0.35 },
+  },
+
+  // ─── 2025 ────────────────────────────────────────────────────────
+  { date: '2025-01-01', source: 'MB 13/11/2024 — Index salaires conv.',
+    cct90: { plafondONSS: 4164, plafondFiscal: 3622 },
     seuils: { ecolage: 43106, nonConcurrenceBas: 43106, nonConcurrenceHaut: 86212, arbitrage: 86212, supplementChomTemp: 4149 },
-    teletravail: { forfaitBureau: 154.74, internet: 20, pc: 20, ecran: 5 },
-    rmmmg: { montant18: 2029.88 },
-    indemKm: { voiture: 0.4415, velo: 0.35 },
-    indexSante: { coeff: 2.0399 },
     pp: { fraisProMax: 5750, quotiteExemptee1: 2920.86 },
-    source: 'MB 13/11/2024 + Instructions ONSS 2025/1'
+    rmmmg: { montant18: 2029.88 },
   },
-  2026: {
-    cct90: { plafondONSS: 4255, plafondFiscal: 3701, cotisationPatronale: 0.33, cotisationTravailleur: 0.1307 },
+  { date: '2025-03-01', source: 'ONSS Instructions 2025/1',
+    teletravail: { forfaitBureau: 157.83 },
+  },
+  { date: '2025-07-01', source: 'AR indem. km 2025-2026',
+    indemKm: { voiture: 0.4415, velo: 0.35 },
+  },
+
+  // ─── 2026 ────────────────────────────────────────────────────────
+  { date: '2026-01-01', source: 'MB 13/11/2025 + AR 10/11/2025 + Loi 30/12/2025',
+    cct90: { plafondONSS: 4255, plafondFiscal: 3701 },
     chequesRepas: { valeurMax: 10.00, partPatronaleMax: 8.91, partTravailleurMin: 1.09, deductibilite: 4.00 },
     seuils: { ecolage: 44447, nonConcurrenceBas: 44447, nonConcurrenceHaut: 88895, arbitrage: 88895, supplementChomTemp: 4284 },
-    teletravail: { forfaitBureau: 157.83, internet: 20, pc: 20, ecran: 5 },
-    rmmmg: { montant18: 2070.48 },
-    indemKm: { voiture: 0.4415, velo: 0.35 },
-    indexSante: { coeff: 2.0399 },
     pp: { fraisProMax: 6070, quotiteExemptee1: 2987.98 },
-    source: 'MB 13/11/2025 + AR 10/11/2025 + Loi 30/12/2025'
+    rmmmg: { montant18: 2070.48 },
   },
+  // Le forfait télétravail n'a PAS changé en mars 2026 (reste 157,83 depuis mars 2025)
+  // Dès publication: ajouter { date: '2026-03-01', teletravail: { forfaitBureau: XXX.XX } }
+  // Idem pour indem. km: { date: '2026-07-01', indemKm: { voiture: X.XXXX } }
+];
+
+// ═══ État courant — Résultat de l'application de la timeline ═══
+var LOIS_BELGES_CURRENT = {
+  cct90: { plafondONSS: 4255, plafondFiscal: 3701, cotisationPatronale: 0.33, cotisationTravailleur: 0.1307 },
+  chequesRepas: { valeurMax: 10.00, partPatronaleMax: 8.91, partTravailleurMin: 1.09, deductibilite: 4.00 },
+  seuils: { ecolage: 44447, nonConcurrenceBas: 44447, nonConcurrenceHaut: 88895, arbitrage: 88895, supplementChomTemp: 4284 },
+  teletravail: { forfaitBureau: 157.83, internet: 20, pc: 20, ecran: 5 },
+  rmmmg: { montant18: 2070.48 },
+  indemKm: { voiture: 0.4415, velo: 0.35 },
+  pp: { fraisProMax: 6070, quotiteExemptee1: 2987.98 },
+  _lastApplied: '2026-01-01',
 };
 
-// Applique les valeurs d'une année donnée à LOIS_BELGES
-function applyLoisBelgesYear(year) {
-  var data = LOIS_BELGES_HISTORIQUE[year];
-  if (!data) return false;
-  LOIS_BELGES.chequesRepas.valeurFaciale.max = data.chequesRepas.valeurMax;
-  LOIS_BELGES.chequesRepas.partPatronale.max = data.chequesRepas.partPatronaleMax;
-  LOIS_BELGES.chequesRepas.partTravailleur.min = data.chequesRepas.partTravailleurMin;
-  LOIS_BELGES.fraisPropres.forfaitBureau.max = data.teletravail.forfaitBureau;
-  LOIS_BELGES.fraisPropres.teletravail.max = data.teletravail.forfaitBureau;
-  LOIS_BELGES.contrats.clauseNonConcurrence.brut_min = data.seuils.nonConcurrenceBas;
-  LOIS_BELGES.contrats.clauseNonConcurrence.brut_mid = data.seuils.nonConcurrenceHaut;
-  LOIS_BELGES.contrats.ecolecholage.brut_min = data.seuils.ecolage;
-  LOIS_BELGES.remuneration.RMMMG.montant18ans = data.rmmmg.montant18;
-  LOIS_BELGES.pp.fraisPro.salarie.max = data.pp.fraisProMax;
-  LOIS_BELGES.pp.quotiteExemptee.bareme1 = data.pp.quotiteExemptee1;
-  LOIS_BELGES.pp.quotiteExemptee.bareme2 = data.pp.quotiteExemptee1 * 2;
-  LOIS_BELGES._meta.annee = year;
-  LOIS_BELGES._meta.dateMAJ = new Date().toISOString().slice(0, 10);
-  LOIS_BELGES._meta.version = year + '.1.0';
-  return true;
-}
-
-function checkLoisBelgesOutdated() {
-  var currentYear = new Date().getFullYear();
-  var loisYear = LOIS_BELGES._meta.annee;
-  var result = { outdated: false, currentYear: currentYear, loisYear: loisYear, missing: [], warnings: [] };
-  if (loisYear < currentYear) {
-    result.outdated = true;
-    if (LOIS_BELGES_HISTORIQUE[currentYear]) {
-      result.warnings.push('Valeurs ' + currentYear + ' disponibles — application automatique possible.');
-    } else {
-      result.missing.push('Aucune donnee pour ' + currentYear + '. Mise a jour LOIS_BELGES_HISTORIQUE requise.');
+// Applique la timeline: merge toutes les entrées dont la date <= targetDate
+function applyTimeline(targetDate) {
+  var td = targetDate || new Date().toISOString().slice(0, 10);
+  var state = {};
+  var lastDate = '';
+  var appliedCount = 0;
+  for (var i = 0; i < LOIS_BELGES_TIMELINE.length; i++) {
+    var entry = LOIS_BELGES_TIMELINE[i];
+    if (entry.date <= td) {
+      // Deep merge: chaque clé de l'entrée override la valeur correspondante
+      var keys = Object.keys(entry);
+      for (var k = 0; k < keys.length; k++) {
+        var key = keys[k];
+        if (key === 'date' || key === 'source') continue;
+        if (!state[key]) state[key] = {};
+        var subKeys = Object.keys(entry[key]);
+        for (var s = 0; s < subKeys.length; s++) {
+          state[key][subKeys[s]] = entry[key][subKeys[s]];
+        }
+      }
+      lastDate = entry.date;
+      appliedCount++;
     }
   }
-  return result;
+  state._lastApplied = lastDate;
+  state._appliedEntries = appliedCount;
+  return state;
 }
 
-// Auto-apply: si l'historique contient l'année courante et que LOIS_BELGES est en retard, on applique
-(function autoApplyLoisBelges() {
-  var y = new Date().getFullYear();
-  if (LOIS_BELGES_HISTORIQUE[y] && LOIS_BELGES._meta.annee < y) {
-    applyLoisBelgesYear(y);
+// Applique l'état à LOIS_BELGES et LOIS_BELGES_CURRENT
+function syncLoisBelges(state) {
+  if (!state || !state.chequesRepas) return;
+  // Copie vers CURRENT
+  Object.keys(state).forEach(function(k) { if (k[0] !== '_') LOIS_BELGES_CURRENT[k] = state[k]; });
+  LOIS_BELGES_CURRENT._lastApplied = state._lastApplied;
+  // Sync vers LOIS_BELGES (objet principal utilisé partout)
+  if (state.chequesRepas) {
+    LOIS_BELGES.chequesRepas.valeurFaciale.max = state.chequesRepas.valeurMax;
+    LOIS_BELGES.chequesRepas.partPatronale.max = state.chequesRepas.partPatronaleMax;
+    if (state.chequesRepas.partTravailleurMin) LOIS_BELGES.chequesRepas.partTravailleur.min = state.chequesRepas.partTravailleurMin;
   }
+  if (state.teletravail) {
+    LOIS_BELGES.fraisPropres.forfaitBureau.max = state.teletravail.forfaitBureau;
+    LOIS_BELGES.fraisPropres.teletravail.max = state.teletravail.forfaitBureau;
+  }
+  if (state.seuils) {
+    LOIS_BELGES.contrats.clauseNonConcurrence.brut_min = state.seuils.nonConcurrenceBas;
+    LOIS_BELGES.contrats.clauseNonConcurrence.brut_mid = state.seuils.nonConcurrenceHaut;
+    LOIS_BELGES.contrats.ecolecholage.brut_min = state.seuils.ecolage;
+  }
+  if (state.rmmmg) LOIS_BELGES.remuneration.RMMMG.montant18ans = state.rmmmg.montant18;
+  if (state.pp) {
+    LOIS_BELGES.pp.fraisPro.salarie.max = state.pp.fraisProMax;
+    LOIS_BELGES.pp.quotiteExemptee.bareme1 = state.pp.quotiteExemptee1;
+    LOIS_BELGES.pp.quotiteExemptee.bareme2 = state.pp.quotiteExemptee1 * 2;
+  }
+  LOIS_BELGES._meta.dateMAJ = new Date().toISOString().slice(0, 10);
+  LOIS_BELGES._meta.version = state._lastApplied.slice(0, 4) + '.auto';
+  LOIS_BELGES._meta.annee = parseInt(state._lastApplied.slice(0, 4));
+}
+
+// Détecte si des entrées futures existent (= on sait déjà ce qui va changer)
+function checkLoisBelgesOutdated() {
+  var today = new Date().toISOString().slice(0, 10);
+  var applied = LOIS_BELGES_CURRENT._lastApplied || '';
+  var future = LOIS_BELGES_TIMELINE.filter(function(e) { return e.date > today; });
+  var pending = LOIS_BELGES_TIMELINE.filter(function(e) { return e.date <= today && e.date > applied; });
+  var lastEntry = LOIS_BELGES_TIMELINE[LOIS_BELGES_TIMELINE.length - 1];
+  var lastYear = lastEntry ? parseInt(lastEntry.date.slice(0, 4)) : 0;
+  var currentYear = new Date().getFullYear();
+  return {
+    outdated: pending.length > 0 || lastYear < currentYear,
+    pendingCount: pending.length,
+    futureCount: future.length,
+    futureEntries: future.map(function(e) { return { date: e.date, source: e.source }; }),
+    lastApplied: applied,
+    missingYear: lastYear < currentYear,
+    warnings: pending.length > 0 ? ['Il y a ' + pending.length + ' mise(s) a jour en attente.'] :
+              lastYear < currentYear ? ['Aucune entree pour ' + currentYear + '. Verifiez les publications officielles.'] : [],
+  };
+}
+
+// Snapshot par année (pour VeilleLegale comparaison)
+var LOIS_BELGES_HISTORIQUE = {};
+(function buildYearlySnapshots() {
+  [2024, 2025, 2026, 2027, 2028].forEach(function(y) {
+    var state = applyTimeline(y + '-12-31');
+    if (state._appliedEntries > 0) LOIS_BELGES_HISTORIQUE[y] = state;
+  });
 })();
+
+// Auto-apply au chargement
+(function autoApplyLoisBelges() {
+  var state = applyTimeline();
+  syncLoisBelges(state);
+})();
+
 
 // Aliases courts pour accès rapide dans tout le code
 var LB=LOIS_BELGES;
@@ -14999,61 +15076,60 @@ const VeilleLegale=({s})=>{
   const [tab,setTab]=useState('dashboard');
   const [selYear,setSelYear]=useState(new Date().getFullYear());
   const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+  const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
   const status=checkLoisBelgesOutdated();
+  const C=LOIS_BELGES_CURRENT;
   const years=Object.keys(LOIS_BELGES_HISTORIQUE).map(Number).sort((a,b)=>b-a);
   const currentData=LOIS_BELGES_HISTORIQUE[selYear];
   const prevData=LOIS_BELGES_HISTORIQUE[selYear-1];
-  const diff=(cur,prev)=>{if(!prev||!cur)return null;const d=cur-prev;return d===0?null:d;};
   const pctDiff=(cur,prev)=>{if(!prev||!cur||prev===0)return '';const p=((cur-prev)/prev*100).toFixed(1);return p>0?'(+'+p+'%)':'('+p+'%)';};
+  const timeline=LOIS_BELGES_TIMELINE;
+  const today=new Date().toISOString().slice(0,10);
 
   const allConstants=currentData?[
     {cat:'CCT 90 — Bonus salarial',items:[
-      {l:'Plafond ONSS (brut)',v:currentData.cct90.plafondONSS,pv:prevData?.cct90?.plafondONSS,u:'EUR',src:'SPF Emploi + CNT'},
-      {l:'Plafond fiscal (net)',v:currentData.cct90.plafondFiscal,pv:prevData?.cct90?.plafondFiscal,u:'EUR',src:'SPF Finances'},
-      {l:'Cotisation patronale',v:(currentData.cct90.cotisationPatronale*100)+'%',pv:null,u:'',src:'ONSS',raw:true},
+      {l:'Plafond ONSS (brut)',v:currentData.cct90?.plafondONSS,pv:prevData?.cct90?.plafondONSS,u:'EUR',src:'SPF Emploi + CNT',when:'1er janvier'},
+      {l:'Plafond fiscal (net)',v:currentData.cct90?.plafondFiscal,pv:prevData?.cct90?.plafondFiscal,u:'EUR',src:'SPF Finances',when:'1er janvier'},
     ]},
     {cat:'Cheques-repas',items:[
-      {l:'Valeur faciale max',v:currentData.chequesRepas.valeurMax,pv:prevData?.chequesRepas?.valeurMax,u:'EUR',src:'AR 12/10/2010 mod.'},
-      {l:'Part patronale max',v:currentData.chequesRepas.partPatronaleMax,pv:prevData?.chequesRepas?.partPatronaleMax,u:'EUR',src:'AR 10/11/2025'},
-      {l:'Deductibilite fiscale',v:currentData.chequesRepas.deductibilite,pv:prevData?.chequesRepas?.deductibilite,u:'EUR/cheque',src:'Loi 30/12/2025'},
+      {l:'Valeur faciale max',v:currentData.chequesRepas?.valeurMax,pv:prevData?.chequesRepas?.valeurMax,u:'EUR',src:'AR / Loi',when:'Variable'},
+      {l:'Part patronale max',v:currentData.chequesRepas?.partPatronaleMax,pv:prevData?.chequesRepas?.partPatronaleMax,u:'EUR',src:'AR ONSS + Loi fiscale',when:'Variable'},
+      {l:'Deductibilite fiscale',v:currentData.chequesRepas?.deductibilite,pv:prevData?.chequesRepas?.deductibilite,u:'EUR/cheque',src:'Loi',when:'Variable'},
     ]},
     {cat:'Seuils contrats de travail',items:[
-      {l:'Clause ecolage (Art. 22bis)',v:currentData.seuils.ecolage,pv:prevData?.seuils?.ecolage,u:'EUR/an',src:'MB index salaires conv.'},
-      {l:'Non-concurrence bas (Art. 65)',v:currentData.seuils.nonConcurrenceBas,pv:prevData?.seuils?.nonConcurrenceBas,u:'EUR/an',src:'MB index salaires conv.'},
-      {l:'Non-concurrence haut',v:currentData.seuils.nonConcurrenceHaut,pv:prevData?.seuils?.nonConcurrenceHaut,u:'EUR/an',src:'MB index salaires conv.'},
-      {l:'Suppl. chomage temporaire',v:currentData.seuils.supplementChomTemp,pv:prevData?.seuils?.supplementChomTemp,u:'EUR/mois',src:'Art. 29 Loi 3/7/1978'},
+      {l:'Clause ecolage (Art. 22bis)',v:currentData.seuils?.ecolage,pv:prevData?.seuils?.ecolage,u:'EUR/an',src:'MB — Index salaires conv.',when:'1er janvier'},
+      {l:'Non-concurrence bas (Art. 65)',v:currentData.seuils?.nonConcurrenceBas,pv:prevData?.seuils?.nonConcurrenceBas,u:'EUR/an',src:'MB — Index salaires conv.',when:'1er janvier'},
+      {l:'Non-concurrence haut',v:currentData.seuils?.nonConcurrenceHaut,pv:prevData?.seuils?.nonConcurrenceHaut,u:'EUR/an',src:'MB — Index salaires conv.',when:'1er janvier'},
     ]},
     {cat:'Teletravail & Frais',items:[
-      {l:'Forfait bureau mensuel',v:currentData.teletravail.forfaitBureau,pv:prevData?.teletravail?.forfaitBureau,u:'EUR/mois',src:'ONSS + Circ. 2021/C/20'},
-      {l:'Forfait internet prive',v:currentData.teletravail.internet,pv:prevData?.teletravail?.internet,u:'EUR/mois',src:'ONSS'},
-      {l:'Forfait PC prive',v:currentData.teletravail.pc,pv:prevData?.teletravail?.pc,u:'EUR/mois',src:'ONSS'},
+      {l:'Forfait bureau mensuel',v:currentData.teletravail?.forfaitBureau,pv:prevData?.teletravail?.forfaitBureau,u:'EUR/mois',src:'ONSS Instructions trimestrielles',when:'1er mars (index T1)'},
+      {l:'Indemnite km voiture',v:currentData.indemKm?.voiture,pv:prevData?.indemKm?.voiture,u:'EUR/km',src:'AR annuel',when:'1er juillet'},
     ]},
     {cat:'Remuneration',items:[
-      {l:'RMMMG (18 ans)',v:currentData.rmmmg.montant18,pv:prevData?.rmmmg?.montant18,u:'EUR/mois',src:'CNT — CCT 43/15'},
-      {l:'Indemnite km voiture',v:currentData.indemKm.voiture,pv:prevData?.indemKm?.voiture,u:'EUR/km',src:'AR annuel'},
+      {l:'RMMMG (18 ans)',v:currentData.rmmmg?.montant18,pv:prevData?.rmmmg?.montant18,u:'EUR/mois',src:'CNT — CCT 43/15',when:'Accord interpro'},
     ]},
     {cat:'Precompte professionnel',items:[
-      {l:'Frais pro max (salarie)',v:currentData.pp.fraisProMax,pv:prevData?.pp?.fraisProMax,u:'EUR/an',src:'SPF Finances'},
-      {l:'Quotite exemptee (bar.1)',v:currentData.pp.quotiteExemptee1,pv:prevData?.pp?.quotiteExemptee1,u:'EUR/an',src:'SPF Finances'},
+      {l:'Frais pro max (salarie)',v:currentData.pp?.fraisProMax,pv:prevData?.pp?.fraisProMax,u:'EUR/an',src:'SPF Finances',when:'1er janvier'},
+      {l:'Quotite exemptee (bar.1)',v:currentData.pp?.quotiteExemptee1,pv:prevData?.pp?.quotiteExemptee1,u:'EUR/an',src:'SPF Finances',when:'1er janvier'},
     ]},
   ]:[];
 
   return <div style={{padding:24}}>
     <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>⚖️ Veille Legale Automatique</h2>
-    <p style={{fontSize:12,color:'#888',margin:'0 0 16px'}}>Constantes legales indexees — Historique {years[years.length-1]}–{years[0]} — Auto-detection annuelle</p>
+    <p style={{fontSize:12,color:'#888',margin:'0 0 16px'}}>Timeline par date effective — Auto-detection continue — {timeline.length} entrees enregistrees</p>
 
-    {/* Status banner */}
     {status.outdated?<div style={{padding:'12px 16px',background:'rgba(239,68,68,.1)',border:'1px solid rgba(239,68,68,.3)',borderRadius:10,marginBottom:16,display:'flex',alignItems:'center',gap:10}}>
       <span style={{fontSize:20}}>⚠️</span>
-      <div><div style={{fontSize:12,fontWeight:700,color:'#ef4444'}}>Constantes potentiellement obsoletes</div>
-        <div style={{fontSize:11,color:'#f87171'}}>{status.warnings.concat(status.missing).join(' ')}</div></div>
+      <div><div style={{fontSize:12,fontWeight:700,color:'#ef4444'}}>Mise a jour requise</div>
+        <div style={{fontSize:11,color:'#f87171'}}>{status.warnings.join(' ')}</div></div>
     </div>:<div style={{padding:'12px 16px',background:'rgba(34,197,94,.06)',border:'1px solid rgba(34,197,94,.2)',borderRadius:10,marginBottom:16,display:'flex',alignItems:'center',gap:10}}>
       <span style={{fontSize:20}}>✅</span>
-      <div style={{fontSize:12,color:'#4ade80',fontWeight:600}}>Toutes les constantes sont a jour pour {LOIS_BELGES._meta.annee} (MAJ: {LOIS_BELGES._meta.dateMAJ})</div>
+      <div><div style={{fontSize:12,color:'#4ade80',fontWeight:600}}>Toutes les constantes sont a jour (derniere entree: {C._lastApplied})</div>
+        {status.futureCount>0&&<div style={{fontSize:10,color:'#60a5fa',marginTop:2}}>{status.futureCount} entree(s) future(s) programmee(s)</div>}</div>
     </div>}
 
-    <div style={{display:'flex',gap:6,marginBottom:16,alignItems:'center'}}>
-      {[{v:'dashboard',l:'Dashboard'},{v:'comparaison',l:'Comparaison annees'},{v:'sources',l:'Sources officielles'},{v:'howto',l:'Comment mettre a jour'}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}
+    <div style={{display:'flex',gap:6,marginBottom:16,alignItems:'center',flexWrap:'wrap'}}>
+      {[{v:'dashboard',l:'Dashboard'},{v:'timeline',l:'Timeline'},{v:'comparaison',l:'Comparaison'},{v:'sources',l:'Sources'},{v:'howto',l:'Comment ajouter'}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}
       <div style={{marginLeft:'auto'}}>
         <select value={selYear} onChange={e=>setSelYear(+e.target.value)} style={{padding:'6px 12px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'#0d1117',color:'#c6a34e',fontSize:12,fontFamily:'inherit',fontWeight:600}}>
           {years.map(y=><option key={y} value={y}>{y}</option>)}
@@ -15065,16 +15141,45 @@ const VeilleLegale=({s})=>{
       {allConstants.map((cat,ci)=><div key={ci} style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
         <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:10}}>{cat.cat}</div>
         {cat.items.map((r,i)=>{
-          const changed=!r.raw&&r.pv!=null&&r.v!==r.pv;
+          const changed=r.pv!=null&&r.v!==r.pv;
           return <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'7px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
-            <div><span style={{color:'#e8e6e0',fontSize:12}}>{r.l}</span><span style={{fontSize:9,color:'#5e5c56',marginLeft:8}}>({r.src})</span></div>
+            <div><span style={{color:'#e8e6e0',fontSize:12}}>{r.l}</span><span style={{fontSize:9,color:'#5e5c56',marginLeft:6}}>({r.src})</span><span style={{fontSize:8,color:'#60a5fa',marginLeft:6}}>{r.when}</span></div>
             <div style={{display:'flex',alignItems:'center',gap:8}}>
               {changed&&<span style={{fontSize:10,color:r.v>r.pv?'#4ade80':'#f87171'}}>{pctDiff(r.v,r.pv)}</span>}
-              <span style={{fontWeight:600,color:changed?'#4ade80':'#c6a34e',fontSize:13}}>{r.raw?r.v:(typeof r.v==='number'&&r.v>=100?fmt(r.v):r.v)} {!r.raw&&r.u}</span>
+              <span style={{fontWeight:600,color:changed?'#4ade80':'#c6a34e',fontSize:13}}>{typeof r.v==='number'&&r.v>=100?fi(r.v):r.v!=null?fmt(r.v):'-'} {r.u}</span>
             </div>
           </div>;
         })}
       </div>)}
+    </div>}
+
+    {tab==='timeline'&&<div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
+      <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Timeline des modifications legales</div>
+      {[...timeline].reverse().map((entry,i)=>{
+        const isPast=entry.date<=today;
+        const isFuture=entry.date>today;
+        const changes=Object.keys(entry).filter(k=>k!=='date'&&k!=='source');
+        return <div key={i} style={{display:'flex',gap:14,padding:'12px 0',borderBottom:'1px solid rgba(255,255,255,.03)',opacity:isFuture?0.5:1}}>
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center',minWidth:70}}>
+            <div style={{fontSize:11,fontWeight:700,color:isPast?'#4ade80':'#60a5fa'}}>{entry.date}</div>
+            <div style={{width:2,flex:1,background:isPast?'rgba(34,197,94,.2)':'rgba(96,165,250,.2)',marginTop:4}}/>
+          </div>
+          <div style={{flex:1}}>
+            <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:4}}>
+              <span style={{fontSize:12,color:isPast?'#4ade80':'#60a5fa'}}>{isPast?'✅':'🔜'}</span>
+              <span style={{fontSize:10,color:'#9e9b93'}}>{entry.source||''}</span>
+            </div>
+            <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
+              {changes.map((c,j)=>{
+                const vals=Object.entries(entry[c]).map(([k,v])=>k+': '+(typeof v==='number'&&v>=100?fi(v):v));
+                return <div key={j} style={{fontSize:10,padding:'3px 8px',borderRadius:6,background:isPast?'rgba(34,197,94,.06)':'rgba(96,165,250,.06)',color:isPast?'#4ade80':'#60a5fa',marginBottom:2}}>
+                  <b>{c}</b>: {vals.join(', ')}
+                </div>;
+              })}
+            </div>
+          </div>
+        </div>;
+      })}
     </div>}
 
     {tab==='comparaison'&&<div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
@@ -15089,55 +15194,59 @@ const VeilleLegale=({s})=>{
             {l:'CCT 90 plafond fiscal',k:y=>LOIS_BELGES_HISTORIQUE[y]?.cct90?.plafondFiscal},
             {l:'CR valeur faciale',k:y=>LOIS_BELGES_HISTORIQUE[y]?.chequesRepas?.valeurMax},
             {l:'CR part patronale',k:y=>LOIS_BELGES_HISTORIQUE[y]?.chequesRepas?.partPatronaleMax},
-            {l:'CR deductibilite',k:y=>LOIS_BELGES_HISTORIQUE[y]?.chequesRepas?.deductibilite},
             {l:'Seuil ecolage',k:y=>LOIS_BELGES_HISTORIQUE[y]?.seuils?.ecolage},
             {l:'Seuil non-concurrence',k:y=>LOIS_BELGES_HISTORIQUE[y]?.seuils?.nonConcurrenceBas},
             {l:'Forfait teletravail',k:y=>LOIS_BELGES_HISTORIQUE[y]?.teletravail?.forfaitBureau},
+            {l:'Indem. km voiture',k:y=>LOIS_BELGES_HISTORIQUE[y]?.indemKm?.voiture},
             {l:'RMMMG',k:y=>LOIS_BELGES_HISTORIQUE[y]?.rmmmg?.montant18},
             {l:'Frais pro max PP',k:y=>LOIS_BELGES_HISTORIQUE[y]?.pp?.fraisProMax},
           ].map((row,i)=><tr key={i} style={{borderBottom:'1px solid rgba(255,255,255,.03)'}}>
             <td style={{padding:'6px 8px',color:'#e8e6e0'}}>{row.l}</td>
-            {years.map(y=>{const v=row.k(y);const pv=row.k(y-1);const changed=pv&&v!==pv;return <td key={y} style={{textAlign:'right',padding:'6px 8px',color:changed?'#4ade80':'#9e9b93',fontWeight:y===new Date().getFullYear()?600:400}}>{v!=null?(v>=100?fmt(v):v):'-'}</td>;})}
+            {years.map(y=>{const v=row.k(y);const pv=row.k(y-1);const changed=pv&&v!==pv;return <td key={y} style={{textAlign:'right',padding:'6px 8px',color:changed?'#4ade80':'#9e9b93',fontWeight:y===new Date().getFullYear()?600:400}}>{v!=null?(v>=100?fi(v):v):'-'}</td>;})}
           </tr>)}
         </tbody>
       </table></div>
     </div>}
 
     {tab==='sources'&&<div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
-      <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Sources officielles a consulter chaque annee</div>
+      <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Sources officielles — Calendrier annuel</div>
       {[
-        {n:'SPF Emploi — Seuils remuneration',u:'https://emploi.belgique.be',d:'Publication annuelle (novembre N-1) des seuils indexes: ecolage, non-concurrence, arbitrage.',quand:'Novembre'},
-        {n:'SPF Emploi — Bonus CCT 90',u:'https://emploi.belgique.be',d:'Plafonds ONSS et fiscaux indexes annuellement.',quand:'Decembre/Janvier'},
-        {n:'ONSS — Instructions administratives',u:'https://www.socialsecurity.be',d:'Forfait teletravail, frais propres, taux cotisations. Mise a jour trimestrielle.',quand:'Mars (T1)'},
-        {n:'SPF Finances — Precompte professionnel',u:'https://finances.belgium.be',d:'Baremes PP, tranches, quotite exemptee, frais pro. Publication annuelle.',quand:'Decembre'},
-        {n:'CNT — RMMMG',u:'https://www.cnt-nar.be',d:'Revenu Minimum Mensuel Moyen Garanti. Negociation interprofessionnelle.',quand:'Selon AIP'},
-        {n:'Moniteur Belge',u:'https://www.ejustice.just.fgov.be',d:'Publication officielle de tous les AR et lois. Source definitive.',quand:'Continu'},
-        {n:'Statbel — Indice sante',u:'https://statbel.fgov.be',d:'Coefficient d\'indexation. Pivot pour indexation salariale.',quand:'Mensuel'},
-        {n:'Partena / Securex / Acerta',u:'https://www.partena-professional.be',d:'Infoflashes pratiques sur nouveaux montants. Excellent pour verification rapide.',quand:'Decembre/Janvier'},
+        {n:'SPF Emploi — Seuils remuneration',quand:'Nov. N-1',freq:'Annuel',d:'Seuils indexes: ecolage, non-concurrence, arbitrage. Publication MB mi-novembre.'},
+        {n:'SPF Emploi — Bonus CCT 90',quand:'Dec/Jan',freq:'Annuel',d:'Plafonds ONSS et fiscaux CCT 90.'},
+        {n:'ONSS — Forfait teletravail',quand:'Mars (T1)',freq:'Variable',d:'Forfait bureau. Indexation via instructions administratives trimestrielles.'},
+        {n:'ONSS — Instructions T2/T3/T4',quand:'Juin/Sept/Dec',freq:'Trimestriel',d:'Verifier si le forfait teletravail change en cours d\'annee.'},
+        {n:'AR — Indemnite km',quand:'Juillet',freq:'Annuel',d:'Cycle 1er juillet → 30 juin. Indemnite km voiture et velo.'},
+        {n:'CNT — RMMMG',quand:'Variable',freq:'Accord interpro',d:'Peut changer a tout moment selon l\'AIP. Suivre les publications CNT.'},
+        {n:'SPF Finances — Baremes PP',quand:'Decembre',freq:'Annuel',d:'Tranches PP, quotite exemptee, frais pro.'},
+        {n:'Index sante (Statbel)',quand:'Mensuel',freq:'Mensuel',d:'Coefficient indexation. Depassement du pivot → indexation salariale.'},
       ].map((r,i)=><div key={i} style={{padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
           <b style={{color:'#c6a34e',fontSize:12}}>{r.n}</b>
-          <span style={{fontSize:9,padding:'2px 8px',borderRadius:4,background:'rgba(96,165,250,.1)',color:'#60a5fa'}}>{r.quand}</span>
+          <div style={{display:'flex',gap:4}}>
+            <span style={{fontSize:9,padding:'2px 8px',borderRadius:4,background:'rgba(96,165,250,.1)',color:'#60a5fa'}}>{r.quand}</span>
+            <span style={{fontSize:9,padding:'2px 8px',borderRadius:4,background:'rgba(198,163,78,.1)',color:'#c6a34e'}}>{r.freq}</span>
+          </div>
         </div>
         <div style={{fontSize:10.5,color:'#9e9b93',marginTop:3}}>{r.d}</div>
       </div>)}
     </div>}
 
     {tab==='howto'&&<div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
-      <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Procedure de mise a jour annuelle</div>
+      <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Comment ajouter une mise a jour</div>
+      <div style={{fontSize:11,color:'#9e9b93',marginBottom:16,lineHeight:1.7}}>Le systeme fonctionne par <b style={{color:'#c6a34e'}}>timeline</b>. Chaque entree a une date effective et ne contient <b>que les champs qui changent</b>. Au chargement, toutes les entrees passees sont appliquees dans l'ordre.</div>
       {[
-        {n:'1',t:'Novembre/Decembre N-1',d:'Le SPF Emploi publie les nouveaux seuils indexes (MB mi-novembre). Le SPF Finances publie les nouveaux baremes PP. Consulter Partena/Securex pour un resume.'},
-        {n:'2',t:'Ajouter l\'annee dans LOIS_BELGES_HISTORIQUE',d:'Copier le bloc de l\'annee precedente, modifier l\'annee et mettre a jour chaque valeur avec les montants publies. Toutes les valeurs indexees changent au 1er janvier.'},
-        {n:'3',t:'Le moteur applique automatiquement',d:'Au chargement de l\'application, la fonction autoApplyLoisBelges() detecte l\'annee courante et applique les valeurs correspondantes depuis l\'historique. Aucune autre modification n\'est necessaire dans le code.'},
-        {n:'4',t:'Verifier les documents juridiques',d:'Les 10 modeles de documents utilisent les constantes LOIS_BELGES dynamiquement. Mais les textes statiques dans les documents generes (articles de loi) doivent etre verifies manuellement si la legislation change (rare).'},
-        {n:'5',t:'Cas special: changement en cours d\'annee',d:'Si un montant change en cours d\'annee (ex: forfait teletravail indexe en mars), mettre a jour la valeur dans le bloc de l\'annee courante dans LOIS_BELGES_HISTORIQUE. Le moteur re-appliquera au prochain chargement.'},
+        {n:'1',t:'Quand un montant change',d:'Ajoutez une entree dans LOIS_BELGES_TIMELINE avec la date effective exacte et UNIQUEMENT les champs modifies. Ex: si le forfait teletravail change en mars, ajoutez: { date: "2027-03-01", source: "ONSS T1/2027", teletravail: { forfaitBureau: 162.50 } }'},
+        {n:'2',t:'Plusieurs changements, meme date',d:'Combinez-les dans une seule entree. Ex: les seuils + CCT 90 + PP changent tous le 1er janvier → une seule entree avec les 3 objets.'},
+        {n:'3',t:'Changement imprevu (RMMMG, pivot index)',d:'Ajoutez une entree avec la date exacte d\'effet. Le moteur la prend en compte au prochain chargement.'},
+        {n:'4',t:'Les documents s\'adaptent seuls',d:'Les 10 documents juridiques lisent depuis LOIS_BELGES_CURRENT. Quand la timeline applique un nouveau montant, tous les documents generes apres cette date utilisent automatiquement les nouvelles valeurs.'},
+        {n:'5',t:'Verifier',d:'L\'onglet Timeline montre toutes les entrees avec leur statut (appliquee / future). L\'onglet Comparaison genere automatiquement les snapshots par annee.'},
       ].map((r,i)=><div key={i} style={{display:'flex',gap:12,padding:'12px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
         <div style={{width:28,height:28,borderRadius:'50%',background:'rgba(198,163,78,.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:700,color:'#c6a34e',flexShrink:0}}>{r.n}</div>
         <div><b style={{color:'#e8e6e0',fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:'#9e9b93',marginTop:3}}>{r.d}</div></div>
       </div>)}
       <div style={{marginTop:16,padding:12,background:'rgba(198,163,78,.06)',borderRadius:8}}>
-        <div style={{fontSize:11,color:'#c6a34e',fontWeight:600}}>Effort annuel: ~15 minutes</div>
-        <div style={{fontSize:10,color:'#9e9b93',marginTop:4}}>Copier le bloc annee, mettre a jour ~15 chiffres depuis les publications officielles, commit + push. Le reste est automatique.</div>
+        <div style={{fontSize:11,fontWeight:600,color:'#c6a34e'}}>Exemple concret</div>
+        <pre style={{fontSize:10,color:'#9e9b93',marginTop:6,fontFamily:'monospace',whiteSpace:'pre-wrap'}}>{"// Forfait teletravail indexe en mars 2027\n{ date: '2027-03-01', source: 'ONSS Instructions 2027/1',\n  teletravail: { forfaitBureau: 162.50 } }\n\n// Seuils + PP + CCT90 en janvier 2027\n{ date: '2027-01-01', source: 'MB 15/11/2026',\n  cct90: { plafondONSS: 4350, plafondFiscal: 3782 },\n  seuils: { ecolage: 45500, nonConcurrenceBas: 45500,\n            nonConcurrenceHaut: 91000 },\n  pp: { fraisProMax: 6200, quotiteExemptee1: 3050 } }"}</pre>
       </div>
     </div>}
   </div>;
@@ -25798,9 +25907,9 @@ const docFooter='<div class="sig"><div>Pour l\'employeur<br><br><br>____________
 
 const genDoc=(type)=>{
   let h=docStyle+docHeader;
-  // ═══ VALEURS DYNAMIQUES — Lues depuis LOIS_BELGES (auto-appliqué par moteur veille légale) ═══
+  // ═══ VALEURS DYNAMIQUES — Lues depuis LOIS_BELGES_CURRENT (auto-appliqué par timeline) ═══
   const Y=LOIS_BELGES._meta.annee;
-  const H=LOIS_BELGES_HISTORIQUE[Y]||LOIS_BELGES_HISTORIQUE[2026];
+  const H=LOIS_BELGES_CURRENT;
   const f=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
   const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
   // Chèques-repas
