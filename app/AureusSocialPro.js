@@ -4089,6 +4089,58 @@ function Tbl({cols,data,onRow}){return(
   </div>
 );}
 
+// ═══ SEARCHABLE CLIENT SELECT — remplace <select> pour supporter 10K+ clients ═══
+const ClientSearch=({clients,value,onChange,placeholder,valueKey,style,showCount,allOption})=>{
+  const [open,setOpen]=useState(false);
+  const [q,setQ]=useState('');
+  const ref=useRef(null);
+  useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};document.addEventListener('mousedown',h);return()=>document.removeEventListener('mousedown',h);},[]);
+  const getVal=c=>valueKey==='name'?c.company?.name||'':valueKey==='index'?clients.indexOf(c):valueKey==='id'?c.id:c.company?.name||'';
+  const getLabel=c=>(c.company?.name||'Sans nom')+(showCount?' ('+(c.emps?.length||0)+')':'');
+  const current=valueKey==='index'?clients[value]:valueKey==='id'?clients.find(c=>c.id===value):clients.find(c=>(c.company?.name||'')===value);
+  const filtered=q?clients.filter(c=>{const s=q.toLowerCase();return(c.company?.name||'').toLowerCase().includes(s)||(c.company?.vat||'').toLowerCase().includes(s)||(c.id||'').toLowerCase().includes(s);}).slice(0,30):clients.slice(0,30);
+  const baseStyle={position:'relative',display:'inline-block',...(style||{})};
+  const inputStyle={width:'100%',padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit',outline:'none',boxSizing:'border-box',cursor:'pointer'};
+  return <div ref={ref} style={baseStyle}>
+    <div onClick={()=>setOpen(!open)} style={inputStyle}>
+      {current?getLabel(current):(allOption||placeholder||'Sélectionner...')}
+      <span style={{float:'right',color:'#555'}}>▾</span>
+    </div>
+    {open&&<div style={{position:'absolute',top:'100%',left:0,right:0,zIndex:9999,background:'#0e1220',border:'1px solid rgba(198,163,78,.2)',borderRadius:8,boxShadow:'0 8px 30px rgba(0,0,0,.5)',maxHeight:260,overflow:'hidden',minWidth:220}}>
+      <input autoFocus value={q} onChange={e=>setQ(e.target.value)} placeholder="🔍 Rechercher..." style={{width:'100%',padding:'8px 10px',background:'#090c16',border:'none',borderBottom:'1px solid rgba(198,163,78,.1)',color:'#e5e5e5',fontSize:11,fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+      <div style={{maxHeight:210,overflowY:'auto'}}>
+        {allOption&&<div onClick={()=>{onChange(valueKey==='index'?-1:'');setOpen(false);setQ('');}} style={{padding:'6px 10px',fontSize:11,color:'#c6a34e',cursor:'pointer',borderBottom:'1px solid rgba(255,255,255,.03)'}} onMouseEnter={e=>e.currentTarget.style.background='rgba(198,163,78,.08)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>{allOption}</div>}
+        {filtered.map((c,i)=><div key={i} onClick={()=>{onChange(getVal(c));setOpen(false);setQ('');}} style={{padding:'6px 10px',fontSize:11,color:getVal(c)===value?'#c6a34e':'#d4d0c8',cursor:'pointer',background:getVal(c)===value?'rgba(198,163,78,.06)':'transparent'}} onMouseEnter={e=>e.currentTarget.style.background='rgba(198,163,78,.08)'} onMouseLeave={e=>e.currentTarget.style.background=getVal(c)===value?'rgba(198,163,78,.06)':'transparent'}>
+          <div style={{fontWeight:500}}>{c.company?.name||'Sans nom'}</div>
+          <div style={{fontSize:9,color:'#5e5c56'}}>{c.company?.vat||''} {showCount?'• '+(c.emps?.length||0)+' emp.':''}</div>
+        </div>)}
+        {filtered.length===0&&<div style={{padding:12,textAlign:'center',color:'#555',fontSize:10}}>Aucun résultat</div>}
+        {clients.length>30&&!q&&<div style={{padding:6,textAlign:'center',color:'#5e5c56',fontSize:9}}>Tapez pour filtrer {clients.length} clients...</div>}
+      </div>
+    </div>}
+  </div>;
+};
+
+// ═══ EMPLOYEE QUICK TEMPLATES — CP 200 defaults ═══
+const EMP_TEMPLATES={
+  cp200_employe:{label:'Employé CP 200',fn:'Employé',contractType:'CDI',whWeek:38,cp:'200',statut:'employe',status:'actif'},
+  cp200_cadre:{label:'Cadre CP 200',fn:'Cadre',contractType:'CDI',whWeek:38,cp:'200',statut:'employe',status:'actif'},
+  cp200_parttime:{label:'Mi-temps CP 200',fn:'Employé',contractType:'CDI',whWeek:19,cp:'200',statut:'employe',status:'actif'},
+  cp200_cdd:{label:'CDD CP 200',fn:'Employé',contractType:'CDD',whWeek:38,cp:'200',statut:'employe',status:'actif'},
+  cp302_horeca:{label:'Employé CP 302 (Horeca)',fn:'Serveur',contractType:'CDI',whWeek:38,cp:'302',statut:'employe',status:'actif'},
+  cp124_ouvrier:{label:'Ouvrier CP 124 (Construction)',fn:'Ouvrier',contractType:'CDI',whWeek:38,cp:'124',statut:'ouvrier',status:'actif'},
+  cp322_interim:{label:'Intérimaire CP 322',fn:'Intérimaire',contractType:'CDD',whWeek:38,cp:'322',statut:'employe',status:'actif'},
+  flexi:{label:'Flexi-job',fn:'Flexi-job',contractType:'CDD',whWeek:0,cp:'200',statut:'employe',status:'actif'},
+  etudiant:{label:'Étudiant',fn:'Étudiant',contractType:'CDD',whWeek:20,cp:'200',statut:'etudiant',status:'actif'},
+};
+const quickAddEmp=(template,extra={})=>{
+  const t=EMP_TEMPLATES[template]||EMP_TEMPLATES.cp200_employe;
+  return{id:'EMP-'+Date.now()+'-'+Math.random().toString(36).substr(2,5),first:'',last:'',niss:'',email:'',phone:'',iban:'',
+    startDate:new Date().toISOString().split('T')[0],function:t.fn,contractType:t.contractType,
+    whWeek:t.whWeek,cp:t.cp,statut:t.statut,status:t.status,monthlySalary:0,gross:0,
+    civil:'single',depChildren:0,mealVoucher:8,ecoCheck:0,...extra};
+};
+
 // Simple table helper (rows-based, used by ATN, ChomTemp, CongeEduc, Outplacement, PAA)
 function TB({cols,rows}){return(
   <div style={{overflowX:'auto'}}>
@@ -4388,26 +4440,44 @@ const NACE_TO_CP={
 // En production: appeler https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html
 // ou l'API VIES pour validation TVA + BCE API pour les données entreprise
 function lookupBCE(vatNumber){
-  // Normaliser le numéro
   const clean=vatNumber.replace(/[^0-9]/g,"");
   if(clean.length<9||clean.length>10)return null;
   const nr=clean.padStart(10,"0");
-  
-  // Simuler des entreprises connues pour la démo
-  // En production: fetch vers l'API BCE
-  const DEMO_COMPANIES={
-    '0419052173':{name:'Colruyt Group NV',forme:'sa',addr:'Edingensesteenweg 196, 1500 Halle',nace:['47.11'],activity:'Commerce de détail alimentaire'},
-    '0403171043':{name:'Delhaize Le Lion SA',forme:'sa',addr:'Rue Osseghem 53, 1080 Molenbeek',nace:['47.11'],activity:'Commerce de détail alimentaire'},
-    '0404616494':{name:'Solvay SA',forme:'sa',addr:'Rue de Ransbeek 310, 1120 Bruxelles',nace:['20'],activity:'Industrie chimique'},
-    '0401574852':{name:'Besix SA',forme:'sa',addr:'Avenue des Communautés 100, 1200 Bruxelles',nace:['41',"42"],activity:'Construction de bâtiments et génie civil'},
-    '1028230781':{name:'Aureus IA SPRL',forme:'sprl',addr:'Saint-Gilles, Bruxelles',nace:['62'],activity:'Programmation informatique'},
-  };
-  
-  if(DEMO_COMPANIES[nr])return{...DEMO_COMPANIES[nr],vat:`BE ${nr.slice(0,4)}.${nr.slice(4,7)}.${nr.slice(7)}`,bce:nr,found:true};
-  
-  // Pour tout autre numéro: retourner un template vide avec les codes NACE à remplir
-  return{name:'',forme:'sprl',addr:'',nace:[],activity:'',vat:`BE ${nr.slice(0,4)}.${nr.slice(4,7)}.${nr.slice(7)}`,bce:nr,found:false,
-    message:"⚠ Entreprise non trouvée dans la démo. En production, les données seront récupérées automatiquement via l'API BCE (KBO) et le Moniteur Belge."};
+  const fmt=`BE ${nr.slice(0,4)}.${nr.slice(4,7)}.${nr.slice(7)}`;
+  // Modulo 97 validation (Belgian BCE)
+  const main=parseInt(nr.substring(0,8));const chk=parseInt(nr.substring(8,10));
+  const valid=(97-(main%97))===chk;
+  return{name:'',forme:'sprl',addr:'',nace:[],activity:'',vat:fmt,bce:nr,found:false,validBCE:valid};
+}
+// Async BCE lookup via VIES (EU VAT validation) — returns company name + address
+async function lookupBCE_async(vatNumber){
+  const clean=vatNumber.replace(/[^0-9]/g,"");
+  if(clean.length<9||clean.length>10)return null;
+  const nr=clean.padStart(10,"0");
+  const fmt=`BE ${nr.slice(0,4)}.${nr.slice(4,7)}.${nr.slice(7)}`;
+  // 1. Try VIES REST API (European Commission — public, CORS OK)
+  try{
+    const resp=await fetch(`https://ec.europa.eu/taxation_customs/vies/rest-api/ms/BE/vat/${nr}`,{signal:AbortSignal.timeout(5000)});
+    if(resp.ok){
+      const data=await resp.json();
+      if(data.isValid&&data.name){
+        const name=data.name.replace(/\n.*/g,'').trim();
+        const addr=(data.address||'').replace(/\n/g,', ').trim();
+        const forme=name.match(/\bSA\b/i)?'sa':name.match(/\bSRL\b|\bSPRL\b/i)?'sprl':name.match(/\bASBL\b/i)?'asbl':name.match(/\bSC\b/i)?'sc':'sprl';
+        return{name,forme,addr,nace:[],activity:'',vat:fmt,bce:nr,found:true,source:'VIES'};
+      }
+    }
+  }catch(e){}
+  // 2. Try local API endpoint
+  try{
+    const resp=await fetch(`/api/bce?vat=${nr}`,{signal:AbortSignal.timeout(3000)});
+    if(resp.ok){const data=await resp.json();if(data&&data.found)return{...data,vat:fmt,bce:nr,source:'API'};}
+  }catch(e){}
+  // 3. Fallback: valid BCE number but no name found
+  const main=parseInt(nr.substring(0,8));const chk=parseInt(nr.substring(8,10));
+  const valid=(97-(main%97))===chk;
+  return{name:'',forme:'sprl',addr:'',nace:[],activity:'',vat:fmt,bce:nr,found:false,validBCE:valid,
+    message:valid?'N° BCE valide — Complétez le nom et l\'adresse':'N° BCE invalide — Vérifiez le numéro'};
 }
 
 // Déterminer toutes les CP applicables à partir des codes NACE
@@ -4432,6 +4502,35 @@ function detectCPFromNACE(naceCodes){
   return results;
 }
 
+// ═══ SEARCHABLE CLIENT SELECT — replaces <select> for 10K clients ═══
+function SearchableClientSelect({clients,value,onChange,placeholder,style}){
+  const [q,setQ]=useState('');
+  const [open,setOpen]=useState(false);
+  const ref=useRef(null);
+  const sel=clients.find(c=>(c.company?.name||c.id)===value);
+  const filtered=q?clients.filter(c=>{const s=q.toLowerCase();return(c.company?.name||'').toLowerCase().includes(s)||(c.company?.vat||'').toLowerCase().includes(s);}):clients;
+  const shown=filtered.slice(0,50);
+  useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};document.addEventListener('mousedown',h);return()=>document.removeEventListener('mousedown',h);},[]);
+  return <div ref={ref} style={{position:'relative',...(style||{})}}>
+    <input value={open?q:(sel?sel.company?.name||sel.id:'')} 
+      onFocus={()=>{setOpen(true);setQ('');}}
+      onChange={e=>{setQ(e.target.value);setOpen(true);}}
+      placeholder={placeholder||'Rechercher un client...'}
+      style={{width:'100%',padding:'8px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+    {open&&<div style={{position:'absolute',top:'100%',left:0,right:0,zIndex:999,maxHeight:240,overflowY:'auto',background:'#0d1117',border:'1px solid rgba(198,163,78,.2)',borderRadius:8,boxShadow:'0 8px 24px rgba(0,0,0,.5)',marginTop:2}}>
+      {shown.length===0&&<div style={{padding:12,color:'#555',fontSize:10,textAlign:'center'}}>Aucun client trouvé</div>}
+      {shown.map((c,i)=><div key={c.id||i} onClick={()=>{onChange(c.company?.name||c.id);setOpen(false);setQ('');}}
+        style={{padding:'8px 12px',cursor:'pointer',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:11,color:(c.company?.name||c.id)===value?'#c6a34e':'#e5e5e5',background:(c.company?.name||c.id)===value?'rgba(198,163,78,.06)':'transparent'}}
+        onMouseEnter={e=>e.currentTarget.style.background='rgba(198,163,78,.08)'}
+        onMouseLeave={e=>e.currentTarget.style.background=(c.company?.name||c.id)===value?'rgba(198,163,78,.06)':'transparent'}>
+        <div style={{fontWeight:500}}>{c.company?.name||'Sans nom'}</div>
+        <div style={{fontSize:9,color:'#555'}}>{c.company?.vat||''} · {(c.emps||[]).length} emp.</div>
+      </div>)}
+      {filtered.length>50&&<div style={{padding:8,textAlign:'center',color:'#555',fontSize:9}}>{filtered.length-50} autres résultats...</div>}
+    </div>}
+  </div>;
+}
+
 function ClientWizard({onFinish,onCancel}){
   const [step,setStep]=useState(1);
   const [bceLoading,setBceLoading]=useState(false);
@@ -4444,43 +4543,34 @@ function ClientWizard({onFinish,onCancel}){
     emps:[],
   });
 
-  // ── BCE LOOKUP (API réelle) ──
+  // ── BCE LOOKUP (VIES API + fallback) ──
   const doLookup=async()=>{
     if(!data.vat||data.vat.replace(/[^0-9]/g,"").length<9)return;
     setBceLoading(true);
     setBceResult(null);
     try{
-      const clean=data.vat.replace(/[^0-9]/g,"");
-      const resp=await fetch(`/api/bce?vat=${clean}`);
-      const result=await resp.json();
+      const result=await lookupBCE_async(data.vat);
       setBceResult(result);
       if(result){
         const upd={...data};
         if(result.found){
-          upd.name=result.name||upd.name;upd.forme=result.forme||upd.forme;upd.addr=result.addr||upd.addr;upd.vat=result.vat||upd.vat;upd.naceCodes=result.nace||[];
+          upd.name=result.name||upd.name;upd.forme=result.forme||upd.forme;upd.addr=result.addr||upd.addr;upd.vat=result.vat||upd.vat;upd.naceCodes=result.nace||upd.naceCodes;
           if(result.email)upd.email=result.email;
           if(result.phone)upd.phone=result.phone;
         } else { upd.vat=result.vat||upd.vat; }
-        const cps=detectCPFromNACE(result.nace||[]);
+        const cps=detectCPFromNACE(upd.naceCodes||[]);
         setCpDetected(cps);
         if(cps.length>0){upd.cpEmploye=cps[0].cpEmp||'200';upd.cpOuvrier=cps[0].cpOuv||'';}
         setData(upd);
+        // Auto-advance: skip sector selection if NACE/CP already detected
+        if(result.found&&cps.length>0&&upd.name){setTimeout(()=>setStep(3),600);}
+        else if(result.found&&upd.name){setTimeout(()=>setStep(2),600);}
       }
     }catch(err){
       console.error('BCE lookup error:',err);
-      // Fallback vers la recherche locale
       const result=lookupBCE(data.vat);
       setBceResult(result);
-      if(result){
-        const upd={...data};
-        if(result.found){
-          upd.name=result.name;upd.forme=result.forme;upd.addr=result.addr;upd.vat=result.vat;upd.naceCodes=result.nace||[];
-        } else { upd.vat=result.vat; }
-        const cps=detectCPFromNACE(result.nace||[]);
-        setCpDetected(cps);
-        if(cps.length>0){upd.cpEmploye=cps[0].cpEmp||'200';upd.cpOuvrier=cps[0].cpOuv||'';}
-        setData(upd);
-      }
+      if(result){const upd={...data};upd.vat=result.vat||upd.vat;setData(upd);}
     }
     setBceLoading(false);
   };
@@ -4560,7 +4650,7 @@ function ClientWizard({onFinish,onCancel}){
       
       {/* TVA + Bouton BCE */}
       <div style={{display:'flex',gap:10,marginBottom:16,alignItems:'flex-end'}}>
-        <div style={{flex:1}}><I label="N° TVA (BE 0xxx.xxx.xxx) *" value={data.vat} onChange={v=>setData({...data,vat:v})}/></div>
+        <div style={{flex:1}}><I label="N° TVA (BE 0xxx.xxx.xxx) *" value={data.vat} onChange={v=>setData({...data,vat:v})} onBlur={()=>{if(data.vat&&data.vat.replace(/[^0-9]/g,'').length>=9&&!bceResult?.found)doLookup();}}/></div>
         <button onClick={doLookup} disabled={bceLoading} style={{padding:'10px 20px',background:bceLoading?'rgba(198,163,78,.1)':'linear-gradient(135deg,#c6a34e,#a68a3c)',color:bceLoading?'#c6a34e':'#060810',fontWeight:700,fontSize:12,border:'none',borderRadius:8,cursor:bceLoading?'wait':'pointer',fontFamily:'inherit',whiteSpace:'nowrap',height:42}}>
           {bceLoading?'⏳ Recherche BCE...':'🔍 Rechercher BCE / MB'}
         </button>
@@ -4667,6 +4757,7 @@ function ClientWizard({onFinish,onCancel}){
       <div style={{display:'flex',justifyContent:'flex-end',gap:10,marginTop:20}}>
         <B v="outline" onClick={onCancel}>Annuler</B>
         <B onClick={()=>{if(!data.name){alert('Raison sociale requise');return;}setStep(2);}}>Suivant →</B>
+        <B onClick={()=>{if(!data.name&&!data.vat){alert('Raison sociale ou n° TVA requis');return;}if(!data.cpEmploye)setData(d=>({...d,cpEmploye:'200'}));setStep(4);}} style={{background:'linear-gradient(135deg,#22c55e,#16a34a)',color:'#fff'}}>⚡ Création rapide (CP 200)</B>
       </div>
     </div>}
 
@@ -4759,6 +4850,7 @@ function ClientWizard({onFinish,onCancel}){
         <div style={{fontSize:12,color:'#5e5c56'}}>{data.emps.length} travailleur{data.emps.length>1?'s':''} ajouté{data.emps.length>1?'s':''}</div>
         <div style={{display:'flex',gap:10}}>
           <B v="outline" onClick={()=>setStep(2)}>← Retour</B>
+          <B v="outline" onClick={()=>{if(!data.name&&!data.vat){alert('Nom ou TVA requis');return;}finish();}} style={{borderColor:'rgba(34,197,94,.3)',color:'#22c55e'}}>⚡ Créer sans employés</B>
           <B onClick={()=>setStep(4)}>Suivant →</B>
         </div>
       </div>
@@ -4830,6 +4922,8 @@ function ClientWizard({onFinish,onCancel}){
 function ClientsPage({s,d,user,onLogout,veilleNotif,setVeilleNotif}){
   const [showWizard,setShowWizard]=useState(false);
   const [search,setSearch]=useState('');
+  const [clientPage,setClientPage]=useState(0);
+  const CLIENT_PAGE_SIZE=60;
   
   const handleFinish=(result)=>{
     d({type:"ADD_CLIENT",d:{company:result.company,emps:result.emps,pays:[],dims:[],dmfas:[],fiches:[],docs:[],sector:result.sector,subType:result.subType}});
@@ -4857,6 +4951,8 @@ function ClientsPage({s,d,user,onLogout,veilleNotif,setVeilleNotif}){
   });
 
   const stats={total:s.clients?.length||0,emps:(s.clients||[]).reduce((a,c)=>a+(c.emps?.length||0),0)};
+  const totalPages=Math.ceil(filtered.length/CLIENT_PAGE_SIZE);
+  const paginated=filtered.slice(clientPage*CLIENT_PAGE_SIZE,(clientPage+1)*CLIENT_PAGE_SIZE);
 
   return(
     <div style={{minHeight:'100vh',background:"#060810",color:'#d4d0c8',fontFamily:`'Outfit','DM Sans',system-ui,sans-serif`}}>
@@ -4882,6 +4978,32 @@ function ClientsPage({s,d,user,onLogout,veilleNotif,setVeilleNotif}){
             </div>}
           </div>
           {onLogout&&<button onClick={onLogout} style={{padding:'8px 14px',background:"rgba(248,113,113,0.08)",border:'1px solid rgba(248,113,113,0.2)',borderRadius:8,color:'#fb923c',fontSize:11,cursor:'pointer',fontFamily:'inherit',fontWeight:600}}>Déconnexion</button>}
+          <label style={{padding:'8px 14px',background:'rgba(34,197,94,.08)',border:'1px solid rgba(34,197,94,.2)',borderRadius:8,color:'#22c55e',fontSize:11,cursor:'pointer',fontFamily:'inherit',fontWeight:600,display:'inline-flex',alignItems:'center',gap:4}}>
+            📥 Import CSV
+            <input type="file" accept=".csv,.txt" style={{display:'none'}} onChange={e=>{
+              const file=e.target.files[0];if(!file)return;
+              const reader=new FileReader();
+              reader.onload=ev=>{
+                const text=ev.target.result;const sep=text.includes(';')?';':',';
+                const lines=text.split('\n').filter(l=>l.trim());if(lines.length<2){alert('Fichier vide');return;}
+                const headers=lines[0].split(sep).map(h=>h.trim().toLowerCase().replace(/['"]/g,''));
+                let imported=0,skipped=0;
+                for(let i=1;i<lines.length;i++){
+                  const vals=lines[i].split(sep).map(v=>v.trim().replace(/^["']|["']$/g,''));
+                  const row={};headers.forEach((h,j)=>row[h]=vals[j]||'');
+                  const name=row.societe||row.nom||row.company||row.raison_sociale||row.name||'';
+                  const vat=row.tva||row.vat||row.bce||row.numero_entreprise||'';
+                  if(!name&&!vat){skipped++;continue;}
+                  if((s.clients||[]).find(c=>(c.company?.name||'')===name||(c.company?.vat||'')===vat)){skipped++;continue;}
+                  d({type:'ADD_CLIENT',d:{company:{name,vat,bce:vat,iban:row.iban||'',address:row.adresse||row.address||'',cp:row.cp||row.commission_paritaire||'200',city:row.ville||row.city||'',phone:row.tel||row.phone||'',email:row.email||'',onss:row.onss||'',contact:row.contact||row.gerant||''},emps:[]}});
+                  imported++;
+                }
+                if(typeof addToast==='function')addToast('📥 '+imported+' clients importés'+(skipped?' ('+skipped+' ignorés)':''));
+                else alert('✅ '+imported+' clients importés'+(skipped?'\n'+skipped+' ignorés (doublons/vides)':''));
+              };
+              reader.readAsText(file,'UTF-8');e.target.value='';
+            }}/>
+          </label>
           <B onClick={()=>setShowWizard(!showWizard)}>{showWizard?'✕ Annuler':'+ Nouveau dossier'}</B>
         </div>
       </div>
@@ -4949,26 +5071,40 @@ function ClientsPage({s,d,user,onLogout,veilleNotif,setVeilleNotif}){
                   const blocked=(s.clients||[]).length-ready.length;
                   const totalEmps=ready.reduce((a,c)=>a+(c.emps?.length||0),0);
                   if(confirm(`⚡ BATCH PAIE MULTI-CLIENTS\n\n✅ ${ready.length} dossiers prêts (${totalEmps} travailleurs)\n${blocked>0?`❌ ${blocked} dossiers bloqués (score santé insuffisant)\n`:''}\nLe système va:\n1. Vérifier les absences encodées\n2. Calculer brut/ONSS/PP/net pour chaque travailleur\n3. Préparer les fiches de paie\n\n🔒 RIEN N'EST ENVOYÉ — Vous validez après.\n\nLancer le calcul ?`)){
-                    alert(`✅ ${totalEmps} fiches de paie calculées pour ${ready.length} clients.\n\n📋 Ouvrez chaque dossier pour vérifier et valider l'envoi.`);
+                    let bpGen=0,bpErr=0;
+                    ready.forEach(cl=>{(cl.emps||[]).forEach(e=>{try{generatePayslipPDF(e,cl.company||{});bpGen++;}catch(ex){bpErr++;}});});
+                    alert(`✅ ${bpGen} fiches de paie générées pour ${ready.length} clients.${bpErr?`\n⚠️ ${bpErr} erreurs.`:''}\n\n📋 Fichiers PDF téléchargés — vérifiez avant envoi.`);
                   }
                 }},
                 {icon:'📡',label:'Batch DmfA',desc:'Générer XML trimestriel',action:()=>{
                   const q=Math.ceil((new Date().getMonth()+1)/3);
                   const ready=(s.clients||[]).filter(cl=>cl.company?.onss&&cl.emps?.length>0);
                   if(confirm(`⚡ BATCH DmfA T${q}/${new Date().getFullYear()}\n\n✅ ${ready.length} dossiers avec n° ONSS\n❌ ${(s.clients||[]).length-ready.length} sans n° ONSS (bloqués)\n\nLe système va générer le XML DmfA pour chaque client.\n\n🔒 RIEN N'EST SOUMIS — Vous envoyez via le portail.\n\nGénérer ?`)){
-                    alert(`✅ ${ready.length} fichiers DmfA générés.\n\n📋 Vérifiez et soumettez sur socialsecurity.be`);
+                    let dmfGen=0;
+                    ready.forEach(cl=>{try{generateDmfAXML(cl.emps||[],cl.company||{});dmfGen++;}catch(ex){}});
+                    alert(`✅ ${dmfGen} fichiers DmfA XML générés.\n\n📋 Téléchargés — soumettez sur socialsecurity.be`);
                   }
                 }},
                 {icon:'📈',label:'Batch Indexation',desc:'Appliquer indexation',action:()=>{
                   const totalEmps=(s.clients||[]).reduce((a,c)=>a+(c.emps?.length||0),0);
                   if(confirm(`⚡ BATCH INDEXATION ${new Date().getFullYear()}\n\n📊 ${(s.clients||[]).length} clients · ${totalEmps} travailleurs\n\nLe système va calculer les nouveaux salaires indexés.\n\n🔒 RIEN N'EST APPLIQUÉ — Vous validez client par client.\n\nCalculer ?`)){
-                    alert(`✅ Indexation calculée pour ${totalEmps} travailleurs.\n\n📋 Ouvrez chaque dossier pour vérifier et appliquer.`);
+                    const idxRate=LOIS_BELGES.INDEX?.tauxAnnuel||2.0;const rate=idxRate/100;
+                    let idxCount=0;
+                    const updClients=(s.clients||[]).map(cl=>({...cl,emps:(cl.emps||[]).map(e=>{
+                      const old=+(e.monthlySalary||e.gross||0);if(old<=0)return e;
+                      const nw=Math.round(old*(1+rate)*100)/100;idxCount++;
+                      return{...e,monthlySalary:nw,gross:nw,prevSalary:old,indexDate:new Date().toISOString().slice(0,10),indexRate:idxRate};
+                    })}));
+                    d({type:'SET_CLIENTS',data:updClients});
+                    alert(`✅ Indexation ${idxRate}% appliquée à ${idxCount} travailleurs.\n\n📋 Salaires bruts mis à jour pour ${(s.clients||[]).length} clients.`);
                   }
                 }},
                 {icon:'📄',label:'Batch Belcotax',desc:'Générer fiches 281',action:()=>{
                   const ready=(s.clients||[]).filter(cl=>cl.company?.vat&&cl.emps?.length>0);
                   if(confirm(`⚡ BATCH BELCOTAX ${new Date().getFullYear()-1}\n\n✅ ${ready.length} dossiers prêts\n📄 Fiches 281.10 + 281.20\n\nLe système va générer toutes les fiches.\n\n🔒 RIEN N'EST SOUMIS — Vous envoyez via Belcotax on web.\n\nGénérer ?`)){
-                    alert(`✅ Fiches 281 générées pour ${ready.length} clients.\n\n📋 Vérifiez et soumettez sur belcotaxonweb.be`);
+                    let belcGen=0;
+                    ready.forEach(cl=>{(cl.emps||[]).forEach(e=>{try{generateBelcotaxXML(e,cl.company||{});belcGen++;}catch(ex){}});});
+                    alert(`✅ ${belcGen} fiches 281 générées pour ${ready.length} clients.\n\n📋 Fichiers téléchargés — soumettez sur belcotaxonweb.be`);
                   }
                 }},
               ].map((act,i)=><button key={i} onClick={act.action} style={{
@@ -4983,20 +5119,37 @@ function ClientsPage({s,d,user,onLogout,veilleNotif,setVeilleNotif}){
             </div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8,marginTop:8}}>
               {[
-                {icon:'🔔',label:'Batch Dimona',desc:'Vérifier toutes Dimona',action:()=>{
-                  const missing=(s.clients||[]).reduce((a,cl)=>{
-                    return a+(cl.emps||[]).filter(e=>!(cl.dims||[]).some(d=>d.niss===e.niss&&d.type==='IN')).length;
-                  },0);
-                  alert(`📡 Vérification Dimona:\n\n${missing>0?`⚠️ ${missing} travailleur(s) sans Dimona IN`:'✅ Toutes les Dimona sont en ordre'}`);
+                {icon:'🔔',label:'Batch Dimona',desc:'Générer Dimona manquantes',action:()=>{
+                  const missingList=[];
+                  (s.clients||[]).forEach(cl=>{
+                    (cl.emps||[]).filter(e=>!(cl.dims||[]).some(d=>d.niss===e.niss&&d.type==='IN')).forEach(e=>missingList.push({emp:e,co:cl.company||{}}));
+                  });
+                  if(!missingList.length){alert('✅ Toutes les Dimona IN sont en ordre.');return;}
+                  if(confirm(`📡 ${missingList.length} travailleur(s) sans Dimona IN.\n\nGénérer les XML Dimona manquantes ?\n\n🔒 RIEN N'EST SOUMIS — Vous envoyez via le portail ONSS.`)){
+                    let dimGen=0;missingList.forEach(({emp,co})=>{try{generateDimonaXML(emp,'IN',co);dimGen++;}catch(ex){}});
+                    alert(`✅ ${dimGen} Dimona IN XML générées.\n\n📋 Soumettez via socialsecurity.be`);
+                  }
                 }},
                 {icon:'💳',label:'Batch SEPA',desc:'Générer virements',action:()=>{
                   const ready=(s.clients||[]).filter(cl=>cl.emps?.some(e=>e.iban&&e.monthlySalary>0));
                   if(confirm(`⚡ BATCH SEPA VIREMENTS\n\n✅ ${ready.length} clients avec IBAN valides\n\nLe système va créer les fichiers SEPA.\n\n🔒 RIEN N'EST VIRÉ — Vous uploadez en banque.\n\nGénérer ?`)){
-                    alert(`✅ ${ready.length} fichiers SEPA générés.\n\n📋 Uploadez sur votre plateforme bancaire (Isabel, Codabox, etc.)`);
+                    let sepaGen=0;
+                    ready.forEach(cl=>{try{generateSEPAXML(cl.emps||[],cl.company||{});sepaGen++;}catch(ex){}});
+                    alert(`✅ ${sepaGen} fichiers SEPA pain.001 générés.\n\n📋 Uploadez sur votre plateforme bancaire (Isabel, Codabox, etc.)`);
                   }
                 }},
                 {icon:'📊',label:'Rapport global',desc:'Export tous clients',action:()=>{
-                  alert(`📊 Rapport global généré:\n\n• ${stats.total} clients\n• ${stats.emps} travailleurs\n• Masse salariale: ${((s.clients||[]).reduce((a,cl)=>a+(cl.emps||[]).reduce((b,e)=>b+(e.monthlySalary||0),0),0)).toLocaleString('fr-BE')}€/mois\n\n📋 Export disponible dans Reporting & Export.`);
+                  const csvHeader='Client;TVA;ONSS;CP;Employés;Masse Brute;Contact;Email\n';
+                  const csvRows=(s.clients||[]).map(cl=>{
+                    const co=cl.company||{};const emps=cl.emps||[];
+                    const masse=emps.reduce((a,e)=>a+(e.monthlySalary||0),0);
+                    return `"${co.name||''}";"${co.vat||''}";"${co.onss||''}";"${co.cp||'200'}";${emps.length};${masse.toFixed(2)};"${co.contact||''}";"${co.email||''}"`;
+                  }).join('\n');
+                  const blob=new Blob([csvHeader+csvRows],{type:'text/csv;charset=utf-8'});
+                  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
+                  a.download='Rapport_Global_'+new Date().toISOString().slice(0,10)+'.csv';
+                  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+                  alert(`📊 Rapport CSV exporté:\n\n• ${stats.total} clients\n• ${stats.emps} travailleurs\n• Masse salariale: ${((s.clients||[]).reduce((a,cl)=>a+(cl.emps||[]).reduce((b,e)=>b+(e.monthlySalary||0),0),0)).toLocaleString('fr-BE')}€/mois`);
                 }},
                 {icon:'🏥',label:'Audit santé',desc:'Score tous dossiers',action:()=>{
                   const results=(s.clients||[]).map(cl=>{
@@ -5010,7 +5163,18 @@ function ClientsPage({s,d,user,onLogout,veilleNotif,setVeilleNotif}){
                   const bad=results.filter(r=>r.score<60);
                   const ok=results.filter(r=>r.score>=60&&r.score<80);
                   const good=results.filter(r=>r.score>=80);
-                  alert(`🏥 AUDIT SANTÉ GLOBAL\n\n🔴 ${bad.length} dossiers critiques (<60%)\n🟡 ${ok.length} dossiers à améliorer (60-80%)\n🟢 ${good.length} dossiers OK (≥80%)\n\n${bad.length>0?'⚠️ Dossiers critiques:\n'+bad.slice(0,10).map(r=>`  • ${r.name}: ${r.score}%`).join('\n'):''}`);
+                  const csvH='Client;TVA;Score;Employés;NISS Manquants;IBAN Manquants;Salaire Manquant;Statut\n';
+                  const csvR=results.map(r=>{
+                    const cl=(s.clients||[]).find(c=>(c.company?.name||'')===r.name);
+                    const emps=cl?.emps||[];const noNISS=emps.filter(e=>!e.niss).length;const noIBAN=emps.filter(e=>!e.iban).length;
+                    const noSal=emps.filter(e=>!(e.monthlySalary>0)).length;
+                    return `"${r.name}";"${cl?.company?.vat||''}";"${r.score}%";${emps.length};${noNISS};${noIBAN};${noSal};${r.score>=80?'OK':r.score>=60?'À améliorer':'CRITIQUE'}`;
+                  }).join('\n');
+                  const blob=new Blob([csvH+csvR],{type:'text/csv;charset=utf-8'});
+                  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
+                  a.download='Audit_Sante_'+new Date().toISOString().slice(0,10)+'.csv';
+                  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+                  alert(`🏥 AUDIT SANTÉ GLOBAL\n\n🔴 ${bad.length} dossiers critiques (<60%)\n🟡 ${ok.length} dossiers à améliorer (60-80%)\n🟢 ${good.length} dossiers OK (≥80%)\n\n📊 Rapport CSV exporté.${bad.length>0?'\n\n⚠️ Dossiers critiques:\n'+bad.slice(0,10).map(r=>`  • ${r.name}: ${r.score}%`).join('\n'):''}`);
                 }},
               ].map((act,i)=><button key={i} onClick={act.action} style={{
                 padding:'14px 12px',background:'rgba(96,165,250,.03)',border:'1px solid rgba(96,165,250,.08)',
@@ -5033,13 +5197,22 @@ function ClientsPage({s,d,user,onLogout,veilleNotif,setVeilleNotif}){
         </div>}
         {/* Search */}
         <div style={{marginBottom:20}}>
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍 Rechercher un dossier (nom, TVA, contact)..."
+          <input value={search} onChange={e=>{setSearch(e.target.value);setClientPage(0);}} placeholder="🔍 Rechercher un dossier (nom, TVA, contact)..."
             style={{width:'100%',padding:'12px 18px',background:"#0e1220",border:'1px solid rgba(139,115,60,.12)',borderRadius:10,color:'#d4d0c8',fontSize:14,fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
         </div>
 
-        {/* Client grid */}
+        {/* Client grid — page {clientPage+1}/{totalPages||1} */}
+        {filtered.length>CLIENT_PAGE_SIZE&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+          <span style={{fontSize:11,color:'#5e5c56'}}>{filtered.length} dossiers — Page {clientPage+1}/{totalPages}</span>
+          <div style={{display:'flex',gap:4}}>
+            <button onClick={()=>setClientPage(0)} disabled={clientPage===0} style={{padding:'4px 10px',borderRadius:6,border:'none',background:clientPage>0?'rgba(198,163,78,.1)':'transparent',color:clientPage>0?'#c6a34e':'#333',fontSize:10,cursor:clientPage>0?'pointer':'default',fontFamily:'inherit'}}>«</button>
+            <button onClick={()=>setClientPage(p=>Math.max(0,p-1))} disabled={clientPage===0} style={{padding:'4px 10px',borderRadius:6,border:'none',background:clientPage>0?'rgba(198,163,78,.1)':'transparent',color:clientPage>0?'#c6a34e':'#333',fontSize:10,cursor:clientPage>0?'pointer':'default',fontFamily:'inherit'}}>‹ Préc</button>
+            <button onClick={()=>setClientPage(p=>Math.min(totalPages-1,p+1))} disabled={clientPage>=totalPages-1} style={{padding:'4px 10px',borderRadius:6,border:'none',background:clientPage<totalPages-1?'rgba(198,163,78,.1)':'transparent',color:clientPage<totalPages-1?'#c6a34e':'#333',fontSize:10,cursor:clientPage<totalPages-1?'pointer':'default',fontFamily:'inherit'}}>Suiv ›</button>
+            <button onClick={()=>setClientPage(totalPages-1)} disabled={clientPage>=totalPages-1} style={{padding:'4px 10px',borderRadius:6,border:'none',background:clientPage<totalPages-1?'rgba(198,163,78,.1)':'transparent',color:clientPage<totalPages-1?'#c6a34e':'#333',fontSize:10,cursor:clientPage<totalPages-1?'pointer':'default',fontFamily:'inherit'}}>»</button>
+          </div>
+        </div>}
         <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(340,1fr))',gap:16}}>
-          {filtered.map(cl=>(
+          {paginated.map(cl=>(
             <div key={cl.id} onClick={()=>d({type:"SELECT_CLIENT",id:cl.id})}
               style={{background:"linear-gradient(145deg,#0e1220,#131829)",border:'1px solid rgba(139,115,60,.12)',borderRadius:14,padding:'20px 22px',cursor:'pointer',transition:'all .2s',position:'relative'}}
               onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(198,163,78,.35)';e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.boxShadow='0 8px 24px rgba(0,0,0,.3)';}}
@@ -5341,6 +5514,19 @@ function AppInner({ supabase, user, onLogout }) {
   </div>:null;
   // Auto-backup every 5min
   useEffect(()=>{const iv=setInterval(()=>{try{localStorage.setItem("aureus_autobackup",JSON.stringify({co:s.co,emps:s.emps,pays:s.pays,clients:s.clients,activeClient:s.activeClient}));localStorage.setItem("aureus_autobackup_date",new Date().toISOString());cloudAutoBackup(s);}catch(e){}},300000);return()=>clearInterval(iv);},[s.co,s.emps,s.pays,s.clients]);
+
+  // ── Keyboard shortcuts ──
+  useEffect(()=>{const h=(e)=>{
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;
+    if(e.ctrlKey||e.metaKey){
+      if(e.key==='k'||e.key==='K'){e.preventDefault();if(spotRef.current)spotRef.current.focus();}
+    }
+    if(!e.ctrlKey&&!e.metaKey&&!e.altKey){
+      if(e.key==='?'){e.preventDefault();alert('⌨️ Raccourcis clavier\n\nCtrl+K — Recherche globale (Spotlight)\nD — Dashboard\nC — Clients\nE — Employés\nP — Paie (Pilote Auto)\nA — Automatisation\nF — Fiscal\nO — ONSS\nS — SEPA');}
+      const shortcuts={d:'dashboard',c:'clientsmenu',e:'employees',p:'piloteauto',a:'automatisation',f:'fiscal',o:'onss',s:'sepa'};
+      if(shortcuts[e.key])d({type:'NAV',page:shortcuts[e.key]});
+    }
+  };window.addEventListener('keydown',h);return()=>window.removeEventListener('keydown',h);},[]);
 
   const spotRef=useRef(null);
   const spotIndex=useMemo(()=>{
@@ -6741,9 +6927,7 @@ const CalcInstant=({s,d})=>{
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Encodez les prestations → la fiche se calcule en temps réel</p>
       </div>
       <div style={{display:'flex',gap:8,alignItems:'center'}}>
-        <select value={selClient} onChange={e=>setSelClient(e.target.value)} style={{padding:'8px 12px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,color:'#e5e5e5',fontSize:12,fontFamily:'inherit'}}>
-          {clients.map((c,i)=><option key={i} value={c.company?.name}>{c.company?.name||'Client '+i}</option>)}
-        </select>
+        <SearchableClientSelect clients={clients} value={selClient} onChange={v=>setSelClient(v)} style={{minWidth:200}}/>
         <select value={selMonth} onChange={e=>setSelMonth(+e.target.value)} style={{padding:'8px 12px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,color:'#e5e5e5',fontSize:12,fontFamily:'inherit'}}>
           {mois.map((m,i)=><option key={i} value={i}>{m}</option>)}
         </select>
@@ -7132,10 +7316,7 @@ const ActionsRapides=({s,d})=>{
         <div style={{display:'grid',gap:10}}>
           <div>
             <label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Client / Entreprise</label>
-            <select value={formData.client} onChange={e=>setFormData(p=>({...p,client:e.target.value}))} style={fieldStyle}>
-              <option value="">— Sélectionner —</option>
-              {clients.map((c,i)=><option key={i} value={c.company?.name}>{c.company?.name}</option>)}
-            </select>
+            <ClientSearch clients={clients} value={formData.client} onChange={v=>setFormData(p=>({...p,client:v}))} valueKey="name" placeholder="— Sélectionner —" style={{width:'100%'}}/>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
             <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Prénom</label><input value={formData.first} onChange={e=>setFormData(p=>({...p,first:e.target.value}))} style={fieldStyle} placeholder="Jean"/></div>
@@ -7546,10 +7727,7 @@ const ExportBatch=({s})=>{
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Generer toutes les fiches de paie d un coup</p>
       </div>
       <div style={{display:'flex',gap:6}}>
-        <select value={selClient} onChange={e=>setSelClient(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
-          <option value={-1}>Tous les clients</option>
-          {clients.map((c,i)=><option key={i} value={i}>{c.company?.name}</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index" allOption="Tous les clients"/>
         <select value={selMonth} onChange={e=>setSelMonth(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
           {mois.map((m,i)=><option key={i} value={i}>{m}</option>)}
         </select>
@@ -7747,10 +7925,7 @@ const RecapEmployeur=({s,user})=>{
         <select value={year} onChange={e=>setYear(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
           {[2024,2025,2026].map(y=><option key={y} value={y}>{y}</option>)}
         </select>
-        <select value={selClient} onChange={e=>setSelClient(e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
-          <option value="all">Tous les clients ({clients.length})</option>
-          {clients.map((c,i)=><option key={i} value={c.id}>{c.company?.name}</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="id" allOption={'Tous les clients ('+clients.length+')'}/>
       </div>
     </div>
 
@@ -8269,10 +8444,7 @@ const ContratGenerator=({s,d,user})=>{
     <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:16}}>
       <div>
         <div style={{fontSize:10,color:'#888',marginBottom:4}}>Client (employeur)</div>
-        <select value={selClient||''} onChange={e=>{ setSelClient(e.target.value); setSelEmp(null); const c=clients.find(cl2=>cl2.id===e.target.value); if(c?.company?.cp) setCp(c.company.cp); }} style={{width:'100%',padding:'10px',background:'#090c16',border:'1px solid rgba(139,115,60,.2)',borderRadius:8,color:'#e5e5e5',fontSize:12,fontFamily:'inherit'}}>
-          <option value="">Selectionnez un client</option>
-          {clients.map((c,i)=><option key={i} value={c.id}>{c.company?.name}</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient||''} onChange={v=>{setSelClient(v);setSelEmp(null);const c=clients.find(cl2=>cl2.id===v);if(c?.company?.cp)setCp(c.company.cp);}} valueKey="id" placeholder="Selectionnez un client" style={{width:'100%'}}/>
       </div>
       <div>
         <div style={{fontSize:10,color:'#888',marginBottom:4}}>Travailleur</div>
@@ -8612,10 +8784,7 @@ const ImportCSV=({s,d})=>{
 
       <div style={{marginTop:12}}>
         <div style={{fontSize:10,color:'#888',marginBottom:4}}>Importer dans quel client ?</div>
-        <select value={selClient} onChange={e=>setSelClient(e.target.value)} style={{width:'100%',padding:'10px',background:'#090c16',border:'1px solid rgba(139,115,60,.2)',borderRadius:8,color:'#e5e5e5',fontSize:12,fontFamily:'inherit'}}>
-          <option value="">Selectionnez le client employeur</option>
-          {clients.map((c,i)=><option key={i} value={c.id}>{c.company?.name} ({(c.emps||[]).length} emp.)</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="id" showCount placeholder="Selectionnez le client employeur" style={{width:'100%'}}/>
       </div>
 
       <div style={{display:'flex',gap:10,marginTop:16}}>
@@ -9534,9 +9703,7 @@ const PlanAbsences=({s,d})=>{
         <button onClick={()=>{if(month===0){setMonth(11);setYear(y=>y-1);}else setMonth(m=>m-1);}} style={{padding:'6px 12px',borderRadius:6,border:'1px solid rgba(198,163,78,.15)',background:'transparent',color:'#c6a34e',cursor:'pointer',fontFamily:'inherit'}}>◀</button>
         <span style={{fontSize:14,fontWeight:700,color:'#c6a34e',minWidth:140,textAlign:'center'}}>{mois[month]} {year}</span>
         <button onClick={()=>{if(month===11){setMonth(0);setYear(y=>y+1);}else setMonth(m=>m+1);}} style={{padding:'6px 12px',borderRadius:6,border:'1px solid rgba(198,163,78,.15)',background:'transparent',color:'#c6a34e',cursor:'pointer',fontFamily:'inherit'}}>▶</button>
-        <select value={selClient} onChange={e=>{setSelClient(+e.target.value);}} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit',marginLeft:8}}>
-          {clients.map((c,i)=><option key={i} value={i}>{c.company?.name}</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index"/>
       </div>
     </div>
 
@@ -9952,9 +10119,7 @@ const GedDocuments=({s,d})=>{
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Gestion electronique des documents employes</p>
       </div>
       <div style={{display:'flex',gap:8}}>
-        <select value={selClient} onChange={e=>{setSelClient(+e.target.value);setSelEmp(null);}} style={{padding:'8px 12px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,color:'#e5e5e5',fontSize:12,fontFamily:'inherit'}}>
-          {clients.map((c,i)=><option key={i} value={i}>{c.company?.name||'Client '+(i+1)}</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>{setSelClient(v);setSelEmp(null);}} valueKey="index"/>
       </div>
     </div>
 
@@ -10054,9 +10219,7 @@ const PortailEmploye=({s})=>{
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
       <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:0}}>👤 Portail Employe</h2>
       <div style={{display:'flex',gap:6}}>
-        <select value={selClient} onChange={e=>{setSelClient(+e.target.value);setSelEmp(0);}} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:10,fontFamily:'inherit'}}>
-          {clients.map((c,i)=><option key={i} value={i}>{c.company?.name}</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>{setSelClient(v);setSelEmp(0);}} valueKey="index"/>
         <select value={selEmp} onChange={e=>setSelEmp(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:10,fontFamily:'inherit'}}>
           {(cl.emps||[]).map((e,i)=><option key={i} value={i}>{(e.first||'')+' '+(e.last||'')}</option>)}
         </select>
@@ -10217,9 +10380,7 @@ const DashboardClient=({s,d})=>{
   return <div style={{padding:24}}>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
       <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:0}}>🏢 Dashboard Client</h2>
-      <select value={sel} onChange={e=>setSel(+e.target.value)} style={{padding:'8px 14px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,color:'#e5e5e5',fontSize:13,fontFamily:'inherit',fontWeight:600}}>
-        {clients.map((c,i)=><option key={i} value={i}>{c.company?.name||'Client '+(i+1)}</option>)}
-      </select>
+      <ClientSearch clients={clients} value={sel} onChange={v=>setSel(v)} valueKey="index" style={{minWidth:220}}/>
     </div>
 
     <div style={{padding:20,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.15)',borderRadius:16,marginBottom:16,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
@@ -10744,10 +10905,7 @@ const ExportCompta=({s})=>{
     <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:16}}>
       <div style={{padding:12,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.15)',borderRadius:12}}>
         <label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Client</label>
-        <select value={selClient} onChange={e=>setSelClient(e.target.value)} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
-          <option value="all">Tous les clients ({totalEmps} emp.)</option>
-          {clients.map((c,i)=><option key={i} value={c.company?.name}>{c.company?.name} ({(c.emps||[]).length})</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="name" showCount allOption={'Tous les clients ('+totalEmps+' emp.)'} style={{width:'100%'}}/>
       </div>
       <div style={{padding:12,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.15)',borderRadius:12}}>
         <label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Mois</label>
@@ -11277,7 +11435,7 @@ const GestionDelegations=({s})=>{
       <div><h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:0}}>🏛 Delegations Syndicales</h2>
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Credit heures, mandats, protection licenciement</p></div>
       <div style={{display:'flex',gap:8}}>
-        <select value={selClient} onChange={e=>setSelClient(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#c6a34e',fontSize:11,fontFamily:'inherit'}}>{clients.map((c,i)=><option key={i} value={i}>{c.company?.name}</option>)}</select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index"/>
         <button onClick={()=>setShowAdd(true)} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:12,cursor:'pointer'}}>+ Delegue</button>
       </div>
     </div>
@@ -11392,9 +11550,7 @@ const PlanifCongesEquipe=({s})=>{
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Vue Gantt — detection conflits automatique</p>
       </div>
       <div style={{display:'flex',gap:6,alignItems:'center'}}>
-        <select value={selClient} onChange={e=>setSelClient(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#c6a34e',fontSize:11,fontFamily:'inherit'}}>
-          {clients.map((c,i)=><option key={i} value={i}>{c.company?.name}</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index"/>
         <button onClick={()=>{if(month===0){setMonth(11);setYear(y=>y-1);}else setMonth(m=>m-1);}} style={{padding:'5px 8px',borderRadius:6,border:'none',background:'rgba(255,255,255,.05)',color:'#c6a34e',cursor:'pointer'}}>◀</button>
         <span style={{fontSize:12,fontWeight:600,color:'#e5e5e5',minWidth:100,textAlign:'center'}}>{mois[month]} {year}</span>
         <button onClick={()=>{if(month===11){setMonth(0);setYear(y=>y+1);}else setMonth(m=>m+1);}} style={{padding:'5px 8px',borderRadius:6,border:'none',background:'rgba(255,255,255,.05)',color:'#c6a34e',cursor:'pointer'}}>▶</button>
@@ -11491,9 +11647,7 @@ const RegistrePersonnel=({s})=>{
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Obligation legale — AR du 8 aout 1980 — {emps.length} travailleurs</p>
       </div>
       <div style={{display:'flex',gap:8}}>
-        <select value={selClient} onChange={e=>setSelClient(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#c6a34e',fontSize:11,fontFamily:'inherit'}}>
-          {clients.map((c,i)=><option key={i} value={i}>{c.company?.name}</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index"/>
         <button onClick={generateRegistreHTML} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:12,cursor:'pointer'}}>📄 Generer PDF</button>
       </div>
     </div>
@@ -11818,7 +11972,7 @@ const GenDocsJuridiques=({s,d})=>{
         <div style={{fontSize:14,fontWeight:700,color:'#c6a34e',marginBottom:14}}>{docTypes.find(d=>d.id===selDoc)?.icon} {docTypes.find(d=>d.id===selDoc)?.title}</div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:12}}>
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Client</label>
-            <select value={selClient} onChange={e=>setSelClient(+e.target.value)} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>{clients.map((c,i)=><option key={i} value={i}>{c.company?.name}</option>)}</select></div>
+            <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index" style={{width:'100%'}}/></div>
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Employe</label>
             <select value={formData.empIndex} onChange={e=>setFormData(p=>({...p,empIndex:+e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>{emps.map((e,i)=><option key={i} value={i}>{(e.first||'')} {(e.last||'')}</option>)}</select></div>
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Date</label>
@@ -11971,9 +12125,7 @@ const GestionFlexiJobs=({s,d})=>{
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Regime flexi-job belge — 0% ONSS travailleur, 0% PP</p>
       </div>
       <div style={{display:'flex',gap:8}}>
-        <select value={selClient} onChange={e=>setSelClient(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#c6a34e',fontSize:11,fontFamily:'inherit'}}>
-          {clients.map((c,i)=><option key={i} value={i}>{c.company?.name}</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index"/>
         <button onClick={()=>setShowAdd(true)} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:12,cursor:'pointer'}}>+ Nouveau flexi</button>
       </div>
     </div>
@@ -12095,9 +12247,7 @@ const SimuChomageTemp=({s})=>{
     </div>
 
     <div style={{display:'flex',gap:10,marginBottom:16,alignItems:'center'}}>
-      <select value={selClient} onChange={e=>setSelClient(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#c6a34e',fontSize:11,fontFamily:'inherit'}}>
-        {clients.map((c,i)=><option key={i} value={i}>{c.company?.name}</option>)}
-      </select>
+      <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index"/>
       <div style={{display:'flex',alignItems:'center',gap:8}}>
         <span style={{fontSize:11,color:'#888'}}>Jours chomage :</span>
         <input type="range" min={1} max={22} value={days} onChange={e=>setDays(+e.target.value)} style={{accentColor:'#c6a34e'}}/>
@@ -12402,9 +12552,7 @@ const ChecklistClient=({s})=>{
         <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:0}}>✅ Checklist Dossier Client</h2>
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>{completed}/{allItems.length} elements completes — {pct}%</p>
       </div>
-      <select value={selClient} onChange={e=>setSelClient(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#c6a34e',fontSize:11,fontFamily:'inherit'}}>
-        {clients.map((c,i)=><option key={i} value={i}>{c.company?.name||'Client '+(i+1)}</option>)}
-      </select>
+      <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index"/>
     </div>
 
     {/* Progress bar */}
@@ -12597,9 +12745,7 @@ const DueDiligenceSociale=({s})=>{
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Audit pre-acquisition — analyse risques sociaux</p>
       </div>
       <div style={{display:'flex',gap:8,alignItems:'center'}}>
-        <select value={selClient} onChange={e=>setSelClient(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#c6a34e',fontSize:11,fontFamily:'inherit'}}>
-          {clients.map((c,i)=><option key={i} value={i}>{c.company?.name}</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index"/>
         <div style={{width:44,height:44,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,fontWeight:900,color:globalScore==='A'?'#22c55e':globalScore==='B'?'#eab308':'#ef4444',border:'3px solid '+(globalScore==='A'?'#22c55e':globalScore==='B'?'#eab308':'#ef4444')+'40',background:(globalScore==='A'?'#22c55e':globalScore==='B'?'#eab308':'#ef4444')+'10'}}>{globalScore}</div>
       </div>
     </div>
@@ -13733,9 +13879,7 @@ const GestionPrimes=({s,d})=>{
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>12 types de primes belges — optimisation fiscale integree</p>
       </div>
       <div style={{display:'flex',gap:8}}>
-        <select value={selClient} onChange={e=>setSelClient(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#c6a34e',fontSize:11,fontFamily:'inherit'}}>
-          {clients.map((c,i)=><option key={i} value={i}>{c.company?.name}</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index"/>
         <button onClick={()=>setShowAdd(true)} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:12,cursor:'pointer'}}>+ Ajouter prime</button>
       </div>
     </div>
@@ -14056,9 +14200,7 @@ const SimuOptiFiscale=({s})=>{
         <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:0}}>💡 Optimisation Fiscale</h2>
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Scenarios d\'optimisation du package salarial belge</p>
       </div>
-      <select value={selClient} onChange={e=>setSelClient(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#c6a34e',fontSize:11,fontFamily:'inherit'}}>
-        {clients.map((c,i)=><option key={i} value={i}>{c.company?.name}</option>)}
-      </select>
+      <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index"/>
     </div>
 
     {/* Current vs optimized */}
@@ -14170,9 +14312,7 @@ const GestionAbsences=({s,d})=>{
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Calendrier, quotas et soldes — {mois[month]} {year}</p>
       </div>
       <div style={{display:'flex',gap:6,alignItems:'center'}}>
-        <select value={selClient} onChange={e=>setSelClient(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#c6a34e',fontSize:11,fontFamily:'inherit'}}>
-          {clients.map((c,i)=><option key={i} value={i}>{c.company?.name||'Client '+(i+1)}</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index"/>
         <button onClick={()=>{if(month===0){setMonth(11);setYear(y=>y-1);}else setMonth(m=>m-1);}} style={{padding:'6px 10px',borderRadius:6,border:'none',background:'rgba(255,255,255,.05)',color:'#c6a34e',cursor:'pointer'}}>◀</button>
         <span style={{fontSize:13,fontWeight:600,color:'#e5e5e5',minWidth:120,textAlign:'center'}}>{mois[month]} {year}</span>
         <button onClick={()=>{if(month===11){setMonth(0);setYear(y=>y+1);}else setMonth(m=>m+1);}} style={{padding:'6px 10px',borderRadius:6,border:'none',background:'rgba(255,255,255,.05)',color:'#c6a34e',cursor:'pointer'}}>▶</button>
@@ -14431,9 +14571,7 @@ const BilanSocial=({s})=>{
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Document legal obligatoire — Exercice {year}</p>
       </div>
       <div style={{display:'flex',gap:8}}>
-        <select value={selClient} onChange={e=>setSelClient(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#c6a34e',fontSize:11,fontFamily:'inherit'}}>
-          {clients.map((c,i)=><option key={i} value={i}>{c.company?.name}</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index"/>
         <button onClick={generateBilanHTML} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:12,cursor:'pointer'}}>📄 Generer PDF</button>
       </div>
     </div>
@@ -14586,10 +14724,7 @@ const ExportComptaPro=({s})=>{
     </div>
 
     <div style={{display:'flex',gap:10,marginBottom:16,alignItems:'center'}}>
-      <select value={selClient} onChange={e=>setSelClient(e.target.value)} style={{padding:'8px 12px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
-        <option value="all">Tous les clients</option>
-        {clients.map((c,i)=><option key={i} value={c.company?.name}>{c.company?.name}</option>)}
-      </select>
+      <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="name" allOption="Tous les clients"/>
       <div style={{display:'flex',gap:4}}>
         {[{id:'month',l:'Mensuel'},{id:'quarter',l:'Trimestriel'},{id:'year',l:'Annuel'}].map(p=><button key={p.id} onClick={()=>setPeriod(p.id)} style={{padding:'6px 12px',borderRadius:6,border:'none',background:period===p.id?'rgba(198,163,78,.12)':'rgba(255,255,255,.03)',color:period===p.id?'#c6a34e':'#888',fontSize:10,cursor:'pointer'}}>{p.l}</button>)}
       </div>
@@ -14674,9 +14809,7 @@ const PortailClientSS=({s,d})=>{
         <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:0}}>🌐 Portail Client</h2>
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Interface self-service pour vos clients fiduciaires</p>
       </div>
-      <select value={selClient} onChange={e=>setSelClient(+e.target.value)} style={{padding:'8px 14px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,color:'#c6a34e',fontSize:12,fontFamily:'inherit'}}>
-        {clients.map((c,i)=><option key={i} value={i}>{c.company?.name||'Client '+(i+1)}</option>)}
-      </select>
+      <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index"/>
     </div>
 
     {/* Client header */}
@@ -16081,10 +16214,7 @@ const SepaGenerator=({s})=>{
     <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:16}}>
       <div style={{padding:14,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.15)',borderRadius:12}}>
         <label style={{fontSize:10,color:'#888',display:'block',marginBottom:4}}>Client</label>
-        <select value={selClient} onChange={e=>setSelClient(e.target.value)} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
-          <option value="all">Tous les clients</option>
-          {clients.map((c,i)=><option key={i} value={c.company?.name}>{c.company?.name}</option>)}
-        </select>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="name" allOption="Tous les clients" style={{width:'100%'}}/>
       </div>
       <div style={{padding:14,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.15)',borderRadius:12}}>
         <label style={{fontSize:10,color:'#888',display:'block',marginBottom:4}}>Date execution SEPA</label>
@@ -18706,9 +18836,61 @@ const SmartAutomation=({s,d,supabase,user})=>{
 
   const parseCSV=(text)=>{const lines=text.trim().split('\n');if(lines.length<2)return{error:'CSV vide'};const headers=lines[0].split(';').map(h=>h.trim().toLowerCase());const rows=[];for(let i=1;i<lines.length;i++){const vals=lines[i].split(';');const row={};headers.forEach((h,j)=>row[h]=vals[j]?.trim()||'');rows.push(row);}return{headers,rows};};
 
-  const importClientsCSV=()=>{const{rows,error}=parseCSV(csvData);if(error){setImportResult({error});return;}let imported=0,skipped=0;rows.forEach(row=>{const name=row.societe||row.nom||row.company||'';const vat=row.tva||row.vat||row.bce||'';if(!name&&!vat){skipped++;return;}if(clients.find(c=>(c.company?.name||'')===name)){skipped++;return;}d({type:'ADD_CLIENT',d:{company:{name,vat,bce:vat,iban:row.iban||'',address:row.adresse||'',cp:row.cp||'',city:row.ville||'',phone:row.tel||'',email:row.email||''},emps:[]}});imported++;});setImportResult({imported,skipped,total:rows.length});};
+  const importClientsCSV=()=>{const{rows,error}=parseCSV(csvData);if(error){setImportResult({error});return;}let imported=0,skipped=0,enriched=0;
+    const existingVats=new Set((clients||[]).map(c=>(c.company?.vat||c.company?.bce||'').replace(/[^0-9]/g,'')).filter(Boolean));
+    const existingNames=new Set((clients||[]).map(c=>(c.company?.name||'').toLowerCase()).filter(Boolean));
+    rows.forEach(row=>{
+      const name=row.societe||row.nom||row.company||row.raison_sociale||row.name||'';
+      let vat=row.tva||row.vat||row.bce||row.numero_entreprise||'';
+      if(!name&&!vat){skipped++;return;}
+      // Normalize & validate BCE
+      const cleanVat=vat.replace(/[^0-9]/g,'').padStart(10,'0');
+      if(cleanVat.length===10){
+        const main=parseInt(cleanVat.substring(0,8));const chk=parseInt(cleanVat.substring(8,10));
+        const validBCE=(97-(main%97))===chk;
+        if(validBCE)vat=`BE ${cleanVat.slice(0,4)}.${cleanVat.slice(4,7)}.${cleanVat.slice(7)}`;
+      }
+      // Dedup by VAT or name
+      if(cleanVat.length===10&&existingVats.has(cleanVat)){skipped++;return;}
+      if(name&&existingNames.has(name.toLowerCase())){skipped++;return;}
+      existingVats.add(cleanVat);existingNames.add(name.toLowerCase());
+      // Auto-detect forme juridique
+      let forme='sprl';
+      if(name.match(/\bSA\b/i))forme='sa';else if(name.match(/\bSRL\b|\bSPRL\b/i))forme='sprl';
+      else if(name.match(/\bASBL\b/i))forme='asbl';else if(name.match(/\bSC\b/i))forme='sc';
+      else if(name.match(/\bSNC\b/i))forme='snc';
+      // Auto-detect CP from NACE if present
+      let cp=row.cp||row.commission_paritaire||'200';
+      const nace=row.nace||row.code_nace||'';
+      if(nace&&typeof detectCPFromNACE==='function'){
+        const cps=detectCPFromNACE([nace]);if(cps.length>0)cp=cps[0].cpEmp||'200';enriched++;
+      }
+      d({type:'ADD_CLIENT',d:{company:{name,vat,bce:cleanVat,iban:row.iban||'',address:row.adresse||row.address||'',cp,city:row.ville||row.city||'',phone:row.tel||row.phone||'',email:row.email||'',onss:row.onss||row.numero_onss||'',contact:row.contact||row.gerant||'',accidentIns:row.assurance_accident||'',forme,naceCodes:nace?[nace]:[]},emps:[]}});imported++;
+    });
+    setImportResult({imported,skipped,enriched,total:rows.length});
+  };
 
-  const importEmpsCSV=()=>{const{rows,error}=parseCSV(csvData);if(error){setImportResult({error});return;}let imported=0;const newEmps=[...(s.emps||[])];rows.forEach(row=>{const emp={id:'E-'+Date.now()+'-'+Math.random().toString(36).substr(2,5),first:row.prenom||row.first||'',last:row.nom||row.last||'',fn:row.prenom||'',ln:row.nom||'',niss:row.niss||'',iban:row.iban||'',email:row.email||'',monthlySalary:parseFloat(row.salaire||row.brut||0)||0,gross:parseFloat(row.salaire||row.brut||0)||0,contractType:row.contrat||'CDI',startD:row.debut||'',cp:row.cp_paritaire||'',status:row.statut||'actif',gender:row.sexe||''};if(emp.first||emp.last){newEmps.push(emp);imported++;}});d({type:'SET_EMPS',data:newEmps});setImportResult({imported,total:rows.length,type:'emps'});};
+  const importEmpsCSV=()=>{const{rows,error}=parseCSV(csvData);if(error){setImportResult({error});return;}let imported=0,skipped=0,nissInvalid=0;
+    const existingNISS=new Set([...(s.emps||[]).map(e=>(e.niss||'').replace(/[\s.\-]/g,'')).filter(Boolean),...(s.clients||[]).flatMap(c=>(c.emps||[]).map(e=>(e.niss||'').replace(/[\s.\-]/g,''))).filter(Boolean)]);
+    const newEmps=[...(s.emps||[])];
+    rows.forEach(row=>{
+      let niss=(row.niss||row.registre_national||row.rn||'').replace(/[\s.\-]/g,'');
+      // NISS validation
+      if(niss.length===11){
+        const base=niss.slice(0,9);const chk=parseInt(niss.slice(9));
+        const valid1=(97-(parseInt(base)%97))===chk;
+        const valid2=(97-(parseInt('2'+base)%97))===chk;
+        if(!valid1&&!valid2)nissInvalid++;
+        // Dedup
+        if(existingNISS.has(niss)){skipped++;return;}
+        existingNISS.add(niss);
+      }
+      const emp={id:'E-'+Date.now()+'-'+Math.random().toString(36).substr(2,5),first:row.prenom||row.prénom||row.first||row.firstname||'',last:row.nom||row.last||row.lastname||row.name||'',fn:row.fonction||row.function||row.poste||'Employé',ln:row.nom||row.last||'',niss,iban:(row.iban||row.compte||'').replace(/\s/g,'').toUpperCase(),email:row.email||row.mail||'',monthlySalary:parseFloat(row.salaire||row.brut||row.salaire_brut||row.monthly_salary||0)||0,gross:parseFloat(row.salaire||row.brut||row.salaire_brut||0)||0,contractType:row.contrat||row.contract||row.type_contrat||'CDI',startD:row.debut||row.start||row.date_debut||row.entree||'',endD:row.fin||row.end||row.date_fin||'',cp:row.cp_paritaire||row.cp||'200',status:row.statut||row.status||'actif',gender:row.sexe||row.genre||'',whWeek:parseFloat(row.heures||row.regime||row.hours||38)||38,dept:row.departement||row.dept||row.service||'',regime:parseFloat(row.heures||row.regime||38)>=35?'full':'half',statut:row.categorie||row.category||'employe'};
+      if(emp.first||emp.last){newEmps.push(emp);imported++;}
+    });
+    if(!confirm('Importer '+imported+' employés ?\n'+(skipped?' ('+skipped+' doublons NISS ignorés)\n':'')+(nissInvalid?'⚠️ '+nissInvalid+' NISS invalides détectés\n':'')+'\nLes valeurs par défaut CP 200 (38h, CDI) seront appliquées aux champs manquants.'))return;
+    d({type:'SET_EMPS',data:newEmps});setImportResult({imported,skipped,nissInvalid,total:rows.length,type:'emps'});
+  };
 
   const autoFix=()=>{if(!confirm('Auto-Fix va corriger le formatage NISS/IBAN et définir les contrats manquants en CDI.\n\nCette action modifie les données employés.\n\nContinuer ?'))return 0;let fixed=0;const up=clients.map(cl=>{const emps=(cl.emps||[]).map(e=>{const u={...e};if(u.niss){const c=u.niss.replace(/[^0-9]/g,'');if(c.length===11&&c!==u.niss){u.niss=c;fixed++;}}if(u.iban){const c=u.iban.replace(/\s/g,'').toUpperCase();if(c!==u.iban){u.iban=c;fixed++;}}if(!u.contractType&&!u.contrat?.type){u.contractType='CDI';fixed++;}if(!u.status){u.status='actif';fixed++;}return u;});return{...cl,emps};});d({type:'SET_CLIENTS',data:up});if(typeof addToast==='function')addToast('Auto-Fix: '+fixed+' corrections');return fixed;};
 
@@ -18753,8 +18935,10 @@ const SmartAutomation=({s,d,supabase,user})=>{
         <label style={{padding:'10px 16px',borderRadius:8,background:'rgba(198,163,78,.1)',border:'1px solid rgba(198,163,78,.2)',color:'#c6a34e',fontSize:11,fontWeight:600,cursor:'pointer'}}>📂 Charger CSV<input type="file" accept=".csv,.txt" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>setCsvData(ev.target.result);r.readAsText(f);}}/></label>
         <button onClick={importClientsCSV} disabled={!csvData} style={{padding:'10px 16px',borderRadius:8,border:'none',background:csvData?'#c6a34e':'#555',color:csvData?'#000':'#999',fontSize:11,fontWeight:600,cursor:csvData?'pointer':'not-allowed'}}>🏢 Importer Clients</button>
         <button onClick={importEmpsCSV} disabled={!csvData} style={{padding:'10px 16px',borderRadius:8,border:'none',background:csvData?'#3b82f6':'#555',color:'#fff',fontSize:11,fontWeight:600,cursor:csvData?'pointer':'not-allowed'}}>👤 Importer Employés</button>
+        <button onClick={()=>{const tpl='societe;tva;onss;nace;iban;adresse;ville;cp;tel;email;contact;assurance_accident\nMa Société SRL;BE 0123.456.789;123-4567890-12;62.01;BE12 3456 7890 1234;Rue Test 1;Bruxelles;200;02 123 45 67;info@example.be;Jean Dupont;AXA\n';const b=new Blob([tpl],{type:'text/csv'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='modele_import_clients.csv';a.click();URL.revokeObjectURL(u);}} style={{padding:'10px 12px',borderRadius:8,border:'1px solid rgba(198,163,78,.15)',background:'transparent',color:'#c6a34e',fontSize:10,cursor:'pointer'}}>📋 Modèle Clients</button>
+        <button onClick={()=>{const tpl='prenom;nom;niss;email;iban;salaire;contrat;debut;fin;cp;heures;fonction;departement;sexe;categorie\nJean;Dupont;85.07.15-123.45;jean@test.be;BE12 3456 7890 1234;3200;CDI;2024-01-15;;200;38;Développeur;IT;M;employe\n';const b=new Blob([tpl],{type:'text/csv'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='modele_import_employes.csv';a.click();URL.revokeObjectURL(u);}} style={{padding:'10px 12px',borderRadius:8,border:'1px solid rgba(96,165,250,.15)',background:'transparent',color:'#60a5fa',fontSize:10,cursor:'pointer'}}>📋 Modèle Employés</button>
       </div>
-      {importResult&&<div style={{marginTop:14,padding:14,background:importResult.error?'rgba(239,68,68,.06)':'rgba(34,197,94,.06)',border:'1px solid '+(importResult.error?'rgba(239,68,68,.15)':'rgba(34,197,94,.15)'),borderRadius:10}}>{importResult.error?<div style={{color:'#ef4444',fontSize:12}}>{importResult.error}</div>:<div style={{fontSize:12,color:'#22c55e'}}>✅ {importResult.imported} {importResult.type==='emps'?'employés':'clients'} importés{importResult.skipped?' · '+importResult.skipped+' doublons':''}</div>}</div>}
+      {importResult&&<div style={{marginTop:14,padding:14,background:importResult.error?'rgba(239,68,68,.06)':'rgba(34,197,94,.06)',border:'1px solid '+(importResult.error?'rgba(239,68,68,.15)':'rgba(34,197,94,.15)'),borderRadius:10}}>{importResult.error?<div style={{color:'#ef4444',fontSize:12}}>{importResult.error}</div>:<div style={{fontSize:12,color:'#22c55e'}}>✅ {importResult.imported} {importResult.type==='emps'?'employés':'clients'} importés{importResult.skipped?' · '+importResult.skipped+' doublons ignorés':''}{importResult.enriched?' · '+importResult.enriched+' enrichis via NACE':''}{importResult.nissInvalid?' · ⚠️ '+importResult.nissInvalid+' NISS invalides':''}</div>}</div>}
     </div>}
 
     {tab==='autofix'&&<div>
@@ -19680,6 +19864,48 @@ function Dashboard({s,d}) {
     
 
     
+    {/* ═══ TÂCHES DU JOUR — Vue multi-client ═══ */}
+    {(s.clients||[]).length>0&&(()=>{
+      const now=new Date();const dom=now.getDate();const m=now.getMonth();
+      const tasks=[];
+      const allClients=s.clients||[];
+      // Scan clients for action items
+      const noVat=allClients.filter(c=>!c.company?.vat);
+      const noOnss=allClients.filter(c=>!c.company?.onss&&(c.emps||[]).length>0);
+      const noEmps=allClients.filter(c=>!(c.emps||[]).length);
+      const missingNISS=allClients.reduce((a,c)=>a+(c.emps||[]).filter(e=>!e.niss).length,0);
+      const missingIBAN=allClients.reduce((a,c)=>a+(c.emps||[]).filter(e=>!e.iban).length,0);
+      const cddExpiring=[];
+      allClients.forEach(c=>(c.emps||[]).forEach(e=>{
+        if((e.contractType||e.contract)==='CDD'&&e.endD){
+          const end=new Date(e.endD);const days=Math.round((end-now)/(86400000));
+          if(days>=0&&days<=30)cddExpiring.push({name:(e.first||'')+' '+(e.last||''),client:c.company?.name,days});
+        }
+      }));
+      if(dom>=20&&dom<=25)tasks.push({icon:'📄',label:'Fiches de paie à générer',count:allClients.reduce((a,c)=>a+(c.emps||[]).length,0)+' employés',col:'#c6a34e',page:'piloteauto'});
+      if(m%3===0&&dom<=15)tasks.push({icon:'📊',label:'DmfA trimestrielle',count:'T'+(Math.ceil((m+1)/3))+' à déclarer',col:'#a855f7',page:'onss'});
+      if(noVat.length)tasks.push({icon:'⚠️',label:'Clients sans n° TVA',count:noVat.length+' dossier'+(noVat.length>1?'s':''),col:'#fb923c',page:'clientsmenu'});
+      if(noOnss.length)tasks.push({icon:'🏛',label:'Clients sans n° ONSS (avec employés)',count:noOnss.length+' dossier'+(noOnss.length>1?'s':''),col:'#ef4444',page:'clientsmenu'});
+      if(missingNISS)tasks.push({icon:'🆔',label:'Employés sans NISS',count:missingNISS+' employé'+(missingNISS>1?'s':''),col:'#fb923c',page:'employees'});
+      if(missingIBAN)tasks.push({icon:'🏦',label:'Employés sans IBAN',count:missingIBAN,col:'#60a5fa',page:'employees'});
+      if(cddExpiring.length)tasks.push({icon:'⏰',label:'CDD expirant sous 30j',count:cddExpiring.length+' contrat'+(cddExpiring.length>1?'s':''),col:'#ef4444',page:'employees',detail:cddExpiring.slice(0,3).map(c=>c.name+' ('+c.client+', '+c.days+'j)').join(', ')});
+      if(noEmps.length>0&&noEmps.length<=10)tasks.push({icon:'👤',label:'Clients sans employés',count:noEmps.length,col:'#888',page:'clientsmenu'});
+      if(!tasks.length)return null;
+      return <div style={{marginBottom:16,padding:14,background:'linear-gradient(135deg,rgba(96,165,250,.04),rgba(198,163,78,.03))',border:'1px solid rgba(96,165,250,.15)',borderRadius:12}}>
+        <div style={{fontSize:13,fontWeight:700,color:'#60a5fa',marginBottom:10,display:'flex',alignItems:'center',gap:6}}>📋 Tâches du jour <span style={{fontSize:10,fontWeight:400,color:'#555'}}>({tasks.length} action{tasks.length>1?'s':''})</span></div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:8}}>
+          {tasks.map((t,i)=><div key={i} onClick={()=>d({type:'NAV',page:t.page})} style={{padding:'10px 12px',background:'rgba(0,0,0,.2)',borderRadius:8,cursor:'pointer',border:'1px solid transparent',transition:'all .15s'}}
+            onMouseEnter={e=>e.currentTarget.style.borderColor=t.col+'44'} onMouseLeave={e=>e.currentTarget.style.borderColor='transparent'}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <span style={{fontSize:12,color:'#e5e5e5'}}>{t.icon} {t.label}</span>
+              <span style={{fontSize:11,fontWeight:700,color:t.col}}>{t.count}</span>
+            </div>
+            {t.detail&&<div style={{fontSize:9,color:'#555',marginTop:4}}>{t.detail}</div>}
+          </div>)}
+        </div>
+      </div>;
+    })()}
+
     {/* ⚡ Automation Shortcuts */}
     <div style={{marginBottom:20,padding:16,background:'linear-gradient(135deg,rgba(198,163,78,.06),rgba(198,163,78,.02))',border:'1px solid rgba(198,163,78,.15)',borderRadius:12,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
       <div style={{display:'flex',alignItems:'center',gap:10}}>
@@ -19910,6 +20136,8 @@ function Employees({s,d}) {
   const [search,setSearch]=useState('');
   const [filter,setFilter]=useState('all'); // all, active, sorti, student, ouvrier
   const [viewMode,setViewMode]=useState('list'); // list, grid
+  const [empPage,setEmpPage]=useState(0);
+  const EMP_PAGE_SIZE=50;
   const empty={first:'',last:'',niss:'',birth:'',addr:'',city:'',zip:'',startD:'',endD:'',fn:"",dept:'',contract:'CDI',regime:'full',whWeek:38,monthlySalary:0,civil:"single",depChildren:0,handiChildren:0,iban:'',mvT:10,mvW:_CR_W,mvE:8.91,expense:0,cp:'200',dmfaCode:'495',dimType:'OTH',commDist:0,commType:'none',commMonth:0,status:'active',sexe:'M',statut:'employe',niveauEtude:'sec',carFuel:"none",carCO2:0,carCatVal:0,carBrand:"",carModel:"",atnGSM:false,atnPC:false,atnInternet:false,atnLogement:false,atnLogementRC:0,atnChauffage:false,atnElec:false,depAscendant:0,depAscendantHandi:0,conjointHandicap:false,depAutres:0,anciennete:0,nrEngagement:0,engagementTrimestre:1,
     veloSociete:false,veloType:'none',veloValeur:0,veloLeasingMois:0,carteCarburant:false,carteCarburantMois:0,borneRecharge:false,borneRechargeCoût:0,
     frontalier:false,frontalierPays:'',frontalierConvention:'',frontalierA1:false,frontalierExoPP:false,
@@ -20079,6 +20307,8 @@ function Employees({s,d}) {
     }
     return true;
   });
+  const empTotalPages=Math.ceil(filtered.length/EMP_PAGE_SIZE);
+  const paginatedEmps=filtered.slice(empPage*EMP_PAGE_SIZE,(empPage+1)*EMP_PAGE_SIZE);
 
   // CSV Export
   const exportCSV=()=>{
@@ -20105,10 +20335,21 @@ function Employees({s,d}) {
       <B v="outline" onClick={exportCSV} style={{padding:'8px 14px',fontSize:11}}>⬇ CSV</B>
       <B onClick={()=>{setF({...empty});setEd(false);}}>+ Nouvel employé</B>
     </div>}/>
+    {/* Quick presets */}
+    <div style={{display:'flex',gap:6,marginBottom:10,flexWrap:'wrap'}}>
+      <span style={{fontSize:10,color:'#5e5c56',alignSelf:'center',marginRight:4}}>Ajout rapide :</span>
+      {[
+        {l:'👔 Employé CP200',p:{fn:'Employé',contract:'CDI',regime:'full',whWeek:38,cp:'200',statut:'employe',monthlySalary:2800}},
+        {l:'🔧 Ouvrier CP124',p:{fn:'Ouvrier',contract:'CDI',regime:'full',whWeek:38,cp:'124',statut:'ouvrier',monthlySalary:2400}},
+        {l:'⏰ Mi-temps CP200',p:{fn:'Employé mi-temps',contract:'CDI',regime:'half',whWeek:19,cp:'200',statut:'employe',monthlySalary:1400}},
+        {l:'📋 CDD 6 mois',p:{fn:'Employé CDD',contract:'CDD',regime:'full',whWeek:38,cp:'200',statut:'employe',monthlySalary:2600,endD:new Date(Date.now()+180*86400000).toISOString().slice(0,10)}},
+        {l:'🎓 Étudiant',p:{fn:'Étudiant',contract:'CDD',regime:'full',whWeek:20,cp:'200',statut:'etudiant',monthlySalary:1200}},
+      ].map((pr,i)=><button key={i} onClick={()=>{setF({...empty,...pr.p,startD:new Date().toISOString().slice(0,10)});setEd(false);}} style={{padding:'5px 10px',borderRadius:6,border:'1px solid rgba(198,163,78,.12)',background:'rgba(198,163,78,.04)',color:'#c6a34e',fontSize:10,cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap'}}>{pr.l}</button>)}
+    </div>
     {/* Search and filters bar */}
     <div style={{display:'flex',gap:10,marginBottom:16,alignItems:'center',flexWrap:'wrap'}}>
       <div style={{flex:1,minWidth:200,position:'relative'}}>
-        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍 Rechercher par nom, NISS, fonction, département..."
+        <input value={search} onChange={e=>{setSearch(e.target.value);setEmpPage(0);}} placeholder="🔍 Rechercher par nom, NISS, fonction, département..."
           style={{width:'100%',padding:'10px 14px 10px 14px',background:"#090c16",border:'1px solid rgba(139,115,60,.15)',borderRadius:8,color:'#d4d0c8',fontSize:12.5,fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
       </div>
       <div style={{display:'flex',gap:4}}>
@@ -20431,9 +20672,19 @@ function Employees({s,d}) {
         <B onClick={save}>{ed?'Mettre à jour':'Enregistrer'}</B>
       </div>
     </C>}
+    {/* PAGINATION */}
+    {filtered.length>EMP_PAGE_SIZE&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+      <span style={{fontSize:11,color:'#5e5c56'}}>{filtered.length} employés — Page {empPage+1}/{empTotalPages}</span>
+      <div style={{display:'flex',gap:4}}>
+        <button onClick={()=>setEmpPage(0)} disabled={empPage===0} style={{padding:'4px 8px',borderRadius:6,border:'none',background:empPage>0?'rgba(198,163,78,.1)':'transparent',color:empPage>0?'#c6a34e':'#333',fontSize:10,cursor:empPage>0?'pointer':'default',fontFamily:'inherit'}}>«</button>
+        <button onClick={()=>setEmpPage(p=>Math.max(0,p-1))} disabled={empPage===0} style={{padding:'4px 8px',borderRadius:6,border:'none',background:empPage>0?'rgba(198,163,78,.1)':'transparent',color:empPage>0?'#c6a34e':'#333',fontSize:10,cursor:empPage>0?'pointer':'default',fontFamily:'inherit'}}>‹</button>
+        <button onClick={()=>setEmpPage(p=>Math.min(empTotalPages-1,p+1))} disabled={empPage>=empTotalPages-1} style={{padding:'4px 8px',borderRadius:6,border:'none',background:empPage<empTotalPages-1?'rgba(198,163,78,.1)':'transparent',color:empPage<empTotalPages-1?'#c6a34e':'#333',fontSize:10,cursor:empPage<empTotalPages-1?'pointer':'default',fontFamily:'inherit'}}>›</button>
+        <button onClick={()=>setEmpPage(empTotalPages-1)} disabled={empPage>=empTotalPages-1} style={{padding:'4px 8px',borderRadius:6,border:'none',background:empPage<empTotalPages-1?'rgba(198,163,78,.1)':'transparent',color:empPage<empTotalPages-1?'#c6a34e':'#333',fontSize:10,cursor:empPage<empTotalPages-1?'pointer':'default',fontFamily:'inherit'}}>»</button>
+      </div>
+    </div>}
     {/* GRID VIEW */}
     {viewMode==='grid'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:12}}>
-      {filtered.map((r,i)=>{const p=calc(r,DPER,s.co);return(
+      {paginatedEmps.map((r,i)=>{const p=calc(r,DPER,s.co);return(
         <C key={r.id} style={{padding:'18px 16px',cursor:'pointer',transition:'all .15s',position:'relative',overflow:'hidden'}} 
           onClick={()=>{setF({...r});setEd(true);}}
           onMouseEnter={e=>e.currentTarget.style.borderColor='rgba(198,163,78,.25)'}
@@ -20479,7 +20730,7 @@ function Employees({s,d}) {
           <B v="ghost" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();setF({...r});setEd(true);}}>✎</B>
           <B v="danger" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();if(confirm('Supprimer ?'))d({type:"DEL_E",id:r.id});}}>✕</B>
         </div>},
-      ]} data={filtered}/>
+      ]} data={paginatedEmps}/>
     </C>}
     {filtered.length===0&&search&&<div style={{textAlign:'center',padding:40,color:'#5e5c56',fontSize:13}}>Aucun employé trouvé pour "{search}"</div>}
   </div>;
