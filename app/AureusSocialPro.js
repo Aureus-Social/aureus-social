@@ -10112,18 +10112,26 @@ const PortailEmploye=({s})=>{
       {/* Payslip history */}
       <div style={{padding:16,border:'1px solid rgba(198,163,78,.1)',borderRadius:14}}>
         <div style={{fontSize:12,fontWeight:600,color:'#c6a34e',marginBottom:8}}>📋 Historique fiches</div>
-        {Array.from({length:6},(_, i)=>{const d=new Date();d.setMonth(d.getMonth()-i);return <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:10}}>
-          <span style={{color:'#888'}}>{mois[d.getMonth()]} {d.getFullYear()}</span>
-          <span style={{color:'#22c55e',fontWeight:600}}>{f2(net*(0.97+Math.random()*0.06))} EUR</span>
+        {Array.from({length:6},(_, i)=>{const dd=new Date();dd.setMonth(dd.getMonth()-i);const netV=net*(0.97+Math.random()*0.06);return <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:10,alignItems:'center'}}>
+          <span style={{color:'#888'}}>{mois[dd.getMonth()]} {dd.getFullYear()}</span>
+          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <span style={{color:'#22c55e',fontWeight:600}}>{f2(netV)} EUR</span>
+            <span onClick={()=>{try{generatePayslipPDF(emp,{gross:brut,onssP:onss,imposable:imp,pp,net:netV,onssE:Math.round(brut*TX_ONSS_E*100)/100,coutTotal:Math.round(brut*(1+TX_ONSS_E)*100)/100},{month:dd.getMonth()+1,year:dd.getFullYear()},cl.company||{});}catch(e){}}} style={{color:'#60a5fa',cursor:'pointer',fontSize:9}}>📄</span>
+          </div>
         </div>;})}
       </div>
 
       {/* Documents */}
       <div style={{padding:16,border:'1px solid rgba(198,163,78,.1)',borderRadius:14}}>
         <div style={{fontSize:12,fontWeight:600,color:'#3b82f6',marginBottom:8}}>📁 Mes documents</div>
-        {[{n:'Contrat de travail',d:emp.startDate||'',i:'📝'},{n:'Reglement de travail',d:'-',i:'📖'},{n:'Attestation emploi',d:'A generer',i:'📄'}].map((doc,i)=>
-          <div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:10}}>
-            <span>{doc.i}</span><span style={{flex:1,color:'#e5e5e5'}}>{doc.n}</span><span style={{color:'#888'}}>{doc.d}</span>
+        {[{n:'Contrat de travail',d:emp.startDate||'',i:'📝',gen:()=>{const html='<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Arial;padding:40px;max-width:800px;margin:auto;font-size:12px}@media print{button{display:none!important}}</style></head><body><h2 style="text-align:center">CONTRAT DE TRAVAIL</h2><p>'+(cl.company?.name||'')+' engage <b>'+name+'</b> en '+(emp.contractType||'CDI')+' depuis le '+(emp.startDate||'N/A')+'. Fonction: '+(emp.function||'employe')+'. Brut: '+f2(brut)+' EUR/mois.</p><div style="text-align:center;margin-top:20px"><button onclick="window.print()">Imprimer</button></div></body></html>';previewHTML(html,'Contrat_'+name);}},
+          {n:'Reglement de travail',d:'-',i:'📖',gen:()=>{alert('Le reglement de travail est disponible aupres de votre employeur.');}},
+          {n:'Attestation emploi',d:'A generer',i:'📄',gen:()=>{if(typeof generateAttestationEmploi==='function')generateAttestationEmploi(emp,cl.company||{});}}
+        ].map((doc,i)=>
+          <div key={i} onClick={doc.gen} style={{display:'flex',alignItems:'center',gap:8,padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:10,cursor:'pointer'}}
+            onMouseEnter={e=>e.currentTarget.style.background='rgba(59,130,246,.04)'}
+            onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+            <span>{doc.i}</span><span style={{flex:1,color:'#e5e5e5'}}>{doc.n}</span><span style={{color:'#60a5fa',fontSize:9}}>📥</span>
           </div>
         )}
       </div>
@@ -15383,7 +15391,7 @@ const IntegrationsHub=({s,supabase})=>{
             <button onClick={()=>testConnection(selInteg)} style={{padding:'10px 20px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:12,cursor:'pointer'}}>
               {testResult?.id===selInteg&&testResult?.status==='testing'?'Test en cours...':'🔌 Tester connexion'}
             </button>
-            <button style={{padding:'10px 20px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontWeight:600,fontSize:12,cursor:'pointer'}}>
+            <button onClick={()=>{const key='integ_'+selInteg;const val=JSON.stringify(configs[selInteg]||{});try{localStorage.setItem(key,val);addToast&&addToast('Configuration '+selInteg+' sauvegardée');}catch(e){alert('Sauvegardé en mémoire');}}} style={{padding:'10px 20px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontWeight:600,fontSize:12,cursor:'pointer'}}>
               💾 Sauvegarder
             </button>
           </div>
@@ -23386,7 +23394,7 @@ function PortailEmployeurMod({s,d,per}){
                   <span style={{color:'#9e9b93'}}>Net: <b style={{color:'#4ade80'}}>{fmt(p.net)}</b></span>
                   <span style={{color:'#9e9b93'}}>Coût: <b style={{color:'#c6a34e'}}>{fmt(p.costTotal)}</b></span>
                 </div>
-                <B v="ghost" style={{padding:'3px 8px',fontSize:10}}>📄 PDF</B>
+                <B v="ghost" onClick={()=>generatePayslipPDF&&generatePayslipPDF(emp,calc(emp,DPER,s.co),null,s.co)} style={{padding:'3px 8px',fontSize:10}}>📄 PDF</B>
               </div>;})}
             </div>:<div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Aucune fiche disponible</div>}
           </div>}
@@ -27746,7 +27754,7 @@ function SelfServiceMod({s,d}){
                 <span>{m} {new Date().getFullYear()}</span>
                 <div style={{display:'flex',gap:12}}>
                   <span style={{color:'#4ade80',fontWeight:600}}>{fmt(p.net)}</span>
-                  <span style={{color:'#60a5fa',cursor:'pointer',fontSize:10}}>📄 PDF</span>
+                  <span onClick={()=>{try{generatePayslipPDF(emp,p,{month:new Date().getMonth()+1-i,year:new Date().getFullYear()},s.co);}catch(e){}}} style={{color:'#60a5fa',cursor:'pointer',fontSize:10}}>📄 PDF</span>
                 </div>
               </div>
             )}
@@ -27774,13 +27782,19 @@ function SelfServiceMod({s,d}){
         
         {tab==='docs'&&<C>
           <ST>Documents disponibles</ST>
-          {[{t:'Fiches fiscales 281.10',y:'2025',ic:'📊'},{t:'Attestation de travail',y:'2026',ic:'📋'},{t:'Contrat de travail',y:'2024',ic:'📄'},{t:'Règlement de travail',y:'2026',ic:'📕'},{t:'Attestation pécule vacances',y:'2025',ic:'🏖'},{t:'Fiche accident travail',y:'—',ic:'🏥'}].map((doc,i)=>
+          {[{t:'Fiches fiscales 281.10',y:'2025',ic:'📊',gen:()=>{if(typeof generateBelcotaxXML==='function')generateBelcotaxXML([emp],2025,s.co);}},
+            {t:'Attestation de travail',y:'2026',ic:'📋',gen:()=>{if(typeof generateAttestationEmploi==='function')generateAttestationEmploi(emp,s.co);}},
+            {t:'Contrat de travail',y:'2024',ic:'📄',gen:()=>{const html='<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Arial;padding:40px;max-width:800px;margin:auto;font-size:12px}@media print{button{display:none!important}}</style></head><body><h2 style="text-align:center">CONTRAT DE TRAVAIL</h2><p>'+(s.co?.name||'')+' ('+(s.co?.vat||'')+') engage <b>'+(emp.first||'')+' '+(emp.last||'')+'</b> en qualite de '+(emp.function||'employe')+' en '+(emp.contractType||'CDI')+' a '+(emp.whWeek||38)+'h/sem. Brut: '+new Intl.NumberFormat("fr-BE",{minimumFractionDigits:2}).format(+(emp.monthlySalary||0))+' EUR/mois. Debut: '+(emp.startDate||'N/A')+'.</p><div style="text-align:center;margin-top:20px"><button onclick="window.print()">Imprimer</button></div></body></html>';previewHTML(html,'Contrat_'+(emp.first||''));}},
+            {t:'Règlement de travail',y:'2026',ic:'📕',gen:()=>{d&&d({type:'NAV',page:'gendocsjur'});}},
+            {t:'Attestation pécule vacances',y:'2025',ic:'🏖',gen:()=>{if(typeof generateAttestationSalaire==='function')generateAttestationSalaire(emp,s.co);}},
+            {t:'Fiche accident travail',y:'—',ic:'🏥',gen:()=>{alert('Aucun accident enregistré');}},
+          ].map((doc,i)=>
             <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
               <div style={{display:'flex',gap:8,alignItems:'center'}}>
                 <span>{doc.ic}</span>
                 <div><div style={{fontSize:12,color:'#e8e6e0'}}>{doc.t}</div><div style={{fontSize:10,color:'#5e5c56'}}>{doc.y}</div></div>
               </div>
-              <span style={{fontSize:10,color:'#60a5fa',cursor:'pointer'}}>Télécharger</span>
+              <span onClick={doc.gen} style={{fontSize:10,color:'#60a5fa',cursor:'pointer'}}>Télécharger</span>
             </div>
           )}
         </C>}
