@@ -7319,8 +7319,8 @@ const ActionsRapides=({s,d})=>{
             <ClientSearch clients={clients} value={formData.client} onChange={v=>setFormData(p=>({...p,client:v}))} valueKey="name" placeholder="— Sélectionner —" style={{width:'100%'}}/>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-            <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Prénom</label><input value={formData.first} onChange={e=>setFormData(p=>({...p,first:e.target.value}))} style={fieldStyle} placeholder="Jean"/></div>
-            <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Nom</label><input value={formData.last} onChange={e=>setFormData(p=>({...p,last:e.target.value}))} style={fieldStyle} placeholder="Dupont"/></div>
+            <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Prénom</label><input value={formData.first} onChange={e=>setFormData(p=>({...p,first:e.target.value}))} style={fieldStyle} placeholder="Prénom"/></div>
+            <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Nom</label><input value={formData.last} onChange={e=>setFormData(p=>({...p,last:e.target.value}))} style={fieldStyle} placeholder="Nom de famille"/></div>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
             <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>NISS</label><input value={formData.niss} onChange={e=>setFormData(p=>({...p,niss:e.target.value}))} style={fieldStyle} placeholder="XX.XX.XX-XXX.XX"/></div>
@@ -8723,8 +8723,8 @@ const ImportCSV=({s,d})=>{
         <div style={{fontSize:10,fontWeight:600,color:'#3b82f6',marginBottom:4}}>💡 Format recommande</div>
         <div style={{fontSize:9,color:'#888',fontFamily:'monospace',lineHeight:1.8}}>
           Prenom;Nom;Email;Salaire brut;Fonction;NISS<br/>
-          Jean;Dupont;jean@mail.be;3500;Comptable;85010112345<br/>
-          Marie;Martin;marie@mail.be;2800;Admin;90051554321
+          Prenom1;Nom1;email@societe.be;3500;Comptable;XXXXXXXXXXX<br/>
+          Prenom2;Nom2;email2@societe.be;2800;Admin;XXXXXXXXXXX
         </div>
       </div>
     </div>}
@@ -8866,7 +8866,7 @@ const SetupWizard=({s,d,setPage})=>{
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
         <div>
           <div style={{fontSize:10,color:'#888',marginBottom:3}}>Denomination sociale *</div>
-          <input value={companyData.name} onChange={e=>setCompanyData(p=>({...p,name:e.target.value}))} placeholder="Ex: Dupont SPRL" style={inputStyle}/>
+          <input value={companyData.name} onChange={e=>setCompanyData(p=>({...p,name:e.target.value}))} placeholder="Ex: Votre Société SRL" style={inputStyle}/>
         </div>
         <div>
           <div style={{fontSize:10,color:'#888',marginBottom:3}}>Forme juridique</div>
@@ -9424,27 +9424,25 @@ const JournalActivite=({s})=>{
   const [filter,setFilter]=useState('all');
   const [search,setSearch]=useState('');
   
-  const actions=[
-    {id:'A1',type:'calcul',icon:'🧮',title:'Calcul de paie batch',desc:'12 employés — TechCorp SPRL',user:'admin@aureussocial.be',time:new Date(Date.now()-1800000).toISOString(),status:'success'},
-    {id:'A2',type:'email',icon:'📧',title:'Envoi fiches de paie',desc:'12 fiches envoyées — TechCorp SPRL',user:'admin@aureussocial.be',time:new Date(Date.now()-3600000).toISOString(),status:'success'},
-    {id:'A3',type:'contrat',icon:'📝',title:'Contrat CDI généré',desc:'Jean Dupont — CP 200 — TechCorp SPRL',user:'admin@aureussocial.be',time:new Date(Date.now()-7200000).toISOString(),status:'success'},
-    {id:'A4',type:'dimona',icon:'📡',title:'Dimona IN soumise',desc:'Marie Martin — NISS 85.04.12-123.45 — TechCorp',user:'admin@aureussocial.be',time:new Date(Date.now()-14400000).toISOString(),status:'success'},
-    {id:'A5',type:'sepa',icon:'💸',title:'SEPA pain.001 généré',desc:'8 virements — 24.567,89 EUR — BelgaCo SA',user:'admin@aureussocial.be',time:new Date(Date.now()-28800000).toISOString(),status:'success'},
-    {id:'A6',type:'import',icon:'📥',title:'Import CSV employés',desc:'5 employés importés — StartupBE SPRL',user:'admin@aureussocial.be',time:new Date(Date.now()-43200000).toISOString(),status:'success'},
-    {id:'A7',type:'alert',icon:'⚠️',title:'Alerte salaire minimum',desc:'Pierre Leroy (2.100€) sous barème CP 200 (2.029,88€ min)',user:'system',time:new Date(Date.now()-50000000).toISOString(),status:'warning'},
-    {id:'A8',type:'onss',icon:'🏛',title:'DmfA T4/2025 générée',desc:'3 clients — 45 travailleurs — XML exporté',user:'admin@aureussocial.be',time:new Date(Date.now()-86400000).toISOString(),status:'success'},
-    {id:'A9',type:'email',icon:'📧',title:'Recap employeur envoyé',desc:'BelgaCo SA — Janvier 2026 — cout total 156.789 EUR',user:'admin@aureussocial.be',time:new Date(Date.now()-90000000).toISOString(),status:'success'},
-    {id:'A10',type:'login',icon:'🔐',title:'Connexion',desc:'Depuis Bruxelles (BE) — Chrome',user:'admin@aureussocial.be',time:new Date(Date.now()-100000000).toISOString(),status:'info'},
-  ];
-  
-  // Add real actions from state
+  const actions=[];
+  // Generate real activity from client data
   const clients=s.clients||[];
+  const totalEmps=clients.reduce((a,c)=>a+(c.emps||[]).length,0);
+  const totalClients=clients.length;
+  // Add dynamic entries based on actual state
+  if(totalClients>0)actions.push({id:'DA1',type:'info',icon:'📊',title:'Portefeuille actif',desc:totalClients+' client'+(totalClients>1?'s':'')+' · '+totalEmps+' employé'+(totalEmps>1?'s':''),user:'system',time:new Date().toISOString(),status:'info'});
   clients.forEach(cl=>{
     const co=cl.company||{};
+    if(cl.createdAt)actions.push({id:'DC-'+cl.id,type:'import',icon:'🏢',title:'Dossier créé',desc:(co.name||'Sans nom')+' — '+(co.vat||'pas de TVA'),user:'admin',time:cl.createdAt,status:'success'});
+    if(cl.updatedAt&&cl.updatedAt!==cl.createdAt)actions.push({id:'DU-'+cl.id,type:'calcul',icon:'✏️',title:'Dossier modifié',desc:(co.name||'Sans nom'),user:'admin',time:cl.updatedAt,status:'info'});
+    (cl.pays||[]).forEach(p=>actions.push({id:'DP-'+(p.id||Math.random()),type:'calcul',icon:'🧮',title:'Calcul de paie',desc:(p.empName||'Employé')+' — '+(co.name||''),user:'admin',time:p.date||p.createdAt||new Date().toISOString(),status:'success'}));
+    (cl.dims||[]).forEach(dm=>actions.push({id:'DD-'+(dm.id||Math.random()),type:'dimona',icon:'📡',title:'Dimona '+dm.type,desc:(dm.empName||'Employé')+' — '+(co.name||''),user:'admin',time:dm.date||new Date().toISOString(),status:'success'}));
     (cl.emps||[]).forEach(e=>{
       if(e.absences?.length>0) e.absences.forEach(a=>actions.push({id:'AA-'+a.id,type:'absence',icon:'📅',title:'Absence encodée',desc:(e.first||'')+' '+(e.last||'')+' — '+a.type+' — '+(co.name||''),user:'client',time:a.createdAt||new Date().toISOString(),status:'info'}));
     });
   });
+  // Show hint if no activity yet
+  if(actions.length===0)actions.push({id:'EMPTY',type:'info',icon:'💡',title:'Aucune activité',desc:'Le journal se remplira automatiquement quand vous commencerez à gérer des dossiers',user:'system',time:new Date().toISOString(),status:'info'});
   
   actions.sort((a,b)=>new Date(b.time)-new Date(a.time));
   
@@ -10935,11 +10933,11 @@ const ExportCompta=({s})=>{
         {format==='coda'&&'Format CODA (Coded Statement of Account) pour reconciliation bancaire belge.'}
       </div>
       <div style={{background:'#090c16',borderRadius:8,padding:12,fontFamily:'monospace',fontSize:10,color:'#e5e5e5',maxHeight:200,overflowY:'auto',whiteSpace:'pre-wrap'}}>
-        {format==='bob50'&&'DBK;DAT;PER;ACC;AMNT;...\nSAL;01/'+mois[selMonth].substring(0,3)+'/'+selYear+';620000;3500.00;Brut Jean Dupont;...\nSAL;01/'+mois[selMonth].substring(0,3)+'/'+selYear+';454000;-457.45;ONSS W Jean Dupont;...'}
+        {format==='bob50'&&'DBK;DAT;PER;ACC;AMNT;...\nSAL;01/'+mois[selMonth].substring(0,3)+'/'+selYear+';620000;3500.00;Brut Employé 1;...\nSAL;01/'+mois[selMonth].substring(0,3)+'/'+selYear+';454000;-457.45;ONSS W Employé 1;...'}
         {format==='winbooks'&&'DBKCODE\tDBKTYPE\tDOCNUMBER\tACCOUNTGL\tAMOUNT\nSAL\t0\t1\t620000\t3500.00\nSAL\t0\t1\t454000\t-457.45'}
         {format==='csv'&&'Client;Employe;NISS;Contrat;Brut;ONSS_W;Imposable;Precompte;Net;ONSS_P;Cout_Total;Periode'}
         {format==='horus'&&'Client;Employe;NISS;Contrat;Brut;ONSS_W;Imposable;Precompte;Net;ONSS_P;Cout_Total;Periode'}
-        {format==='coda'&&'0000000'+selYear+'01AUREUS SOCIAL PRO\n0001SAL BE68539007547034    1976.28 Jean Dupont'}
+        {format==='coda'&&'0000000'+selYear+'01AUREUS SOCIAL PRO\n0001SAL BE68539007547034    1976.28 Employe 1'}
       </div>
     </div>
   </div>;
@@ -11219,7 +11217,7 @@ const SimulateurEmbauche=({s})=>{
 // SPRINT 35: VEHICULES + PENSION + CCT + INTERIMAIRES
 
 const GestionVehicules=({s})=>{
-  const [vehicules,setVehicules]=useState([{id:1,marque:'BMW',modele:'320d',plaque:'1-ABC-123',co2:118,type:'diesel',catalogValue:42000,age:2,empName:'Jean Dupont'},{id:2,marque:'Tesla',modele:'Model 3',plaque:'1-DEF-456',co2:0,type:'electrique',catalogValue:48000,age:1,empName:'Marie Lambert'}]);
+  const [vehicules,setVehicules]=useState([]);
   const [showAdd,setShowAdd]=useState(false);
   const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
   const calcATN=(v)=>{const dv=v.catalogValue*(1-Math.min(v.age,5)*0.06);const ref=v.type==='diesel'?67:82;let p=5.5;if(v.co2>ref)p+=(v.co2-ref)*0.1;if(v.co2<ref)p-=(ref-v.co2)*0.1;p=Math.max(4,Math.min(18,p));const an=Math.max(1600,Math.round(dv*p)/100);return{dv:Math.round(dv*100)/100,pct:Math.round(p*100)/100,an:Math.round(an*100)/100,mens:Math.round(an/12*100)/100};};
@@ -11232,6 +11230,7 @@ const GestionVehicules=({s})=>{
       {[{l:'Flotte',v:vehicules.length,c:'#3b82f6'},{l:'ATN total/mois',v:f2(vehicules.reduce((a,v)=>a+calcATN(v).mens,0))+' EUR',c:'#c6a34e'},{l:'Electriques',v:vehicules.filter(v=>v.type==='electrique').length,c:'#22c55e'},{l:'CO2 moyen',v:Math.round(vehicules.reduce((a,v)=>a+v.co2,0)/(vehicules.length||1))+'g/km',c:'#eab308'}].map((k,i)=>
         <div key={i} style={{padding:14,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid '+k.c+'15',borderRadius:12,textAlign:'center'}}><div style={{fontSize:9,color:'#888'}}>{k.l}</div><div style={{fontSize:16,fontWeight:700,color:k.c}}>{k.v}</div></div>)}
     </div>
+    {vehicules.length===0&&<div style={{textAlign:'center',padding:40,color:'#555',fontSize:12}}>🚗 Aucun véhicule de société.<br/><span style={{fontSize:10}}>Cliquez "+ Véhicule" pour ajouter une voiture de société et calculer l'ATN automatiquement.</span></div>}
     {vehicules.map((v,i)=>{const atn=calcATN(v);const dd=deduct(v.co2,v.type);return <div key={i} style={{padding:14,marginBottom:8,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.08)',borderRadius:12}}>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
         <div style={{display:'flex',alignItems:'center',gap:10}}><span style={{fontSize:22}}>{v.type==='electrique'?'⚡':'⛽'}</span><div><div style={{fontSize:14,fontWeight:700,color:'#e5e5e5'}}>{v.marque} {v.modele}</div><div style={{fontSize:10,color:'#888'}}>{v.plaque} — {v.empName}</div></div></div>
@@ -12341,7 +12340,7 @@ const OnboardingWizard=({s,d})=>{
       {step===0&&<div>
         <div style={{fontSize:15,fontWeight:700,color:'#c6a34e',marginBottom:16}}>🏢 Identification de l'entreprise</div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
-          <div><label style={labelStyle}>Nom de l'entreprise *</label><input value={data.company.name} onChange={e=>setData(p=>({...p,company:{...p.company,name:e.target.value}}))} style={inputStyle} placeholder="ACME SA"/></div>
+          <div><label style={labelStyle}>Nom de l'entreprise *</label><input value={data.company.name} onChange={e=>setData(p=>({...p,company:{...p.company,name:e.target.value}}))} style={inputStyle} placeholder="Nom de la société"/></div>
           <div><label style={labelStyle}>N° BCE / TVA *</label><input value={data.company.vat} onChange={e=>setData(p=>({...p,company:{...p.company,vat:e.target.value}}))} style={inputStyle} placeholder="BE0123.456.789"/></div>
           <div><label style={labelStyle}>Adresse</label><input value={data.company.address} onChange={e=>setData(p=>({...p,company:{...p.company,address:e.target.value}}))} style={inputStyle} placeholder="Rue de la Loi 1"/></div>
           <div style={{display:'grid',gridTemplateColumns:'80px 1fr',gap:8}}>
@@ -12801,11 +12800,7 @@ const AuthMultiRoles=({s,d})=>{
     {id:'comptable',name:'Comptable externe',icon:'📒',color:'#eab308',desc:'Exports comptables, journaux, reconciliation',perms:['export_compta','journaux','reporting_read']},
   ]);
   const [users,setUsers]=useState([
-    {id:1,name:'Admin Principal',email:'admin@aureussocial.be',role:'admin',active:true,lastLogin:'2026-02-20 09:14'},
-    {id:2,name:'Marie Dupont',email:'marie@aureussocial.be',role:'gestionnaire',active:true,lastLogin:'2026-02-20 08:30'},
-    {id:3,name:'Jean Martin',email:'jean@client.be',role:'client',active:true,lastLogin:'2026-02-19 16:45',client:'ACME SA'},
-    {id:4,name:'Sophie Leroy',email:'sophie@employe.be',role:'employe',active:true,lastLogin:'2026-02-18 14:20',client:'ACME SA'},
-    {id:5,name:'Pierre Comptable',email:'pierre@fiduciaire.be',role:'comptable',active:false,lastLogin:'2026-02-15 11:00'},
+    {id:1,name:'Administrateur',email:s.co?.email||'admin@aureussocial.be',role:'admin',active:true,lastLogin:new Date().toISOString().slice(0,16).replace('T',' ')},
   ]);
   const [selRole,setSelRole]=useState('admin');
   const [showAdd,setShowAdd]=useState(false);
@@ -18928,15 +18923,15 @@ const SmartAutomation=({s,d,supabase,user})=>{
       <div style={{fontSize:11,color:'#888',marginBottom:14}}>Collez un CSV pour importer clients ou employés</div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:16}}>
         <div style={{padding:14,background:'rgba(198,163,78,.04)',border:'1px solid rgba(198,163,78,.1)',borderRadius:12}}><div style={{fontSize:12,fontWeight:600,color:'#c6a34e',marginBottom:6}}>📋 Template Clients</div><code style={{fontSize:9,color:'#888',display:'block',background:'#090c16',padding:8,borderRadius:6,whiteSpace:'pre'}}>{"societe;tva;iban;adresse;cp;ville;email;tel\nAureus;BE1028230781;BE68...;Rue...;1060;Bruxelles;a@b.be;02123"}</code></div>
-        <div style={{padding:14,background:'rgba(59,130,246,.04)',border:'1px solid rgba(59,130,246,.1)',borderRadius:12}}><div style={{fontSize:12,fontWeight:600,color:'#3b82f6',marginBottom:6}}>📋 Template Employés</div><code style={{fontSize:9,color:'#888',display:'block',background:'#090c16',padding:8,borderRadius:6,whiteSpace:'pre'}}>{"prenom;nom;niss;iban;salaire;contrat;debut;email\nJean;Dupont;85073015784;BE68...;3500;CDI;2024-01-15;j@m.be"}</code></div>
+        <div style={{padding:14,background:'rgba(59,130,246,.04)',border:'1px solid rgba(59,130,246,.1)',borderRadius:12}}><div style={{fontSize:12,fontWeight:600,color:'#3b82f6',marginBottom:6}}>📋 Template Employés</div><code style={{fontSize:9,color:'#888',display:'block',background:'#090c16',padding:8,borderRadius:6,whiteSpace:'pre'}}>{"prenom;nom;niss;iban;salaire;contrat;debut;email\nPrénom;Nom;XXXXXXXXXXX;BE68...;3500;CDI;2024-01-15;email@test.be"}</code></div>
       </div>
       <textarea value={csvData} onChange={e=>setCsvData(e.target.value)} rows={8} placeholder="Collez votre CSV ici (séparateur: ;)" style={{width:'100%',padding:12,background:'#090c16',border:'1px solid rgba(139,115,60,.2)',borderRadius:10,color:'#e5e5e5',fontSize:12,fontFamily:'monospace',resize:'vertical',outline:'none',boxSizing:'border-box'}}/>
       <div style={{display:'flex',gap:8,marginTop:10}}>
         <label style={{padding:'10px 16px',borderRadius:8,background:'rgba(198,163,78,.1)',border:'1px solid rgba(198,163,78,.2)',color:'#c6a34e',fontSize:11,fontWeight:600,cursor:'pointer'}}>📂 Charger CSV<input type="file" accept=".csv,.txt" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>setCsvData(ev.target.result);r.readAsText(f);}}/></label>
         <button onClick={importClientsCSV} disabled={!csvData} style={{padding:'10px 16px',borderRadius:8,border:'none',background:csvData?'#c6a34e':'#555',color:csvData?'#000':'#999',fontSize:11,fontWeight:600,cursor:csvData?'pointer':'not-allowed'}}>🏢 Importer Clients</button>
         <button onClick={importEmpsCSV} disabled={!csvData} style={{padding:'10px 16px',borderRadius:8,border:'none',background:csvData?'#3b82f6':'#555',color:'#fff',fontSize:11,fontWeight:600,cursor:csvData?'pointer':'not-allowed'}}>👤 Importer Employés</button>
-        <button onClick={()=>{const tpl='societe;tva;onss;nace;iban;adresse;ville;cp;tel;email;contact;assurance_accident\nMa Société SRL;BE 0123.456.789;123-4567890-12;62.01;BE12 3456 7890 1234;Rue Test 1;Bruxelles;200;02 123 45 67;info@example.be;Jean Dupont;AXA\n';const b=new Blob([tpl],{type:'text/csv'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='modele_import_clients.csv';a.click();URL.revokeObjectURL(u);}} style={{padding:'10px 12px',borderRadius:8,border:'1px solid rgba(198,163,78,.15)',background:'transparent',color:'#c6a34e',fontSize:10,cursor:'pointer'}}>📋 Modèle Clients</button>
-        <button onClick={()=>{const tpl='prenom;nom;niss;email;iban;salaire;contrat;debut;fin;cp;heures;fonction;departement;sexe;categorie\nJean;Dupont;85.07.15-123.45;jean@test.be;BE12 3456 7890 1234;3200;CDI;2024-01-15;;200;38;Développeur;IT;M;employe\n';const b=new Blob([tpl],{type:'text/csv'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='modele_import_employes.csv';a.click();URL.revokeObjectURL(u);}} style={{padding:'10px 12px',borderRadius:8,border:'1px solid rgba(96,165,250,.15)',background:'transparent',color:'#60a5fa',fontSize:10,cursor:'pointer'}}>📋 Modèle Employés</button>
+        <button onClick={()=>{const tpl='societe;tva;onss;nace;iban;adresse;ville;cp;tel;email;contact;assurance_accident\nMa Société SRL;BE 0123.456.789;123-4567890-12;62.01;BE12 3456 7890 1234;Rue Test 1;Bruxelles;200;02 123 45 67;info@exemple.be;Gérant;AXA\n';const b=new Blob([tpl],{type:'text/csv'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='modele_import_clients.csv';a.click();URL.revokeObjectURL(u);}} style={{padding:'10px 12px',borderRadius:8,border:'1px solid rgba(198,163,78,.15)',background:'transparent',color:'#c6a34e',fontSize:10,cursor:'pointer'}}>📋 Modèle Clients</button>
+        <button onClick={()=>{const tpl='prenom;nom;niss;email;iban;salaire;contrat;debut;fin;cp;heures;fonction;departement;sexe;categorie\nPrénom1;Nom1;XX.XX.XX-XXX.XX;email@societe.be;BE68 5390 0754 7034;3200;CDI;2024-01-15;;200;38;Développeur;IT;M;employe\n';const b=new Blob([tpl],{type:'text/csv'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='modele_import_employes.csv';a.click();URL.revokeObjectURL(u);}} style={{padding:'10px 12px',borderRadius:8,border:'1px solid rgba(96,165,250,.15)',background:'transparent',color:'#60a5fa',fontSize:10,cursor:'pointer'}}>📋 Modèle Employés</button>
       </div>
       {importResult&&<div style={{marginTop:14,padding:14,background:importResult.error?'rgba(239,68,68,.06)':'rgba(34,197,94,.06)',border:'1px solid '+(importResult.error?'rgba(239,68,68,.15)':'rgba(34,197,94,.15)'),borderRadius:10}}>{importResult.error?<div style={{color:'#ef4444',fontSize:12}}>{importResult.error}</div>:<div style={{fontSize:12,color:'#22c55e'}}>✅ {importResult.imported} {importResult.type==='emps'?'employés':'clients'} importés{importResult.skipped?' · '+importResult.skipped+' doublons ignorés':''}{importResult.enriched?' · '+importResult.enriched+' enrichis via NACE':''}{importResult.nissInvalid?' · ⚠️ '+importResult.nissInvalid+' NISS invalides':''}</div>}</div>}
     </div>}
@@ -25509,7 +25504,7 @@ function APIDocMod({s,d}){
     ]},
     {id:'employees',cat:'👤 Employés',endpoints:[
       {method:'GET',path:'/api/v1/employees',desc:'Liste des employés',body:null,response:'[{"id":"...","first":"...","last":"...","niss":"..."}]'},
-      {method:'POST',path:'/api/v1/employees',desc:'Créer un employé',body:'{"first":"Jean","last":"Dupont","niss":"85.07.15-123.45","cp":"200","monthlySalary":3000}',response:'{"id":"E-xxx","created":true}'},
+      {method:'POST',path:'/api/v1/employees',desc:'Créer un employé',body:'{"first":"Prénom","last":"Nom","niss":"XX.XX.XX-XXX.XX","cp":"200","monthlySalary":3000}',response:'{"id":"E-xxx","created":true}'},
       {method:'PUT',path:'/api/v1/employees/:id',desc:'Modifier un employé',body:'{"monthlySalary":3200}',response:'{"updated":true}'},
       {method:'DELETE',path:'/api/v1/employees/:id',desc:'Supprimer un employé',body:null,response:'{"deleted":true}'},
     ]},
