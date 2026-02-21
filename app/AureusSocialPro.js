@@ -19621,13 +19621,15 @@ function Dashboard({s,d}) {
     {/* KPI ROW */}
     <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:14,marginBottom:22}}>
       {[
-        {label:"Employés actifs",value:ae.length,sub:`${sortie.length} sorti${sortie.length>1?'s':''} · ${etudiants.length} étudiant${etudiants.length>1?'s':''}`,color:'#c6a34e',icon:'◉'},
-        {label:"Masse salariale brute",value:fmt(tm),sub:`Moy: ${fmt(avgGross)}/emp`,color:'#4ade80',icon:'◈'},
-        {label:"Net total",value:fmt(tn),sub:`${ae.length?Math.round(tn/tm*100):0}% du brut`,color:'#60a5fa',icon:'▤'},
-        {label:"Coût employeur total",value:fmt(tc),sub:`Ratio: ${ae.length?((tc/tm)*100).toFixed(0):0}% du brut`,color:'#a78bfa',icon:'◆'},
-        {label:"Déclarations",value:`${s.pays.length}`,sub:`${s.dims.length} Dimona · ${s.dmfas.length} DmfA`,color:'#fb923c',icon:'◇'},
+        {label:"Employés actifs",value:ae.length,sub:`${sortie.length} sorti${sortie.length>1?'s':''} · ${etudiants.length} étudiant${etudiants.length>1?'s':''}`,color:'#c6a34e',icon:'◉',nav:'employees'},
+        {label:"Masse salariale brute",value:fmt(tm),sub:`Moy: ${fmt(avgGross)}/emp`,color:'#4ade80',icon:'◈',nav:'payslip'},
+        {label:"Net total",value:fmt(tn),sub:`${ae.length?Math.round(tn/tm*100):0}% du brut`,color:'#60a5fa',icon:'▤',nav:'dashrh'},
+        {label:"Coût employeur total",value:fmt(tc),sub:`Ratio: ${ae.length?((tc/tm)*100).toFixed(0):0}% du brut`,color:'#a78bfa',icon:'◆',nav:'couttotal'},
+        {label:"Déclarations",value:`${s.pays.length}`,sub:`${s.dims.length} Dimona · ${s.dmfas.length} DmfA`,color:'#fb923c',icon:'◇',nav:'onss'},
       ].map((kpi,i)=>
-        <div key={i} style={{background:"linear-gradient(145deg,#0e1220,#131829)",border:'1px solid rgba(139,115,60,.12)',borderRadius:14,padding:'20px 18px',position:'relative',overflow:'hidden',animation:`fadeIn .4s ease ${i*0.08}s both`}}>
+        <div key={i} onClick={()=>d({type:"NAV",page:kpi.nav})} style={{background:"linear-gradient(145deg,#0e1220,#131829)",border:'1px solid rgba(139,115,60,.12)',borderRadius:14,padding:'20px 18px',position:'relative',overflow:'hidden',animation:`fadeIn .4s ease ${i*0.08}s both`,cursor:'pointer',transition:'all .15s'}}
+          onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(198,163,78,.35)';e.currentTarget.style.transform='translateY(-2px)';}}
+          onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(139,115,60,.12)';e.currentTarget.style.transform='translateY(0)';}}>
           <div style={{position:'absolute',top:12,right:14,fontSize:22,opacity:.08,color:kpi.color}}>{kpi.icon}</div>
           <div style={{fontSize:10,color:'#5e5c56',marginBottom:8,textTransform:'uppercase',letterSpacing:'1.2px',fontWeight:600}}>{kpi.label}</div>
           <div style={{fontSize:24,fontWeight:700,color:kpi.color,animation:'countUp .5s ease'}}>{kpi.value}</div>
