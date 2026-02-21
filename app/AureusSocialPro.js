@@ -5492,6 +5492,7 @@ function AppInner({ supabase, user, onLogout }) {
 
     const rejectSelected=()=>{
       const sel=queue.filter(q=>q.selected!==false&&q.status==='pending');
+      if(!confirm('Rejeter '+sel.length+' tâche(s) ? Elles seront marquées comme non traitées.'))return;
       setQueue(prev=>prev.filter(q=>!sel.find(s=>s.id===q.id)));
       setProcessed(p=>[...sel.map(q=>({...q,status:'rejected',time:new Date().toISOString()})),...p]);
     };
@@ -6449,6 +6450,7 @@ const ClotureMensuelle=({s,d,supabase,user})=>{
 
   // ═══ STEP 6: CLOSE MONTH ═══
   const runClose=async()=>{
+    if(!confirm('🔒 CLÔTURE DÉFINITIVE\n\nClôturer le mois de '+prevMonth+' '+prevYear+' ?\n\nCette action archive les données et passe au mois suivant.\nAssurez-vous que toutes les fiches sont validées et envoyées.'))return;
     setRunning(true);
     addLog('🔒 Clôture du mois '+prevMonth+' '+prevYear+'...','info');
     await delay(500);
@@ -7046,9 +7048,11 @@ const ActionsRapides=({s,d})=>{
   ];
 
   const runEmbauche=async()=>{
-    setRunning(true);
     const fd=formData;
     const name=fd.first+' '+fd.last;
+    if(!name.trim()||!fd.niss||!fd.brut){alert('Veuillez remplir tous les champs obligatoires (Nom, NISS, Salaire).');return;}
+    if(!confirm('Confirmer l\'embauche de '+name+' ?\n\nNISS: '+fd.niss+'\nContrat: '+fd.contractType+'\nBrut: '+fd.brut+'€\nDébut: '+fd.startDate+'\n\nCette action va créer la fiche employé et les documents.'))return;
+    setRunning(true);
     addLog('🟢 EMBAUCHE — '+name,'info');
     addLog('📋 Étape 1/5 : Création Dimona IN...','info');
     await new Promise(r=>setTimeout(r,400));
@@ -7502,6 +7506,7 @@ const ExportBatch=({s})=>{
   const addLog=(msg,type='info')=>setLogs(p=>[{msg,type,time:new Date().toLocaleTimeString('fr-BE')},...p]);
 
   const runExport=async()=>{
+    if(!confirm('Générer les fiches de paie en batch ?\n\nPériode: '+mois[selMonth]+' '+selYear+'\n\nLes fichiers seront téléchargés localement.'))return;
     setExporting(true);
     setLogs([]);
     addLog('🚀 Export batch lance — '+mois[selMonth]+' '+selYear,'info');
@@ -16126,7 +16131,7 @@ const SepaGenerator=({s})=>{
 };
 
 // ═══ 2. SMART ALERTS — Alertes proactives temps reel ═══
-const SmartAlerts=({s})=>{
+const SmartAlerts=({s,d})=>{
   const clients=s.clients||[];
   const now=new Date();
   const [filter,setFilter]=useState('all');
@@ -16225,6 +16230,14 @@ const SmartAlerts=({s})=>{
           <span style={{fontSize:9,padding:'3px 8px',borderRadius:6,background:a.cat==='ONSS'?'rgba(239,68,68,.1)':a.cat==='Fiscal'?'rgba(168,85,247,.1)':a.cat==='Paie'?'rgba(34,197,94,.1)':'rgba(59,130,246,.1)',color:a.cat==='ONSS'?'#ef4444':a.cat==='Fiscal'?'#a855f7':a.cat==='Paie'?'#22c55e':'#3b82f6',fontWeight:600}}>{a.cat}</span>
           {typeof a.deadline==='number'&&a.deadline>=0&&<div style={{fontSize:10,color:a.deadline<=3?'#ef4444':a.deadline<=7?'#eab308':'#888',fontWeight:600,marginTop:4}}>J-{a.deadline}</div>}
           {typeof a.deadline==='number'&&a.deadline<0&&<div style={{fontSize:10,color:'#ef4444',fontWeight:700,marginTop:4}}>RETARD {Math.abs(a.deadline)}j</div>}
+          <button onClick={()=>{
+            if(a.cat==='ONSS')d&&d({type:'NAV',page:'onss'});
+            else if(a.cat==='Fiscal')d&&d({type:'NAV',page:'fiscal'});
+            else if(a.cat==='Paie')d&&d({type:'NAV',page:'payslip'});
+            else if(a.cat==='Contrat')d&&d({type:'NAV',page:'contratsmenu'});
+            else if(a.cat==='RH')d&&d({type:'NAV',page:'employees'});
+            else d&&d({type:'NAV',page:'dashboard'});
+          }} style={{marginTop:4,padding:'3px 8px',borderRadius:5,border:'none',background:'rgba(198,163,78,.08)',color:'#c6a34e',fontSize:9,cursor:'pointer',fontWeight:600}}>→ Traiter</button>
         </div>
       </div>)}
       {filtered.length===0&&<div style={{padding:40,textAlign:'center',color:'#888'}}>Aucune alerte dans cette categorie</div>}
@@ -16270,6 +16283,12 @@ const BatchDeclarations=({s})=>{
         }
       }
       addLog(count>0?'✅ '+count+' declaration(s) Dimona IN preparee(s)':'✅ Aucune nouvelle entree a declarer','success');
+      if(count>0){
+        addLog('📥 Generation des XML Dimona IN...','info');
+        await delay(200);
+        for(const cl of clients){for(const e of (cl.emps||[])){const start=new Date(e.startDate||e.start||'2020-01-01');if((now-start)<90*86400000&&!e.dimonaDone){try{generateDimonaXML(e,'IN',cl.company);}catch(ex){}}}}
+        addLog('✅ Fichiers Dimona IN generees','success');
+      }
 
     } else if(declType==='dimona_out'){
       addLog('🔴 BATCH DIMONA OUT — Scanning fins de contrat...','info');
@@ -16288,6 +16307,12 @@ const BatchDeclarations=({s})=>{
         }
       }
       addLog(count>0?'✅ '+count+' declaration(s) Dimona OUT preparee(s)':'✅ Aucune sortie a declarer','success');
+      if(count>0){
+        addLog('📥 Generation des XML Dimona OUT + C4...','info');
+        await delay(200);
+        for(const cl of clients){for(const e of (cl.emps||[])){if((e.contractType||'')==='CDD'){const end=new Date(e.endDate||e.end||'2099-12-31');if(end<now){try{generateDimonaXML(e,'OUT',cl.company);generateC4PDF(e,cl.company);}catch(ex){}}}}}
+        addLog('✅ Fichiers Dimona OUT + C4 generes','success');
+      }
 
     } else if(declType==='dmfa'){
       addLog('🏛 BATCH DmfA T'+quarter+' '+now.getFullYear()+' — Generation...','info');
@@ -16336,6 +16361,14 @@ const BatchDeclarations=({s})=>{
         }
       }
       addLog('✅ Belcotax 281.10 prepare pour '+(now.getFullYear()-1),'success');
+      // Generate Belcotax XML
+      addLog('📥 Generation XML Belcotax...','info');
+      await delay(200);
+      const allBelcoEmps=clients.reduce((a,c)=>[...a,...(c.emps||[]).filter(e=>(+(e.monthlySalary||e.gross||0))>0)],[]);
+      if(allBelcoEmps.length>0&&typeof generateBelcotaxXML==='function'){
+        try{generateBelcotaxXML(allBelcoEmps,now.getFullYear()-1,clients[0]?.company||{});}catch(ex){}
+        addLog('✅ Fichier Belcotax XML genere et telecharge','success');
+      }
     }
 
     setRunning(false);
@@ -16493,6 +16526,12 @@ const ComplianceRadar=({s,d})=>{
               {!c.ok&&<div style={{fontSize:9,color:'#ef4444'}}>Fix: {c.fix}</div>}
             </div>
             <span style={{fontSize:9,padding:'2px 6px',borderRadius:4,background:'rgba(255,255,255,.03)',color:'#888'}}>{c.cat}</span>
+            {!c.ok&&<button onClick={()=>{
+              if(c.cat==='Entreprise')d({type:'NAV',page:'config'});
+              else if(c.cat==='ONSS'||c.cat==='Dimona')d({type:'NAV',page:'dimona'});
+              else if(c.cat==='Sante'||c.cat==='Médical')d({type:'NAV',page:'medtravail'});
+              else d({type:'NAV',page:'employees'});
+            }} style={{padding:'3px 8px',borderRadius:5,border:'none',background:'rgba(239,68,68,.08)',color:'#ef4444',fontSize:9,cursor:'pointer',fontWeight:600,whiteSpace:'nowrap'}}>Corriger →</button>}
           </div>)}
         </div>
       </div>
@@ -16688,7 +16727,17 @@ const HistoriquePilote=({s,supabase})=>{
 
   return <div style={{padding:24}}>
     <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>📊 Historique Pilote Auto</h2>
-    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>Suivi de toutes les executions du Pilote Automatique</p>
+    <p style={{fontSize:12,color:'#888',margin:'0 0 12px'}}>Suivi de toutes les executions du Pilote Automatique</p>
+    <div style={{display:'flex',gap:8,marginBottom:16}}>
+      <button onClick={()=>{
+        const csv='Periode;Envoyees;Echouees;En attente;Masse brute;Net total;Date\n'+history.map(h=>mois[(h.month||1)-1]+' '+h.year+';'+(h.stats?.sent||0)+';'+(h.stats?.failed||0)+';'+(h.stats?.held||0)+';'+f2(h.stats?.brut||0)+';'+f2(h.stats?.net||0)+';'+(h.completedAt?new Date(h.completedAt).toLocaleDateString('fr-BE'):'-')).join('\n');
+        const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Historique_Pilote_'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);
+      }} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'rgba(34,197,94,.1)',color:'#22c55e',fontSize:11,fontWeight:600,cursor:'pointer'}}>📥 Exporter CSV</button>
+      <button onClick={()=>{
+        const html='<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Arial;padding:30px;max-width:900px;margin:auto;font-size:11px}h1{color:#c6a34e;text-align:center}table{width:100%;border-collapse:collapse}th{background:#f0ece3;padding:6px 8px;font-size:10px;text-align:left}td{padding:5px 8px;border-bottom:1px solid #eee;font-size:10px}.r{text-align:right;font-family:monospace}@media print{button{display:none!important}}</style></head><body><h1>Historique Pilote Auto — Aureus Social Pro</h1><table><tr><th>Periode</th><th class="r">Envoyees</th><th class="r">Echouees</th><th class="r">Masse brute</th><th class="r">Net total</th><th>Date</th></tr>'+history.map(h=>'<tr><td>'+mois[(h.month||1)-1]+' '+h.year+'</td><td class="r">'+(h.stats?.sent||0)+'</td><td class="r">'+(h.stats?.failed||0)+'</td><td class="r">'+f2(h.stats?.brut||0)+' EUR</td><td class="r">'+f2(h.stats?.net||0)+' EUR</td><td>'+(h.completedAt?new Date(h.completedAt).toLocaleDateString('fr-BE'):'-')+'</td></tr>').join('')+'</table><div style="text-align:center;margin:20px"><button onclick="window.print()">Imprimer</button></div></body></html>';
+        previewHTML(html,'Historique_Pilote');
+      }} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'rgba(198,163,78,.1)',color:'#c6a34e',fontSize:11,fontWeight:600,cursor:'pointer'}}>🖨 Imprimer</button>
+    </div>
 
     {/* KPIs */}
     <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:20}}>
@@ -18661,7 +18710,7 @@ const SmartAutomation=({s,d,supabase,user})=>{
 
   const importEmpsCSV=()=>{const{rows,error}=parseCSV(csvData);if(error){setImportResult({error});return;}let imported=0;const newEmps=[...(s.emps||[])];rows.forEach(row=>{const emp={id:'E-'+Date.now()+'-'+Math.random().toString(36).substr(2,5),first:row.prenom||row.first||'',last:row.nom||row.last||'',fn:row.prenom||'',ln:row.nom||'',niss:row.niss||'',iban:row.iban||'',email:row.email||'',monthlySalary:parseFloat(row.salaire||row.brut||0)||0,gross:parseFloat(row.salaire||row.brut||0)||0,contractType:row.contrat||'CDI',startD:row.debut||'',cp:row.cp_paritaire||'',status:row.statut||'actif',gender:row.sexe||''};if(emp.first||emp.last){newEmps.push(emp);imported++;}});d({type:'SET_EMPS',data:newEmps});setImportResult({imported,total:rows.length,type:'emps'});};
 
-  const autoFix=()=>{let fixed=0;const up=clients.map(cl=>{const emps=(cl.emps||[]).map(e=>{const u={...e};if(u.niss){const c=u.niss.replace(/[^0-9]/g,'');if(c.length===11&&c!==u.niss){u.niss=c;fixed++;}}if(u.iban){const c=u.iban.replace(/\s/g,'').toUpperCase();if(c!==u.iban){u.iban=c;fixed++;}}if(!u.contractType&&!u.contrat?.type){u.contractType='CDI';fixed++;}if(!u.status){u.status='actif';fixed++;}return u;});return{...cl,emps};});d({type:'SET_CLIENTS',data:up});if(typeof addToast==='function')addToast('Auto-Fix: '+fixed+' corrections');return fixed;};
+  const autoFix=()=>{if(!confirm('Auto-Fix va corriger le formatage NISS/IBAN et définir les contrats manquants en CDI.\n\nCette action modifie les données employés.\n\nContinuer ?'))return 0;let fixed=0;const up=clients.map(cl=>{const emps=(cl.emps||[]).map(e=>{const u={...e};if(u.niss){const c=u.niss.replace(/[^0-9]/g,'');if(c.length===11&&c!==u.niss){u.niss=c;fixed++;}}if(u.iban){const c=u.iban.replace(/\s/g,'').toUpperCase();if(c!==u.iban){u.iban=c;fixed++;}}if(!u.contractType&&!u.contrat?.type){u.contractType='CDI';fixed++;}if(!u.status){u.status='actif';fixed++;}return u;});return{...cl,emps};});d({type:'SET_CLIENTS',data:up});if(typeof addToast==='function')addToast('Auto-Fix: '+fixed+' corrections');return fixed;};
 
   const tabs2=[{id:'alerts',l:'\u{1F6A8} Alertes ('+errCount+')',badge:errCount},{id:'deadlines',l:'\u{1F4C5} Échéances'},{id:'validation',l:'\u2705 Pré-Vol'},{id:'import',l:'\u{1F4E5} Import CSV'},{id:'autofix',l:'\u{1F527} Auto-Fix'},{id:'onboarding',l:'\u{1F680} Onboarding'}];
 
@@ -19327,7 +19376,7 @@ const AutomationHub=({s,d})=>{
       case'couttotal':return <CoutTotalDash s={s}/>;
       case'timeline':return <PayrollTimeline s={s}/>;
       case'sepa':return <SepaGenerator s={s}/>;
-      case'smartalerts':return <SmartAlerts s={s}/>;
+      case'smartalerts':return <SmartAlerts s={s} d={d}/>;
       case'batchdecl':return <BatchDeclarations s={s}/>;
       case'compliance':return <ComplianceRadar s={s} d={d}/>;
       case'autoindex':return <AutoIndexation s={s} d={d}/>;
