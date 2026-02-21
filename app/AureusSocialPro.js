@@ -4502,34 +4502,36 @@ function detectCPFromNACE(naceCodes){
   return results;
 }
 
-// ═══ SEARCHABLE CLIENT SELECT — replaces <select> for 10K clients ═══
-function SearchableClientSelect({clients,value,onChange,placeholder,style}){
-  const [q,setQ]=useState('');
+// ═══ SEARCHABLE EMPLOYEE SELECT — replaces <select> for large employee lists ═══
+const EmployeeSearch=({emps,value,onChange,placeholder,valueKey,style,showClient,allOption})=>{
   const [open,setOpen]=useState(false);
+  const [q,setQ]=useState('');
   const ref=useRef(null);
-  const sel=clients.find(c=>(c.company?.name||c.id)===value);
-  const filtered=q?clients.filter(c=>{const s=q.toLowerCase();return(c.company?.name||'').toLowerCase().includes(s)||(c.company?.vat||'').toLowerCase().includes(s);}):clients;
-  const shown=filtered.slice(0,50);
   useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};document.addEventListener('mousedown',h);return()=>document.removeEventListener('mousedown',h);},[]);
-  return <div ref={ref} style={{position:'relative',...(style||{})}}>
-    <input value={open?q:(sel?sel.company?.name||sel.id:'')} 
-      onFocus={()=>{setOpen(true);setQ('');}}
-      onChange={e=>{setQ(e.target.value);setOpen(true);}}
-      placeholder={placeholder||'Rechercher un client...'}
-      style={{width:'100%',padding:'8px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
-    {open&&<div style={{position:'absolute',top:'100%',left:0,right:0,zIndex:999,maxHeight:240,overflowY:'auto',background:'#0d1117',border:'1px solid rgba(198,163,78,.2)',borderRadius:8,boxShadow:'0 8px 24px rgba(0,0,0,.5)',marginTop:2}}>
-      {shown.length===0&&<div style={{padding:12,color:'#555',fontSize:10,textAlign:'center'}}>Aucun client trouvé</div>}
-      {shown.map((c,i)=><div key={c.id||i} onClick={()=>{onChange(c.company?.name||c.id);setOpen(false);setQ('');}}
-        style={{padding:'8px 12px',cursor:'pointer',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:11,color:(c.company?.name||c.id)===value?'#c6a34e':'#e5e5e5',background:(c.company?.name||c.id)===value?'rgba(198,163,78,.06)':'transparent'}}
-        onMouseEnter={e=>e.currentTarget.style.background='rgba(198,163,78,.08)'}
-        onMouseLeave={e=>e.currentTarget.style.background=(c.company?.name||c.id)===value?'rgba(198,163,78,.06)':'transparent'}>
-        <div style={{fontWeight:500}}>{c.company?.name||'Sans nom'}</div>
-        <div style={{fontSize:9,color:'#555'}}>{c.company?.vat||''} · {(c.emps||[]).length} emp.</div>
-      </div>)}
-      {filtered.length>50&&<div style={{padding:8,textAlign:'center',color:'#555',fontSize:9}}>{filtered.length-50} autres résultats...</div>}
+  const getVal=(e,i)=>valueKey==='id'?e.id:valueKey==='index'?i:valueKey==='name'?((e.first||e.fn||'')+(e.last||e.ln||'')+(e._client||'')):e.id||i;
+  const getLabel=e=>((e.first||e.fn||'')+' '+(e.last||e.ln||'')).trim()+(showClient&&e._client?' — '+e._client:'');
+  const current=valueKey==='index'?emps[value]:emps.find((e,i)=>getVal(e,i)===value);
+  const filtered=q?emps.filter(e=>{const s=q.toLowerCase();return((e.first||e.fn||'')+' '+(e.last||e.ln||'')+' '+(e.niss||'')+' '+(e.fn||'')+' '+(e._client||'')).toLowerCase().includes(s);}).slice(0,40):emps.slice(0,40);
+  const inputStyle={width:'100%',padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit',outline:'none',boxSizing:'border-box',cursor:'pointer'};
+  return <div ref={ref} style={{position:'relative',display:'inline-block',...(style||{})}}>
+    <div onClick={()=>setOpen(!open)} style={inputStyle}>
+      {current?getLabel(current):(allOption||placeholder||'Sélectionner un employé...')}
+      <span style={{float:'right',color:'#555'}}>▾</span>
+    </div>
+    {open&&<div style={{position:'absolute',top:'100%',left:0,right:0,zIndex:9999,background:'#0e1220',border:'1px solid rgba(198,163,78,.2)',borderRadius:8,boxShadow:'0 8px 30px rgba(0,0,0,.5)',maxHeight:260,overflow:'hidden',minWidth:200}}>
+      <input autoFocus value={q} onChange={e=>setQ(e.target.value)} placeholder="🔍 Nom, NISS..." style={{width:'100%',padding:'8px 10px',background:'#090c16',border:'none',borderBottom:'1px solid rgba(198,163,78,.1)',color:'#e5e5e5',fontSize:11,fontFamily:'inherit',outline:'none',boxSizing:'border-box'}}/>
+      <div style={{maxHeight:210,overflowY:'auto'}}>
+        {allOption&&<div onClick={()=>{onChange(valueKey==='index'?-1:'');setOpen(false);setQ('');}} style={{padding:'6px 10px',fontSize:11,color:'#c6a34e',cursor:'pointer',borderBottom:'1px solid rgba(255,255,255,.03)'}} onMouseEnter={e=>e.currentTarget.style.background='rgba(198,163,78,.08)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>{allOption}</div>}
+        {filtered.map((e,idx)=>{const realIdx=emps.indexOf(e);const v=getVal(e,realIdx);return <div key={v+'-'+idx} onClick={()=>{onChange(v);setOpen(false);setQ('');}} style={{padding:'6px 10px',fontSize:11,color:v===value?'#c6a34e':'#d4d0c8',cursor:'pointer',background:v===value?'rgba(198,163,78,.06)':'transparent'}} onMouseEnter={ev=>ev.currentTarget.style.background='rgba(198,163,78,.08)'} onMouseLeave={ev=>ev.currentTarget.style.background=v===value?'rgba(198,163,78,.06)':'transparent'}>
+          <div style={{fontWeight:500}}>{getLabel(e)}</div>
+          <div style={{fontSize:9,color:'#5e5c56'}}>{e.niss||''} {e.fn?'· '+e.fn:''}</div>
+        </div>;})}
+        {filtered.length===0&&<div style={{padding:12,textAlign:'center',color:'#555',fontSize:10}}>Aucun employé trouvé</div>}
+        {emps.length>40&&!q&&<div style={{padding:6,textAlign:'center',color:'#5e5c56',fontSize:9}}>Tapez pour filtrer {emps.length} employés...</div>}
+      </div>
     </div>}
   </div>;
-}
+};
 
 function ClientWizard({onFinish,onCancel}){
   const [step,setStep]=useState(1);
@@ -6060,10 +6062,7 @@ function AppInner({ supabase, user, onLogout }) {
                   </div>
                   <div>
                     <label style={{fontSize:10,color:'#888',display:'block',marginBottom:4}}>Employé</label>
-                    <select value={demandeForm.empId} onChange={e=>setDemandeForm(p=>({...p,empId:e.target.value}))} style={fieldStyle}>
-                      <option value="">— Sélectionner —</option>
-                      {emps.map(e=><option key={e.id} value={e.id}>{e.first||e.fn||''} {e.last||e.ln||''}</option>)}
-                    </select>
+                    <EmployeeSearch emps={emps} value={demandeForm.empId} onChange={v=>setDemandeForm(p=>({...p,empId:v}))} valueKey="id" placeholder="— Sélectionner —" style={{width:'100%'}}/>
                   </div>
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
                     <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:4}}>Du</label><input type="date" value={demandeForm.dateDebut} onChange={e=>setDemandeForm(p=>({...p,dateDebut:e.target.value}))} style={fieldStyle}/></div>
@@ -6927,7 +6926,7 @@ const CalcInstant=({s,d})=>{
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Encodez les prestations → la fiche se calcule en temps réel</p>
       </div>
       <div style={{display:'flex',gap:8,alignItems:'center'}}>
-        <SearchableClientSelect clients={clients} value={selClient} onChange={v=>setSelClient(v)} style={{minWidth:200}}/>
+        <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="name" style={{minWidth:200}}/>
         <select value={selMonth} onChange={e=>setSelMonth(+e.target.value)} style={{padding:'8px 12px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,color:'#e5e5e5',fontSize:12,fontFamily:'inherit'}}>
           {mois.map((m,i)=><option key={i} value={i}>{m}</option>)}
         </select>
@@ -8448,10 +8447,7 @@ const ContratGenerator=({s,d,user})=>{
       </div>
       <div>
         <div style={{fontSize:10,color:'#888',marginBottom:4}}>Travailleur</div>
-        <select value={selEmp||''} onChange={e=>setSelEmp(e.target.value)} disabled={!selClient} style={{width:'100%',padding:'10px',background:'#090c16',border:'1px solid rgba(139,115,60,.2)',borderRadius:8,color:selClient?'#e5e5e5':'#555',fontSize:12,fontFamily:'inherit'}}>
-          <option value="">Selectionnez un employe</option>
-          {cl&&(cl.emps||[]).map((e,i)=><option key={i} value={e.id}>{(e.first||e.fn||'')+' '+(e.last||e.ln||'')}</option>)}
-        </select>
+        <EmployeeSearch emps={cl?(cl.emps||[]):[]} value={selEmp||''} onChange={v=>setSelEmp(v)} valueKey="id" placeholder="Selectionnez un employe" style={{width:'100%'}}/>
       </div>
       <div>
         <div style={{fontSize:10,color:'#888',marginBottom:4}}>Commission Paritaire</div>
@@ -10218,9 +10214,7 @@ const PortailEmploye=({s})=>{
       <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:0}}>👤 Portail Employe</h2>
       <div style={{display:'flex',gap:6}}>
         <ClientSearch clients={clients} value={selClient} onChange={v=>{setSelClient(v);setSelEmp(0);}} valueKey="index"/>
-        <select value={selEmp} onChange={e=>setSelEmp(+e.target.value)} style={{padding:'6px 10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:10,fontFamily:'inherit'}}>
-          {(cl.emps||[]).map((e,i)=><option key={i} value={i}>{(e.first||'')+' '+(e.last||'')}</option>)}
-        </select>
+        <EmployeeSearch emps={cl.emps||[]} value={selEmp} onChange={v=>setSelEmp(v)} valueKey="index" style={{minWidth:160}}/>
         <div style={{padding:'6px 12px',borderRadius:6,background:'rgba(234,179,8,.1)',border:'1px solid rgba(234,179,8,.2)',color:'#eab308',fontSize:10,fontWeight:600}}>MODE PREVIEW</div>
       </div>
     </div>
@@ -10413,10 +10407,7 @@ const DashboardClient=({s,d})=>{
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
           <div>
             <div style={{fontSize:9,color:'#888',marginBottom:3}}>Employe *</div>
-            <select value={absForm.empId} onChange={e=>setAbsForm(p=>({...p,empId:e.target.value}))} style={iS}>
-              <option value="">Choisir...</option>
-              {emps.map(e2=><option key={e2.id} value={e2.id}>{(e2.first||e2.fn||'')+' '+(e2.last||e2.ln||'')}</option>)}
-            </select>
+            <EmployeeSearch emps={emps} value={absForm.empId} onChange={v=>setAbsForm(p=>({...p,empId:v}))} valueKey="id" placeholder="Choisir..." style={{width:'100%'}}/>
           </div>
           <div>
             <div style={{fontSize:9,color:'#888',marginBottom:3}}>Type *</div>
@@ -11459,7 +11450,7 @@ const GestionDelegations=({s})=>{
     {showAdd&&<div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,.6)',zIndex:999,display:'flex',alignItems:'center',justifyContent:'center'}} onClick={()=>setShowAdd(false)}>
       <div onClick={e=>e.stopPropagation()} style={{background:'#0d1117',border:'1px solid rgba(198,163,78,.2)',borderRadius:16,padding:24,width:400}}>
         <h3 style={{fontSize:16,fontWeight:700,color:'#c6a34e',marginBottom:14}}>Nouveau delegue</h3>
-        <div style={{marginBottom:10}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Employe</label><select value={newDel.empIndex} onChange={e=>setNewDel(p=>({...p,empIndex:+e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>{emps.map((e,i)=><option key={i} value={i}>{(e.first||'')} {(e.last||'')}</option>)}</select></div>
+        <div style={{marginBottom:10}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Employe</label><EmployeeSearch emps={emps} value={newDel.empIndex} onChange={v=>setNewDel(p=>({...p,empIndex:+v}))} valueKey="index" style={{width:'100%'}}/></div>
         <div style={{marginBottom:10}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Syndicat</label><div style={{display:'flex',gap:4}}>{syndicats.map(s=><button key={s.id} onClick={()=>setNewDel(p=>({...p,syndicat:s.id}))} style={{flex:1,padding:'8px',borderRadius:6,border:newDel.syndicat===s.id?'1px solid '+s.color:'1px solid rgba(255,255,255,.05)',background:newDel.syndicat===s.id?s.color+'10':'transparent',color:newDel.syndicat===s.id?s.color:'#888',fontSize:10,cursor:'pointer'}}>{s.icon} {s.id}</button>)}</div></div>
         <div style={{marginBottom:10}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Mandat</label><select value={newDel.mandat} onChange={e=>setNewDel(p=>({...p,mandat:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>{mandats.map(m=><option key={m.id} value={m.id}>{m.label}</option>)}</select></div>
         <div style={{marginBottom:14}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Credit heures/sem</label><input type="number" value={newDel.creditHeures} onChange={e=>setNewDel(p=>({...p,creditHeures:+e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}/></div>
@@ -11973,7 +11964,7 @@ const GenDocsJuridiques=({s,d})=>{
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Client</label>
             <ClientSearch clients={clients} value={selClient} onChange={v=>setSelClient(v)} valueKey="index" style={{width:'100%'}}/></div>
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Employe</label>
-            <select value={formData.empIndex} onChange={e=>setFormData(p=>({...p,empIndex:+e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>{emps.map((e,i)=><option key={i} value={i}>{(e.first||'')} {(e.last||'')}</option>)}</select></div>
+            <EmployeeSearch emps={emps} value={formData.empIndex} onChange={v=>setFormData(p=>({...p,empIndex:+v}))} valueKey="index" style={{width:'100%'}}/></div>
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Date</label>
             <input type="date" value={formData.date} onChange={e=>setFormData(p=>({...p,date:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}/></div>
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Delai</label>
@@ -13936,10 +13927,7 @@ const GestionPrimes=({s,d})=>{
         </div>
         <div style={{marginBottom:10}}>
           <label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Beneficiaire</label>
-          <select value={newPrime.empId} onChange={e=>setNewPrime(p=>({...p,empId:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
-            <option value="all">Tous les employes ({emps.length})</option>
-            {emps.map((e,i)=><option key={i} value={(e.first||e.fn||'')+(e.last||e.ln||'')}>{(e.first||e.fn||'')} {(e.last||e.ln||'')}</option>)}
-          </select>
+          <EmployeeSearch emps={emps} value={newPrime.empId} onChange={v=>setNewPrime(p=>({...p,empId:v}))} valueKey="name" allOption={'Tous les employes ('+emps.length+')'} style={{width:'100%'}}/>
         </div>
         <div style={{display:'flex',gap:8,marginTop:14}}>
           <button onClick={addPrime} style={{flex:1,padding:'10px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:12,cursor:'pointer'}}>Valider</button>
@@ -15806,10 +15794,7 @@ const SimuLicenciement=({s})=>{
         <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Configuration</div>
         <div style={{marginBottom:12}}>
           <label style={{fontSize:10,color:'#888',display:'block',marginBottom:4}}>Travailleur</label>
-          <select value={selEmp||''} onChange={e=>setSelEmp(e.target.value)} style={{width:'100%',padding:'10px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,color:'#e5e5e5',fontSize:12,fontFamily:'inherit'}}>
-            <option value="">-- Selectionner --</option>
-            {allEmps.map((e,i)=><option key={i} value={(e.first||e.fn||'')+(e.last||e.ln||'')+(e._client)}>{(e.first||e.fn||'')} {(e.last||e.ln||'')} — {e._client}</option>)}
-          </select>
+          <EmployeeSearch emps={allEmps} value={selEmp||''} onChange={v=>setSelEmp(v)} valueKey="name" showClient placeholder="-- Selectionner --" style={{width:'100%'}}/>
         </div>
         <div style={{marginBottom:12}}>
           <label style={{fontSize:10,color:'#888',display:'block',marginBottom:4}}>Initiative</label>
