@@ -13137,7 +13137,7 @@ const BaremesPPOfficiel=({s})=>{
 
     try{
       safeLS.set('aureus_pp_lastcheck',Date.now().toString());
-      safeLS.set('aureus_pp_history',JSON.stringify([entry,...(()=>{try{return JSON.parse(safeLS.get('aureus_pp_history'))}catch(e){return null}})()||[]).slice(0,29)]));
+      safeLS.set('aureus_pp_history',JSON.stringify([entry,...((()=>{try{return JSON.parse(safeLS.get('aureus_pp_history'))}catch(e){return null}})()||[])].slice(0,30)));
     }catch(e){}
   };
 
