@@ -5107,7 +5107,7 @@ function AppInner({ supabase, user, onLogout }) {
     {id:"planabs",l:"Planificateur Absences",i:"📅"},
     {id:"dashrh",l:"Dashboard RH",i:"👥"},
     {id:"budget",l:"Budget Previsionnel",i:"💰"},
-    {id:"echeancier",l:"Echeancier Paiements",i:"📆"},
+    {id:"echeancierdetail",l:"Echeancier Detail",i:"📆"},
     {id:"facturation",l:"Facturation",i:"🧾"},
     {id:"validation",l:"Validation Pre-Paie",i:"✅"},
     {id:"exportbatch",l:"Export Batch",i:"📦"},
@@ -14808,6 +14808,106 @@ const ReportingAvance=({s})=>{
   </div>;
 };
 
+// ═══ TABLEAU DE BORD DIRECTION ═══
+const TableauDirection=({s})=>{
+  const clients=s.clients||[];const emps=clients.flatMap(c=>c.emps||[]);const n=emps.length;
+  const mb=emps.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||0)),0);
+  const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+  const coutTotal=mb*(1+TX_ONSS_E);const coutAnnuel=coutTotal*12;
+  const [tab,setTab]=useState("kpi");
+  return <div style={{padding:24}}>
+    <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>🎯 Tableau de Bord Direction</h2>
+    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>Vue strategique — Indicateurs cles RH et financiers</p>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:16}}>
+      {[{l:'Effectif total',v:n,c:'#c6a34e'},{l:'Masse salariale brute/mois',v:fmt(mb)+' €',c:'#60a5fa'},{l:'Cout employeur/mois',v:fmt(coutTotal)+' €',c:'#f87171'},{l:'Cout annuel total',v:fmt(coutAnnuel)+' €',c:'#4ade80'}].map((k,i)=>
+        <div key={i} style={{padding:14,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid '+k.c+'20',borderRadius:12,textAlign:'center'}}>
+          <div style={{fontSize:18,fontWeight:700,color:k.c}}>{k.v}</div>
+          <div style={{fontSize:9,color:'#888',marginTop:4}}>{k.l}</div>
+        </div>)}
+    </div>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>{[{v:'kpi',l:'KPI'},{v:'repartition',l:'Repartition'},{v:'projections',l:'Projections'},{v:'risques',l:'Risques'}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}</div>
+    {tab==='kpi'&&<div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
+      <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Indicateurs Cles</div>
+      {[{l:'Cout moyen par employe/mois',v:fmt(n?coutTotal/n:0)+' €',c:'#c6a34e'},{l:'Ratio ONSS/brut',v:(TX_ONSS_E*100).toFixed(2)+'%',c:'#f87171'},{l:'Estimation precompte pro/mois',v:fmt(emps.reduce((a,e)=>a+quickPP(+(e.monthlySalary||e.gross||0)),0))+' €',c:'#fb923c'},{l:'Budget formation (2% masse)',v:fmt(coutAnnuel*0.02)+' €/an',c:'#a78bfa'},{l:'Provision pecule vacances',v:fmt(mb*12*0.1447)+' €/an',c:'#4ade80'},{l:'Provision 13eme mois',v:fmt(mb)+' €',c:'#60a5fa'}].map((r,i)=>
+        <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}><span style={{color:'#e8e6e0',fontSize:12}}>{r.l}</span><span style={{color:r.c,fontWeight:600}}>{r.v}</span></div>)}
+    </div>}
+    {tab==='repartition'&&<div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
+      <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Repartition par client</div>
+      {clients.map((c,i)=>{const ce=(c.emps||[]);const cb=ce.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||0)),0);return <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+        <span style={{color:'#e8e6e0',fontSize:12}}>{c.name||'Client '+(i+1)} ({ce.length} emp.)</span>
+        <span style={{color:'#c6a34e',fontWeight:600}}>{fmt(cb*(1+TX_ONSS_E))} €/mois</span></div>;})}
+    </div>}
+    {tab==='projections'&&<div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
+      <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Projections annuelles</div>
+      {[{l:'Masse salariale brute annuelle',v:fmt(mb*12)+' €'},{l:'Cotisations ONSS annuelles',v:fmt(mb*12*(TX_ONSS_W+TX_ONSS_E))+' €'},{l:'Precompte pro annuel (est.)',v:fmt(emps.reduce((a,e)=>a+quickPP(+(e.monthlySalary||e.gross||0)),0)*12)+' €'},{l:'Pecule vacances total',v:fmt(mb*12*0.1447)+' €'},{l:'13eme mois total',v:fmt(mb)+' €'},{l:'COUT TOTAL ANNUEL',v:fmt(coutAnnuel+mb*12*0.1447+mb)+' €'}].map((r,i)=>
+        <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:i===5?'2px solid rgba(198,163,78,.3)':'1px solid rgba(255,255,255,.03)',fontWeight:i===5?700:400}}><span style={{color:'#e8e6e0',fontSize:12}}>{r.l}</span><span style={{color:'#c6a34e',fontWeight:600}}>{r.v}</span></div>)}
+    </div>}
+    {tab==='risques'&&<div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
+      <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Points d'attention</div>
+      {[{t:'Conformite ONSS',d:'Verifier declarations trimestrielles DmfA et paiements provisions mensuelles.',c:n>0?'#4ade80':'#888'},{t:'Indexation salariale',d:'Surveiller index sante et conventions sectorielles pour ajustements.',c:'#fb923c'},{t:'Droit social',d:'Contrats, reglements de travail, registre du personnel a jour.',c:'#60a5fa'},{t:'Bien-etre au travail',d:'Plan global de prevention, SEPP, medecine du travail.',c:'#a78bfa'}].map((r,i)=>
+        <div key={i} style={{padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}><div style={{display:'flex',alignItems:'center',gap:8}}><div style={{width:8,height:8,borderRadius:'50%',background:r.c}}/><b style={{color:'#e8e6e0',fontSize:12}}>{r.t}</b></div><div style={{fontSize:10.5,color:'#9e9b93',marginTop:4,marginLeft:16}}>{r.d}</div></div>)}
+    </div>}
+  </div>;
+};
+
+// ═══ CALCULATEUR PRIMES & BONUS ═══
+const PrimeCalculator=({s,d})=>{
+  const clients=s.clients||[];const emps=clients.flatMap(c=>c.emps||[]);
+  const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+  const [tab,setTab]=useState("calc");
+  const [primeType,setPrimeType]=useState("resultat");
+  const [montant,setMontant]=useState(1000);
+  const brut=+montant||0;
+  const onssW=Math.round(brut*TX_ONSS_W*100)/100;
+  const onssE=Math.round(brut*TX_ONSS_E*100)/100;
+  const pp=quickPP(brut);
+  const net=Math.round((brut-onssW-pp)*100)/100;
+  const coutTotal=brut+onssE;
+  return <div style={{padding:24}}>
+    <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>🎁 Primes & Bonus</h2>
+    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>Simulateur de primes — Cout employeur et net employe</p>
+    <div style={{display:'flex',gap:6,marginBottom:16}}>{[{v:'calc',l:'Simulateur'},{v:'types',l:'Types de primes'},{v:'collectif',l:'Bonus CCT 90'},{v:'legal',l:'Cadre legal'}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}</div>
+    {tab==='calc'&&<div>
+      <div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)',marginBottom:16}}>
+        <div style={{display:'flex',gap:16,alignItems:'center',marginBottom:16,flexWrap:'wrap'}}>
+          <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:4}}>Type de prime</label>
+            <select value={primeType} onChange={e=>setPrimeType(e.target.value)} style={{padding:'8px 12px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'#0d1117',color:'#e8e6e0',fontSize:12,fontFamily:'inherit'}}>
+              <option value="resultat">Prime de resultat</option><option value="fin_annee">Prime de fin d'annee</option><option value="anciennete">Prime d'anciennete</option><option value="exceptionnelle">Prime exceptionnelle</option>
+            </select></div>
+          <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:4}}>Montant brut (EUR)</label>
+            <input type="number" value={montant} onChange={e=>setMontant(e.target.value)} style={{padding:'8px 12px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'#0d1117',color:'#e8e6e0',fontSize:14,fontFamily:'inherit',width:140}}/></div>
+        </div>
+        <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Decomposition</div>
+        {[{l:'Montant brut prime',v:fmt(brut)+' €',c:'#c6a34e'},{l:'ONSS travailleur (13,07%)',v:'- '+fmt(onssW)+' €',c:'#f87171'},{l:'Imposable',v:fmt(brut-onssW)+' €',c:'#e8e6e0'},{l:'Precompte professionnel (est.)',v:'- '+fmt(pp)+' €',c:'#fb923c'},{l:'NET employe',v:fmt(net)+' €',c:'#4ade80'},{l:'ONSS employeur (25,07%)',v:fmt(onssE)+' €',c:'#f87171'},{l:'COUT TOTAL EMPLOYEUR',v:fmt(coutTotal)+' €',c:'#c6a34e'}].map((r,i)=>
+          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:i===4||i===6?'2px solid rgba(198,163,78,.3)':'1px solid rgba(255,255,255,.03)',fontWeight:i===4||i===6?700:400}}><span style={{color:'#e8e6e0',fontSize:12}}>{r.l}</span><span style={{color:r.c,fontWeight:600}}>{r.v}</span></div>)}
+        <div style={{marginTop:12,padding:12,background:'rgba(198,163,78,.06)',borderRadius:8}}>
+          <div style={{fontSize:11,color:'#c6a34e'}}>Ratio net/cout: <b>{coutTotal>0?(net/coutTotal*100).toFixed(1):'0'}%</b> — Pour 1 EUR de cout, l'employe recoit {coutTotal>0?(net/coutTotal).toFixed(2):'0'} EUR net</div>
+        </div>
+      </div>
+      {emps.length>0&&<div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
+        <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Impact si distribue a tous ({emps.length} employes)</div>
+        {[{l:'Budget total brut',v:fmt(brut*emps.length)+' €'},{l:'Cout total employeur',v:fmt(coutTotal*emps.length)+' €'},{l:'Net total distribue',v:fmt(net*emps.length)+' €'}].map((r,i)=>
+          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}><span style={{color:'#e8e6e0',fontSize:12}}>{r.l}</span><span style={{color:'#c6a34e',fontWeight:600}}>{r.v}</span></div>)}
+      </div>}
+    </div>}
+    {tab==='types'&&<div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
+      <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Types de primes en Belgique</div>
+      {[{t:'Prime de resultat (CCT 90)',d:'Max 3.948 EUR (2024). Cotisation speciale 33% employeur + 13,07% travailleur. Pas de precompte.',c:'#4ade80'},{t:'13eme mois / Prime de fin d\'annee',d:'Soumis integralement aux cotisations ONSS et au precompte professionnel. Souvent prevu par CCT sectorielle.',c:'#60a5fa'},{t:'Prime exceptionnelle / Bonus',d:'Regime ONSS + PP standard. Cout eleve pour l\'employeur mais flexibilite totale.',c:'#c6a34e'},{t:'Warrants / Stock options',d:'Regime fiscal specifique. Imposition forfaitaire a l\'attribution. Pas de cotisations ONSS.',c:'#a78bfa'},{t:'Cheques-repas',d:'Exonere ONSS et fiscal si conditions respectees (max 8 EUR/jour, part patronale max 6,91 EUR).',c:'#fb923c'},{t:'Eco-cheques',d:'Max 250 EUR/an. Exonere ONSS et impot si conditions CCT respectees.',c:'#22c55e'}].map((r,i)=>
+        <div key={i} style={{padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}><b style={{color:r.c,fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:'#9e9b93',marginTop:4}}>{r.d}</div></div>)}
+    </div>}
+    {tab==='collectif'&&<div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
+      <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Bonus CCT n° 90 — Avantages non recurrents</div>
+      {[{t:'Plafond 2024',d:'3.948 EUR brut par travailleur par an.'},{t:'Cotisation speciale employeur',d:'33% sur le montant (au lieu de 25,07% ONSS standard).'},{t:'Cotisation travailleur',d:'13,07% retenue ONSS standard.'},{t:'Precompte',d:'Aucun precompte professionnel.'},{t:'Condition',d:'Objectifs collectifs mesurables, transparents. Plan bonus depose au SPF ETCS.'},{t:'Procedure',d:'Acte d\'adhesion ou CCT d\'entreprise. Periode de reference: 3 mois minimum.'}].map((r,i)=>
+        <div key={i} style={{padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}><b style={{color:'#c6a34e',fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:'#9e9b93',marginTop:2}}>{r.d}</div></div>)}
+    </div>}
+    {tab==='legal'&&<div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
+      <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Cadre legal</div>
+      {[{t:'Loi 21/12/2007',d:'Avantages non recurrents lies aux resultats. Base CCT 90.'},{t:'CCT n° 90 du 20/12/2007',d:'CNT — Convention collective cadrant les bonus collectifs.'},{t:'AR 25/08/2012',d:'Warrants — Regime fiscal a l\'attribution.'},{t:'AR 12/10/2010',d:'Cheques-repas electroniques — Conditions d\'exoneration.'}].map((r,i)=>
+        <div key={i} style={{padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}><b style={{color:'#c6a34e',fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:'#9e9b93',marginTop:2}}>{r.d}</div></div>)}
+    </div>}
+  </div>;
+};
+
 // ═══ 3. HUB INTÉGRATIONS — API ONSS, Belcotax, Banque ═══
 const IntegrationsHub=({s,supabase})=>{
   const [configs,setConfigs]=useState({
@@ -18814,7 +18914,7 @@ const AutomationHub=({s,d})=>{
       case'exportcompta':return <ExportCompta s={s}/>;
       case'audittrail':return <AuditTrail s={s} user={user}/>;
       case'simembauche':return <SimulateurEmbauche s={s}/>;
-      case'echeancier':return <EcheancierPaiements s={s}/>;
+      case'echeancierdetail':return <EcheancierPaiements s={s}/>;
       case'simutp':return <SimuTempsPartiel s={s}/>;
       case'delegations':return <GestionDelegations s={s}/>;
       case'chargessociales':return <TableauChargesSociales s={s}/>;
