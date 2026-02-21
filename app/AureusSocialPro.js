@@ -14720,8 +14720,27 @@ const PortailClientSS=({s,d})=>{
           <div style={{fontSize:10,color:'#888'}}>{p.emps} fiche{p.emps>1?'s':''} | Brut: {f2(p.brut)} | Net: {f2(p.net)}</div>
         </div>
         <div style={{display:'flex',gap:6}}>
-          <button style={{padding:'5px 10px',borderRadius:6,border:'none',background:'rgba(198,163,78,.08)',color:'#c6a34e',fontSize:10,cursor:'pointer'}}>📥 PDF</button>
-          <button style={{padding:'5px 10px',borderRadius:6,border:'none',background:'rgba(34,197,94,.08)',color:'#22c55e',fontSize:10,cursor:'pointer'}}>👁 Voir</button>
+          <button onClick={()=>{emps.forEach(e=>generatePayslipPDF&&generatePayslipPDF(e,co));}} style={{padding:'5px 10px',borderRadius:6,border:'none',background:'rgba(198,163,78,.08)',color:'#c6a34e',fontSize:10,cursor:'pointer'}}>📥 PDF</button>
+          <button onClick={()=>{
+            const moisIdx=mois.indexOf(p.month);
+            let html='<!DOCTYPE html><html><head><meta charset="utf-8"><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:11px;padding:30px;max-width:900px;margin:auto;color:#333}.header{text-align:center;border-bottom:3px solid #c6a34e;padding-bottom:15px;margin-bottom:20px}.logo{font-size:20px;font-weight:800;color:#c6a34e}table{width:100%;border-collapse:collapse;margin:10px 0}th{background:#f0ece3;padding:6px 8px;font-size:9px;text-align:left}td{padding:5px 8px;border-bottom:1px solid #eee;font-size:10px}.r{text-align:right;font-family:monospace}.total{background:#f8f7f4;font-weight:700}@media print{button{display:none!important}}</style></head><body>';
+            html+='<div class="header"><div class="logo">'+(co.name||'Entreprise')+'</div><div style="font-size:10px;color:#888">'+(co.vat||'')+'</div><div style="font-size:12px;margin-top:8px;font-weight:600">Fiches de paie — '+p.month+' '+p.year+'</div></div>';
+            html+='<table><tr><th>Nom</th><th>Fonction</th><th>Contrat</th><th class="r">Brut</th><th class="r">ONSS 13,07%</th><th class="r">PP</th><th class="r">Net</th><th class="r">Cout empl.</th></tr>';
+            let tBrut=0,tNet=0,tCout=0;
+            emps.forEach(e=>{
+              const br=+(e.monthlySalary||e.gross||0);
+              const ow=Math.round(br*0.1307*100)/100;
+              const imp=br-ow;
+              const pp=Math.round(imp*0.2717*100)/100;
+              const net=Math.round((imp-pp)*100)/100;
+              const cout=Math.round(br*1.2507*100)/100;
+              tBrut+=br;tNet+=net;tCout+=cout;
+              html+='<tr><td>'+(e.first||e.fn||'')+' '+(e.last||e.ln||'')+'</td><td>'+(e.function||e.job||'-')+'</td><td>'+(e.contractType||'CDI')+'</td><td class="r">'+f2(br)+'</td><td class="r">'+f2(ow)+'</td><td class="r">'+f2(pp)+'</td><td class="r">'+f2(net)+'</td><td class="r">'+f2(cout)+'</td></tr>';
+            });
+            html+='<tr class="total"><td colspan="3">TOTAL</td><td class="r">'+f2(tBrut)+'</td><td class="r">'+f2(Math.round(tBrut*0.1307*100)/100)+'</td><td class="r">-</td><td class="r">'+f2(tNet)+'</td><td class="r">'+f2(tCout)+'</td></tr></table>';
+            html+='<div style="margin-top:20px;text-align:center"><button onclick="window.print()" style="background:#c6a34e;color:#fff;border:none;padding:10px 30px;border-radius:6px;cursor:pointer;font-weight:700">Imprimer / PDF</button></div></body></html>';
+            previewHTML(html,'Fiches_'+p.month+'_'+p.year+'_'+(co.name||'').replace(/ /g,'_'));
+          }} style={{padding:'5px 10px',borderRadius:6,border:'none',background:'rgba(34,197,94,.08)',color:'#22c55e',fontSize:10,cursor:'pointer'}}>👁 Voir</button>
         </div>
       </div>)}
     </div>}
@@ -14744,16 +14763,18 @@ const PortailClientSS=({s,d})=>{
     {/* Documents */}
     {tab==='documents'&&<div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
-        {[{l:'Contrats de travail',i:'📋',count:emps.length},
-          {l:'Fiches de paie',i:'📄',count:emps.length*6},
-          {l:'Attestations',i:'📝',count:Math.ceil(emps.length/2)},
-          {l:'Declarations ONSS',i:'🏛',count:4},
-          {l:'Fiches fiscales 281.10',i:'🧾',count:emps.length},
-          {l:'Reglements de travail',i:'📖',count:1},
-        ].map((d,i)=><div key={i} style={{padding:16,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.08)',borderRadius:12,cursor:'pointer'}}>
-          <div style={{fontSize:24,marginBottom:6}}>{d.i}</div>
-          <div style={{fontSize:12,fontWeight:600,color:'#e5e5e5'}}>{d.l}</div>
-          <div style={{fontSize:10,color:'#888',marginTop:2}}>{d.count} document{d.count>1?'s':''}</div>
+        {[{l:'Contrats de travail',i:'📋',count:emps.length,action:()=>{emps.forEach(e=>{if(typeof generateDocHTML==='function'){const html=generateDocHTML({name:(e.first||'')+' '+(e.last||''),niss:e.niss,contractType:e.contractType||'CDI',fonction:e.function||'Employe',startDate:e.startDate,brut:+(e.monthlySalary||0),whWeek:e.whWeek||38,company:co},'contrat_travail');previewHTML(html,'Contrat_'+(e.first||'')+'_'+(e.last||''));}});}},
+          {l:'Fiches de paie',i:'📄',count:emps.length*6,action:()=>setTab('fiches')},
+          {l:'Attestations',i:'📝',count:Math.ceil(emps.length/2),action:()=>{emps.forEach(e=>{if(typeof generateAttestationEmploi==='function')generateAttestationEmploi(e,co);});}},
+          {l:'Declarations ONSS',i:'🏛',count:4,action:()=>{if(typeof generateDmfAXML==='function')generateDmfAXML(emps,co);}},
+          {l:'Fiches fiscales 281.10',i:'🧾',count:emps.length,action:()=>{if(typeof generateBelcotaxXML==='function')generateBelcotaxXML(emps,new Date().getFullYear(),co);}},
+          {l:'Reglements de travail',i:'📖',count:1,action:()=>{if(d)d({type:'NAV',page:'gendocsjur'});}},
+        ].map((doc,i)=><div key={i} onClick={doc.action} style={{padding:16,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.08)',borderRadius:12,cursor:'pointer',transition:'all .15s'}}
+          onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(198,163,78,.3)';e.currentTarget.style.transform='translateY(-2px)';}}
+          onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(198,163,78,.08)';e.currentTarget.style.transform='translateY(0)';}}>
+          <div style={{fontSize:24,marginBottom:6}}>{doc.i}</div>
+          <div style={{fontSize:12,fontWeight:600,color:'#e5e5e5'}}>{doc.l}</div>
+          <div style={{fontSize:10,color:'#888',marginTop:2}}>{doc.count} document{doc.count>1?'s':''}</div>
         </div>)}
       </div>
     </div>}
