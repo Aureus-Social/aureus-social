@@ -9660,6 +9660,7 @@ const Echeancier=({s})=>{
   const mois=['Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
   const month=now.getMonth();const year=now.getFullYear();
   const totalBrut=clients.reduce((a,c)=>a+(c.emps||[]).reduce((b,e)=>b+(+(e.monthlySalary||e.gross||0)),0),0);
+  const emps=clients.flatMap(c=>c.emps||[]);
 
   const echeances=[
     {day:5,label:'ONSS provisoire',amount:Math.round(totalBrut*(TX_ONSS_W+TX_ONSS_E)),cat:'ONSS',icon:'🏛',dest:'ONSS via portail securite sociale'},
