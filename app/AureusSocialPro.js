@@ -161,8 +161,8 @@ var LOIS_BELGES = {
   // ═══ CONTRATS ═══
   contrats: {
     periodeEssai: { supprimee: true, exception: 'travail etudiant/interim/occupation temporaire' },
-    clauseNonConcurrence: { dureeMax: 12, brut_min: 42441, indemniteMin: 0.50 },
-    ecolecholage: { dureeMax: 36, brut_min: 39422, formationMin: 80 },
+    clauseNonConcurrence: { dureeMax: 12, brut_min: 44447, brut_mid: 88895, indemniteMin: 0.50 },
+    ecolecholage: { dureeMax: 36, brut_min: 44447, formationMin: 80 },
   },
 
   // ═══ SEUILS SOCIAUX ═══
@@ -228,6 +228,90 @@ var LOIS_BELGES = {
     { id: 'refli', nom: 'Refli.be', url: 'https://refli.be/fr/documentation/computation/tax', type: 'Reference technique' },
   ],
 };
+
+// ═══════════════════════════════════════════════════════════════════
+// MOTEUR DE VEILLE LÉGALE AUTOMATIQUE — Historique + Auto-détection
+// ═══════════════════════════════════════════════════════════════════
+var LOIS_BELGES_HISTORIQUE = {
+  2024: {
+    cct90: { plafondONSS: 4020, plafondFiscal: 3496, cotisationPatronale: 0.33, cotisationTravailleur: 0.1307 },
+    chequesRepas: { valeurMax: 8.00, partPatronaleMax: 6.91, partTravailleurMin: 1.09, deductibilite: 2.00 },
+    seuils: { ecolage: 39353, nonConcurrenceBas: 39353, nonConcurrenceHaut: 78606, arbitrage: 78606, supplementChomTemp: 3946 },
+    teletravail: { forfaitBureau: 148.73, internet: 20, pc: 20, ecran: 5 },
+    rmmmg: { montant18: 1994.18 },
+    indemKm: { voiture: 0.4269, velo: 0.35 },
+    indexSante: { coeff: 2.0399 },
+    pp: { fraisProMax: 5520, quotiteExemptee1: 2887.55 },
+    source: 'MB 2023/2024 — SPF Finances / ONSS'
+  },
+  2025: {
+    cct90: { plafondONSS: 4164, plafondFiscal: 3622, cotisationPatronale: 0.33, cotisationTravailleur: 0.1307 },
+    chequesRepas: { valeurMax: 8.00, partPatronaleMax: 6.91, partTravailleurMin: 1.09, deductibilite: 2.00 },
+    seuils: { ecolage: 43106, nonConcurrenceBas: 43106, nonConcurrenceHaut: 86212, arbitrage: 86212, supplementChomTemp: 4149 },
+    teletravail: { forfaitBureau: 154.74, internet: 20, pc: 20, ecran: 5 },
+    rmmmg: { montant18: 2029.88 },
+    indemKm: { voiture: 0.4415, velo: 0.35 },
+    indexSante: { coeff: 2.0399 },
+    pp: { fraisProMax: 5750, quotiteExemptee1: 2920.86 },
+    source: 'MB 13/11/2024 + Instructions ONSS 2025/1'
+  },
+  2026: {
+    cct90: { plafondONSS: 4255, plafondFiscal: 3701, cotisationPatronale: 0.33, cotisationTravailleur: 0.1307 },
+    chequesRepas: { valeurMax: 10.00, partPatronaleMax: 8.91, partTravailleurMin: 1.09, deductibilite: 4.00 },
+    seuils: { ecolage: 44447, nonConcurrenceBas: 44447, nonConcurrenceHaut: 88895, arbitrage: 88895, supplementChomTemp: 4284 },
+    teletravail: { forfaitBureau: 157.83, internet: 20, pc: 20, ecran: 5 },
+    rmmmg: { montant18: 2070.48 },
+    indemKm: { voiture: 0.4415, velo: 0.35 },
+    indexSante: { coeff: 2.0399 },
+    pp: { fraisProMax: 6070, quotiteExemptee1: 2987.98 },
+    source: 'MB 13/11/2025 + AR 10/11/2025 + Loi 30/12/2025'
+  },
+};
+
+// Applique les valeurs d'une année donnée à LOIS_BELGES
+function applyLoisBelgesYear(year) {
+  var data = LOIS_BELGES_HISTORIQUE[year];
+  if (!data) return false;
+  LOIS_BELGES.chequesRepas.valeurFaciale.max = data.chequesRepas.valeurMax;
+  LOIS_BELGES.chequesRepas.partPatronale.max = data.chequesRepas.partPatronaleMax;
+  LOIS_BELGES.chequesRepas.partTravailleur.min = data.chequesRepas.partTravailleurMin;
+  LOIS_BELGES.fraisPropres.forfaitBureau.max = data.teletravail.forfaitBureau;
+  LOIS_BELGES.fraisPropres.teletravail.max = data.teletravail.forfaitBureau;
+  LOIS_BELGES.contrats.clauseNonConcurrence.brut_min = data.seuils.nonConcurrenceBas;
+  LOIS_BELGES.contrats.clauseNonConcurrence.brut_mid = data.seuils.nonConcurrenceHaut;
+  LOIS_BELGES.contrats.ecolecholage.brut_min = data.seuils.ecolage;
+  LOIS_BELGES.remuneration.RMMMG.montant18ans = data.rmmmg.montant18;
+  LOIS_BELGES.pp.fraisPro.salarie.max = data.pp.fraisProMax;
+  LOIS_BELGES.pp.quotiteExemptee.bareme1 = data.pp.quotiteExemptee1;
+  LOIS_BELGES.pp.quotiteExemptee.bareme2 = data.pp.quotiteExemptee1 * 2;
+  LOIS_BELGES._meta.annee = year;
+  LOIS_BELGES._meta.dateMAJ = new Date().toISOString().slice(0, 10);
+  LOIS_BELGES._meta.version = year + '.1.0';
+  return true;
+}
+
+function checkLoisBelgesOutdated() {
+  var currentYear = new Date().getFullYear();
+  var loisYear = LOIS_BELGES._meta.annee;
+  var result = { outdated: false, currentYear: currentYear, loisYear: loisYear, missing: [], warnings: [] };
+  if (loisYear < currentYear) {
+    result.outdated = true;
+    if (LOIS_BELGES_HISTORIQUE[currentYear]) {
+      result.warnings.push('Valeurs ' + currentYear + ' disponibles — application automatique possible.');
+    } else {
+      result.missing.push('Aucune donnee pour ' + currentYear + '. Mise a jour LOIS_BELGES_HISTORIQUE requise.');
+    }
+  }
+  return result;
+}
+
+// Auto-apply: si l'historique contient l'année courante et que LOIS_BELGES est en retard, on applique
+(function autoApplyLoisBelges() {
+  var y = new Date().getFullYear();
+  if (LOIS_BELGES_HISTORIQUE[y] && LOIS_BELGES._meta.annee < y) {
+    applyLoisBelgesYear(y);
+  }
+})();
 
 // Aliases courts pour accès rapide dans tout le code
 var LB=LOIS_BELGES;
@@ -5060,6 +5144,7 @@ function AppInner({ supabase, user, onLogout }) {
     {id:"portailclient",l:"Portail Client",i:"🌐"},
     {id:"reportingpro",l:"Reporting Pro",i:"📊"},
     {id:"integrations",l:"Integrations",i:"🔌"},
+    {id:"veillelegale",l:"Veille Legale",i:"⚖️"},
     {id:"absencespro",l:"Absences Pro",i:"🏖"},
     {id:"exportcomptapro",l:"Export Compta",i:"📒"},
     {id:"tableaudirection",l:"Tableau Direction",i:"🎯"},
@@ -14909,6 +14994,155 @@ const PrimeCalculator=({s,d})=>{
 };
 
 // ═══ 3. HUB INTÉGRATIONS — API ONSS, Belcotax, Banque ═══
+// ═══ VEILLE LÉGALE AUTOMATIQUE — Dashboard constantes + historique ═══
+const VeilleLegale=({s})=>{
+  const [tab,setTab]=useState('dashboard');
+  const [selYear,setSelYear]=useState(new Date().getFullYear());
+  const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+  const status=checkLoisBelgesOutdated();
+  const years=Object.keys(LOIS_BELGES_HISTORIQUE).map(Number).sort((a,b)=>b-a);
+  const currentData=LOIS_BELGES_HISTORIQUE[selYear];
+  const prevData=LOIS_BELGES_HISTORIQUE[selYear-1];
+  const diff=(cur,prev)=>{if(!prev||!cur)return null;const d=cur-prev;return d===0?null:d;};
+  const pctDiff=(cur,prev)=>{if(!prev||!cur||prev===0)return '';const p=((cur-prev)/prev*100).toFixed(1);return p>0?'(+'+p+'%)':'('+p+'%)';};
+
+  const allConstants=currentData?[
+    {cat:'CCT 90 — Bonus salarial',items:[
+      {l:'Plafond ONSS (brut)',v:currentData.cct90.plafondONSS,pv:prevData?.cct90?.plafondONSS,u:'EUR',src:'SPF Emploi + CNT'},
+      {l:'Plafond fiscal (net)',v:currentData.cct90.plafondFiscal,pv:prevData?.cct90?.plafondFiscal,u:'EUR',src:'SPF Finances'},
+      {l:'Cotisation patronale',v:(currentData.cct90.cotisationPatronale*100)+'%',pv:null,u:'',src:'ONSS',raw:true},
+    ]},
+    {cat:'Cheques-repas',items:[
+      {l:'Valeur faciale max',v:currentData.chequesRepas.valeurMax,pv:prevData?.chequesRepas?.valeurMax,u:'EUR',src:'AR 12/10/2010 mod.'},
+      {l:'Part patronale max',v:currentData.chequesRepas.partPatronaleMax,pv:prevData?.chequesRepas?.partPatronaleMax,u:'EUR',src:'AR 10/11/2025'},
+      {l:'Deductibilite fiscale',v:currentData.chequesRepas.deductibilite,pv:prevData?.chequesRepas?.deductibilite,u:'EUR/cheque',src:'Loi 30/12/2025'},
+    ]},
+    {cat:'Seuils contrats de travail',items:[
+      {l:'Clause ecolage (Art. 22bis)',v:currentData.seuils.ecolage,pv:prevData?.seuils?.ecolage,u:'EUR/an',src:'MB index salaires conv.'},
+      {l:'Non-concurrence bas (Art. 65)',v:currentData.seuils.nonConcurrenceBas,pv:prevData?.seuils?.nonConcurrenceBas,u:'EUR/an',src:'MB index salaires conv.'},
+      {l:'Non-concurrence haut',v:currentData.seuils.nonConcurrenceHaut,pv:prevData?.seuils?.nonConcurrenceHaut,u:'EUR/an',src:'MB index salaires conv.'},
+      {l:'Suppl. chomage temporaire',v:currentData.seuils.supplementChomTemp,pv:prevData?.seuils?.supplementChomTemp,u:'EUR/mois',src:'Art. 29 Loi 3/7/1978'},
+    ]},
+    {cat:'Teletravail & Frais',items:[
+      {l:'Forfait bureau mensuel',v:currentData.teletravail.forfaitBureau,pv:prevData?.teletravail?.forfaitBureau,u:'EUR/mois',src:'ONSS + Circ. 2021/C/20'},
+      {l:'Forfait internet prive',v:currentData.teletravail.internet,pv:prevData?.teletravail?.internet,u:'EUR/mois',src:'ONSS'},
+      {l:'Forfait PC prive',v:currentData.teletravail.pc,pv:prevData?.teletravail?.pc,u:'EUR/mois',src:'ONSS'},
+    ]},
+    {cat:'Remuneration',items:[
+      {l:'RMMMG (18 ans)',v:currentData.rmmmg.montant18,pv:prevData?.rmmmg?.montant18,u:'EUR/mois',src:'CNT — CCT 43/15'},
+      {l:'Indemnite km voiture',v:currentData.indemKm.voiture,pv:prevData?.indemKm?.voiture,u:'EUR/km',src:'AR annuel'},
+    ]},
+    {cat:'Precompte professionnel',items:[
+      {l:'Frais pro max (salarie)',v:currentData.pp.fraisProMax,pv:prevData?.pp?.fraisProMax,u:'EUR/an',src:'SPF Finances'},
+      {l:'Quotite exemptee (bar.1)',v:currentData.pp.quotiteExemptee1,pv:prevData?.pp?.quotiteExemptee1,u:'EUR/an',src:'SPF Finances'},
+    ]},
+  ]:[];
+
+  return <div style={{padding:24}}>
+    <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>⚖️ Veille Legale Automatique</h2>
+    <p style={{fontSize:12,color:'#888',margin:'0 0 16px'}}>Constantes legales indexees — Historique {years[years.length-1]}–{years[0]} — Auto-detection annuelle</p>
+
+    {/* Status banner */}
+    {status.outdated?<div style={{padding:'12px 16px',background:'rgba(239,68,68,.1)',border:'1px solid rgba(239,68,68,.3)',borderRadius:10,marginBottom:16,display:'flex',alignItems:'center',gap:10}}>
+      <span style={{fontSize:20}}>⚠️</span>
+      <div><div style={{fontSize:12,fontWeight:700,color:'#ef4444'}}>Constantes potentiellement obsoletes</div>
+        <div style={{fontSize:11,color:'#f87171'}}>{status.warnings.concat(status.missing).join(' ')}</div></div>
+    </div>:<div style={{padding:'12px 16px',background:'rgba(34,197,94,.06)',border:'1px solid rgba(34,197,94,.2)',borderRadius:10,marginBottom:16,display:'flex',alignItems:'center',gap:10}}>
+      <span style={{fontSize:20}}>✅</span>
+      <div style={{fontSize:12,color:'#4ade80',fontWeight:600}}>Toutes les constantes sont a jour pour {LOIS_BELGES._meta.annee} (MAJ: {LOIS_BELGES._meta.dateMAJ})</div>
+    </div>}
+
+    <div style={{display:'flex',gap:6,marginBottom:16,alignItems:'center'}}>
+      {[{v:'dashboard',l:'Dashboard'},{v:'comparaison',l:'Comparaison annees'},{v:'sources',l:'Sources officielles'},{v:'howto',l:'Comment mettre a jour'}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}
+      <div style={{marginLeft:'auto'}}>
+        <select value={selYear} onChange={e=>setSelYear(+e.target.value)} style={{padding:'6px 12px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'#0d1117',color:'#c6a34e',fontSize:12,fontFamily:'inherit',fontWeight:600}}>
+          {years.map(y=><option key={y} value={y}>{y}</option>)}
+        </select>
+      </div>
+    </div>
+
+    {tab==='dashboard'&&<div style={{display:'flex',flexDirection:'column',gap:16}}>
+      {allConstants.map((cat,ci)=><div key={ci} style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
+        <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:10}}>{cat.cat}</div>
+        {cat.items.map((r,i)=>{
+          const changed=!r.raw&&r.pv!=null&&r.v!==r.pv;
+          return <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'7px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <div><span style={{color:'#e8e6e0',fontSize:12}}>{r.l}</span><span style={{fontSize:9,color:'#5e5c56',marginLeft:8}}>({r.src})</span></div>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              {changed&&<span style={{fontSize:10,color:r.v>r.pv?'#4ade80':'#f87171'}}>{pctDiff(r.v,r.pv)}</span>}
+              <span style={{fontWeight:600,color:changed?'#4ade80':'#c6a34e',fontSize:13}}>{r.raw?r.v:(typeof r.v==='number'&&r.v>=100?fmt(r.v):r.v)} {!r.raw&&r.u}</span>
+            </div>
+          </div>;
+        })}
+      </div>)}
+    </div>}
+
+    {tab==='comparaison'&&<div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
+      <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Evolution {years[years.length-1]} → {years[0]}</div>
+      <div style={{overflowX:'auto'}}><table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
+        <thead><tr style={{borderBottom:'2px solid rgba(198,163,78,.2)'}}>
+          <th style={{textAlign:'left',padding:'6px 8px',color:'#888'}}>Constante</th>
+          {years.map(y=><th key={y} style={{textAlign:'right',padding:'6px 8px',color:y===new Date().getFullYear()?'#c6a34e':'#888',fontWeight:y===new Date().getFullYear()?700:400}}>{y}</th>)}
+        </tr></thead>
+        <tbody>
+          {[{l:'CCT 90 plafond ONSS',k:y=>LOIS_BELGES_HISTORIQUE[y]?.cct90?.plafondONSS},
+            {l:'CCT 90 plafond fiscal',k:y=>LOIS_BELGES_HISTORIQUE[y]?.cct90?.plafondFiscal},
+            {l:'CR valeur faciale',k:y=>LOIS_BELGES_HISTORIQUE[y]?.chequesRepas?.valeurMax},
+            {l:'CR part patronale',k:y=>LOIS_BELGES_HISTORIQUE[y]?.chequesRepas?.partPatronaleMax},
+            {l:'CR deductibilite',k:y=>LOIS_BELGES_HISTORIQUE[y]?.chequesRepas?.deductibilite},
+            {l:'Seuil ecolage',k:y=>LOIS_BELGES_HISTORIQUE[y]?.seuils?.ecolage},
+            {l:'Seuil non-concurrence',k:y=>LOIS_BELGES_HISTORIQUE[y]?.seuils?.nonConcurrenceBas},
+            {l:'Forfait teletravail',k:y=>LOIS_BELGES_HISTORIQUE[y]?.teletravail?.forfaitBureau},
+            {l:'RMMMG',k:y=>LOIS_BELGES_HISTORIQUE[y]?.rmmmg?.montant18},
+            {l:'Frais pro max PP',k:y=>LOIS_BELGES_HISTORIQUE[y]?.pp?.fraisProMax},
+          ].map((row,i)=><tr key={i} style={{borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+            <td style={{padding:'6px 8px',color:'#e8e6e0'}}>{row.l}</td>
+            {years.map(y=>{const v=row.k(y);const pv=row.k(y-1);const changed=pv&&v!==pv;return <td key={y} style={{textAlign:'right',padding:'6px 8px',color:changed?'#4ade80':'#9e9b93',fontWeight:y===new Date().getFullYear()?600:400}}>{v!=null?(v>=100?fmt(v):v):'-'}</td>;})}
+          </tr>)}
+        </tbody>
+      </table></div>
+    </div>}
+
+    {tab==='sources'&&<div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
+      <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Sources officielles a consulter chaque annee</div>
+      {[
+        {n:'SPF Emploi — Seuils remuneration',u:'https://emploi.belgique.be',d:'Publication annuelle (novembre N-1) des seuils indexes: ecolage, non-concurrence, arbitrage.',quand:'Novembre'},
+        {n:'SPF Emploi — Bonus CCT 90',u:'https://emploi.belgique.be',d:'Plafonds ONSS et fiscaux indexes annuellement.',quand:'Decembre/Janvier'},
+        {n:'ONSS — Instructions administratives',u:'https://www.socialsecurity.be',d:'Forfait teletravail, frais propres, taux cotisations. Mise a jour trimestrielle.',quand:'Mars (T1)'},
+        {n:'SPF Finances — Precompte professionnel',u:'https://finances.belgium.be',d:'Baremes PP, tranches, quotite exemptee, frais pro. Publication annuelle.',quand:'Decembre'},
+        {n:'CNT — RMMMG',u:'https://www.cnt-nar.be',d:'Revenu Minimum Mensuel Moyen Garanti. Negociation interprofessionnelle.',quand:'Selon AIP'},
+        {n:'Moniteur Belge',u:'https://www.ejustice.just.fgov.be',d:'Publication officielle de tous les AR et lois. Source definitive.',quand:'Continu'},
+        {n:'Statbel — Indice sante',u:'https://statbel.fgov.be',d:'Coefficient d\'indexation. Pivot pour indexation salariale.',quand:'Mensuel'},
+        {n:'Partena / Securex / Acerta',u:'https://www.partena-professional.be',d:'Infoflashes pratiques sur nouveaux montants. Excellent pour verification rapide.',quand:'Decembre/Janvier'},
+      ].map((r,i)=><div key={i} style={{padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <b style={{color:'#c6a34e',fontSize:12}}>{r.n}</b>
+          <span style={{fontSize:9,padding:'2px 8px',borderRadius:4,background:'rgba(96,165,250,.1)',color:'#60a5fa'}}>{r.quand}</span>
+        </div>
+        <div style={{fontSize:10.5,color:'#9e9b93',marginTop:3}}>{r.d}</div>
+      </div>)}
+    </div>}
+
+    {tab==='howto'&&<div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)'}}>
+      <div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>Procedure de mise a jour annuelle</div>
+      {[
+        {n:'1',t:'Novembre/Decembre N-1',d:'Le SPF Emploi publie les nouveaux seuils indexes (MB mi-novembre). Le SPF Finances publie les nouveaux baremes PP. Consulter Partena/Securex pour un resume.'},
+        {n:'2',t:'Ajouter l\'annee dans LOIS_BELGES_HISTORIQUE',d:'Copier le bloc de l\'annee precedente, modifier l\'annee et mettre a jour chaque valeur avec les montants publies. Toutes les valeurs indexees changent au 1er janvier.'},
+        {n:'3',t:'Le moteur applique automatiquement',d:'Au chargement de l\'application, la fonction autoApplyLoisBelges() detecte l\'annee courante et applique les valeurs correspondantes depuis l\'historique. Aucune autre modification n\'est necessaire dans le code.'},
+        {n:'4',t:'Verifier les documents juridiques',d:'Les 10 modeles de documents utilisent les constantes LOIS_BELGES dynamiquement. Mais les textes statiques dans les documents generes (articles de loi) doivent etre verifies manuellement si la legislation change (rare).'},
+        {n:'5',t:'Cas special: changement en cours d\'annee',d:'Si un montant change en cours d\'annee (ex: forfait teletravail indexe en mars), mettre a jour la valeur dans le bloc de l\'annee courante dans LOIS_BELGES_HISTORIQUE. Le moteur re-appliquera au prochain chargement.'},
+      ].map((r,i)=><div key={i} style={{display:'flex',gap:12,padding:'12px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+        <div style={{width:28,height:28,borderRadius:'50%',background:'rgba(198,163,78,.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:700,color:'#c6a34e',flexShrink:0}}>{r.n}</div>
+        <div><b style={{color:'#e8e6e0',fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:'#9e9b93',marginTop:3}}>{r.d}</div></div>
+      </div>)}
+      <div style={{marginTop:16,padding:12,background:'rgba(198,163,78,.06)',borderRadius:8}}>
+        <div style={{fontSize:11,color:'#c6a34e',fontWeight:600}}>Effort annuel: ~15 minutes</div>
+        <div style={{fontSize:10,color:'#9e9b93',marginTop:4}}>Copier le bloc annee, mettre a jour ~15 chiffres depuis les publications officielles, commit + push. Le reste est automatique.</div>
+      </div>
+    </div>}
+  </div>;
+};
+
 const IntegrationsHub=({s,supabase})=>{
   const [configs,setConfigs]=useState({
     onss:{enabled:false,endpoint:'https://api.socialsecurity.be/rest/dimona/v1',apiKey:'',lastSync:null,status:'disconnected'},
@@ -18950,6 +19184,7 @@ const AutomationHub=({s,d})=>{
       case'portailclient':return <PortailClientSS s={s} d={d}/>;
       case'reportingpro':return <ReportingAvance s={s}/>;
       case'integrations':return <IntegrationsHub s={s} supabase={supabase}/>;
+      case'veillelegale':return <VeilleLegale s={s}/>;
       case'fiduciaire':return <FiduciaireHub s={s} d={d}/>;
       case'simulicenciement':return <SimuLicenciement s={s}/>;
       case'couttotal':return <CoutTotalDash s={s}/>;
@@ -25556,13 +25791,34 @@ function TemplatesMod({s,d}){
 // Génération PDF côté client + envoi email en 1 clic
 // ═══════════════════════════════════════════════════════════
 
-function DocumentsJuridiquesMod({s,d}){const [tab,setTab]=useState("docs");const clients=s.clients||[];const co=clients[0]?.company||{};const coName=co.name||'[Nom societe]';const coVat=co.vat||'[BCE]';const coAddr=(co.address||'[adresse]')+' '+(co.zip||'')+' '+(co.city||'');const dateNow=new Date().toLocaleDateString('fr-BE');
+function DocumentsJuridiquesMod({s,d}){const [tab,setTab]=useState("docs");const clients=s.clients||[];const co=clients[0]?.company||{};const coName=co.name||'[Nom societe]';const coVat=co.vat||'[BCE]';const coAddr=(co.address||'[adresse]')+' '+(co.zip||'')+' '+(co.city||'');const dateNow=new Date().toLocaleDateString('fr-BE');const loisStatus=checkLoisBelgesOutdated();
 const docStyle='<!DOCTYPE html><html><head><meta charset="utf-8"><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Georgia,serif;font-size:12px;padding:50px 60px;max-width:800px;margin:auto;line-height:1.8;color:#222}h1{font-size:18px;text-align:center;margin:20px 0 10px;text-transform:uppercase;letter-spacing:2px;color:#333}h2{font-size:14px;margin:18px 0 8px;color:#444;border-bottom:1px solid #ddd;padding-bottom:4px}h3{font-size:12px;margin:12px 0 6px;color:#555}p{margin:8px 0;text-align:justify}.header{text-align:center;margin-bottom:30px;border-bottom:2px solid #c6a34e;padding-bottom:15px}.between{display:flex;justify-content:space-between;margin:15px 0;padding:12px;background:#f9f7f0;border-radius:4px}.art{margin:10px 0;padding:8px 0;border-bottom:1px solid #eee}.art b{color:#444}.sig{margin-top:40px;display:flex;justify-content:space-between}.sig div{width:45%;text-align:center}.footer{text-align:center;font-size:9px;color:#888;margin-top:40px;border-top:1px solid #eee;padding-top:10px}.print-btn{text-align:center;margin:15px}<button onclick="window.print()" style="background:#c6a34e;color:#fff;border:none;padding:10px 30px;border-radius:6px;cursor:pointer;font-weight:700">Imprimer / PDF</button>}@media print{.print-btn{display:none!important}}</style></head><body>';
 const docHeader='<div class="header"><div style="font-size:22px;font-weight:700;color:#c6a34e">'+coName+'</div><div style="font-size:10px;color:#888;margin-top:4px">'+coVat+' — '+coAddr+'</div></div>';
 const docFooter='<div class="sig"><div>Pour l\'employeur<br><br><br>____________________<br>'+coName+'</div><div>Le travailleur<br><br><br>____________________<br>[Nom prenom]</div></div><div class="footer">Document genere par Aureus Social Pro — '+dateNow+' — Confidentiel</div><div class="print-btn"><button onclick="window.print()" style="background:#c6a34e;color:#fff;border:none;padding:10px 30px;border-radius:6px;cursor:pointer;font-weight:700">Imprimer / PDF</button></div></body></html>';
 
 const genDoc=(type)=>{
   let h=docStyle+docHeader;
+  // ═══ VALEURS DYNAMIQUES — Lues depuis LOIS_BELGES (auto-appliqué par moteur veille légale) ═══
+  const Y=LOIS_BELGES._meta.annee;
+  const H=LOIS_BELGES_HISTORIQUE[Y]||LOIS_BELGES_HISTORIQUE[2026];
+  const f=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+  const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
+  // Chèques-repas
+  const crVal=H.chequesRepas.valeurMax;
+  const crPat=H.chequesRepas.partPatronaleMax;
+  const crTrav=H.chequesRepas.partTravailleurMin;
+  const crDeduct=H.chequesRepas.deductibilite;
+  // Seuils
+  const seuilEcolage=fi(H.seuils.ecolage);
+  const seuilNC=fi(H.seuils.nonConcurrenceBas);
+  const seuilNCHaut=fi(H.seuils.nonConcurrenceHaut);
+  // Télétravail
+  const forfaitTT=f(H.teletravail.forfaitBureau);
+  // CCT 90
+  const cct90ONSS=fi(H.cct90.plafondONSS);
+  const cct90Fiscal=fi(H.cct90.plafondFiscal);
+  const cct90CoutEmpl=f(H.cct90.plafondONSS*(1+H.cct90.cotisationPatronale));
+  const cct90Net=f(H.cct90.plafondONSS*(1-H.cct90.cotisationTravailleur));
   if(type==='rgpd_st'){
     h+='<h1>Convention de sous-traitance RGPD</h1><p style="text-align:center;color:#888">Reglement (UE) 2016/679 — Article 28</p>';
     h+='<h2>ENTRE LES PARTIES</h2>';
@@ -25583,7 +25839,7 @@ const genDoc=(type)=>{
     h+='<h2>Article 2 — Definitions</h2><p><b>Teletravail structurel :</b> Organisation reguliere du travail en dehors des locaux de l\'entreprise, selon un horaire convenu par avenant au contrat de travail (CCT n° 85).</p><p><b>Teletravail occasionnel :</b> Execution ponctuelle du travail a distance, en cas de force majeure ou pour raisons personnelles, moyennant accord prealable (Loi 5/3/2017).</p>';
     h+='<h2>Article 3 — Conditions d\'eligibilite</h2><p>Le teletravail est accessible aux travailleurs : disposant d\'un contrat de travail depuis au moins 3 mois, dont les fonctions sont compatibles avec le travail a distance, disposant d\'un espace de travail adequat a domicile, ayant recu l\'accord de leur responsable hierarchique.</p>';
     h+='<h2>Article 4 — Modalites pratiques</h2><p><b>Frequence :</b> Maximum [2-3] jours par semaine en teletravail structurel. Le teletravail occasionnel est soumis a accord prealable du responsable.</p><p><b>Horaires :</b> Le travailleur en teletravail respecte l\'horaire de travail applicable dans l\'entreprise. Il reste joignable pendant les heures de travail.</p><p><b>Lieu :</b> Le domicile du travailleur ou tout autre lieu convenu avec l\'employeur.</p><p><b>Enregistrement :</b> Le travailleur enregistre ses jours de teletravail dans le systeme de gestion des presences.</p>';
-    h+='<h2>Article 5 — Equipement et frais</h2><p>L\'employeur fournit ou met a disposition : un ordinateur portable avec les logiciels necessaires, un acces VPN securise au reseau de l\'entreprise, un telephone professionnel ou un abonnement telephonique.</p><p>L\'employeur verse une indemnite forfaitaire de teletravail de 157,83 EUR/mois (montant ONSS/fiscal 2024 a ajuster annuellement) couvrant les frais de bureau, chauffage, electricite et internet.</p>';
+    h+='<h2>Article 5 — Equipement et frais</h2><p>L\'employeur fournit ou met a disposition : un ordinateur portable avec les logiciels necessaires, un acces VPN securise au reseau de l\'entreprise, un telephone professionnel ou un abonnement telephonique.</p><p>L\'employeur verse une indemnite forfaitaire de teletravail de '+forfaitTT+' EUR/mois (montant ONSS/fiscal '+Y+', indexe automatiquement) couvrant les frais de bureau, chauffage, electricite et internet.</p>';
     h+='<h2>Article 6 — Protection des donnees et confidentialite</h2><p>Le travailleur s\'engage a : proteger les donnees professionnelles conformement a la politique RGPD de l\'entreprise, utiliser exclusivement les outils informatiques fournis ou approuves, ne pas stocker de donnees professionnelles sur des supports personnels, verrouiller son poste de travail en cas d\'absence.</p>';
     h+='<h2>Article 7 — Sante et securite</h2><p>Le travailleur en teletravail beneficie des memes droits en matiere de bien-etre au travail que les travailleurs occupes dans les locaux de l\'entreprise. L\'employeur, le CPPT et le conseiller en prevention ont acces au lieu de teletravail pour verifier la conformite du poste, sur rendez-vous prealable (CCT n° 85, art. 8).</p>';
     h+='<h2>Article 8 — Accidents du travail</h2><p>Un accident survenu pendant les heures de teletravail, dans le lieu de teletravail declare, est presume etre un accident du travail (Loi 10/4/1971, art. 7bis insere par Loi 21/12/2018). Le travailleur le declare immediatement a son employeur.</p>';
@@ -25617,7 +25873,7 @@ const genDoc=(type)=>{
     h+='<h2>Article 1 — Objet de la formation</h2><p>L\'employeur s\'engage a faire suivre au travailleur la formation suivante : <b>[Intitule de la formation]</b>, dispensee par [organisme de formation], d\'une duree de [nombre] heures/jours, se deroulant du [date debut] au [date fin].</p>';
     h+='<h2>Article 2 — Cout de la formation</h2><p>Le cout total de la formation est de <b>[montant] EUR</b>, comprenant : les frais d\'inscription et de formation, les frais de deplacement et d\'hebergement eventuels, le maintien de la remuneration pendant la formation.</p>';
     h+='<h2>Article 3 — Clause de remboursement</h2><p>Conformement a l\'article 22bis de la loi du 3 juillet 1978, si le travailleur met fin au contrat de travail avant l\'ecoulement de la periode convenue, il est tenu de rembourser une partie des frais de formation selon le bareme degressif suivant :</p><p>• Depart au cours de la 1ere annee apres la formation : remboursement de <b>80%</b> des frais</p><p>• Depart au cours de la 2eme annee : remboursement de <b>50%</b></p><p>• Depart au cours de la 3eme annee : remboursement de <b>20%</b></p><p>La duree de validite maximale de la clause d\'ecolage est de 3 ans (Art. 22bis §5).</p>';
-    h+='<h2>Article 4 — Conditions de validite (Art. 22bis §2)</h2><p>La presente clause n\'est valable que si : la remuneration annuelle brute du travailleur depasse 44.447 EUR (montant 2026, indexe annuellement), la formation permet l\'acquisition de nouvelles competences valorisables en dehors de l\'entreprise, la duree de la formation est d\'au moins 80 heures ou sa valeur depasse le double du RMMM.</p>';
+    h+='<h2>Article 4 — Conditions de validite (Art. 22bis §2)</h2><p>La presente clause n\'est valable que si : la remuneration annuelle brute du travailleur depasse '+seuilEcolage+' EUR (montant '+Y+', indexe automatiquement), la formation permet l\'acquisition de nouvelles competences valorisables en dehors de l\'entreprise, la duree de la formation est d\'au moins 80 heures ou sa valeur depasse le double du RMMM.</p>';
     h+='<h2>Article 5 — Exclusions</h2><p>La clause d\'ecolage ne s\'applique pas : si le contrat est rompu par l\'employeur, si la rupture intervient pendant la periode d\'essai, en cas de licenciement pour motif grave imputable a l\'employeur, si la formation est imposee par une obligation legale ou reglementaire.</p>';
     h+='<h2>Article 6 — Montant maximum</h2><p>Le montant du remboursement ne peut jamais exceder 30% de la remuneration annuelle brute du travailleur (Art. 22bis §4).</p>';
     h+='<p style="margin-top:15px;font-style:italic;color:#666">Fait en double exemplaire a '+(co.city||'Bruxelles')+', le '+dateNow+'.</p>';
@@ -25625,7 +25881,7 @@ const genDoc=(type)=>{
     h+='<h1>Clause de non-concurrence</h1><p style="text-align:center;color:#888">Articles 65, 85 et 86 — Loi du 3 juillet 1978</p>';
     h+='<h2>ENTRE</h2><p><b>L\'employeur :</b> '+coName+', '+coVat+'</p><p><b>Le travailleur :</b> [Nom, prenom], engage(e) en qualite de [fonction]</p>';
     h+='<h2>Article 1 — Objet</h2><p>La presente clause interdit au travailleur, apres la fin du contrat de travail, d\'exercer des activites similaires, soit pour son propre compte, soit au service d\'un employeur concurrent, en ayant la possibilite de porter prejudice a '+coName+' en utilisant les connaissances acquises dans l\'entreprise, de nature industrielle ou commerciale.</p>';
-    h+='<h2>Article 2 — Conditions de validite (Art. 65 §1)</h2><p>La presente clause n\'est valable que si : le contrat est resilie par le travailleur ou par l\'employeur pour motif grave imputable au travailleur, la remuneration annuelle brute du travailleur est superieure a 44.447 EUR (montant 2026, indexe annuellement), les activites visees sont similaires et le prejudice potentiel est reel.</p>';
+    h+='<h2>Article 2 — Conditions de validite (Art. 65 §1)</h2><p>La presente clause n\'est valable que si : le contrat est resilie par le travailleur ou par l\'employeur pour motif grave imputable au travailleur, la remuneration annuelle brute du travailleur est superieure a '+seuilNC+' EUR (montant '+Y+', indexe automatiquement), les activites visees sont similaires et le prejudice potentiel est reel.</p>';
     h+='<h2>Article 3 — Duree et territoire</h2><p>La clause de non-concurrence s\'applique pour une duree maximale de <b>12 mois</b> a compter de la fin du contrat, sur le territoire suivant : <b>[Belgique / region specifique]</b>.</p>';
     h+='<h2>Article 4 — Indemnite compensatoire</h2><p>En contrepartie de l\'engagement de non-concurrence, l\'employeur verse au travailleur une indemnite forfaitaire unique equivalente a <b>la moitie de la remuneration brute correspondant a la duree d\'application de la clause</b> (Art. 65 §2). Cette indemnite est due meme si l\'employeur renonce a l\'application de la clause dans un delai de 15 jours apres la fin du contrat.</p>';
     h+='<h2>Article 5 — Sanction en cas de violation</h2><p>Si le travailleur viole la clause de non-concurrence, il est tenu de rembourser l\'indemnite et de payer un montant equivalent a titre de dommages et interets, sauf si l\'employeur prouve un prejudice superieur (Art. 65 §2 al. 3).</p>';
@@ -25635,8 +25891,8 @@ const genDoc=(type)=>{
     h+='<h1>Accord d\'octroi de cheques-repas</h1><p style="text-align:center;color:#888">AR 12/10/2010 — Conditions d\'exoneration ONSS et fiscales</p>';
     h+='<h2>ENTRE</h2><p><b>L\'employeur :</b> '+coName+', '+coVat+'</p><p><b>Et l\'ensemble des travailleurs</b> de l\'entreprise.</p>';
     h+='<h2>Article 1 — Octroi</h2><p>L\'employeur octroie a chaque travailleur des cheques-repas electroniques pour chaque journee de travail effectivement prestee, conformement aux conditions legales d\'exoneration de cotisations sociales et d\'impots.</p>';
-    h+='<h2>Article 2 — Valeur faciale</h2><p>La valeur faciale de chaque cheque-repas est fixee a <b>10,00 EUR</b>, repartie comme suit :</p><p>• Part patronale : <b>8,91 EUR</b> (maximum legal 2026)</p><p>• Part travailleur : <b>1,09 EUR</b> (minimum legal 1,09 EUR)</p><p>La part travailleur est retenue mensuellement sur la remuneration nette.</p>';
-    h+='<h2>Article 3 — Conditions d\'exoneration (AR 12/10/2010)</h2><p>Les cheques-repas sont exoneres de cotisations ONSS et d\'impots pour autant que : le nombre de cheques corresponde au nombre de jours de travail effectivement prestes, l\'intervention de l\'employeur n\'excede pas 8,91 EUR, l\'intervention du travailleur soit au minimum de 1,09 EUR, les cheques soient delivres sous forme electronique, les cheques soient au nom du travailleur.</p>';
+    h+='<h2>Article 2 — Valeur faciale</h2><p>La valeur faciale de chaque cheque-repas est fixee a <b>'+f(crVal)+' EUR</b>, repartie comme suit :</p><p>• Part patronale : <b>'+f(crPat)+' EUR</b> (maximum legal '+Y+')</p><p>• Part travailleur : <b>'+f(crTrav)+' EUR</b> (minimum legal '+f(crTrav)+' EUR)</p><p>La part travailleur est retenue mensuellement sur la remuneration nette.</p>';
+    h+='<h2>Article 3 — Conditions d\'exoneration (AR 12/10/2010)</h2><p>Les cheques-repas sont exoneres de cotisations ONSS et d\'impots pour autant que : le nombre de cheques corresponde au nombre de jours de travail effectivement prestes, l\'intervention de l\'employeur n\'excede pas '+f(crPat)+' EUR, l\'intervention du travailleur soit au minimum de '+f(crTrav)+' EUR, les cheques soient delivres sous forme electronique, les cheques soient au nom du travailleur.</p>';
     h+='<h2>Article 4 — Validite</h2><p>Les cheques-repas ont une duree de validite de <b>12 mois</b> a compter de leur emission. Ils ne peuvent etre utilises que dans les commerces et restaurants qui acceptent les cheques-repas electroniques et ne sont utilisables que pour l\'achat d\'aliments prets a la consommation ou de produits alimentaires.</p>';
     h+='<h2>Article 5 — Emetteur</h2><p>Les cheques-repas sont emis par [Sodexo / Edenred / Monizze], agree par le SPF Economie.</p>';
     h+='<h2>Article 6 — Jours prestes</h2><p>Un cheque-repas est octroi par journee de travail effective. Les jours de maladie, vacances, conges et chomage ne donnent pas droit aux cheques-repas, sauf si une CCT sectorielle ou d\'entreprise le prevoit expressement.</p>';
@@ -25670,8 +25926,8 @@ const genDoc=(type)=>{
     h+='<h2>Article 2 — Champ d\'application</h2><p>Le present plan s\'applique a tous les travailleurs de '+coName+' lies par un contrat de travail pendant la periode de reference.</p>';
     h+='<h2>Article 3 — Periode de reference</h2><p>La periode de reference court du <b>[1er janvier 20XX]</b> au <b>[31 decembre 20XX]</b>, soit une duree de 12 mois (minimum legal : 3 mois).</p>';
     h+='<h2>Article 4 — Objectifs collectifs</h2><p>Les objectifs suivants doivent etre atteints collectivement pour donner droit au bonus :</p><p><b>Objectif 1 :</b> [Chiffre d\'affaires annuel atteignant X EUR — Poids : 50%]</p><p><b>Objectif 2 :</b> [Taux de satisfaction client >= X% — Poids : 30%]</p><p><b>Objectif 3 :</b> [Reduction des accidents de travail de X% — Poids : 20%]</p><p>Les objectifs sont mesurables, verifiables, incertains a l\'avance et collectifs (non lies a des performances individuelles).</p>';
-    h+='<h2>Article 5 — Montant du bonus</h2><p>Si les objectifs sont pleinement atteints, le bonus s\'eleve a <b>[montant] EUR brut</b> par travailleur.</p><p>Si les objectifs sont partiellement atteints (seuil minimum de [80%]), le bonus est calcule au prorata.</p><p><b>Plafond legal 2024 :</b> 4.255 EUR brut par travailleur et par an.</p>';
-    h+='<h2>Article 6 — Regime social et fiscal</h2><p>Le bonus CCT 90 beneficie d\'un regime favorable :</p><p>• <b>Cotisation speciale employeur :</b> 33% (au lieu de 25,07% ONSS standard)</p><p>• <b>Cotisation travailleur :</b> 13,07% (retenue ONSS standard)</p><p>• <b>Precompte professionnel :</b> Aucun</p><p>Pour un bonus brut de 4.255 EUR : cout employeur total = 5.659,15 EUR, net travailleur = 3.699,77 EUR.</p>';
+    h+='<h2>Article 5 — Montant du bonus</h2><p>Si les objectifs sont pleinement atteints, le bonus s\'eleve a <b>[montant] EUR brut</b> par travailleur.</p><p>Si les objectifs sont partiellement atteints (seuil minimum de [80%]), le bonus est calcule au prorata.</p><p><b>Plafond legal '+Y+' :</b> '+cct90ONSS+' EUR brut par travailleur et par an.</p>';
+    h+='<h2>Article 6 — Regime social et fiscal</h2><p>Le bonus CCT 90 beneficie d\'un regime favorable :</p><p>• <b>Cotisation speciale employeur :</b> 33% (au lieu de 25,07% ONSS standard)</p><p>• <b>Cotisation travailleur :</b> 13,07% (retenue ONSS standard)</p><p>• <b>Precompte professionnel :</b> Aucun</p><p>Pour un bonus brut de '+cct90ONSS+' EUR : cout employeur total = '+cct90CoutEmpl+' EUR, net travailleur = '+cct90Net+' EUR.</p>';
     h+='<h2>Article 7 — Verification et paiement</h2><p>La verification de l\'atteinte des objectifs est effectuee dans le mois suivant la fin de la periode de reference. Le paiement intervient dans les 2 mois suivant la verification. Le travailleur est informe individuellement du montant qui lui est attribue.</p>';
     h+='<h2>Article 8 — Procedure de depot</h2><p>Le present plan bonus est depose au greffe de la Direction generale Relations collectives de travail du SPF Emploi, Travail et Concertation sociale (Art. 13 CCT n° 90). Le depot doit intervenir dans le tiers de la periode de reference.</p>';
     h+='<h2>Article 9 — Information</h2><p>Le present plan est porte a la connaissance de tous les travailleurs par affichage et/ou communication electronique. Le suivi des objectifs est communique au minimum trimestriellement.</p>';
@@ -25684,7 +25940,7 @@ const genDoc=(type)=>{
 
 const modeles=[{id:'rgpd_st',m:'Convention RGPD sous-traitant',i:'🔒',ref:'RGPD Art. 28'},{id:'teletravail',m:'Politique teletravail',i:'🏠',ref:'CCT 85 + Loi 5/3/2017'},{id:'car_policy',m:'Car policy',i:'🚗',ref:'Art. 36 §2 CIR'},{id:'it_policy',m:'Politique IT et usage',i:'💻',ref:'CCT 81 du 26/4/2002'},{id:'ecolage',m:'Convention ecolage',i:'🎓',ref:'Art. 22bis Loi 3/7/1978'},{id:'non_concurrence',m:'Clause non-concurrence',i:'🚫',ref:'Art. 65 Loi 3/7/1978'},{id:'cheques_repas',m:'Accord cheques-repas',i:'🍽',ref:'AR 12/10/2010'},{id:'alcool',m:'Politique alcool et drogues',i:'🍷',ref:'CCT 100 du 1/4/2009'},{id:'cameras',m:'Reglement cameras',i:'📹',ref:'CCT 68 + Loi 21/3/2007'},{id:'bonus_cct90',m:'Convention bonus CCT 90',i:'🎁',ref:'CCT 90 + Loi 21/12/2007'}];
 
-return <div><PH title="Documents Juridiques" sub="Modeles, conventions, reglements obligatoires — 10 documents generables"/><div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"docs",l:"Documents obligatoires"},{v:"modeles",l:"Modeles disponibles"},{v:"rgpd",l:"RGPD"},{v:"archivage",l:"Archivage"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="docs"&&<C><ST>Documents obligatoires employeur</ST>{[{d:"Reglement de travail",ob:true,ref:"Loi 08/04/1965"},{d:"Registre du personnel",ob:true,ref:"AR 08/08/1980"},{d:"Compte individuel",ob:true,ref:"AR 08/08/1980"},{d:"Contrat de travail",ob:true,ref:"Loi 03/07/1978"},{d:"Fiches de paie mensuelles",ob:true,ref:"AR 27/09/1966"},{d:"Plan global prevention",ob:true,ref:"AR 27/03/1998"},{d:"Plan annuel prevention",ob:true,ref:"Code bien-etre"},{d:"Document identification SEPPT",ob:true,ref:"AR 28/05/2003"},{d:"Registre securite",ob:true,ref:"Code bien-etre"},{d:"RGPD - Registre traitements",ob:true,ref:"RGPD Art. 30"},{d:"Plan formation (20+ ETP)",ob:true,ref:"Loi 3/10/2022"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#e8e6e0",fontSize:12}}>{r.d}</span><span style={{fontSize:10,color:"#9e9b93"}}>{r.ref}</span></div>)}</C>}{tab==="modeles"&&<C><ST>Modeles disponibles — Cliquez pour generer</ST><div style={{display:"flex",flexDirection:"column",gap:8}}>{modeles.map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 14px",borderRadius:10,border:"1px solid rgba(198,163,78,.08)",background:"rgba(198,163,78,.02)"}}><div style={{display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:18}}>{r.i}</span><div><div style={{color:"#e8e6e0",fontSize:12,fontWeight:600}}>{r.m}</div><div style={{fontSize:9,color:"#888"}}>{r.ref}</div></div></div><button onClick={()=>genDoc(r.id)} style={{padding:"6px 16px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#c6a34e,#e2c878)",color:"#060810",fontWeight:700,fontSize:11,cursor:"pointer"}}>Generer</button></div>)}</div></C>}{tab==="rgpd"&&<C><ST>RGPD Employeur</ST>{[{t:"Base legale",d:"Traitement donnees employes: execution contrat de travail (Art. 6.1.b RGPD)."},{t:"Registre traitements",d:"Art. 30: liste de tous traitements, finalites, destinataires, durees."},{t:"DPO",d:"Obligatoire si traitement grande echelle. Recommande pour PME."},{t:"Droits travailleurs",d:"Acces, rectification, effacement, portabilite. Reponse 30 jours."},{t:"Retention donnees",d:"Fiches paie: 5 ans. Documents sociaux: 5-7 ans. Contrats: 5 ans apres fin."}].map((r,i)=><div key={i} style={{padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><b style={{color:"#c6a34e",fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:"#9e9b93",marginTop:2}}>{r.d}</div></div>)}</C>}{tab==="archivage"&&<C><ST>Durees archivage legales</ST>{[{d:"Contrats de travail",duree:"5 ans apres fin contrat"},{d:"Fiches de paie",duree:"5 ans"},{d:"Comptes individuels",duree:"5 ans"},{d:"Documents ONSS",duree:"7 ans"},{d:"Documents fiscaux (281)",duree:"7 ans"},{d:"Registre personnel",duree:"5 ans apres depart"},{d:"Documents prevention",duree:"20 ans (agents cancerigenes: 40 ans)"},{d:"Accidents travail",duree:"10 ans minimum"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#e8e6e0",fontSize:12}}>{r.d}</span><span style={{color:"#c6a34e",fontWeight:600}}>{r.duree}</span></div>)}</C>}</div>;}
+return <div><PH title="Documents Juridiques" sub={"Modeles, conventions, reglements obligatoires — 10 documents generables — Montants "+LOIS_BELGES._meta.annee+" (auto)"}/>{loisStatus.outdated&&<div style={{padding:'10px 14px',background:'rgba(239,68,68,.08)',border:'1px solid rgba(239,68,68,.25)',borderRadius:10,marginBottom:14,fontSize:11,color:'#f87171'}}>⚠️ Les constantes legales sont datees de {LOIS_BELGES._meta.annee}. Les documents generes utiliseront ces montants. Mettez a jour LOIS_BELGES_HISTORIQUE pour {new Date().getFullYear()}.</div>}<div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"docs",l:"Documents obligatoires"},{v:"modeles",l:"Modeles disponibles"},{v:"rgpd",l:"RGPD"},{v:"archivage",l:"Archivage"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="docs"&&<C><ST>Documents obligatoires employeur</ST>{[{d:"Reglement de travail",ob:true,ref:"Loi 08/04/1965"},{d:"Registre du personnel",ob:true,ref:"AR 08/08/1980"},{d:"Compte individuel",ob:true,ref:"AR 08/08/1980"},{d:"Contrat de travail",ob:true,ref:"Loi 03/07/1978"},{d:"Fiches de paie mensuelles",ob:true,ref:"AR 27/09/1966"},{d:"Plan global prevention",ob:true,ref:"AR 27/03/1998"},{d:"Plan annuel prevention",ob:true,ref:"Code bien-etre"},{d:"Document identification SEPPT",ob:true,ref:"AR 28/05/2003"},{d:"Registre securite",ob:true,ref:"Code bien-etre"},{d:"RGPD - Registre traitements",ob:true,ref:"RGPD Art. 30"},{d:"Plan formation (20+ ETP)",ob:true,ref:"Loi 3/10/2022"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#e8e6e0",fontSize:12}}>{r.d}</span><span style={{fontSize:10,color:"#9e9b93"}}>{r.ref}</span></div>)}</C>}{tab==="modeles"&&<C><ST>Modeles disponibles — Cliquez pour generer</ST><div style={{display:"flex",flexDirection:"column",gap:8}}>{modeles.map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 14px",borderRadius:10,border:"1px solid rgba(198,163,78,.08)",background:"rgba(198,163,78,.02)"}}><div style={{display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:18}}>{r.i}</span><div><div style={{color:"#e8e6e0",fontSize:12,fontWeight:600}}>{r.m}</div><div style={{fontSize:9,color:"#888"}}>{r.ref}</div></div></div><button onClick={()=>genDoc(r.id)} style={{padding:"6px 16px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#c6a34e,#e2c878)",color:"#060810",fontWeight:700,fontSize:11,cursor:"pointer"}}>Generer</button></div>)}</div></C>}{tab==="rgpd"&&<C><ST>RGPD Employeur</ST>{[{t:"Base legale",d:"Traitement donnees employes: execution contrat de travail (Art. 6.1.b RGPD)."},{t:"Registre traitements",d:"Art. 30: liste de tous traitements, finalites, destinataires, durees."},{t:"DPO",d:"Obligatoire si traitement grande echelle. Recommande pour PME."},{t:"Droits travailleurs",d:"Acces, rectification, effacement, portabilite. Reponse 30 jours."},{t:"Retention donnees",d:"Fiches paie: 5 ans. Documents sociaux: 5-7 ans. Contrats: 5 ans apres fin."}].map((r,i)=><div key={i} style={{padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><b style={{color:"#c6a34e",fontSize:12}}>{r.t}</b><div style={{fontSize:10.5,color:"#9e9b93",marginTop:2}}>{r.d}</div></div>)}</C>}{tab==="archivage"&&<C><ST>Durees archivage legales</ST>{[{d:"Contrats de travail",duree:"5 ans apres fin contrat"},{d:"Fiches de paie",duree:"5 ans"},{d:"Comptes individuels",duree:"5 ans"},{d:"Documents ONSS",duree:"7 ans"},{d:"Documents fiscaux (281)",duree:"7 ans"},{d:"Registre personnel",duree:"5 ans apres depart"},{d:"Documents prevention",duree:"20 ans (agents cancerigenes: 40 ans)"},{d:"Accidents travail",duree:"10 ans minimum"}].map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{color:"#e8e6e0",fontSize:12}}>{r.d}</span><span style={{color:"#c6a34e",fontWeight:600}}>{r.duree}</span></div>)}</C>}</div>;}
 // ═══ SPRINT 37: MOTEUR LOIS BELGES — COMPOSANT UI ═══
 function MoteurLoisBelges({s,d}){
 const ae=s.emps||[];
