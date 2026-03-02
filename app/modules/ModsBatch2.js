@@ -1359,7 +1359,327 @@ export function CompteIndividuelMod({s,d}){
   </div>;
 }
 
-export function AccountingOutputMod({s,d}){const ae=(s.emps||[]).filter(e=>e.status==='active'||!e.status);const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2}).format(v);const [tab,setTab]=useState("journal");const now=new Date();const moisLabel=now.toLocaleDateString('fr-BE',{month:'long',year:'numeric'});const totBrut=ae.reduce((a,e)=>a+(e.gross||e.brut||0),0);const totOnssT=Math.round(totBrut*0.1307*100)/100;const totOnssP=Math.round(totBrut*0.2507*100)/100;const totPP=ae.reduce((a,e)=>{const b=e.gross||e.brut||0;return a+(quickPP?quickPP(b):Math.round(b*0.22*100)/100)},0);const totNet=totBrut-totOnssT-totPP;const exportCSV=()=>{let csv="Date;Compte;Libelle;Debit;Credit\n";const dt=now.toLocaleDateString('fr-BE');ae.forEach(e=>{const b=e.gross||e.brut||0;const ot=Math.round(b*0.1307*100)/100;const op=Math.round(b*0.2507*100)/100;const pp=quickPP?quickPP(b):Math.round(b*0.22*100)/100;const net=b-ot-pp;const nom=(e.first||e.fn||"")+" "+(e.last||e.ln||"");csv+=dt+";620000;Rémunérations "+nom+";"+b.toFixed(2)+";\n";csv+=dt+";621000;ONSS patronal "+nom+";"+op.toFixed(2)+";\n";csv+=dt+";454000;ONSS travailleur "+nom+";;"+ot.toFixed(2)+"\n";csv+=dt+";453100;Precompte PP "+nom+";;"+pp.toFixed(2)+"\n";csv+=dt+";455000;Net a payer "+nom+";;"+net.toFixed(2)+"\n"});const b=new Blob([csv],{type:'text/csv;charset=utf-8'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='journal_paie_'+now.toISOString().slice(0,7)+'.csv';a.click()};const exportCentralisateur=()=>{let csv="Compte;Libelle;Debit;Credit\n";csv+="620000;Rémunérations brutes;"+totBrut.toFixed(2)+";\n";csv+="621000;ONSS patronal;"+totOnssP.toFixed(2)+";\n";csv+="454000;ONSS travailleur;;"+totOnssT.toFixed(2)+"\n";csv+="453100;Precompte professionnel;;"+totPP.toFixed(2)+"\n";csv+="455000;Net a payer;;"+totNet.toFixed(2)+"\n";csv+="\nTotal;;"+(totBrut+totOnssP).toFixed(2)+";"+(totOnssT+totPP+totNet).toFixed(2)+"\n";const b=new Blob([csv],{type:'text/csv'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='centralisateur_'+now.toISOString().slice(0,7)+'.csv';a.click()};const exportWinbooks=()=>{let txt="DBKCODE\tDBKTYPE\tDOCNUMBER\tDOCORDER\tOPCODE\tACCOUNTGL\tACCOUNTRP\tBOOKYEAR\tPERIOD\tDATE\tCOMMENT\tAMOUNTEUR\tMATCHNO\tOLDDATE\tISMATCHED\tMEMOTYPE\tCURRCODE\n";const period=String(now.getMonth()+1).padStart(2,"0");const dateStr=String(now.getDate()).padStart(2,"0")+String(now.getMonth()+1).padStart(2,"0")+String(now.getFullYear());let docNum=1;ae.forEach((e,idx)=>{const b=e.gross||e.brut||0;const ot=Math.round(b*0.1307*100)/100;const op=Math.round(b*0.2507*100)/100;const pp=quickPP?quickPP(b):Math.round(b*0.22*100)/100;const net=b-ot-pp;const nom=(e.first||e.fn||"").slice(0,10)+" "+(e.last||e.ln||"").slice(0,10);txt+="SAL\t0\t"+String(docNum).padStart(5,"0")+"\t1\t\t620000\t\t2026\t"+period+"\t"+dateStr+"\tRemun "+nom+"\t"+b.toFixed(2)+"\t\t\t0\t0\tEUR\n";txt+="SAL\t0\t"+String(docNum).padStart(5,"0")+"\t2\t\t621000\t\t2026\t"+period+"\t"+dateStr+"\tONSS P "+nom+"\t"+op.toFixed(2)+"\t\t\t0\t0\tEUR\n";txt+="SAL\t0\t"+String(docNum).padStart(5,"0")+"\t3\t\t454000\t\t2026\t"+period+"\t"+dateStr+"\tONSS T "+nom+"\t-"+ot.toFixed(2)+"\t\t\t0\t0\tEUR\n";txt+="SAL\t0\t"+String(docNum).padStart(5,"0")+"\t4\t\t453100\t\t2026\t"+period+"\t"+dateStr+"\tPP "+nom+"\t-"+pp.toFixed(2)+"\t\t\t0\t0\tEUR\n";txt+="SAL\t0\t"+String(docNum).padStart(5,"0")+"\t5\t\t455000\t\t2026\t"+period+"\t"+dateStr+"\tNet "+nom+"\t-"+net.toFixed(2)+"\t\t\t0\t0\tEUR\n";docNum++});const bl=new Blob([txt],{type:'text/tab-separated-values;charset=utf-8'});const u=URL.createObjectURL(bl);const a=document.createElement('a');a.href=u;a.download='winbooks_sal_'+now.toISOString().slice(0,7)+'.txt';a.click()};const exportBOB50=()=>{let txt="JESSION\tYEAR\tMONTH\tDOCTYPE\tDOCNR\tLINENR\tGLACCT\tDEBIT\tCREDIT\tCOMMENT\tDATE\n";const m=now.getMonth()+1;let docNr=1;ae.forEach((e,idx)=>{const b=e.gross||e.brut||0;const ot=Math.round(b*0.1307*100)/100;const op=Math.round(b*0.2507*100)/100;const pp=quickPP?quickPP(b):Math.round(b*0.22*100)/100;const net=b-ot-pp;const nom=(e.first||e.fn||"").slice(0,10)+" "+(e.last||e.ln||"").slice(0,10);txt+="SAL\t2026\t"+m+"\tSAL\t"+docNr+"\t1\t620000\t"+b.toFixed(2)+"\t0.00\tRémunération "+nom+"\t"+now.toISOString().slice(0,10)+"\n";txt+="SAL\t2026\t"+m+"\tSAL\t"+docNr+"\t2\t621000\t"+op.toFixed(2)+"\t0.00\tONSS patronal "+nom+"\t"+now.toISOString().slice(0,10)+"\n";txt+="SAL\t2026\t"+m+"\tSAL\t"+docNr+"\t3\t454000\t0.00\t"+ot.toFixed(2)+"\tONSS travailleur "+nom+"\t"+now.toISOString().slice(0,10)+"\n";txt+="SAL\t2026\t"+m+"\tSAL\t"+docNr+"\t4\t453100\t0.00\t"+pp.toFixed(2)+"\tPrecompte PP "+nom+"\t"+now.toISOString().slice(0,10)+"\n";txt+="SAL\t2026\t"+m+"\tSAL\t"+docNr+"\t5\t455000\t0.00\t"+net.toFixed(2)+"\tNet a payer "+nom+"\t"+now.toISOString().slice(0,10)+"\n";docNr++});const bl=new Blob([txt],{type:'text/tab-separated-values;charset=utf-8'});const u=URL.createObjectURL(bl);const a=document.createElement('a');a.href=u;a.download='bob50_sal_'+now.toISOString().slice(0,7)+'.txt';a.click()};return <div><PH title="Exports Comptables" sub={"Journal de paie "+moisLabel+" — "+ae.length+" travailleurs — 4 formats"}/><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>{[{l:"Masse brute",v:f2(totBrut),c:"#c6a34e"},{l:"ONSS patronal",v:f2(totOnssP),c:"#ef4444"},{l:"Total employeur",v:f2(totBrut+totOnssP),c:"#a78bfa"},{l:"Net a payer",v:f2(totNet),c:"#22c55e"}].map((k,i)=><div key={i} style={{padding:"14px 16px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:10,color:"#5e5c56",textTransform:"uppercase"}}>{k.l}</div><div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div><C><ST>Formats d'export disponibles</ST><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>{[{l:"Journal de paie CSV",d:"Ecritures detaillees par travailleur — separateur point-virgule",fn:exportCSV,c:"#22c55e"},{l:"Centralisateur CSV",d:"Totaux par compte comptable — resume mensuel",fn:exportCentralisateur,c:"#60a5fa"},{l:"Winbooks Desktop",d:"Format ACT/TSV compatible Winbooks — DBKCODE SAL",fn:exportWinbooks,c:"#c6a34e"},{l:"BOB50 / Sage BOB",d:"Format TSV compatible BOB50 — import journaux",fn:exportBOB50,c:"#a78bfa"}].map((exp,i)=><button key={i} onClick={exp.fn} style={{padding:16,borderRadius:10,border:"1px solid rgba(198,163,78,.1)",background:"rgba(198,163,78,.04)",cursor:"pointer",textAlign:"left"}}><div style={{fontSize:13,fontWeight:700,color:exp.c,marginBottom:4}}>{"📥"} {exp.l}</div><div style={{fontSize:10,color:"#9e9b93"}}>{exp.d}</div></button>)}</div></C><C><ST>Apercu journal — {moisLabel}</ST><table style={{width:"100%",borderCollapse:"collapse",fontSize:11}}><thead><tr>{["Compte","Libelle","Debit","Credit"].map(h=><th key={h} style={{padding:"8px",textAlign:"left",color:"#c6a34e",borderBottom:"2px solid rgba(198,163,78,.2)",fontSize:10}}>{h}</th>)}</tr></thead><tbody>{[{c:"620000",l:"Rémunérations brutes",d:totBrut,cr:0},{c:"621000",l:"ONSS patronal (25,07%)",d:totOnssP,cr:0},{c:"454000",l:"ONSS travailleur (13,07%)",d:0,cr:totOnssT},{c:"453100",l:"Precompte professionnel",d:0,cr:totPP},{c:"455000",l:"Net a payer",d:0,cr:totNet}].map((r,i)=><tr key={i} style={{borderBottom:"1px solid rgba(255,255,255,.03)"}}><td style={{padding:"6px",fontFamily:"monospace",color:"#c6a34e"}}>{r.c}</td><td style={{padding:"6px"}}>{r.l}</td><td style={{padding:"6px",fontWeight:600,color:r.d>0?"#e8e6e0":"#5e5c56"}}>{r.d>0?f2(r.d):""}</td><td style={{padding:"6px",fontWeight:600,color:r.cr>0?"#e8e6e0":"#5e5c56"}}>{r.cr>0?f2(r.cr):""}</td></tr>)}<tr style={{borderTop:"2px solid rgba(198,163,78,.3)"}}><td style={{padding:"8px"}}></td><td style={{padding:"8px",fontWeight:700,color:"#c6a34e"}}>TOTAL</td><td style={{padding:"8px",fontWeight:700,color:"#c6a34e"}}>{f2(totBrut+totOnssP)}</td><td style={{padding:"8px",fontWeight:700,color:"#c6a34e"}}>{f2(totOnssT+totPP+totNet)}</td></tr></tbody></table></C></div>;}
+export function AccountingOutputMod({s,d,supabase,user}){
+  const clients=s.clients||[];
+  const ae=(s.emps||[]).filter(e=>e.status==='active'||!e.status);
+  const [selClient,setSelClient]=useState('all');
+  const [format,setFormat]=useState('winbooks');
+  const [exported,setExported]=useState(null);
+  const [tab,setTab]=useState('export');
+  const [previewData,setPreviewData]=useState(null);
+  const [showPreview,setShowPreview]=useState(false);
+
+  // === PÉRIODE AVANCÉE ===
+  const now=new Date();
+  const [selMonth,setSelMonth]=useState(now.getMonth());
+  const [selYear,setSelYear]=useState(now.getFullYear());
+  const [periodType,setPeriodType]=useState('month');
+  const moisNames=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const years=[];for(let y=now.getFullYear();y>=now.getFullYear()-5;y--)years.push(y);
+
+  // === MAPPING COMPTES PCMN ===
+  const defaultPcmn={brut:'620000',onssE:'621000',onssW:'453000',pp:'453100',net:'455000',cheqRepas:'623000',fraisDeplacement:'625000',provisions:'460000',maladieGM:'453200',peculeVacances:'622000',primeFinAnnee:'623100',avantagesNature:'623200'};
+  const pcmnLabels={brut:'Rémunérations brutes',onssE:'ONSS patronal',onssW:'ONSS travailleur',pp:'Précompte professionnel',net:'Net à payer',cheqRepas:'Chèques-repas',fraisDeplacement:'Frais de déplacement',provisions:'Provisions sociales',maladieGM:'Assurance groupe/maladie',peculeVacances:'Pécule de vacances',primeFinAnnee:'Prime de fin d\'année',avantagesNature:'Avantages en nature'};
+  const [pcmn,setPcmn]=useState({...defaultPcmn});
+  const [pcmnSaved,setPcmnSaved]=useState(true);
+  const [pcmnLoading,setPcmnLoading]=useState(true);
+
+  // === HISTORIQUE EXPORTS ===
+  const [history,setHistory]=useState([]);
+  const [historyLoading,setHistoryLoading]=useState(true);
+
+  const formats=[
+    {id:'winbooks',name:'WinBooks',icon:'📗',ext:'.txt',desc:'Format TXT WinBooks Classic/Connect'},
+    {id:'bob',name:'BOB Software',icon:'📘',ext:'.csv',desc:'Import CSV BOB 50/Sage BOB'},
+    {id:'exact',name:'Exact Online',icon:'📙',ext:'.xml',desc:'XML Exact Online Belgium'},
+    {id:'octopus',name:'Octopus',icon:'📕',ext:'.csv',desc:'CSV Octopus Accountancy'},
+    {id:'horus',name:'Horus',icon:'📓',ext:'.txt',desc:'Format Horus/Popsy complet'},
+    {id:'csv_generic',name:'CSV Générique',icon:'📄',ext:'.csv',desc:'CSV universel (import manuel)'},
+  ];
+
+  const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
+
+  // Load PCMN mappings from Supabase
+  useEffect(()=>{
+    if(!supabase||!user){setPcmnLoading(false);return;}
+    (async()=>{try{const{data}=await supabase.from('export_pcmn_mappings').select('*').eq('user_id',user.id).single();if(data?.mappings)setPcmn({...defaultPcmn,...data.mappings});}catch(e){}setPcmnLoading(false);})();
+  },[supabase,user]);
+
+  // Load export history from Supabase
+  useEffect(()=>{
+    if(!supabase||!user){setHistoryLoading(false);return;}
+    (async()=>{try{const{data}=await supabase.from('export_history').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(50);if(data)setHistory(data);}catch(e){}setHistoryLoading(false);})();
+  },[supabase,user]);
+
+  // Save PCMN mapping
+  const savePcmnMapping=async()=>{
+    if(!supabase||!user)return;
+    try{const{error}=await supabase.from('export_pcmn_mappings').upsert({user_id:user.id,mappings:pcmn,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(!error)setPcmnSaved(true);}catch(e){}
+  };
+
+  // Compute totals
+  const computeTotals=()=>{
+    const mult=periodType==='year'?12:periodType==='quarter'?3:1;
+    const targetClients=selClient==='all'?clients:clients.filter(c=>c.company?.name===selClient);
+    const lines=[];
+    targetClients.forEach(client=>{
+      (client.emps||[]).forEach(emp=>{
+        const gross=+(emp.monthlySalary||emp.gross||emp.brut||0)*mult;
+        const onssW=gross*0.1307;const onssE=gross*0.2714;
+        const taxable=gross-onssW;
+        const pp=quickPP?quickPP(gross)*mult:taxable*0.2672;
+        const net=taxable-pp;
+        lines.push({client:client.company?.name||'N/A',employee:emp.firstName||emp.first||emp.fn?(emp.firstName||emp.first||emp.fn)+' '+(emp.lastName||emp.last||emp.ln||''):(emp.name||'Employé'),gross,onssW,onssE,pp,net,niss:emp.niss||emp.nationalNumber||'',period:periodType==='year'?selYear+'':periodType==='quarter'?'T'+Math.floor(selMonth/3+1)+'/'+selYear:moisNames[selMonth]+' '+selYear});
+      });
+    });
+    // Fallback: if no clients with emps, use direct emps from state
+    if(lines.length===0&&ae.length>0){
+      ae.forEach(emp=>{
+        const gross=+(emp.monthlySalary||emp.gross||emp.brut||0)*mult;
+        const onssW=gross*0.1307;const onssE=gross*0.2714;
+        const taxable=gross-onssW;
+        const pp=quickPP?quickPP(gross)*mult:taxable*0.2672;
+        const net=taxable-pp;
+        lines.push({client:'Direct',employee:emp.firstName||emp.first||emp.fn?(emp.firstName||emp.first||emp.fn)+' '+(emp.lastName||emp.last||emp.ln||''):(emp.name||'Employé'),gross,onssW,onssE,pp,net,niss:emp.niss||emp.nationalNumber||'',period:periodType==='year'?selYear+'':periodType==='quarter'?'T'+Math.floor(selMonth/3+1)+'/'+selYear:moisNames[selMonth]+' '+selYear});
+      });
+    }
+    const totalBrut=lines.reduce((a,l)=>a+l.gross,0);
+    const totalOnssW=lines.reduce((a,l)=>a+l.onssW,0);
+    const totalOnssE=lines.reduce((a,l)=>a+l.onssE,0);
+    const totalPP=lines.reduce((a,l)=>a+l.pp,0);
+    const totalNet=lines.reduce((a,l)=>a+l.net,0);
+    return{lines,totalBrut,totalOnssW,totalOnssE,totalPP,totalNet};
+  };
+
+  // Generate file content
+  const generateContent=(fmt,totals)=>{
+    const{totalBrut,totalOnssW,totalOnssE,totalPP,totalNet,lines}=totals;
+    const dateStr=now.toLocaleDateString('fr-BE');
+    const isoDate=now.toISOString().slice(0,10);
+    const periodLabel=periodType==='year'?selYear+'':periodType==='quarter'?'T'+Math.floor(selMonth/3+1)+'/'+selYear:(selMonth+1).toString().padStart(2,'0')+'/'+selYear;
+    let content='';
+    if(fmt==='winbooks'){
+      const journalCode='SAL';const docNum='SAL'+selYear+(selMonth+1).toString().padStart(2,'0')+'001';
+      const period_wb=(selMonth+1).toString().padStart(2,'0');
+      content+='DBKCODE\tDOCNUMBER\tDOCORDER\tOPCODE\tACCOUNTGL\tACCOUNTRP\tBOOKYEAR\tPERIOD\tDATE\tCOMMENT\tAMOUNTEUR\tCURRCODE\n';
+      content+=journalCode+'\t'+docNum+'\t1\t0\t'+pcmn.brut+'\t\t'+selYear+'\t'+period_wb+'\t'+isoDate+'\tRémunérations brutes '+periodLabel+'\t'+totalBrut.toFixed(2)+'\tEUR\n';
+      content+=journalCode+'\t'+docNum+'\t2\t0\t'+pcmn.onssE+'\t\t'+selYear+'\t'+period_wb+'\t'+isoDate+'\tONSS patronal '+periodLabel+'\t'+totalOnssE.toFixed(2)+'\tEUR\n';
+      content+=journalCode+'\t'+docNum+'\t3\t0\t'+pcmn.onssW+'\t\t'+selYear+'\t'+period_wb+'\t'+isoDate+'\tONSS travailleur '+periodLabel+'\t'+(-totalOnssW).toFixed(2)+'\tEUR\n';
+      content+=journalCode+'\t'+docNum+'\t4\t0\t'+pcmn.pp+'\t\t'+selYear+'\t'+period_wb+'\t'+isoDate+'\tPrécompte prof. '+periodLabel+'\t'+(-totalPP).toFixed(2)+'\tEUR\n';
+      content+=journalCode+'\t'+docNum+'\t5\t0\t'+pcmn.net+'\t\t'+selYear+'\t'+period_wb+'\t'+isoDate+'\tNet à payer '+periodLabel+'\t'+(-totalNet).toFixed(2)+'\tEUR\n';
+    }else if(fmt==='bob'){
+      content+='JOURNAL;YEAR;MONTH;DOCNR;DOCTYPE;DTEFIN;ACCOUNT;COMMENT;AMOUNTD;AMOUNTC;VATCODE;MATCHING\n';
+      const docNr='SAL'+(selMonth+1).toString().padStart(2,'0')+selYear;
+      content+='SAL;'+selYear+';'+(selMonth+1)+';'+docNr+';N;'+isoDate+';'+pcmn.brut+';Rémunérations brutes;'+totalBrut.toFixed(2)+';0;;\n';
+      content+='SAL;'+selYear+';'+(selMonth+1)+';'+docNr+';N;'+isoDate+';'+pcmn.onssE+';ONSS patronal;'+totalOnssE.toFixed(2)+';0;;\n';
+      content+='SAL;'+selYear+';'+(selMonth+1)+';'+docNr+';N;'+isoDate+';'+pcmn.onssW+';ONSS travailleur;0;'+totalOnssW.toFixed(2)+';;\n';
+      content+='SAL;'+selYear+';'+(selMonth+1)+';'+docNr+';N;'+isoDate+';'+pcmn.pp+';Précompte prof.;0;'+totalPP.toFixed(2)+';;\n';
+      content+='SAL;'+selYear+';'+(selMonth+1)+';'+docNr+';N;'+isoDate+';'+pcmn.net+';Net à payer;0;'+totalNet.toFixed(2)+';;\n';
+    }else if(fmt==='exact'){
+      content+='<?xml version="1.0" encoding="UTF-8"?>\n<GLTransactions>\n';
+      content+='  <GLTransaction journal="SAL" date="'+isoDate+'" description="Écritures salariales '+periodLabel+'">\n';
+      content+='    <GLTransactionLine type="20" GLAccount="'+pcmn.brut+'" description="Rémunérations brutes" debit="'+totalBrut.toFixed(2)+'" credit="0"/>\n';
+      content+='    <GLTransactionLine type="20" GLAccount="'+pcmn.onssE+'" description="ONSS patronal" debit="'+totalOnssE.toFixed(2)+'" credit="0"/>\n';
+      content+='    <GLTransactionLine type="20" GLAccount="'+pcmn.onssW+'" description="ONSS travailleur" debit="0" credit="'+totalOnssW.toFixed(2)+'"/>\n';
+      content+='    <GLTransactionLine type="20" GLAccount="'+pcmn.pp+'" description="Précompte prof." debit="0" credit="'+totalPP.toFixed(2)+'"/>\n';
+      content+='    <GLTransactionLine type="20" GLAccount="'+pcmn.net+'" description="Net à payer" debit="0" credit="'+totalNet.toFixed(2)+'"/>\n';
+      content+='  </GLTransaction>\n</GLTransactions>';
+    }else if(fmt==='octopus'){
+      content+='Dagboek;Nummer;Datum;Rekening;Omschrijving;Debet;Credit;BTW-code\n';
+      const num='SAL'+(selMonth+1).toString().padStart(2,'0');
+      content+='SAL;'+num+';'+isoDate+';'+pcmn.brut+';Rémunérations brutes;'+totalBrut.toFixed(2)+';0;\n';
+      content+='SAL;'+num+';'+isoDate+';'+pcmn.onssE+';ONSS patronal;'+totalOnssE.toFixed(2)+';0;\n';
+      content+='SAL;'+num+';'+isoDate+';'+pcmn.onssW+';ONSS travailleur;0;'+totalOnssW.toFixed(2)+';\n';
+      content+='SAL;'+num+';'+isoDate+';'+pcmn.pp+';Précompte prof.;0;'+totalPP.toFixed(2)+';\n';
+      content+='SAL;'+num+';'+isoDate+';'+pcmn.net+';Net à payer;0;'+totalNet.toFixed(2)+';\n';
+    }else if(fmt==='horus'){
+      const padN=(s,n)=>(s+'').padStart(n,'0').slice(0,n);
+      const docNumH=padN(selYear+''+(selMonth+1)+'01',8);
+      const exercice=selYear+'';const periode=padN(selMonth+1,2);
+      content+='# Format Horus/Popsy — Export Aureus Social Pro\n';
+      content+='# TYPE|JOURNAL|EXERCICE|PERIODE|NUMDOC|NUMSEQ|COMPTE|LIBELLE|MONTANT|DC|DATE|DEVISE|REFEXT\n';
+      content+='G|SAL|'+exercice+'|'+periode+'|'+docNumH+'|001|'+pcmn.brut+'|Rémunérations brutes|'+totalBrut.toFixed(2)+'|D|'+isoDate+'|EUR|AUREUS_SAL\n';
+      content+='G|SAL|'+exercice+'|'+periode+'|'+docNumH+'|002|'+pcmn.onssE+'|ONSS patronal|'+totalOnssE.toFixed(2)+'|D|'+isoDate+'|EUR|AUREUS_SAL\n';
+      content+='G|SAL|'+exercice+'|'+periode+'|'+docNumH+'|003|'+pcmn.onssW+'|ONSS travailleur|'+totalOnssW.toFixed(2)+'|C|'+isoDate+'|EUR|AUREUS_SAL\n';
+      content+='G|SAL|'+exercice+'|'+periode+'|'+docNumH+'|004|'+pcmn.pp+'|Précompte professionnel|'+totalPP.toFixed(2)+'|C|'+isoDate+'|EUR|AUREUS_SAL\n';
+      content+='G|SAL|'+exercice+'|'+periode+'|'+docNumH+'|005|'+pcmn.net+'|Net à payer|'+totalNet.toFixed(2)+'|C|'+isoDate+'|EUR|AUREUS_SAL\n';
+      let seq=6;lines.forEach(l=>{content+='D|SAL|'+exercice+'|'+periode+'|'+docNumH+'|'+padN(seq,3)+'|'+pcmn.brut+'|'+l.employee+' - Brut|'+l.gross.toFixed(2)+'|D|'+isoDate+'|EUR|'+(l.niss||'')+'\n';seq++;});
+    }else{
+      content+='Compte;Libellé;Débit;Crédit;Journal;Date;Période\n';
+      content+=pcmn.brut+';Rémunérations brutes;'+totalBrut.toFixed(2)+';;SAL;'+dateStr+';'+periodLabel+'\n';
+      content+=pcmn.onssE+';ONSS patronal;'+totalOnssE.toFixed(2)+';;SAL;'+dateStr+';'+periodLabel+'\n';
+      content+=pcmn.onssW+';ONSS travailleur;;'+totalOnssW.toFixed(2)+';SAL;'+dateStr+';'+periodLabel+'\n';
+      content+=pcmn.pp+';Précompte prof.;;'+totalPP.toFixed(2)+';SAL;'+dateStr+';'+periodLabel+'\n';
+      content+=pcmn.net+';Net à payer;;'+totalNet.toFixed(2)+';SAL;'+dateStr+';'+periodLabel+'\n';
+    }
+    return content;
+  };
+
+  // Preview
+  const generatePreview=()=>{
+    const totals=computeTotals();const selFormat=formats.find(f=>f.id===format);
+    const content=generateContent(format,totals);
+    setPreviewData({content,format:selFormat,...totals,periodLabel:periodType==='year'?selYear+'':periodType==='quarter'?'T'+Math.floor(selMonth/3+1)+'/'+selYear:moisNames[selMonth]+' '+selYear});
+    setShowPreview(true);setTab('preview');
+  };
+
+  // Export file + save to Supabase
+  const doExport=async()=>{
+    const totals=computeTotals();const selFormat=formats.find(f=>f.id===format);
+    const content=generateContent(format,totals);
+    const periodLabel=periodType==='year'?selYear+'':periodType==='quarter'?'T'+Math.floor(selMonth/3+1)+'_'+selYear:moisNames[selMonth]+'_'+selYear;
+    try{const blob=new Blob([content],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Export_'+selFormat.name+'_'+periodLabel+selFormat.ext;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);}catch(e){}
+    const exportRecord={format:selFormat.name,format_id:format,period:periodLabel,period_type:periodType,client:selClient,lines_count:totals.lines.length,total_brut:totals.totalBrut,total_net:totals.totalNet,total_onss_e:totals.totalOnssE,total_onss_w:totals.totalOnssW,total_pp:totals.totalPP,date:now.toLocaleString('fr-BE')};
+    setExported(exportRecord);
+    if(supabase&&user){try{const{data}=await supabase.from('export_history').insert({user_id:user.id,...exportRecord,created_at:new Date().toISOString()}).select().single();if(data)setHistory(prev=>[data,...prev]);}catch(e){}}
+  };
+
+  // Styles
+  const gold='#c6a34e';const goldBg='rgba(198,163,78,';const cardBg='rgba(255,255,255,.02)';const borderSub='rgba(255,255,255,.05)';
+  const sBtn=(active)=>({padding:'6px 14px',borderRadius:6,border:'none',fontSize:11,fontWeight:600,cursor:'pointer',background:active?goldBg+'0.12)':'rgba(255,255,255,.03)',color:active?gold:'#888',transition:'all .15s'});
+  const sCard={background:cardBg,borderRadius:12,border:'1px solid '+borderSub,padding:16,marginBottom:12};
+  const sInput={padding:'8px 12px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'};
+  const sTh={padding:'8px 10px',textAlign:'left',borderBottom:'1px solid '+borderSub,color:'#888',fontWeight:600,fontSize:10,textTransform:'uppercase',letterSpacing:'.5px'};
+  const sTd={padding:'7px 10px',borderBottom:'1px solid rgba(255,255,255,.02)',color:'#ccc',fontSize:11};
+
+  return <div style={{padding:24}}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:20}}>
+      <div>
+        <h2 style={{fontSize:22,fontWeight:700,color:gold,margin:'0 0 4px'}}>📒 Export Comptable Pro</h2>
+        <p style={{fontSize:12,color:'#888',margin:0}}>Connecteurs BOB, WinBooks, Exact, Octopus, Horus — Export complet écritures salariales</p>
+      </div>
+      <div style={{display:'flex',gap:2,background:'rgba(255,255,255,.02)',borderRadius:8,padding:3}}>
+        {[{id:'export',label:'📤 Export'},{id:'mapping',label:'🔗 Mapping PCMN'},{id:'history',label:'📋 Historique'}].map(t=><button key={t.id} onClick={()=>setTab(t.id)} style={{...sBtn(tab===t.id),padding:'8px 14px',borderRadius:6}}>{t.label}</button>)}
+        {showPreview&&<button onClick={()=>setTab('preview')} style={{...sBtn(tab==='preview'),padding:'8px 14px',borderRadius:6}}>👁️ Aperçu</button>}
+      </div>
+    </div>
+
+    {tab==='export'&&<>
+      <div style={sCard}>
+        <div style={{fontSize:11,fontWeight:600,color:'#888',marginBottom:10,textTransform:'uppercase',letterSpacing:'.5px'}}>Format d'export</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
+          {formats.map(fmt=><button key={fmt.id} onClick={()=>setFormat(fmt.id)} style={{padding:14,borderRadius:12,cursor:'pointer',textAlign:'left',transition:'all .15s',border:format===fmt.id?'2px solid '+gold:'1px solid '+borderSub,background:format===fmt.id?goldBg+'0.08)':cardBg}}>
+            <div style={{fontSize:18}}>{fmt.icon}</div>
+            <div style={{fontSize:12,fontWeight:600,color:format===fmt.id?gold:'#e5e5e5',marginTop:4}}>{fmt.name}</div>
+            <div style={{fontSize:9,color:'#888'}}>{fmt.desc} ({fmt.ext})</div>
+          </button>)}
+        </div>
+      </div>
+
+      <div style={sCard}>
+        <div style={{fontSize:11,fontWeight:600,color:'#888',marginBottom:10,textTransform:'uppercase',letterSpacing:'.5px'}}>Période & Filtre</div>
+        <div style={{display:'flex',gap:12,alignItems:'center',flexWrap:'wrap'}}>
+          <div style={{display:'flex',gap:4}}>
+            {[{id:'month',l:'Mensuel'},{id:'quarter',l:'Trimestriel'},{id:'year',l:'Annuel'}].map(p=><button key={p.id} onClick={()=>setPeriodType(p.id)} style={sBtn(periodType===p.id)}>{p.l}</button>)}
+          </div>
+          {periodType!=='year'&&<select value={selMonth} onChange={e=>setSelMonth(+e.target.value)} style={sInput}>
+            {periodType==='quarter'?[0,3,6,9].map(m=><option key={m} value={m}>T{m/3+1}</option>):moisNames.map((m,i)=><option key={i} value={i}>{m}</option>)}
+          </select>}
+          <select value={selYear} onChange={e=>setSelYear(+e.target.value)} style={sInput}>{years.map(y=><option key={y} value={y}>{y}</option>)}</select>
+          <select value={selClient} onChange={e=>setSelClient(e.target.value)} style={{...sInput,minWidth:160}}>
+            <option value="all">Tous les clients</option>
+            {clients.map((c,i)=><option key={i} value={c.company?.name}>{c.company?.name}</option>)}
+          </select>
+        </div>
+        <div style={{marginTop:10,padding:'8px 12px',background:goldBg+'0.04)',borderRadius:6,fontSize:11,color:'#aaa'}}>
+          📅 Période: <span style={{color:gold,fontWeight:600}}>{periodType==='year'?'Année '+selYear:periodType==='quarter'?'T'+Math.floor(selMonth/3+1)+' '+selYear:moisNames[selMonth]+' '+selYear}</span>
+          {selClient!=='all'&&<span> — Client: <span style={{color:gold,fontWeight:600}}>{selClient}</span></span>}
+        </div>
+      </div>
+
+      {(()=>{const{lines,totalBrut,totalOnssW,totalOnssE,totalPP,totalNet}=computeTotals();return <div style={sCard}>
+        <div style={{fontSize:11,fontWeight:600,color:'#888',marginBottom:10,textTransform:'uppercase',letterSpacing:'.5px'}}>Résumé — {lines.length} employé{lines.length>1?'s':''}</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:8}}>
+          {[{label:'Brut total',val:totalBrut,color:'#4fc3f7'},{label:'ONSS patron.',val:totalOnssE,color:'#ff8a65'},{label:'ONSS trav.',val:totalOnssW,color:'#ffb74d'},{label:'Précompte',val:totalPP,color:'#e57373'},{label:'Net à payer',val:totalNet,color:'#81c784'}].map(item=><div key={item.label} style={{padding:12,borderRadius:8,background:'rgba(255,255,255,.02)',textAlign:'center'}}>
+            <div style={{fontSize:9,color:'#666',marginBottom:4}}>{item.label}</div>
+            <div style={{fontSize:15,fontWeight:700,color:item.color}}>{f2(item.val)} €</div>
+          </div>)}
+        </div>
+      </div>;})()}
+
+      <div style={{display:'flex',gap:10}}>
+        <button onClick={generatePreview} style={{padding:'12px 24px',borderRadius:8,border:'1px solid '+gold,background:'transparent',color:gold,fontSize:13,fontWeight:600,cursor:'pointer',flex:1}}>👁️ Aperçu avant export</button>
+        <button onClick={doExport} style={{padding:'12px 24px',borderRadius:8,border:'none',background:'linear-gradient(135deg,'+gold+',#a8893a)',color:'#090c16',fontSize:13,fontWeight:700,cursor:'pointer',flex:1}}>📥 Exporter {formats.find(f=>f.id===format)?.name}</button>
+      </div>
+
+      {exported&&<div style={{marginTop:12,padding:14,borderRadius:8,background:'rgba(76,175,80,.08)',border:'1px solid rgba(76,175,80,.2)'}}>
+        <div style={{fontSize:12,fontWeight:600,color:'#81c784',marginBottom:4}}>✅ Export effectué</div>
+        <div style={{fontSize:11,color:'#aaa'}}>{exported.format} — {exported.lines_count} ligne{exported.lines_count>1?'s':''} — Brut: {f2(exported.total_brut)}€ / Net: {f2(exported.total_net)}€ — {exported.date}</div>
+      </div>}
+    </>}
+
+    {tab==='mapping'&&<div style={sCard}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+        <div>
+          <div style={{fontSize:13,fontWeight:600,color:'#e5e5e5'}}>🔗 Mapping comptes PCMN</div>
+          <div style={{fontSize:10,color:'#666',marginTop:2}}>Correspondance entre les types de salaire et votre plan comptable</div>
+        </div>
+        <div style={{display:'flex',gap:8,alignItems:'center'}}>
+          <button onClick={()=>{setPcmn({...defaultPcmn});setPcmnSaved(false);}} style={{padding:'6px 12px',borderRadius:6,border:'1px solid '+borderSub,background:'transparent',color:'#888',fontSize:10,cursor:'pointer'}}>↩️ Réinitialiser</button>
+          <button onClick={savePcmnMapping} style={{padding:'6px 16px',borderRadius:6,border:'none',background:pcmnSaved?'rgba(76,175,80,.1)':goldBg+'0.15)',color:pcmnSaved?'#81c784':gold,fontSize:10,fontWeight:600,cursor:'pointer'}}>{pcmnSaved?'✅ Sauvegardé':'💾 Sauvegarder'}</button>
+        </div>
+      </div>
+      {pcmnLoading?<div style={{padding:20,textAlign:'center',color:'#666'}}>Chargement...</div>:
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
+          <thead><tr><th style={sTh}>Type</th><th style={sTh}>Compte PCMN</th><th style={sTh}>Par défaut</th></tr></thead>
+          <tbody>{Object.keys(pcmnLabels).map(key=><tr key={key}>
+            <td style={sTd}><span style={{fontWeight:600,color:'#e5e5e5'}}>{pcmnLabels[key]}</span></td>
+            <td style={sTd}><input type="text" value={pcmn[key]||''} onChange={e=>{setPcmn(prev=>({...prev,[key]:e.target.value}));setPcmnSaved(false);}} style={{...sInput,width:120,textAlign:'center',fontFamily:'monospace',fontWeight:600,fontSize:13}}/></td>
+            <td style={{...sTd,fontFamily:'monospace',color:'#555',fontSize:10}}>{defaultPcmn[key]}</td>
+          </tr>)}</tbody>
+        </table>}
+      <div style={{marginTop:12,padding:10,background:'rgba(66,165,245,.05)',borderRadius:6,fontSize:10,color:'#78909c'}}>💡 Ces comptes sont utilisés pour tous les formats d'export. Les changements sont sauvegardés dans votre profil Supabase.</div>
+    </div>}
+
+    {tab==='history'&&<div style={sCard}>
+      <div style={{fontSize:13,fontWeight:600,color:'#e5e5e5',marginBottom:12}}>📋 Historique des exports</div>
+      {historyLoading?<div style={{padding:20,textAlign:'center',color:'#666'}}>Chargement...</div>:
+        history.length===0?<div style={{padding:30,textAlign:'center',color:'#555'}}><div style={{fontSize:28,marginBottom:8}}>📭</div><div style={{fontSize:12}}>Aucun export effectué</div></div>:
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
+          <thead><tr><th style={sTh}>Date</th><th style={sTh}>Format</th><th style={sTh}>Période</th><th style={sTh}>Client</th><th style={sTh}>Lignes</th><th style={sTh}>Brut</th><th style={sTh}>Net</th></tr></thead>
+          <tbody>{history.map((h,i)=><tr key={i} style={{background:i%2===0?'transparent':'rgba(255,255,255,.01)'}}>
+            <td style={sTd}>{h.date||new Date(h.created_at).toLocaleString('fr-BE')}</td>
+            <td style={sTd}><span style={{padding:'2px 8px',borderRadius:4,fontSize:10,fontWeight:600,background:goldBg+'0.08)',color:gold}}>{h.format}</span></td>
+            <td style={sTd}>{h.period}</td>
+            <td style={sTd}>{h.client==='all'?'Tous':h.client}</td>
+            <td style={sTd}>{h.lines_count}</td>
+            <td style={{...sTd,fontFamily:'monospace',color:'#4fc3f7'}}>{f2(h.total_brut)}€</td>
+            <td style={{...sTd,fontFamily:'monospace',color:'#81c784'}}>{f2(h.total_net)}€</td>
+          </tr>)}</tbody>
+        </table>}
+      {history.length>0&&<div style={{marginTop:12,padding:10,background:'rgba(66,165,245,.05)',borderRadius:6,fontSize:10,color:'#78909c'}}>💡 {history.length} export{history.length>1?'s':''} enregistré{history.length>1?'s':''}. L'historique permet de tracer et d'éviter les doublons.</div>}
+    </div>}
+
+    {tab==='preview'&&previewData&&<div style={sCard}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+        <div>
+          <div style={{fontSize:13,fontWeight:600,color:'#e5e5e5'}}>👁️ Aperçu — {previewData.format.name} ({previewData.format.ext})</div>
+          <div style={{fontSize:10,color:'#666',marginTop:2}}>Période: {previewData.periodLabel} — {previewData.lines.length} employé{previewData.lines.length>1?'s':''}</div>
+        </div>
+        <button onClick={doExport} style={{padding:'8px 20px',borderRadius:6,border:'none',background:'linear-gradient(135deg,'+gold+',#a8893a)',color:'#090c16',fontSize:11,fontWeight:700,cursor:'pointer'}}>📥 Confirmer l'export</button>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:6,marginBottom:12}}>
+        {[{l:'Brut',v:previewData.totalBrut,c:'#4fc3f7'},{l:'ONSS P.',v:previewData.totalOnssE,c:'#ff8a65'},{l:'ONSS T.',v:previewData.totalOnssW,c:'#ffb74d'},{l:'Préc.',v:previewData.totalPP,c:'#e57373'},{l:'Net',v:previewData.totalNet,c:'#81c784'}].map(x=><div key={x.l} style={{padding:'6px 8px',borderRadius:6,background:'rgba(255,255,255,.02)',textAlign:'center'}}>
+          <div style={{fontSize:8,color:'#555'}}>{x.l}</div>
+          <div style={{fontSize:12,fontWeight:700,color:x.c}}>{f2(x.v)}€</div>
+        </div>)}
+      </div>
+      <div style={{fontSize:11,fontWeight:600,color:'#888',marginBottom:6,textTransform:'uppercase',letterSpacing:'.5px'}}>Détail par employé</div>
+      <table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
+        <thead><tr><th style={sTh}>Client</th><th style={sTh}>Employé</th><th style={sTh}>Brut</th><th style={sTh}>ONSS T.</th><th style={sTh}>Précompte</th><th style={sTh}>Net</th></tr></thead>
+        <tbody>{previewData.lines.map((l,i)=><tr key={i} style={{background:i%2===0?'transparent':'rgba(255,255,255,.01)'}}>
+          <td style={sTd}>{l.client}</td><td style={{...sTd,fontWeight:600,color:'#e5e5e5'}}>{l.employee}</td>
+          <td style={{...sTd,fontFamily:'monospace'}}>{f2(l.gross)}€</td><td style={{...sTd,fontFamily:'monospace'}}>{f2(l.onssW)}€</td>
+          <td style={{...sTd,fontFamily:'monospace'}}>{f2(l.pp)}€</td><td style={{...sTd,fontFamily:'monospace',color:'#81c784'}}>{f2(l.net)}€</td>
+        </tr>)}</tbody>
+      </table>
+      <div style={{marginTop:16}}><div style={{fontSize:11,fontWeight:600,color:'#888',marginBottom:6,textTransform:'uppercase',letterSpacing:'.5px'}}>Contenu du fichier</div>
+        <pre style={{background:'#0a0d17',border:'1px solid '+borderSub,borderRadius:8,padding:14,fontSize:10,color:'#8bc34a',fontFamily:'monospace',overflow:'auto',maxHeight:300,lineHeight:1.5,whiteSpace:'pre-wrap'}}>{previewData.content}</pre>
+      </div>
+      {(()=>{const balance=previewData.totalBrut+previewData.totalOnssE-previewData.totalOnssW-previewData.totalPP-previewData.totalNet;const balanced=Math.abs(balance)<0.01;return <div style={{marginTop:10,padding:10,borderRadius:6,fontSize:11,background:balanced?'rgba(76,175,80,.06)':'rgba(244,67,54,.06)',border:'1px solid '+(balanced?'rgba(76,175,80,.15)':'rgba(244,67,54,.15)'),color:balanced?'#81c784':'#e57373'}}>{balanced?'✅ Balance vérifiée — Débit = Crédit':'⚠️ Déséquilibre détecté: '+f2(balance)+'€'}</div>;})()}
+    </div>}
+  </div>;
+}
 
 export function RecoSalaireMod({s,d}){const ae=s.emps||[];const n=ae.length;const [tab,setTab]=useState("analyse");const [poste,setPoste]=useState("admin");const mb=ae.reduce((a,e)=>a+(+e.gross||0),0);const moyBrut=n>0?mb/n:0;
 const baremes={admin:{min:2200,med:2800,max:3600,p25:2450,p75:3200},compta:{min:2500,med:3200,max:4200,p25:2800,p75:3700},rh:{min:2600,med:3400,max:4500,p25:2900,p75:3900},dev:{min:2800,med:3800,max:5500,p25:3200,p75:4600},manager:{min:3500,med:4500,max:6500,p25:3900,p75:5500},directeur:{min:4500,med:6000,max:9000,p25:5000,p75:7500},ouvrier:{min:RMMMG,med:2400,max:3000,p25:2100,p75:2700},logistique:{min:2100,med:2600,max:3200,p25:2300,p75:2900}};

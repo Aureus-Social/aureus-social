@@ -18802,7 +18802,7 @@ const pg=()=>{
       case'dashclient':return <Dashboard s={s} d={d}/>;
       case'comparateur':return <StatsINSModLazy s={s} d={d}/>;
       case'analytics':return <AnalyticsDashLazy s={s} d={d}/>;
-      case'exportcompta':return <AccountingOutputModLazy s={s} d={d}/>;
+      case'exportcompta':return <AccountingOutputModLazy s={s} d={d} supabase={supabase} user={user}/>;
       case'audittrail':return <AuditTrailLazy s={s} d={d} user={user}/>;
       case'simembauche':return <PromesseEmbaucheLazy s={s} d={d}/>;
       case'echeancier':return <EcheancierPaiementsLazy s={s} d={d}/>;
@@ -18836,7 +18836,7 @@ const pg=()=>{
       case'formationsec':return <PlanFormationModLazy s={s} d={d}/>;
       case'bilansocial':return <BilanSocialBNBModLazy s={s} d={d}/>;
       case'absencespro':return <AbsencesModLazy s={s} d={d}/>;
-      case'exportcomptapro':return <AccountingOutputModLazy s={s} d={d}/>;
+      case'exportcomptapro':return <AccountingOutputModLazy s={s} d={d} supabase={supabase} user={user}/>;
       case'tableaudirection':return <TableauDirectionLazy s={s} d={d}/>;
       case'primecalc':return <GestionPrimesLazy s={s} d={d}/>;
       case'portailclient':return <PortailClientSSLazy s={s} d={d}/>;
