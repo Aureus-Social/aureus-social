@@ -110,6 +110,161 @@ const CATEGORIES = {
   reglementaire: { label: 'Réglementaire', icon: '📋', color: '#f59e0b' },
 }
 
+// Types « contrat de travail » (layout avec logo + références légales)
+const CONTRACT_TYPES = ['CONTRAT_CDI', 'CONTRAT_CDD', 'CONTRAT_STUDENT', 'CONTRAT_TEMPS_PARTIEL', 'AVENANT', 'CONVENTION_RUPTURE']
+
+const REFERENCE_LOIS = [
+  { abbr: 'Loi du 3 juillet 1978', full: 'Loi relative aux contrats de travail (M.B. 22 août 1978)', arts: 'Art. 2, 7, 11, 32' },
+  { abbr: 'Loi du 26 décembre 2013', full: 'Statut unique — préavis', arts: 'Art. 67 à 82' },
+  { abbr: 'AR du 25 juin 1990', full: 'Temps partiel, équipes, week-end', arts: 'Mentions obligatoires' },
+  { abbr: 'Loi du 8 avril 1965', full: 'Règlement de travail', arts: 'Art. 3 et suivants' },
+  { abbr: 'Code civil', full: 'Obligations contractuelles', arts: 'Art. 1134' },
+  { abbr: 'CCT et CP', full: 'Conventions collectives et commission paritaire', arts: 'Conformité CP' },
+]
+
+function escapeHtml(s) {
+  if (s == null || s === '') return ''
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
+function buildContractHTML(type, data) {
+  const company = data.company || {}
+  const now = new Date()
+  const dateStr = now.toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
+  const logoUrl = company.logoUrl || company.logo || ''
+  const coName = escapeHtml(company.name || 'ENTREPRISE')
+  const coAddr = escapeHtml(company.address || '')
+  const coBce = escapeHtml(company.bce || 'N/A')
+  const coOnss = escapeHtml(company.onss || 'N/A')
+  const cp = escapeHtml(data.cp || company.cp || '200')
+  const workerName = escapeHtml(data.name || '___')
+  const workerAddr = escapeHtml(data.address || '___')
+  const workerNiss = escapeHtml(data.niss || '___')
+  const workerBirth = escapeHtml(data.birthDate || '___')
+  const workerFn = escapeHtml(data.function || '___')
+  const startDate = escapeHtml(data.startDate || '___')
+  const endDate = escapeHtml(data.endDate || '___')
+  const salary = escapeHtml(data.salary || '___')
+  const hours = escapeHtml(data.hoursPerWeek || '38')
+  const workplace = escapeHtml(data.workplace || company.address || '___')
+  const city = escapeHtml(company.city || '___')
+  const regime = escapeHtml(data.regime || 'plein')
+
+  const headerBlock = `
+    <header class="contract-header">
+      ${logoUrl ? `<img src="${escapeHtml(logoUrl)}" alt="Logo" class="contract-logo" />` : `<div class="contract-logo-placeholder">${coName}</div>`}
+      <div class="contract-company"><strong>${coName}</strong><br/>${coAddr}<br/>BCE : ${coBce} — ONSS : ${coOnss}<br/>CP : n° ${cp}</div>
+    </header>`
+
+  const loisBlock = `
+    <footer class="contract-lois">
+      <strong>Références légales</strong>
+      <ul>${REFERENCE_LOIS.map(l => `<li><strong>${escapeHtml(l.abbr)}</strong> — ${escapeHtml(l.full)} (${escapeHtml(l.arts)})</li>`).join('')}</ul>
+      <p class="contract-generated">Document généré par Aureus Social Pro — ${dateStr}</p>
+    </footer>`
+
+  const signaturesBlock = `
+    <div class="contract-signatures">
+      <p>Fait en double exemplaire à ${city}, le ${dateStr}.</p>
+      <table class="sign-table"><tr>
+        <td><strong>L'employeur</strong><br/>${coName}<br/><em>(signature)</em></td>
+        <td><strong>Le travailleur</strong><br/>${workerName}<br/><em>(signature)</em></td>
+      </tr></table>
+      <p class="exemplaire">Chaque partie reconnaît avoir reçu un exemplaire du présent contrat.</p>
+    </div>`
+
+  let titleDoc = ''; let lawRef = ''; let bodyArticles = ''
+  switch (type) {
+    case 'CONTRAT_CDI':
+      titleDoc = 'CONTRAT DE TRAVAIL À DURÉE INDÉTERMINÉE'; lawRef = 'Article 7 de la loi du 3 juillet 1978'
+      bodyArticles = `
+        <article class="contract-article"><strong>Article 1 — Objet</strong><br/>Le travailleur est engagé en qualité de ${workerFn}, contrat à durée indéterminée, à temps ${regime}.</article>
+        <article class="contract-article"><strong>Article 2 — Date d'entrée</strong><br/>Le présent contrat prend effet le ${startDate}.</article>
+        <article class="contract-article"><strong>Article 3 — Fonction et lieu</strong><br/>Fonction : ${workerFn}. Lieu : ${workplace}.</article>
+        <article class="contract-article"><strong>Article 4 — Rémunération</strong><br/>Salaire mensuel brut : ${salary} EUR pour ${hours} h/semaine.</article>
+        <article class="contract-article"><strong>Article 5 — Horaire</strong><br/>Conforme au règlement de travail. Régime : ${hours} h/semaine.</article>
+        <article class="contract-article"><strong>Article 6 — Commission paritaire</strong><br/>CP n° ${cp}.</article>
+        <article class="contract-article"><strong>Article 7 — Période d'essai</strong><br/>Conformément à la loi du 26 décembre 2013, plus de clause d'essai depuis le 1er janvier 2014.</article>
+        <article class="contract-article"><strong>Article 8 — Préavis</strong><br/>Délais prévus par la loi du 26 décembre 2013 (statut unique).</article>
+        <article class="contract-article"><strong>Article 9 — Divers</strong><br/>Respect du règlement de travail et secret professionnel.</article>`
+      break
+    case 'CONTRAT_CDD':
+      titleDoc = 'CONTRAT DE TRAVAIL À DURÉE DÉTERMINÉE'; lawRef = 'Article 7 de la loi du 3 juillet 1978'
+      bodyArticles = `
+        <article class="contract-article"><strong>Article 1</strong><br/>Engagement en qualité de ${workerFn}, CDD du ${startDate} au ${endDate}.</article>
+        <article class="contract-article"><strong>Article 2 — Rémunération</strong><br/>${salary} EUR brut/mois, ${hours} h/semaine. CP n° ${cp}.</article>
+        <article class="contract-article"><strong>Article 3 — Fin</strong><br/>Fin de plein droit à l'échéance. Résiliation anticipée : motif grave ou indemnité compensatoire (loi 3 juillet 1978).</article>`
+      break
+    case 'CONTRAT_STUDENT':
+      titleDoc = "CONVENTION D'OCCUPATION ÉTUDIANT"; lawRef = 'Titre VII loi du 3 juillet 1978 — AR du 8 mars 2023'
+      bodyArticles = `
+        <article class="contract-article"><strong>Article 1 — Parties</strong><br/>Employeur : ${coName}. Étudiant : ${workerName} — NISS : ${workerNiss}.</article>
+        <article class="contract-article"><strong>Article 2 — Période</strong><br/>Du ${startDate} au ${endDate}. Fonction : ${workerFn}. Rémunération : ${salary} EUR brut/heure. ${hours} h/semaine.</article>
+        <article class="contract-article"><strong>Article 3 — Mentions obligatoires (AR 8 mars 2023)</strong><br/>Lieu : ${workplace}, préavis, etc.</article>
+        <article class="contract-article"><strong>Article 4 — Cotisations réduites</strong><br/>2,71 % / 5,42 % dans la limite de 600 h/an (Loi 03/07/1978, Titre VII).</article>`
+      break
+    case 'CONTRAT_TEMPS_PARTIEL':
+      titleDoc = 'CONTRAT DE TRAVAIL À TEMPS PARTIEL'; lawRef = 'AR du 25 juin 1990 — Art. 11bis loi du 3 juillet 1978'
+      bodyArticles = `
+        <article class="contract-article"><strong>Article 1 — Régime</strong><br/>Temps partiel : ${hours} h/semaine.</article>
+        <article class="contract-article"><strong>Article 2 — Entrée</strong><br/>Effet le ${startDate}.</article>
+        <article class="contract-article"><strong>Article 3 — Fonction et rémunération</strong><br/>${workerFn} — ${salary} EUR (prorata). CP n° ${cp}.</article>
+        <article class="contract-article"><strong>Article 4 — Art. 11bis</strong><br/>Dérogations régies par le règlement de travail et la loi.</article>`
+      break
+    case 'AVENANT':
+      titleDoc = 'AVENANT AU CONTRAT DE TRAVAIL'; lawRef = 'Art. 1134 Code civil'
+      const modif = escapeHtml(data.modification || '___'); const effDate = escapeHtml(data.effectiveDate || data.startDate || dateStr)
+      bodyArticles = `<article class="contract-article"><strong>Article 1 — Modifications</strong><br/>Effet le ${effDate} :<br/>${modif}</article>`
+      break
+    case 'CONVENTION_RUPTURE':
+      titleDoc = 'CONVENTION DE RUPTURE DE COMMUN ACCORD'; lawRef = 'Art. 32 de la loi du 3 juillet 1978'
+      bodyArticles = `<article class="contract-article"><strong>Article 1</strong><br/>Fin du contrat sans préavis le ${endDate}. Rupture libre et éclairée. Aucune indemnité de préavis. Information sur les conséquences chômage.</article>`
+      break
+    default: return ''
+  }
+
+  const partiesBlock = (type === 'CONVENTION_RUPTURE' || type === 'AVENANT') ? `
+    <div class="contract-parties">
+      <p><strong>L'employeur :</strong> ${coName} — BCE : ${coBce}<br/>${coAddr}</p>
+      <p><strong>Le travailleur :</strong> ${workerName}<br/>NISS : ${workerNiss}${type === 'CONVENTION_RUPTURE' ? `<br/>Domicile : ${workerAddr}` : ''}</p>
+    </div>` : `
+    <div class="contract-parties">
+      <p><strong>L'employeur :</strong> ${coName}, siège ${coAddr}, BCE ${coBce}.</p>
+      <p><strong>Le travailleur :</strong> ${workerName}<br/>Domicile : ${workerAddr}<br/>NISS : ${workerNiss}${workerBirth !== '___' ? `<br/>Né(e) le : ${workerBirth}` : ''}</p>
+    </div>`
+
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>${titleDoc} — ${workerName}</title>
+<style>
+  @page{margin:20mm;size:A4}*{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',Georgia,serif;font-size:11px;line-height:1.5;color:#1a1a1a;padding:20px;max-width:210mm;margin:0 auto}
+  .contract-header{display:flex;align-items:center;gap:20px;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #c6a34e}
+  .contract-logo{max-height:70px;max-width:180px;object-fit:contain}
+  .contract-logo-placeholder{font-size:18px;font-weight:700;color:#c6a34e;min-width:160px}
+  .contract-company{font-size:11px;color:#333;line-height:1.5}
+  .contract-title{font-size:16px;font-weight:700;text-align:center;margin:16px 0 6px;text-transform:uppercase}
+  .contract-law-ref{font-size:10px;color:#666;text-align:center;margin-bottom:16px;font-style:italic}
+  .contract-parties{margin:14px 0;padding:12px;background:#f8f8f8;border-radius:6px}
+  .contract-article{margin:12px 0;padding-left:8px;border-left:3px solid #c6a34e}
+  .contract-signatures{margin-top:28px}.sign-table{width:100%;margin-top:24px}
+  .sign-table td{width:50%;vertical-align:top;padding:8px;font-size:10px}
+  .contract-lois{margin-top:28px;padding-top:16px;border-top:1px solid #ccc;font-size:9px;color:#555}
+  .contract-lois ul{margin:8px 0;padding-left:18px}.contract-generated{margin-top:12px;color:#999}
+  .exemplaire{font-size:10px;margin-top:12px;color:#666}
+  .no-print{display:none!important}
+  @media print{.no-print{display:none!important}}
+</style></head><body>
+<div class="no-print" style="margin-bottom:12px;padding:10px;background:#f0f0f0;border-radius:6px;font-size:11px;">Pour enregistrer en PDF : <strong>Ctrl+P</strong> (ou Cmd+P) puis « Enregistrer au format PDF ».</div>
+${headerBlock}
+<h1 class="contract-title">${titleDoc}</h1>
+<p class="contract-law-ref">${lawRef}</p>
+${partiesBlock}
+<p><strong>Il est convenu ce qui suit :</strong></p>
+${bodyArticles}
+${signaturesBlock}
+${loisBlock}
+</body></html>`
+}
+
 // ── Calcul préavis belge (loi du 26 décembre 2013) ──
 function calculateNotice(startDate, isEmployer, statut) {
   if (!startDate) return 0
@@ -629,7 +784,9 @@ export default function DocumentGenerator({ state }) {
 
     const typeName = DOC_TYPES[selectedType]?.label || selectedType
     const title = `${typeName} — ${(data.name || 'doc').replace(/\s+/g, ' ').trim() || 'doc'}`
-    const html = documentToPrintHTML(content, title)
+    const html = CONTRACT_TYPES.includes(selectedType)
+      ? buildContractHTML(selectedType, data)
+      : documentToPrintHTML(content, title)
 
     setGenerated({ type: selectedType, content, data, html, title })
 
@@ -641,14 +798,18 @@ export default function DocumentGenerator({ state }) {
     if (!generated) return
     const typeName = DOC_TYPES[generated.type]?.label || generated.type
     const title = `${typeName} — ${(generated.data.name || 'doc').replace(/\s+/g, ' ')}`
-    const html = documentToPrintHTML(generated.content, title)
+    const html = CONTRACT_TYPES.includes(generated.type)
+      ? buildContractHTML(generated.type, generated.data)
+      : documentToPrintHTML(generated.content, title)
     openForPDF(html, title)
   }, [generated])
 
   const handlePrint = useCallback(() => {
     if (!generated) return
     const typeName = DOC_TYPES[generated.type]?.label || generated.type
-    const html = documentToPrintHTML(generated.content, typeName)
+    const html = CONTRACT_TYPES.includes(generated.type)
+      ? buildContractHTML(generated.type, generated.data)
+      : documentToPrintHTML(generated.content, typeName)
     openForPDF(html, typeName)
   }, [generated])
 
@@ -806,7 +967,7 @@ export default function DocumentGenerator({ state }) {
             <iframe
               title="Aperçu document"
               style={{ width: '100%', height: 680, border: 'none', display: 'block' }}
-              srcDoc={generated.html || documentToPrintHTML(generated.content || '', generated.title || '')}
+              srcDoc={generated.html || (CONTRACT_TYPES.includes(generated.type) ? buildContractHTML(generated.type, generated.data) : documentToPrintHTML(generated.content || '', generated.title || ''))}
             />
           </div>
         </div>
