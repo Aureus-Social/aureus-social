@@ -26,6 +26,7 @@ export default function RootLayout({ children }) {
     <html lang="fr">
       <head>
         <meta name="theme-color" content="#c6a34e" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-title" content="AureusPro" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
