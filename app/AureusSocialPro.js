@@ -22599,26 +22599,30 @@ function downloadFile(content, filename, mimeType) {
 
 function openForPDF(html, title) {
   try {
-    const win = window.open('', '_blank', 'width=900,height=700,scrollbars=yes');
+    const win = window.open('', '_blank', 'noopener,noreferrer,width=900,height=700,scrollbars=yes');
     if (win && !win.closed) {
       win.document.write(html);
       win.document.close();
       win.document.title = title || 'Aureus Social Pro';
       win.focus();
-      setTimeout(() => { try { win.print(); } catch(e) {} }, 500);
+      setTimeout(function(){ try { win.print(); } catch(err) {} }, 600);
       return;
     }
   } catch(e) {}
-  const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.88);z-index:99999;display:flex;flex-direction:column;align-items:center;padding:16px';
-  const bar = document.createElement('div');
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:2147483647;display:flex;flex-direction:column;align-items:center;padding:20px;font-family:system-ui,sans-serif';
+  var titre = document.createElement('div');
+  titre.textContent = 'Document prêt — Cliquez « Télécharger PDF » puis dans la fenêtre choisissez « Enregistrer au format PDF »';
+  titre.style.cssText = 'color:#c6a34e;font-weight:700;font-size:14px;margin-bottom:12px;text-align:center;max-width:600px';
+  overlay.appendChild(titre);
+  var bar = document.createElement('div');
   bar.style.cssText = 'display:flex;gap:8px;margin-bottom:12px';
-  const iframe = document.createElement('iframe');
-  iframe.style.cssText = 'flex:1;width:100%;max-width:900px;border:2px solid rgba(198,163,78,.3);border-radius:10px;background:#fff';
+  var iframe = document.createElement('iframe');
+  iframe.style.cssText = 'flex:1;width:100%;max-width:900px;border:2px solid rgba(198,163,78,.4);border-radius:10px;background:#fff';
   iframe.srcdoc = html;
   [
-    { text: '📄 Télécharger PDF', bg: '#c6a34e', color: '#060810', fn: () => { try { iframe.contentWindow.print(); } catch(e) { alert('Utilisez Ctrl+P pour enregistrer en PDF'); } } },
-    { text: '✕ Fermer', bg: '#ef4444', color: '#fff', fn: () => document.body.removeChild(overlay) }
+    { text: '📄 Télécharger PDF', bg: '#c6a34e', color: '#060810', fn: function() { try { if (iframe.contentWindow) iframe.contentWindow.print(); else alert('Chargement... Réessayez dans 2 secondes.'); } catch(e) { alert('Utilisez Ctrl+P (ou Cmd+P) puis « Enregistrer au format PDF »'); } } },
+    { text: '✕ Fermer', bg: '#ef4444', color: '#fff', fn: function() { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); } }
   ].forEach(b => {
     const btn = document.createElement('button');
     btn.textContent = b.text;

@@ -121,7 +121,7 @@ export function middleware(request) {
     `object-src 'none'`,
   ].join('; ');
   response.headers.set('Content-Security-Policy', csp);
-  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
 
   return response;
