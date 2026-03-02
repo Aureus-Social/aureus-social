@@ -7,6 +7,7 @@
 // ═══════════════════════════════════════════════════════
 
 import { useState, useMemo, useCallback } from 'react'
+import { openForPDF } from '@/app/lib/doc-generators'
 
 const GOLD = '#c6a34e'
 const DARK = '#0d1117'
@@ -583,7 +584,6 @@ function documentToPrintHTML(content, title) {
 </div>
 <div class="content">${escaped}</div>
 <div class="footer">Document généré par Aureus Social Pro — ${new Date().toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
-<script>window.onload=function(){window.print();}</script>
 </body></html>`
 }
 
@@ -626,40 +626,30 @@ export default function DocumentGenerator({ state }) {
     }
 
     const content = generateDocument(selectedType, data)
-    setGenerated({ type: selectedType, content, data })
-  }, [selectedType, selectedEmployee, formData, employees, company])
 
-  const handleDownloadTxt = useCallback(() => {
-    if (!generated) return
-    const blob = new Blob([generated.content], { type: 'text/plain;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    const typeName = DOC_TYPES[generated.type]?.label || generated.type
-    a.download = `${typeName.replace(/\s+/g, '_')}_${(generated.data.name || 'doc').replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.txt`
-    a.click()
-    URL.revokeObjectURL(url)
-  }, [generated])
+    const typeName = DOC_TYPES[selectedType]?.label || selectedType
+    const title = `${typeName} — ${(data.name || 'doc').replace(/\s+/g, ' ').trim() || 'doc'}`
+    const html = documentToPrintHTML(content, title)
+
+    setGenerated({ type: selectedType, content, data, html, title })
+
+    // PDF par défaut (impression navigateur → Enregistrer au format PDF)
+    openForPDF(html, title)
+  }, [selectedType, selectedEmployee, formData, employees, company])
 
   const handleDownloadPDF = useCallback(() => {
     if (!generated) return
     const typeName = DOC_TYPES[generated.type]?.label || generated.type
     const title = `${typeName} — ${(generated.data.name || 'doc').replace(/\s+/g, ' ')}`
     const html = documentToPrintHTML(generated.content, title)
-    const printWindow = window.open('', '_blank')
-    if (!printWindow) return
-    printWindow.document.write(html)
-    printWindow.document.close()
+    openForPDF(html, title)
   }, [generated])
 
   const handlePrint = useCallback(() => {
     if (!generated) return
     const typeName = DOC_TYPES[generated.type]?.label || generated.type
     const html = documentToPrintHTML(generated.content, typeName)
-    const printWindow = window.open('', '_blank')
-    if (!printWindow) return
-    printWindow.document.write(html)
-    printWindow.document.close()
+    openForPDF(html, typeName)
   }, [generated])
 
   return (
@@ -804,22 +794,21 @@ export default function DocumentGenerator({ state }) {
                 📄 Télécharger PDF
               </button>
               <button onClick={handlePrint} style={btnStyle}>Imprimer</button>
-              <button onClick={handleDownloadTxt} style={btnStyle}>Télécharger .txt</button>
               <button
                 onClick={() => { navigator.clipboard?.writeText(generated.content) }}
                 style={btnStyle}
               >
-                Copier
+                Copier le texte
               </button>
             </div>
           </div>
-          <pre style={{
-            whiteSpace: 'pre-wrap', fontFamily: 'monospace', fontSize: 12, color: TEXT,
-            lineHeight: 1.5, maxHeight: 600, overflowY: 'auto', padding: 16,
-            background: '#060810', borderRadius: 6, border: `1px solid ${BORDER}`,
-          }}>
-            {generated.content}
-          </pre>
+          <div style={{ borderRadius: 10, overflow: 'hidden', border: `1px solid ${BORDER}`, background: '#fff' }}>
+            <iframe
+              title="Aperçu document"
+              style={{ width: '100%', height: 680, border: 'none', display: 'block' }}
+              srcDoc={generated.html || documentToPrintHTML(generated.content || '', generated.title || '')}
+            />
+          </div>
         </div>
       )}
     </div>

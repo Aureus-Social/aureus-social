@@ -4,9 +4,10 @@
 // network-first for data, cache-first for assets
 // ═══════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'aureus-v20.5';
-const STATIC_CACHE = 'aureus-static-v20.5';
-const DATA_CACHE = 'aureus-data-v20.5';
+// IMPORTANT: Incrémenter ces versions pour forcer la mise à jour client.
+const CACHE_NAME = 'aureus-v20.6';
+const STATIC_CACHE = 'aureus-static-v20.6';
+const DATA_CACHE = 'aureus-data-v20.6';
 
 const STATIC_ASSETS = [
   '/',
