@@ -20513,13 +20513,10 @@ function Payslips({s,d}) {
           </table>
         </div>
 
-        {/* BOUTON EXPORT PDF */}
+        {/* BOUTON PDF uniquement — plus de téléchargement HTML/txt */}
         <div style={{marginTop:14,display:'flex',gap:10,justifyContent:'center'}} className="no-print">
           <button onClick={()=>{
             generatePayslipPDF(emp,res,per,s.co)}} style={{padding:'12px 28px',background:"#c6a34e",color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer',letterSpacing:'.5px'}}>🖨 Imprimer / PDF</button>
-          <button onClick={()=>{
-            generatePayslipPDF(emp,res,per,s.co)
-          }} style={{padding:'12px 28px',background:"transparent",color:'#c6a34e',border:'2px solid #c6a34e',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer'}}>💾 Télécharger HTML</button>
         </div>
       </div>}
     </div>
