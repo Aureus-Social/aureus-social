@@ -34,7 +34,7 @@ const DOC_TYPES = {
     label: 'Convention étudiant',
     category: 'contrat',
     icon: '🎓',
-    description: 'Convention d\'occupation étudiant (max 650h/an)',
+    description: 'Convention d\'occupation étudiant — max 600 h/an, cotisations réduites 2,71 %',
     required: ['name', 'startDate', 'endDate', 'salary'],
   },
   AVENANT: {
@@ -43,6 +43,20 @@ const DOC_TYPES = {
     icon: '📝',
     description: 'Modification du contrat de travail existant',
     required: ['name', 'modification'],
+  },
+  CONVENTION_RUPTURE: {
+    label: 'Convention de rupture',
+    category: 'sortie',
+    icon: '🤝',
+    description: 'Rupture d\'un commun accord — pas de préavis (Art. 32 Loi 03/07/1978)',
+    required: ['name', 'endDate'],
+  },
+  CONTRAT_TEMPS_PARTIEL: {
+    label: 'Contrat temps partiel',
+    category: 'contrat',
+    icon: '📄',
+    description: 'AR 25/06/1990 — Mentions obligatoires: régime, horaire',
+    required: ['name', 'startDate', 'salary', 'function', 'hoursPerWeek'],
   },
   ATTESTATION_EMPLOI: {
     label: 'Attestation d\'emploi',
@@ -265,8 +279,8 @@ MENTIONS OBLIGATOIRES (AR du 8 mars 2023) :
 - Durée du préavis : ${data.noticeDays || 3} jours (premiers 7 jours) / 7 jours (après)
 
 COTISATIONS SOCIALES RÉDUITES :
-L'étudiant bénéficie du régime de cotisations réduites (2,71% + 5,42%)
-dans la limite de 650 heures par année civile (contingent).
+L'étudiant bénéficie du régime de cotisations réduites (2,71 % travailleur, 5,42 % employeur)
+dans la limite de 600 heures par année civile (contingent — Loi 03/07/1978, Titre VII).
 
 Fait en double exemplaire à ${company.city || '___'}, le ${dateStr}.
 `
@@ -413,9 +427,164 @@ Fait à ${company.city || '___'}, le ${dateStr}.
 (signature et cachet)
 `
 
+    case 'AVENANT':
+      return `${header}
+AVENANT AU CONTRAT DE TRAVAIL
+(Art. 1134 Code civil — modification par accord mutuel)
+
+Entre :
+  L'employeur : ${company.name || '___'} — BCE : ${company.bce || '___'}
+  ${company.address || '___'}
+
+Et :
+  Le travailleur : ${data.name || '___'}
+  NISS : ${data.niss || '___'}
+
+Les parties conviennent des modifications suivantes, prenant effet le ${data.effectiveDate || data.startDate || dateStr} :
+
+${data.modification || '___'}
+
+Fait en double exemplaire à ${company.city || '___'}, le ${dateStr}.
+
+L'employeur                          Le travailleur
+(signature)                          (signature)
+`
+
+    case 'CONVENTION_RUPTURE':
+      return `${header}
+CONVENTION DE RUPTURE DE COMMUN ACCORD
+(Art. 32 de la loi du 3 juillet 1978)
+
+Entre :
+  L'employeur : ${company.name || '___'} — BCE : ${company.bce || '___'}
+  ${company.address || '___'}
+
+Et :
+  Le travailleur : ${data.name || '___'}
+  NISS : ${data.niss || '___'}
+  Domicilié(e) à : ${data.address || '___'}
+
+Les parties conviennent de mettre fin au contrat de travail qui les lie,
+sans préavis, à la date du ${data.endDate || '___'}.
+
+Cette rupture est décidée d'un commun accord, libre et éclairé.
+Aucune indemnité de préavis n'est due.
+
+Le travailleur déclare avoir été informé des conséquences sur ses droits
+au chômage (possibilité de sanction ONEM en cas de rupture de commun accord).
+
+Fait en double exemplaire à ${company.city || '___'}, le ${dateStr}.
+
+L'employeur                          Le travailleur
+(signature)                          (signature)
+`
+
+    case 'CONTRAT_TEMPS_PARTIEL':
+      return `${header}
+CONTRAT DE TRAVAIL À TEMPS PARTIEL
+(AR du 25 juin 1990 — Art. 11bis loi du 3 juillet 1978)
+
+Entre :
+  L'employeur : ${company.name || '___'} — BCE : ${company.bce || '___'}
+  ${company.address || '___'}
+
+Et :
+  Le travailleur : ${data.name || '___'}
+  NISS : ${data.niss || '___'}
+
+Il est convenu ce qui suit :
+
+Article 1 — Régime de travail
+Le travailleur est engagé à temps partiel.
+Nombre d'heures par semaine : ${data.hoursPerWeek || '___'} heures.
+Répartition : ${data.schedule || 'conformément au règlement de travail'}.
+
+Article 2 — Entrée en service
+Le présent contrat prend effet le ${data.startDate || '___'}.
+
+Article 3 — Fonction et rémunération
+Fonction : ${data.function || '___'}.
+Salaire mensuel brut (prorata) : ${data.salary || '___'} EUR.
+Commission paritaire : n° ${data.cp || '200'}.
+
+Article 4 — Mentions obligatoires (Art. 11bis)
+Les dérogations au principe de l'égalité de traitement (heures complémentaires,
+jours de travail, etc.) sont régies par le règlement de travail et la loi.
+
+Fait en double exemplaire à ${company.city || '___'}, le ${dateStr}.
+
+L'employeur                          Le travailleur
+(signature)                          (signature)
+`
+
+    case 'REGLEMENT_TRAVAIL':
+      return `${header}
+RÈGLEMENT DE TRAVAIL
+(Loi du 8 avril 1965)
+
+Entreprise : ${company.name || data.companyName || '___'}
+Siège : ${company.address || '___'}
+BCE : ${company.bce || '___'}
+
+Le présent règlement de travail est applicable à l'ensemble du personnel.
+Il comporte les dispositions relatives à l'ordre et à la discipline,
+à la durée du travail, aux congés, à la rémunération et aux conditions
+de travail, conformément à la loi du 8 avril 1965.
+
+(Modèle — à compléter selon les dispositions légales et la CCT applicable.)
+
+Fait à ${company.city || '___'}, le ${dateStr}.
+`
+
+    case 'ATTESTATION_VACANCES':
+      return `${header}
+ATTESTATION DE VACANCES ANNUELLES
+(Année ${data.year || now.getFullYear()})
+
+Je soussigné(e), ${data.signatoryName || '___'}, au nom de ${company.name || '___'},
+
+ATTESTE QUE :
+
+Madame/Monsieur ${data.name || '___'} a droit au pécule de vacances
+pour l'année ${data.year || now.getFullYear()}, conformément à la législation
+sur les vacances annuelles (loi du 4 janvier 1974).
+
+La présente attestation est délivrée pour servir et valoir ce que de droit.
+
+Fait à ${company.city || '___'}, le ${dateStr}.
+
+(signature et cachet)
+`
+
     default:
       return `Document de type ${type} — génération non implémentée.`
   }
+}
+
+// ── HTML print-ready pour export PDF (impression navigateur → Enregistrer en PDF) ──
+function documentToPrintHTML(content, title) {
+  const escaped = content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br>\n')
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>${title || 'Document'}</title>
+<style>
+  @page { margin: 20mm; size: A4; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; line-height: 1.5; color: #1a1a1a; padding: 24px; max-width: 210mm; margin: 0 auto; }
+  .content { white-space: pre-wrap; word-wrap: break-word; }
+  .content br { display: block; content: ''; }
+  .footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid #ccc; font-size: 9px; color: #666; }
+  @media print { body { padding: 0; } .no-print { display: none !important; } }
+</style></head><body>
+<div class="no-print" style="margin-bottom:16px;padding:12px;background:#f0f0f0;border-radius:8px;font-size:12px;">
+  Pour enregistrer en PDF : <strong>Ctrl+P</strong> (ou Cmd+P) puis choisir « Enregistrer au format PDF ».
+</div>
+<div class="content">${escaped}</div>
+<div class="footer">Document généré par Aureus Social Pro — ${new Date().toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+<script>window.onload=function(){window.print();}</script>
+</body></html>`
 }
 
 // ── Composant principal ──
@@ -460,7 +629,7 @@ export default function DocumentGenerator({ state }) {
     setGenerated({ type: selectedType, content, data })
   }, [selectedType, selectedEmployee, formData, employees, company])
 
-  const handleDownload = useCallback(() => {
+  const handleDownloadTxt = useCallback(() => {
     if (!generated) return
     const blob = new Blob([generated.content], { type: 'text/plain;charset=utf-8' })
     const url = URL.createObjectURL(blob)
@@ -472,12 +641,25 @@ export default function DocumentGenerator({ state }) {
     URL.revokeObjectURL(url)
   }, [generated])
 
+  const handleDownloadPDF = useCallback(() => {
+    if (!generated) return
+    const typeName = DOC_TYPES[generated.type]?.label || generated.type
+    const title = `${typeName} — ${(generated.data.name || 'doc').replace(/\s+/g, ' ')}`
+    const html = documentToPrintHTML(generated.content, title)
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) return
+    printWindow.document.write(html)
+    printWindow.document.close()
+  }, [generated])
+
   const handlePrint = useCallback(() => {
     if (!generated) return
+    const typeName = DOC_TYPES[generated.type]?.label || generated.type
+    const html = documentToPrintHTML(generated.content, typeName)
     const printWindow = window.open('', '_blank')
-    printWindow.document.write(`<pre style="font-family:monospace;font-size:12px;white-space:pre-wrap;max-width:800px;margin:40px auto;">${generated.content}</pre>`)
+    if (!printWindow) return
+    printWindow.document.write(html)
     printWindow.document.close()
-    printWindow.print()
   }, [generated])
 
   return (
@@ -617,9 +799,12 @@ export default function DocumentGenerator({ state }) {
             <h3 style={{ color: GOLD, margin: 0, fontSize: 15 }}>
               {DOC_TYPES[generated.type]?.label}
             </h3>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button onClick={handleDownloadPDF} style={{ ...btnStyle, background: GOLD, color: DARK, fontWeight: 600 }}>
+                📄 Télécharger PDF
+              </button>
               <button onClick={handlePrint} style={btnStyle}>Imprimer</button>
-              <button onClick={handleDownload} style={btnStyle}>Télécharger</button>
+              <button onClick={handleDownloadTxt} style={btnStyle}>Télécharger .txt</button>
               <button
                 onClick={() => { navigator.clipboard?.writeText(generated.content) }}
                 style={btnStyle}
