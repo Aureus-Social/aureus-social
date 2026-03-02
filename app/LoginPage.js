@@ -60,7 +60,7 @@ export default function LoginPage({ onLogin }) {
     return true;
   }, []);
 
-  if (!supabase) return <div style={{minHeight:"100vh",background:"#060810",display:"flex",alignItems:"center",justifyContent:"center",color:"#ef4444",fontFamily:"Inter,sans-serif",padding:40,textAlign:"center"}}><div><div style={{fontSize:48,marginBottom:16}}>⚠️</div><div style={{fontSize:18,fontWeight:600,color:"#e5e5e5",marginBottom:8}}>Configuration requise</div><div style={{fontSize:13,color:"#999",lineHeight:1.6}}>Les variables d'environnement Supabase ne sont pas configurées.<br/>Ajoutez NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY dans Vercel.</div></div></div>;
+  if (!supabase) return <div style={{minHeight:"100vh",background:"#060810",display:"flex",alignItems:"center",justifyContent:"center",color:"#ef4444",fontFamily:"Inter,sans-serif",padding:40,textAlign:"center"}}><div><div style={{fontSize:48,marginBottom:16}}>⚠️</div><div style={{fontSize:18,fontWeight:600,color:"#e5e5e5",marginBottom:8}}>Configuration requise</div><div style={{fontSize:13,color:"#999",lineHeight:1.6}}>Les variables d'environnement Supabase ne sont pas configurées.<br/>En local : créez un fichier <code style={{background:"#1a1d24",padding:"2px 6px",borderRadius:4}}>.env.local</code> à la racine du projet avec NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY (voir <code style={{background:"#1a1d24",padding:"2px 6px",borderRadius:4}}>.env.example</code>).<br/>En production : ajoutez ces variables dans les paramètres du projet Vercel.</div></div></div>;
 
   const handleLogin = async (e) => {
     e.preventDefault();

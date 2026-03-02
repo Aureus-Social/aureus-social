@@ -1601,7 +1601,7 @@ function calc(emp, per, co) {
   // → L'employeur ne la déclare PAS en DmfA (c'est l'ONEM qui déclare)
   //
   // Sur la fiche de paie: mention "pour mémoire" — déduit du coût employeur
-  const allocType = per.allocTravailType || 'none';
+  const allocType = per.allocTravailType || (emp && emp.allocTravailType) || 'none';
   r.allocTravail = per.allocTravail || 0;
   r.allocTravailType = allocType;
   // Montants standards par type (si pas de montant custom)
@@ -1613,6 +1613,7 @@ function calc(emp, per, co) {
       'impulsion55': 500,      // Impulsion 55+: €500/mois
       'sine': 500,             // SINE: €500/mois (variable)
       'vdab': 0,               // Flandre: pas d'allocation trav. (prime directe employeur)
+      'art60': 0,              // Art. 60 §7: réduction ONSS employeur
     };
     r.allocTravail = ALLOC_MONTANTS[allocType] || 0;
   }
@@ -1623,6 +1624,7 @@ function calc(emp, per, co) {
     'impulsion55': 'Impulsion 55+ (FOREM)',
     'sine': 'SINE (économie sociale)',
     'vdab': 'Groupe-cible flamand (VDAB)',
+    'art60': 'Art. 60 §7 (1er emploi)',
   }[allocType] || '';
 
   // ── 14. FLEXI-JOB (Art. 3 Loi 16/11/2015 — modifié 01/01/2024) ──

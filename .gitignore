@@ -3,6 +3,7 @@ node_modules
 .env.local
 .env
 .env.*
+!.env.example
 # .github/ — now tracked (CI/CD workflows)
 
 # ONSS private keys and certificates — NEVER commit

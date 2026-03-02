@@ -179,6 +179,7 @@ for (const sig of targets) {
 
 // 5. Assembler et nettoyer
 let src = parts.join('\n\n');
+src = src.replace(/\r\n/g, '\n'); // normaliser fins de ligne
 src = src.replace(/^['"]use client['"];?\s*/gm, '');
 src = src.replace(/import\s+.*?from\s+['"].*?['"];?\s*/gm, '');
 src = src.replace(/export\s+default\s+/gm, 'var __exported__ = ');
@@ -202,6 +203,23 @@ src = src.replace(/^\s*"[^"]+":.*\{\s*fr:.*$/gm, '// [removed]');
 src = src.replace(/^.*return\s+\(?<[A-Za-z].*$/gm, '// [removed]');
 src = src.replace(/^.*<\/[a-zA-Z].*>.*$/gm, '// [removed]');
 src = src.replace(/^\s*<[a-zA-Z].*$/gm, '// [removed]');
+
+// Supprimer tous les blocs orphelins const t (reste de LangProvider après blacklist) — évite "Identifier 't' has already been declared"
+// 1) Bloc complet ou avec body (avec ou sans }; à la fin)
+src = src.replace(/\s*const t = \(key\) => \{\s*const entry = I18N\[key\];\s*if \(!entry\) return key;\s*return entry\[lang\] \|\| entry\.fr \|\| key;\s*(\};?\s*)?/g, '// [removed i18n t]\n');
+// 2) Blocs très incomplets (extraction a coupé juste après const entry)
+src = src.replace(/\s*const t = \(key\) => \{\s*const entry = I18N\[key\];/g, ' { void 0; } // [removed i18n t]\n');
+// 3) Lignes orphelines (if + return + };) — jusqu'au "  }; " (avec point-virgule, pas seulement })
+src = src.replace(/^\s*if \(!entry\) return key;[\s\S]*?\n  \};/gm, '// [removed]\n');
+
+// 4) Corps orphelin de importTravailleurs — bloc précédé du cleanup i18n, suivi de "// ═══ SPRINT 41: TEST SUITE"
+src = src.replace(/\s*const colMap=headers\.map\(h=>\{[\s\S]*?return \{imported,count:imported\.length,headers:headers\};\s*\n\s*\}(?=\s*\n\s*\/\/ ═══)/, '// [removed importTravailleurs body]\n');
+// 5) Accolades orphelines "  }" après des lignes "// [removed]" (ex: fermeture LangProvider) — répéter jusqu'à plus de match
+let prev = '';
+while (prev !== src) {
+  prev = src;
+  src = src.replace(/(\/\/ \[removed\][^\n]*\n)(\s*\}\s*\n)(\s*(?:var |function ))/, '$1// [removed]\n$3');
+}
 
 try {
   const vm = require('vm');

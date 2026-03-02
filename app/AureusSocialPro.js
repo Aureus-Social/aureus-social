@@ -2541,28 +2541,44 @@ function calc(emp, per, co) {
   // → L'employeur ne la déclare PAS en DmfA (c'est l'ONEM qui déclare)
   //
   // Sur la fiche de paie: mention "pour mémoire" — déduit du coût employeur
-  const allocType = per.allocTravailType || 'none';
+  const allocType = per.allocTravailType || emp.allocTravailType || 'none';
   r.allocTravail = per.allocTravail || 0;
   r.allocTravailType = allocType;
   // Montants standards par type (si pas de montant custom)
   if (r.allocTravail === 0 && allocType !== 'none') {
-    const ALLOC_MONTANTS = {
-      'activa_bxl': 350,       // Activa.brussels: €350/mois
-      'activa_jeune': 350,     // Activa Jeunes: €350/mois
-      'impulsion_wal': 500,    // Impulsion Wallonie: €500/mois
-      'impulsion55': 500,      // Impulsion 55+: €500/mois
-      'sine': 500,             // SINE: €500/mois (variable)
-      'vdab': 0,               // Flandre: pas d'allocation trav. (prime directe employeur)
-    };
-    r.allocTravail = ALLOC_MONTANTS[allocType] || 0;
+    // Activa.brussels AP = allocation progressive (attestation Actiris: 350€ mois 1-6, 800€ mois 7-18, 350€ mois 19-30)
+    if (allocType === 'activa_bxl_ap') {
+      let monthIndex = 1;
+      const startDateStr = emp.startDate || emp.startD || '';
+      if (startDateStr && per.year && per.month) {
+        const s = String(startDateStr).slice(0, 10).split('-');
+        const startYear = parseInt(s[0], 10), startMonth = parseInt(s[1], 10) || 1;
+        monthIndex = (per.year - startYear) * 12 + (per.month - startMonth) + 1;
+        monthIndex = Math.max(1, Math.min(30, monthIndex));
+      }
+      r.allocTravail = monthIndex <= 6 ? 350 : monthIndex <= 18 ? 800 : 350;
+    } else {
+      const ALLOC_MONTANTS = {
+        'activa_bxl': 350,       // Activa.brussels: €350/mois
+        'activa_jeune': 350,     // Activa Jeunes: €350/mois
+        'impulsion_wal': 500,    // Impulsion Wallonie: €500/mois
+        'impulsion55': 500,      // Impulsion 55+: €500/mois
+        'sine': 500,             // SINE: €500/mois (variable)
+        'vdab': 0,               // Flandre: pas d'allocation trav. (prime directe employeur)
+        'art60': 0,              // Art. 60 §7: réduction ONSS employeur (pas d'allocation versée au travailleur)
+      };
+      r.allocTravail = ALLOC_MONTANTS[allocType] || 0;
+    }
   }
   r.allocTravailLabel = {
     'activa_bxl': 'Activa.brussels (Actiris)',
+    'activa_bxl_ap': 'Activa.brussels AP (350/800/350)',
     'activa_jeune': 'Activa Jeunes <30 (Actiris)',
     'impulsion_wal': 'Impulsion Wallonie (FOREM)',
     'impulsion55': 'Impulsion 55+ (FOREM)',
     'sine': 'SINE (économie sociale)',
     'vdab': 'Groupe-cible flamand (VDAB)',
+    'art60': 'Art. 60 §7 (1er emploi)',
   }[allocType] || '';
 
   // ── 14. FLEXI-JOB (Art. 3 Loi 16/11/2015 — modifié 01/01/2024) ──
@@ -3704,8 +3720,8 @@ function reducer(s,a){
     case'ADD_EMPS_BATCH':return{...s,emps:[...s.emps,...(a.data||[])]};
     case'SET_PAYS':return{...s,pays:a.data};
     case'SET_CLIENTS':return{...s,clients:a.data||[]};
-    case'NAV':if(a.page==='sprint10'){window.location.href='/sprint10/auth';return s;}const s9map={s9_dimona:'/sprint9/dimona',s9_precompte:'/sprint9/precompte',s9_onss:'/sprint9/onss',s9_bilan:'/sprint9/bilan-social',s9_netbrut:'/sprint9/net-brut',s9_od:'/sprint9/od-comptables',s9_cheques:'/sprint9/cheques-repas',s9_trilingue:'/sprint9/trilingue',s9_vacances:'/sprint9/vacances',s9_enfants:'/sprint9/enfants',s9_attestations:'/sprint9/attestations',s9_exports:'/sprint9/exports',s9_baremes:'/sprint9/baremes',s9_provisions:'/sprint9/provisions',s9_heures:'/sprint9/heures-sup',s9_primes:'/sprint9/primes',s9_saisies:'/sprint9/saisies'};ns={...s,page:a.page,sub:a.sub||null};break;
-    case'ADD_E':ns={...s,emps:[...s.emps,{...a.d,id:"E-"+uid()}]};break;
+    case'NAV':if(a.page==='sprint10'){window.location.href='/sprint10/auth';return s;}const s9map={s9_dimona:'/sprint9/dimona',s9_precompte:'/sprint9/precompte',s9_onss:'/sprint9/onss',s9_bilan:'/sprint9/bilan-social',s9_netbrut:'/sprint9/net-brut',s9_od:'/sprint9/od-comptables',s9_cheques:'/sprint9/cheques-repas',s9_trilingue:'/sprint9/trilingue',s9_vacances:'/sprint9/vacances',s9_enfants:'/sprint9/enfants',s9_attestations:'/sprint9/attestations',s9_exports:'/sprint9/exports',s9_baremes:'/sprint9/baremes',s9_provisions:'/sprint9/provisions',s9_heures:'/sprint9/heures-sup',s9_primes:'/sprint9/primes',s9_saisies:'/sprint9/saisies'};ns={...s,page:a.page,sub:a.sub||null,...(a.selectedEmpIdForPayslip!=null?{selectedEmpIdForPayslip:a.selectedEmpIdForPayslip}:{})};break;
+    case'ADD_E':ns={...s,emps:[...s.emps,{...a.d,id:a.d.id||"E-"+uid()}]};break;
     case'UPD_E':ns={...s,emps:(s.emps||[]).map(e=>e.id===a.d.id?a.d:e)};break;
     case'DEL_E':ns={...s,emps:(s.emps||[]).filter(e=>e.id!==a.id)};break;
     case'ADD_P':ns={...s,pays:[...s.pays,{...a.d,id:"P-"+uid()}]};break;
@@ -4405,7 +4421,7 @@ function detectCPFromNACE(naceCodes){
   return results;
 }
 
-function ClientWizard({onFinish,onCancel}){
+function ClientWizard({onFinish,onCancel,supabase}){
   const [step,setStep]=useState(1);
   const [bceLoading,setBceLoading]=useState(false);
   const [bceResult,setBceResult]=useState(null);
@@ -4417,43 +4433,39 @@ function ClientWizard({onFinish,onCancel}){
     emps:[],
   });
 
-  // ── BCE LOOKUP (API réelle) ──
+  // ── BCE LOOKUP (API réelle + fallback local si échec ou non autorisé) ──
   const doLookup=async()=>{
-    if(!data.vat||data.vat.replace(/[^0-9]/g,"").length<9)return;
+    const clean=data.vat&&data.vat.replace(/[^0-9]/g,"");
+    if(!clean||clean.length<9)return;
     setBceLoading(true);
     setBceResult(null);
+    let result=null;
     try{
-      const clean=data.vat.replace(/[^0-9]/g,"");
-      const resp=await fetch(`/api/bce?vat=${clean}`);
-      const result=await resp.json();
-      setBceResult(result);
-      if(result){
-        const upd={...data};
-        if(result.found){
-          upd.name=result.name||upd.name;upd.forme=result.forme||upd.forme;upd.addr=result.addr||upd.addr;upd.vat=result.vat||upd.vat;upd.naceCodes=result.nace||[];
-          if(result.email)upd.email=result.email;
-          if(result.phone)upd.phone=result.phone;
-        } else { upd.vat=result.vat||upd.vat; }
-        const cps=detectCPFromNACE(result.nace||[]);
-        setCpDetected(cps);
-        if(cps.length>0){upd.cpEmploye=cps[0].cpEmp||'200';upd.cpOuvrier=cps[0].cpOuv||'';}
-        setData(upd);
+      const headers={};
+      if(supabase){ try{ const {data:session}=await supabase.auth.getSession(); if(session?.session?.access_token) headers['Authorization']='Bearer '+session.session.access_token; }catch(_){} }
+      const resp=await fetch(`/api/bce?vat=${clean}`,{headers});
+      result=await resp.json();
+      // Si l'API renvoie une erreur (401, 429) ou "non trouvée", essayer le fallback local (démo + entreprises connues)
+      if(!resp.ok||!result.found){
+        const fallback=lookupBCE(data.vat);
+        if(fallback&&fallback.found){ result=fallback; }
       }
     }catch(err){
       console.error('BCE lookup error:',err);
-      // Fallback vers la recherche locale
-      const result=lookupBCE(data.vat);
-      setBceResult(result);
-      if(result){
-        const upd={...data};
-        if(result.found){
-          upd.name=result.name;upd.forme=result.forme;upd.addr=result.addr;upd.vat=result.vat;upd.naceCodes=result.nace||[];
-        } else { upd.vat=result.vat; }
-        const cps=detectCPFromNACE(result.nace||[]);
-        setCpDetected(cps);
-        if(cps.length>0){upd.cpEmploye=cps[0].cpEmp||'200';upd.cpOuvrier=cps[0].cpOuv||'';}
-        setData(upd);
-      }
+      result=lookupBCE(data.vat);
+    }
+    setBceResult(result);
+    if(result){
+      const upd={...data};
+      if(result.found){
+        upd.name=result.name||upd.name;upd.forme=result.forme||upd.forme;upd.addr=result.addr||upd.addr;upd.vat=result.vat||upd.vat;upd.naceCodes=result.nace||[];
+        if(result.email)upd.email=result.email;
+        if(result.phone)upd.phone=result.phone;
+      } else { upd.vat=result.vat||upd.vat; }
+      const cps=detectCPFromNACE(result.nace||[]);
+      setCpDetected(cps);
+      if(cps.length>0){upd.cpEmploye=cps[0].cpEmp||'200';upd.cpOuvrier=cps[0].cpOuv||'';}
+      setData(upd);
     }
     setBceLoading(false);
   };
@@ -4800,7 +4812,7 @@ function ClientWizard({onFinish,onCancel}){
   </div>;
 }
 
-function ClientsPage({s,d,user,userRole,onLogout,veilleNotif,setVeilleNotif}){
+function ClientsPage({s,d,user,userRole,onLogout,veilleNotif,setVeilleNotif,supabase}){
   const isCommercial=userRole==='commercial';
   const userEmail=user?.email?.toLowerCase()||'';
   const visibleClients=isCommercial?(s.clients||[]).filter(c=>c.assignedTo?.toLowerCase()===userEmail):(s.clients||[]);
@@ -4885,7 +4897,7 @@ function ClientsPage({s,d,user,userRole,onLogout,veilleNotif,setVeilleNotif}){
       </div>
 
       <div style={{maxWidth:1200,margin:'0 auto',padding:'30px 36px'}}>
-        {showWizard?<ClientWizard onFinish={handleFinish} onCancel={()=>setShowWizard(false)}/>:<>
+        {showWizard?<ClientWizard onFinish={handleFinish} onCancel={()=>setShowWizard(false)} supabase={supabase}/>:<>
         
         {/* ═══ VEILLE LÉGALE AUTO ═══ */}
         {veilleNotif&&<div style={{marginBottom:14,padding:'12px 18px',borderRadius:10,background:veilleNotif.changed?'rgba(248,113,113,.06)':'rgba(74,222,128,.06)',border:`1px solid ${veilleNotif.changed?'rgba(248,113,113,.15)':'rgba(74,222,128,.15)'}`,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
@@ -5424,7 +5436,7 @@ function AppInner({ supabase, user, onLogout }) {
     </div>
   </div>;
   if(!loggedIn)return <LoginPage onLogin={handleLogin}/>;
-  if(!s.activeClient)return <ClientsPage s={s} d={d} user={user} userRole={userRole} onLogout={onLogout} veilleNotif={veilleNotif} setVeilleNotif={setVeilleNotif}/>;
+  if(!s.activeClient)return <ClientsPage s={s} d={d} user={user} userRole={userRole} onLogout={onLogout} veilleNotif={veilleNotif} setVeilleNotif={setVeilleNotif} supabase={supabase}/>;
 
   // ── Sprint 17: Automation Hub ──
   
@@ -19441,7 +19453,7 @@ function Employees({s,d}) {
   const [search,setSearch]=useState('');
   const [filter,setFilter]=useState('all'); // all, active, sorti, student, ouvrier
   const [viewMode,setViewMode]=useState('list'); // list, grid
-  const empty={first:'',last:'',niss:'',birth:'',addr:'',city:'',zip:'',startD:'',endD:'',fn:"",dept:'',contract:'CDI',regime:'full',whWeek:38,monthlySalary:0,civil:"single",depChildren:0,handiChildren:0,iban:'',mvT:10,mvW:CR_TRAV,mvE:8.91,expense:0,cp:'200',dmfaCode:'495',dimType:'OTH',commDist:0,commType:'none',commMonth:0,status:'active',sexe:'M',statut:'employe',niveauEtude:'sec',carFuel:"none",carCO2:0,carCatVal:0,carBrand:"",carModel:"",atnGSM:false,atnPC:false,atnInternet:false,atnLogement:false,atnLogementRC:0,atnChauffage:false,atnElec:false,depAscendant:0,depAscendantHandi:0,conjointHandicap:false,depAutres:0,anciennete:0,nrEngagement:0,engagementTrimestre:1,
+  const empty={first:'',last:'',niss:'',birth:'',addr:'',city:'',zip:'',startD:'',endD:'',fn:"",dept:'',contract:'CDI',regime:'full',whWeek:38,monthlySalary:0,civil:"single",depChildren:0,handiChildren:0,iban:'',mvT:10,mvW:CR_TRAV,mvE:8.91,expense:0,cp:'200',dmfaCode:'495',dimType:'OTH',commDist:0,commType:'none',commMonth:0,status:'active',sexe:'M',statut:'employe',niveauEtude:'sec',allocTravailType:'none',allocTravail:0,carFuel:"none",carCO2:0,carCatVal:0,carBrand:"",carModel:"",atnGSM:false,atnPC:false,atnInternet:false,atnLogement:false,atnLogementRC:0,atnChauffage:false,atnElec:false,depAscendant:0,depAscendantHandi:0,conjointHandicap:false,depAutres:0,anciennete:0,nrEngagement:0,engagementTrimestre:1,
     veloSociete:false,veloType:'none',veloValeur:0,veloLeasingMois:0,carteCarburant:false,carteCarburantMois:0,borneRecharge:false,borneRechargeCoût:0,
     frontalier:false,frontalierPays:'',frontalierConvention:'',frontalierA1:false,frontalierExoPP:false,
     pensionné:false,pensionType:'none',pensionAge:0,pensionCarriere:0,pensionCumulIllimite:false,pensionMontant:0,
@@ -19626,6 +19638,29 @@ function Employees({s,d}) {
   const sortiCount=(s.emps||[]).filter(e=>e.status==='sorti').length;
   const studentCount=(s.emps||[]).filter(e=>e.contract==='student').length;
 
+  // Exemple Activa — Nourdin MOUSSATI (attestation Activa.brussels AP 350/800/350) — fiche complète
+  // CDD 3 mois : entrée 2 mars 2026, fin 1er juin 2026 ; fiche de paie pour fin mars 2026
+  const addExempleActivaNordin=()=>{
+    const startDate='2026-03-02';
+    const endDate='2026-06-01';
+    const exemple={...empty,
+      id:'E-Activa-Nourdin',
+      first:'Nourdin',last:'MOUSSATI',niss:'83.09.30.133.94',birth:'1983-09-30',
+      fn:'Assistant administratif',function:'Assistant administratif',dept:'Administration',
+      contract:'CDD',regime:'full',whWeek:38,monthlySalary:2800,
+      cp:'200',dmfaCode:'495',dimType:'OTH',
+      startD:startDate,startDate:startDate,endD:endDate,endDate:endDate,
+      addr:'Avenue Princesse Elisabeth 5 Bte 1',zip:'1030',city:'Schaerbeek',
+      email:'nourdin.moussati@example.com',phone:'+32 2 123 45 67',
+      civil:'single',depChildren:0,sexe:'M',statut:'employe',status:'active',
+      iban:'BE71 0961 2345 6769',mvT:10,mvW:CR_TRAV,mvE:8.91,expense:0,
+    };
+    d({type:'ADD_E',d:exemple});
+    d({type:'NAV',page:'payslip',sub:null,selectedEmpIdForPayslip:'E-Activa-Nourdin'});
+    if(typeof addToast==='function')addToast('Nourdin MOUSSATI ajouté. Dans Fiches de Paie : choisir « Activa.brussels AP (350→800→350) » pour l\'allocation.');
+    else alert('Nourdin MOUSSATI ajouté. Allez dans Fiches de Paie → sélectionnez-le → Activation ONEM : Activa.brussels AP (350→800→350).');
+  };
+
   return <div>
     <PH title="Gestion des Employés" sub={`${(s.emps||[]).length} employé(s)`} actions={<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
       <label style={{padding:'8px 14px',borderRadius:8,fontSize:11,cursor:'pointer',border:'1px solid rgba(198,163,78,.25)',background:'transparent',color:'#c6a34e',fontWeight:600,display:'flex',alignItems:'center',gap:4}}>
@@ -19634,8 +19669,14 @@ function Employees({s,d}) {
       </label>
       <B v="outline" onClick={()=>setShowROI(!showROI)} style={{padding:'8px 14px',fontSize:11}}>💰 ROI</B>
       <B v="outline" onClick={exportCSV} style={{padding:'8px 14px',fontSize:11}}>⬇ CSV</B>
+      <B v="outline" onClick={addExempleActivaNordin} style={{padding:'8px 14px',fontSize:11}}>💼 Exemple Activa Nourdin</B>
       <B onClick={()=>{setF({...empty});setEd(false);}}>+ Nouvel employé</B>
     </div>}/>
+    {/* Barre visible Exemple Activa — toujours affichée sous le titre */}
+    <div style={{marginBottom:16,padding:'12px 16px',background:'linear-gradient(135deg,rgba(34,197,94,.08),rgba(34,197,94,.03))',border:'1px solid rgba(34,197,94,.2)',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
+      <span style={{fontSize:12,color:'#86efac'}}>💼 Plan Activa (attestation Actiris) — Exemple Nourdin MOUSSATI : ajout en 1 clic + redirection Fiches de Paie</span>
+      <button onClick={addExempleActivaNordin} style={{padding:'10px 18px',borderRadius:8,border:'none',background:'#22c55e',color:'#fff',fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap'}}>💼 Créer Nourdin MOUSSATI (Activa)</button>
+    </div>
     {/* Search and filters bar */}
     <div style={{display:'flex',gap:10,marginBottom:16,alignItems:'center',flexWrap:'wrap'}}>
       <div style={{flex:1,minWidth:200,position:'relative'}}>
@@ -19729,6 +19770,14 @@ function Employees({s,d}) {
         <I label="Code DMFA" value={form.dmfaCode} onChange={v=>setF({...form,dmfaCode:v})} options={Object.entries(LEGAL.DMFA_CODES).map(([k,v])=>({v:k,l:`${k} - ${v}`}))}/>
         <I label="Rang engagement" value={form.nrEngagement||0} onChange={v=>setF({...form,nrEngagement:parseInt(v)||0})} options={[{v:0,l:"— Pas de réduction —"},{v:1,l:"1er employé (exo totale)"},{v:2,l:"2è employé"},{v:3,l:"3è employé"},{v:4,l:"4è employé"},{v:5,l:"5è employé"},{v:6,l:"6è employé"}]}/>
         {form.nrEngagement>0&&<I label="Trimestre depuis eng." type="number" value={form.engagementTrimestre||1} onChange={v=>setF({...form,engagementTrimestre:parseInt(v)||1})}/>}
+      </div>
+      <ST style={{marginTop:14}}>Activation ONEM (comme dans Fiches de Paie)</ST>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:8,padding:12,background:'rgba(34,197,94,.04)',border:'1px solid rgba(34,197,94,.15)',borderRadius:8}}>
+        <I label="Activation ONEM" value={form.allocTravailType||'none'} onChange={v=>setF({...form,allocTravailType:v,allocTravail:v!=='none'?(form.allocTravail||0):0})} options={[{v:"none",l:"— Aucune —"},{v:"activa_bxl",l:"Activa.brussels (€350/m)"},{v:"activa_bxl_ap",l:"Activa.brussels AP (350→800→350)"},{v:"activa_jeune",l:"Activa Jeunes <30 (€350/m)"},{v:"impulsion_wal",l:"Impulsion Wallonie (€500/m)"},{v:"impulsion55",l:"Impulsion 55+ (€500/m)"},{v:"sine",l:"SINE écon. sociale (€500/m)"},{v:"vdab",l:"VDAB (prime directe)"},{v:"art60",l:"Art. 60 §7 (1er emploi)"}]}/>
+        {form.allocTravailType&&form.allocTravailType!=='none'&&<I label="Montant alloc. ONEM (€)" type="number" value={form.allocTravail||0} onChange={v=>setF({...form,allocTravail:parseFloat(v)||0})}/>}
+      </div>
+      <div style={{marginTop:6,marginBottom:12,padding:10,background:'rgba(198,163,78,.04)',borderRadius:8,fontSize:10.5,color:'#9e9b93',lineHeight:1.5}}>
+        💡 Ce réglage sera repris par défaut sur les Fiches de Paie. Le montant (Activa AP) peut être calculé automatiquement selon le mois d’ancienneté (350 → 800 → 350 €).
       </div>
       <ST>Grille horaire (Loi 16/03/1971 + Règlement de travail)</ST>
       <div style={{padding:10,background:"rgba(198,163,78,.03)",borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
@@ -20020,13 +20069,18 @@ function Employees({s,d}) {
 //  PAYSLIPS
 // ═══════════════════════════════════════════════════════════════
 function Payslips({s,d}) {
-  const [eid,setEid]=useState((s.emps||[])[0]?.id||'');
+  const [eid,setEid]=useState(s.selectedEmpIdForPayslip||(s.emps||[])[0]?.id||'');
   const [per,setPer]=useState({...DPER});
   const [res,setRes]=useState(null);
   const [batchMode,setBatchMode]=useState(false);
   const [batchResults,setBatchResults]=useState([]);
   const [batchRunning,setBatchRunning]=useState(false);
   const emp=(s.emps||[]).find(e=>e.id===eid);
+  // Préremplir Activation ONEM depuis la fiche employé quand on change d'employé
+  useEffect(()=>{
+    if(emp&&(emp.allocTravailType||'none')!=='none')
+      setPer(prev=>({...prev,allocTravailType:emp.allocTravailType||prev.allocTravailType,allocTravail:emp.allocTravail||prev.allocTravail||0}));
+  },[eid]);
 
   // ── BATCH PROCESSING ──
   const runBatch=()=>{
@@ -20144,7 +20198,7 @@ function Payslips({s,d}) {
           <I label="Réd. trav. âgé 55+ (€)" type="number" value={per.redGCAge} onChange={v=>setPer({...per,redGCAge:v})}/>
           <I label="Réd. jeune <26 (€)" type="number" value={per.redGCJeune} onChange={v=>setPer({...per,redGCJeune:v})}/>
           <I label="Réd. handicap (€)" type="number" value={per.redGCHandicap} onChange={v=>setPer({...per,redGCHandicap:v})}/>
-          <I label="Activation ONEM" value={per.allocTravailType||'none'} onChange={v=>setPer({...per,allocTravailType:v,allocTravail:0})} options={[{v:"none",l:"— Aucune —"},{v:"activa_bxl",l:"Activa.brussels (€350/m)"},{v:"activa_jeune",l:"Activa Jeunes <30 (€350/m)"},{v:"impulsion_wal",l:"Impulsion Wallonie (€500/m)"},{v:"impulsion55",l:"Impulsion 55+ (€500/m)"},{v:"sine",l:"SINE écon. sociale (€500/m)"},{v:"vdab",l:"VDAB (prime directe)"}]}/>
+          <I label="Activation ONEM" value={per.allocTravailType||emp?.allocTravailType||'none'} onChange={v=>setPer({...per,allocTravailType:v,allocTravail:0})} options={[{v:"none",l:"— Aucune —"},{v:"activa_bxl",l:"Activa.brussels (€350/m)"},{v:"activa_bxl_ap",l:"Activa.brussels AP (350→800→350)"},{v:"activa_jeune",l:"Activa Jeunes <30 (€350/m)"},{v:"impulsion_wal",l:"Impulsion Wallonie (€500/m)"},{v:"impulsion55",l:"Impulsion 55+ (€500/m)"},{v:"sine",l:"SINE écon. sociale (€500/m)"},{v:"vdab",l:"VDAB (prime directe)"},{v:"art60",l:"Art. 60 §7 (1er emploi)"}]}/>
           {per.allocTravailType&&per.allocTravailType!=='none'&&<I label="Montant alloc. ONEM (€)" type="number" value={per.allocTravail} onChange={v=>setPer({...per,allocTravail:v})}/>}
         </div>
         <ST style={{marginTop:14}}>Mi-temps médical / thérapeutique</ST>

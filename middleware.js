@@ -98,13 +98,16 @@ export function middleware(request) {
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
 
-  // CSP — Content Security Policy (renforcée : suppression de unsafe-eval)
+  // CSP — Content Security Policy (en prod : stricte ; en dev Next.js nécessite unsafe-eval)
   const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
     ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).host
     : '*.supabase.co';
+  const scriptSrc = process.env.NODE_ENV === 'development'
+    ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com`
+    : `script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com`;
   const csp = [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com`,
+    scriptSrc,
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
     `font-src 'self' https://fonts.gstatic.com data:`,
     `img-src 'self' data: blob: https://${supabaseHost}`,
