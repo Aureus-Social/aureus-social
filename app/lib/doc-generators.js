@@ -43,7 +43,6 @@ export function previewHTML(html, title) {
   const iframe = document.createElement('iframe');
   [
     { text: '📄 Télécharger PDF', bg: '#c6a34e', color: '#060810', fn: () => { try { iframe.contentWindow.print(); } catch(e) { alert('Utilisez Ctrl+P pour enregistrer en PDF'); } } },
-    { text: '📥 Télécharger .html', bg: '#22c55e', color: '#fff', fn: () => downloadFile(html, (title || 'document') + '.html', 'text/html;charset=utf-8') },
     { text: '✕ Fermer', bg: '#ef4444', color: '#fff', fn: () => document.body.removeChild(overlay) }
   ].forEach(b => {
     const btn = document.createElement('button');
@@ -61,6 +60,7 @@ export function previewHTML(html, title) {
 
 /** Ouvre le document et lance l'impression (Enregistrer au format PDF). */
 export function openForPDF(html, title) {
+  if (!html || typeof html !== 'string') { alert('Document indisponible.'); return; }
   try {
     const win = window.open('', '_blank', 'noopener,noreferrer,width=900,height=700,scrollbars=yes');
     if (win && !win.closed) {

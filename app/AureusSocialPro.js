@@ -7737,7 +7737,21 @@ const ContratGenerator=({s,d,user})=>{
     html+='.signature{display:inline-block;width:45%;vertical-align:top;margin-top:40px;text-align:center;border-top:1px solid #000;padding-top:8px}';
     html+='.header-info{font-size:11pt;margin-bottom:5px}';
     html+='.important{font-weight:bold;text-decoration:underline}';
+    html+='.contract-header{display:flex;align-items:center;gap:20px;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #c6a34e}';
+    html+='.contract-logo{max-height:70px;max-width:180px;object-fit:contain}';
+    html+='.contract-logo-placeholder{font-size:18px;font-weight:700;color:#c6a34e;min-width:160px}';
+    html+='.contract-lois{margin-top:24px;padding-top:16px;border-top:1px solid #ccc;font-size:9px;color:#555}.contract-lois ul{margin:8px 0;padding-left:18px}';
     html+='</style></head><body>';
+
+    // EN-TÊTE AVEC LOGO SOCIÉTÉ
+    const coNameSafe=(co.name||'ENTREPRISE').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const coAddrSafe=(co.address||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const logoUrl=co.logoUrl||co.logo||'';
+    html+='<header class="contract-header">';
+    if(logoUrl) html+='<img src="'+(logoUrl.replace(/"/g,'&quot;'))+'" alt="Logo" class="contract-logo" />';
+    else html+='<div class="contract-logo-placeholder">'+coNameSafe+'</div>';
+    html+='<div style="font-size:11px;color:#333;line-height:1.5"><strong>'+coNameSafe+'</strong><br/>'+(coAddrSafe||'—')+'<br/>BCE : '+(co.vat||co.bce||'—').replace(/&/g,'&amp;')+' — ONSS : '+(co.onss||'—').replace(/&/g,'&amp;')+'<br/>Commission paritaire : n° '+cp+'</div>';
+    html+='</header>';
 
     // HEADER
     html+='<h1>CONTRAT DE TRAVAIL '+(contractType==='CDD'?'A DUREE DETERMINEE':'A DUREE INDETERMINEE')+'</h1>';
@@ -7908,6 +7922,19 @@ const ContratGenerator=({s,d,user})=>{
     html+='<div style="display:inline-block;width:8%"></div>';
     html+='<div class="signature">LE TRAVAILLEUR<br/><br/><br/>'+empName+'<br/>Precede de la mention manuscrite :<br/>"Lu et approuve"</div>';
     html+='</div>';
+
+    // RÉFÉRENCES LÉGALES (pied de contrat)
+    const refLois=[
+      { abbr: 'Loi du 3 juillet 1978', full: 'Loi relative aux contrats de travail (M.B. 22 août 1978)', arts: 'Art. 2, 7, 11, 32' },
+      { abbr: 'Loi du 26 décembre 2013', full: 'Statut unique — préavis', arts: 'Art. 67 à 82' },
+      { abbr: 'AR du 25 juin 1990', full: 'Temps partiel, équipes, week-end', arts: 'Mentions obligatoires' },
+      { abbr: 'Loi du 8 avril 1965', full: 'Règlement de travail', arts: 'Art. 3 et suivants' },
+      { abbr: 'Code civil', full: 'Obligations contractuelles', arts: 'Art. 1134' },
+      { abbr: 'CCT et CP', full: 'Conventions collectives et commission paritaire', arts: 'Conformité CP' },
+    ];
+    html+='<footer class="contract-lois"><strong>Références légales</strong><ul>';
+    refLois.forEach(function(l){ html+='<li><strong>'+l.abbr+'</strong> — '+l.full+' ('+l.arts+')</li>'; });
+    html+='</ul></footer>';
 
     html+='<div style="margin-top:30px;padding-top:15px;border-top:2px solid #eee;font-size:8pt;color:#888">';
     html+='Document genere par Aureus Social Pro — aureussocial.be — Ce contrat doit être adapté par un juriste ou un conseiller en droit social avant signature definitive. '+new Date().toLocaleDateString('fr-BE');
@@ -22598,6 +22625,7 @@ function downloadFile(content, filename, mimeType) {
 }
 
 function openForPDF(html, title) {
+  if (!html || typeof html !== 'string') { alert('Document indisponible.'); return; }
   try {
     const win = window.open('', '_blank', 'noopener,noreferrer,width=900,height=700,scrollbars=yes');
     if (win && !win.closed) {
@@ -22652,8 +22680,7 @@ function previewHTML(html, title) {
   bar.style.cssText = 'display:flex;gap:8px;margin-bottom:12px';
   const iframe = document.createElement('iframe');
   [
-    { text: '📄 Télécharger PDF', bg: '#c6a34e', color: '#060810', fn: () => { try { iframe.contentWindow.print(); } catch(e) { alert('Utilisez Ctrl+P'); } } },
-    { text: '📥 Télécharger .html', bg: '#22c55e', color: '#fff', fn: () => downloadFile(html, (title || 'document') + '.html', 'text/html;charset=utf-8') },
+    { text: '📄 Télécharger PDF', bg: '#c6a34e', color: '#060810', fn: () => { try { iframe.contentWindow.print(); } catch(e) { alert('Utilisez Ctrl+P pour enregistrer en PDF'); } } },
     { text: '✕ Fermer', bg: '#ef4444', color: '#fff', fn: () => document.body.removeChild(overlay) }
   ].forEach(b => {
     const btn = document.createElement('button');
@@ -23113,8 +23140,8 @@ updateHistory.map((h,i)=><div key={i} style={{display:"flex",gap:10,padding:"10p
   <button onClick={()=>{let csv='Categorie;Parametre;Valeur;Type\n';categories.forEach(cat=>cat.params.forEach(p=>{csv+=cat.nom+';'+p.l+';'+p.v+';'+p.t+'\n';}));const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='parametres_legaux_'+L._meta.annee+'.csv';a.click();}} style={{padding:16,borderRadius:10,border:"1px solid rgba(198,163,78,.2)",cursor:"pointer",fontFamily:"inherit",background:"rgba(198,163,78,.04)",color:"#c6a34e",textAlign:"center"}}>
     <div style={{fontSize:24}}>📊</div><div style={{fontWeight:600,fontSize:12,marginTop:6}}>CSV parametres</div><div style={{fontSize:10,color:"#9e9b93"}}>Pour Excel/Sheets</div>
   </button>
-  <button onClick={()=>{const txt='LOIS BELGES '+L._meta.annee+'\nVersion: '+L._meta.version+'\n'+'='.repeat(50)+'\n\n'+categories.map(cat=>cat.icon+' '+cat.nom.toUpperCase()+'\n'+'-'.repeat(40)+'\n'+cat.params.map(p=>'  '+p.l+': '+p.v).join('\n')+'\n').join('\n');const blob=new Blob([txt],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='resume_lois_'+L._meta.annee+'.txt';a.click();}} style={{padding:16,borderRadius:10,border:"1px solid rgba(198,163,78,.2)",cursor:"pointer",fontFamily:"inherit",background:"rgba(198,163,78,.04)",color:"#c6a34e",textAlign:"center"}}>
-    <div style={{fontSize:24}}>📄</div><div style={{fontWeight:600,fontSize:12,marginTop:6}}>Resume texte</div><div style={{fontSize:10,color:"#9e9b93"}}>Format lisible</div>
+  <button onClick={()=>{const txt='LOIS BELGES '+L._meta.annee+'\nVersion: '+L._meta.version+'\n'+'='.repeat(50)+'\n\n'+categories.map(cat=>cat.icon+' '+cat.nom.toUpperCase()+'\n'+'-'.repeat(40)+'\n'+cat.params.map(p=>'  '+p.l+': '+p.v).join('\n')+'\n').join('\n');const escaped=(txt||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>\n');const html='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Résumé lois '+L._meta.annee+'</title><style>body{font-family:system-ui,sans-serif;font-size:12px;padding:24px;max-width:800px;margin:0 auto;line-height:1.5;color:#1a1a1a}</style></head><body><div>'+escaped+'</div><p style="margin-top:20px;font-size:10px;color:#666">Document généré par Aureus Social Pro</p></body></html>';openForPDF(html,'Resume_lois_'+L._meta.annee);}} style={{padding:16,borderRadius:10,border:"1px solid rgba(198,163,78,.2)",cursor:"pointer",fontFamily:"inherit",background:"rgba(198,163,78,.04)",color:"#c6a34e",textAlign:"center"}}>
+    <div style={{fontSize:24}}>📄</div><div style={{fontWeight:600,fontSize:12,marginTop:6}}>Résumé PDF</div><div style={{fontSize:10,color:"#9e9b93"}}>Imprimer / Enregistrer en PDF</div>
   </button>
 </div>
 <div style={{marginTop:16,padding:16,background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.12)"}}>
