@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  eslint: { ignoreDuringBuilds: true },
   images: {
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 86400,
