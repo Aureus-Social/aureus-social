@@ -5,9 +5,9 @@
 // ═══════════════════════════════════════════════════════════
 
 // IMPORTANT: Incrémenter ces versions pour forcer la mise à jour client.
-const CACHE_NAME = 'aureus-v20.6';
-const STATIC_CACHE = 'aureus-static-v20.6';
-const DATA_CACHE = 'aureus-data-v20.6';
+const CACHE_NAME = 'aureus-v21.0';
+const STATIC_CACHE = 'aureus-static-v21.0';
+const DATA_CACHE = 'aureus-data-v21.0';
 
 const STATIC_ASSETS = [
   '/',
