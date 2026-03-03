@@ -1,0 +1,17 @@
+const fs=require('fs');
+let c=fs.readFileSync('app/AureusSocialPro.js','utf8');
+c=c.replace('// SPRINT 50: PDF Generator','// SPRINT 50: PDF Generator\n// Expose document functions globally for cross-module access\nif(typeof window!=="undefined"){["aureusDocHTML","aureuspdf","openForPDF","generateAttestationEmploi","generateAttestationSalaire","generateSoldeCompte","generateC4PDF","generatePayslipPDF","generateContract","previewHTML"].forEach(function(fn){var check=function(){try{var f=eval(fn);if(typeof f==="function"&&!window[fn])window[fn]=f}catch(e){}};check();setTimeout(check,2000);setTimeout(check,5000)})}');
+fs.writeFileSync('app/AureusSocialPro.js',c,'utf8');
+console.log('OK1');
+let s=fs.readFileSync('app/modules/SprintComponents.js','utf8');
+s=s.split('if(typeof generatePayslipPDF==="function")generatePayslipPDF(emp,s)').join('if(typeof window.generatePayslipPDF==="function")window.generatePayslipPDF(emp,s)');
+s=s.split('if(typeof generatePayslipPDF==="function")generatePayslipPDF(emp,null,null,s.co||s.company||{})').join('if(typeof window.generatePayslipPDF==="function")window.generatePayslipPDF(emp,null,null,s.co||s.company||{})');
+s=s.split('if(typeof generateAttestationEmploi==="function")generateAttestationEmploi(emp,s.co||s.company||{})').join('if(typeof window.generateAttestationEmploi==="function")window.generateAttestationEmploi(emp,s.co||s.company||{})');
+s=s.split('if(typeof openForPDF==="function"){').join('if(typeof window.openForPDF==="function"){');
+s=s.split('typeof aureusDocHTML==="function"?aureusDocHTML').join('typeof window.aureusDocHTML==="function"?window.aureusDocHTML');
+s=s.split('openForPDF(html,"Reglement_travail")').join('window.openForPDF(html,"Reglement_travail")');
+s=s.split('typeof generateContract==="function"?generateContract()').join('typeof window.generateContract==="function"?window.generateContract()');
+s=s.split('typeof openForPDF==="function")openForPDF(html,"Contrat_"').join('typeof window.openForPDF==="function")window.openForPDF(html,"Contrat_"');
+s=s.split('typeof aureuspdf==="function")aureuspdf').join('typeof window.aureuspdf==="function")window.aureuspdf');
+fs.writeFileSync('app/modules/SprintComponents.js',s,'utf8');
+console.log('OK2');

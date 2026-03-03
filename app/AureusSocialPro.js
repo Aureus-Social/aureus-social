@@ -3068,7 +3068,9 @@ function genBelcotax(co, emp, yr, ad) {
 const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:"info@aureus-ia.com",version:'v38',sprint:'Sprint 17 — Automatisation 100%'};
 
 // ═════════════════════════════════════════════════════
-// SPRINT 50: PDF Generator — jsPDF + Aureus branding
+// SPRINT 50: PDF Generator
+// Expose document functions globally for cross-module access
+if(typeof window!=="undefined"){["aureusDocHTML","aureuspdf","openForPDF","generateAttestationEmploi","generateAttestationSalaire","generateSoldeCompte","generateC4PDF","generatePayslipPDF","generateContract","previewHTML"].forEach(function(fn){var check=function(){try{var f=eval(fn);if(typeof f==="function"&&!window[fn])window[fn]=f}catch(e){}};check();setTimeout(check,2000);setTimeout(check,5000)})} — jsPDF + Aureus branding
 // ═════════════════════════════════════════════════════
 const _jsPDFLoaded={v:false,p:null};
 
