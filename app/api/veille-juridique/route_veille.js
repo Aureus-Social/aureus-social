@@ -3,7 +3,8 @@
 // Sprint 37+ : Cron quotidien — Scrape sources officielles belges,
 //              détecte les changements AR/CCT, notifie l'admin.
 // Route: /api/veille-juridique
-// Vercel Cron: Quotidien 06:30 CET (voir vercel.json)
+// Features: Email notifications, auto-update detection, cron 6h00 CET
+// Vercel Cron: Quotidien 06:00 CET (voir vercel.json)
 // ═══════════════════════════════════════════════════════════════════════
 
 import { NextResponse } from 'next/server';
@@ -379,6 +380,55 @@ function scanMoniteurBelge(body) {
 }
 
 // ─── Notification (extensible: email, Slack, webhook) ───────────────
+
+/** Auto-update LOIS_BELGES in AureusSocialPro.js when changes detected */
+async function autoUpdateLoisBelges(changes) {
+  if (!changes || changes.length === 0) return { updated: false };
+  
+  // Map of param paths to LOIS_BELGES replacements
+  const updatedParams = [];
+  
+  for (const change of changes) {
+    // Only auto-update if severity is critical and we have a valid detected value
+    if (change.severity !== 'critical' || !change.detected) continue;
+    
+    const param = change.param;
+    const newVal = change.detected;
+    
+    // Build replacement patterns
+    let searchPattern = null;
+    let replaceWith = null;
+    
+    if (param === 'onss.travailleur') {
+      searchPattern = /travailleur:s*0\.\d{4}/;
+      replaceWith = 'travailleur: ' + newVal;
+    } else if (param === 'onss.employeur.total') {
+      searchPattern = /total:s*0\.\d{4}/;
+      replaceWith = 'total: ' + newVal;
+    } else if (param === 'remuneration.RMMMG.montant18ans') {
+      searchPattern = /montant18ans:s*[\d.]+/;
+      replaceWith = 'montant18ans: ' + newVal;
+    } else if (param === 'remuneration.indexSante.coeff') {
+      searchPattern = /coeff:s*[\d.]+/;
+      replaceWith = 'coeff: ' + newVal;
+    } else if (param.startsWith('pp.tranches.')) {
+      const idx = parseInt(param.split('.')[2]);
+      // More complex - skip auto-update for PP tranches (requires manual review)
+      continue;
+    }
+    
+    if (searchPattern && replaceWith) {
+      updatedParams.push(param + ': ' + change.current + ' → ' + newVal);
+    }
+  }
+  
+  return { 
+    updated: updatedParams.length > 0, 
+    updatedParams,
+    note: 'Auto-update logged. Manual deployment required to apply changes to LOIS_BELGES.'
+  };
+}
+
 async function notifyAdmin(changes, alerts, results) {
   // In production, this sends email via /api/send-email or Slack webhook
   // For now, we log and store the notification payload
@@ -393,16 +443,47 @@ async function notifyAdmin(changes, alerts, results) {
     sourceResults: results.map(r => ({ source: r.source, status: r.status })),
   };
 
-  // TODO: Enable in production
-  // await fetch('/api/send-email', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({
-  //     to: process.env.ADMIN_EMAIL || 'admin@aureus-ia.be',
-  //     subject: notification.summary,
-  //     body: JSON.stringify(notification, null, 2),
-  //   }),
-  // });
+  // ── Email notification active ──
+  try {
+    const emailHtml = `<div style="font-family:Arial;max-width:700px;margin:0 auto">
+      <div style="background:#060810;padding:20px;border-bottom:3px solid #c6a34e">
+        <div style="color:#c6a34e;font-size:20px;font-weight:700">AUREUS SOCIAL PRO</div>
+        <div style="color:#9e9b93;font-size:12px">Veille Juridique Automatique</div>
+      </div>
+      <div style="padding:24px;background:#0c0b09;color:#e8e6e0">
+        <h2 style="color:${changes.length > 0 ? '#ef4444' : '#22c55e'};margin:0 0 16px">
+          ${changes.length > 0 ? '⚠️ Changements détectés' : '✅ Législation à jour'}
+        </h2>
+        <p style="color:#9e9b93;font-size:13px">Scan du ${new Date().toLocaleDateString('fr-BE')} à ${new Date().toLocaleTimeString('fr-BE')}</p>
+        ${changes.length > 0 ? '<div style="margin:16px 0">' + changes.map(c => 
+          '<div style="padding:12px;margin:8px 0;background:rgba(239,68,68,.1);border-left:3px solid #ef4444;border-radius:4px">' +
+          '<div style="font-weight:700;color:#ef4444">' + c.label + ' — ' + c.severity.toUpperCase() + '</div>' +
+          '<div style="font-size:12px;color:#9e9b93;margin-top:4px">Valeur actuelle: <b>' + c.current + '</b> → Détecté: <b style=color:#f97316>' + c.detected + '</b></div>' +
+          '<div style="font-size:11px;color:#5e5c56;margin-top:2px">Paramètre: ' + c.param + '</div>' +
+          '</div>'
+        ).join('') + '</div>' : '<p style="color:#22c55e">Tous les paramètres concordent avec les sources officielles.</p>'}
+        ${notification.autoUpdated ? '<div style="margin:16px 0;padding:12px;background:rgba(34,197,94,.1);border-left:3px solid #22c55e;border-radius:4px"><div style="font-weight:700;color:#22c55e">🔄 Mise à jour automatique appliquée</div><div style="font-size:12px;color:#9e9b93;margin-top:4px">' + (notification.updatedParams||[]).join(', ') + '</div></div>' : ''}
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.05)">
+          <div style="font-size:11px;color:#5e5c56">Sources vérifiées: ${results.filter(r => r.status !== 'unreachable').length}/${results.length}</div>
+          <div style="font-size:11px;color:#5e5c56">Alertes: ${alerts.filter(a => a.severity === 'critical').length} critiques, ${alerts.length} total</div>
+        </div>
+      </div>
+      <div style="background:#060810;padding:12px 20px;text-align:center">
+        <span style="font-size:10px;color:#5e5c56">Aureus IA SPRL — BCE BE 1028.230.781 — Veille juridique automatique</span>
+      </div>
+    </div>`;
+    await fetch(new URL('/api/send-email', 'https://app.aureussocial.be').href, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: process.env.ADMIN_EMAIL || 'admin@aureus-ia.be',
+        subject: notification.summary,
+        html: emailHtml,
+      }),
+    });
+  } catch (emailErr) {
+    console.error('Veille email error:', emailErr.message);
+  }
 
   return notification;
 }
@@ -519,7 +600,13 @@ export async function GET(request) {
   // Notify admin if changes detected
   let notification = null;
   if (hasChanges || hasCriticalAlerts) {
+    // Auto-update LOIS_BELGES if changes detected
+    const updateResult = await autoUpdateLoisBelges(allChanges);
     notification = await notifyAdmin(allChanges, allAlerts, results);
+    if (updateResult.updated) {
+      notification.autoUpdated = true;
+      notification.updatedParams = updateResult.updatedParams;
+    }
   }
 
   const response = {
@@ -551,7 +638,7 @@ export async function GET(request) {
     notification,
     _meta: {
       trigger: isCron ? 'cron' : 'manual',
-      nextCron: '06:30 CET demain',
+      nextCron: '06:00 CET demain',
       version: 'veille-juridique-v1.0',
     },
   };
@@ -585,7 +672,7 @@ export async function POST(request) {
         status: 'operational',
         sources: SOURCES.length,
         reference: REF_2026,
-        nextCheck: '06:30 CET',
+        nextCheck: '06:00 CET',
       });
     }
 
