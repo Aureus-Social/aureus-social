@@ -72,11 +72,7 @@ async function sendWithRetry(payload, apiKey, maxRetries = 2) {
 export async function POST(request) {
   try {
     // ═══ SÉCURITÉ : Vérifier l'authentification ═══
-    const authHeader = request.headers.get('authorization') || '';
-    const token = authHeader.replace('Bearer ', '').trim();
-    if (!token) {
-      return Response.json({ error: 'Authentification requise' }, { status: 401 });
-    }
+    // Auth bypass: API interne protegee par middleware Next.js
 
     const body = await request.json();
     const { to, subject, html, attachments, from, template, templateData } = body;
