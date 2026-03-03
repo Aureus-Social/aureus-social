@@ -23418,6 +23418,9 @@ updateHistory.map((h,i)=><div key={i} style={{display:"flex",gap:10,padding:"10p
 
 
 
+
+// ??? EXPOSE FUNCTIONS ON WINDOW FOR CROSS-MODULE ACCESS ???
+if(typeof window!=="undefined"){window.aureusDocHTML=aureusDocHTML;window.aureuspdf=aureuspdf;window.openForPDF=openForPDF;window.generateAttestationEmploi=generateAttestationEmploi;window.generateAttestationSalaire=generateAttestationSalaire;window.generateSoldeCompte=generateSoldeCompte;window.generateC4PDF=generateC4PDF;window.generatePayslipPDF=generatePayslipPDF;window.previewHTML=previewHTML;}
 export default function AureusSocialPro({ supabase, user, onLogout }) {
   return <LangProvider><AppInner supabase={supabase} user={user} onLogout={onLogout}/></LangProvider>;
 }// clean
