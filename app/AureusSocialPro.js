@@ -3,6 +3,7 @@
 import { useState, useReducer, useRef, useMemo, useEffect, useCallback, createContext, useContext } from "react";
 import dynamic from "next/dynamic";
 import { I18N } from "./lib/i18n";
+import { initCalcEngine } from "./lib/calc-paie";
 const AccessManagement = dynamic(() => import("./modules/AccessManagement"), { ssr: false, loading: () => <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Chargement...</div> });
 const CommissionsModule = dynamic(() => import("./modules/CommissionsModule"), { ssr: false, loading: () => <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Chargement...</div> });
 const TwoFactorSetup = dynamic(() => import("./modules/TwoFactorSetup"), { ssr: false });
@@ -3728,6 +3729,11 @@ if(typeof window!=='undefined'){
   window.TX_ONSS_W=TX_ONSS_W;window.TX_ONSS_E=TX_ONSS_E;window.TX_OUV108=TX_OUV108;
   window.TX_AT=TX_AT;window.COUT_MED=COUT_MED;window.CR_TRAV=CR_TRAV;window.LEGAL=LEGAL;
   window.LOIS_BELGES=LOIS_BELGES;window.PV_SIMPLE=PV_SIMPLE;window.BAREMES=BAREMES;
+}
+
+// Init calc-paie engine with dependencies
+if(typeof initCalcEngine==='function'){
+  try{initCalcEngine({LEGAL,LOIS_BELGES,fmt,calcPrecompteExact,calcCSSS,calcBonusEmploi:typeof calcBonusEmploi!=='undefined'?calcBonusEmploi:null});}catch(e){console.warn('initCalcEngine:',e);}
 }
 
 // Bonus emploi (Art. 289ter CIR) — Réduction fiscale
