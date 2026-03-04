@@ -43,6 +43,9 @@ self.addEventListener('fetch', (event) => {
   // Ne pas intercepter Google Fonts
   if (event.request.url.includes("fonts.googleapis.com") || event.request.url.includes("fonts.gstatic.com")) return;
 
+  // Ne pas intercepter Google Fonts
+  if (event.request.url.includes("fonts.googleapis.com") || event.request.url.includes("fonts.gstatic.com")) return;
+
   const url = new URL(event.request.url);
 
   // Skip non-GET requests
@@ -172,4 +175,5 @@ async function syncPendingDeclarations() {
     console.warn('[SW] Sync failed:', e);
   }
 }
+
 
