@@ -1,10 +1,10 @@
-// ═══════════════════════════════════════════════════════════
-// AUREUS SOCIAL PRO — SERVICE WORKER v2.0 (Item #38)
-// Cache strategies: stale-while-revalidate for barèmes,
+﻿// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// AUREUS SOCIAL PRO â€” SERVICE WORKER v2.0 (Item #38)
+// Cache strategies: stale-while-revalidate for barÃ¨mes,
 // network-first for data, cache-first for assets
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-// IMPORTANT: Incrémenter ces versions pour forcer la mise à jour client.
+// IMPORTANT: IncrÃ©menter ces versions pour forcer la mise Ã  jour client.
 const CACHE_NAME = 'aureus-v21.0';
 const STATIC_CACHE = 'aureus-static-v21.0';
 const DATA_CACHE = 'aureus-data-v21.0';
@@ -20,7 +20,7 @@ const STATIC_ASSETS = [
   '/landing.html',
 ];
 
-// Install — precache static assets
+// Install â€” precache static assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
@@ -29,7 +29,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate — clean old caches
+// Activate â€” clean old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then(keys => 
@@ -38,8 +38,11 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch — strategy based on request type
+// Fetch â€” strategy based on request type
 self.addEventListener('fetch', (event) => {
+  // Ne pas intercepter Google Fonts
+  if (event.request.url.includes("fonts.googleapis.com") || event.request.url.includes("fonts.gstatic.com")) return;
+
   const url = new URL(event.request.url);
 
   // Skip non-GET requests
@@ -48,26 +51,26 @@ self.addEventListener('fetch', (event) => {
   // Skip chrome-extension, etc
   if (!url.protocol.startsWith('http')) return;
 
-  // API calls — Network first, fallback to cache
+  // API calls â€” Network first, fallback to cache
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(networkFirst(event.request, DATA_CACHE, 5000));
     return;
   }
 
-  // Supabase — Network only (real-time data)
+  // Supabase â€” Network only (real-time data)
   if (url.hostname.includes('supabase')) return;
 
-  // Static assets (JS, CSS, images) — Cache first
+  // Static assets (JS, CSS, images) â€” Cache first
   if (url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|ico|woff2?)$/)) {
     event.respondWith(cacheFirst(event.request, STATIC_CACHE));
     return;
   }
 
-  // HTML pages — Stale while revalidate
+  // HTML pages â€” Stale while revalidate
   event.respondWith(staleWhileRevalidate(event.request, CACHE_NAME));
 });
 
-// ═══ CACHE STRATEGIES ═══
+// â•â•â• CACHE STRATEGIES â•â•â•
 
 async function cacheFirst(request, cacheName) {
   const cached = await caches.match(request);
@@ -115,7 +118,7 @@ async function staleWhileRevalidate(request, cacheName) {
   return cached || await fetchPromise || caches.match('/offline.html');
 }
 
-// ═══ PUSH NOTIFICATIONS ═══
+// â•â•â• PUSH NOTIFICATIONS â•â•â•
 self.addEventListener('push', (event) => {
   const data = event.data?.json() || {};
   event.waitUntil(
@@ -144,7 +147,7 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// ═══ BACKGROUND SYNC ═══
+// â•â•â• BACKGROUND SYNC â•â•â•
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-declarations') {
     event.waitUntil(syncPendingDeclarations());
@@ -169,3 +172,4 @@ async function syncPendingDeclarations() {
     console.warn('[SW] Sync failed:', e);
   }
 }
+
