@@ -1,5 +1,5 @@
-const AUREUS_INFO={name:"Aureus IA SPRL",vat:"BE 1028.230.781",addr:"Saint-Gilles, Bruxelles",email:"info@aureus-ia.com",version:"v38",sprint:"Sprint 17 — Automatisation 100%"};
 'use client';
+const AUREUS_INFO={name:"Aureus IA SPRL",vat:"BE 1028.230.781",addr:"Saint-Gilles, Bruxelles",email:"info@aureus-ia.com",version:"v38",sprint:"Sprint 17 — Automatisation 100%"};
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { LOIS_BELGES, LB, RMMMG, TX_ONSS_W, TX_ONSS_E, NET_FACTOR, PV_DOUBLE, PV_SIMPLE, PP_EST, obf, SAISIE_2026_TRAVAIL, SAISIE_2026_REMPLACEMENT, SAISIE_IMMUN_ENFANT_2026, quickNetEst } from '@/app/lib/lois-belges';
 // ═══ AUREUS SOCIAL PRO — Pages Inline ═══
