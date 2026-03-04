@@ -8,7 +8,10 @@ import { LOIS_BELGES, RMMMG, TX_ONSS_E, TX_ONSS_W, NET_FACTOR, quickNetEst,
   PV_DOUBLE, PV_SIMPLE, CR_PAT, CR_MAX, HEURES_HEBDO, BONUS_MAX,
   TX_OUV108, TX_AT, obf, COUT_MED, CR_TRAV, PP_EST } from "@/app/lib/lois-belges";
 import { quickPP, quickNet, calcCSSS, calcBonusEmploi, calcPrecompteExact } from "@/app/lib/payroll-engine";
+import { calc } from "@/app/lib/calc-paie";
 import { aureuspdf } from "@/app/lib/pdf-aureus";
+
+const DPER={month:new Date().getMonth()+1,year:new Date().getFullYear(),days:22,sickG:0,holidays:0,overtimeH:0,sundayH:0,nightH:0,bonus:0,y13:0,otherDed:0,advance:0,garnish:0,ppVolontaire:0};
 
 export function GuidePortailMod({s,d}){const loisRef=LOIS_BELGES;
   const [tab,setTab]=useState('intro');
