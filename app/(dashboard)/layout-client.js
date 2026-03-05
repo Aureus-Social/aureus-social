@@ -1,7 +1,50 @@
 'use client';
-import { useState, useMemo, lazy, Suspense } from 'react';
+import { useState, useReducer, useMemo, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { MENU, GROUPS, getGroupItems } from '../lib/menu-config';
 import { supabase } from '../lib/supabase';
+
+const Loading = () => <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Chargement...</div>;
+
+// Pages migrées (import dynamique = code splitting)
+const DashboardPage = dynamic(() => import('../pages/dashboard'), { ssr: false, loading: Loading });
+const EmployeesPage = dynamic(() => import('../pages/employees'), { ssr: false, loading: Loading });
+const PayslipsPage = dynamic(() => import('../pages/payslips'), { ssr: false, loading: Loading });
+const DimonaPageComp = dynamic(() => import('../pages/dimona'), { ssr: false, loading: Loading });
+const AdminPage = dynamic(() => import('../pages/admin'), { ssr: false, loading: Loading });
+const SettingsPageComp = dynamic(() => import('../pages/settings'), { ssr: false, loading: Loading });
+const LoisPage = dynamic(() => import('../pages/lois'), { ssr: false, loading: Loading });
+const BaremesCPPage = dynamic(() => import('../pages/BaremesCP'), { ssr: false, loading: Loading });
+const SimuNetBrutPage = dynamic(() => import('../pages/SimulateurNetBrut'), { ssr: false, loading: Loading });
+const DiagnosticPage = dynamic(() => import('../pages/DiagnosticCommercial'), { ssr: false, loading: Loading });
+const SeuilsPage = dynamic(() => import('../pages/SeuilsSociaux'), { ssr: false, loading: Loading });
+const OnboardingPage = dynamic(() => import('../pages/OnboardingHub'), { ssr: false, loading: Loading });
+const CloturePage = dynamic(() => import('../pages/ClotureMensuelle'), { ssr: false, loading: Loading });
+const AnalyticsPage = dynamic(() => import('../pages/AnalyticsDashboard'), { ssr: false, loading: Loading });
+const AdminBaremesPage = dynamic(() => import('../pages/AdminBaremes'), { ssr: false, loading: Loading });
+const AuditCodePage = dynamic(() => import('../pages/AuditSecuriteCode'), { ssr: false, loading: Loading });
+const PayrollSimPage = dynamic(() => import('../pages/PayrollSimulator'), { ssr: false, loading: Loading });
+const AureusIAPage = dynamic(() => import('../pages/AureusSuitePage'), { ssr: false, loading: Loading });
+const EmployeeHubPage = dynamic(() => import('../pages/EmployeeHub'), { ssr: false, loading: Loading });
+const SmartOpsPage = dynamic(() => import('../pages/SmartOpsCenter'), { ssr: false, loading: Loading });
+const CompliancePage = dynamic(() => import('../pages/ComplianceDashboard'), { ssr: false, loading: Loading });
+const SecurityPage = dynamic(() => import('../pages/SecurityDashboard'), { ssr: false, loading: Loading });
+const RelancesPage = dynamic(() => import('../pages/RelancesFacturation'), { ssr: false, loading: Loading });
+const PrimesPage = dynamic(() => import('../pages/PrimesAvantagesV2'), { ssr: false, loading: Loading });
+
+// Reducer pour le state global
+function reducer(state, action) {
+  switch (action.type) {
+    case 'SET_CLIENTS': return { ...state, clients: action.data };
+    case 'SET_EMPS': return { ...state, emps: action.data };
+    case 'ADD_EMP': return { ...state, emps: [...(state.emps||[]), action.d] };
+    case 'UPD_EMP': return { ...state, emps: (state.emps||[]).map(e => e.id === action.d.id ? { ...e, ...action.d } : e) };
+    case 'DEL_EMP': return { ...state, emps: (state.emps||[]).filter(e => e.id !== action.id) };
+    case 'ADD_P': return { ...state, payrollHistory: [...(state.payrollHistory||[]), action.d] };
+    case 'ADD_DIM': return { ...state, dimonaHistory: [...(state.dimonaHistory||[]), action.d] };
+    default: return state;
+  }
+}
 
 // Placeholder pour les pages pas encore migrées
 function PlaceholderPage({ id, label }) {
@@ -85,7 +128,16 @@ export default function DashboardLayout({ user }) {
   const [page, setPage] = useState('dashboard');
   const [collapsed, setCollapsed] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [state] = useState({ emps: [], clients: [], co: { name: 'Aureus IA SPRL', vat: 'BE 1028.230.781' } });
+  const [state, dispatch] = useReducer(reducer, {
+    emps: [],
+    clients: [],
+    payrollHistory: [],
+    dimonaHistory: [],
+    co: { name: 'Aureus IA SPRL', vat: 'BE 1028.230.781' }
+  });
+
+  const s = state;
+  const d = dispatch;
 
   const toggleGroup = (gId) => setCollapsed(p => ({ ...p, [gId]: !p[gId] }));
   const currentItem = MENU.find(m => m.id === page) || { label: 'Dashboard' };
@@ -96,8 +148,32 @@ export default function DashboardLayout({ user }) {
   };
 
   const renderPage = () => {
-    if (page === 'dashboard') return <DashboardHome state={state} />;
-    return <PlaceholderPage id={page} label={currentItem.label} />;
+    switch (page) {
+      case 'dashboard': return <DashboardPage s={s} d={d} />;
+      case 'employees': return <EmployeesPage s={s} d={d} />;
+      case 'payslip': return <PayslipsPage s={s} d={d} />;
+      case 'declarations': case 'onss': return <DimonaPageComp s={s} d={d} />;
+      case 'admin': return <AdminPage s={s} d={d} />;
+      case 'baremescp': return <BaremesCPPage s={s} d={d} />;
+      case 'calcinstant': return <SimuNetBrutPage s={s} d={d} />;
+      case 'diagnostic': case 'diagnosticv': return <DiagnosticPage s={s} d={d} />;
+      case 'seuilssociaux': return <SeuilsPage s={s} d={d} />;
+      case 'onboarding': case 'onboardwizard': return <OnboardingPage s={s} d={d} />;
+      case 'cloture': return <CloturePage s={s} d={d} />;
+      case 'analytics': return <AnalyticsPage s={s} d={d} />;
+      case 'adminbaremes': return <AdminBaremesPage s={s} d={d} />;
+      case 'auditsecuritecode': return <AuditCodePage s={s} d={d} />;
+      case 'optifiscale': case 'couttotal': return <PayrollSimPage s={s} d={d} />;
+      case 'aureussuite': return <AureusIAPage s={s} d={d} />;
+      case 'dashrh': return <EmployeeHubPage s={s} d={d} />;
+      case 'commandcenter': return <SmartOpsPage s={s} d={d} />;
+      case 'compliance': return <CompliancePage s={s} d={d} />;
+      case 'securitedata': return <SecurityPage s={s} d={d} />;
+      case 'facturation': return <RelancesPage s={s} d={d} />;
+      case 'gestionprimes': return <PrimesPage s={s} d={d} />;
+      case 'seuilssociaux': return <LoisPage s={s} d={d} />;
+      default: return <PlaceholderPage id={page} label={currentItem.label} />;
+    }
   };
 
   return (
