@@ -318,7 +318,7 @@ export function SecurityDashboard({s,supabase,user}){
       <C title="📋 Middleware de vérification IP" sub="Code à ajouter dans middleware.js pour enforcement">
         <div style={{background:'rgba(255,255,255,.02)',borderRadius:8,padding:14,fontFamily:'monospace',fontSize:10,color:'#e5e5e5',whiteSpace:'pre-wrap',lineHeight:1.6,maxHeight:300,overflow:'auto'}}>
 {`// middleware.js — IP Whitelist Enforcement
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+// import removed - not needed client-side
 import { NextResponse } from 'next/server'
 
 export async function middleware(req) {

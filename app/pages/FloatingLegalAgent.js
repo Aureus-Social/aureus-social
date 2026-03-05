@@ -575,7 +575,7 @@ function FloatingLegalAgent({onAction}){
   // Log to audit_log in Supabase
   const logAudit=async(action,details)=>{
     try{
-      const{supabase}=await import('../lib/supabase');
+      const{supabase}=await import('@/app/lib/supabase');
       if(!supabase)return;
       await supabase.from('audit_log').insert({action,table_name:'agent_ia',details:{...details,timestamp:new Date().toISOString()}});
     }catch(e){}

@@ -121,7 +121,7 @@ function SettingsPage({s,d}) {
           <div style={{marginTop:12}}>
             <B v="outline" style={{width:'100%'}} onClick={async()=>{
               try{
-                const{data,error}=await(await import('./lib/supabase')).supabase.auth.mfa.enroll({factorType:'totp'});
+                const{data,error}=await(await import('@/app/lib/supabase')).supabase.auth.mfa.enroll({factorType:'totp'});
                 if(error)return alert('Erreur: '+error.message);
                 if(data){
                   const qr=data.totp?.qr_code;

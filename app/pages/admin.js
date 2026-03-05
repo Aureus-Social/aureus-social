@@ -55,7 +55,7 @@ function AdminDashboard({s,d}){
   async function loadData(){
     try{
       setLoading(true);
-      const {supabase}=await import('./lib/supabase');
+      const {supabase}=await import('@/app/lib/supabase');
       if(!supabase){setLoading(false);return;}
       const [uRes,cRes,tRes,fRes]=await Promise.all([
         supabase.from('users').select('*').limit(200),
