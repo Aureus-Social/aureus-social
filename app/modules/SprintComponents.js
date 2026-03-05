@@ -9,3 +9,5 @@ export { AuthMultiRoles, AuditTrail, SecuriteData, RGPDManager, MonitoringSante,
 export { PiloteAuto, SmartAutopilot, SmartAutomation, AutomationHub, MassEngine, ProcessingQueue, HistoriquePilote } from "./AutomationGroup";
 export { LandingPage, ComparatifConcurrents, ParserImportConcurrent, IntegrationsHub, PortalManager } from "./CommercialGroup";
 export { ComingSoon, SetupWizard, R, detectAgentLang } from "./UtilsGroup";
+
+// ═══ Stub exports (placeholder) ═══
