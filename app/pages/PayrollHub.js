@@ -657,3 +657,6 @@ export function SimuTempsPartielV2({s}){
     </div>
   </div>;
 }
+
+
+export default ValidationPrePaieV2;

@@ -412,3 +412,6 @@ export function OnboardingWizardV2({s,d}){
     </div>
   </div>;
 }
+
+
+export default OnboardingWizardV2;

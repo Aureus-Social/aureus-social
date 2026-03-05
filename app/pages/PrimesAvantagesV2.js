@@ -1536,3 +1536,6 @@ export function CheqRepasV2({s}){
     </C>}
   </div>;
 }
+
+
+export default PrimeCalculatorV2;

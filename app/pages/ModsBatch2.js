@@ -2935,3 +2935,6 @@ export function GEDMod({s,d}){
     </C>}
   </div>;
 }
+
+
+export default GuidePortailMod;

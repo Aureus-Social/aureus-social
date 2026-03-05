@@ -468,3 +468,6 @@ CREATE INDEX idx_ip_whitelist_tenant ON ip_whitelist(tenant_id, active);`}
     </div>}
   </div>;
 }
+
+
+export default SecurityDashboard;

@@ -620,3 +620,6 @@ export function JournalActiviteV2({s,d}){
     </div>}
   </div>;
 }
+
+
+export default SmartAlertsEngine;

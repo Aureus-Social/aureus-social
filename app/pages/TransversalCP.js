@@ -622,3 +622,6 @@ export function TransversalCPView({cp,initialTab,barData}){
     </div>}
   </div>;
 }
+
+
+export default TransversalCPView;

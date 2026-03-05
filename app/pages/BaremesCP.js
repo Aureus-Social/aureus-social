@@ -586,3 +586,6 @@ export function BaremesCPV2({s}){
     </div>
   </div>;
 }
+
+
+export default BaremesCPV2;

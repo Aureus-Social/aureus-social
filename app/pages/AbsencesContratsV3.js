@@ -678,3 +678,6 @@ export function ContratsLegauxV3({s}){
     </C>}
   </div>;
 }
+
+
+export default PlanningCongesV3;

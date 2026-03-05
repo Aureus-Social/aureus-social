@@ -384,3 +384,6 @@ export function GestionInterimairesV2({s,d}){
     </div>}
   </div>;
 }
+
+
+export default DashboardRHV2;

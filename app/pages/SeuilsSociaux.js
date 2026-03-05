@@ -6,3 +6,6 @@ export function GestionElections({s,d}){return <div style={{padding:40,textAlign
 export function PlanDiversite({s,d}){return <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Module PlanDiversite</div>;}
 export function RapportCE({s,d}){return <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Module RapportCE</div>;}
 export function TableauSeuils({s,d}){return <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Module TableauSeuils</div>;}
+
+
+export default DashDelegation;
