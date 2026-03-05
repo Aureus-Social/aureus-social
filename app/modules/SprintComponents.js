@@ -1,13 +1,10 @@
-// AUREUS SOCIAL PRO - Sprint Components (Split)
-// Re-export hub
-
-export { TableauDirection, TableauBordDirection, CommandCenter, SmartAlerts, JournalActivite, AnalyticsDash } from "./DashboardGroup";
-export { GestionPrimes, EcheancierPaiements, Echeancier, PayrollTimeline, AutoIndexation, RegulPPAnnuelle, CalcJoursPrestes, RecapEmployeur, SimuOptiFiscale, ValidationEngine, BudgetPrev } from "./PayrollGroup";
-export { OnboardingWizard, PromesseEmbauche, WorkflowAbsences, CalendrierSocial, ContratGenerator, ConventionsCollectives, GestionVehicules, PortailEmploye, ChecklistClient } from "./HRGroup";
-export { ExportWinbooks, FacturationTarif, EnvoiMasse } from "./DeclarationsGroup";
-export { AuthMultiRoles, AuditTrail, SecuriteData, RGPDManager, MonitoringSante, TestSuiteDash, ActionsRapides, ArchivesNumeriques } from "./AdminGroup";
-export { PiloteAuto, SmartAutopilot, SmartAutomation, AutomationHub, MassEngine, ProcessingQueue, HistoriquePilote } from "./AutomationGroup";
-export { LandingPage, ComparatifConcurrents, ParserImportConcurrent, IntegrationsHub, PortalManager } from "./CommercialGroup";
-export { ComingSoon, SetupWizard, R, detectAgentLang } from "./UtilsGroup";
-
-// ═══ Stub exports (placeholder) ═══
+'use client';
+import { useState } from 'react';
+export { ActionsRapides, ArchivesNumeriques, AuditTrail, AuthMultiRoles, MonitoringSante, RGPDManager, SecuriteData, TestSuiteDash } from './AdminGroup';
+export { AnalyticsDash, CommandCenter, JournalActivite, SmartAlerts, TableauBordDirection, TableauDirection } from './DashboardGroup';
+export { AutoIndexation, BudgetPrev, CalcJoursPrestes, Echeancier, EcheancierPaiements, GestionPrimes, PayrollTimeline, RecapEmployeur, RegulPPAnnuelle, SimuOptiFiscale, ValidationEngine } from './PayrollGroup';
+export { AutomationHub, HistoriquePilote, MassEngine, PiloteAuto, ProcessingQueue, SmartAutomation, SmartAutopilot } from './AutomationGroup';
+export { CalendrierSocial, ChecklistClient, ContratGenerator, ConventionsCollectives, GestionVehicules, OnboardingWizard, PortailEmploye, PromesseEmbauche, WorkflowAbsences } from './HRGroup';
+export { ComingSoon, SetupWizard } from './UtilsGroup';
+export { ComparatifConcurrents, IntegrationsHub, LandingPage, ParserImportConcurrent, PortalManager } from './CommercialGroup';
+export { EnvoiMasse, ExportWinbooks, FacturationTarif } from './DeclarationsGroup';
