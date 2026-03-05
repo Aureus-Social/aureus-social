@@ -24,6 +24,29 @@ function escapeHtml(str) {
 }
 
 const fmt=n=>new Intl.NumberFormat('fr-BE',{style:'currency',currency:'EUR'}).format(n||0);
+
+// ═══ Fonctions de calcul paie — stubs avec fallback window ═══
+const LEGAL={WD:21.67,WHD:7.6,TX_ONSS_W:0.1307,TX_ONSS_E:0.2507};
+const DPER={month:new Date().getMonth()+1,year:new Date().getFullYear(),days:LEGAL.WD,overtimeH:0,sundayH:0,nightH:0,bonus:0,y13:0,sickG:0};
+function calc(emp, per, co) {
+  if (typeof window !== 'undefined' && window.calc && window.calc !== calc) return window.calc(emp, per, co);
+  var brut = +(emp&&(emp.monthlySalary||emp.gross)||0);
+  var onssW = Math.round(brut * TX_ONSS_W * 100) / 100;
+  var imposable = brut - onssW;
+  var pp = Math.round(imposable * PP_EST * 100) / 100;
+  var net = Math.round((imposable - pp) * 100) / 100;
+  var onssE = Math.round(brut * TX_ONSS_E * 100) / 100;
+  return {base:brut,gross:brut,onssNet:onssW,imposable:imposable,tax:pp,pp:pp,css:0,net:net,onssE:onssE,costTotal:Math.round((brut+onssE)*100)/100,bonus:0,overtime:0,sunday:0,night:0,y13:0,sickPay:0,atnCar:0,cotCO2:0,hsBrutNetTotal:0};
+}
+function calcCSSS(emp, per, co) {
+  if (typeof window !== 'undefined' && window.calcCSSS && window.calcCSSS !== calcCSSS) return window.calcCSSS(emp, per, co);
+  return {css:0,total:0};
+}
+function quickNet(brut) {
+  if (typeof window !== 'undefined' && window.quickNet && window.quickNet !== quickNet) return window.quickNet(brut);
+  return Math.round((brut||0) * NET_FACTOR * 100) / 100;
+}
+
 const fmtP=n=>`${((n||0)*100).toFixed(2)}%`;
 const uid=()=>`${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
 const MN_FR=['Janvier',"Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
@@ -3874,7 +3897,7 @@ const handleRollback=async(id)=>{
 };
 
 const L=LOIS_BELGES;
-const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v);
+const fmtNum=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v);
 const pct=v=>(v*100).toFixed(2)+'%';
 
 // Catégories de paramètres
