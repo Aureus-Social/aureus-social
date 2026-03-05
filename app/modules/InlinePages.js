@@ -1,5 +1,5 @@
 'use client';
-const AUREUS_INFO={name:"Aureus IA SPRL",vat:"BE 1028.230.781",addr:"Saint-Gilles, Bruxelles",email:"info@aureus-ia.com",version:"v38",sprint:"Sprint 17 — Automatisation 100%"};
+
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { LOIS_BELGES, LB, RMMMG, TX_ONSS_W, TX_ONSS_E, NET_FACTOR, PV_DOUBLE, PV_SIMPLE, PP_EST, obf, SAISIE_2026_TRAVAIL, SAISIE_2026_REMPLACEMENT, SAISIE_IMMUN_ENFANT_2026, quickNetEst } from '@/app/lib/lois-belges';
 // ═══ AUREUS SOCIAL PRO — Pages Inline ═══
@@ -22,73 +22,6 @@ function escapeHtml(str) {
   }
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
-function calc(emp, per, co) {
-  if (typeof window !== 'undefined' && window.calc) return window.calc(emp, per, co);
-  const b=+(emp?.monthlySalary||emp?.gross||0);
-  return {gross:b,net:b*0.56,tax:b*0.22,onssNet:b*0.1307,onssE:b*0.2507,css:0,costTotal:b*1.2507,bonus:0,peculeV:0,y13:0,totalBrut:b,netAPayer:b*0.56};
-}
-function calcCSSS(emp, per, co) {
-  if (typeof window !== 'undefined' && window.calcCSSS) return window.calcCSSS(emp, per, co);
-  return 0;
-}
-function quickNet(brut) {
-  if (typeof window !== 'undefined' && window.quickNet) return window.quickNet(brut);
-  return Math.round((brut||0)*0.56*100)/100;
-}
-function genBelcotax(data) {
-  if (typeof window !== 'undefined' && window.genBelcotax) return window.genBelcotax(data);
-  return "";
-}
-function genDMFANotification(data) {
-  if (typeof window !== 'undefined' && window.genDMFANotification) return window.genDMFANotification(data);
-  return "";
-}
-function genDMFATicket(data) {
-  if (typeof window !== 'undefined' && window.genDMFATicket) return window.genDMFATicket(data);
-  return "";
-}
-function genDMFAXML(data) {
-  if (typeof window !== 'undefined' && window.genDMFAXML) return window.genDMFAXML(data);
-  return "";
-}
-function genDimonaXML(data) {
-  if (typeof window !== 'undefined' && window.genDimonaXML) return window.genDimonaXML(data);
-  return "";
-}
-function loadHtml2Pdf() {
-  if (typeof window !== 'undefined' && window.loadHtml2Pdf) return window.loadHtml2Pdf();
-  return "";
-}
-// ═══ Constantes manquantes depuis monolithe ═══
-const DPER={month:new Date().getMonth()+1,year:new Date().getFullYear(),days:22,sickG:0,holidays:0,overtimeH:0,sundayH:0,nightH:0,bonus:0,y13:0,otherDed:0,advance:0,garnish:0,ppVolontaire:0,
-  // Éléments fiscaux complets
-  doublePecule:0,         // Double pécule vacances (si payé par employeur — employés)
-  peculeDepart:0,         // Pécule de vacances de départ (sortie de service)
-  primeAnciennete:0,      // Prime d'ancienneté (exo ONSS+IPP si ≤ plafond)
-  primeNaissance:0,       // Prime de naissance/mariage (exo ONSS si ≤ plafond)
-  primeInnovation:0,      // Prime d'innovation (Art. 38 §1er 25° CIR — exo IPP max 1 mois)
-  indemTeletravail:0,     // Indemnité forfaitaire télétravail (max 154,74€/mois 2026)
-  indemBureau:0,          // Indemnité frais de bureau (si pas forfaitaire)
-  pensionCompl:0,         // Retenue personnelle pension complémentaire (2è pilier — assur. groupe)
-  retSyndicale:0,         // Retenue cotisation syndicale
-  saisieAlim:0,           // Pension alimentaire (saisie prioritaire)
-  heuresSupFisc:0,        // Heures sup ouvrant droit à réduction PP (max 180h/an — Art.154bis CIR — 2026)
-  // Heures sup volontaires brut=net (nouveau régime 01/04/2026)
-  hsVolontBrutNet:0,      // HS volontaires brut=net (max 240h/an — 360h horeca) — exo ONSS + PP + sursalaire
-  hsRelance:0,            // HS relance transitoire T1/2026 (max 120h) — brut=net aussi
-  typeSpecial:"normal",   // normal, doublePecule, y13, depart, preavis
-  // Activation ONEM
-  allocTravail:0,         // Allocation de travail ONEM (Activa/Impulsion — déduit du net par l'employeur)
-  allocTravailType:'none', // none, activa_bxl, activa_jeune, impulsion_wal, impulsion55, vdab
-  // Mi-temps médical / Reprise progressive
-  miTempsMed:false,       // Reprise partielle du travail (Art. 100§2 Loi coord. 14/07/1994)
-  miTempsHeures:0,        // Heures/semaine prestées chez employeur (ex: 19h sur 38h)
-  miTempsINAMI:0,         // Complément INAMI perçu par le travailleur (indemnités mutuelle)
-};
-var TX_AT=LB.assurances.accidentTravail.taux;
-var COUT_MED=LB.assurances.medecineTravail.cout;
-
-
 
 const fmt=n=>new Intl.NumberFormat('fr-BE',{style:'currency',currency:'EUR'}).format(n||0);
 const fmtP=n=>`${((n||0)*100).toFixed(2)}%`;
