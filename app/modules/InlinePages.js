@@ -48,6 +48,7 @@ function quickNet(brut) {
 }
 
 const fmtP=n=>`${((n||0)*100).toFixed(2)}%`;
+const AUREUS_INFO={name:'Aureus IA SPRL',vat:'BE 1028.230.781',addr:'Saint-Gilles, Bruxelles',email:'info@aureus-ia.com',version:'v38',sprint:'Sprint 38'};
 const uid=()=>`${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
 const MN_FR=['Janvier',"Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 const MN_NL=['Januari',"Februari","Maart","April","Mei","Juni","Juli","Augustus","September","Oktober","November","December"];
