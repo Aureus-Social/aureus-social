@@ -52,7 +52,7 @@ function Dashboard({s,d}) {
   const months12=Array.from({length:12},(_,i)=>{
     const mi=(curMonth-11+i+12)%12;
     const yi=curYear-(curMonth-11+i<0?1:0);
-    const found=s.pays.filter(p=>p.month===mi+1&&p.year===yi);
+    const found=( s.pays||[]).filter(p=>p.month===mi+1&&p.year===yi);
     const mass=found.length>0?found.reduce((a,p)=>a+(p.gross||0),0):tm;
     const cost=found.length>0?found.reduce((a,p)=>a+(p.costTotal||0),0):tc;
     return {m:MN[mi]?.substring(0,3)||'',mass,cost,net:found.length>0?found.reduce((a,p)=>a+(p.net||0),0):tn};
@@ -158,7 +158,7 @@ function Dashboard({s,d}) {
         {label:"Masse salariale brute",value:fmt(tm),sub:`Moy: ${fmt(avgGross)}/emp`,color:'#4ade80',icon:'◈'},
         {label:"Net total",value:fmt(tn),sub:`${ae.length?Math.round(tn/tm*100):0}% du brut`,color:'#60a5fa',icon:'▤'},
         {label:"Coût employeur total",value:fmt(tc),sub:`Ratio: ${ae.length?((tc/tm)*100).toFixed(0):0}% du brut`,color:'#a78bfa',icon:'◆'},
-        {label:"Déclarations",value:`${s.pays.length}`,sub:`${s.dims.length} Dimona · ${s.dmfas.length} DmfA`,color:'#fb923c',icon:'◇'},
+        {label:"Déclarations",value:`${(s.pays||[]).length}`,sub:`${(s.dims||[]).length} Dimona · ${(s.dmfas||[]).length} DmfA`,color:'#fb923c',icon:'◇'},
       ].map((kpi,i)=>
         <div key={i} style={{background:"linear-gradient(145deg,#0e1220,#131829)",border:'1px solid rgba(139,115,60,.12)',borderRadius:14,padding:'20px 18px',position:'relative',overflow:'hidden',animation:`fadeIn .4s ease ${i*0.08}s both`}}>
           <div style={{position:'absolute',top:12,right:14,fontSize:22,opacity:.08,color:kpi.color}}>{kpi.icon}</div>
