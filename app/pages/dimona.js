@@ -138,10 +138,10 @@ function DimonaPage({s,d}) {
   };
 
   // Stats
-  const statsIN=s.dims.filter(x=>x.action==='IN').length;
-  const statsOUT=s.dims.filter(x=>x.action==='OUT').length;
-  const statsUPD=s.dims.filter(x=>x.action==='UPDATE').length;
-  const filtered=filter==='all'?s.dims:s.dims.filter(x=>x.action===filter);
+  const statsIN=( s.dims||[]).filter(x=>x.action==='IN').length;
+  const statsOUT=( s.dims||[]).filter(x=>x.action==='OUT').length;
+  const statsUPD=( s.dims||[]).filter(x=>x.action==='UPDATE').length;
+  const filtered=filter==='all'?s.dims:( s.dims||[]).filter(x=>x.action===filter);
 
   return <div>
     <PH title="Déclarations Dimona" sub="Déclaration immédiate de l'emploi — ONSS REST v2 — Connecté via Chaman"/>
@@ -162,7 +162,7 @@ function DimonaPage({s,d}) {
     <div style={{marginBottom:14,padding:"10px 14px",background:"linear-gradient(135deg,rgba(59,130,246,.06),rgba(59,130,246,.02))",border:"1px solid rgba(59,130,246,.1)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}><div style={{fontSize:11,color:"#888"}}>⚡ Dimona automatique à chaque embauche/sortie</div><button onClick={()=>{if(confirm("Générer Dimona IN pour tous ?")){(s.emps||[]).forEach(e=>generateDimonaXML(e,"IN",s.co));alert("✅ Dimona générées")}}} style={{padding:"6px 14px",borderRadius:8,border:"none",background:"#3b82f6",color:"#fff",fontSize:11,cursor:"pointer",fontWeight:600}}>⚡ Générer tout</button></div><div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap"}}>{s.emps.filter(e=>e.status==="active"||!e.status).map(e=><div key={e.id} style={{display:"flex",gap:4}}><button onClick={()=>generateDimonaXML(e,"IN",s.co)} style={{padding:"6px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:600,background:"rgba(74,222,128,.15)",color:"#4ade80"}}>IN {e.first||e.fn} {e.last||e.ln}</button><button onClick={()=>generateDimonaXML(e,"OUT",s.co)} style={{padding:"6px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:600,background:"rgba(248,113,113,.15)",color:"#f87171"}}>OUT {e.first||e.fn} {e.last||e.ln}</button></div>)}</div>
     <div style={{marginBottom:12}}><button onClick={()=>generateSEPAXML(s.emps,per,s.co)} style={{padding:"8px 16px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,background:"rgba(96,165,250,.15)",color:"#60a5fa"}}>Generer SEPA XML (virements)</button></div>{/* Stats bar */}
     <div style={{display:'flex',gap:12,marginBottom:18}}>
-      {[{l:"Total",v:s.dims.length,c:'#c6a34e'},{l:"IN",v:statsIN,c:'#4ade80'},{l:"OUT",v:statsOUT,c:'#f87171'},{l:"UPDATE",v:statsUPD,c:'#60a5fa'}].map((st,i)=>
+      {[{l:"Total",v:(s.dims||[]).length,c:'#c6a34e'},{l:"IN",v:statsIN,c:'#4ade80'},{l:"OUT",v:statsOUT,c:'#f87171'},{l:"UPDATE",v:statsUPD,c:'#60a5fa'}].map((st,i)=>
         <div key={i} style={{flex:1,padding:'12px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
           <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{st.l}</div>
           <div style={{fontSize:22,fontWeight:700,color:st.c,marginTop:2}}>{st.v}</div>

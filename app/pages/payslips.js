@@ -478,12 +478,12 @@ function Payslips({s,d}) {
         </div>
       </div>}
     </div>
-    {s.pays.length>0&&<C className="no-print" style={{marginTop:20,padding:0,overflow:'hidden'}}>
+    {(s.pays||[]).length>0&&<C className="no-print" style={{marginTop:20,padding:0,overflow:'hidden'}}>
       <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Historique ({s.pays.length} fiches)</div>
+        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Historique ({(s.pays||[]).length} fiches)</div>
         <div style={{display:'flex',gap:8}}>
-          {s.pays.some(p=>(!p.gross||p.gross===0)&&(!p.ename||p.ename==='undefined undefined'))&&<button onClick={()=>{if(confirm('Supprimer toutes les fiches en erreur (undefined / 0€) ?')){const badIds=s.pays.filter(p=>(!p.gross||p.gross===0)&&(!p.ename||p.ename==='undefined undefined')).map(p=>p.id);d({type:'DEL_PAYS_BATCH',ids:badIds})}}} style={{padding:'6px 12px',background:'#7f1d1d',color:'#fca5a5',border:'1px solid #991b1b',borderRadius:6,fontSize:11,fontWeight:600,cursor:'pointer'}}>🗑 Supprimer les fiches en erreur ({s.pays.filter(p=>(!p.gross||p.gross===0)&&(!p.ename||p.ename==='undefined undefined')).length})</button>}
-          {s.pays.length>0&&<button onClick={()=>{if(confirm('⚠ Supprimer TOUTES les fiches de paie ? Cette action est irréversible.')){d({type:'SET_PAYS',data:[]})}}} style={{padding:'6px 12px',background:'#1e293b',color:'#94a3b8',border:'1px solid #334155',borderRadius:6,fontSize:11,fontWeight:500,cursor:'pointer'}}>Tout effacer</button>}
+          {(s.pays||[]).some(p=>(!p.gross||p.gross===0)&&(!p.ename||p.ename==='undefined undefined'))&&<button onClick={()=>{if(confirm('Supprimer toutes les fiches en erreur (undefined / 0€) ?')){const badIds=(s.pays||[]).filter(p=>(!p.gross||p.gross===0)&&(!p.ename||p.ename==='undefined undefined')).map(p=>p.id);d({type:'DEL_PAYS_BATCH',ids:badIds})}}} style={{padding:'6px 12px',background:'#7f1d1d',color:'#fca5a5',border:'1px solid #991b1b',borderRadius:6,fontSize:11,fontWeight:600,cursor:'pointer'}}>🗑 Supprimer les fiches en erreur ({(s.pays||[]).filter(p=>(!p.gross||p.gross===0)&&(!p.ename||p.ename==='undefined undefined')).length})</button>}
+          {(s.pays||[]).length>0&&<button onClick={()=>{if(confirm('⚠ Supprimer TOUTES les fiches de paie ? Cette action est irréversible.')){d({type:'SET_PAYS',data:[]})}}} style={{padding:'6px 12px',background:'#1e293b',color:'#94a3b8',border:'1px solid #334155',borderRadius:6,fontSize:11,fontWeight:500,cursor:'pointer'}}>Tout effacer</button>}
         </div>
       </div>
       <Tbl cols={[

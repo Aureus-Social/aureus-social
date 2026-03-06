@@ -776,7 +776,7 @@ export function PortailEmployeurMod({s,d,per}){const loisRef=LOIS_BELGES;const n
         {/* ── Fiches de paie consultables ── */}
         {clientView==='fiches'&&<div>
           <div style={{fontSize:12,fontWeight:600,color:'#c6a34e',marginBottom:10}}>Fiches de paie — Consultation employeur</div>
-          {s.pays.length>0?<Tbl cols={[
+          {(s.pays||[]).length>0?<Tbl cols={[
             {k:'e',l:"Travailleur",b:1,r:r=>r.ename||'—'},
             {k:'p',l:"Période",r:r=>r.period||'—'},
             {k:'g',l:"Brut",a:'right',r:r=>fmt(r.gross||0)},
