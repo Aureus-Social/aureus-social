@@ -320,7 +320,7 @@ export default function DashboardLayout({ user }) {
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
           {[1, 2, 3, 4, 5, 6, 7].map(gNum => {
             const group = GROUPS.find(g => g.id === `_g${gNum}`);
-            const items = getGroupItems(gNum);
+            const items = getGroupItems(gNum) || [];
             const isCollapsed = collapsed[gNum];
             return (
               <div key={gNum}>
