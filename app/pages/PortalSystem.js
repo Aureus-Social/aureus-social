@@ -845,9 +845,66 @@ export function PortalSwitcher({portal, switchPortal, userRole}) {
   );
 }
 
-export default {
-  usePortalMode, PORTAL_CONFIG, CLIENT_NAV, EMPLOYEE_NAV,
-  EmployeeDashboard, EmployeePayslips, EmployeeLeave, EmployeeDocuments, EmployeeProfile, EmployeeTimesheet, EmployeeTraining,
-  ClientDashboard, ClientFactures,
-  PortalBadge, PortalSwitcher
-};
+function PortalSystemPage({ s, d }) {
+  const { portal, switchPortal } = usePortalMode();
+  const cfg = PORTAL_CONFIG[portal] || PORTAL_CONFIG.admin;
+  const GOLD = '#c6a34e';
+
+  const tabs = portal === 'client'
+    ? CLIENT_NAV
+    : portal === 'employee'
+    ? EMPLOYEE_NAV
+    : [
+        { id:'emp-dash', label:'Vue Employé', icon:'👤' },
+        { id:'client-dash', label:'Vue Client', icon:'🏢' },
+        { id:'emp-payslips', label:'Fiches de paie', icon:'📄' },
+        { id:'emp-leave', label:'Congés', icon:'🌴' },
+        { id:'emp-docs', label:'Documents', icon:'📁' },
+        { id:'emp-profile', label:'Profil', icon:'⚙️' },
+        { id:'emp-timesheet', label:'Pointage', icon:'⏱️' },
+        { id:'emp-training', label:'Formation', icon:'🎓' },
+        { id:'client-fac', label:'Facturation', icon:'💶' },
+      ];
+
+  const [tab, setTab] = React.useState(tabs[0]?.id || 'emp-dash');
+
+  const renderContent = () => {
+    switch(tab) {
+      case 'emp-dash': return <EmployeeDashboard s={s} d={d} employee={s?.user} />;
+      case 'emp-payslips': return <EmployeePayslips s={s} d={d} employee={s?.user} />;
+      case 'emp-leave': return <EmployeeLeave s={s} d={d} employee={s?.user} />;
+      case 'emp-docs': return <EmployeeDocuments s={s} d={d} employee={s?.user} />;
+      case 'emp-profile': return <EmployeeProfile s={s} d={d} employee={s?.user} />;
+      case 'emp-timesheet': return <EmployeeTimesheet s={s} d={d} employee={s?.user} />;
+      case 'emp-training': return <EmployeeTraining s={s} d={d} />;
+      case 'client-dash': return <ClientDashboard s={s} d={d} />;
+      case 'client-fac': return <ClientFactures s={s} />;
+      default: return <EmployeeDashboard s={s} d={d} employee={s?.user} />;
+    }
+  };
+
+  return (
+    <div>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+        <div>
+          <div style={{ fontSize:18, fontWeight:800, color:GOLD }}>🏛️ Gestion des Portails</div>
+          <div style={{ fontSize:11, color:'#5e5c56', marginTop:2 }}>{cfg?.label || 'Admin'} — Aureus Social Pro</div>
+        </div>
+        <PortalSwitcher portal={portal} switchPortal={switchPortal} userRole="admin" />
+      </div>
+      <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:20 }}>
+        {tabs.map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)}
+            style={{ padding:'6px 14px', borderRadius:8, border:`1px solid ${tab===t.id?GOLD:'rgba(198,163,78,.15)'}`,
+              background: tab===t.id?'rgba(198,163,78,.1)':'transparent',
+              color: tab===t.id?GOLD:'#9e9b93', fontSize:11, cursor:'pointer', fontFamily:'inherit' }}>
+            {t.icon} {t.label}
+          </button>
+        ))}
+      </div>
+      {renderContent()}
+    </div>
+  );
+}
+
+export default PortalSystemPage;
