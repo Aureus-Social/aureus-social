@@ -45,6 +45,7 @@ const OnboardingPage = dynamic(() => import('../pages/OnboardingHub'), { ssr: fa
 const CloturePage = dynamic(() => import('../pages/ClotureMensuelle'), { ssr: false, loading: Loading });
 const AdminBaremesPageOld = dynamic(() => import('../pages/AdminBaremes'), { ssr: false, loading: Loading });
 const SecurityPage = dynamic(() => import('../pages/SecurityDashboard'), { ssr: false, loading: Loading });
+const RolesPermissionsPage = dynamic(() => import('../pages/RolesPermissions'), { ssr: false, loading: Loading });
 const AuditCodePage = dynamic(() => import('../pages/AuditSecuriteCode'), { ssr: false, loading: Loading });
 const PayrollSimPage = dynamic(() => import('../pages/PayrollSimulator'), { ssr: false, loading: Loading });
 const AureusIAPage = dynamic(() => import('../pages/AureusSuitePage'), { ssr: false, loading: Loading });
@@ -328,7 +329,7 @@ export default function DashboardLayout({ user }) {
       case 'archives': return <SecurityPage s={s} d={d} tab={page} />;
       case 'auditfiscale': return <AuditCodePage s={s} d={d} tab={page} />;
       case 'audittrail': return <AuditCodePage s={s} d={d} tab={page} />;
-      case 'authroles': return <SecurityPage s={s} d={d} tab={page} />;
+      case 'authroles': return <RolesPermissionsPage s={s} d={d} tab={page} />;
       case 'autoindex': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'autopilot': return <SmartOpsPage s={s} d={d} tab={page} />;
       case 'cgvsaas': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
