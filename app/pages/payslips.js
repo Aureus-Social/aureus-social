@@ -362,7 +362,7 @@ function Payslips({s,d}) {
         </div>
         <div style={{marginTop:10,fontSize:10.5,color:'#bbb'}}>Versement: {emp.iban}</div>
         {/* CONDITIONS GÉNÉRALES INSTITUTIONNELLES */}
-        <div className="no-print" style={{marginTop:18,paddingTop:14,borderTop:'1px solid #e0dfda'}}>
+        <div  style={{marginTop:18,paddingTop:14,borderTop:'1px solid #e0dfda'}}>
           <div style={{fontSize:8.5,color:'#bbb',textTransform:'uppercase',letterSpacing:'1.5px',fontWeight:600,marginBottom:8}}>Conditions générales</div>
           <div style={{fontSize:8,color:'#aaa',lineHeight:1.7,columnCount:2,columnGap:20}}>
             <p style={{margin:'0 0 4px'}}><b style={{color:'#999'}}>1. Confidentialité</b> — La présente fiche de paie est un document strictement confidentiel destiné exclusivement au travailleur mentionné ci-dessus. Toute reproduction, diffusion ou communication à des tiers est interdite sauf accord écrit de l'employeur.</p>
@@ -381,7 +381,7 @@ function Payslips({s,d}) {
         </div>
 
         {/* TABLEAU RÉCAPITULATIF SOUMISSION ONSS / PP PAR ÉLÉMENT */}
-        <div className="no-print" style={{marginTop:18,padding:14,background:"#f0efea",borderRadius:8}}>
+        <div  style={{marginTop:18,padding:14,background:"#f0efea",borderRadius:8}}>
           <div style={{fontSize:9.5,color:'#999',textTransform:'uppercase',letterSpacing:'1px',fontWeight:600,marginBottom:10}}>Récapitulatif soumission ONSS & Précompte professionnel</div>
           <table style={{width:'100%',borderCollapse:'collapse',fontSize:10.5}}>
             <thead><tr style={{borderBottom:'2px solid #c6a34e'}}>
@@ -627,13 +627,13 @@ function Payslips({s,d}) {
 
 
         {/* BOUTON PDF uniquement — plus de téléchargement HTML/txt */}
-        <div style={{marginTop:14,display:'flex',gap:10,justifyContent:'center'}} className="no-print">
+        <div style={{marginTop:14,display:'flex',gap:10,justifyContent:'center'}} >
           <button onClick={()=>{
             generatePayslipPDF(emp,res,per,s.co)}} style={{padding:'12px 28px',background:"#c6a34e",color:'#fff',border:'none',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer',letterSpacing:'.5px'}}>🖨 Imprimer / PDF</button>
         </div>
       </div>}
     </div>
-    {(s.pays||[]).length>0&&<C className="no-print" style={{marginTop:20,padding:0,overflow:'hidden'}}>
+    {(s.pays||[]).length>0&&<C  style={{marginTop:20,padding:0,overflow:'hidden'}}>
       <div style={{padding:'14px 18px',borderBottom:'1px solid rgba(139,115,60,.1)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
         <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Historique ({(s.pays||[]).length} fiches)</div>
         <div style={{display:'flex',gap:8}}>
