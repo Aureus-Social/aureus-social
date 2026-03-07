@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useReducer, useMemo, Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { MENU, GROUPS, getGroupItems } from '../lib/menu-config';
+import { MENU, GROUPS, getGroupItems, SEARCH_SUBSECTIONS } from '../lib/menu-config';
 import { supabase } from '../lib/supabase';
 
 const Loading = () => <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Chargement...</div>;
@@ -196,6 +196,7 @@ export default function DashboardLayout({ user }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocus, setSearchFocus] = useState(false);
+  const [scrollAnchor, setScrollAnchor] = useState(null);
   const [state, dispatch] = useReducer(reducer, {
     emps: [],
     clients: [],
@@ -219,7 +220,7 @@ export default function DashboardLayout({ user }) {
     switch (page) {
       case 'dashboard': return <DashboardPage s={s} d={d} onNavigate={setPage} />;
       case 'employees': return <EmployeesPage s={s} d={d} />;
-      case 'payslip': return <PayslipsPage s={s} d={d} />;
+      case 'payslip': return <PayslipsPage s={s} d={d} scrollAnchor={scrollAnchor} onAnchorHandled={()=>setScrollAnchor(null)} />;
       case 'declarations': case 'onss': return <DimonaPageComp s={s} d={d} />;
       case 'admin': return <AdminPage s={s} d={d} tab={page} />;
       case 'baremescp': return <BaremesCPPage s={s} d={d} />;
@@ -399,9 +400,16 @@ export default function DashboardLayout({ user }) {
           {/* Dropdown résultats */}
           {(searchFocus || searchQuery) && searchQuery.length > 0 && (() => {
             const q = searchQuery.toLowerCase();
-            const results = MENU.filter(m => !m.group && (
+            // Résultats pages menu
+            const menuResults = MENU.filter(m => !m.group && (
               m.label.toLowerCase().includes(q) || m.id.toLowerCase().includes(q)
-            )).slice(0, 8);
+            )).slice(0, 5).map(m => ({ ...m, isSubsection: false }));
+            // Résultats sous-sections (paramètres légaux fiche de paie)
+            const subResults = (SEARCH_SUBSECTIONS || []).filter(s =>
+              s.label.toLowerCase().includes(q) ||
+              s.keywords.some(k => k.includes(q) || q.includes(k))
+            ).slice(0, 4).map(s => ({ ...s, isSubsection: true }));
+            const results = [...subResults, ...menuResults].slice(0, 8);
             const groupName = (g) => GROUPS.find(gr => gr.id === `_g${g}`)?.label || '';
             return results.length > 0 ? (
               <div style={{
@@ -409,23 +417,28 @@ export default function DashboardLayout({ user }) {
                 background: '#111009', border: '1px solid rgba(198,163,78,.2)',
                 borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,.6)', overflow: 'hidden',
               }}>
-                {results.map(item => (
-                  <div key={item.id}
-                    onClick={() => { setPage(item.id); setSearchQuery(''); setSearchFocus(false); }}
-                    style={{ padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid rgba(255,255,255,.03)' }}
+                {results.map((item, idx) => (
+                  <div key={idx}
+                    onClick={() => {
+                      setPage(item.id);
+                      if (item.isSubsection && item.anchor) {
+                        setScrollAnchor(item.anchor);
+                      }
+                      setSearchQuery('');
+                      setSearchFocus(false);
+                    }}
+                    style={{ padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid rgba(255,255,255,.03)', background: item.isSubsection ? 'rgba(198,163,78,.03)' : 'transparent' }}
                     onMouseEnter={e => e.currentTarget.style.background = 'rgba(198,163,78,.08)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    onMouseLeave={e => e.currentTarget.style.background = item.isSubsection ? 'rgba(198,163,78,.03)' : 'transparent'}
                   >
                     <span style={{ fontSize: 13, width: 18, textAlign: 'center' }}>{item.icon}</span>
-                    <div>
+                    <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 11.5, color: '#e8e6e0', fontWeight: 500 }}>{item.label}</div>
-                      <div style={{ fontSize: 9.5, color: '#5e5c56', marginTop: 1 }}>{groupName(item.g)}</div>
+                      <div style={{ fontSize: 9.5, color: item.isSubsection ? '#c6a34e' : '#5e5c56', marginTop: 1 }}>{item.isSubsection ? item.sub : groupName(item.g)}</div>
                     </div>
+                    {item.isSubsection && <span style={{ fontSize: 9, color: '#c6a34e', opacity: 0.7 }}>↗ section</span>}
                   </div>
                 ))}
-                {results.length === 0 && (
-                  <div style={{ padding: '10px 12px', fontSize: 11, color: '#5e5c56', textAlign: 'center' }}>Aucun résultat</div>
-                )}
               </div>
             ) : (
               <div style={{

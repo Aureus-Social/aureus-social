@@ -158,3 +158,65 @@ export const MENU = [
 
 export const GROUPS = MENU.filter(m => m.group);
 export const getGroupItems = (gNum) => MENU.filter(m => m.g === gNum && !m.group);
+
+// ═══ INDEX SOUS-SECTIONS — RECHERCHE CONTEXTUELLE ═══
+// Permet de taper "ONSS", "Précompte", "CSSS" etc. dans la barre de recherche
+// et d'atterrir directement sur la bonne section de la fiche de paie
+export const SEARCH_SUBSECTIONS = [
+  {
+    id: 'payslip',
+    anchor: 'section-onss-cotisations',
+    icon: '⚡',
+    label: 'ONSS & Cotisations',
+    sub: 'Fiche de paie — Paramètres légaux',
+    keywords: ['onss','cotisation','13,07','25,07','cotisations sociales','securite sociale','travailleur','patronal','ouvrier','108%','rmmmg','co2','majoration'],
+  },
+  {
+    id: 'payslip',
+    anchor: 'section-precompte',
+    icon: '🧾',
+    label: 'Précompte professionnel',
+    sub: 'Fiche de paie — Paramètres légaux',
+    keywords: ['precompte','précompte','pp','impot','impôt','tranches','taux','26,75','42,80','48,15','53,50','bonus emploi','quotite','quotité','seuil','fiscal','fiscalite','fiscalité'],
+  },
+  {
+    id: 'payslip',
+    anchor: 'section-csss',
+    icon: '📊',
+    label: 'CSSS — Cotisation spéciale SS',
+    sub: 'Fiche de paie — Paramètres légaux',
+    keywords: ['csss','cotisation speciale','spéciale','cotisation special','revenu imposable','tranche csss','securite sociale speciale'],
+  },
+  {
+    id: 'payslip',
+    anchor: 'section-avantages',
+    icon: '🎁',
+    label: 'Avantages & Frais propres',
+    sub: 'Fiche de paie — Paramètres légaux',
+    keywords: ['avantages','frais propres','cheques repas','chèques-repas','eco cheques','éco-chèques','ecocheques','forfait bureau','teletravail','télétravail','km voiture','kilometrique','kilométrique','frais','depenses','dépenses','repas','indemnite','indemnité'],
+  },
+  {
+    id: 'payslip',
+    anchor: 'section-saisies',
+    icon: '⚖️',
+    label: 'Saisies sur salaire',
+    sub: 'Fiche de paie — Paramètres légaux',
+    keywords: ['saisie','saisies','salaire','art 1409','1409','garnish','garnissement','immunite','immunité','enfant','saisie salaire','baremes saisie'],
+  },
+  {
+    id: 'payslip',
+    anchor: 'section-af',
+    icon: '👶',
+    label: 'Allocations familiales',
+    sub: 'Fiche de paie — Paramètres légaux',
+    keywords: ['allocations familiales','allocation familiale','af','enfant','iriscare','aviq','groeipakket','bruxelles','wallonie','flandre','region','bxl','wal','vl'],
+  },
+  {
+    id: 'payslip',
+    anchor: 'section-cp',
+    icon: '📋',
+    label: 'Barème sectoriel CP',
+    sub: 'Fiche de paie — Paramètres légaux',
+    keywords: ['bareme','barème','cp','commission paritaire','sectoriel','classe','minimum','minima','secteur','cp 200','cp 111','cp 118','cp 119','cp 124','cp 140','cp 302','cp 330'],
+  },
+];

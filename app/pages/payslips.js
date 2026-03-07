@@ -12,7 +12,7 @@ const MN = MN_FR;
 
 function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function Payslips({s,d}) {
+function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const [eid,setEid]=useState(s.selectedEmpIdForPayslip||(s?.emps||[])[0]?.id||'');
   const [per,setPer]=useState({...DPER});
@@ -21,6 +21,13 @@ function Payslips({s,d}) {
   const [batchResults,setBatchResults]=useState([]);
   const [batchRunning,setBatchRunning]=useState(false);
   const emp=(s?.emps||[]).find(e=>e.id===eid);
+  // Scroll vers une section quand scrollAnchor est défini
+  useEffect(()=>{
+    if(!scrollAnchor) return;
+    const el=document.getElementById(scrollAnchor);
+    if(el){el.scrollIntoView({behavior:'smooth',block:'start'});}
+    if(onAnchorHandled) setTimeout(onAnchorHandled,500);
+  },[scrollAnchor]);
   // Préremplir Activation ONEM depuis la fiche employé quand on change d'employé
   useEffect(()=>{
     if(emp&&(emp.allocTravailType||'none')!=='none')
@@ -594,7 +601,7 @@ function Payslips({s,d}) {
 
           {/* Ligne 1 — ONSS */}
           <div style={{marginBottom:8}}>
-            <div style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>ONSS & Cotisations</div>
+            <div id='section-onss-cotisations' style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>ONSS & Cotisations</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:6}}>
               {[
                 {l:'ONSS travailleur',v:`${(TX_ONSS_W*100).toFixed(2)}%`,ref:'Loi 29/06/1981',ok:true},
@@ -613,7 +620,7 @@ function Payslips({s,d}) {
 
           {/* Ligne 2 — Fiscalité PP */}
           <div style={{marginBottom:8}}>
-            <div style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>Précompte professionnel & Bonus emploi</div>
+            <div id='section-precompte' style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>Précompte professionnel & Bonus emploi</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:6}}>
               {[
                 {l:'Tranche ≤ 16.710€',v:'26,75%',ref:'AR/CIR 92 ann.III',ok:true},
@@ -642,7 +649,7 @@ function Payslips({s,d}) {
 
           {/* Ligne 3 — CSSS */}
           <div style={{marginBottom:8}}>
-            <div style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>CSSS — Cotisation spéciale sécurité sociale</div>
+            <div id='section-csss' style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>CSSS — Cotisation spéciale sécurité sociale</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6}}>
               {(()=>{
                 const tranches=LOIS_BELGES.csss?.isole||[];
@@ -664,7 +671,7 @@ function Payslips({s,d}) {
 
           {/* Ligne 4 — Avantages & Frais */}
           <div style={{marginBottom:8}}>
-            <div style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>Avantages exonérés & Frais propres</div>
+            <div id='section-avantages' style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>Avantages exonérés & Frais propres</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:6}}>
               {[
                 {l:'Chèques-repas max',v:`${fmt(CR_MAX)}/jour`,ref:'CCT nat. + AR',used:res.mvDays>0},
@@ -682,7 +689,7 @@ function Payslips({s,d}) {
 
           {/* Ligne 5 — Saisies sur salaire */}
           {res.garnish>0&&<div style={{marginBottom:8}}>
-            <div style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>Saisies sur salaire — Barèmes 2026 (Art.1409 C.jud.)</div>
+            <div id='section-saisies' style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>Saisies sur salaire — Barèmes 2026 (Art.1409 C.jud.)</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:6}}>
               {(SAISIE_2026_TRAVAIL||[]).map((t,i)=>{
                 const active=res.net>=t.min&&res.net<(t.max===Infinity?999999:t.max);
@@ -702,7 +709,7 @@ function Payslips({s,d}) {
 
           {/* Ligne 6 — Allocations familiales région */}
           {emp.region&&<div style={{marginBottom:8}}>
-            <div style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>Allocations familiales — {emp.region==='BXL'?'Bruxelles (Iriscare)':emp.region==='WAL'?'Wallonie (AViQ)':emp.region==='VL'?'Flandre (Groeipakket)':'Région'}</div>
+            <div style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}} id='section-af'>Allocations familiales — {emp.region==='BXL'?'Bruxelles (Iriscare)':emp.region==='WAL'?'Wallonie (AViQ)':emp.region==='VL'?'Flandre (Groeipakket)':'Région'}</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:6}}>
               {(()=>{
                 const reg=AF_REGIONS?.[emp.region];
@@ -722,7 +729,7 @@ function Payslips({s,d}) {
             const bcp=BAREMES_CP_MIN?.[cp];
             if(!bcp) return null;
             const belowMin=res.gross<bcp.cl1;
-            return <div style={{marginBottom:4}}>
+            return <div id='section-cp' style={{marginBottom:4}}>
               <div style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>Barème sectoriel CP {cp} — Minima {bcp.nom||''}</div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6}}>
                 {['cl1','cl2','cl3','cl4','cl5'].filter(k=>bcp[k]).map((k,i)=>{
