@@ -14,7 +14,8 @@ const GOLD='#c6a34e',GREEN='#22c55e',BLUE='#3b82f6',RED='#ef4444',PURPLE='#a855f
 
 // ── Portal Detection ──
 export function usePortalMode() {
-  const [portal, setPortal] = useState('admin');
+  const TAB_TO_PORTAL = { portail:'admin', portailclient:'client', portalmanager:'employee' };
+  const [portal, setPortal] = useState(TAB_TO_PORTAL[initialPortalTab] || 'admin');
   
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -845,7 +846,7 @@ export function PortalSwitcher({portal, switchPortal, userRole}) {
   );
 }
 
-function PortalSystemPage({ s, d }) {
+function PortalSystemPage({ s, d, tab: initialPortalTab }) {
   const { portal, switchPortal } = usePortalMode();
   const cfg = PORTAL_CONFIG[portal] || PORTAL_CONFIG.admin;
   const GOLD = '#c6a34e';
@@ -907,4 +908,6 @@ function PortalSystemPage({ s, d }) {
   );
 }
 
-export default PortalSystemPage;
+export default function PortalSystemPg({ s, d, tab }) {
+  return <PortalSystemPage s={s} d={d} tab={tab} />;
+}

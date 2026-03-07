@@ -376,12 +376,13 @@ const CAT_COLORS={remvar:'#c6a34e',exonere:'#22c55e',frais:'#3b82f6',atn:'#f8717
 // ════════════════════════════════════════════════════════════
 // COMPOSANT 1: PRIME CALCULATOR V2 — Simulateur comparatif
 // ════════════════════════════════════════════════════════════
-export function PrimeCalculatorV2({s,d}){
+export function PrimeCalculatorV2({s,d,props_tab}){
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const emps=(s?.clients||[]).flatMap(c=>c.emps||[]);
   const [selPrime,setSelPrime]=useState('prime_fin_annee');
   const [montant,setMontant]=useState(2000);
-  const [tab,setTab]=useState('simu');
+  const TAB_MAP_PV = { gestionprimes:'catalogue', avantages:'simu' };
+  const [tab,setTab]=useState(TAB_MAP_PV[props_tab]||'simu');
   const [expanded,setExpanded]=useState({});
   const [searchP,setSearchP]=useState('');
   const [selCat,setSelCat]=useState('all');
@@ -1536,4 +1537,4 @@ export function CheqRepasV2({s}){
 }
 
 
-export default function PrimesAvantagesTabbed({ s, d, tab }) { return <PrimeCalculatorV2 state={s||{}} dispatch={d||(()=>{})}/> }
+export default function PrimesAvantagesTabbed({ s, d, tab }) { return <PrimeCalculatorV2 s={s||{}} d={d||(()=>{})} props_tab={tab}/> }

@@ -10,11 +10,11 @@ const Badge=({text,color})=><span style={{padding:'2px 7px',borderRadius:5,fontS
 // ═══════════════════════════════════════════════════════════
 // 1. DASHBOARD RH — Vrais indicateurs calcules
 // ═══════════════════════════════════════════════════════════
-export function DashboardRHV2({s,d}){
+export function DashboardRHV2({s,d,props_tab}){
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const clients= s?.clients||[];const now=new Date();const yr=now.getFullYear();
   const allEmps=clients.flatMap(c=>(c.emps||[]).map(e=>({...e,_co:c.company?.name||c.id})));
-  const n=allEmps.length;const [tab,setTab]=useState('overview');
+  const n=allEmps.length;const [tab,setTab]=useState((()=>{const m={dashrh:'overview',rh:'overview',team:'events'};return m[props_tab]||'overview';})());
   const mb=allEmps.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||e.brut||0)),0);
   const coutTotal=mb*(1+TX_ONSS_E);
 
@@ -385,5 +385,5 @@ export function GestionInterimairesV2({s,d}){
 
 
 export default function EmployeeHubWrapped({ s, d, tab }) {
-  return <DashboardRHV2 state={s||{}} dispatch={d||(()=>{})} defaultTab={tab} />;
+  return <DashboardRHV2 s={s||{}} d={d||(()=>{})} props_tab={tab} />;
 }

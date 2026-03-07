@@ -253,8 +253,9 @@ function TestSuiteTab({s}) {
 // ════════════════════════════
 // COMPOSANT PRINCIPAL
 // ════════════════════════════
-export default function AuditSecuriteCode({s, d}) {
-  const [tab, setTab] = useState('securite');
+export default function AuditSecuriteCode({s, d, tab: props_tab}) {
+  const TAB_MAP = { auditsecuritecode:'securite', auditfiscale:'securite', audittrail:'trail', testsuite:'tests' };
+  const [tab, setTab] = useState(TAB_MAP[props_tab] || 'securite');
 
   const tabs = [
     {id:'securite', label:'🛡 Sécurité Code', subtitle:'Audit OWASP'},

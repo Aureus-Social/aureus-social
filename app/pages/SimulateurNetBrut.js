@@ -8,8 +8,8 @@ import React, { useState, useMemo } from 'react';
 
 const GOLD='#c6a34e',GREEN='#22c55e';
 
-export function SimulateurNetBrut({ calcPaie, baremes }) {
-  const [mode, setMode] = useState('brut'); // 'brut' or 'net'
+export function SimulateurNetBrut({ calcPaie, baremes, props_tab }) {
+  const [mode, setMode] = useState(props_tab === 'simutp' ? 'net' : 'brut'); // 'brut' or 'net'
   const [brutInput, setBrutInput] = useState(3500);
   const [netInput, setNetInput] = useState(2200);
   const [situation, setSituation] = useState('isole');
@@ -120,5 +120,5 @@ export function SimulateurNetBrut({ calcPaie, baremes }) {
 }
 
 export default function SimulateurNetBrutWrapped({ s, d, tab }) {
-  return <SimulateurNetBrut state={s||{}} dispatch={d||(()=>{})} defaultTab={tab} />;
+  return <SimulateurNetBrut props_tab={tab} />;
 }

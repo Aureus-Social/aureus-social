@@ -116,7 +116,9 @@ export function optimizePackage(budgetMensuel, calcPayrollFn, LOIS_BELGES, opts 
 // COMPOSANT: Simulateur Avancé Brut↔Net
 // ═══════════════════════════════════════════════════════════════════
 export function PayrollSimulatorAdvanced({ calcPayroll, LOIS_BELGES }) {
-  const [tab, setTab] = useState('brut2net');
+  const TAB_MAP_PS = { couttotal:'cost2net', simulateurspro:'brut2net', simulicenciement:'net2brut',
+    simupension:'package', comparateur:'compare', optifiscale:'package' };
+  const [tab, setTab] = useState(TAB_MAP_PS[props_tab] || 'brut2net');
   const [brut, setBrut] = useState(3500);
   const [targetNet, setTargetNet] = useState(2200);
   const [targetCost, setTargetCost] = useState(5000);
@@ -413,5 +415,5 @@ export function PayrollSimulatorAdvanced({ calcPayroll, LOIS_BELGES }) {
 }
 
 export default function PayrollSimPage({s, d, tab}) {
-  return <PayrollSimulatorAdvanced calcPayroll={calcPayroll} LOIS_BELGES={LOIS_BELGES} />;
+  return <PayrollSimulatorAdvanced calcPayroll={calcPayroll} LOIS_BELGES={LOIS_BELGES} props_tab={tab} />;
 }
