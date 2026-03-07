@@ -91,6 +91,8 @@ const RelancesRaw = dynamic(() => import('../pages/RelancesFacturation'), { ssr:
 const RelancesPage = ({ s, d }) => <RelancesRaw supabase={null} user={s?.user} clients={s?.clients||[]} />;
 
 const ProceduresRHHubRaw = dynamic(() => import('../pages/procedures/ProceduresRHHub'), { ssr: false, loading: Loading });
+const MandatsAdminRaw = dynamic(() => import('../pages/MandatsAdminPage'), { ssr: false, loading: Loading });
+const MandatsAdminPg = ({ s, d, tab }) => <MandatsAdminRaw s={s} d={d} tab={tab} />;
 const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 
 // Reducer pour le state global
@@ -288,6 +290,11 @@ export default function DashboardLayout({ user }) {
       // DECLARATIONS & COMPTABILITE
       case 'batchdecl': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'belcotax281': return <ModsBatch2Pg s={s} d={d} tab={page} />;
+      // ── MANDATS & PRIMES EMPLOI ──
+      case 'mandatonss': case 'belcotaxmandat': case 'domiciliation':
+      case 'premieremploi': case 'activabruxelles': case 'art60cpas':
+      case 'impulsion55': case 'monbee':
+        return <MandatsAdminPg s={s} d={d} tab={page} />;
       case 'bilansocial': return <AnalyticsPage s={s} d={d} tab={page} />;
       case 'chargessociales': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'chomagetemporaire': return <ModsBatch2Pg s={s} d={d} tab={page} />;

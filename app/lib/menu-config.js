@@ -113,6 +113,16 @@ export const MENU = [
   { id: 'repriseclient', label: 'Reprise Concurrent', icon: '🔄', g: 6 },
   { id: 'legal', label: 'Juridique & Veille', icon: '⚖', g: 6 },
 
+  { id: '_g_mandats', label: 'MANDATS & PRIMES EMPLOI', icon: '🏛', group: true },
+  { id: 'mandatonss', label: 'Mandat ONSS/Mahis', icon: '🏛', g: 7 },
+  { id: 'belcotaxmandat', label: 'Belcotax — Mandat Fiscal', icon: '📄', g: 7 },
+  { id: 'domiciliation', label: 'Domiciliation 5% Ristourne', icon: '💳', g: 7 },
+  { id: 'premieremploi', label: '1er–6e Employé Exonération', icon: '🏅', g: 7 },
+  { id: 'activabruxelles', label: 'Activa.brussels (N° 829605)', icon: '✅', g: 7 },
+  { id: 'art60cpas', label: 'Art. 60 §7 CPAS', icon: '🏢', g: 7 },
+  { id: 'impulsion55', label: 'Impulsion 55+ / Jeunes', icon: '💼', g: 7 },
+  { id: 'monbee', label: 'MonBEE — deadline 01/06/2026', icon: '⚡', g: 7 },
+
   { id: '_g7', label: 'ADMINISTRATION', icon: '👑', group: true },
   { id: 'actionsrapides', label: 'Actions Rapides', icon: '⚡', g: 7 },
   { id: 'admin', label: 'Admin', icon: '👑', g: 7 },
