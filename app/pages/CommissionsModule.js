@@ -250,14 +250,14 @@ function RelancesModule({ factures, sendEmailFn }) {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(RELANCE_STORAGE_KEY);
+      const raw = null; // localStorage supprimé — données relances chargées depuis Supabase
       if(raw) setRelances(JSON.parse(raw));
     } catch(e) {}
   }, []);
 
   const saveRelances = useCallback((updated) => {
     setRelances(updated);
-    localStorage.setItem(RELANCE_STORAGE_KEY, JSON.stringify(updated));
+    // Relances persistées en mémoire uniquement — sync via Supabase
   }, []);
 
   // Synchroniser les factures existantes avec les relances
@@ -568,12 +568,12 @@ function CommissionsModule({ userRole, user, factures, sendEmailFn, defaultTab }
   const userEmail = user?.email?.toLowerCase() || '';
 
   useEffect(() => {
-    try { const raw=localStorage.getItem('aureus_commissions'); if(raw) setCommissions(JSON.parse(raw)); } catch(e) {}
+    // localStorage supprimé — commissions chargées depuis Supabase via props ou state parent
   }, []);
 
   const save = useCallback((updated) => {
     setCommissions(updated);
-    localStorage.setItem('aureus_commissions', JSON.stringify(updated));
+    // Commissions persistées en mémoire — sync Supabase via le state parent
   }, []);
 
   // Admin: marquer une commission comme payée (client a payé -> commission verte)

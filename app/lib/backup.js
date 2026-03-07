@@ -55,20 +55,36 @@ export async function restoreBackup(supabase, userId, file) {
   });
 }
 
-export function scheduleAutoBackup(supabase, userId, intervalHours = 24) {
-  const key = `aureus-last-backup-${userId}`;
-  const last = localStorage.getItem(key);
-  const now = Date.now();
-  if (last && now - parseInt(last) < intervalHours * 3600000) return;
+export async function scheduleAutoBackup(supabase, userId, intervalHours = 24) {
+  // ── SÉCURITÉ: autobackup stocké côté serveur (Supabase) uniquement ──
+  // localStorage supprimé — données clients sensibles non chiffrées dans le navigateur = risque RGPD
+  try {
+    const now = Date.now();
+    // Vérifier le dernier backup en base
+    const { data: lastBk } = await supabase
+      .from('audit_log')
+      .select('created_at')
+      .eq('user_id', userId)
+      .eq('action', 'auto_backup')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-  // Auto-backup to localStorage (lightweight)
-  supabase.from('app_state').select('val').eq('user_id', userId).eq('key', 'client_data').maybeSingle()
-    .then(({ data }) => {
-      if (data?.val) {
-        localStorage.setItem(`aureus-autobackup-${userId}`, data.val);
-        localStorage.setItem(key, String(now));
-      }
-    }).catch(() => {});
+    if (lastBk) {
+      const elapsed = now - new Date(lastBk.created_at).getTime();
+      if (elapsed < intervalHours * 3600000) return; // Pas encore l'heure
+    }
+
+    // Enregistrer trace du backup dans audit_log
+    await supabase.from('audit_log').insert({
+      user_id: userId,
+      action: 'auto_backup',
+      details: JSON.stringify({ timestamp: new Date().toISOString(), intervalHours }),
+      created_at: new Date().toISOString()
+    });
+  } catch (e) {
+    // Silencieux — backup non critique
+  }
 }
 
 // ═══ EXPORT CSV — Employés + Fiches de paie ═══

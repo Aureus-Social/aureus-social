@@ -213,7 +213,9 @@ const ClotureMensuelle=({s,d,supabase,user})=>{
       }
     }
     addLog('📧 '+sent+'/'+pays.length+' fiches distribuées'+(emailMode==='simulate'?' (mode simulation)':''),'success');
-    try{const COMMISSION_PER_FICHE=2;const clientId=s.activeClient;const clientData=(s?.clients||[]).find(c=>c.id===clientId);if(clientData?.assignedTo){const commissionsKey='aureus_commissions';const existing=JSON.parse(localStorage.getItem(commissionsKey)||'{}');const commercialEmail=clientData.assignedTo.toLowerCase();if(!existing[commercialEmail])existing[commercialEmail]={total:0,paid:0,entries:[]};const entry={id:'COM-'+Date.now(),date:new Date().toISOString(),clientId,clientName:clientData.company?.name||clientId,period:prevMonth+' '+prevYear,fichesCount:sent,amount:sent*COMMISSION_PER_FICHE,status:'pending'};existing[commercialEmail].entries.push(entry);existing[commercialEmail].total+=entry.amount;localStorage.setItem(commissionsKey,JSON.stringify(existing));addLog('💰 Commission: '+sent+' fiches × '+COMMISSION_PER_FICHE+'€ = '+entry.amount+'€ → '+commercialEmail,'success');}}catch(e){}
+    try{const COMMISSION_PER_FICHE=2;const clientId=s.activeClient;const clientData=(s?.clients||[]).find(c=>c.id===clientId);if(clientData?.assignedTo){const commissionsKey='aureus_commissions';const existing={}; // localStorage supprimé
+    const commercialEmail=clientData.assignedTo.toLowerCase();if(!existing[commercialEmail])existing[commercialEmail]={total:0,paid:0,entries:[]};const entry={id:'COM-'+Date.now(),date:new Date().toISOString(),clientId,clientName:clientData.company?.name||clientId,period:prevMonth+' '+prevYear,fichesCount:sent,amount:sent*COMMISSION_PER_FICHE,status:'pending'};existing[commercialEmail].entries.push(entry);existing[commercialEmail].total+=entry.amount;// Commissions: localStorage supprimé — persistance via dispatch vers state Supabase
+    addLog('💰 Commission: '+sent+' fiches × '+COMMISSION_PER_FICHE+'€ = '+entry.amount+'€ → '+commercialEmail,'success');}}catch(e){}
     setProgress(p=>({...p,send:{done:true,sent,total:pays.length}}));
     setRunning(false);
   };

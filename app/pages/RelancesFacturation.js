@@ -35,6 +35,26 @@ const TEMPLATES = {
   })
 };
 
+
+// ── SÉCURITÉ: sanitize HTML — prévention XSS ──────────────────────────────
+function sanitizeHtml(html) {
+  const ALLOWED_TAGS = ['p','strong','em','br','ul','ol','li','span','div','h1','h2','h3','b','i'];
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  // Supprimer les balises dangereuses et attributs event handlers
+  const dangerous = tmp.querySelectorAll('script,iframe,object,embed,form,input,button,link,style,meta,base,applet');
+  dangerous.forEach(el => el.remove());
+  // Supprimer les attributs on* (onclick, onerror...) et href javascript:
+  tmp.querySelectorAll('*').forEach(el => {
+    Array.from(el.attributes).forEach(attr => {
+      if (attr.name.startsWith('on') || (attr.name === 'href' && attr.value.toLowerCase().startsWith('javascript'))) {
+        el.removeAttribute(attr.name);
+      }
+    });
+  });
+  return tmp.innerHTML;
+}
+// ─────────────────────────────────────────────────────────────────────────────
 // Données de test initiales
 const DEMO_FACTURES = [
   { id: 'FAC-2026-001', client: 'Boulangerie Dupont SPRL', email: 'comptabilite@dupont.be', montant: 950, dateFacture: '2026-01-10', status: 'impayee', relances: [] },
@@ -416,7 +436,7 @@ export default function RelancesFacturation({ supabase, user, clients = [] }) {
               <div style={{ marginBottom: 16 }}>
                 <div style={{ fontSize: 11, color: '#5e5c56', marginBottom: 6 }}>Corps :</div>
                 <div style={{ background: '#fff', borderRadius: 8, padding: 16, color: '#1a1a1a', fontSize: 13, lineHeight: 1.6 }}
-                  dangerouslySetInnerHTML={{ __html: template.html }} />
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(template.html) }} />
               </div>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
                 <button onClick={() => setShowPreview(null)} style={S.btn('#9e9b93')}>Fermer</button>
