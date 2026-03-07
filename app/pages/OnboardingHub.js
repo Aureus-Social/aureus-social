@@ -1,10 +1,11 @@
 'use client';
 import{useState,useMemo,useEffect}from'react';
+import{TX_ONSS_E,TX_ONSS_W,RMMMG,CR_MAX,CR_PAT,FORF_BUREAU}from'@/app/lib/helpers';
 
 // ═══════════════════════════════════════════════════════════
 // ONBOARDING HUB — Wizard complet + Reprise concurrent
 // ═══════════════════════════════════════════════════════════
-const TX_ONSS_E=0.2507;
+// TX_ONSS_E importé depuis helpers → source unique lois-belges
 const C=({children,title:t,sub})=><div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)',marginBottom:14}}>{t&&<div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:sub?2:12}}>{t}</div>}{sub&&<div style={{fontSize:10,color:'#888',marginBottom:12}}>{sub}</div>}{children}</div>;
 const inputStyle={width:'100%',padding:'10px 12px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,color:'#e5e5e5',fontSize:12,fontFamily:'inherit',boxSizing:'border-box'};
 const labelStyle={fontSize:10,color:'#888',display:'block',marginBottom:4,fontWeight:500};

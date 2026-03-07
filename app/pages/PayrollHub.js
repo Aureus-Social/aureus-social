@@ -29,8 +29,7 @@ export function ValidationPrePaieV2({s,d}){
     // 3. Salaire > 0
     const noSal=allEmps.filter(e=>!(+(e.monthlySalary||e.gross||e.brut||0)));
     r.push({id:'salaire',cat:'Remuneration',title:'Salaires bruts definis',desc:'Tous les bruts > 0',pass:noSal.length===0,count:n-noSal.length,total:n,sev:noSal.length>0?'critical':'ok',items:noSal.map(e=>e.first+' '+e.last)});
-    // 4. RMMMG check (2.070,48 EUR CP200 2026)
-    const RMMMG=2070.48;
+    // 4. RMMMG check — valeur depuis lois-belges (auto-maj par cron 06h00)
     const underRMMMG=allEmps.filter(e=>{const b=+(e.monthlySalary||e.gross||0);return b>0&&b<RMMMG&&(e.regime||100)>=100;});
     r.push({id:'rmmmg',cat:'Remuneration',title:'RMMMG respecte ('+fmt(RMMMG)+' EUR)',desc:'Salaire minimum garanti',pass:underRMMMG.length===0,count:n-underRMMMG.length,total:n,sev:underRMMMG.length>0?'critical':'ok',items:underRMMMG.map(e=>e.first+' '+e.last+': '+fmt(+(e.monthlySalary||e.gross||0))+' EUR')});
     // 5. Date debut

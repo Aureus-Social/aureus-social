@@ -1,10 +1,11 @@
 'use client';
 import{useState,useMemo}from'react';
 import{TransversalCPView}from'./TransversalCP';
+import{TX_ONSS_E,TX_ONSS_W,CR_PAT,CR_MAX,FORF_BUREAU,RMMMG}from'@/app/lib/helpers';
 
 const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
 const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
-const TX_ONSS_E=0.2507,TX_ONSS_W=0.1307;
+// TX_ONSS_E, TX_ONSS_W importés depuis helpers → lois-belges (auto-mis à jour par cron)
 
 // ════════════════════════════════════════════════════════════
 // BAREMES SALARIAUX BELGES — INDEX JANVIER 2026

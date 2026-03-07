@@ -1,5 +1,6 @@
 'use client';
 import { useState, useMemo } from 'react';
+import { TX_ONSS_E, TX_ONSS_W, RMMMG } from '@/app/lib/helpers';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MODULE PROCÉDURES RH — EMBAUCHE & MISE À L'EMPLOI
@@ -695,7 +696,7 @@ Quand vous êtes prêt à engager le 2e travailleur :
       brut_mensuel: 3500,
       statut: 'employé',
       regime: 'temps_plein',
-      taux_onss_patronal: 0.2507,
+      taux_onss_patronal: TX_ONSS_E,
     },
     calcul: [
       { label: 'Salaire brut mensuel', montant: '3.500,00€', type: 'neutre' },

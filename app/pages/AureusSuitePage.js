@@ -1,5 +1,5 @@
 'use client';
-import { RMMMG, calc } from '@/app/lib/helpers';
+import { RMMMG, calc, TX_ONSS_E, TX_ONSS_W } from '@/app/lib/helpers';
 import { useState, useMemo } from 'react';
 
 // ═══ AUREUS IA SUITE — Module IA complet ═══
@@ -252,25 +252,25 @@ function WhatIfSimulator({ emps }) {
     switch (scenario) {
       case 'augmentation': {
         const augMensuel = Math.round(totalBrut * pct / 100);
-        const cotisONSS = Math.round(augMensuel * 0.2507);
+        const cotisONSS = Math.round(augMensuel * TX_ONSS_E);
         const coutTotal = augMensuel + cotisONSS;
         return { augMensuel, cotisONSS, coutTotal, annuel: coutTotal * 13.92 };
       }
       case 'embauche': {
         const salaireMoyen = nbActifs > 0 ? Math.round(totalBrut / nbActifs) : 3500;
         const nouveauBrut = salaireMoyen * (nbEmps || 1);
-        const cotis = Math.round(nouveauBrut * 0.2507);
+        const cotis = Math.round(nouveauBrut * TX_ONSS_E);
         return { augMensuel: nouveauBrut, cotisONSS: cotis, coutTotal: nouveauBrut + cotis, annuel: (nouveauBrut + cotis) * 13.92 };
       }
       case 'licenciement': {
         const salaireMoyen = nbActifs > 0 ? Math.round(totalBrut / nbActifs) : 3500;
         const eco = salaireMoyen * (nbEmps || 1);
-        const cotis = Math.round(eco * 0.2507);
+        const cotis = Math.round(eco * TX_ONSS_E);
         return { augMensuel: -eco, cotisONSS: -cotis, coutTotal: -(eco + cotis), annuel: -((eco + cotis) * 13.92) };
       }
       case 'indexation': {
         const idx = Math.round(totalBrut * pct / 100);
-        const cotis = Math.round(idx * 0.2507);
+        const cotis = Math.round(idx * TX_ONSS_E);
         return { augMensuel: idx, cotisONSS: cotis, coutTotal: idx + cotis, annuel: (idx + cotis) * 13.92 };
       }
       default: return { augMensuel: 0, cotisONSS: 0, coutTotal: 0, annuel: 0 };
@@ -341,7 +341,7 @@ function KPIDashboardIA({ emps }) {
       return ages.length ? Math.round(ages.reduce((a, b) => a + b, 0) / ages.length) : '-';
     })();
     const masseSalariale = totalBrut;
-    const cotisONSS = Math.round(totalBrut * 0.2507);
+    const cotisONSS = Math.round(totalBrut * TX_ONSS_E);
     const coutTotal = totalBrut + cotisONSS;
 
     return { totalBrut, avgBrut, medianBrut, cdi, cdd, hommes, femmes, avgAge, masseSalariale, cotisONSS, coutTotal, total: emps.length };

@@ -2,6 +2,10 @@
 "use client";
 export { C, B, I, ST, PH, SC, fmt, Tbl, f2, f0 } from './shared-ui';
 export { LOIS_BELGES, LB, TX_ONSS_W, TX_ONSS_E, TX_OUV108, TX_AT, PP_EST, NET_FACTOR, PV_SIMPLE, PV_DOUBLE, RMMMG, CR_PAT, CR_MAX, CR_TRAV, FORF_BUREAU, FORF_KM, BONUS_MAX, SEUIL_CPPT, SEUIL_CE, HEURES_HEBDO, JOURS_FERIES, SAISIE_2026_TRAVAIL, SAISIE_2026_REMPLACEMENT, SAISIE_IMMUN_ENFANT_2026, AF_REGIONS, quickNetEst, generateExportCompta, exportTravailleurs, importTravailleurs, obf, safeLS } from './lois-belges';
+// Exports supplémentaires pour éliminer les valeurs en dur dans les modules
+export const FORF_VELO = 0.35;   // LB.fraisPropres.forfaitDeplacement.velo
+export const ECO_MAX   = 250;    // LB.avantages.ecoMax
+export const TX_OUV_SPECIAL = 0.2714; // ONSS patronal ouvrier 108% (~25.07% × 1.08)
 export const LEGAL = { WD: 21.67, WHD: 7.6 };
 export const DPER = { month: new Date().getMonth()+1, year: new Date().getFullYear(), days: 21.67 };
 export function calc(emp, per, co) {

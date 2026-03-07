@@ -8,6 +8,7 @@
 
 import { useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
+import { TX_ONSS_W, TX_ONSS_E, RMMMG } from '@/app/lib/helpers'
 
 // Recharts — chargement dynamique pour éviter SSR
 const RechartsComponents = dynamic(() =>
@@ -129,7 +130,7 @@ function AnalyticsDashboard({ state, defaultTab }) {
     return MONTHS_FR.map((month, i) => {
       const variation = 1 + (Math.sin(i * 0.5) * 0.05) // +/- 5%
       const gross = Math.round(base * variation)
-      const onssW = Math.round(gross * 0.1307)
+      const onssW = Math.round(gross * TX_ONSS_W)
       const onssE = Math.round(gross * 0.2738)
       const pp = Math.round((gross - onssW) * 0.25) // estimation
       const net = gross - onssW - pp
@@ -154,7 +155,7 @@ function AnalyticsDashboard({ state, defaultTab }) {
     const gross = kpis.totalGross
     return [
       { name: 'Net', value: Math.round(gross * 0.55), color: '#22c55e' },
-      { name: 'ONSS travailleur', value: Math.round(gross * 0.1307), color: '#3b82f6' },
+      { name: 'ONSS travailleur', value: Math.round(gross * TX_ONSS_W), color: '#3b82f6' },
       { name: 'Précompte prof.', value: Math.round(gross * 0.20), color: '#f59e0b' },
       { name: 'ONSS employeur', value: Math.round(gross * 0.2738), color: '#ef4444' },
       { name: 'Cotisation spéc.', value: Math.round(gross * 0.02), color: '#8b5cf6' },
