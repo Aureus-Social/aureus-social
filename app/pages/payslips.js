@@ -452,7 +452,7 @@ function Payslips({s,d}) {
         {/* ═══════════════════════════════════════════════════════════════ */}
         {/* PARAMÈTRES LÉGAUX APPLICABLES — Source: crons auto-update      */}
         {/* ═══════════════════════════════════════════════════════════════ */}
-        <div className="no-print" style={{marginTop:18,padding:16,background:'linear-gradient(135deg,rgba(198,163,78,.05),rgba(198,163,78,.02))',borderRadius:10,border:'1px solid rgba(198,163,78,.15)'}}>
+        <div style={{marginTop:18,padding:16,background:'linear-gradient(135deg,rgba(198,163,78,.05),rgba(198,163,78,.02))',borderRadius:10,border:'1px solid rgba(198,163,78,.15)'}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
             <div>
               <div style={{fontSize:10,fontWeight:700,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'1.5px'}}>⚡ Paramètres légaux applicables</div>
