@@ -470,4 +470,7 @@ CREATE INDEX idx_ip_whitelist_tenant ON ip_whitelist(tenant_id, active);`}
 }
 
 
-export default SecurityDashboard;
+export default function SecurityDashboardWrapped({ s, d, tab }) {
+  return <SecurityDashboard state={s || {}} dispatch={d || (() => {})} defaultTab={tab} />;
+}
+

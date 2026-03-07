@@ -76,7 +76,11 @@ function ChartCard({ title, children, height }) {
   )
 }
 
-export default function AnalyticsDashboard({ state }) {
+export default function AnalyticsDashboardWrapped({ s, d, tab }) {
+  return <AnalyticsDashboard state={s || {}} defaultTab={tab} />;
+}
+
+function AnalyticsDashboard({ state, defaultTab }) {
   const [period, setPeriod] = useState('12m')
   const employees = state?.employees || []
   const company = state?.co || state?.company || {}

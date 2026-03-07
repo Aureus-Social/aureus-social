@@ -529,7 +529,11 @@ function RelancesModule({ factures, sendEmailFn }) {
 }
 
 
-export default function CommissionsModule({ userRole, user, factures, sendEmailFn, defaultTab }) {
+export default function CommissionsModuleWrapped({ s, d, tab }) {
+  return <CommissionsModule userRole="admin" user={s?.user} factures={s?.factures||[]} sendEmailFn={null} defaultTab={tab} />;
+}
+
+function CommissionsModule({ userRole, user, factures, sendEmailFn, defaultTab }) {
   const [commissions, setCommissions] = useState({});
   const [selectedCommercial, setSelectedCommercial] = useState(null);
   const [tab, setTab] = useState('pending');

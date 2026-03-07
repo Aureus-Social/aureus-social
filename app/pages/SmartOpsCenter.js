@@ -621,4 +621,7 @@ export function JournalActiviteV2({s,d}){
 }
 
 
-export default SmartAlertsEngine;
+export default function SmartOpsWrapped({ s, d, tab }) {
+  return <SmartAlertsEngine state={s || {}} dispatch={d || (() => {})} defaultTab={tab} />;
+}
+

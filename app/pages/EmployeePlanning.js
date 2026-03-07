@@ -173,7 +173,11 @@ function EmployeeRow({ employee, year, month, absences, joursFeries, onCellClick
 }
 
 // ── Composant principal ──
-export default function EmployeePlanning({ state, dispatch }) {
+export default function EmployeePlanningWrapped({ s, d, tab }) {
+  return <EmployeePlanning state={s || {}} dispatch={d || (() => {})} defaultTab={tab} />;
+}
+
+function EmployeePlanning({ state, dispatch, defaultTab }) {
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())

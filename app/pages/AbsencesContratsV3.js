@@ -678,4 +678,7 @@ export function ContratsLegauxV3({s}){
 }
 
 
-export default PlanningCongesV3;
+export default function AbsencesWrapped({ s, d, tab }) {
+  return <PlanningCongesV3 state={s || {}} dispatch={d || (() => {})} defaultTab={tab} />;
+}
+

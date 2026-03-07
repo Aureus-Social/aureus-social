@@ -2932,4 +2932,18 @@ export function GEDMod({s,d}){
 }
 
 
-export default GuidePortailMod;
+export default function ModsBatch2Wrapped({s, d, tab}) {
+  // Déclarations & exports comptables
+  if(tab==='sepa') return <FraisGestionMod s={s} d={d}/>;
+  if(tab==='exportWinbooks' || tab==='exportcompta' || tab==='exportcomptapro' || tab==='exportbatch') return <AccountingOutputMod s={s} d={d}/>;
+  if(tab==='exportcoda') return <AccountingOutputMod s={s} d={d}/>;
+  if(tab==='importcsv') return <FichesMod s={s} d={d}/>;
+  if(tab==='belcotax281') return <FichesMod s={s} d={d}/>;
+  if(tab==='chargessociales') return <PortailEmployeurMod s={s} d={d}/>;
+  if(tab==='chomagetemporaire') return <CreditTempsMod s={s} d={d}/>;
+  if(tab==='batchdecl') return <EnvoiMod s={s} d={d}/>;
+  if(tab==='massengine') return <NetBrutMod s={s} d={d}/>;
+  if(tab==='queue') return <KPIDashboardMod s={s} d={d}/>;
+  // Default
+  return <GuidePortailMod s={s} d={d}/>;
+}

@@ -490,4 +490,7 @@ updateHistory.map((h,i)=><div key={i} style={{display:"flex",gap:10,padding:"10p
 
 
 
-export default MoteurLoisBelges;
+export default function LoisWrapped({ s, d, tab }) {
+  return <MoteurLoisBelges s={s} d={d} defaultTab={tab} />;
+}
+

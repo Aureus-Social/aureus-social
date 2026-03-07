@@ -314,7 +314,13 @@ export function NotifDropdown({ notifications, onClose, onMarkRead, onViewAll })
 }
 
 // ── Composant principal: Page Notifications ──
-export default function NotificationCenter({ state, dispatch }) {
+export default function NotificationCenterWrapped({ s, d, tab }) {
+  const state = s || {};
+  const dispatch = d || (() => {});
+  return <NotificationCenter state={state} dispatch={dispatch} defaultTab={tab} />;
+}
+
+function NotificationCenter({ state, dispatch, defaultTab }) {
   const [filter, setFilter] = useState('all')
   const [readIds, setReadIds] = useState(() => {
     try { return new Set(JSON.parse(localStorage.getItem('aureus_notif_read') || '[]')) }

@@ -33,4 +33,18 @@ export function BudgetPrev({s,d}){const ae=(s?.emps||[]).filter(e=>e.status==='a
 
 
 
-export default GestionPrimes;
+export default function PayrollGroupWrapped({s, d, tab}) {
+  if(tab==='echeancier') return <EcheancierPaiements s={s}/>;
+  if(tab==='timeline') return <PayrollTimeline s={s} d={d}/>;
+  if(tab==='autoindex') return <AutoIndexation s={s} d={d}/>;
+  if(tab==='regulPP') return <RegulPPAnnuelle s={s} d={d}/>;
+  if(tab==='calendrier' || tab==='joursPrestes') return <CalcJoursPrestes s={s} d={d}/>;
+  if(tab==='coutsannuel' || tab==='compteIndividuel' || tab==='compteindividuelannuel') return <RecapEmployeur s={s} d={d}/>;
+  if(tab==='validation') return <ValidationEngine s={s} d={d}/>;
+  if(tab==='budget') return <BudgetPrev s={s} d={d}/>;
+  if(tab==='calcmaladie' || tab==='soldetoutcompte') return <GestionPrimes s={s} d={d}/>;
+  if(tab==='flexijobs') return <SimuOptiFiscale s={s} d={d}/>;
+  if(tab==='vehiculesatn') return <SimuOptiFiscale s={s} d={d}/>;
+  // Default
+  return <GestionPrimes s={s} d={d}/>;
+}

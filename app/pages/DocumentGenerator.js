@@ -744,7 +744,11 @@ function documentToPrintHTML(content, title) {
 }
 
 // ── Composant principal ──
-export default function DocumentGenerator({ state }) {
+export default function DocumentGeneratorWrapped({ s, d, tab }) {
+  return <DocumentGenerator state={s || {}} defaultTab={tab} />;
+}
+
+function DocumentGenerator({ state, defaultTab }) {
   const [selectedType, setSelectedType] = useState(null)
   const [selectedEmployee, setSelectedEmployee] = useState(null)
   const [formData, setFormData] = useState({})
