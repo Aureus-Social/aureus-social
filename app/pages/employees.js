@@ -1,17 +1,11 @@
 'use client';
-import { LOIS_BELGES, LB, TX_ONSS_W, TX_ONSS_E, NET_FACTOR, PP_EST, PV_SIMPLE, PV_DOUBLE, RMMMG, CR_PAT, Tbl, f2, f0 } from '@/app/lib/helpers';
+import { B, C, CR_PAT, DPER, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt } from '@/app/lib/helpers';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
-const AUREUS_INFO = { name: 'Aureus IA SPRL', vat: 'BE 1028.230.781', version: 'v38', sprint: 'Sprint 38' };
-const LEGAL = { WD: 21.67, WHD: 7.6 };
-const DPER = { month: new Date().getMonth()+1, year: new Date().getFullYear(), days: 21.67 };
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
-function PH({title,sub}){return <div style={{marginBottom:16}}><div style={{fontSize:18,fontWeight:800,color:'#c6a34e',letterSpacing:'.3px'}}>{title}</div>{sub&&<div style={{fontSize:11,color:'#9e9b93',marginTop:2}}>{sub}</div>}</div>;}
-function C({children,style}){return <div style={{padding:'16px 20px',background:'rgba(198,163,78,.03)',borderRadius:12,border:'1px solid rgba(198,163,78,.06)',marginBottom:14,...style}}>{children}</div>;}
-function ST({children}){return <div style={{fontSize:13,fontWeight:700,color:'#c6a34e',marginBottom:10,paddingBottom:6,borderBottom:'1px solid rgba(198,163,78,.1)'}}>{children}</div>;}
 
 
 
@@ -51,10 +45,10 @@ function Employees({s,d}) {
     if(!niss)return null;
     const clean=niss.replace(/[\s.\-]/g,'');
     // Level 1: Same dossier
-    const dupLocal=(s.emps||[]).find(e=>e.niss&&e.niss.replace(/[\s.\-]/g,'')===clean&&e.id!==currentId);
+    const dupLocal=(s?.emps||[]).find(e=>e.niss&&e.niss.replace(/[\s.\-]/g,'')===clean&&e.id!==currentId);
     if(dupLocal)return{level:'error',msg:`⛔ NISS déjà utilisé dans ce dossier: ${dupLocal.first} ${dupLocal.last}`};
     // Level 2: Platform-wide (check all clients)
-    const allClients=s.clients||[];
+    const allClients= s?.clients||[];
     for(const cl of allClients){
       if(cl.id===s.activeClient)continue;
       const dupPlatform=(cl.emps||[]).find(e=>e.niss&&e.niss.replace(/[\s.\-]/g,'')===clean);
@@ -182,7 +176,7 @@ function Employees({s,d}) {
   };
 
   // Filter and search
-  const filtered=(s.emps||[]).filter(e=>{
+  const filtered=(s?.emps||[]).filter(e=>{
     if(filter==='active'&&e.status==='sorti')return false;
     if(filter==='sorti'&&e.status!=='sorti')return false;
     if(filter==='student'&&e.contract!=='student')return false;
@@ -205,9 +199,9 @@ function Employees({s,d}) {
     setTimeout(()=>URL.revokeObjectURL(url),3000);
   };
 
-  const activeCount=(s.emps||[]).filter(e=>e.status!=='sorti').length;
-  const sortiCount=(s.emps||[]).filter(e=>e.status==='sorti').length;
-  const studentCount=(s.emps||[]).filter(e=>e.contract==='student').length;
+  const activeCount=(s?.emps||[]).filter(e=>e.status!=='sorti').length;
+  const sortiCount=(s?.emps||[]).filter(e=>e.status==='sorti').length;
+  const studentCount=(s?.emps||[]).filter(e=>e.contract==='student').length;
 
   // Exemple Activa — Nourdin MOUSSATI (attestation Activa.brussels AP 350/800/350) — fiche complète
   // CDD 3 mois : entrée 2 mars 2026, fin 1er juin 2026 ; fiche de paie pour fin mars 2026
@@ -233,7 +227,7 @@ function Employees({s,d}) {
   };
 
   return <div>
-    <PH title="Gestion des Employés" sub={`${(s.emps||[]).length} employé(s)`} actions={<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+    <PH title="Gestion des Employés" sub={`${(s?.emps||[]).length} employé(s)`} actions={<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
       <label style={{padding:'8px 14px',borderRadius:8,fontSize:11,cursor:'pointer',border:'1px solid rgba(198,163,78,.25)',background:'transparent',color:'#c6a34e',fontWeight:600,display:'flex',alignItems:'center',gap:4}}>
         📥 {importing?'Import...':'Import Excel'}
         <input type="file" accept=".xlsx,.xls,.csv" onChange={handleImportExcel} style={{display:'none'}}/>
@@ -256,7 +250,7 @@ function Employees({s,d}) {
       </div>
       <div style={{display:'flex',gap:4}}>
         {[
-          {id:"all",l:`Tous (${(s.emps||[]).length})`},
+          {id:"all",l:`Tous (${(s?.emps||[]).length})`},
           {id:"active",l:`Actifs (${activeCount})`},
           {id:"sorti",l:`Sortis (${sortiCount})`},
           {id:"student",l:`Étudiants (${studentCount})`},

@@ -52,9 +52,9 @@ function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(
 
 function Dashboard({s,d}) {
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
-  const ae=(s.emps||[]).filter(e=>e.status==='active'||!e.status||e.status===undefined);
-  const sortie=(s.emps||[]).filter(e=>e.status==='sorti');
-  const etudiants=(s.emps||[]).filter(e=>e.contract==='student');
+  const ae=(s?.emps||[]).filter(e=>e.status==='active'||!e.status||e.status===undefined);
+  const sortie=(s?.emps||[]).filter(e=>e.status==='sorti');
+  const etudiants=(s?.emps||[]).filter(e=>e.contract==='student');
   const tm=ae.reduce((a,e)=>a+(e.monthlySalary||0),0);
   const calcs=ae.map(e=>({e,c:calc(e,DPER,s.co)}));
   const tc=calcs.reduce((a,x)=>a+x.c.costTotal,0);
@@ -158,7 +158,7 @@ function Dashboard({s,d}) {
         <div><div style={{fontSize:13,fontWeight:600,color:'#c6a34e'}}>Automatisation</div><div style={{fontSize:10,color:'#888'}}>Actions rapides</div></div>
       </div>
       <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-        <button onClick={()=>{if(confirm('Générer toutes les fiches de paie ?')){(s.emps||[]).forEach(e=>generatePayslipPDF(e,s.co));addToast(s.emps.length+' fiches de paie générées')}}} style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(198,163,78,.15)',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:600}}>📄 Fiches</button>
+        <button onClick={()=>{if(confirm('Générer toutes les fiches de paie ?')){(s?.emps||[]).forEach(e=>generatePayslipPDF(e,s.co));addToast(s.emps.length+' fiches de paie générées')}}} style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(198,163,78,.15)',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:600}}>📄 Fiches</button>
         <button onClick={()=>{if(confirm('Générer SEPA ?')){generateSEPAXML(s.emps||[],s.co);addToast('Fichier SEPA pain.001 généré')}}} style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(34,197,94,.12)',color:'#22c55e',fontSize:11,cursor:'pointer',fontWeight:600}}>💸 SEPA</button>
         <button onClick={()=>{if(confirm('Générer DmfA ?')){generateDmfAXML(s.emps||[],Math.ceil((new Date().getMonth()+1)/3),new Date().getFullYear(),s.co);addToast('DmfA trimestrielle générée')}}} style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(168,85,247,.12)',color:'#a855f7',fontSize:11,cursor:'pointer',fontWeight:600}}>📊 DmfA</button>
         <button onClick={()=>d({type:'NAV',page:'automatisation'})} style={{padding:'7px 14px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:500}}>Voir tout →</button>

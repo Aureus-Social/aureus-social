@@ -478,7 +478,7 @@ export function EmployeeDocuments({s, d, employee}) {
 // ═══════════════════════════════════════════════════════════════════
 export function EmployeeProfile({s, d, employee}) {
   const emp = employee || s.emps?.[0] || {};
-  const co = s.co || {};
+  const co = s?.co || {};
   
   const cs = {padding:'20px',borderRadius:'14px',border:'1px solid rgba(59,130,246,.06)',background:'rgba(255,255,255,.01)'};
   
@@ -658,8 +658,8 @@ export function EmployeeTraining({s, d}) {
 // COMPOSANT : Client Portal — Dashboard Employeur
 // ═══════════════════════════════════════════════════════════════════
 export function ClientDashboard({s, d}) {
-  const co = s.co || {};
-  const emps = s.emps || [];
+  const co = s?.co || {};
+  const emps = s?.emps || [];
   const pays = s.pays || [];
   const lastMonth = pays.length > 0 ? pays.reduce((a,b) => (b.year*12+b.month) > (a.year*12+a.month) ? b : a) : null;
   

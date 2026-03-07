@@ -1,4 +1,5 @@
-'use client'
+'use client';
+import { B } from '@/app/lib/helpers';
 
 // ═══════════════════════════════════════════════════════
 //  AUREUS SOCIAL PRO — Module: Générateur de Documents

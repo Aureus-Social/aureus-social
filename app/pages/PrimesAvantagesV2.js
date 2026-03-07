@@ -1,9 +1,8 @@
 'use client';
+import { B, C, TX_ONSS_E, TX_ONSS_W, fmt, quickPP } from '@/app/lib/helpers';
 import{useState,useMemo}from'react';
 
-const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
 const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
-const C=({children,title:t,sub,color})=><div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid '+(color||'rgba(198,163,78,.08)'),marginBottom:14}}>{t&&<div style={{fontSize:13,fontWeight:600,color:color||'#c6a34e',marginBottom:sub?2:10}}>{t}</div>}{sub&&<div style={{fontSize:10,color:'#888',marginBottom:10}}>{sub}</div>}{children}</div>;
 const Row=({l,v,c,b,sub})=><div style={{display:'flex',justifyContent:'space-between',padding:b?'8px 0':'5px 0',borderBottom:b?'2px solid rgba(198,163,78,.2)':'1px solid rgba(255,255,255,.03)',fontWeight:b?700:400}}><span style={{color:sub?'#888':'#e8e6e0',fontSize:sub?10:11.5,fontStyle:sub?'italic':'normal'}}>{l}</span><span style={{color:c||'#c6a34e',fontWeight:600,fontSize:12}}>{v}</span></div>;
 const I=({label,type,value,onChange,style:st,options})=>{
   return <div style={st}><div style={{fontSize:10,color:'#5e5c56',marginBottom:3}}>{label}</div>
@@ -14,8 +13,6 @@ const I=({label,type,value,onChange,style:st,options})=>{
 const Badge=({text,color})=><span style={{padding:'2px 7px',borderRadius:5,fontSize:8,fontWeight:600,background:(color||'#888')+'15',color:color||'#888'}}>{text}</span>;
 const Bar=({pct,color})=><div style={{width:'100%',height:6,background:'rgba(255,255,255,.05)',borderRadius:3,overflow:'hidden'}}><div style={{width:Math.min(pct,100)+'%',height:'100%',background:color||'#c6a34e',borderRadius:3}}/></div>;
 
-const TX_ONSS_W=0.1307,TX_ONSS_E=0.2507;
-const quickPP=(brut,anc)=>{const imp=brut*(1-TX_ONSS_W);if(imp<=1170)return 0;if(imp<=2050)return imp*0.2615;if(imp<=3600)return imp*0.3218;return imp*0.3500;};
 
 // ════════════════════════════════════════════════════════════
 // 56 PRIMES BELGES — DONNÉES COMPLÈTES
@@ -381,7 +378,7 @@ const CAT_COLORS={remvar:'#c6a34e',exonere:'#22c55e',frais:'#3b82f6',atn:'#f8717
 // ════════════════════════════════════════════════════════════
 export function PrimeCalculatorV2({s,d}){
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
-  const emps=(s.clients||[]).flatMap(c=>c.emps||[]);
+  const emps=(s?.clients||[]).flatMap(c=>c.emps||[]);
   const [selPrime,setSelPrime]=useState('prime_fin_annee');
   const [montant,setMontant]=useState(2000);
   const [tab,setTab]=useState('simu');
@@ -910,7 +907,7 @@ export function FlexiJobsV2({s,d}){
 // COMPOSANT 5: 13ÈME MOIS V2 — Prorata + spécificités sectorielles
 // ════════════════════════════════════════════════════════════
 export function TreiziemeMoisV2({s}){
-  const emps=(s.clients||[]).flatMap(c=>c.emps||[]);
+  const emps=(s?.clients||[]).flatMap(c=>c.emps||[]);
   const [moisPrestes,setMoisPrestes]=useState(12);
   const [salaire,setSalaire]=useState(3000);
   const [cp,setCp]=useState('200');
@@ -974,7 +971,7 @@ export {PRIMES_DB,CATS,CAT_COLORS};
 // COMPOSANT 6: ÉCO-CHÈQUES V2 — Prorata + plafond sectoriel
 // ════════════════════════════════════════════════════════════
 export function EcoChequesV2({s}){
-  const emps=(s.clients||[]).flatMap(c=>c.emps||[]);
+  const emps=(s?.clients||[]).flatMap(c=>c.emps||[]);
   const [montant,setMontant]=useState(250);
   const [moisPrestes,setMoisPrestes]=useState(12);
   const [regime,setRegime]=useState(100);
@@ -1138,7 +1135,7 @@ export function PlanCafeteriaV2({s}){
 // COMPOSANT 8: CCT 90 BONUS V2 — Plan bonus + dépôt SPF
 // ════════════════════════════════════════════════════════════
 export function CCT90BonusV2({s}){
-  const emps=(s.clients||[]).flatMap(c=>c.emps||[]);const n=emps.length||1;
+  const emps=(s?.clients||[]).flatMap(c=>c.emps||[]);const n=emps.length||1;
   const [montant,setMontant]=useState(3000);
   const [periodeRef,setPeriodeRef]=useState(12);
   const [tab,setTab]=useState('simu');
@@ -1414,7 +1411,7 @@ export function NoteFraisV2({s}){
 // COMPOSANT 10: CHÈQUES-REPAS V2
 // ════════════════════════════════════════════════════════════
 export function CheqRepasV2({s}){
-  const emps=(s.clients||[]).flatMap(c=>c.emps||[]);
+  const emps=(s?.clients||[]).flatMap(c=>c.emps||[]);
   const [valFaciale,setValFaciale]=useState(8);
   const [partPatron,setPartPatron]=useState(6.91);
   const [joursPrestes,setJoursPrestes]=useState(220);

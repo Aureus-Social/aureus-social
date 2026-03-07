@@ -1,18 +1,11 @@
 'use client';
-import { LOIS_BELGES, LB, TX_ONSS_W, TX_ONSS_E, NET_FACTOR, PP_EST, PV_SIMPLE, PV_DOUBLE, RMMMG, CR_PAT, Tbl, f2, f0 } from '@/app/lib/helpers';
+import { B, C, CR_PAT, DPER, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt } from '@/app/lib/helpers';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
-const fmt = n => new Intl.NumberFormat('fr-BE', { style: 'currency', currency: 'EUR' }).format(n || 0);
 const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
-const AUREUS_INFO = { name: 'Aureus IA SPRL', vat: 'BE 1028.230.781', version: 'v38', sprint: 'Sprint 38' };
-const LEGAL = { WD: 21.67, WHD: 7.6 };
-const DPER = { month: new Date().getMonth()+1, year: new Date().getFullYear(), days: 21.67 };
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
-function PH({title,sub}){return <div style={{marginBottom:16}}><div style={{fontSize:18,fontWeight:800,color:'#c6a34e',letterSpacing:'.3px'}}>{title}</div>{sub&&<div style={{fontSize:11,color:'#9e9b93',marginTop:2}}>{sub}</div>}</div>;}
-function C({children,style}){return <div style={{padding:'16px 20px',background:'rgba(198,163,78,.03)',borderRadius:12,border:'1px solid rgba(198,163,78,.06)',marginBottom:14,...style}}>{children}</div>;}
-function ST({children}){return <div style={{fontSize:13,fontWeight:700,color:'#c6a34e',marginBottom:10,paddingBottom:6,borderBottom:'1px solid rgba(198,163,78,.1)'}}>{children}</div>;}
 
 
 
@@ -20,13 +13,13 @@ function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(
 
 function Payslips({s,d}) {
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
-  const [eid,setEid]=useState(s.selectedEmpIdForPayslip||(s.emps||[])[0]?.id||'');
+  const [eid,setEid]=useState(s.selectedEmpIdForPayslip||(s?.emps||[])[0]?.id||'');
   const [per,setPer]=useState({...DPER});
   const [res,setRes]=useState(null);
   const [batchMode,setBatchMode]=useState(false);
   const [batchResults,setBatchResults]=useState([]);
   const [batchRunning,setBatchRunning]=useState(false);
-  const emp=(s.emps||[]).find(e=>e.id===eid);
+  const emp=(s?.emps||[]).find(e=>e.id===eid);
   // Préremplir Activation ONEM depuis la fiche employé quand on change d'employé
   useEffect(()=>{
     if(emp&&(emp.allocTravailType||'none')!=='none')
@@ -36,7 +29,7 @@ function Payslips({s,d}) {
   // ── BATCH PROCESSING ──
   const runBatch=()=>{
     setBatchRunning(true);
-    const ae=(s.emps||[]).filter(e=>e.status==='active'||!e.status);
+    const ae=(s?.emps||[]).filter(e=>e.status==='active'||!e.status);
     const results=[];
     for(const emp of ae){
       try{
@@ -70,7 +63,7 @@ function Payslips({s,d}) {
     </div>}/>
     <div style={{marginBottom:14,padding:'10px 14px',background:'linear-gradient(135deg,rgba(198,163,78,.06),rgba(198,163,78,.02))',border:'1px solid rgba(198,163,78,.1)',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
       <div style={{fontSize:11,color:'#888'}}>⚡ Auto-génération disponible</div>
-      <button onClick={()=>{if(confirm('Générer les fiches de paie pour tous les employés ?')){(s.emps||[]).forEach(e=>generatePayslipPDF(e,s.co));alert('✅ Fiches générées')}}} style={{padding:'6px 14px',borderRadius:8,border:'none',background:'#c6a34e',color:'#fff',fontSize:11,cursor:'pointer',fontWeight:600}}>⚡ Générer tout</button>
+      <button onClick={()=>{if(confirm('Générer les fiches de paie pour tous les employés ?')){(s?.emps||[]).forEach(e=>generatePayslipPDF(e,s.co));alert('✅ Fiches générées')}}} style={{padding:'6px 14px',borderRadius:8,border:'none',background:'#c6a34e',color:'#fff',fontSize:11,cursor:'pointer',fontWeight:600}}>⚡ Générer tout</button>
     </div>
     {/* Batch Mode */}
     {batchMode&&<C style={{marginBottom:18,border:'1px solid rgba(198,163,78,.25)'}}>
@@ -80,7 +73,7 @@ function Payslips({s,d}) {
           <div style={{fontSize:11,color:'#5e5c56',marginTop:2}}>Calcule toutes les fiches de paie des travailleurs actifs en 1 clic</div>
         </div>
         <B onClick={runBatch} disabled={batchRunning} style={{fontSize:13,padding:'12px 24px'}}>
-          {batchRunning?'⏳ Calcul en cours...':'⚡ Lancer le batch ('+(s.emps||[]).filter(e=>e.status==='active'||!e.status).length+' fiches)'}
+          {batchRunning?'⏳ Calcul en cours...':'⚡ Lancer le batch ('+(s?.emps||[]).filter(e=>e.status==='active'||!e.status).length+' fiches)'}
         </B>
       </div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:12}}>
@@ -88,7 +81,7 @@ function Payslips({s,d}) {
         <I label="Année" type="number" value={per.year} onChange={v=>setPer({...per,year:v})}/>
         <div style={{padding:12,background:'rgba(198,163,78,.06)',borderRadius:8,textAlign:'center'}}>
           <div style={{fontSize:10,color:'#9e9b93'}}>Travailleurs actifs</div>
-          <div style={{fontSize:22,fontWeight:700,color:'#c6a34e'}}>{(s.emps||[]).filter(e=>e.status==='active'||!e.status).length}</div>
+          <div style={{fontSize:22,fontWeight:700,color:'#c6a34e'}}>{(s?.emps||[]).filter(e=>e.status==='active'||!e.status).length}</div>
         </div>
       </div>
       {batchResults.length>0&&<div>
@@ -110,7 +103,7 @@ function Payslips({s,d}) {
       <C>
         <ST>Paramètres</ST>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9}}>
-          <I label="Employé" value={eid} onChange={setEid} options={(s.emps||[]).map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))} span={2}/>
+          <I label="Employé" value={eid} onChange={setEid} options={(s?.emps||[]).map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))} span={2}/>
           <I label="Mois" value={per.month} onChange={v=>setPer({...per,month:parseInt(v)})} options={MN.map((m,i)=>({v:i+1,l:m}))}/>
           <I label="Année" type="number" value={per.year} onChange={v=>setPer({...per,year:v})}/>
           <I label="Jours prestés" type="number" value={per.days} onChange={v=>setPer({...per,days:v})}/>

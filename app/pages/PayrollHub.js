@@ -1,14 +1,11 @@
 'use client';
+import { C, PV_DOUBLE, PV_SIMPLE, RMMMG, TX_ONSS_E, TX_ONSS_W, fmt, quickPP } from '@/app/lib/helpers';
 import{useState,useMemo}from'react';
 
-const TX_ONSS_E=0.2507,TX_ONSS_W=0.1307,PV_SIMPLE=0.0769,PV_DOUBLE=0.0769;
-const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
 const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
-const C=({children,title:t,sub})=><div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)',marginBottom:14}}>{t&&<div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:sub?2:12}}>{t}</div>}{sub&&<div style={{fontSize:10,color:'#888',marginBottom:12}}>{sub}</div>}{children}</div>;
 const KPI=({l,v,c,sub})=><div style={{padding:14,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid '+(c||'#c6a34e')+'20',borderRadius:12,textAlign:'center',flex:1,minWidth:100}}><div style={{fontSize:18,fontWeight:800,color:c||'#c6a34e'}}>{v}</div><div style={{fontSize:9,color:'#888',marginTop:3}}>{l}</div>{sub&&<div style={{fontSize:8,color:'#5e5c56',marginTop:2}}>{sub}</div>}</div>;
 const Row=({l,v,c,b})=><div style={{display:'flex',justifyContent:'space-between',padding:'7px 0',borderBottom:b?'2px solid rgba(198,163,78,.2)':'1px solid rgba(255,255,255,.03)',fontWeight:b?700:400}}><span style={{color:b?'#e8e6e0':'#e8e6e0',fontSize:11.5}}>{l}</span><span style={{color:c||'#c6a34e',fontWeight:600,fontSize:12}}>{v}</span></div>;
 const Badge=({text,color})=><span style={{padding:'2px 7px',borderRadius:5,fontSize:8,fontWeight:600,background:(color||'#888')+'15',color:color||'#888'}}>{text}</span>;
-const quickPP=br=>{const imp=br*(1-TX_ONSS_W);if(imp<=1170)return 0;if(imp<=2350)return Math.round((imp-1170)*0.25*100)/100;return Math.round((1180*0.25+(imp-2350)*0.4)*100)/100;};
 const moisN=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
 // ═══════════════════════════════════════════════════════════
@@ -16,7 +13,7 @@ const moisN=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août',
 // ═══════════════════════════════════════════════════════════
 export function ValidationPrePaieV2({s,d}){
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
-  const clients=s.clients||[];const now=new Date();
+  const clients= s?.clients||[];const now=new Date();
   const allEmps=clients.flatMap(c=>(c.emps||[]).map(e=>({...e,_co:c.company?.name||c.id,_cp:c.company?.cp||'200'})));
   const n=allEmps.length;const [showDetail,setShowDetail]=useState(null);
 
@@ -197,7 +194,7 @@ export function TimelinePaieV2({s}){
 // 3. SOLDE TOUT COMPTE V2 — Prorata complet
 // ═══════════════════════════════════════════════════════════
 export function SoldeToutCompteV2({s,d}){
-  const clients=s.clients||[];const allEmps=clients.flatMap(c=>(c.emps||[]).map(e=>({...e,_co:c.company?.name||'',_cp:c.company?.cp||'200'})));
+  const clients= s?.clients||[];const allEmps=clients.flatMap(c=>(c.emps||[]).map(e=>({...e,_co:c.company?.name||'',_cp:c.company?.cp||'200'})));
   const [selEmp,setSelEmp]=useState('');const [dateSortie,setDateSortie]=useState(new Date().toISOString().slice(0,10));
   const [motif,setMotif]=useState('employeur');const [result,setResult]=useState(null);
 
@@ -338,7 +335,7 @@ export function SoldeToutCompteV2({s,d}){
 // 4. COUTS ANNUELS V2 — Saisonnalite + primes sectorielles
 // ═══════════════════════════════════════════════════════════
 export function CoutsAnnuelsV2({s}){
-  const clients=s.clients||[];
+  const clients= s?.clients||[];
   const allEmps=clients.flatMap(c=>(c.emps||[]).map(e=>({...e,_cp:c.company?.cp||'200'})));
   const n=allEmps.length;const mb=allEmps.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||e.brut||0)),0);
   const coutM=mb*(1+TX_ONSS_E);const ppM=allEmps.reduce((a,e)=>a+quickPP(+(e.monthlySalary||e.gross||0)),0);
@@ -422,7 +419,7 @@ export function CoutsAnnuelsV2({s}){
 // 5. SIMU LICENCIEMENT V2 — Outplacement + indemnites speciales
 // ═══════════════════════════════════════════════════════════
 export function SimuLicenciementV2({s}){
-  const clients=s.clients||[];
+  const clients= s?.clients||[];
   const allEmps=clients.flatMap(c=>(c.emps||[]).map(e=>({...e,_co:c.company?.name||''})));
   const [selEmp,setSelEmp]=useState(null);const [motif,setMotif]=useState('employeur');
   const [manualAnc,setManualAnc]=useState('');const [manualBrut,setManualBrut]=useState('');

@@ -1,4 +1,5 @@
 'use client';
+import { RMMMG, calc } from '@/app/lib/helpers';
 import { useState, useMemo } from 'react';
 
 // ═══ AUREUS IA SUITE — Module IA complet ═══
@@ -391,7 +392,7 @@ function KPIDashboardIA({ emps }) {
 // ═══ PAGE PRINCIPALE ═══
 export default function AureusSuitePage({ s, d }) {
   const sub = s.sub || 'ia_turnover';
-  const emps = s.emps || s.employees || [];
+  const emps = s?.emps || s.employees || [];
 
   const tabs = [
     { id: 'ia_turnover', l: '🧠 Prediction Turnover', icon: '🧠' },

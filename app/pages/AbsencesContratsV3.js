@@ -1,10 +1,9 @@
 'use client';
-import { calc, quickPP, quickNet, fmt, f2, f0, PH, C, ST, Tbl, obf, LEGAL, DPER, TX_ONSS_W, TX_ONSS_E, LOIS_BELGES, RMMMG, LB, PV_SIMPLE, PV_DOUBLE, NET_FACTOR, PP_EST, CR_PAT } from '@/app/lib/helpers';
+import { C, CR_PAT, DPER, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, obf, quickNet, quickPP } from '@/app/lib/helpers';
 import{useState,useMemo}from'react';
 
 const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
 const Row=({l,v,c,b,sub})=><div style={{display:'flex',justifyContent:'space-between',padding:b?'8px 0':'5px 0',borderBottom:b?'2px solid rgba(198,163,78,.2)':'1px solid rgba(255,255,255,.03)',fontWeight:b?700:400}}><span style={{color:sub?'#888':'#e8e6e0',fontSize:sub?10:11.5}}>{l}</span><span style={{color:c||'#c6a34e',fontWeight:600,fontSize:12}}>{v}</span></div>;
-const I=({label,type,value,onChange,style:st,options,placeholder})=><div style={st}><div style={{fontSize:10,color:'#5e5c56',marginBottom:3}}>{label}</div>{options?<select value={value} onChange={e=>onChange(e.target.value)} style={{width:'100%',padding:'8px 10px',borderRadius:6,border:'1px solid rgba(198,163,78,.15)',background:'rgba(198,163,78,.04)',color:'#e8e6e0',fontSize:12,fontFamily:'inherit'}}>{options.map(o=><option key={o.v||o} value={o.v||o}>{o.l||o}</option>)}</select>:<input type={type||'text'} value={value} onChange={e=>onChange(type==='number'?+e.target.value:e.target.value)} placeholder={placeholder} style={{width:'100%',padding:'8px 10px',borderRadius:6,border:'1px solid rgba(198,163,78,.15)',background:'rgba(198,163,78,.04)',color:'#e8e6e0',fontSize:12,fontFamily:'inherit',boxSizing:'border-box'}}/>}</div>;
 const Badge=({text,color})=><span style={{padding:'2px 7px',borderRadius:5,fontSize:8,fontWeight:600,background:(color||'#888')+'15',color:color||'#888'}}>{text}</span>;
 
 // ════════════════════════════════════════════════════════════
@@ -12,7 +11,7 @@ const Badge=({text,color})=><span style={{padding:'2px 7px',borderRadius:5,fontS
 // ════════════════════════════════════════════════════════════
 export function PlanningCongesV3({s}){
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
-  const emps=(s.clients||[]).flatMap(c=>(c.emps||[]).map(e=>({...e,_cl:c.company?.name||'Client'})));
+  const emps=(s?.clients||[]).flatMap(c=>(c.emps||[]).map(e=>({...e,_cl:c.company?.name||'Client'})));
   const [month,setMonth]=useState(new Date().getMonth());
   const [year]=useState(2026);
   const [tab,setTab]=useState('calendrier');
@@ -154,7 +153,7 @@ export function PlanningCongesV3({s}){
 // 2. BILAN SOCIAL V3 — Calcul automatique indicateurs BNB
 // ════════════════════════════════════════════════════════════
 export function BilanSocialV3({s}){
-  const emps=(s.clients||[]).flatMap(c=>(c.emps||[]).map(e=>({...e,_cl:c.company?.name||''})));
+  const emps=(s?.clients||[]).flatMap(c=>(c.emps||[]).map(e=>({...e,_cl:c.company?.name||''})));
   const [tab,setTab]=useState('indicateurs');
   const n=emps.length;
   const masseBrut=emps.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||0)),0);
@@ -284,8 +283,8 @@ export function BilanSocialV3({s}){
 // 3. ANALYTICS V3 — Vrais analytics sur données réelles
 // ════════════════════════════════════════════════════════════
 export function AnalyticsV3({s}){
-  const emps=(s.clients||[]).flatMap(c=>(c.emps||[]).map(e=>({...e,_cl:c.company?.name||''})));
-  const clients=s.clients||[];
+  const emps=(s?.clients||[]).flatMap(c=>(c.emps||[]).map(e=>({...e,_cl:c.company?.name||''})));
+  const clients= s?.clients||[];
   const [tab,setTab]=useState('dashboard');
   const n=emps.length;
   const masseBrut=emps.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||0)),0);

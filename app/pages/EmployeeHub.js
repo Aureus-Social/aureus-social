@@ -1,21 +1,18 @@
 'use client';
+import { C, TX_ONSS_E, TX_ONSS_W, fmt, quickPP } from '@/app/lib/helpers';
 import{useState,useMemo}from'react';
 
-const TX_ONSS_E=0.2507,TX_ONSS_W=0.1307;
-const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
 const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
-const C=({children,title:t})=><div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)',marginBottom:14}}>{t&&<div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:12}}>{t}</div>}{children}</div>;
 const KPI=({l,v,c,sub})=><div style={{padding:14,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid '+(c||'#c6a34e')+'20',borderRadius:12,textAlign:'center',flex:1,minWidth:110}}><div style={{fontSize:20,fontWeight:800,color:c||'#c6a34e'}}>{v}</div><div style={{fontSize:9,color:'#888',marginTop:3}}>{l}</div>{sub&&<div style={{fontSize:8,color:'#5e5c56',marginTop:2}}>{sub}</div>}</div>;
 const Row=({l,v,c})=><div style={{display:'flex',justifyContent:'space-between',padding:'7px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}><span style={{color:'#e8e6e0',fontSize:11.5}}>{l}</span><span style={{color:c||'#c6a34e',fontWeight:600,fontSize:12}}>{v}</span></div>;
 const Badge=({text,color})=><span style={{padding:'2px 7px',borderRadius:5,fontSize:8,fontWeight:600,background:(color||'#888')+'15',color:color||'#888'}}>{text}</span>;
-const quickPP=br=>{const imp=br*(1-TX_ONSS_W);if(imp<=1170)return 0;if(imp<=2350)return Math.round((imp-1170)*0.25*100)/100;return Math.round((1180*0.25+(imp-2350)*0.4)*100)/100;};
 
 // ═══════════════════════════════════════════════════════════
 // 1. DASHBOARD RH — Vrais indicateurs calcules
 // ═══════════════════════════════════════════════════════════
 export function DashboardRHV2({s,d}){
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
-  const clients=s.clients||[];const now=new Date();const yr=now.getFullYear();
+  const clients= s?.clients||[];const now=new Date();const yr=now.getFullYear();
   const allEmps=clients.flatMap(c=>(c.emps||[]).map(e=>({...e,_co:c.company?.name||c.id})));
   const n=allEmps.length;const [tab,setTab]=useState('overview');
   const mb=allEmps.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||e.brut||0)),0);
@@ -106,7 +103,7 @@ export function DashboardRHV2({s,d}){
 // 2. REGISTRE PERSONNEL — Format legal + export PDF
 // ═══════════════════════════════════════════════════════════
 export function RegistrePersonnelV2({s}){
-  const clients=s.clients||[];const [sel,setSel]=useState(0);const now=new Date();
+  const clients= s?.clients||[];const [sel,setSel]=useState(0);const now=new Date();
   const cl=clients[sel];const co=cl?.company||{};const emps=cl?.emps||[];
 
   const generateRegistre=()=>{
@@ -203,7 +200,7 @@ td{padding:4px;border:1px solid #ddd;font-size:8.5px}
 // 3. PORTAIL EMPLOYE — Fiches paie + demandes fonctionnelles
 // ═══════════════════════════════════════════════════════════
 export function PortailEmployeV2({s,d}){
-  const clients=s.clients||[];const [selC,setSelC]=useState(0);const [selE,setSelE]=useState(0);
+  const clients= s?.clients||[];const [selC,setSelC]=useState(0);const [selE,setSelE]=useState(0);
   const [tab,setTab]=useState('accueil');const [demandes,setDemandes]=useState([]);
   const [newDem,setNewDem]=useState({type:'conge',dateDebut:'',dateFin:'',motif:''});
   const mois=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
@@ -309,7 +306,7 @@ export function PortailEmployeV2({s,d}){
 // 4. GESTION INTERIMAIRES — Contrats + DIMONA + Couts
 // ═══════════════════════════════════════════════════════════
 export function GestionInterimairesV2({s,d}){
-  const clients=s.clients||[];const [sel,setSel]=useState(0);
+  const clients= s?.clients||[];const [sel,setSel]=useState(0);
   const [ints,setInts]=useState([]);const [showAdd,setShowAdd]=useState(false);const [tab,setTab]=useState('liste');
   const agences=[{id:'randstad',n:'Randstad',c:'#0066cc'},{id:'adecco',n:'Adecco',c:'#ef4444'},{id:'manpower',n:'Manpower',c:'#3b82f6'},{id:'tempo',n:'Tempo-Team',c:'#22c55e'},{id:'start',n:'Start People',c:'#eab308'},{id:'unique',n:'Unique',c:'#a855f7'},{id:'robert',n:'Robert Half',c:'#06b6d4'}];
   const [ni,setNi]=useState({first:'',last:'',niss:'',agence:'randstad',brutH:15.50,heures:152,coeff:2.0,motif:'remplacement',debut:'',fin:'',client:''});

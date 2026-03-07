@@ -1,5 +1,5 @@
 'use client';
-import { calc, quickPP, quickNet, fmt, f2, f0, PH, C, ST, Tbl, obf, LEGAL, DPER, TX_ONSS_W, TX_ONSS_E, LOIS_BELGES, RMMMG, LB, PV_SIMPLE, PV_DOUBLE, NET_FACTOR, PP_EST, CR_PAT } from '@/app/lib/helpers';
+import { C, CR_PAT, DPER, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, obf, quickNet, quickPP } from '@/app/lib/helpers';
 import { useState, useEffect, useCallback } from 'react';
 
 const COMMISSION_PER_FICHE = 2;

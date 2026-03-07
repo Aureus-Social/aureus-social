@@ -1,4 +1,5 @@
-'use client'
+'use client';
+import { LEGAL } from '@/app/lib/helpers';
 
 // ═══════════════════════════════════════════════════════
 //  AUREUS SOCIAL PRO — Module: Centre de Notifications
