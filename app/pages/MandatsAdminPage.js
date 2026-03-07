@@ -193,6 +193,7 @@ export default function MandatsAdminPage({ s, d, tab }) {
     { k: 'premieremploi', l: '🏅 1er–6e Employé' },
     { k: 'primes', l: '💼 Activa / Art.60' },
     { k: 'generateur', l: '📝 Générateur Documents' },
+    { k: 'connexions', l: '🔗 Connexions & RMMMG' },
   ];
 
   const copy = (text, key) => {
@@ -705,6 +706,124 @@ est interrompue pendant plus de 2 mois consécutifs.`}
               ))}
             </C>
           )}
+        </div>
+      )}
+
+      {/* ── CONNEXIONS & RMMMG ── */}
+      {activeTab === 'connexions' && (
+        <div>
+          <div style={{ padding: 20, background: 'rgba(34,197,94,0.06)', borderRadius: 14,
+            border: '2px solid rgba(34,197,94,0.25)', marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <ST style={{ margin: 0 }}>🏆 RMMMG 2026 — Salaire Minimum Belge</ST>
+              <Badge label="CNT — CCT 43/15" color="#22c55e" bg="rgba(34,197,94,0.12)" />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 14 }}>
+              {[
+                { l: 'Montant mensuel', v: '2.070,48 EUR', sub: '≥ 18 ans — taux plein', c: '#22c55e' },
+                { l: 'Montant horaire (38h/sem)', v: '13,24 EUR/h', sub: 'Base 38h hebdomadaires', c: '#c6a34e' },
+                { l: 'Montant annuel brut', v: '24.845,76 EUR', sub: '× 12 mensualités', c: '#a78bfa' },
+              ].map((k, i) => (
+                <div key={i} style={{ padding: '14px', background: 'rgba(255,255,255,0.04)',
+                  borderRadius: 10, border: `1px solid ${k.c}30`, textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, color: '#888', marginBottom: 4 }}>{k.l}</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: k.c }}>{k.v}</div>
+                  <div style={{ fontSize: 9, color: '#555', marginTop: 3 }}>{k.sub}</div>
+                </div>
+              ))}
+            </div>
+            <a href="https://www.cnt-nar.be/CCT-ORIG/cct-043-15.pdf" target="_blank" rel="noreferrer"
+              style={{ display: 'inline-block', padding: '8px 14px', borderRadius: 8,
+                background: 'rgba(34,197,94,0.15)', color: '#22c55e', fontSize: 11,
+                fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(34,197,94,0.3)' }}>
+              📄 Texte officiel CCT 43/15 — CNT ↗
+            </a>
+          </div>
+
+          <C>
+            <ST>📊 Barèmes RMMMG par Âge</ST>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+              <thead><tr>{['Âge', 'Ancienneté', 'Montant/mois', 'Base légale', 'Notes'].map(h => (
+                <th key={h} style={{ padding: '8px', textAlign: 'left', color: '#c6a34e',
+                  borderBottom: '2px solid rgba(198,163,78,0.2)', fontSize: 10 }}>{h}</th>
+              ))}</tr></thead>
+              <tbody>
+                {[
+                  ['< 18 ans', '—', '1.657,73 EUR', 'CCT 43/15 §4', 'Apprentis et étudiants jobistes'],
+                  ['18 ans', 'Entrée', '2.070,48 EUR', 'CCT 43/15 §3', 'Taux de base'],
+                  ['19–20 ans', '6 mois+', '2.070,48 EUR', 'CCT 43/15 §3', 'Identique taux de base'],
+                  ['21 ans+', '12 mois+', '2.070,48 EUR', 'CCT 43/15 §3', '⚠ Vérifier barème sectoriel CP'],
+                ].map(([age, anc, mnt, base, note], i) => (
+                  <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)',
+                    borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                    <td style={{ padding: '7px 8px', fontWeight: 600, color: '#c6a34e' }}>{age}</td>
+                    <td style={{ padding: '7px 8px', color: '#888' }}>{anc}</td>
+                    <td style={{ padding: '7px 8px', fontWeight: 700, color: '#22c55e' }}>{mnt}</td>
+                    <td style={{ padding: '7px 8px', color: '#555', fontSize: 9, fontFamily: 'monospace' }}>{base}</td>
+                    <td style={{ padding: '7px 8px', color: '#888', fontSize: 10 }}>{note}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </C>
+
+          <ST>🔗 Portails Officiels — Connexions Directes</ST>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 10 }}>
+            {[
+              { cat: '🏛 ONSS & Sécurité Sociale', color: '#c6a34e', links: [
+                { l: 'ONSS — Portail employeur', url: 'https://www.socialsecurity.be', desc: 'DmfA, déclarations, cotisations' },
+                { l: 'ONSS — Mahis (mandats)', url: 'https://www.socialsecurity.be/site_fr/employer/applics/mahis/index.htm', desc: 'Gestion mandats prestataires' },
+                { l: 'CSAM GAP — Accès applications', url: 'https://csam.belgique.be', desc: 'Configurer accès eID / mandats' },
+                { l: 'WIDE — Immatriculation ONSS', url: 'https://www.socialsecurity.be/site_fr/employer/applics/wide/index.htm', desc: 'Demande matricule employeur' },
+                { l: 'Dimona — Déclarations immédiates', url: 'https://www.socialsecurity.be/site_fr/employer/applics/dimona/index.htm', desc: 'IN/OUT/INTERM travailleurs' },
+              ]},
+              { cat: '💰 SPF Finances & Fiscal', color: '#60a5fa', links: [
+                { l: 'MyMinfin — Espace professionnel', url: 'https://eservices.minfin.fgov.be', desc: 'TVA, PP, Belcotax, taxe' },
+                { l: 'Belcotax-on-web', url: 'https://eservices.minfin.fgov.be/belcotax-on-web', desc: 'Fiches 281.10/20/30 mandataire' },
+                { l: 'SPF Finances — Barèmes PP 2026', url: 'https://finances.belgium.be/fr/entreprises/personnel_et_remuneration/precompte_professionnel/baremes', desc: 'Tables officielles précompte' },
+                { l: 'CNT — CCT & RMMMG', url: 'https://www.cnt-nar.be', desc: 'CCT 43/15 — Salaire minimum 2.070,48 EUR' },
+              ]},
+              { cat: '💼 Primes Emploi Bruxelles', color: '#22c55e', links: [
+                { l: 'Actiris — Activa.brussels', url: 'https://www.actiris.brussels/fr/employeurs/activa-brussels/', desc: 'Attestation, suivi N° 829605' },
+                { l: 'Actiris — Impulsion 55+', url: 'https://www.actiris.brussels/fr/employeurs/impulsion/', desc: '500 EUR/mois — 36 mois' },
+                { l: 'Actiris — Activa Jeunes', url: 'https://www.actiris.brussels/fr/employeurs/activa-jeunes/', desc: 'Prime < 30 ans' },
+                { l: '⚠ MonBEE — deadline 01/06/2026', url: 'https://environnement.brussels/monbee', desc: 'Primes énergie bruxelloises' },
+              ]},
+              { cat: '📋 Réglementations & Barèmes', color: '#a78bfa', links: [
+                { l: 'CCT 43/15 — RMMMG officiel', url: 'https://www.cnt-nar.be/CCT-ORIG/cct-043-15.pdf', desc: '2.070,48 EUR — texte CCT complet' },
+                { l: 'ONSS — Cotisations 2026', url: 'https://www.socialsecurity.be/site_fr/employer/general/contributions/index.htm', desc: 'Taux patronaux, réductions' },
+                { l: 'Fedris — Accidents du travail', url: 'https://www.fedris.be', desc: 'Taux cotisation AT par secteur' },
+                { l: 'SPF ETCS — Barèmes salaires CP', url: 'https://emploi.belgique.be/fr/themes/remunerations/baremes-de-salaires', desc: '228 CP — barèmes officiels' },
+              ]},
+              { cat: '🔌 Outils Administratifs', color: '#f97316', links: [
+                { l: 'BCE.be — Banque-Carrefour', url: 'https://economie.fgov.be/fr/themes/entreprises/banque-carrefour-des/rechercher-dans-la-banque', desc: 'Vérifier BCE, statuts, mandats' },
+                { l: 'Peppol — Facturation électronique', url: 'https://peppol.eu', desc: 'ID Aureus : 0208:1028230781' },
+                { l: 'Isabel 6 — Virements SEPA', url: 'https://www.isabel.eu', desc: 'Paiements SEPA pain.001' },
+                { l: 'APD — Protection données', url: 'https://www.autoriteprotectiondonnees.be', desc: 'RGPD — plainte, DPA' },
+              ]},
+              { cat: '📊 Références Salariales', color: '#ec4899', links: [
+                { l: 'RMMMG — CCT 43 coordonnée', url: 'https://www.cnt-nar.be/CCT-COORD/cct-043.pdf', desc: 'Évolutions historiques RMMMG' },
+                { l: 'Statbel — Statistiques salariales', url: 'https://statbel.fgov.be/fr/themes/emploi-formation/salaires', desc: 'Données officielles salaires BE' },
+                { l: 'SPF ETCS — Législation emploi', url: 'https://emploi.belgique.be/fr', desc: 'Contrats types, loi 03/07/1978' },
+                { l: 'Moniteur Belge', url: 'https://www.ejustice.just.fgov.be/cgi/welcome.pl', desc: 'Législation officielle belge' },
+              ]},
+            ].map((section, si) => (
+              <C key={si} style={{ marginBottom: 0 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: section.color, marginBottom: 10 }}>{section.cat}</div>
+                {section.links.map((lnk, li) => (
+                  <div key={li} style={{ padding: '7px 0',
+                    borderBottom: li < section.links.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                    <a href={lnk.url} target="_blank" rel="noreferrer"
+                      style={{ fontSize: 11, fontWeight: 600, color: section.color,
+                        textDecoration: 'none', display: 'block', marginBottom: 2 }}>
+                      {lnk.l} ↗
+                    </a>
+                    <div style={{ fontSize: 10, color: '#555' }}>{lnk.desc}</div>
+                  </div>
+                ))}
+              </C>
+            ))}
+          </div>
         </div>
       )}
     </div>
