@@ -1,5 +1,5 @@
 'use client';
-import { C, CR_PAT, LB, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, f0, f2, fmt, quickPP } from '@/app/lib/helpers';
+import { C, CR_PAT, LB, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, f0, f2, fmt, quickPP, safeLS } from '@/app/lib/helpers';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 const fmtP = n => `${((n||0)*100).toFixed(2)}%`;

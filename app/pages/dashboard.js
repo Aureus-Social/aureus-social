@@ -1,49 +1,17 @@
 'use client';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { LOIS_BELGES, LB, RMMMG, TX_ONSS_W, TX_ONSS_E, NET_FACTOR, PV_DOUBLE, PV_SIMPLE, PP_EST, generatePayslipPDF, C, B, I, ST, PH, Tbl, f2, f0, fmt as fmtH, DPER } from '@/app/lib/helpers';
+import { B, C, DPER, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, generatePayslipPDF, getAlertes, quickNet, quickPP } from '@/app/lib/helpers';
 const AUREUS_INFO = { name: 'Aureus IA SPRL', vat: 'BE 1028.230.781', version: 'v38', sprint: 'Sprint 38' };
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-const fmt = fmtH;
 
 const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
-const LEGAL = { WD: 21.67, WHD: 7.6 };
 const MN = MN_FR;
 
-function getAlertes(emps, co) {
-  const al = [];
-  const ae = (emps||[]).filter(e => e.status==='active'||!e.status);
-  if (ae.length === 0) al.push({ level: 'info', icon: '👥', msg: 'Aucun travailleur actif — Ajoutez votre premier employé' });
-  ae.forEach(e => {
-    if (!e.niss) al.push({ level: 'warning', icon: '⚠️', msg: `NISS manquant — ${(e.first||e.fn||'')+' '+(e.last||e.ln||'')}` });
-    if (!e.gross && !e.brut) al.push({ level: 'warning', icon: '💰', msg: `Salaire non défini — ${(e.first||e.fn||'')+' '+(e.last||e.ln||'')}` });
-  });
-  const now = new Date();
-  if (now.getDate() >= 20) al.push({ level: 'info', icon: '📅', msg: `Clôture paie ${MN[now.getMonth()]} — J${31-now.getDate()} jours restants` });
-  if (now.getDate() >= 25) al.push({ level: 'danger', icon: '🚨', msg: 'Virements SEPA à préparer avant fin du mois' });
-  return al;
-}
 
 
-function calc(emp, per, co) {
-  var brut = +(emp&&(emp.monthlySalary||emp.gross)||0);
-  var onssW = Math.round(brut * TX_ONSS_W * 100) / 100;
-  var imposable = brut - onssW;
-  var pp = Math.round(imposable * PP_EST * 100) / 100;
-  var net = Math.round((imposable - pp) * 100) / 100;
-  var onssE = Math.round(brut * TX_ONSS_E * 100) / 100;
-  return {base:brut,gross:brut,onssNet:onssW,imposable:imposable,tax:pp,pp:pp,css:0,net:net,onssE:onssE,costTotal:Math.round((brut+onssE)*100)/100,bonus:0,overtime:0,sunday:0,night:0,y13:0,sickPay:0,atnCar:0,cotCO2:0,hsBrutNetTotal:0};
-}
 
-function quickPP(brut) {
-  const imposable = brut - brut * TX_ONSS_W;
-  if (imposable <= 1110) return 0;
-  if (imposable <= 1560) return Math.round((imposable - 1110) * 0.2668 * 100) / 100;
-  if (imposable <= 2700) return Math.round((120.06 + (imposable - 1560) * 0.4280) * 100) / 100;
-  return Math.round((607.98 + (imposable - 2700) * 0.4816) * 100) / 100;
-}
 
-function quickNet(brut) { return Math.round((brut||0) * NET_FACTOR * 100) / 100; }
 function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function Dashboard({s,d}) {

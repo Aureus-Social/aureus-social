@@ -3,10 +3,8 @@
 "use client";
 
 import { useState } from "react";
-import { C, B, I, ST, PH, SC, fmt } from "@/app/lib/helpers";
-import { LOIS_BELGES, LB, RMMMG, TX_ONSS_E, TX_ONSS_W, NET_FACTOR,
-  PV_DOUBLE, PV_SIMPLE, CR_PAT, HEURES_HEBDO } from "@/app/lib/lois-belges";
-import { quickPP, quickNet, calcPrecompteExact } from "@/app/lib/payroll-engine";
+import { B, C, CR_PAT, HEURES_HEBDO, I, LB, LOIS_BELGES, NET_FACTOR, PH, PV_DOUBLE, PV_SIMPLE, RMMMG, SC, ST, TX_ONSS_E, TX_ONSS_W, f0, f2, fmt, quickNet, quickPP } from "@/app/lib/helpers";
+import { calcPrecompteExact } from "@/app/lib/payroll-engine";
 import { aureuspdf } from "@/app/lib/pdf-aureus";
 import { generateSEPAXML, previewHTML } from "@/app/lib/doc-generators";
 

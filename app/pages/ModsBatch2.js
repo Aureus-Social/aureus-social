@@ -3,21 +3,13 @@
 "use client";
 
 import { useState } from "react";
-import { C, B, I, ST, PH, Tbl, fmt } from "@/app/lib/helpers";
-import { LOIS_BELGES, RMMMG, TX_ONSS_E, TX_ONSS_W, NET_FACTOR, quickNetEst,
-  PV_DOUBLE, PV_SIMPLE, CR_PAT, CR_MAX, HEURES_HEBDO, BONUS_MAX,
-  TX_OUV108, TX_AT, obf, COUT_MED, CR_TRAV, PP_EST } from "@/app/lib/lois-belges";
-import { quickPP, quickNet, calcCSSS, calcBonusEmploi, calcPrecompteExact } from "@/app/lib/payroll-engine";
+import { B, BONUS_MAX, C, CR_MAX, CR_PAT, CR_TRAV, DPER, HEURES_HEBDO, I, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, SC, ST, TX_AT, TX_ONSS_E, TX_ONSS_W, TX_OUV108, Tbl, calc, f2, fmt, obf, quickNet, quickNetEst, quickPP } from "@/app/lib/helpers";
+import { calcCSSS, calcBonusEmploi, calcPrecompteExact } from "@/app/lib/payroll-engine";
 import { aureuspdf } from "@/app/lib/pdf-aureus";
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const MN = MN_FR;
 
-function calc(emp,per,co){
-  if(typeof window!=='undefined'&&window.calc)return window.calc(emp,per,co);
-  const b=+(emp?.monthlySalary||emp?.gross||0);
-  return {gross:b,net:b*0.56,tax:b*0.22,onssNet:b*0.1307,onssE:b*0.2507,css:0,costTotal:b*1.2507,bonus:0,peculeV:0,y13:0,totalBrut:b,netAPayer:b*0.56};
-}
 
 export function GuidePortailMod({s,d}){
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};const loisRef=LOIS_BELGES;
