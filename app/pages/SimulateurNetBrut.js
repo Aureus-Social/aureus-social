@@ -119,4 +119,6 @@ export function SimulateurNetBrut({ calcPaie, baremes }) {
   );
 }
 
-export default SimulateurNetBrut;
+export default function SimulateurNetBrutWrapped({ s, d, tab }) {
+  return <SimulateurNetBrut state={s||{}} dispatch={d||(()=>{})} defaultTab={tab} />;
+}

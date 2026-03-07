@@ -9,12 +9,12 @@ const Badge=({text,color})=><span style={{padding:'2px 7px',borderRadius:5,fontS
 // ════════════════════════════════════════════════════════════
 // 1. PLANNING CONGÉS V3 — Chevauchements + règles min présence
 // ════════════════════════════════════════════════════════════
-export function PlanningCongesV3({s}){
+export function PlanningCongesV3({s, defaultTab}){
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const emps=(s?.clients||[]).flatMap(c=>(c.emps||[]).map(e=>({...e,_cl:c.company?.name||'Client'})));
   const [month,setMonth]=useState(new Date().getMonth());
   const [year]=useState(2026);
-  const [tab,setTab]=useState('calendrier');
+  const [tab,setTab]=useState(defaultTab||'calendrier');
   const [minPresence,setMinPresence]=useState(60);
   const [conges,setConges]=useState(()=>{
     // Generate sample leave data
@@ -679,6 +679,32 @@ export function ContratsLegauxV3({s}){
 
 
 export default function AbsencesWrapped({ s, d, tab }) {
-  return <PlanningCongesV3 state={s || {}} dispatch={d || (() => {})} defaultTab={tab} />;
+  const TAB_MAP = {
+    accidentTravail: 'regles',
+    dashabsent:      'soldes',
+    gestionabs:      'calendrier',
+    planifconges:    'calendrier',
+    workflowAbs:     'chevauchements',
+  };
+  const TAB_LABELS = {
+    accidentTravail: '🏥 Accident de Travail',
+    dashabsent:      '📊 Dashboard Absences',
+    gestionabs:      '📋 Gestion Absences',
+    planifconges:    '🏖 Planification Congés',
+    workflowAbs:     '🔄 Workflow Absences',
+  };
+  const mappedTab = TAB_MAP[tab] || tab || 'calendrier';
+  const label = TAB_LABELS[tab];
+  return (
+    <div>
+      {label && (
+        <div style={{marginBottom:12,padding:'10px 16px',background:'rgba(198,163,78,.03)',
+          borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <h2 style={{color:'#c6a34e',margin:0,fontSize:16}}>{label}</h2>
+        </div>
+      )}
+      <PlanningCongesV3 s={s || {}} defaultTab={mappedTab} />
+    </div>
+  );
 }
 

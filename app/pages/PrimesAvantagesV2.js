@@ -1536,4 +1536,4 @@ export function CheqRepasV2({s}){
 }
 
 
-export default PrimeCalculatorV2;
+export default function PrimesAvantagesTabbed({ s, d, tab }) { return <PrimeCalculatorV2 state={s||{}} dispatch={d||(()=>{})}/> }

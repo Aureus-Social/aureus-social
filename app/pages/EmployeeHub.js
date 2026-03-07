@@ -384,4 +384,6 @@ export function GestionInterimairesV2({s,d}){
 }
 
 
-export default DashboardRHV2;
+export default function EmployeeHubWrapped({ s, d, tab }) {
+  return <DashboardRHV2 state={s||{}} dispatch={d||(()=>{})} defaultTab={tab} />;
+}

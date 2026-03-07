@@ -77,11 +77,26 @@ function ChartCard({ title, children, height }) {
 }
 
 export default function AnalyticsDashboardWrapped({ s, d, tab }) {
+  // analytics et tbdirection → dashboard complet avec graphiques
+  // autres tabs → vue dédiée avec titre contextuel + dashboard intégré
+  const meta = TAB_META[tab] || TAB_META['analytics'];
+  if (tab && tab !== 'analytics') {
+    return (
+      <div>
+        <div style={{marginBottom:16,padding:'14px 18px',background:'rgba(198,163,78,.03)',borderRadius:12,border:'1px solid rgba(198,163,78,.08)'}}>
+          <h2 style={{color:'#c6a34e',margin:'0 0 4px',fontSize:18}}>{meta.icon} {meta.title}</h2>
+          <p style={{color:'#5e5c56',margin:0,fontSize:12}}>{meta.sub}</p>
+        </div>
+        <AnalyticsDashboard state={s || {}} defaultTab={tab} />
+      </div>
+    );
+  }
   return <AnalyticsDashboard state={s || {}} defaultTab={tab} />;
 }
 
 function AnalyticsDashboard({ state, defaultTab }) {
   const [period, setPeriod] = useState('12m')
+  const [activeTab, setActiveTab] = useState(defaultTab || 'analytics')
   const employees = state?.employees || []
   const company = state?.co || state?.company || {}
 
@@ -326,4 +341,16 @@ function AnalyticsDashboard({ state, defaultTab }) {
       </div>
     </div>
   )
+}
+
+// ── Pages dédiées par tab ──────────────────────────────────────
+const TAB_META = {
+  analytics:    { icon:'📈', title:'Analytics',           sub:'Tableau analytique paie & RH' },
+  tbdirection:  { icon:'📊', title:'Tableau de Direction',sub:'KPIs direction — masse salariale, coûts, tendances' },
+  bilansocial:  { icon:'📋', title:'Bilan Social',        sub:'Rapport annuel obligations légales (>50 ETP)' },
+  rapportce:    { icon:'🏛', title:'Rapport CE',          sub:'Rapport annuel Conseil d\'Entreprise' },
+  rapports:     { icon:'📊', title:'Rapports Mensuels',   sub:'Rapports périodiques paie & déclarations' },
+  rapportsrole: { icon:'📈', title:'Rapports par Rôle',   sub:'Rapports personnalisés selon le profil utilisateur' },
+  reporting:    { icon:'▤',  title:'Reporting & Export',  sub:'Centre d\'export reporting multi-format' },
+  reportingpro: { icon:'📊', title:'Reporting Pro',       sub:'Reporting avancé avec filtres personnalisés' },
 }

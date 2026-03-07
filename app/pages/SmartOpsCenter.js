@@ -622,6 +622,14 @@ export function JournalActiviteV2({s,d}){
 
 
 export default function SmartOpsWrapped({ s, d, tab }) {
-  return <SmartAlertsEngine state={s || {}} dispatch={d || (() => {})} defaultTab={tab} />;
+  const tabMap = {
+    commandcenter:  'dashboard',
+    actionsrapides: 'calendar',
+    autopilot:      'rules',
+    piloteauto:     'categories',
+  };
+  const mappedTab = tabMap[tab] || 'dashboard';
+  const stateWithSub = { ...(s||{}), sub: mappedTab };
+  return <SmartAlertsEngine state={stateWithSub} dispatch={d || (() => {})} defaultTab={mappedTab} />;
 }
 

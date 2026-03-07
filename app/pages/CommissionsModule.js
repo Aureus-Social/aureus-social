@@ -530,7 +530,30 @@ function RelancesModule({ factures, sendEmailFn }) {
 
 
 export default function CommissionsModuleWrapped({ s, d, tab }) {
-  return <CommissionsModule userRole="admin" user={s?.user} factures={s?.factures||[]} sendEmailFn={null} defaultTab={tab} />;
+  const TAB_META = {
+    checklistclient:  { icon:'✅', title:'Checklist Client',      sub:'Vérifications onboarding nouveau client', mainTab:'commissions' },
+    comparatif:       { icon:'⚔️', title:'Comparatif Marché',     sub:'Analyse concurrentielle secrétariats sociaux', mainTab:'commissions' },
+    fiduciaire:       { icon:'🏢', title:'Hub Fiduciaire',        sub:'Gestion du portefeuille fiduciaire', mainTab:'commissions' },
+    guidecommercial:  { icon:'📊', title:'Guide Commercial',      sub:'Scripts et argumentaires de vente', mainTab:'commissions' },
+    guidefiduciaire:  { icon:'📖', title:'Guide Fiduciaire',      sub:'Guide d\'intégration pour fiduciaires', mainTab:'commissions' },
+    landing:          { icon:'🌐', title:'Page Commerciale',      sub:'Landing page et matériaux marketing', mainTab:'commissions' },
+    parserConcurrent: { icon:'🔍', title:'Audit Concurrent',      sub:'Analyse des contrats concurrents', mainTab:'relances' },
+    repriseclient:    { icon:'🔄', title:'Reprise Concurrent',    sub:'Processus de reprise client SD Worx / Securex', mainTab:'relances' },
+  };
+  const meta = TAB_META[tab];
+  const mappedTab = meta?.mainTab || 'commissions';
+  return (
+    <div>
+      {meta && (
+        <div style={{marginBottom:12,padding:'10px 16px',background:'rgba(198,163,78,.03)',
+          borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <h2 style={{color:'#c6a34e',margin:'0 0 2px',fontSize:16}}>{meta.icon} {meta.title}</h2>
+          <p style={{color:'#5e5c56',margin:0,fontSize:11}}>{meta.sub}</p>
+        </div>
+      )}
+      <CommissionsModule userRole="admin" user={s?.user} factures={s?.factures||[]} sendEmailFn={null} defaultTab={mappedTab} />
+    </div>
+  );
 }
 
 function CommissionsModule({ userRole, user, factures, sendEmailFn, defaultTab }) {

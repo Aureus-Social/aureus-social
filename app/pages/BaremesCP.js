@@ -589,4 +589,6 @@ export function BaremesCPV2({s}){
 }
 
 
-export default BaremesCPV2;
+export default function BaremesCPWrapped({ s, d, tab }) {
+  return <BaremesCPV2 state={s||{}} dispatch={d||(()=>{})} />;
+}

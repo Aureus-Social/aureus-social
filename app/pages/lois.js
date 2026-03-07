@@ -14,7 +14,7 @@ function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(
 function MoteurLoisBelges({s,d}){
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
 const ae= s?.emps||[];
-const [tab,setTab]=useState("dashboard");
+const [tab,setTab]=useState(defaultTab||"dashboard");
 const [editMode,setEditMode]=useState(false);
 const [customLois,setCustomLois]=useState(()=>{try{return (()=>{try{return JSON.parse(safeLS.get('aureus_lois_custom'))}catch(e){return null}})()||{};}catch(e){return {};}});
 const [updateHistory,setUpdateHistory]=useState(()=>{try{return (()=>{try{return JSON.parse(safeLS.get('aureus_lois_history'))}catch(e){return null}})()||[];}catch(e){return [];}});
@@ -491,6 +491,43 @@ updateHistory.map((h,i)=><div key={i} style={{display:"flex",gap:10,padding:"10p
 
 
 export default function LoisWrapped({ s, d, tab }) {
-  return <MoteurLoisBelges s={s} d={d} defaultTab={tab} />;
+  // Mapper nos tabs menu vers les onglets internes du moteur lois
+  const TAB_MAP = {
+    seuilssociaux:       'parametres',
+    ccts:                'parametres',
+    delegations:         'parametres',
+    delegationsyndicale: 'parametres',
+    egalitehf:           'parametres',
+    electionsociales:    'parametres',
+    formationsec:        'parametres',
+    lanceursalerte:      'parametres',
+    plandiversite:       'parametres',
+    social:              'dashboard',
+  };
+  const TAB_LABELS = {
+    seuilssociaux:       '📐 Seuils Sociaux 2026',
+    ccts:                '📜 Conventions CCT',
+    delegations:         '🏛 Délégations',
+    delegationsyndicale: '🏛 Délégation Syndicale',
+    egalitehf:           '⚖️ Égalité H/F',
+    electionsociales:    '🗳 Élections Sociales',
+    formationsec:        '🎓 Formation & Sécurité',
+    lanceursalerte:      '🚨 Lanceurs d\'Alerte',
+    plandiversite:       '🌍 Plan Diversité',
+    social:              '◆ Social & Assurances',
+  };
+  const mappedTab = TAB_MAP[tab] || 'dashboard';
+  const label = TAB_LABELS[tab];
+  return (
+    <div>
+      {label && (
+        <div style={{marginBottom:12,padding:'10px 16px',background:'rgba(198,163,78,.03)',
+          borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
+          <h2 style={{color:'#c6a34e',margin:0,fontSize:16}}>{label}</h2>
+        </div>
+      )}
+      <MoteurLoisBelges s={s} d={d} defaultTab={mappedTab} />
+    </div>
+  );
 }
 

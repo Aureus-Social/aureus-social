@@ -745,15 +745,17 @@ function documentToPrintHTML(content, title) {
 
 // ── Composant principal ──
 export default function DocumentGeneratorWrapped({ s, d, tab }) {
-  return <DocumentGenerator state={s || {}} defaultTab={tab} />;
+  const TAB_TO_CAT = {'contratgen': 'contrat', 'contratsmenu': 'contrat', 'annexeReglement': 'reglementaire', 'gendocsjur': 'reglementaire', 'formC4': 'sortie', 'formC131': 'attestation', 'legal': 'reglementaire', 'cgvsaas': 'reglementaire', 'mentionslegales': 'reglementaire'};
+  const initialCat = TAB_TO_CAT[tab] || null;
+  return <DocumentGenerator state={s || {}} defaultTab={tab} initialCat={initialCat} />;
 }
 
-function DocumentGenerator({ state, defaultTab }) {
+function DocumentGenerator({ state, defaultTab, initialCat }) {
   const [selectedType, setSelectedType] = useState(null)
   const [selectedEmployee, setSelectedEmployee] = useState(null)
   const [formData, setFormData] = useState({})
   const [generated, setGenerated] = useState(null)
-  const [filterCat, setFilterCat] = useState('all')
+  const [filterCat, setFilterCat] = useState(initialCat || 'all')
 
   const employees = state?.employees || []
   const company = state?.co || state?.company || {}
