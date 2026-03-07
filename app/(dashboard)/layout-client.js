@@ -123,67 +123,153 @@ function PlaceholderPage({ id, label }) {
   );
 }
 
-// Dashboard principal
+// Dashboard principal — version complète intégrée (sans dépendances externes)
 function DashboardHome({ state, onNavigate }) {
-  const ae = (state.emps || []).filter(e => e.status === 'active' || !e.status);
+  const s = state || {};
+  const ae = (s.emps || []).filter(e => e.status === 'active' || !e.status);
+  const sortie = (s.emps || []).filter(e => e.status === 'sorti');
+  const etudiants = (s.emps || []).filter(e => e.contract === 'student');
   const masse = ae.reduce((a, e) => a + (+(e.monthlySalary || e.gross || 0)), 0);
-  const fmt = n => new Intl.NumberFormat('fr-BE', { style: 'currency', currency: 'EUR' }).format(n || 0);
+  const avgGross = ae.length ? masse / ae.length : 0;
   const net = Math.round(masse * 0.6687);
   const cout = Math.round(masse * 1.2507);
   const now = new Date();
   const mois = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const fmtE = n => new Intl.NumberFormat('fr-BE', { style: 'currency', currency: 'EUR' }).format(n || 0);
+  const f2 = n => (Math.round((n||0)*100)/100).toFixed(2);
+
+  // Alertes dynamiques
+  const alertes = [];
+  ae.forEach(e => {
+    const brut = +(e.monthlySalary || e.gross || 0);
+    if (brut > 0 && brut < 2070.48) alertes.push({ level: 'danger', icon: '⚠', msg: `${e.first||''} ${e.last||''} — Salaire ${fmtE(brut)} sous RMMMG (${fmtE(2070.48)})` });
+    if (!e.niss) alertes.push({ level: 'warning', icon: '◇', msg: `${e.first||''} ${e.last||''} — NISS manquant` });
+    if (!e.iban) alertes.push({ level: 'warning', icon: '◇', msg: `${e.first||''} ${e.last||''} — IBAN manquant` });
+  });
+  const t1end = new Date(now.getFullYear(), 2, 31);
+  const daysToT1 = Math.ceil((t1end - now) / 86400000);
+  if (daysToT1 >= 0 && daysToT1 <= 30) alertes.push({ level: 'danger', icon: '⏰', msg: `DmfA T1/${now.getFullYear()} — Échéance dans ${daysToT1} jour(s) (31/03)` });
+
+  // Échéances calendrier
+  const y = now.getFullYear();
+  const m = now.getMonth() + 1;
+  const echeances = [
+    { label: `DmfA T${Math.ceil(m/3)}/${y}`, date: [new Date(y,2,31),new Date(y,5,30),new Date(y,8,30),new Date(y,11,31)][Math.ceil(m/3)-1], icon: '◆', color: '#f87171' },
+    { label: `PP 274 — ${mois[m-1]} ${y}`, date: new Date(y,m-1,15), icon: '◇', color: '#fb923c' },
+    { label: `ONSS provisions — ${mois[m-1]}`, date: new Date(y,m-1,5), icon: '◆', color: '#a78bfa' },
+    { label: 'Dimona IN — avant embauche', date: null, icon: '⬆', color: '#4ade80' },
+  ];
+
+  const KPI = [
+    { icon: '◉', label: 'Employés actifs', value: ae.length, sub: `${sortie.length} sorti · ${etudiants.length} étudiant`, color: '#c6a34e', page: 'employees' },
+    { icon: '◈', label: 'Masse salariale brute', value: fmtE(masse), sub: `Moy: ${fmtE(avgGross)}/emp`, color: '#c6a34e', page: 'salaires' },
+    { icon: '▤', label: 'Net total estimé', value: fmtE(net), sub: `${ae.length ? Math.round(net/masse*100) : 0}% du brut`, color: '#4ade80', page: 'payslip' },
+    { icon: '◆', label: 'Coût employeur total', value: fmtE(cout), sub: `Ratio: ${ae.length ? Math.round(cout/masse*100) : 0}% du brut`, color: '#a78bfa', page: 'analytics' },
+    { icon: '📄', label: 'Fiches de paie', value: (s.payrollHistory||[]).length, sub: `Ce mois: ${(s.payrollHistory||[]).filter(p=>{ const d=new Date(p.at||0); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).length}`, color: '#fb923c', page: 'payslip' },
+    { icon: '⬆', label: 'Dimona', value: (s.dimonaHistory||[]).length, sub: `IN/OUT déclarés`, color: '#60a5fa', page: 'declarations' },
+  ];
+
+  const ACTIONS = [
+    { icon: '◉', label: '+ Nouvel employé', id: 'employees', color: '#c6a34e' },
+    { icon: '◈', label: 'Générer fiche de paie', id: 'payslip', color: '#4ade80' },
+    { icon: '⬆', label: 'Dimona IN/OUT', id: 'declarations', color: '#60a5fa' },
+    { icon: '◆', label: 'DmfA trimestrielle', id: 'declarations', color: '#a78bfa' },
+    { icon: '📊', label: 'Analytics & Rapports', id: 'analytics', color: '#fb923c' },
+    { icon: '🔗', label: 'Hub Connexions H24', id: 'connexionshub', color: '#c6a34e' },
+    { icon: '📋', label: 'Barèmes CP', id: 'baremescp', color: '#fbbf24' },
+    { icon: '⚡', label: 'Simulateur net/brut', id: 'calcinstant', color: '#4ade80' },
+  ];
 
   return (
-    <div>
-      <div style={{ fontSize: 19, fontWeight: 800, color: '#c6a34e', marginBottom: 4 }}>Tableau de bord</div>
-      <div style={{ fontSize: 12, color: '#5e5c56', marginBottom: 24 }}>{mois[now.getMonth()]} {now.getFullYear()} — Aureus IA SPRL · BCE BE 1028.230.781</div>
-      
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 24 }}>
-        {[
-          { icon: '◉', label: 'Employés actifs', value: ae.length, sub: `0 sorti · 0 étudiant`, color: '#c6a34e' },
-          { icon: '◈', label: 'Masse salariale brute', value: fmt(masse), sub: `Moy: ${fmt(ae.length ? masse / ae.length : 0)}/emp`, color: '#c6a34e' },
-          { icon: '▤', label: 'Net total', value: fmt(net), sub: '68% du brut', color: '#22c55e' },
-          { icon: '◆', label: 'Coût employeur total', value: fmt(cout), sub: 'Ratio: 125% du brut', color: '#a78bfa' },
-        ].map((k, i) => (
-          <div key={i} style={{ padding: '18px 20px', background: 'rgba(198,163,78,.03)', borderRadius: 12, border: '1px solid rgba(198,163,78,.06)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <span style={{ fontSize: 16 }}>{k.icon}</span>
-              <span style={{ fontSize: 10, color: '#5e5c56', textTransform: 'uppercase', letterSpacing: '.5px' }}>{k.label}</span>
+    <div style={{ padding: '0 2px' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 22 }}>
+        <div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: '#c6a34e', letterSpacing: '.5px' }}>Tableau de bord</div>
+          <div style={{ fontSize: 11, color: '#5e5c56', marginTop: 3 }}>{mois[now.getMonth()]} {now.getFullYear()} — Aureus IA SPRL · BCE BE 1028.230.781</div>
+        </div>
+        <div style={{ fontSize: 10, color: '#5e5c56', textAlign: 'right' }}>
+          <div style={{ color: '#c6a34e', fontWeight: 600 }}>⚡ RMMMG: {fmtE(2070.48)}</div>
+          <div>Index santé: 2,0399 · Pivot: 125,60</div>
+        </div>
+      </div>
+
+      {/* Alertes */}
+      {alertes.length > 0 && (
+        <div style={{ marginBottom: 18, padding: '12px 16px', borderRadius: 10, border: '1px solid rgba(248,113,113,.2)', background: 'rgba(248,113,113,.04)' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#f87171', marginBottom: 8 }}>⚠ {alertes.length} alerte(s) — Action requise</div>
+          {alertes.slice(0, 5).map((a, i) => (
+            <div key={i} style={{ fontSize: 11, color: a.level === 'danger' ? '#f87171' : '#fb923c', padding: '3px 0' }}>{a.icon} {a.msg}</div>
+          ))}
+          {alertes.length > 5 && <div style={{ fontSize: 10, color: '#888', marginTop: 4 }}>+{alertes.length - 5} autres alertes</div>}
+        </div>
+      )}
+
+      {/* KPIs */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
+        {KPI.map((k, i) => (
+          <div key={i} onClick={() => onNavigate && onNavigate(k.page)}
+            style={{ padding: '16px 18px', background: 'rgba(198,163,78,.03)', borderRadius: 12, border: '1px solid rgba(198,163,78,.06)', cursor: 'pointer', transition: 'all .15s' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(198,163,78,.07)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(198,163,78,.03)'}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <span style={{ fontSize: 15 }}>{k.icon}</span>
+              <span style={{ fontSize: 9.5, color: '#5e5c56', textTransform: 'uppercase', letterSpacing: '.5px' }}>{k.label}</span>
             </div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: k.color }}>{k.value}</div>
-            <div style={{ fontSize: 10, color: '#5e5c56', marginTop: 4 }}>{k.sub}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: k.color }}>{k.value}</div>
+            <div style={{ fontSize: 9.5, color: '#5e5c56', marginTop: 3 }}>{k.sub}</div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        <div style={{ padding: '18px 20px', background: 'rgba(198,163,78,.03)', borderRadius: 12, border: '1px solid rgba(198,163,78,.06)' }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#c6a34e', marginBottom: 12 }}>Échéances & Obligations</div>
-          {[
-            { icon: '◆', label: 'DmfA T1/2026', date: '31/03/2026', type: 'trimestriel' },
-            { icon: '◇', label: 'Précompte professionnel 274', date: '5/04/2026', type: 'mensuel' },
-            { icon: '◆', label: 'Provisions ONSS mensuelles', date: '5 du mois', type: 'mensuel' },
-            { icon: '⬆', label: 'Dimona IN — Avant embauche', date: 'Permanent', type: '' },
-          ].map((e, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,.03)', fontSize: 12 }}>
-              <span><span style={{ marginRight: 8 }}>{e.icon}</span>{e.label}</span>
-              <span style={{ color: '#c6a34e', fontSize: 11 }}>{e.date}</span>
+      {/* Grille principale */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+        {/* Échéances */}
+        <div style={{ padding: '16px 18px', background: 'rgba(198,163,78,.03)', borderRadius: 12, border: '1px solid rgba(198,163,78,.06)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#c6a34e' }}>Échéances & Obligations</div>
+            <button onClick={() => onNavigate && onNavigate('declarations')} style={{ fontSize: 10, color: '#c6a34e', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Voir tout →</button>
+          </div>
+          {echeances.map((e, i) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderBottom: '1px solid rgba(255,255,255,.03)', fontSize: 11.5 }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ color: e.color }}>{e.icon}</span>{e.label}
+              </span>
+              <span style={{ color: e.date ? (e.date < now ? '#f87171' : '#888') : '#4ade80', fontSize: 10.5, fontWeight: 600 }}>
+                {e.date ? e.date.toLocaleDateString('fr-BE') : 'Permanent'}
+              </span>
             </div>
           ))}
         </div>
-        <div style={{ padding: '18px 20px', background: 'rgba(198,163,78,.03)', borderRadius: 12, border: '1px solid rgba(198,163,78,.06)' }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#c6a34e', marginBottom: 12 }}>Actions rapides</div>
-          {[
-            { icon: '◉', label: '+ Nouvel employé', id: 'employees' },
-            { icon: '◈', label: 'Générer fiche de paie', id: 'payslip' },
-            { icon: '⬆', label: 'Dimona IN/OUT', id: 'declarations' },
-            { icon: '◆', label: 'DmfA trimestrielle', id: 'declarations' },
-          ].map((a, i) => (
-            <div key={i} style={{ padding: '10px 12px', borderRadius: 8, marginBottom: 4, cursor: 'pointer', fontSize: 12, background: 'rgba(198,163,78,.02)' }}
-              onClick={() => onNavigate && onNavigate(a.id)}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(198,163,78,.06)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(198,163,78,.02)'}>
-              <span style={{ marginRight: 8 }}>{a.icon}</span>{a.label}
+
+        {/* Derniers employés */}
+        <div style={{ padding: '16px 18px', background: 'rgba(198,163,78,.03)', borderRadius: 12, border: '1px solid rgba(198,163,78,.06)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#c6a34e' }}>Travailleurs ({ae.length})</div>
+            <button onClick={() => onNavigate && onNavigate('employees')} style={{ fontSize: 10, color: '#c6a34e', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Voir tout →</button>
+          </div>
+          {ae.length === 0 && <div style={{ fontSize: 11, color: '#5e5c56', fontStyle: 'italic' }}>Aucun travailleur encodé — <span style={{ color: '#c6a34e', cursor: 'pointer' }} onClick={() => onNavigate && onNavigate('employees')}>+ Ajouter</span></div>}
+          {ae.slice(0, 5).map((e, i) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: '1px solid rgba(255,255,255,.03)', fontSize: 11 }}>
+              <span style={{ color: '#d4d0c8' }}>◉ {e.first||''} {e.last||''} <span style={{ color: '#5e5c56', fontSize: 9.5 }}>CP {e.cp||'200'}</span></span>
+              <span style={{ color: '#4ade80', fontWeight: 600 }}>{fmtE(+(e.monthlySalary||e.gross||0))}</span>
+            </div>
+          ))}
+          {ae.length > 5 && <div style={{ fontSize: 10, color: '#888', marginTop: 6 }}>+{ae.length - 5} autres travailleurs</div>}
+        </div>
+      </div>
+
+      {/* Actions rapides */}
+      <div style={{ padding: '16px 18px', background: 'rgba(198,163,78,.03)', borderRadius: 12, border: '1px solid rgba(198,163,78,.06)' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#c6a34e', marginBottom: 12 }}>⚡ Actions rapides</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 }}>
+          {ACTIONS.map((a, i) => (
+            <div key={i} onClick={() => onNavigate && onNavigate(a.id)}
+              style={{ padding: '10px 12px', borderRadius: 8, cursor: 'pointer', fontSize: 11.5, display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(198,163,78,.02)', border: '1px solid rgba(198,163,78,.05)', transition: 'all .15s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(198,163,78,.08)'; e.currentTarget.style.borderColor = 'rgba(198,163,78,.2)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(198,163,78,.02)'; e.currentTarget.style.borderColor = 'rgba(198,163,78,.05)'; }}>
+              <span style={{ color: a.color }}>{a.icon}</span>
+              <span style={{ color: '#d4d0c8' }}>{a.label}</span>
             </div>
           ))}
         </div>
@@ -228,7 +314,7 @@ export default function DashboardLayout({ user }) {
 
   const renderPage = () => {
     switch (page) {
-      case 'dashboard': return <DashboardPage s={s} d={d} onNavigate={setPage} />;
+      case 'dashboard': return <DashboardHome state={s} onNavigate={setPage} />;
       case 'employees': return <EmployeesPage s={s} d={d} />;
       case 'payslip': return <PayslipsPage s={s} d={d} scrollAnchor={scrollAnchor} onAnchorHandled={()=>setScrollAnchor(null)} />;
       case 'declarations': case 'onss': return <DimonaPageComp s={s} d={d} />;
