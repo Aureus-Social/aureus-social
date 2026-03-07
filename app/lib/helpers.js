@@ -62,3 +62,44 @@ export function getAlertes(emps,co){
   return al;
 }
 export { BAREMES_CP_MIN } from './lois-belges';
+
+// ── SEPA depuis doc-generators ──
+export { generateSEPAXML } from './doc-generators';
+
+// ── DmfA XML generator ──
+export function generateDmfAXML(emps, trimestre, annee, co) {
+  const coName = co?.name || 'Aureus IA SPRL';
+  const coOnss = (co?.onss || '').replace(/[^0-9]/g, '');
+  const ae = (emps || []).filter(e => e.status === 'active' || !e.status);
+  const lignes = ae.map(e => {
+    const brut = +(e.monthlySalary || e.gross || 0) * 3; // trimestre
+    const onssW = Math.round(brut * 0.1307 * 100) / 100;
+    const onssE = Math.round(brut * 0.2507 * 100) / 100;
+    return `  <Travailleur>
+    <NISS>${e.niss || ''}</NISS>
+    <Nom>${(e.last || e.ln || '')}</Nom>
+    <Prenom>${(e.first || e.fn || '')}</Prenom>
+    <RemunerationBrute>${brut.toFixed(2)}</RemunerationBrute>
+    <CotisationTravailleur>${onssW.toFixed(2)}</CotisationTravailleur>
+    <CotisationPatronale>${onssE.toFixed(2)}</CotisationPatronale>
+  </Travailleur>`;
+  }).join('\n');
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<DmfA xmlns="http://www.onss.be/dmfa/2026">
+  <Employeur>
+    <Nom>${coName}</Nom>
+    <MatriculeONSS>${coOnss}</MatriculeONSS>
+    <Trimestre>${annee}T${trimestre}</Trimestre>
+  </Employeur>
+  <Travailleurs>
+${lignes}
+  </Travailleurs>
+</DmfA>`;
+  const blob = new Blob([xml], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `DmfA_${annee}_T${trimestre}.xml`;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 3000);
+  return xml;
+}
