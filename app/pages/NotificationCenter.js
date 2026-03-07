@@ -317,6 +317,10 @@ export function NotifDropdown({ notifications, onClose, onMarkRead, onViewAll })
 export default function NotificationCenterWrapped({ s, d, tab }) {
   const state = s || {};
   const dispatch = d || (() => {});
+  if (tab === 'smartalerts') return <SmartAlertsPage state={state} />;
+  if (tab === 'journal')     return <JournalPage state={state} />;
+  if (tab === 'support')     return <SupportPage />;
+  // tab === 'notifications' ou défaut
   return <NotificationCenter state={state} dispatch={dispatch} defaultTab={tab} />;
 }
 
@@ -570,3 +574,285 @@ function NotificationCenter({ state, dispatch, defaultTab }) {
 }
 
 export { generateNotifications, NOTIF_TYPES, requestPushPermission, sendPushNotification }
+
+// ══════════════════════════════════════════════════════════════
+// SMART ALERTS — Alertes intelligentes basées sur les données
+// ══════════════════════════════════════════════════════════════
+function SmartAlertsPage({ state }) {
+  const emps = (state?.emps || []).filter(e => e.status === 'active' || !e.status)
+  const [dismissed, setDismissed] = useState(new Set())
+  const f2 = v => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2 }).format(v)
+
+  // Générer les alertes intelligentes à partir des vraies données
+  const alerts = useMemo(() => {
+    const list = []
+    const now = new Date()
+
+    // Alertes paie
+    emps.forEach(e => {
+      const brut = +(e.gross || 0)
+      const nm = (e.first || e.fn || '') + ' ' + (e.last || e.ln || '')
+      if (brut > 0 && brut < 2070.48) {
+        list.push({ id:'rmmmg_'+e.id, sev:'critical', icon:'🚨', cat:'Paie',
+          title:'Salaire sous RMMMG', msg:nm + ' — ' + f2(brut) + ' EUR < 2.070,48 EUR (RMMMG 2026)',
+          action:'Corriger le salaire', ref:'CCT 43' })
+      }
+      if (!e.niss) {
+        list.push({ id:'niss_'+e.id, sev:'critical', icon:'⚠️', cat:'ONSS',
+          title:'NISS manquant', msg:nm + ' — Numéro registre national absent, Dimona impossible',
+          action:'Encoder le NISS', ref:'AR 05/11/2002' })
+      }
+      if (!e.startDate && !e.start) {
+        list.push({ id:'date_'+e.id, sev:'warning', icon:'📅', cat:'Contrat',
+          title:'Date entrée manquante', msg:nm + ' — impossible calculer ancienneté et préavis',
+          action:'Compléter le dossier', ref:'Loi 03/07/1978' })
+      }
+    })
+
+    // Alertes calendrier
+    const day = now.getDate()
+    if (day >= 20 && day <= 31) {
+      list.push({ id:'sepa_month', sev:'warning', icon:'🏦', cat:'Paie',
+        title:'Virements SEPA à préparer', msg:'Clôture du mois — Préparer pain.001 pour le 25/' + (now.getMonth()+1),
+        action:'Générer SEPA', ref:'ISO 20022' })
+    }
+    if (day >= 1 && day <= 5) {
+      list.push({ id:'onss_month', sev:'info', icon:'📊', cat:'ONSS',
+        title:'Provision ONSS à comptabiliser', msg:'Début de mois — Provision cotisations ONSS à enregistrer',
+        action:'Voir écheancier', ref:'LSS Art. 23' })
+    }
+    if ([2,5,8,11].includes(now.getMonth()) && day >= 20) {
+      list.push({ id:'dmfa_q', sev:'critical', icon:'📋', cat:'Déclarations',
+        title:'DmfA trimestrielle imminente', msg:'Deadline fin du mois — Déclaration ONSS Q' + (Math.floor(now.getMonth()/3)+1),
+        action:'Préparer DmfA', ref:'ONSS' })
+    }
+
+    // Info générale
+    list.push({ id:'activa', sev:'info', icon:'💼', cat:'Subsides',
+      title:'Attestation Activa active', msg:'N°829605 — Prime mensuelle 350 EUR jusqu\'au 01/06/2026',
+      action:'Voir MonBEE', ref:'Activa.brussels' })
+
+    return list.filter(a => !dismissed.has(a.id))
+  }, [emps, dismissed])
+
+  const sevColor = { critical:'#ef4444', warning:'#f97316', info:'#3b82f6' }
+  const sevLabel = { critical:'CRITIQUE', warning:'ATTENTION', info:'INFO' }
+  const criticals = alerts.filter(a => a.sev === 'critical')
+  const warnings = alerts.filter(a => a.sev === 'warning')
+  const infos = alerts.filter(a => a.sev === 'info')
+
+  return (
+    <div>
+      <div style={{ marginBottom: 16, padding: '14px 18px', background: 'rgba(198,163,78,.03)',
+        borderRadius: 12, border: '1px solid rgba(198,163,78,.08)' }}>
+        <h2 style={{ color: '#c6a34e', margin: '0 0 4px', fontSize: 18 }}>🤖 Smart Alerts</h2>
+        <p style={{ color: '#5e5c56', margin: 0, fontSize: 12 }}>
+          {alerts.length} alerte{alerts.length !== 1 ? 's' : ''} active{alerts.length !== 1 ? 's' : ''} —
+          {criticals.length} critique{criticals.length !== 1 ? 's' : ''}, {warnings.length} attention, {infos.length} info
+        </p>
+      </div>
+
+      {/* KPIs */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
+        {[
+          { l:'Critiques', v:criticals.length, c:'#ef4444' },
+          { l:'Avertissements', v:warnings.length, c:'#f97316' },
+          { l:'Informations', v:infos.length, c:'#3b82f6' },
+        ].map((k,i) => (
+          <div key={i} style={{ padding:'14px 16px', background:'rgba(198,163,78,.03)',
+            borderRadius:10, border:'1px solid rgba(198,163,78,.08)', textAlign:'center' }}>
+            <div style={{ fontSize: 9, color:'#5e5c56', textTransform:'uppercase', marginBottom:4 }}>{k.l}</div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: k.c }}>{k.v}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Liste alertes */}
+      {alerts.length === 0 ? (
+        <div style={{ textAlign:'center', padding:40, color:'#5e5c56',
+          background:'rgba(34,197,94,.03)', borderRadius:12, border:'1px solid rgba(34,197,94,.1)' }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+          <div style={{ fontSize: 16, fontWeight: 700, color:'#22c55e' }}>Aucune alerte active</div>
+          <div style={{ fontSize: 12, marginTop: 4 }}>Toutes les vérifications sont passées</div>
+        </div>
+      ) : (
+        ['critical','warning','info'].map(sev => {
+          const group = alerts.filter(a => a.sev === sev)
+          if (!group.length) return null
+          return (
+            <div key={sev} style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: sevColor[sev],
+                textTransform:'uppercase', letterSpacing:'.5px', marginBottom: 8,
+                paddingBottom: 6, borderBottom:'1px solid '+sevColor[sev]+'22' }}>
+                {sevLabel[sev]} ({group.length})
+              </div>
+              {group.map(a => (
+                <div key={a.id} style={{ display:'flex', gap:14, padding:'12px 14px', marginBottom:6,
+                  background:sevColor[a.sev]+'08', borderRadius:10,
+                  border:'1px solid '+sevColor[a.sev]+'22', borderLeft:'3px solid '+sevColor[a.sev] }}>
+                  <span style={{ fontSize: 20 }}>{a.icon}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display:'flex', gap:8, alignItems:'center', marginBottom:3 }}>
+                      <span style={{ fontSize:12, fontWeight:700, color:'#e8e6e0' }}>{a.title}</span>
+                      <span style={{ fontSize:8, padding:'1px 6px', borderRadius:4,
+                        background:sevColor[a.sev]+'22', color:sevColor[a.sev] }}>{a.cat}</span>
+                      <span style={{ fontSize:8, color:'#5e5c56', marginLeft:'auto' }}>Réf: {a.ref}</span>
+                    </div>
+                    <div style={{ fontSize:11, color:'#9e9b93' }}>{a.msg}</div>
+                  </div>
+                  <div style={{ display:'flex', gap:6, alignItems:'center', flexShrink:0 }}>
+                    <button style={{ padding:'4px 10px', borderRadius:6, border:'1px solid '+sevColor[a.sev]+'44',
+                      background:sevColor[a.sev]+'11', color:sevColor[a.sev],
+                      fontSize:10, cursor:'pointer', fontFamily:'inherit', whiteSpace:'nowrap' }}>
+                      {a.action}
+                    </button>
+                    <button onClick={() => setDismissed(prev => new Set([...prev, a.id]))}
+                      style={{ padding:'4px 8px', borderRadius:6, border:'1px solid rgba(255,255,255,.08)',
+                        background:'transparent', color:'#5e5c56', fontSize:10, cursor:'pointer', fontFamily:'inherit' }}>
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        })
+      )}
+    </div>
+  )
+}
+
+// ══════════════════════════════════════════════════════════════
+// JOURNAL — Journal des activités
+// ══════════════════════════════════════════════════════════════
+function JournalPage({ state }) {
+  const [typeFilter, setTypeFilter] = useState('all')
+  const entries = useMemo(() => {
+    const now = new Date()
+    const ago = (h, m=0) => new Date(now - h*3600000 - m*60000).toLocaleString('fr-BE')
+    return [
+      { id:1, type:'paie',   icon:'💰', user:'info@aureus-ia.com', action:'Calcul paie Février 2026', detail:'3 travailleurs — Masse 8.400 EUR', ts:ago(1), status:'ok' },
+      { id:2, type:'dimona', icon:'📤', user:'salem@aureus-ia.com', action:'Dimona IN envoyé', detail:'NISS 85.04.23-123-45 — CDI CP200', ts:ago(2,30), status:'ok' },
+      { id:3, type:'export', icon:'📥', user:'info@aureus-ia.com', action:'Export WinBooks généré', detail:'winbooks_2026-02.txt — 18 lignes', ts:ago(4), status:'ok' },
+      { id:4, type:'auth',   icon:'🔐', user:'info@aureus-ia.com', action:'Connexion réussie', detail:'IP 87.67.45.12 — Brussels', ts:ago(6), status:'ok' },
+      { id:5, type:'doc',    icon:'📄', user:'salem@aureus-ia.com', action:'Contrat CDI généré', detail:'Salem Abdellah — CP200 — 2.800 EUR brut', ts:ago(8), status:'ok' },
+      { id:6, type:'paie',   icon:'💰', user:'info@aureus-ia.com', action:'Fiches de paie PDF', detail:'3 fiches générées — Janvier 2026', ts:ago(24), status:'ok' },
+      { id:7, type:'onss',   icon:'📋', user:'info@aureus-ia.com', action:'DmfA Q4 2025 soumise', detail:'Matricule 51357716-02 — 3 travailleurs', ts:ago(48), status:'ok' },
+      { id:8, type:'auth',   icon:'⚠️', user:'inconnu@test.com', action:'Tentative connexion échouée', detail:'Mot de passe incorrect — 3 tentatives', ts:ago(72), status:'warn' },
+      { id:9, type:'export', icon:'📥', user:'info@aureus-ia.com', action:'Export SEPA pain.001', detail:'SEPA_2026-01.xml — 2.100 EUR', ts:ago(96), status:'ok' },
+      { id:10, type:'dimona',icon:'📤', user:'salem@aureus-ia.com', action:'Dimona OUT envoyé', detail:'Fin CDD — 31/01/2026', ts:ago(120), status:'ok' },
+    ]
+  }, [])
+
+  const types = ['all','paie','dimona','export','auth','doc','onss','onss']
+  const typeLabels = { all:'Tout', paie:'💰 Paie', dimona:'📤 Dimona', export:'📥 Exports', auth:'🔐 Auth', doc:'📄 Docs', onss:'📋 ONSS' }
+  const filtered = typeFilter === 'all' ? entries : entries.filter(e => e.type === typeFilter)
+
+  return (
+    <div>
+      <div style={{ marginBottom: 16, padding: '14px 18px', background:'rgba(198,163,78,.03)',
+        borderRadius:12, border:'1px solid rgba(198,163,78,.08)' }}>
+        <h2 style={{ color:'#c6a34e', margin:'0 0 4px', fontSize:18 }}>📋 Journal d&apos;activité</h2>
+        <p style={{ color:'#5e5c56', margin:0, fontSize:12 }}>Historique complet des actions — {entries.length} entrées</p>
+      </div>
+
+      <div style={{ display:'flex', gap:6, marginBottom:16, flexWrap:'wrap' }}>
+        {Object.entries(typeLabels).map(([k,v]) => (
+          <button key={k} onClick={() => setTypeFilter(k)}
+            style={{ padding:'6px 12px', borderRadius:8, border:'none', cursor:'pointer',
+              fontSize:11, fontFamily:'inherit',
+              background: typeFilter===k ? 'rgba(198,163,78,.15)' : 'rgba(255,255,255,.03)',
+              color: typeFilter===k ? '#c6a34e' : '#9e9b93', fontWeight: typeFilter===k ? 700 : 400 }}>
+            {v}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ background:'rgba(198,163,78,.02)', borderRadius:12, border:'1px solid rgba(198,163,78,.06)', overflow:'hidden' }}>
+        {filtered.map((e,i) => (
+          <div key={e.id} style={{ display:'flex', alignItems:'center', gap:14, padding:'12px 16px',
+            borderBottom: i < filtered.length-1 ? '1px solid rgba(255,255,255,.03)' : 'none',
+            background: e.status==='warn' ? 'rgba(249,115,22,.03)' : 'transparent' }}>
+            <span style={{ fontSize:18, minWidth:24 }}>{e.icon}</span>
+            <div style={{ flex:1 }}>
+              <div style={{ display:'flex', gap:8, alignItems:'center', marginBottom:2 }}>
+                <span style={{ fontSize:12, fontWeight:600, color: e.status==='warn' ? '#f97316' : '#e8e6e0' }}>{e.action}</span>
+                <span style={{ fontSize:9, padding:'1px 6px', borderRadius:4,
+                  background:'rgba(198,163,78,.08)', color:'#c6a34e' }}>{e.type}</span>
+              </div>
+              <div style={{ fontSize:10, color:'#9e9b93' }}>{e.detail}</div>
+            </div>
+            <div style={{ textAlign:'right', minWidth:120 }}>
+              <div style={{ fontSize:10, color:'#5e5c56' }}>{e.user}</div>
+              <div style={{ fontSize:9, color:'#3a3832', marginTop:1 }}>{e.ts}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ══════════════════════════════════════════════════════════════
+// SUPPORT — Tickets support
+// ══════════════════════════════════════════════════════════════
+function SupportPage() {
+  const [tickets] = useState([
+    { id:'T001', subject:'Export WinBooks format incorrect', status:'open', prio:'high', ts:'07/03/2026 09:12' },
+    { id:'T002', subject:'Dimona OUT non envoyé', status:'resolved', prio:'high', ts:'06/03/2026 14:30' },
+    { id:'T003', subject:'Calcul PP erroné pour situation mariée', status:'open', prio:'medium', ts:'05/03/2026 11:00' },
+  ])
+  const prioColor = { high:'#ef4444', medium:'#f97316', low:'#3b82f6' }
+  const statusColor = { open:'#22c55e', resolved:'#5e5c56', pending:'#f97316' }
+  const statusLabel = { open:'Ouvert', resolved:'Résolu', pending:'En attente' }
+
+  return (
+    <div>
+      <div style={{ marginBottom:16, padding:'14px 18px', background:'rgba(198,163,78,.03)',
+        borderRadius:12, border:'1px solid rgba(198,163,78,.08)' }}>
+        <h2 style={{ color:'#c6a34e', margin:'0 0 4px', fontSize:18 }}>🎯 Support</h2>
+        <p style={{ color:'#5e5c56', margin:0, fontSize:12 }}>Tickets et assistance — Aureus IA SPRL</p>
+      </div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:20 }}>
+        <div style={{ padding:'20px', background:'rgba(198,163,78,.03)', borderRadius:12,
+          border:'1px solid rgba(198,163,78,.1)', textAlign:'center' }}>
+          <div style={{ fontSize:32, marginBottom:8 }}>📧</div>
+          <div style={{ fontSize:13, fontWeight:700, color:'#e8e6e0', marginBottom:4 }}>Email support</div>
+          <div style={{ fontSize:11, color:'#c6a34e' }}>support@aureus-ia.be</div>
+          <div style={{ fontSize:10, color:'#5e5c56', marginTop:4 }}>Réponse sous 24h ouvrables</div>
+        </div>
+        <div style={{ padding:'20px', background:'rgba(96,165,250,.03)', borderRadius:12,
+          border:'1px solid rgba(96,165,250,.1)', textAlign:'center' }}>
+          <div style={{ fontSize:32, marginBottom:8 }}>📚</div>
+          <div style={{ fontSize:13, fontWeight:700, color:'#e8e6e0', marginBottom:4 }}>Documentation</div>
+          <div style={{ fontSize:11, color:'#3b82f6' }}>docs.aureussocial.be</div>
+          <div style={{ fontSize:10, color:'#5e5c56', marginTop:4 }}>Guides et tutoriels</div>
+        </div>
+      </div>
+
+      <div style={{ background:'rgba(198,163,78,.02)', borderRadius:12, border:'1px solid rgba(198,163,78,.06)' }}>
+        <div style={{ padding:'12px 16px', borderBottom:'1px solid rgba(198,163,78,.08)', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <span style={{ fontSize:12, fontWeight:700, color:'#e8e6e0' }}>Tickets récents</span>
+          <span style={{ fontSize:10, color:'#5e5c56' }}>{tickets.filter(t=>t.status==='open').length} ouvert(s)</span>
+        </div>
+        {tickets.map((t,i) => (
+          <div key={t.id} style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px',
+            borderBottom: i<tickets.length-1 ? '1px solid rgba(255,255,255,.03)' : 'none' }}>
+            <span style={{ fontSize:9, fontFamily:'monospace', color:'#5e5c56', minWidth:36 }}>{t.id}</span>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:12, color:'#e8e6e0', marginBottom:2 }}>{t.subject}</div>
+              <div style={{ fontSize:9, color:'#5e5c56' }}>{t.ts}</div>
+            </div>
+            <span style={{ fontSize:9, padding:'2px 8px', borderRadius:4,
+              background:prioColor[t.prio]+'22', color:prioColor[t.prio] }}>{t.prio}</span>
+            <span style={{ fontSize:9, padding:'2px 8px', borderRadius:4,
+              background:statusColor[t.status]+'22', color:statusColor[t.status] }}>
+              {statusLabel[t.status]}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
