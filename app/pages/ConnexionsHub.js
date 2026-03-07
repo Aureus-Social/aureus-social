@@ -1,5 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { RMMMG } from '../lib/lois-belges';
+
+// RMMMG importé depuis lois-belges.js — source unique de vérité
+// Pour mettre à jour : modifier lois-belges.js → remuneration.RMMMG.montant18ans
+const RMMMG_HORAIRE = (RMMMG / (52 * 38 / 12)).toFixed(2);  // mensuel → horaire 38h
+const RMMMG_ANNUEL  = (RMMMG * 12).toFixed(2);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // AUREUS SOCIAL PRO — HUB CONNEXIONS H24
@@ -290,7 +296,7 @@ export default function ConnexionsHub({ s, d, tab }) {
         alignItems:'center',flexWrap:'wrap'}}>
         <span style={{fontSize:14}}>⚖</span>
         <span style={{fontSize:11,fontWeight:700,color:'#22c55e'}}>RMMMG 2026 — Salaire Minimum Légal</span>
-        {[['2.070,48 EUR/mois','#22c55e'],['13,24 EUR/heure','#c6a34e'],['CCT 43/15 · CNT','#888']].map(([v,c],i)=>(
+        {[[`${RMMMG.toLocaleString('fr-BE', {minimumFractionDigits:2})} EUR/mois`,'#22c55e'],[`${RMMMG_HORAIRE} EUR/heure`,'#c6a34e'],['CCT 43/15 · CNT','#888']].map(([v,c],i)=>(
           <span key={i} style={{fontSize:10,fontWeight:i<2?700:400,color:c,padding:'3px 8px',
             background:`${c}15`,borderRadius:6,border:`1px solid ${c}30`}}>{v}</span>
         ))}

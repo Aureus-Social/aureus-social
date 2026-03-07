@@ -1,5 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { RMMMG } from '../lib/lois-belges';
+
+const RMMMG_H  = (RMMMG / (52 * 38 / 12)).toFixed(2);
+const RMMMG_AN = (RMMMG * 12).toLocaleString('fr-BE', { minimumFractionDigits: 2 });
+const RMMMG_M  = RMMMG.toLocaleString('fr-BE', { minimumFractionDigits: 2 });
+const RMMMG_MOINS18 = (RMMMG * 0.8007).toLocaleString('fr-BE', { minimumFractionDigits: 2 }); // 80,07% du RMMMG
 
 // ═══════════════════════════════════════════════════════════════════════════
 // AUREUS SOCIAL PRO — MANDATS ADMINISTRATIFS COMPLETS
@@ -720,9 +726,9 @@ est interrompue pendant plus de 2 mois consécutifs.`}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 14 }}>
               {[
-                { l: 'Montant mensuel', v: '2.070,48 EUR', sub: '≥ 18 ans — taux plein', c: '#22c55e' },
-                { l: 'Montant horaire (38h/sem)', v: '13,24 EUR/h', sub: 'Base 38h hebdomadaires', c: '#c6a34e' },
-                { l: 'Montant annuel brut', v: '24.845,76 EUR', sub: '× 12 mensualités', c: '#a78bfa' },
+                { l: 'Montant mensuel', v: `${RMMMG_M} EUR`, sub: '≥ 18 ans — taux plein', c: '#22c55e' },
+                { l: 'Montant horaire (38h/sem)', v: `${RMMMG_H} EUR/h`, sub: 'Base 38h hebdomadaires', c: '#c6a34e' },
+                { l: 'Montant annuel brut', v: `${RMMMG_AN} EUR`, sub: '× 12 mensualités', c: '#a78bfa' },
               ].map((k, i) => (
                 <div key={i} style={{ padding: '14px', background: 'rgba(255,255,255,0.04)',
                   borderRadius: 10, border: `1px solid ${k.c}30`, textAlign: 'center' }}>
@@ -749,10 +755,10 @@ est interrompue pendant plus de 2 mois consécutifs.`}
               ))}</tr></thead>
               <tbody>
                 {[
-                  ['< 18 ans', '—', '1.657,73 EUR', 'CCT 43/15 §4', 'Apprentis et étudiants jobistes'],
-                  ['18 ans', 'Entrée', '2.070,48 EUR', 'CCT 43/15 §3', 'Taux de base'],
-                  ['19–20 ans', '6 mois+', '2.070,48 EUR', 'CCT 43/15 §3', 'Identique taux de base'],
-                  ['21 ans+', '12 mois+', '2.070,48 EUR', 'CCT 43/15 §3', '⚠ Vérifier barème sectoriel CP'],
+                  ['< 18 ans', '—', `${RMMMG_MOINS18} EUR`, 'CCT 43/15 §4', 'Apprentis et étudiants jobistes'],
+                  ['18 ans', 'Entrée', `${RMMMG_M} EUR`, 'CCT 43/15 §3', 'Taux de base'],
+                  ['19–20 ans', '6 mois+', `${RMMMG_M} EUR`, 'CCT 43/15 §3', 'Identique taux de base'],
+                  ['21 ans+', '12 mois+', `${RMMMG_M} EUR`, 'CCT 43/15 §3', '⚠ Vérifier barème sectoriel CP'],
                 ].map(([age, anc, mnt, base, note], i) => (
                   <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)',
                     borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
