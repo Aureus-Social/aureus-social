@@ -6,6 +6,9 @@ export { LOIS_BELGES, LB, TX_ONSS_W, TX_ONSS_E, TX_OUV108, TX_AT, PP_EST, NET_FA
 export const FORF_VELO = 0.35;   // LB.fraisPropres.forfaitDeplacement.velo
 export const ECO_MAX   = 250;    // LB.avantages.ecoMax
 export const TX_OUV_SPECIAL = 0.2714; // ONSS patronal ouvrier 108% (~25.07% × 1.08)
+export const BONUS_SEUIL1 = 2561.42; // LB.pp.bonusEmploi.seuilBrut1
+export const BONUS_SEUIL2 = 2997.59; // LB.pp.bonusEmploi.seuilBrut2
+export const CO2MIN = 31.34;          // LB.vehicules.cotCO2Min
 export const LEGAL = { WD: 21.67, WHD: 7.6 };
 export const DPER = { month: new Date().getMonth()+1, year: new Date().getFullYear(), days: 21.67 };
 export function calc(emp, per, co) {

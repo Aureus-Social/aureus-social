@@ -900,15 +900,16 @@ function calc(emp, per, co) {
     if (carFuel === 'electrique') {
       r.atnPct = 4;
       r.atnCar = Math.max(1600/12, (carCatVal * (6/7) * 0.04) / 12);
-      r.cotCO2 = 31.34; // minimum
+      r.cotCO2 = LOIS_BELGES.vehicules.cotCO2Min; // minimum légal (source: lois-belges)
     } else {
       const refCO2 = (carFuel === 'diesel') ? 84 : 102;
       const delta = carCO2 - refCO2;
       r.atnPct = Math.max(4, Math.min(18, 5.5 + (delta * 0.1)));
       r.atnCar = Math.max(1600/12, (carCatVal * (6/7) * (r.atnPct/100)) / 12);
       // Cotisation CO2 patronale (solidarité ONSS)
-      if (carFuel === 'diesel') r.cotCO2 = Math.max(31.34, (carCO2 * 0.00714 * 71.4644) + 31.34);
-      else r.cotCO2 = Math.max(31.34, (carCO2 * 0.00714 * 83.6644) + 31.34);
+      const _co2min = LOIS_BELGES.vehicules.cotCO2Min;
+      if (carFuel === 'diesel') r.cotCO2 = Math.max(_co2min, (carCO2 * 0.00714 * 71.4644) + _co2min);
+      else r.cotCO2 = Math.max(_co2min, (carCO2 * 0.00714 * 83.6644) + _co2min);
     }
   }
 

@@ -1,5 +1,5 @@
 'use client';
-import { B, C, TX_ONSS_E, TX_ONSS_W, fmt, quickPP } from '@/app/lib/helpers';
+import { B, C, TX_ONSS_E, TX_ONSS_W, fmt, quickPP, LOIS_BELGES, FORF_KM, ECO_MAX } from '@/app/lib/helpers';
 import{useState,useMemo}from'react';
 
 const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
@@ -320,7 +320,7 @@ const PRIMES_DB=[
     desc:'0.4415 EUR/km (2026) — max 24.000 km/an exonéré',
     base_legale:'AR fixant les indemnités km — indexé annuellement',
     conditions:['Utilisation véhicule privé pour déplacements professionnels','0.4415 EUR/km (montant 2026, indexé juillet)','Max 24.000 km/an exonéré','Ne couvre PAS le domicile-travail (sauf si itinérant)','Justification: agenda, carnet de route'],
-    calcul:(brut,km)=>{const k=km||15000;const ind=Math.min(k,24000)*0.4415;return{brut:0,onssW:0,onssE:0,pp:0,coutEmployeur:ind,avantageNet:ind,desc:`${fi(k)} km × 0.4415 EUR = ${fmt(ind)} EUR/an. 100% exonéré.`}},
+    calcul:(brut,km)=>{const k=km||15000;const ind=Math.min(k,24000)*FORF_KM;return{brut:0,onssW:0,onssE:0,pp:0,coutEmployeur:ind,avantageNet:ind,desc:`${fi(k)} km × ${FORF_KM} EUR = ${fmt(ind)} EUR/an. 100% exonéré.`}},
     plafond:24000,fiscal:'100% exonéré ONSS + IPP dans la limite de 24.000 km/an'},
   {id:'assurance_revenu',cat:'assurance',icon:'🛡',nom:'Assurance revenu garanti',taxable:false,onss:false,
     desc:'Compense la perte de revenus en cas de maladie/invalidité longue',
@@ -694,10 +694,11 @@ export function VehiculesATNV2({s}){
   const atnMois=atnAn/12;
 
   // Cotisation CO2 employeur
+  const _co2min = LOIS_BELGES.vehicules.cotCO2Min;
   const cotCO2=carburant==='diesel'?
-    (co2<=0?31.34:((co2*9)/100)*12*6.5):
-    carburant==='electrique'?31.34*12:
-    (co2<=0?31.34:((co2*9)/100)*12*6.5);
+    (co2<=0?_co2min:((co2*9)/100)*12*6.5):
+    carburant==='electrique'?_co2min*12:
+    (co2<=0?_co2min:((co2*9)/100)*12*6.5);
 
   // TCO (Total Cost of Ownership)
   const leasing=valCat*0.018*12;// ~1.8%/mois
@@ -770,7 +771,7 @@ export function VehiculesATNV2({s}){
             if(v.type==='Électrique')p=4;
             const atn=Math.max(1600,valCat*6/7*p/100);
             const fuel=km*v.prix;
-            const cot=v.cotMin?31.34*12:((co2*9)/100)*12*6.5;
+            const cot=v.cotMin?LOIS_BELGES.vehicules.cotCO2Min*12:((co2*9)/100)*12*6.5;
             const dna=v.type==='Électrique'?0:tcoAn*(dnaTable.find(d=>co2>=d.min&&co2<=d.max)?.pct||100)/100;
             const tot=leasing+fuel+assurance+km*0.04+cot;
             return <div key={v.type} style={{padding:14,background:'rgba(198,163,78,.03)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
