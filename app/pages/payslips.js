@@ -1,5 +1,5 @@
 'use client';
-import { B, C, CR_PAT, DPER, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, TX_OUV108, Tbl, calc, f0, f2, fmt, generatePayslipPDF } from '@/app/lib/helpers';
+import { B, BAREMES_CP_MIN, BONUS_MAX, BONUS_SEUIL1, BONUS_SEUIL2, C, CO2MIN, CR_MAX, CR_PAT, DPER, ECO_MAX, FORF_BUREAU, FORF_KM, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, AF_REGIONS, SAISIE_2026_TRAVAIL, SAISIE_IMMUN_ENFANT_2026, ST, TX_ONSS_E, TX_ONSS_W, TX_OUV108, Tbl, calc, f0, f2, fmt, generatePayslipPDF } from '@/app/lib/helpers';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
@@ -447,6 +447,184 @@ function Payslips({s,d}) {
             </tbody>
           </table>
         </div>
+
+
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        {/* PARAMÈTRES LÉGAUX APPLICABLES — Source: crons auto-update      */}
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        <div className="no-print" style={{marginTop:18,padding:16,background:'linear-gradient(135deg,rgba(198,163,78,.05),rgba(198,163,78,.02))',borderRadius:10,border:'1px solid rgba(198,163,78,.15)'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+            <div>
+              <div style={{fontSize:10,fontWeight:700,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'1.5px'}}>⚡ Paramètres légaux applicables</div>
+              <div style={{fontSize:8.5,color:'#888',marginTop:2}}>Valeurs utilisées pour ce calcul — mise à jour automatique quotidienne (crons 06h00–06h10)</div>
+            </div>
+            <div style={{textAlign:'right'}}>
+              <div style={{fontSize:8,color:'#aaa'}}>Source: {LOIS_BELGES._meta?.source||'SPF Finances / ONSS / CNT'}</div>
+              <div style={{fontSize:8,color:'#aaa'}}>Dernière MAJ: {LOIS_BELGES._meta?.dateMAJ||'—'} · v{LOIS_BELGES._meta?.version||'2026'}</div>
+              {(()=>{const cp=emp.cp||s.co?.cp||'200';const bcp=BAREMES_CP_MIN?.[cp];return bcp?<div style={{fontSize:8,color:'#4ade80',marginTop:1}}>Barème CP {cp} MAJ: {BAREMES_CP_MIN?.dateMAJ||'—'}</div>:null;})()}
+            </div>
+          </div>
+
+          {/* Ligne 1 — ONSS */}
+          <div style={{marginBottom:8}}>
+            <div style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>ONSS & Cotisations</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:6}}>
+              {[
+                {l:'ONSS travailleur',v:`${(TX_ONSS_W*100).toFixed(2)}%`,ref:'Loi 29/06/1981',ok:true},
+                {l:'ONSS patronal',v:`${(TX_ONSS_E*100).toFixed(2)}%`,ref:'Loi 29/06/1981',ok:true},
+                ...(emp.statut==='ouvrier'?[{l:'Majoration ouvrier',v:'× 108%',ref:'AR 28/11/1969 Art.23',ok:true}]:[]),
+                {l:'RMMMG (CCT 43)',v:`${fmt(RMMMG)}`,ref:'CNT CCT 43/15',ok:!!(res.gross>=RMMMG),warn:res.gross<RMMMG},
+                {l:'Cot. CO2 min',v:`${fmt(CO2MIN)}`,ref:'AR ATN voiture',ok:true},
+              ].map((x,i)=><div key={i} style={{background:x.warn?'rgba(239,68,68,.08)':'rgba(198,163,78,.04)',borderRadius:6,padding:'6px 8px',border:`1px solid ${x.warn?'rgba(239,68,68,.2)':'rgba(198,163,78,.08)'}`}}>
+                <div style={{fontSize:7.5,color:x.warn?'#f87171':'#888'}}>{x.l}</div>
+                <div style={{fontSize:11,fontWeight:700,color:x.warn?'#f87171':'#e8e6e0',marginTop:1}}>{x.v}</div>
+                <div style={{fontSize:7,color:'#666',marginTop:1}}>{x.ref}</div>
+                {x.warn&&<div style={{fontSize:7,color:'#f87171',fontWeight:700,marginTop:2}}>⚠ Salaire sous RMMMG!</div>}
+              </div>)}
+            </div>
+          </div>
+
+          {/* Ligne 2 — Fiscalité PP */}
+          <div style={{marginBottom:8}}>
+            <div style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>Précompte professionnel & Bonus emploi</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:6}}>
+              {[
+                {l:'Tranche ≤ 16.710€',v:'26,75%',ref:'AR/CIR 92 ann.III',ok:true},
+                {l:'Tranche 16.710–29.500€',v:'42,80%',ref:'AR/CIR 92 ann.III',ok:true},
+                {l:'Tranche 29.500–51.050€',v:'48,15%',ref:'AR/CIR 92 ann.III',ok:true},
+                {l:'Tranche > 51.050€',v:'53,50%',ref:'AR/CIR 92 ann.III',ok:true},
+                {l:'Quotité exemptée',v:`${fmt(LOIS_BELGES.pp?.quotiteExemptee?.bareme1||2987.98)}`,ref:'Art.131 CIR 92',ok:true},
+              ].map((x,i)=><div key={i} style={{background:'rgba(198,163,78,.04)',borderRadius:6,padding:'6px 8px',border:'1px solid rgba(198,163,78,.08)'}}>
+                <div style={{fontSize:7.5,color:'#888'}}>{x.l}</div>
+                <div style={{fontSize:11,fontWeight:700,color:'#e8e6e0',marginTop:1}}>{x.v}</div>
+                <div style={{fontSize:7,color:'#666',marginTop:1}}>{x.ref}</div>
+              </div>)}
+            </div>
+            {res.gross<=BONUS_SEUIL2&&<div style={{marginTop:6,display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:6}}>
+              {[
+                {l:`Bonus emploi — seuil brut 1`,v:`${fmt(BONUS_SEUIL1)}`,ref:'AR 21/12/2017',active:res.gross<=BONUS_SEUIL1},
+                {l:`Bonus emploi — seuil brut 2`,v:`${fmt(BONUS_SEUIL2)}`,ref:'AR 21/12/2017',active:res.gross>BONUS_SEUIL1&&res.gross<=BONUS_SEUIL2},
+                {l:`Bonus emploi max (${(LOIS_BELGES.pp?.bonusEmploi?.pctReduction*100||33.14).toFixed(2)}%)`,v:`${fmt(BONUS_MAX)}/mois`,ref:'Art. 289ter CIR',active:res.empBonus>0},
+              ].map((x,i)=><div key={i} style={{background:x.active?'rgba(74,222,128,.06)':'rgba(198,163,78,.04)',borderRadius:6,padding:'6px 8px',border:`1px solid ${x.active?'rgba(74,222,128,.15)':'rgba(198,163,78,.08)'}`}}>
+                <div style={{fontSize:7.5,color:x.active?'#4ade80':'#888'}}>{x.l} {x.active&&'✓'}</div>
+                <div style={{fontSize:11,fontWeight:700,color:x.active?'#4ade80':'#e8e6e0',marginTop:1}}>{x.v}</div>
+                <div style={{fontSize:7,color:'#666',marginTop:1}}>{x.ref}</div>
+              </div>)}
+            </div>}
+          </div>
+
+          {/* Ligne 3 — CSSS */}
+          <div style={{marginBottom:8}}>
+            <div style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>CSSS — Cotisation spéciale sécurité sociale</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6}}>
+              {(()=>{
+                const tranches=LOIS_BELGES.csss?.isole||[];
+                const annuel=(res.gross||0)*12;
+                return tranches.filter(t=>t.taux>0||t.montantFixe).map((t,i)=>{
+                  const active=annuel>=t.min&&annuel<(t.max===Infinity?999999:t.max);
+                  return <div key={i} style={{background:active?'rgba(96,165,250,.06)':'rgba(198,163,78,.04)',borderRadius:6,padding:'6px 8px',border:`1px solid ${active?'rgba(96,165,250,.15)':'rgba(198,163,78,.08)'}`}}>
+                    <div style={{fontSize:7.5,color:active?'#60a5fa':'#888'}}>Tranche {i+1} {active&&'← applicable'}</div>
+                    <div style={{fontSize:9,fontWeight:700,color:active?'#60a5fa':'#e8e6e0',marginTop:1}}>
+                      {t.montantFixe?`Fixe: ${fmt(t.montantFixe)}`:`${(t.taux*100).toFixed(1)}%`}
+                    </div>
+                    <div style={{fontSize:7,color:'#666',marginTop:1}}>{fmt(t.min)}–{t.max===Infinity?'∞':fmt(t.max)} €/an</div>
+                    {active&&<div style={{fontSize:7.5,fontWeight:700,color:'#60a5fa',marginTop:2}}>{fmt(res.css)}/mois</div>}
+                  </div>;
+                });
+              })()}
+            </div>
+          </div>
+
+          {/* Ligne 4 — Avantages & Frais */}
+          <div style={{marginBottom:8}}>
+            <div style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>Avantages exonérés & Frais propres</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:6}}>
+              {[
+                {l:'Chèques-repas max',v:`${fmt(CR_MAX)}/jour`,ref:'CCT nat. + AR',used:res.mvDays>0},
+                {l:'Part patronale CR max',v:`${fmt(CR_PAT)}/jour`,ref:'AR 28/11/1969 Art.19bis',used:res.mvEmployer>0},
+                {l:'Éco-chèques max',v:`${fmt(ECO_MAX)}/an`,ref:'CCT 98 — 20/02/2009',used:res.ecoCheques>0},
+                {l:'Forfait bureau/télétravail',v:`${fmt(FORF_BUREAU)}/mois`,ref:'Circ. 2021/C/20',used:res.indemTeletravail>0||res.indemBureau>0},
+                {l:'Indemnité km voiture',v:`${FORF_KM} €/km`,ref:'AR mobilité 2026',used:emp.commType==='car'||emp.commType==='own'},
+              ].map((x,i)=><div key={i} style={{background:x.used?'rgba(74,222,128,.06)':'rgba(198,163,78,.04)',borderRadius:6,padding:'6px 8px',border:`1px solid ${x.used?'rgba(74,222,128,.15)':'rgba(198,163,78,.08)'}`}}>
+                <div style={{fontSize:7.5,color:x.used?'#4ade80':'#888'}}>{x.l} {x.used&&'✓'}</div>
+                <div style={{fontSize:11,fontWeight:700,color:x.used?'#4ade80':'#e8e6e0',marginTop:1}}>{x.v}</div>
+                <div style={{fontSize:7,color:'#666',marginTop:1}}>{x.ref}</div>
+              </div>)}
+            </div>
+          </div>
+
+          {/* Ligne 5 — Saisies sur salaire */}
+          {res.garnish>0&&<div style={{marginBottom:8}}>
+            <div style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>Saisies sur salaire — Barèmes 2026 (Art.1409 C.jud.)</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:6}}>
+              {(SAISIE_2026_TRAVAIL||[]).map((t,i)=>{
+                const active=res.net>=t.min&&res.net<(t.max===Infinity?999999:t.max);
+                return <div key={i} style={{background:active?'rgba(251,146,60,.08)':'rgba(198,163,78,.04)',borderRadius:6,padding:'6px 8px',border:`1px solid ${active?'rgba(251,146,60,.2)':'rgba(198,163,78,.08)'}`}}>
+                  <div style={{fontSize:7.5,color:active?'#fb923c':'#888'}}>{t.label} {active&&'← applicable'}</div>
+                  <div style={{fontSize:9,fontWeight:700,color:active?'#fb923c':'#e8e6e0',marginTop:1}}>{fmt(t.min)}–{t.max===Infinity?'∞':fmt(t.max)}</div>
+                  {active&&<div style={{fontSize:7.5,fontWeight:700,color:'#fb923c',marginTop:2}}>Saisie: {fmt(res.garnish)}</div>}
+                </div>;
+              })}
+              <div style={{background:'rgba(239,68,68,.06)',borderRadius:6,padding:'6px 8px',border:'1px solid rgba(239,68,68,.1)'}}>
+                <div style={{fontSize:7.5,color:'#f87171'}}>Immunité enfant à charge</div>
+                <div style={{fontSize:11,fontWeight:700,color:'#f87171',marginTop:1}}>+{fmt(SAISIE_IMMUN_ENFANT_2026)}/enfant</div>
+                <div style={{fontSize:7,color:'#666',marginTop:1}}>Art.1409§1 bis C.jud.</div>
+              </div>
+            </div>
+          </div>}
+
+          {/* Ligne 6 — Allocations familiales région */}
+          {emp.region&&<div style={{marginBottom:8}}>
+            <div style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>Allocations familiales — {emp.region==='BXL'?'Bruxelles (Iriscare)':emp.region==='WAL'?'Wallonie (AViQ)':emp.region==='VL'?'Flandre (Groeipakket)':'Région'}</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:6}}>
+              {(()=>{
+                const reg=AF_REGIONS?.[emp.region];
+                if(!reg) return null;
+                return reg.base?.slice(0,3).map((t,i)=><div key={i} style={{background:'rgba(167,139,250,.06)',borderRadius:6,padding:'6px 8px',border:'1px solid rgba(167,139,250,.1)'}}>
+                  <div style={{fontSize:7.5,color:'#a78bfa'}}>{t.age||0}–{t.to||'?'} ans</div>
+                  <div style={{fontSize:11,fontWeight:700,color:'#a78bfa',marginTop:1}}>{fmt(t.amt)}/mois</div>
+                  <div style={{fontSize:7,color:'#666',marginTop:1}}>Source cron quotidien</div>
+                </div>);
+              })()}
+            </div>
+          </div>}
+
+          {/* Ligne 7 — Barème sectoriel CP */}
+          {(()=>{
+            const cp=emp.cp||s.co?.cp||'200';
+            const bcp=BAREMES_CP_MIN?.[cp];
+            if(!bcp) return null;
+            const belowMin=res.gross<bcp.cl1;
+            return <div style={{marginBottom:4}}>
+              <div style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>Barème sectoriel CP {cp} — Minima {bcp.nom||''}</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6}}>
+                {['cl1','cl2','cl3','cl4','cl5'].filter(k=>bcp[k]).map((k,i)=>{
+                  const active=i===0&&belowMin;
+                  return <div key={k} style={{background:belowMin&&i===0?'rgba(239,68,68,.08)':'rgba(198,163,78,.04)',borderRadius:6,padding:'6px 8px',border:`1px solid ${belowMin&&i===0?'rgba(239,68,68,.2)':'rgba(198,163,78,.08)'}`}}>
+                    <div style={{fontSize:7.5,color:belowMin&&i===0?'#f87171':'#888'}}>Classe {i+1} {i===0&&belowMin&&'⚠ SOUS MIN'}</div>
+                    <div style={{fontSize:11,fontWeight:700,color:belowMin&&i===0?'#f87171':'#e8e6e0',marginTop:1}}>{fmt(bcp[k])}</div>
+                    <div style={{fontSize:7,color:'#666',marginTop:1}}>min. anc. 0 an — MAJ {BAREMES_CP_MIN?.dateMAJ||'—'}</div>
+                  </div>;
+                })}
+              </div>
+              {belowMin&&<div style={{marginTop:6,padding:'6px 10px',background:'rgba(239,68,68,.08)',borderRadius:6,border:'1px solid rgba(239,68,68,.2)',fontSize:9,color:'#f87171',fontWeight:600}}>
+                ⚠ ATTENTION — Salaire brut {fmt(res.gross)} inférieur au minimum CP {cp} classe I ({fmt(bcp.cl1)}) — Risque de sanction ONSS
+              </div>}
+            </div>;
+          })()}
+
+          <div style={{marginTop:10,paddingTop:8,borderTop:'1px solid rgba(198,163,78,.1)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <div style={{fontSize:7.5,color:'#555'}}>
+              🤖 Ces paramètres sont mis à jour automatiquement chaque matin à 06h00 par les crons Aureus Social Pro
+              via scraping officiel: SPF Finances · ONSS · CNT · Iriscare · AViQ · Groeipakket · SPF Justice
+            </div>
+            <div style={{fontSize:7.5,color:'#888',textAlign:'right'}}>
+              Indice santé: {LOIS_BELGES.remuneration?.indexSante?.coeff||2.0399} (pivot {LOIS_BELGES.remuneration?.indexSante?.pivot||125.60})<br/>
+              Prochain pivot estimé: {LOIS_BELGES.remuneration?.indexSante?.prochainPivotEstime||'—'}
+            </div>
+          </div>
+        </div>
+
 
         {/* BOUTON PDF uniquement — plus de téléchargement HTML/txt */}
         <div style={{marginTop:14,display:'flex',gap:10,justifyContent:'center'}} className="no-print">
