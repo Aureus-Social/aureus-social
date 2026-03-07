@@ -37,16 +37,13 @@ const DiagnosticPage = dynamic(() => import('../pages/DiagnosticCommercial'), { 
 const SeuilsPage = dynamic(() => import('../pages/SeuilsSociaux'), { ssr: false, loading: Loading });
 const OnboardingPage = dynamic(() => import('../pages/OnboardingHub'), { ssr: false, loading: Loading });
 const CloturePage = dynamic(() => import('../pages/ClotureMensuelle'), { ssr: false, loading: Loading });
-const AnalyticsPage = dynamic(() => import('../pages/AnalyticsDashboard'), { ssr: false, loading: Loading });
-const AdminBaremesPage = dynamic(() => import('../pages/AdminBaremes'), { ssr: false, loading: Loading });
+const AdminBaremesPageOld = dynamic(() => import('../pages/AdminBaremes'), { ssr: false, loading: Loading });
+const SecurityPage = dynamic(() => import('../pages/SecurityDashboard'), { ssr: false, loading: Loading });
 const AuditCodePage = dynamic(() => import('../pages/AuditSecuriteCode'), { ssr: false, loading: Loading });
 const PayrollSimPage = dynamic(() => import('../pages/PayrollSimulator'), { ssr: false, loading: Loading });
 const AureusIAPage = dynamic(() => import('../pages/AureusSuitePage'), { ssr: false, loading: Loading });
 const EmployeeHubPage = dynamic(() => import('../pages/EmployeeHub'), { ssr: false, loading: Loading });
 const SmartOpsPage = dynamic(() => import('../pages/SmartOpsCenter'), { ssr: false, loading: Loading });
-const CompliancePage = dynamic(() => import('../pages/ComplianceDashboard'), { ssr: false, loading: Loading });
-const SecurityPage = dynamic(() => import('../pages/SecurityDashboard'), { ssr: false, loading: Loading });
-const RelancesPage = dynamic(() => import('../pages/RelancesFacturation'), { ssr: false, loading: Loading });
 const PrimesPage = dynamic(() => import('../pages/PrimesAvantagesV2'), { ssr: false, loading: Loading });
 
 const AbsencesContratsV3Pg = dynamic(() => import('../pages/AbsencesContratsV3'), { ssr: false, loading: Loading });
@@ -60,6 +57,34 @@ const TransversalCPPg = dynamic(() => import('../pages/TransversalCP'), { ssr: f
 const ModsBatch2Pg = dynamic(() => import('../pages/ModsBatch2'), { ssr: false, loading: Loading });
 const PayrollHubPg = dynamic(() => import('../pages/PayrollHub'), { ssr: false, loading: Loading });
 const ProceduresRHHubPg = dynamic(() => import('../pages/procedures/ProceduresRHHub'), { ssr: false, loading: Loading });
+
+// Wrappers pour modules avec props non-standard
+const AnalyticsDashboardRaw = dynamic(() => import('../pages/AnalyticsDashboard'), { ssr: false, loading: Loading });
+const AnalyticsPage = ({ s, d }) => <AnalyticsDashboardRaw state={s} dispatch={d} />;
+
+const ComplianceDashboardRaw = dynamic(() => import('../pages/ComplianceDashboard'), { ssr: false, loading: Loading });
+const CompliancePage = ({ s, d }) => <ComplianceDashboardRaw state={s} dispatch={d} />;
+
+const DocumentGeneratorRaw = dynamic(() => import('../pages/DocumentGenerator'), { ssr: false, loading: Loading });
+const DocumentGeneratorPgW = ({ s, d }) => <DocumentGeneratorRaw state={s} dispatch={d} />;
+
+const EmployeePlanningRaw = dynamic(() => import('../pages/EmployeePlanning'), { ssr: false, loading: Loading });
+const EmployeePlanningPgW = ({ s, d }) => <EmployeePlanningRaw state={s} dispatch={d} />;
+
+const NotificationCenterRaw = dynamic(() => import('../pages/NotificationCenter'), { ssr: false, loading: Loading });
+const NotificationCenterPgW = ({ s, d }) => <NotificationCenterRaw state={s} dispatch={d} />;
+
+const CommissionsModuleRaw = dynamic(() => import('../pages/CommissionsModule'), { ssr: false, loading: Loading });
+const CommissionsModulePgW = ({ s, d }) => <CommissionsModuleRaw userRole="admin" user={s?.user} factures={s?.factures||[]} sendEmailFn={null} />;
+
+const AdminBaremesRaw = dynamic(() => import('../pages/AdminBaremes'), { ssr: false, loading: Loading });
+const AdminBaremesPageW = ({ s, d }) => <AdminBaremesRaw loisBelges={{}} loisTimeline={[]} loisCurrent={{}} onUpdate={()=>{}} />;
+
+const RelancesRaw = dynamic(() => import('../pages/RelancesFacturation'), { ssr: false, loading: Loading });
+const RelancesPage = ({ s, d }) => <RelancesRaw supabase={null} user={s?.user} clients={s?.clients||[]} />;
+
+const ProceduresRHHubRaw = dynamic(() => import('../pages/procedures/ProceduresRHHub'), { ssr: false, loading: Loading });
+const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 
 // Reducer pour le state global
 function reducer(state, action) {
@@ -192,7 +217,7 @@ export default function DashboardLayout({ user }) {
       case 'onboarding': case 'onboardwizard': return <OnboardingPage s={s} d={d} />;
       case 'cloture': return <CloturePage s={s} d={d} />;
       case 'analytics': return <AnalyticsPage s={s} d={d} />;
-      case 'adminbaremes': return <AdminBaremesPage s={s} d={d} />;
+      case 'adminbaremes': return <AdminBaremesPageW s={s} d={d} />;
       case 'auditsecuritecode': return <AuditCodePage s={s} d={d} />;
       case 'optifiscale': case 'couttotal': return <PayrollSimPage s={s} d={d} />;
       case 'aureussuite': return <AureusIAPage s={s} d={d} />;
@@ -206,28 +231,28 @@ export default function DashboardLayout({ user }) {
       // TABLEAU DE BORD
       case 'accidentTravail': return <AbsencesContratsV3Pg s={s} d={d} />;
       case 'actionsrapides': return <SmartOpsPage s={s} d={d} />;
-      case 'journal': return <NotificationCenterPg s={s} d={d} />;
+      case 'journal': return <NotificationCenterPgW s={s} d={d} />;
       case 'tbdirection': return <AnalyticsPage s={s} d={d} />;
-      case 'smartalerts': return <NotificationCenterPg s={s} d={d} />;
-      case 'notifications': return <NotificationCenterPg s={s} d={d} />;
+      case 'smartalerts': return <NotificationCenterPgW s={s} d={d} />;
+      case 'notifications': return <NotificationCenterPgW s={s} d={d} />;
       // GESTION RH
-      case 'annexeReglement': return <DocumentGeneratorPg s={s} d={d} />;
-      case 'contratgen': return <DocumentGeneratorPg s={s} d={d} />;
-      case 'contratsmenu': return <DocumentGeneratorPg s={s} d={d} />;
-      case 'gendocsjur': return <DocumentGeneratorPg s={s} d={d} />;
+      case 'annexeReglement': return <DocumentGeneratorPgW s={s} d={d} />;
+      case 'contratgen': return <DocumentGeneratorPgW s={s} d={d} />;
+      case 'contratsmenu': return <DocumentGeneratorPgW s={s} d={d} />;
+      case 'gendocsjur': return <DocumentGeneratorPgW s={s} d={d} />;
       case 'dashabsent': return <AbsencesContratsV3Pg s={s} d={d} />;
       case 'gestionabs': return <AbsencesContratsV3Pg s={s} d={d} />;
       case 'planifconges': return <AbsencesContratsV3Pg s={s} d={d} />;
       case 'workflowAbs': return <AbsencesContratsV3Pg s={s} d={d} />;
-      case 'interimaires': return <EmployeePlanningPg s={s} d={d} />;
-      case 'joursPrestes': return <EmployeePlanningPg s={s} d={d} />;
-      case 'registrepersonnel': return <EmployeePlanningPg s={s} d={d} />;
+      case 'interimaires': return <EmployeePlanningPgW s={s} d={d} />;
+      case 'joursPrestes': return <EmployeePlanningPgW s={s} d={d} />;
+      case 'registrepersonnel': return <EmployeePlanningPgW s={s} d={d} />;
       case 'rh': return <EmployeeHubPage s={s} d={d} />;
-      case 'proceduresrh': return <ProceduresRHHubPg s={s} d={d} />;
+      case 'proceduresrh': return <ProceduresRHHubPgW s={s} d={d} />;
       case 'portail': return <PortalSystemPg s={s} d={d} />;
       case 'portailclient': return <PortalSystemPg s={s} d={d} />;
       case 'portalmanager': return <PortalSystemPg s={s} d={d} />;
-      case 'formC4': return <DocumentGeneratorPg s={s} d={d} />;
+      case 'formC4': return <DocumentGeneratorPgW s={s} d={d} />;
       // PAIE & CALCULS
       case 'avantages': return <PrimesPage s={s} d={d} />;
       case 'baremespp': return <TransversalCPPg s={s} d={d} />;
@@ -237,8 +262,8 @@ export default function DashboardLayout({ user }) {
       case 'coutsannuel': return <PayrollGroupPg s={s} d={d} />;
       case 'echeancier': return <PayrollGroupPg s={s} d={d} />;
       case 'flexijobs': return <PayrollGroupPg s={s} d={d} />;
-      case 'formC131': return <DocumentGeneratorPg s={s} d={d} />;
-      case 'joursPrestes': return <EmployeePlanningPg s={s} d={d} />;
+      case 'formC131': return <DocumentGeneratorPgW s={s} d={d} />;
+      case 'joursPrestes': return <EmployeePlanningPgW s={s} d={d} />;
       case 'regulPP': return <PayrollGroupPg s={s} d={d} />;
       case 'salaires': return <PayrollHubPg s={s} d={d} />;
       case 'simembauche': return <SimuNetBrutPage s={s} d={d} />;
@@ -283,15 +308,15 @@ export default function DashboardLayout({ user }) {
       case 'plandiversite': return <LoisPage s={s} d={d} />;
       case 'social': return <LoisPage s={s} d={d} />;
       // COMMERCIAL
-      case 'checklistclient': return <CommissionsModulePg s={s} d={d} />;
-      case 'comparatif': return <CommissionsModulePg s={s} d={d} />;
-      case 'fiduciaire': return <CommissionsModulePg s={s} d={d} />;
-      case 'guidecommercial': return <CommissionsModulePg s={s} d={d} />;
-      case 'guidefiduciaire': return <CommissionsModulePg s={s} d={d} />;
-      case 'landing': return <CommissionsModulePg s={s} d={d} />;
-      case 'legal': return <DocumentGeneratorPg s={s} d={d} />;
-      case 'parserConcurrent': return <CommissionsModulePg s={s} d={d} />;
-      case 'repriseclient': return <CommissionsModulePg s={s} d={d} />;
+      case 'checklistclient': return <CommissionsModulePgW s={s} d={d} />;
+      case 'comparatif': return <CommissionsModulePgW s={s} d={d} />;
+      case 'fiduciaire': return <CommissionsModulePgW s={s} d={d} />;
+      case 'guidecommercial': return <CommissionsModulePgW s={s} d={d} />;
+      case 'guidefiduciaire': return <CommissionsModulePgW s={s} d={d} />;
+      case 'landing': return <CommissionsModulePgW s={s} d={d} />;
+      case 'legal': return <DocumentGeneratorPgW s={s} d={d} />;
+      case 'parserConcurrent': return <CommissionsModulePgW s={s} d={d} />;
+      case 'repriseclient': return <CommissionsModulePgW s={s} d={d} />;
       // ADMINISTRATION
       case 'archives': return <SecurityPage s={s} d={d} />;
       case 'auditfiscale': return <AuditCodePage s={s} d={d} />;
@@ -299,20 +324,20 @@ export default function DashboardLayout({ user }) {
       case 'authroles': return <SecurityPage s={s} d={d} />;
       case 'autoindex': return <PayrollGroupPg s={s} d={d} />;
       case 'autopilot': return <SmartOpsPage s={s} d={d} />;
-      case 'cgvsaas': return <DocumentGeneratorPg s={s} d={d} />;
+      case 'cgvsaas': return <DocumentGeneratorPgW s={s} d={d} />;
       case 'changelog': return <AdminPage s={s} d={d} />;
       case 'demodonnees': return <AdminPage s={s} d={d} />;
       case 'ged': return <SecurityPage s={s} d={d} />;
       case 'historique': return <AdminPage s={s} d={d} />;
       case 'integrations': return <AdminPage s={s} d={d} />;
       case 'massengine': return <ModsBatch2Pg s={s} d={d} />;
-      case 'mentionslegales': return <DocumentGeneratorPg s={s} d={d} />;
+      case 'mentionslegales': return <DocumentGeneratorPgW s={s} d={d} />;
       case 'monitoring': return <AdminPage s={s} d={d} />;
       case 'piloteauto': return <SmartOpsPage s={s} d={d} />;
       case 'queue': return <ModsBatch2Pg s={s} d={d} />;
       case 'rgpd': return <CompliancePage s={s} d={d} />;
       case 'roadmapinfra': return <AdminPage s={s} d={d} />;
-      case 'support': return <NotificationCenterPg s={s} d={d} />;
+      case 'support': return <NotificationCenterPgW s={s} d={d} />;
       case 'team': return <EmployeeHubPage s={s} d={d} />;
       case 'testsuite': return <AuditCodePage s={s} d={d} />;
       default: return <PlaceholderPage id={page} label={currentItem.label} />;
