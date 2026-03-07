@@ -114,6 +114,7 @@ export const MENU = [
   { id: 'legal', label: 'Juridique & Veille', icon: '⚖', g: 6 },
 
   { id: '_g_mandats', label: 'MANDATS & PRIMES EMPLOI', icon: '🏛', group: true },
+  { id: 'connexionshub', label: 'Hub Connexions H24', icon: '🔗', g: 7 },
   { id: 'mandatonss', label: 'Mandat ONSS/Mahis', icon: '🏛', g: 7 },
   { id: 'belcotaxmandat', label: 'Belcotax — Mandat Fiscal', icon: '📄', g: 7 },
   { id: 'domiciliation', label: 'Domiciliation 5% Ristourne', icon: '💳', g: 7 },

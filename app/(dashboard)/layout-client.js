@@ -93,6 +93,8 @@ const RelancesPage = ({ s, d }) => <RelancesRaw supabase={null} user={s?.user} c
 const ProceduresRHHubRaw = dynamic(() => import('../pages/procedures/ProceduresRHHub'), { ssr: false, loading: Loading });
 const MandatsAdminRaw = dynamic(() => import('../pages/MandatsAdminPage'), { ssr: false, loading: Loading });
 const MandatsAdminPg = ({ s, d, tab }) => <MandatsAdminRaw s={s} d={d} tab={tab} />;
+const ConnexionsHubRaw = dynamic(() => import('../pages/ConnexionsHub'), { ssr: false, loading: Loading });
+const ConnexionsHubPg = ({ s, d }) => <ConnexionsHubRaw s={s} d={d} />;
 const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 
 // Reducer pour le state global
@@ -295,6 +297,8 @@ export default function DashboardLayout({ user }) {
       case 'premieremploi': case 'activabruxelles': case 'art60cpas':
       case 'impulsion55': case 'monbee':
         return <MandatsAdminPg s={s} d={d} tab={page} />;
+      case 'connexionshub': case 'portailsbelges': case 'liensutiles':
+        return <ConnexionsHubPg s={s} d={d} />;
       case 'bilansocial': return <AnalyticsPage s={s} d={d} tab={page} />;
       case 'chargessociales': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'chomagetemporaire': return <ModsBatch2Pg s={s} d={d} tab={page} />;
