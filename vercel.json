@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/rmmmg",
       "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/baremes",
+      "schedule": "5 5 * * *"
     }
   ]
 }
