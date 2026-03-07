@@ -314,7 +314,7 @@ export default function DashboardLayout({ user }) {
 
   const renderPage = () => {
     switch (page) {
-      case 'dashboard': return <DashboardHome state={s} onNavigate={setPage} />;
+      case 'dashboard': return <DashboardPage s={s} d={d} onNavigate={setPage} />;
       case 'employees': return <EmployeesPage s={s} d={d} />;
       case 'payslip': return <PayslipsPage s={s} d={d} scrollAnchor={scrollAnchor} onAnchorHandled={()=>setScrollAnchor(null)} />;
       case 'declarations': case 'onss': return <DimonaPageComp s={s} d={d} />;
