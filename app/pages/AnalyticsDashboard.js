@@ -69,7 +69,7 @@ function ChartCard({ title, children, height }) {
   return (
     <div style={{ background: DARK, borderRadius: 8, border: `1px solid ${BORDER}`, padding: 16, marginBottom: 16 }}>
       <h3 style={{ margin: '0 0 16px 0', fontSize: 14, fontWeight: 600, color: GOLD }}>{title}</h3>
-      <div style={{ height: height || 300 }}>
+      <div style={{ height: height || 300, minHeight: height || 300, width: '100%', position: 'relative' }}>
         {children}
       </div>
     </div>
@@ -181,7 +181,7 @@ function AnalyticsDashboard({ state, defaultTab }) {
         <ChartCard title="Évolution de la masse salariale">
           <RechartsComponents>
             {({ AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer }) => (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={280}>
                 <AreaChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke={BORDER} />
                   <XAxis dataKey="month" stroke={MUTED} fontSize={11} />
@@ -203,7 +203,7 @@ function AnalyticsDashboard({ state, defaultTab }) {
         <ChartCard title="Répartition du coût salarial">
           <RechartsComponents>
             {({ PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend }) => (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie
                     data={costBreakdown}
@@ -234,7 +234,7 @@ function AnalyticsDashboard({ state, defaultTab }) {
         <ChartCard title="Décomposition mensuelle">
           <RechartsComponents>
             {({ BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend }) => (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke={BORDER} />
                   <XAxis dataKey="month" stroke={MUTED} fontSize={11} />
@@ -258,7 +258,7 @@ function AnalyticsDashboard({ state, defaultTab }) {
         <ChartCard title="Répartition par statut" height={250}>
           <RechartsComponents>
             {({ PieChart, Pie, Cell, Tooltip, ResponsiveContainer }) => (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie
                     data={statutData}
@@ -286,7 +286,7 @@ function AnalyticsDashboard({ state, defaultTab }) {
           <ChartCard title="Répartition par Commission Paritaire" height={250}>
             <RechartsComponents>
               {({ BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer }) => (
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={cpData} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke={BORDER} />
                     <XAxis type="number" stroke={MUTED} fontSize={11} />
@@ -304,7 +304,7 @@ function AnalyticsDashboard({ state, defaultTab }) {
         <ChartCard title="Coût employeur vs Net à payer">
           <RechartsComponents>
             {({ LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend }) => (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke={BORDER} />
                   <XAxis dataKey="month" stroke={MUTED} fontSize={11} />
