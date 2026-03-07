@@ -100,6 +100,8 @@ const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 // Reducer pour le state global
 function reducer(state, action) {
   switch (action.type) {
+    case 'NAV': return { ...state, _nav: action.page, _navSub: action.sub };
+    case 'CLEAR_NAV': return { ...state, _nav: null, _navSub: null };
     case 'SET_CLIENTS': return { ...state, clients: action.data };
     case 'SET_EMPS': return { ...state, emps: action.data };
     case 'ADD_EMP': return { ...state, emps: [...(state.emps||[]), action.d] };
@@ -207,6 +209,14 @@ export default function DashboardLayout({ user }) {
 
   const s = state;
   const d = dispatch;
+
+  // Intercepte les dispatch NAV depuis les pages enfants
+  useEffect(()=>{
+    if(s._nav){
+      setPage(s._nav);
+      dispatch({type:'CLEAR_NAV'});
+    }
+  },[s._nav]);
 
   const toggleGroup = (gId) => setCollapsed(p => ({ ...p, [gId]: !p[gId] }));
   const currentItem = MENU.find(m => m.id === page) || { label: 'Dashboard' };
