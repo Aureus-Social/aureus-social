@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useReducer, useMemo, Suspense } from 'react';
+import React, { useState, useReducer, useMemo, useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { MENU, GROUPS, getGroupItems, SEARCH_SUBSECTIONS } from '../lib/menu-config';
 import { supabase } from '../lib/supabase';
