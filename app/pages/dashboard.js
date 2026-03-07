@@ -11,6 +11,20 @@ const DPER = { month: new Date().getMonth()+1, year: new Date().getFullYear(), d
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const MN = MN_FR;
 
+function getAlertes(emps, co) {
+  const al = [];
+  const ae = (emps||[]).filter(e => e.status==='active'||!e.status);
+  if (ae.length === 0) al.push({ level: 'info', icon: '👥', msg: 'Aucun travailleur actif — Ajoutez votre premier employé' });
+  ae.forEach(e => {
+    if (!e.niss) al.push({ level: 'warning', icon: '⚠️', msg: `NISS manquant — ${(e.first||e.fn||'')+' '+(e.last||e.ln||'')}` });
+    if (!e.gross && !e.brut) al.push({ level: 'warning', icon: '💰', msg: `Salaire non défini — ${(e.first||e.fn||'')+' '+(e.last||e.ln||'')}` });
+  });
+  const now = new Date();
+  if (now.getDate() >= 20) al.push({ level: 'info', icon: '📅', msg: `Clôture paie ${MN[now.getMonth()]} — J${31-now.getDate()} jours restants` });
+  if (now.getDate() >= 25) al.push({ level: 'danger', icon: '🚨', msg: 'Virements SEPA à préparer avant fin du mois' });
+  return al;
+}
+
 function PH({title,sub}){return <div style={{marginBottom:16}}><div style={{fontSize:18,fontWeight:800,color:'#c6a34e',letterSpacing:'.3px'}}>{title}</div>{sub&&<div style={{fontSize:11,color:'#9e9b93',marginTop:2}}>{sub}</div>}</div>;}
 function C({children,style}){return <div style={{padding:'16px 20px',background:'rgba(198,163,78,.03)',borderRadius:12,border:'1px solid rgba(198,163,78,.06)',marginBottom:14,...style}}>{children}</div>;}
 function ST({children}){return <div style={{fontSize:13,fontWeight:700,color:'#c6a34e',marginBottom:10,paddingBottom:6,borderBottom:'1px solid rgba(198,163,78,.1)'}}>{children}</div>;}

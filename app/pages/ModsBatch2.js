@@ -10,7 +10,6 @@ import { LOIS_BELGES, RMMMG, TX_ONSS_E, TX_ONSS_W, NET_FACTOR, quickNetEst,
 import { quickPP, quickNet, calcCSSS, calcBonusEmploi, calcPrecompteExact } from "@/app/lib/payroll-engine";
 import { aureuspdf } from "@/app/lib/pdf-aureus";
 
-const DPER={month:new Date().getMonth()+1,year:new Date().getFullYear(),days:22,sickG:0,holidays:0,overtimeH:0,sundayH:0,nightH:0,bonus:0,y13:0,otherDed:0,advance:0,garnish:0,ppVolontaire:0};
 function calc(emp,per,co){
   if(typeof window!=='undefined'&&window.calc)return window.calc(emp,per,co);
   const b=+(emp?.monthlySalary||emp?.gross||0);

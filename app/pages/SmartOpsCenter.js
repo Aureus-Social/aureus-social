@@ -1,4 +1,5 @@
 'use client';
+import { calc, quickPP, quickNet, fmt, f2, f0, PH, C, ST, Tbl, obf, LEGAL, DPER, TX_ONSS_W, TX_ONSS_E, LOIS_BELGES, RMMMG, LB, PV_SIMPLE, PV_DOUBLE, NET_FACTOR, PP_EST, CR_PAT } from '@/app/lib/helpers';
 import{useState,useEffect,useMemo,useCallback,useRef}from'react';
 
 // ═══════════════════════════════════════════════════════════
@@ -7,12 +8,10 @@ import{useState,useEffect,useMemo,useCallback,useRef}from'react';
 // ═══════════════════════════════════════════════════════════
 
 const TX_ONSS_E=0.2507,TX_ONSS_W=0.1307;
-const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
 const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
 const mois=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
 // ═══ HELPERS ═══
-const C=({children,title:t,sub})=><div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)',marginBottom:14}}>{t&&<div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:sub?2:12}}>{t}</div>}{sub&&<div style={{fontSize:10,color:'#888',marginBottom:12}}>{sub}</div>}{children}</div>;
 const KPI=({l,v,c,sub,onClick})=><div onClick={onClick} style={{padding:14,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid '+(c||'#c6a34e')+'20',borderRadius:12,textAlign:'center',flex:1,minWidth:110,cursor:onClick?'pointer':'default'}}><div style={{fontSize:20,fontWeight:800,color:c||'#c6a34e'}}>{v}</div><div style={{fontSize:9,color:'#888',marginTop:3}}>{l}</div>{sub&&<div style={{fontSize:8,color:'#5e5c56',marginTop:2}}>{sub}</div>}</div>;
 const Row=({l,v,c})=><div style={{display:'flex',justifyContent:'space-between',padding:'7px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}><span style={{color:'#e8e6e0',fontSize:11.5}}>{l}</span><span style={{color:c||'#c6a34e',fontWeight:600,fontSize:12}}>{v}</span></div>;
 const Badge=({text,color})=><span style={{padding:'2px 7px',borderRadius:5,fontSize:8,fontWeight:600,background:(color||'#888')+'15',color:color||'#888',textTransform:'uppercase',letterSpacing:'.3px'}}>{text}</span>;
