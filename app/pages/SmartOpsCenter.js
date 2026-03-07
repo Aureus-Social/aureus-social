@@ -7,7 +7,6 @@ import{useState,useEffect,useMemo,useCallback,useRef}from'react';
 // Aureus Social Pro — Sprint 37
 // ═══════════════════════════════════════════════════════════
 
-const TX_ONSS_E=0.2507,TX_ONSS_W=0.1307;
 const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
 const mois=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
