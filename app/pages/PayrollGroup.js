@@ -3,7 +3,7 @@
 "use client";
 
 import { useState } from "react";
-import { C, B, I, ST, PH, SC, fmt } from "@/app/lib/shared-ui";
+import { C, B, I, ST, PH, SC, fmt } from "@/app/lib/helpers";
 import { LOIS_BELGES, LB, RMMMG, TX_ONSS_E, TX_ONSS_W, NET_FACTOR,
   PV_DOUBLE, PV_SIMPLE, CR_PAT, HEURES_HEBDO } from "@/app/lib/lois-belges";
 import { quickPP, quickNet, calcPrecompteExact } from "@/app/lib/payroll-engine";

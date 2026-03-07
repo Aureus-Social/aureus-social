@@ -1,35 +1,56 @@
-// ═══ AUREUS SOCIAL PRO — Helpers partagés ═══
+// === AUREUS SOCIAL PRO - Helpers partages ===
 "use client";
-import { LOIS_BELGES, LB, TX_ONSS_W, TX_ONSS_E, NET_FACTOR, PP_EST, PV_SIMPLE, PV_DOUBLE, RMMMG, CR_PAT, CR_MAX } from './lois-belges';
-import { C, B, I, ST, PH, SC, fmt, Tbl, f2, f0 } from './shared-ui';
-
-export { LOIS_BELGES, LB, TX_ONSS_W, TX_ONSS_E, NET_FACTOR, PP_EST, PV_SIMPLE, PV_DOUBLE, RMMMG, CR_PAT, CR_MAX };
-export { C, B, I, ST, PH, SC, fmt, Tbl, f2, f0 };
-
+export { C, B, I, ST, PH, SC, fmt, Tbl, f2, f0 } from './shared-ui';
+export { LOIS_BELGES, LB, TX_ONSS_W, TX_ONSS_E, TX_OUV108, TX_AT, PP_EST, NET_FACTOR, PV_SIMPLE, PV_DOUBLE, RMMMG, CR_PAT, CR_MAX, CR_TRAV, FORF_BUREAU, FORF_KM, BONUS_MAX, SEUIL_CPPT, SEUIL_CE, HEURES_HEBDO, JOURS_FERIES, SAISIE_2026_TRAVAIL, SAISIE_2026_REMPLACEMENT, SAISIE_IMMUN_ENFANT_2026, AF_REGIONS, quickNetEst, generateExportCompta, exportTravailleurs, importTravailleurs, obf, safeLS } from './lois-belges';
 export const LEGAL = { WD: 21.67, WHD: 7.6 };
 export const DPER = { month: new Date().getMonth()+1, year: new Date().getFullYear(), days: 21.67 };
-
 export function calc(emp, per, co) {
   const brut = +(emp&&(emp.monthlySalary||emp.gross||emp.brut)||0);
-  const onssW = Math.round(brut * TX_ONSS_W * 100) / 100;
-  const imposable = brut - onssW;
-  const pp = Math.round(imposable * PP_EST * 100) / 100;
-  const net = Math.round((imposable - pp) * 100) / 100;
-  const onssE = Math.round(brut * TX_ONSS_E * 100) / 100;
+  const onssW = Math.round(brut*0.1307*100)/100;
+  const imposable = brut-onssW;
+  const pp = Math.round(imposable*0.22*100)/100;
+  const net = Math.round((imposable-pp)*100)/100;
+  const onssE = Math.round(brut*0.2507*100)/100;
   return {base:brut,gross:brut,onssNet:onssW,imposable,tax:pp,pp,css:0,net,onssE,costTotal:Math.round((brut+onssE)*100)/100,bonus:0,overtime:0,y13:0,sickPay:0};
 }
-
 export function quickPP(brut) {
-  const imposable = brut - brut * TX_ONSS_W;
-  if (imposable <= 1110) return 0;
-  if (imposable <= 1560) return Math.round((imposable - 1110) * 0.2668 * 100) / 100;
-  if (imposable <= 2700) return Math.round((120.06 + (imposable - 1560) * 0.4280) * 100) / 100;
-  return Math.round((607.98 + (imposable - 2700) * 0.4816) * 100) / 100;
+  const imp = brut-brut*0.1307;
+  if(imp<=1110)return 0;
+  if(imp<=1560)return Math.round((imp-1110)*0.2668*100)/100;
+  if(imp<=2700)return Math.round((120.06+(imp-1560)*0.4280)*100)/100;
+  return Math.round((607.98+(imp-2700)*0.4816)*100)/100;
 }
-
-export function quickNet(brut) { return Math.round((brut||0) * NET_FACTOR * 100) / 100; }
-
-export const obf = {
-  maskNISS: (n) => n ? String(n).replace(/(\d{2})\.?(\d{2})\.?(\d{2})-?(\d{3})-?(\d{2})/, '$1.$2.$3-***-**') : '—',
-  maskIBAN: (i) => i ? String(i).replace(/(.{4})(.+)(.{4})/, '$1 **** **** $3') : '—',
-};
+export function quickNet(brut){return Math.round((brut||0)*(1-0.1307)*(1-0.22)*100)/100;}
+export function validateNISS(niss){
+  if(!niss)return{valid:false,msg:'NISS vide'};
+  const c=String(niss).replace(/[\s.\-]/g,'');
+  if(!/^\d{11}$/.test(c))return{valid:false,msg:'Format invalide (11 chiffres)'};
+  const base=parseInt(c.substring(0,9)),check=parseInt(c.substring(9,11));
+  const v=97-(base%97)===check||97-((2000000000+base)%97)===check;
+  return{valid:v,msg:v?'NISS valide':'Cle de controle invalide'};
+}
+export function genDimonaXML({emp,action,startDate,endDate,wtype,employer}){
+  const e=emp||{},niss=(e.niss||'').replace(/[\s.\-]/g,'');
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<Dimona xmlns="http://www.socialsecurity.be/xsd/dimona/2.1">\n  <Sender><EnterpriseID>${employer?.vat?.replace(/[^0-9]/g,'')||'1028230781'}</EnterpriseID><Timestamp>${new Date().toISOString()}</Timestamp></Sender>\n  <Declaration><Action>${action||'IN'}</Action><Worker><NISS>${niss}</NISS><LastName>${e.last||''}</LastName><FirstName>${e.first||''}</FirstName></Worker><WorkerType>${wtype||'OTH'}</WorkerType><StartDate>${startDate||new Date().toISOString().split('T')[0]}</StartDate>${endDate?`<EndDate>${endDate}</EndDate>`:''}</Declaration>\n</Dimona>`;
+}
+export async function submitToONSS(xml,env){
+  await new Promise(r=>setTimeout(r,800));
+  return{success:true,ref:`SIM-${Date.now()}`,status:'ACCEPTED',env:'simulation',msg:'Dimona simulee - reference test generee'};
+}
+export async function generatePayslipPDF(payslip,emp,co){
+  const{aureuspdf}=await import('./pdf-aureus');
+  return aureuspdf(`Fiche de paie - ${co?.name||'Employeur'}`,[{title:'Employe',items:[{label:'Nom',value:`${emp?.first||''} ${emp?.last||''}`},{label:'NISS',value:emp?.niss||'-'},{label:'CP',value:emp?.cp||'200'}]},{title:'Remuneration',items:[{label:'Brut',value:`${payslip?.gross||0} EUR`},{label:'ONSS',value:`-${payslip?.onssNet||0} EUR`},{label:'PP',value:`-${payslip?.pp||0} EUR`},{label:'NET',value:`${payslip?.net||0} EUR`,bold:true}]}],{period:payslip?.period});
+}
+export function getAlertes(emps,co){
+  const al=[];
+  const ae=(emps||[]).filter(e=>e.status==='active'||!e.status);
+  if(!ae.length)al.push({level:'info',icon:'👥',msg:'Aucun travailleur actif'});
+  ae.forEach(e=>{
+    if(!e.niss)al.push({level:'warning',icon:'⚠️',msg:`NISS manquant - ${e.first||''} ${e.last||''}`});
+    if(!e.monthlySalary&&!e.gross)al.push({level:'warning',icon:'💰',msg:`Salaire non defini - ${e.first||''}`});
+  });
+  const now=new Date();
+  if(now.getDate()>=20)al.push({level:'info',icon:'📅',msg:`Cloture paie ${now.getMonth()+1}/${now.getFullYear()}`});
+  if(now.getDate()>=25)al.push({level:'danger',icon:'🚨',msg:'Virements SEPA a preparer'});
+  return al;
+}
