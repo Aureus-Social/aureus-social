@@ -67,22 +67,22 @@ const ProceduresRHHubPg = dynamic(() => import('../pages/procedures/ProceduresRH
 
 // Wrappers pour modules avec props non-standard
 const AnalyticsDashboardRaw = dynamic(() => import('../pages/AnalyticsDashboard'), { ssr: false, loading: Loading });
-const AnalyticsPage = ({ s, d }) => <AnalyticsDashboardRaw state={s} dispatch={d} />;
+const AnalyticsPage = ({ s, d, tab }) => <AnalyticsDashboardRaw s={s} d={d} tab={tab} />;
 
 const ComplianceDashboardRaw = dynamic(() => import('../pages/ComplianceDashboard'), { ssr: false, loading: Loading });
-const CompliancePage = ({ s, d }) => <ComplianceDashboardRaw state={s} dispatch={d} />;
+const CompliancePage = ({ s, d, tab }) => <ComplianceDashboardRaw s={s} d={d} tab={tab} />;
 
 const DocumentGeneratorRaw = dynamic(() => import('../pages/DocumentGenerator'), { ssr: false, loading: Loading });
-const DocumentGeneratorPgW = ({ s, d }) => <DocumentGeneratorRaw state={s} dispatch={d} />;
+const DocumentGeneratorPgW = ({ s, d, tab }) => <DocumentGeneratorRaw s={s} d={d} tab={tab} />;
 
 const EmployeePlanningRaw = dynamic(() => import('../pages/EmployeePlanning'), { ssr: false, loading: Loading });
-const EmployeePlanningPgW = ({ s, d }) => <EmployeePlanningRaw state={s} dispatch={d} />;
+const EmployeePlanningPgW = ({ s, d, tab }) => <EmployeePlanningRaw s={s} d={d} tab={tab} />;
 
 const NotificationCenterRaw = dynamic(() => import('../pages/NotificationCenter'), { ssr: false, loading: Loading });
-const NotificationCenterPgW = ({ s, d }) => <NotificationCenterRaw state={s} dispatch={d} />;
+const NotificationCenterPgW = ({ s, d, tab }) => <NotificationCenterRaw s={s} d={d} tab={tab} />;
 
 const CommissionsModuleRaw = dynamic(() => import('../pages/CommissionsModule'), { ssr: false, loading: Loading });
-const CommissionsModulePgW = ({ s, d }) => <CommissionsModuleRaw userRole="admin" user={s?.user} factures={s?.factures||[]} sendEmailFn={null} />;
+const CommissionsModulePgW = ({ s, d, tab }) => <CommissionsModuleRaw s={s} d={d} tab={tab} />;
 
 const AdminBaremesRaw = dynamic(() => import('../pages/AdminBaremes'), { ssr: false, loading: Loading });
 const AdminBaremesPageW = ({ s, d }) => <AdminBaremesRaw loisBelges={{}} loisTimeline={[]} loisCurrent={{}} onUpdate={()=>{}} />;
