@@ -9,6 +9,9 @@ import { LOIS_BELGES, RMMMG, TX_ONSS_E, TX_ONSS_W, NET_FACTOR, quickNetEst,
   TX_OUV108, TX_AT, obf, COUT_MED, CR_TRAV, PP_EST } from "@/app/lib/lois-belges";
 import { quickPP, quickNet, calcCSSS, calcBonusEmploi, calcPrecompteExact } from "@/app/lib/payroll-engine";
 import { aureuspdf } from "@/app/lib/pdf-aureus";
+const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
+const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const MN = MN_FR;
 
 function calc(emp,per,co){
   if(typeof window!=='undefined'&&window.calc)return window.calc(emp,per,co);

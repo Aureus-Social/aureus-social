@@ -1,4 +1,5 @@
 'use client';
+import { supabase } from '@/app/lib/supabase';
 import { useState } from 'react';
 import { TX_ONSS_W, TX_ONSS_E } from '@/app/lib/lois-belges';
 import { quickPP, quickNet } from '@/app/lib/payroll-engine';
