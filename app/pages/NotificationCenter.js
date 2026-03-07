@@ -1,5 +1,5 @@
 'use client';
-import { LEGAL } from '@/app/lib/helpers';
+import { LEGAL, RMMMG } from '@/app/lib/helpers';
 
 // ═══════════════════════════════════════════════════════
 //  AUREUS SOCIAL PRO — Module: Centre de Notifications
@@ -592,9 +592,9 @@ function SmartAlertsPage({ state }) {
     emps.forEach(e => {
       const brut = +(e.gross || 0)
       const nm = (e.first || e.fn || '') + ' ' + (e.last || e.ln || '')
-      if (brut > 0 && brut < 2070.48) {
+      if (brut > 0 && brut < RMMMG) {
         list.push({ id:'rmmmg_'+e.id, sev:'critical', icon:'🚨', cat:'Paie',
-          title:'Salaire sous RMMMG', msg:nm + ' — ' + f2(brut) + ' EUR < 2.070,48 EUR (RMMMG 2026)',
+          title:'Salaire sous RMMMG', msg:nm + ' — ' + f2(brut) + ' EUR < ' + f2(RMMMG) + ' EUR (RMMMG 2026)',
           action:'Corriger le salaire', ref:'CCT 43' })
       }
       if (!e.niss) {
