@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/baremes",
       "schedule": "5 5 * * *"
+    },
+    {
+      "path": "/api/cron/baremes-cp",
+      "schedule": "10 5 * * *"
     }
   ]
 }

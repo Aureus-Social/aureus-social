@@ -61,3 +61,4 @@ export function getAlertes(emps,co){
   if(now.getDate()>=25)al.push({level:'danger',icon:'🚨',msg:'Virements SEPA a preparer'});
   return al;
 }
+export { BAREMES_CP_MIN } from './lois-belges';

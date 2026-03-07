@@ -507,3 +507,22 @@ export const AF_REGIONS = {
   WAL: { cutoff: 2020, base: [{ age: 0, to: 5, amt: 181.61 }, { age: 6, to: 11, amt: 181.61 }, { age: 12, to: 17, amt: 181.61 + 22.53 }, { age: 18, to: 24, amt: 181.61 + 30.88 }], ancien: { rang1: 97.73 } },
   VL: { cutoff: 2019, base: [{ age: 0, to: 11, amt: 173.20 }, { age: 12, to: 17, amt: 173.20 + 6.32 }, { age: 18, to: 24, amt: 173.20 + 10.44 }], ancien: { rang1: 97.73 } },
 };
+
+// ═══ BARÈMES MINIMA SECTORIELS — CLASSE I (NON-QUALIFIÉ) ═══
+// Source: CCT sectorielles + salairesminimums.be
+// Auto-mis à jour par /api/cron/baremes-cp — 06h10 CET quotidien
+// Ces valeurs représentent le MINIMUM ABSOLU de classe 1 pour chaque CP
+export const BAREMES_CP_MIN = {
+  '200':   { cl1: 2070.48, cl2: 2174.00, cl3: 2266.16, cl4: 2614.86, nom: 'CP 200 — Employés auxiliaire' },
+  '118':   { cl1: 2095.44, cl2: 2173.20, cl3: 2269.56, cl4: 2365.92, cl5: 2510.52, nom: 'CP 118 — Industrie alimentaire' },
+  '119':   { cl1: 2029.88, cl2: 2134.72, cl3: 2269.56, cl4: 2414.40, nom: 'CP 119 — Commerce alimentaire' },
+  '302':   { cl1: 2029.88, cl2: 2095.44, cl3: 2226.58, cl4: 2365.92, cl5: 2582.76, nom: 'CP 302 — Hôtellerie' },
+  '124':   { cl1: 2095.44, cl2: 2204.76, cl3: 2366.28, cl4: 2594.16, nom: 'CP 124 — Construction' },
+  '32201': { cl1: 2029.88, cl2: 2070.48, nom: 'CP 322.01 — Titres-services' },
+  '330':   { cl1: 2070.48, cl2: 2173.20, cl3: 2366.28, cl4: 2623.92, cl5: 2916.24, nom: 'CP 330 — Santé' },
+  '111':   { cl1: 2095.44, cl2: 2248.32, cl3: 2473.80, cl4: 2723.58, nom: 'CP 111 — Métal' },
+  '140':   { cl1: 2095.44, cl2: 2204.76, cl3: 2430.12, cl4: 2763.60, nom: 'CP 140 — Transport' },
+  '121':   { cl1: 2029.88, cl2: 2095.44, cl3: 2204.76, cl4: 2366.28, nom: 'CP 121 — Nettoyage' },
+  '152':   { cl1: 2029.88, cl2: 2134.72, cl3: 2269.56, cl4: 2462.28, nom: 'CP 152 — Enseignement libre' },
+  dateMAJ: '2026-03-08',
+};
