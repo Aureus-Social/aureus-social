@@ -11,11 +11,17 @@ const Loading = () => <div style={{padding:40,textAlign:'center',color:'#5e5c56'
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false, error: null }; }
   static getDerivedStateFromError(error) { return { hasError: true, error }; }
+  componentDidUpdate(prevProps) {
+    if (prevProps.pageKey !== this.props.pageKey && this.state.hasError) {
+      this.setState({ hasError: false, error: null });
+    }
+  }
   render() {
     if (this.state.hasError) {
-      return <div style={{padding:40,textAlign:'center'}}>
-        <div style={{fontSize:16,fontWeight:700,color:'#c6a34e',marginBottom:8}}>Module en cours de chargement</div>
-        <div style={{fontSize:11,color:'#5e5c56',marginBottom:16}}>Ce module sera disponible prochainement.</div>
+      const msg = this.state.error?.message || 'Erreur inconnue';
+      return <div style={{padding:40}}>
+        <div style={{fontSize:15,fontWeight:700,color:'#ef4444',marginBottom:8}}>❌ {this.props.label || 'Module'} — Erreur</div>
+        <div style={{fontSize:11,color:'#9e9b93',marginBottom:12,fontFamily:'monospace',background:'rgba(239,68,68,.06)',padding:'10px 14px',borderRadius:8,border:'1px solid rgba(239,68,68,.15)',wordBreak:'break-all'}}>{msg}</div>
         <button onClick={()=>this.setState({hasError:false,error:null})} style={{padding:'8px 20px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>Réessayer</button>
       </div>;
     }
@@ -111,7 +117,7 @@ function PlaceholderPage({ id, label }) {
 }
 
 // Dashboard principal
-function DashboardHome({ state }) {
+function DashboardHome({ state, onNavigate }) {
   const ae = (state.emps || []).filter(e => e.status === 'active' || !e.status);
   const masse = ae.reduce((a, e) => a + (+(e.monthlySalary || e.gross || 0)), 0);
   const fmt = n => new Intl.NumberFormat('fr-BE', { style: 'currency', currency: 'EUR' }).format(n || 0);
@@ -167,6 +173,7 @@ function DashboardHome({ state }) {
             { icon: '◆', label: 'DmfA trimestrielle', id: 'declarations' },
           ].map((a, i) => (
             <div key={i} style={{ padding: '10px 12px', borderRadius: 8, marginBottom: 4, cursor: 'pointer', fontSize: 12, background: 'rgba(198,163,78,.02)' }}
+              onClick={() => onNavigate && onNavigate(a.id)}
               onMouseEnter={e => e.currentTarget.style.background = 'rgba(198,163,78,.06)'}
               onMouseLeave={e => e.currentTarget.style.background = 'rgba(198,163,78,.02)'}>
               <span style={{ marginRight: 8 }}>{a.icon}</span>{a.label}
@@ -205,7 +212,7 @@ export default function DashboardLayout({ user }) {
 
   const renderPage = () => {
     switch (page) {
-      case 'dashboard': return <DashboardPage s={s} d={d} />;
+      case 'dashboard': return <DashboardPage s={s} d={d} onNavigate={setPage} />;
       case 'employees': return <EmployeesPage s={s} d={d} />;
       case 'payslip': return <PayslipsPage s={s} d={d} />;
       case 'declarations': case 'onss': return <DimonaPageComp s={s} d={d} />;
@@ -479,7 +486,7 @@ export default function DashboardLayout({ user }) {
 
         {/* Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
-          <ErrorBoundary>{renderPage()}</ErrorBoundary>
+          <ErrorBoundary pageKey={page} label={currentItem?.label}>{renderPage()}</ErrorBoundary>
         </div>
       </div>
     </div>
