@@ -157,6 +157,8 @@ export default function DashboardLayout({ user }) {
   const [page, setPage] = useState('dashboard');
   const [collapsed, setCollapsed] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchFocus, setSearchFocus] = useState(false);
   const [state, dispatch] = useReducer(reducer, {
     emps: [],
     clients: [],
@@ -325,6 +327,70 @@ export default function DashboardLayout({ user }) {
         <div style={{ padding: '20px 18px 16px', borderBottom: '1px solid rgba(198,163,78,.06)' }}>
           <div style={{ fontSize: 18, fontWeight: 800, color: '#c6a34e', letterSpacing: '2px' }}>AUREUS</div>
           <div style={{ fontSize: 9, color: '#5e5c56', letterSpacing: '3px', marginTop: 2 }}>SOCIAL PRO</div>
+        </div>
+
+        {/* Barre de recherche */}
+        <div style={{ padding: '10px 12px 6px', borderBottom: '1px solid rgba(198,163,78,.06)', position: 'relative' }}>
+          <div style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: '#5e5c56', pointerEvents: 'none' }}>🔍</span>
+            <input
+              type="text"
+              placeholder="Rechercher..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onFocus={() => setSearchFocus(true)}
+              onBlur={() => setTimeout(() => setSearchFocus(false), 150)}
+              style={{
+                width: '100%', boxSizing: 'border-box',
+                padding: '7px 10px 7px 28px',
+                background: 'rgba(255,255,255,.04)', border: '1px solid rgba(198,163,78,.12)',
+                borderRadius: 8, color: '#e8e6e0', fontSize: 11.5,
+                fontFamily: 'inherit', outline: 'none',
+              }}
+            />
+            {searchQuery && (
+              <span onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: '#5e5c56', cursor: 'pointer' }}>✕</span>
+            )}
+          </div>
+          {/* Dropdown résultats */}
+          {(searchFocus || searchQuery) && searchQuery.length > 0 && (() => {
+            const q = searchQuery.toLowerCase();
+            const results = MENU.filter(m => !m.group && (
+              m.label.toLowerCase().includes(q) || m.id.toLowerCase().includes(q)
+            )).slice(0, 8);
+            const groupName = (g) => GROUPS.find(gr => gr.id === `_g${g}`)?.label || '';
+            return results.length > 0 ? (
+              <div style={{
+                position: 'absolute', left: 12, right: 12, top: '100%', zIndex: 999,
+                background: '#111009', border: '1px solid rgba(198,163,78,.2)',
+                borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,.6)', overflow: 'hidden',
+              }}>
+                {results.map(item => (
+                  <div key={item.id}
+                    onClick={() => { setPage(item.id); setSearchQuery(''); setSearchFocus(false); }}
+                    style={{ padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid rgba(255,255,255,.03)' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(198,163,78,.08)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <span style={{ fontSize: 13, width: 18, textAlign: 'center' }}>{item.icon}</span>
+                    <div>
+                      <div style={{ fontSize: 11.5, color: '#e8e6e0', fontWeight: 500 }}>{item.label}</div>
+                      <div style={{ fontSize: 9.5, color: '#5e5c56', marginTop: 1 }}>{groupName(item.g)}</div>
+                    </div>
+                  </div>
+                ))}
+                {results.length === 0 && (
+                  <div style={{ padding: '10px 12px', fontSize: 11, color: '#5e5c56', textAlign: 'center' }}>Aucun résultat</div>
+                )}
+              </div>
+            ) : (
+              <div style={{
+                position: 'absolute', left: 12, right: 12, top: '100%', zIndex: 999,
+                background: '#111009', border: '1px solid rgba(198,163,78,.2)',
+                borderRadius: 8, padding: '10px 12px', fontSize: 11, color: '#5e5c56', textAlign: 'center',
+              }}>Aucun résultat</div>
+            );
+          })()}
         </div>
 
         {/* Menu */}
