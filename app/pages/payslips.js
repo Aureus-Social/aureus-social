@@ -215,6 +215,7 @@ function Payslips({s,d}) {
             {res.atnLogement>0&&<PR l="ATN Logement gratuit (RC × coeff.)" a={res.atnLogement}/>}
             {res.atnChauffage>0&&<PR l="ATN Chauffage gratuit (2.130€/an)" a={res.atnChauffage}/>}
             {res.atnElec>0&&<PR l="ATN Électricité gratuite (1.060€/an)" a={res.atnElec}/>}
+            {res.atnMoto>0&&<PR l={`ATN moto de société (${emp.motoBrand||''} ${emp.motoModel||''} — ${emp.motoCO2||0}g CO2)`} rate={`${(res.atnPctMoto||0).toFixed(1)}%`} a={res.atnMoto}/>}
             {res.veloSociete&&<PR l={`🚲 Vélo de société (${res.veloType}) — ATN = 0€ (Art.38§1er 14°a — exonéré)`} a={0}/>}
             {res.atnCarteCarburant>0&&<PR l="ATN Carte carburant (sans voiture soc. — imposable)" a={res.atnCarteCarburant}/>}
             {res.atnBorne>0&&<PR l="ATN Borne recharge domicile (sans voiture soc.)" a={res.atnBorne}/>}
@@ -250,6 +251,7 @@ function Payslips({s,d}) {
             {res.retSyndicale>0&&<PR l="Cotisation syndicale" a={-res.retSyndicale} neg/>}
             {res.otherDed>0&&<PR l="Autres retenues" a={-res.otherDed} neg/>}
             {res.atnCar>0&&<PR l="ATN voiture (déduit du net)" a={-res.atnCar} neg/>}
+            {res.atnMoto>0&&<PR l="ATN moto (déduit du net)" a={-res.atnMoto} neg/>}
             {res.atnAutresTot>0&&<PR l="ATN autres (déduit du net)" a={-res.atnAutresTot} neg/>}
             {(res.doublePecule>0||res.peculeDepart>0||res.primeAnciennete>0||res.primeNaissance>0||res.primeInnovation>0)&&<PS t="Éléments exceptionnels"/>}
             {res.doublePecule>0&&<><PR l="Double pécule vacances (92% brut)" a={res.doublePecule} pos/>
@@ -416,6 +418,7 @@ function Payslips({s,d}) {
                 ...(res.atnLogement>0?[{l:"ATN Logement",m:res.atnLogement,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 18 AR/CIR 92"}]:[]),
                 ...(res.atnChauffage>0?[{l:"ATN Chauffage",m:res.atnChauffage,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 18 AR/CIR 92"}]:[]),
                 ...(res.atnElec>0?[{l:"ATN Électricité",m:res.atnElec,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 18 AR/CIR 92"}]:[]),
+                ...(res.atnMoto>0?[{l:`🏍 ATN moto (${emp.motoBrand||''} ${emp.motoModel||''})`,m:res.atnMoto,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 36 CIR 92"}]:[]),
                 ...(res.veloSociete?[{l:"🚲 Vélo de société",m:0,onss:'❌ Exonéré',pp:'❌ Exonéré',ref:"Art. 38§1er 14°a CIR",hl:"green"}]:[]),
                 ...(res.atnCarteCarburant>0?[{l:"Carte carburant (sans voit. soc.)",m:res.atnCarteCarburant,onss:'✅ Oui',pp:'✅ Oui',ref:"Art. 36§2 CIR 92"}]:[]),
                 ...(res.transport>0?[{l:"Transport domicile-travail",m:res.transport,onss:'❌ Exonéré',pp:'❌ Exonéré',ref:"CCT 19/9 + Art. 38§1er 9° CIR",hl:"green"}]:[]),
@@ -448,6 +451,130 @@ function Payslips({s,d}) {
           </table>
         </div>
 
+
+
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        {/* CHARGES & AVANTAGES EMPLOYEUR — Détail complet                 */}
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        {(res.atnCar>0||res.atnMoto>0||res.veloSociete||res.atnGSM>0||res.atnPC>0||res.atnInternet>0||res.atnChauffage>0||res.atnElec>0||res.atnLogement>0||res.carteCarburant||res.borneRecharge)&&<div style={{marginTop:14,padding:14,background:"#f5f4ef",borderRadius:10,border:'1px solid rgba(198,163,78,.12)'}}>
+          <div style={{fontSize:9.5,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'1px',fontWeight:600,marginBottom:10}}>
+            Charges & Avantages Employeur — Détail
+          </div>
+          <table style={{width:'100%',borderCollapse:'collapse',fontSize:10.5}}>
+            <thead><tr style={{borderBottom:'2px solid #c6a34e'}}>
+              <th style={{textAlign:'left',padding:'6px 8px',color:'#999',fontSize:9,textTransform:'uppercase'}}>Avantage</th>
+              <th style={{textAlign:'right',padding:'6px 8px',color:'#999',fontSize:9}}>ATN / Charge</th>
+              <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>ONSS empl.</th>
+              <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>PP trav.</th>
+              <th style={{textAlign:'right',padding:'6px 8px',color:'#999',fontSize:9}}>Coût empl./mois</th>
+              <th style={{textAlign:'left',padding:'6px 8px',color:'#999',fontSize:9}}>Référence</th>
+            </tr></thead>
+            <tbody>
+              {[
+                // Voiture de société
+                ...(res.atnCar>0?[{
+                  l:`🚗 Voiture société (${emp.carBrand||''} ${emp.carModel||''} — ${emp.carFuel||''} ${emp.carCO2||0}g)`,
+                  atn:res.atnCar, onssEmpl:'❌ Non soumis', ppTrav:'✅ Imposable',
+                  cout:res.cotCO2, coutLabel:`Cot. CO2: ${fmt(res.cotCO2)}/mois`,
+                  ref:'Art. 36 CIR 92 + cotis. solidarité ONSS'
+                }]:[]),
+                // Moto de société
+                ...(res.atnMoto>0?[{
+                  l:`🏍 Moto société (${emp.motoBrand||''} ${emp.motoModel||''} — ${emp.motoFuel||''} ${emp.motoCO2||0}g)`,
+                  atn:res.atnMoto, onssEmpl:'❌ Non soumis', ppTrav:'✅ Imposable',
+                  cout:res.cotCO2Moto||0, coutLabel:`Cot. CO2: ${fmt(res.cotCO2Moto||0)}/mois`,
+                  ref:'Art. 36 CIR 92'
+                }]:[]),
+                // Vélo de société
+                ...(res.veloSociete?[{
+                  l:`🚲 Vélo société (${res.veloType||''})${res.veloLeasingMois>0?' — Leasing: '+fmt(res.veloLeasingMois)+'/mois':''}`,
+                  atn:0, onssEmpl:'❌ Exonéré', ppTrav:'❌ Exonéré (ATN=0)',
+                  cout:res.veloLeasingMois||0, coutLabel:`Leasing: ${fmt(res.veloLeasingMois||0)}/mois (déduc. 100%)`,
+                  ref:'Art. 38§1er 14°a CIR — exo depuis 01/01/2024', green:true
+                }]:[]),
+                // PC / Tablette
+                ...(res.atnPC>0?[{
+                  l:'💻 PC / Tablette de société', atn:res.atnPC,
+                  onssEmpl:'❌ Non soumis', ppTrav:'✅ Imposable (6€/mois)',
+                  cout:res.atnPC, coutLabel:`ATN: ${fmt(res.atnPC)}/mois`,
+                  ref:'AR 18/12/2024 — forfait 72€/an'
+                }]:[]),
+                // Abonnement GSM
+                ...(res.atnGSM>0?[{
+                  l:'📱 Abonnement GSM / Téléphone', atn:res.atnGSM,
+                  onssEmpl:'❌ Non soumis', ppTrav:'✅ Imposable (3€/mois)',
+                  cout:res.atnGSM, coutLabel:`ATN: ${fmt(res.atnGSM)}/mois`,
+                  ref:'AR 18/12/2024 — forfait 36€/an'
+                }]:[]),
+                // Internet privé
+                ...(res.atnInternet>0?[{
+                  l:'🌐 Connexion internet privée', atn:res.atnInternet,
+                  onssEmpl:'❌ Non soumis', ppTrav:'✅ Imposable (5€/mois)',
+                  cout:res.atnInternet, coutLabel:`ATN: ${fmt(res.atnInternet)}/mois`,
+                  ref:'AR 18/12/2024 — forfait 60€/an'
+                }]:[]),
+                // Carte carburant
+                ...(res.carteCarburant?[{
+                  l:`⛽ Carte carburant / recharge (${fmt(res.carteCarburantMois)}/mois)`,
+                  atn:res.atnCarteCarburant>0?res.atnCarteCarburant:0,
+                  onssEmpl:res.atnCar>0?'Inclus ATN voiture':'✅ Soumis ONSS',
+                  ppTrav:res.atnCar>0?'Inclus ATN voiture':'✅ Imposable',
+                  cout:res.carteCarburantMois||0, coutLabel:`Budget: ${fmt(res.carteCarburantMois||0)}/mois`,
+                  ref:res.atnCar>0?'Art. 36§2 CIR — inclus ATN voiture':'Art. 36§2 CIR — ATN imposable si sans voiture soc.'
+                }]:[]),
+                // Borne de recharge
+                ...(res.borneRecharge?[{
+                  l:`🔌 Borne de recharge domicile (${fmt(res.borneRechargeCoût||0)}/mois)`,
+                  atn:res.atnBorne>0?res.atnBorne:0,
+                  onssEmpl:res.atnCar>0?'❌ Exonéré':'✅ Soumis si sans voit.',
+                  ppTrav:res.atnCar>0?'❌ Exonéré':'✅ Imposable si sans voit.',
+                  cout:res.borneRechargeCoût||0, coutLabel:`Coût: ${fmt(res.borneRechargeCoût||0)}/mois`,
+                  ref:res.atnCar>0?'Art. 14536 CIR — exo si voiture soc.':'Art. 14536 CIR — ATN si sans voiture soc.',
+                  green:res.atnCar>0
+                }]:[]),
+                // Chauffage gratuit
+                ...(res.atnChauffage>0?[{
+                  l:'🔥 Chauffage gratuit (forfait 2.130€/an)',
+                  atn:res.atnChauffage, onssEmpl:'❌ Non soumis', ppTrav:'✅ Imposable',
+                  cout:res.atnChauffage, coutLabel:`Forfait: ${fmt(res.atnChauffage)}/mois`,
+                  ref:'Art. 18 §3 4° AR/CIR 92'
+                }]:[]),
+                // Électricité gratuite
+                ...(res.atnElec>0?[{
+                  l:'⚡ Électricité gratuite (forfait 1.060€/an)',
+                  atn:res.atnElec, onssEmpl:'❌ Non soumis', ppTrav:'✅ Imposable',
+                  cout:res.atnElec, coutLabel:`Forfait: ${fmt(res.atnElec)}/mois`,
+                  ref:'Art. 18 §3 3° AR/CIR 92'
+                }]:[]),
+                // Logement gratuit
+                ...(res.atnLogement>0?[{
+                  l:'🏠 Logement gratuit (RC indexé × coeff.)',
+                  atn:res.atnLogement, onssEmpl:'❌ Non soumis', ppTrav:'✅ Imposable',
+                  cout:res.atnLogement, coutLabel:`ATN: ${fmt(res.atnLogement)}/mois`,
+                  ref:'Art. 18 §1er AR/CIR 92 — RC × 2,1763 / 12'
+                }]:[]),
+              ].map((x,i)=><tr key={i} style={{borderBottom:'1px solid #e5e4df',background:x.green?'rgba(74,222,128,.03)':'transparent'}}>
+                <td style={{padding:'6px 8px',fontSize:10.5,color:x.green?'#4ade80':'#555',fontWeight:500}}>{x.l}</td>
+                <td style={{padding:'6px 8px',textAlign:'right',fontWeight:600,color:x.atn>0?'#fb923c':'#4ade80',fontSize:10.5}}>{x.atn>0?fmt(x.atn):'0€ exonéré'}</td>
+                <td style={{padding:'6px 8px',textAlign:'center',color:x.onssEmpl?.includes('❌')?'#4ade80':'#fb923c',fontSize:10}}>{x.onssEmpl}</td>
+                <td style={{padding:'6px 8px',textAlign:'center',color:x.ppTrav?.includes('❌')?'#4ade80':'#fb923c',fontSize:10}}>{x.ppTrav}</td>
+                <td style={{padding:'6px 8px',textAlign:'right',fontSize:10,color:'#888'}}>{x.coutLabel}</td>
+                <td style={{padding:'6px 8px',fontSize:9,color:'#999'}}>{x.ref}</td>
+              </tr>)}
+              <tr style={{borderTop:'2px solid #c6a34e',background:'rgba(198,163,78,.05)'}}>
+                <td style={{padding:'8px',fontWeight:700,fontSize:11,color:'#c6a34e'}}>TOTAL ATN imposable (ajouté revenu PP)</td>
+                <td style={{padding:'8px',textAlign:'right',fontWeight:800,fontSize:12,color:'#fb923c'}}>{fmt(res.atnTotal||0)}</td>
+                <td colSpan={2} style={{padding:'8px',textAlign:'center',fontSize:10,color:'#888'}}>Soumis PP uniquement</td>
+                <td style={{padding:'8px',textAlign:'right',fontWeight:700,fontSize:11,color:'#c6a34e'}}>{fmt((res.cotCO2||0)+(res.cotCO2Moto||0)+(res.veloLeasingMois||0))}/mois charges</td>
+                <td style={{padding:'8px',fontSize:9,color:'#999'}}>Art. 36 + 38 CIR 92</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style={{marginTop:8,fontSize:8.5,color:'#aaa',lineHeight:1.6}}>
+            ⚠ Les ATN augmentent le revenu imposable du travailleur (base PP) mais ne sont <b>pas soumis à l'ONSS</b> (sauf exception). 
+            Les cotisations CO2 sont des charges patronales ONSS. Les coûts de leasing vélo sont déductibles à 100% pour l'employeur.
+          </div>
+        </div>}
 
         {/* ═══════════════════════════════════════════════════════════════ */}
         {/* PARAMÈTRES LÉGAUX APPLICABLES — Source: crons auto-update      */}

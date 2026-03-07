@@ -913,6 +913,25 @@ function calc(emp, per, co) {
     }
   }
 
+  // ── MOTO DE SOCIÉTÉ (Art. 36 CIR 92 — même régime que voiture) ──
+  r.atnMoto = 0; r.atnPctMoto = 0; r.cotCO2Moto = 0;
+  const motoFuel = emp.motoFuel || 'essence';
+  const motoCO2 = parseInt(emp.motoCO2) || 0;
+  const motoCatVal = parseFloat(emp.motoCatVal) || 0;
+  if (emp.motoSociete && motoCatVal > 0) {
+    if (motoFuel === 'electrique') {
+      r.atnPctMoto = 4;
+      r.atnMoto = Math.max(1600/12, (motoCatVal * (6/7) * 0.04) / 12);
+      r.cotCO2Moto = LOIS_BELGES.vehicules.cotCO2Min;
+    } else {
+      const refCO2Moto = motoFuel === 'diesel' ? 84 : 102;
+      const deltaMoto = motoCO2 - refCO2Moto;
+      r.atnPctMoto = Math.max(4, Math.min(18, 5.5 + (deltaMoto * 0.1)));
+      r.atnMoto = Math.max(1600/12, (motoCatVal * (6/7) * (r.atnPctMoto/100)) / 12);
+      r.cotCO2Moto = Math.max(LOIS_BELGES.vehicules.cotCO2Min, (motoCO2 * 0.00714 * 83.6644) + LOIS_BELGES.vehicules.cotCO2Min);
+    }
+  }
+
   // ── ATN Autres avantages en nature (AR 18/12/2024 — Forfaits 2026) ──
   r.atnGSM = emp.atnGSM ? 3.00 : 0;         // 36€/an = 3€/mois
   r.atnPC = emp.atnPC ? 6.00 : 0;            // 72€/an = 6€/mois
@@ -939,8 +958,8 @@ function calc(emp, per, co) {
       r.atnLogement = (rcIndex * 100 / 60) / 12;
     }
   }
-  r.atnAutresTot = r.atnGSM + r.atnPC + r.atnInternet + r.atnChauffage + r.atnElec + r.atnLogement;
-  r.atnTotal = r.atnCar + r.atnAutresTot;
+  r.atnAutresTot = r.atnGSM + r.atnPC + r.atnInternet + r.atnChauffage + r.atnElec + r.atnLogement + r.atnMoto;
+  r.atnTotal = r.atnCar + r.atnMoto + r.atnAutresTot;
 
   // ── VÉLO DE SOCIÉTÉ (Loi 25/11/2021 + Art. 38§1er 14°a CIR 92) ──
   // Depuis 01/01/2024: l'ATN vélo de société = 0€ (exonéré IPP et ONSS)
@@ -982,7 +1001,7 @@ function calc(emp, per, co) {
 
   // Ajouter aux ATN autres si applicable
   r.atnAutresTot += r.atnCarteCarburant + r.atnBorne;
-  r.atnTotal = r.atnCar + r.atnAutresTot;
+  r.atnTotal = r.atnCar + r.atnMoto + r.atnAutresTot;
 
   // ── ONSS Travailleur ──
   const isOuvrier = (emp.statut === 'ouvrier');

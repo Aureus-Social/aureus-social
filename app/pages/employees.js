@@ -19,7 +19,7 @@ function Employees({s,d}) {
   const [filter,setFilter]=useState('all'); // all, active, sorti, student, ouvrier
   const [viewMode,setViewMode]=useState('list'); // list, grid
   const empty={first:'',last:'',niss:'',birth:'',addr:'',city:'',zip:'',startD:'',endD:'',fn:"",dept:'',contract:'CDI',regime:'full',whWeek:38,monthlySalary:0,civil:"single",depChildren:0,handiChildren:0,iban:'',mvT:10,mvW:CR_TRAV,mvE:8.91,expense:0,cp:'200',dmfaCode:'495',dimType:'OTH',commDist:0,commType:'none',commMonth:0,status:'active',sexe:'M',statut:'employe',niveauEtude:'sec',allocTravailType:'none',allocTravail:0,carFuel:"none",carCO2:0,carCatVal:0,carBrand:"",carModel:"",atnGSM:false,atnPC:false,atnInternet:false,atnLogement:false,atnLogementRC:0,atnChauffage:false,atnElec:false,depAscendant:0,depAscendantHandi:0,conjointHandicap:false,depAutres:0,anciennete:0,nrEngagement:0,engagementTrimestre:1,
-    veloSociete:false,veloType:'none',veloValeur:0,veloLeasingMois:0,carteCarburant:false,carteCarburantMois:0,borneRecharge:false,borneRechargeCoût:0,
+    veloSociete:false,veloType:'none',veloValeur:0,veloLeasingMois:0,motoSociete:false,motoCO2:0,motoCatVal:0,motoBrand:'',carteCarburant:false,carteCarburantMois:0,borneRecharge:false,borneRechargeCoût:0,
     frontalier:false,frontalierPays:'',frontalierConvention:'',frontalierA1:false,frontalierExoPP:false,
     pensionné:false,pensionType:'none',pensionAge:0,pensionCarriere:0,pensionCumulIllimite:false,pensionMontant:0,
   };
@@ -471,6 +471,23 @@ function Employees({s,d}) {
       </div>
       {form.veloSociete&&<div style={{marginTop:8,padding:10,background:"rgba(74,222,128,.04)",borderRadius:8,fontSize:10.5,color:'#4ade80',lineHeight:1.6}}>
         🚲 <b>Vélo de société</b> — ATN = 0€ (Art. 38§1er 14°a CIR — exonéré ONSS et IPP depuis 01/01/2024). Leasing vélo déductible 100% pour l'employeur. Cumulable avec l'indemnité vélo 0,27€/km. Le speed pedelec est assimilé à un vélo.
+      </div>}
+      <ST>Moto de société (ATN)</ST>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+        <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>🏍 Moto de société</div>
+          <div onClick={()=>setF({...form,motoSociete:!form.motoSociete})} style={{padding:'8px 12px',borderRadius:6,cursor:'pointer',fontSize:11,
+            background:form.motoSociete?'rgba(251,146,60,.15)':'rgba(198,163,78,.04)',color:form.motoSociete?'#fb923c':'#5e5c56',border:'1px solid '+(form.motoSociete?'rgba(251,146,60,.3)':'rgba(198,163,78,.1)'),textAlign:'center'}}>
+            {form.motoSociete?'✅ OUI — ATN calculé sur valeur catalogue':'❌ NON'}
+          </div>
+        </div>
+        {form.motoSociete&&<I label="Carburant moto" value={form.motoFuel||'essence'} onChange={v=>setF({...form,motoFuel:v})} options={[{v:'essence',l:'Essence'},{v:'electrique',l:'Électrique'},{v:'hybride',l:'Hybride'}]}/>}
+        {form.motoSociete&&<I label="CO2 g/km moto" type="number" value={form.motoCO2} onChange={v=>setF({...form,motoCO2:v})}/>}
+        {form.motoSociete&&<I label="Valeur catalogue moto (€)" type="number" value={form.motoCatVal} onChange={v=>setF({...form,motoCatVal:v})}/>}
+        {form.motoSociete&&<I label="Marque moto" value={form.motoBrand||''} onChange={v=>setF({...form,motoBrand:v})} options={[{v:'',l:'— Sélectionner —'},{v:'BMW Motorrad',l:'BMW Motorrad'},{v:'Ducati',l:'Ducati'},{v:'Harley-Davidson',l:'Harley-Davidson'},{v:'Honda',l:'Honda'},{v:'Kawasaki',l:'Kawasaki'},{v:'KTM',l:'KTM'},{v:'Piaggio',l:'Piaggio'},{v:'Suzuki',l:'Suzuki'},{v:'Triumph',l:'Triumph'},{v:'Yamaha',l:'Yamaha'},{v:'Autre',l:'Autre'}]}/>}
+        {form.motoSociete&&<I label="Modèle moto" value={form.motoModel||''} onChange={v=>setF({...form,motoModel:v})}/>}
+      </div>
+      {form.motoSociete&&<div style={{marginTop:8,padding:10,background:"rgba(251,146,60,.04)",borderRadius:8,fontSize:10.5,color:'#fb923c',lineHeight:1.6}}>
+        🏍 <b>Moto de société</b> — ATN = valeur catalogue × (6/7) × taux CO2 / 12. Même formule que la voiture (Art. 36 CIR 92). Cotisation CO2 patronale applicable. ATN imposable PP, non soumis ONSS.
       </div>}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginTop:10}}>
         <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>⛽ Carte carburant / recharge</div>
