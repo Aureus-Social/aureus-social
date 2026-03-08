@@ -16,7 +16,7 @@ const MN = MN_FR;
 function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function Dashboard({s,d}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const ae=(s?.emps||[]).filter(e=>e.status==='active'||!e.status||e.status===undefined);
   const sortie=(s?.emps||[]).filter(e=>e.status==='sorti');

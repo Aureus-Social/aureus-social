@@ -11,7 +11,7 @@ const StatusDot=({ok})=><span style={{display:'inline-block',width:8,height:8,bo
 // SECURITY DASHBOARD — Vue complète sécurité
 // ════════════════════════════════════════════════════════════
 export function SecurityDashboard({s,supabase,user}){
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [tab,setTab]=useState(defaultTab||'overview');
   const [pwTest,setPwTest]=useState('');
   const [ipList,setIpList]=useState([
@@ -473,7 +473,7 @@ CREATE INDEX idx_ip_whitelist_tenant ON ip_whitelist(tenant_id, active);`}
 
 
 export default function SecurityDashboardWrapped({ s, d, tab }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const tabMap = { securitedata:'overview', archives:'niveau3', ged:'rgpddocs' };
   const mappedTab = tabMap[tab] || tab || 'overview';
   return <SecurityDashboard state={s || {}} dispatch={d || (() => {})} defaultTab={mappedTab} />;

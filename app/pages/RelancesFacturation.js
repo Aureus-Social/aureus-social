@@ -66,7 +66,7 @@ const DEMO_FACTURES = [
 ];
 
 export default function RelancesFacturation({ supabase, user, clients = [] }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [factures, setFactures] = useState([]);
   const [tab, setTab] = useState('retard');
   const [sending, setSending] = useState(null);

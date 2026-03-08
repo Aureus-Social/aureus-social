@@ -38,7 +38,7 @@ function quickNet(brut) { return Math.round((brut||0) * NET_FACTOR * 100) / 100;
 function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function AdminDashboard({s,d,tab}){
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   // Routing par tab
   if(tab==='historique') return <HistoriquePage s={s}/>;
   if(tab==='integrations') return <IntegrationsPage s={s}/>;
@@ -52,7 +52,7 @@ function AdminDashboard({s,d,tab}){
 }
 
 function AdminDashboard_Main({s,d}){
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const sub=s.sub||'admin_users';
   const [users,setUsers]=useState([]);
   const [clients,setClients]=useState([]);

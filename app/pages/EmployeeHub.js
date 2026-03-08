@@ -449,6 +449,6 @@ export function GestionInterimairesV2({s,d}){
 
 
 export default function EmployeeHubWrapped({ s, d, tab }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   return <DashboardRHV2 s={s||{}} d={d||(()=>{})} props_tab={tab} />;
 }

@@ -492,7 +492,7 @@ updateHistory.map((h,i)=><div key={i} style={{display:"flex",gap:10,padding:"10p
 
 
 export default function LoisWrapped({ s, d, tab }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   // Mapper nos tabs menu vers les onglets internes du moteur lois
   const TAB_MAP = {
     seuilssociaux:       'parametres',

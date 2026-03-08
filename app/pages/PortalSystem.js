@@ -15,7 +15,7 @@ const GOLD='#c6a34e',GREEN='#22c55e',BLUE='#3b82f6',RED='#ef4444',PURPLE='#a855f
 
 // ── Portal Detection ──
 export function usePortalMode() {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const TAB_TO_PORTAL = { portail:'admin', portailclient:'client', portalmanager:'employee' };
   const [portal, setPortal] = useState(TAB_TO_PORTAL[initialPortalTab] || 'admin');
   
@@ -132,7 +132,7 @@ export const EMPLOYEE_NAV = [
 // COMPOSANT : Portail Employé — Dashboard
 // ═══════════════════════════════════════════════════════════════════
 export function EmployeeDashboard({s, d, employee}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const emp = employee || s.emps?.[0] || {};
   const pays = s.pays || [];
   const lastPay = pays.filter(p => p.eid === emp.id).sort((a,b) => (b.year*12+b.month) - (a.year*12+a.month))[0];
@@ -204,7 +204,7 @@ export function EmployeeDashboard({s, d, employee}) {
 // COMPOSANT : Portail Employé — Mes Fiches de Paie
 // ═══════════════════════════════════════════════════════════════════
 export function EmployeePayslips({s, d, employee}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [year, setYear] = useState(2026);
   const emp = employee || s.emps?.[0] || {};
   const pays = (s.pays || []).filter(p => p.eid === emp.id && p.year === year)
@@ -258,7 +258,7 @@ export function EmployeePayslips({s, d, employee}) {
 // COMPOSANT : Portail Employé — Congés & Absences
 // ═══════════════════════════════════════════════════════════════════
 export function EmployeeLeave({s, d, employee}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [tab, setTab] = useState('solde');
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({type:'annuel',debut:'',fin:'',motif:''});
@@ -421,7 +421,7 @@ export function EmployeeLeave({s, d, employee}) {
 // COMPOSANT : Portail Employé — Mes Documents
 // ═══════════════════════════════════════════════════════════════════
 export function EmployeeDocuments({s, d, employee}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const emp = employee || s.emps?.[0] || {};
   
   const docs = [
@@ -484,7 +484,7 @@ export function EmployeeDocuments({s, d, employee}) {
 // COMPOSANT : Portail Employé — Mon Profil
 // ═══════════════════════════════════════════════════════════════════
 export function EmployeeProfile({s, d, employee}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const emp = employee || s.emps?.[0] || {};
   const co = s?.co || {};
   
@@ -553,7 +553,7 @@ export function EmployeeProfile({s, d, employee}) {
 // COMPOSANT : Portail Employé — Prestations / Pointage
 // ═══════════════════════════════════════════════════════════════════
 export function EmployeeTimesheet({s, d, employee}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const emp = employee || s.emps?.[0] || {};
   const [month, setMonth] = useState(2);
   const MONTHS=['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
@@ -619,7 +619,7 @@ export function EmployeeTimesheet({s, d, employee}) {
 // COMPOSANT : Portail Employé — Mes Formations
 // ═══════════════════════════════════════════════════════════════════
 export function EmployeeTraining({s, d}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const cs = {padding:'20px',borderRadius:'14px',border:'1px solid rgba(59,130,246,.06)',background:'rgba(255,255,255,.01)'};
   
@@ -668,7 +668,7 @@ export function EmployeeTraining({s, d}) {
 // COMPOSANT : Client Portal — Dashboard Employeur
 // ═══════════════════════════════════════════════════════════════════
 export function ClientDashboard({s, d}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const co = s?.co || {};
   const emps = s?.emps || [];
   const pays = s.pays || [];
@@ -776,7 +776,7 @@ export function ClientDashboard({s, d}) {
 // COMPOSANT : Client Portal — Mes Factures
 // ═══════════════════════════════════════════════════════════════════
 export function ClientFactures({s}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const cs = {padding:'20px',borderRadius:'14px',border:'1px solid rgba(34,197,94,.06)',background:'rgba(255,255,255,.01)'};
   
   const factures = Array.from({length:12},(_,i)=>({
@@ -823,7 +823,7 @@ export function ClientFactures({s}) {
 // COMPOSANT : Portail Sidebar Branding
 // ═══════════════════════════════════════════════════════════════════
 export function PortalBadge({portal}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const config = PORTAL_CONFIG[portal];
   if (portal === 'admin') return null;
   
@@ -843,7 +843,7 @@ export function PortalBadge({portal}) {
 // COMPOSANT : Portal Switcher (Admin only)
 // ═══════════════════════════════════════════════════════════════════
 export function PortalSwitcher({portal, switchPortal, userRole}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   if (userRole !== 'admin' && portal === 'admin') return null;
   
   const portals = [
@@ -860,7 +860,7 @@ export function PortalSwitcher({portal, switchPortal, userRole}) {
 }
 
 function PortalSystemPage({ s, d, tab: initialPortalTab }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const { portal, switchPortal } = usePortalMode();
   const cfg = PORTAL_CONFIG[portal] || PORTAL_CONFIG.admin;
   const GOLD = '#c6a34e';
@@ -923,6 +923,6 @@ function PortalSystemPage({ s, d, tab: initialPortalTab }) {
 }
 
 export default function PortalSystemPg({ s, d, tab }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   return <PortalSystemPage s={s} d={d} tab={tab} />;
 }

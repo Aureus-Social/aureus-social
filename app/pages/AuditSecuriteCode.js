@@ -255,7 +255,7 @@ function TestSuiteTab({s}) {
 // COMPOSANT PRINCIPAL
 // ════════════════════════════
 export default function AuditSecuriteCode({s, d, tab: props_tab}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const TAB_MAP = { auditsecuritecode:'securite', auditfiscale:'securite', audittrail:'trail', testsuite:'tests' };
   const [tab, setTab] = useState(TAB_MAP[props_tab] || 'securite');
 

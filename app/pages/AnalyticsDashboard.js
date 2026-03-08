@@ -22,6 +22,7 @@ const RechartsComponents = dynamic(() =>
     } = mod
 
     function ChartWrapper({ children, type, ...props }) {
+  const { t, lang, tText } = useLang();
       return children({
         BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
         AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -48,6 +49,7 @@ function fmt(v) {
 }
 
 function KPICard({ label, value, icon, trend, color }) {
+  const { t, lang, tText } = useLang();
   return (
     <div style={{
       padding: 16, background: DARK, borderRadius: 8, border: `1px solid ${BORDER}`,
@@ -68,6 +70,7 @@ function KPICard({ label, value, icon, trend, color }) {
 }
 
 function ChartCard({ title, children, height }) {
+  const { t, lang, tText } = useLang();
   return (
     <div style={{ background: DARK, borderRadius: 8, border: `1px solid ${BORDER}`, padding: 16, marginBottom: 16 }}>
       <h3 style={{ margin: '0 0 16px 0', fontSize: 14, fontWeight: 600, color: GOLD }}>{title}</h3>
@@ -79,7 +82,7 @@ function ChartCard({ title, children, height }) {
 }
 
 export default function AnalyticsDashboardWrapped({ s, d, tab }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   // analytics et tbdirection → dashboard complet avec graphiques
   // autres tabs → vue dédiée avec titre contextuel + dashboard intégré
   const meta = TAB_META[tab] || TAB_META['analytics'];
@@ -98,7 +101,7 @@ export default function AnalyticsDashboardWrapped({ s, d, tab }) {
 }
 
 function AnalyticsDashboard({ state, defaultTab }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [period, setPeriod] = useState('12m')
   const [activeTab, setActiveTab] = useState(defaultTab || 'analytics')
   const employees = state?.employees || []

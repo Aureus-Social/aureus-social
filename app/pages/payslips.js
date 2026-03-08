@@ -14,7 +14,7 @@ const MN = MN_FR;
 function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const [eid,setEid]=useState(s.selectedEmpIdForPayslip||(s?.emps||[])[0]?.id||'');
   const [per,setPer]=useState({...DPER});

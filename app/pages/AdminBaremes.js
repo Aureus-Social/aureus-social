@@ -111,7 +111,7 @@ function setNestedValue(obj, path, value) {
 }
 
 export default function AdminBaremes({ loisBelges, loisTimeline, loisCurrent, onUpdate }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [tab, setTab] = useState('current');
   const [editValues, setEditValues] = useState({});
   const [dirty, setDirty] = useState({});

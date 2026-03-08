@@ -13,7 +13,7 @@ const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août
 function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function Employees({s,d}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const [form,setF]=useState(null);
   const [ed,setEd]=useState(false);

@@ -746,13 +746,14 @@ function documentToPrintHTML(content, title) {
 
 // ── Composant principal ──
 export default function DocumentGeneratorWrapped({ s, d, tab }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const TAB_TO_CAT = {'contratgen': 'contrat', 'contratsmenu': 'contrat', 'annexeReglement': 'reglementaire', 'gendocsjur': 'reglementaire', 'formC4': 'sortie', 'formC131': 'attestation', 'legal': 'reglementaire', 'cgvsaas': 'reglementaire', 'mentionslegales': 'reglementaire'};
   const initialCat = TAB_TO_CAT[tab] || null;
   return <DocumentGenerator state={s || {}} defaultTab={tab} initialCat={initialCat} />;
 }
 
 function DocumentGenerator({ state, defaultTab, initialCat }) {
+  const { t, lang, tText } = useLang();
   const [selectedType, setSelectedType] = useState(null)
   const [selectedEmployee, setSelectedEmployee] = useState(null)
   const [formData, setFormData] = useState({})
@@ -853,7 +854,7 @@ function DocumentGenerator({ state, defaultTab, initialCat }) {
               color: filterCat === key ? val.color : MUTED, cursor: 'pointer', fontSize: 12,
             }}
           >
-            {val.icon} {val.label}
+            {val.icon} {tText(val.label)}
           </button>
         ))}
       </div>
@@ -871,8 +872,8 @@ function DocumentGenerator({ state, defaultTab, initialCat }) {
             }}
           >
             <div style={{ fontSize: 20, marginBottom: 6 }}>{val.icon}</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: selectedType === key ? GOLD : TEXT }}>{val.label}</div>
-            <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>{val.description}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: selectedType === key ? GOLD : TEXT }}>{tText(val.label)}</div>
+            <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>{tText(val.description)}</div>
           </button>
         ))}
       </div>
@@ -991,6 +992,7 @@ const btnStyle = {
 }
 
 function Field({ label, value, onChange, type, placeholder }) {
+  const { t, lang, tText } = useLang();
   return (
     <div>
       <label style={{ fontSize: 12, color: MUTED, display: 'block', marginBottom: 4 }}>{label}</label>

@@ -26,6 +26,7 @@ const Badge = ({ text, color }) => (
 
 // ═══ Prediction Turnover ═══
 function PredictionTurnover({ emps }) {
+  const { t, lang, tText } = useLang();
   const data = useMemo(() => {
     if (!emps || !emps.length) return { risk: [], stats: {} };
     const now = new Date();
@@ -114,6 +115,7 @@ function PredictionTurnover({ emps }) {
 
 // ═══ Recommandations Salariales ═══
 function RecoSalariales({ emps }) {
+  const { t, lang, tText } = useLang();
   const recos = useMemo(() => {
     if (!emps || !emps.length) return [];
     const now = new Date();
@@ -175,6 +177,7 @@ function RecoSalariales({ emps }) {
 
 // ═══ Detection Anomalies ═══
 function DetectionAnomalies({ emps }) {
+  const { t, lang, tText } = useLang();
   const anomalies = useMemo(() => {
     if (!emps || !emps.length) return [];
     const results = [];
@@ -242,6 +245,7 @@ function DetectionAnomalies({ emps }) {
 
 // ═══ What-If Simulator ═══
 function WhatIfSimulator({ emps }) {
+  const { t, lang, tText } = useLang();
   const [scenario, setScenario] = useState('augmentation');
   const [pct, setPct] = useState(3);
   const [nbEmps, setNbEmps] = useState(0);
@@ -323,6 +327,7 @@ function WhatIfSimulator({ emps }) {
 
 // ═══ KPI Dashboard ═══
 function KPIDashboardIA({ emps }) {
+  const { t, lang, tText } = useLang();
   const stats = useMemo(() => {
     if (!emps || !emps.length) return {};
     const now = new Date();
@@ -392,7 +397,7 @@ function KPIDashboardIA({ emps }) {
 
 // ═══ PAGE PRINCIPALE ═══
 export default function AureusSuitePage({ s, d }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const sub = s.sub || 'ia_turnover';
   const emps = s?.emps || s.employees || [];
 

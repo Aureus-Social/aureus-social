@@ -89,6 +89,7 @@ function getFirstDayOfWeek(year, month) {
 
 // ── Composant: Vue mensuelle d'un employé ──
 function EmployeeRow({ employee, year, month, absences, joursFeries, onCellClick }) {
+  const { t, lang, tText } = useLang();
   const days = getDaysInMonth(year, month)
   const ferieMap = {}
   joursFeries.forEach(jf => {
@@ -175,12 +176,13 @@ function EmployeeRow({ employee, year, month, absences, joursFeries, onCellClick
 
 // ── Composant principal ──
 export default function EmployeePlanningWrapped({ s, d, tab }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const viewMap = { interimaires:'interimaires', joursPrestes:'joursPrestes', registrepersonnel:'registrepersonnel' };
   return <EmployeePlanning state={s || {}} dispatch={d || (() => {})} defaultTab={tab} initialView={viewMap[tab] || 'team'} />;
 }
 
 function EmployeePlanning({ state, dispatch, defaultTab, initialView }) {
+  const { t, lang, tText } = useLang();
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())

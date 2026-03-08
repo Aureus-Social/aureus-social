@@ -378,7 +378,7 @@ const CAT_COLORS={remvar:'#c6a34e',exonere:'#22c55e',frais:'#3b82f6',atn:'#f8717
 // COMPOSANT 1: PRIME CALCULATOR V2 — Simulateur comparatif
 // ════════════════════════════════════════════════════════════
 export function PrimeCalculatorV2({s,d,props_tab}){
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const emps=(s?.clients||[]).flatMap(c=>c.emps||[]);
   const [selPrime,setSelPrime]=useState('prime_fin_annee');
@@ -607,7 +607,7 @@ export function PrimeCalculatorV2({s,d,props_tab}){
 // COMPOSANT 2: OPTI FISCALE V2 — Simulation comparative
 // ════════════════════════════════════════════════════════════
 export function OptiFiscaleV2({s}){
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [budget,setBudget]=useState(5000);
   const [tab,setTab]=useState('opti');
   const b=+budget||0;
@@ -685,7 +685,7 @@ export function OptiFiscaleV2({s}){
 // COMPOSANT 3: VÉHICULES & ATN V2 — Car policy + TCO
 // ════════════════════════════════════════════════════════════
 export function VehiculesATNV2({s}){
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [co2,setCo2]=useState(120);
   const [valCat,setValCat]=useState(35000);
   const [carburant,setCarburant]=useState('essence');
@@ -813,7 +813,7 @@ export function VehiculesATNV2({s}){
 // COMPOSANT 4: FLEXI-JOBS V2 — Contingent + bascule ONSS
 // ════════════════════════════════════════════════════════════
 export function FlexiJobsV2({s,d}){
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [heures,setHeures]=useState(500);
   const [salaire,setSalaire]=useState(14.97);
   const [tab,setTab]=useState('simu');
@@ -914,7 +914,7 @@ export function FlexiJobsV2({s,d}){
 // COMPOSANT 5: 13ÈME MOIS V2 — Prorata + spécificités sectorielles
 // ════════════════════════════════════════════════════════════
 export function TreiziemeMoisV2({s}){
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const emps=(s?.clients||[]).flatMap(c=>c.emps||[]);
   const [moisPrestes,setMoisPrestes]=useState(12);
   const [salaire,setSalaire]=useState(3000);
@@ -979,7 +979,7 @@ export {PRIMES_DB,CATS,CAT_COLORS};
 // COMPOSANT 6: ÉCO-CHÈQUES V2 — Prorata + plafond sectoriel
 // ════════════════════════════════════════════════════════════
 export function EcoChequesV2({s}){
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const emps=(s?.clients||[]).flatMap(c=>c.emps||[]);
   const [montant,setMontant]=useState(250);
   const [moisPrestes,setMoisPrestes]=useState(12);
@@ -1036,7 +1036,7 @@ export function EcoChequesV2({s}){
 // COMPOSANT 7: PLAN CAFÉTÉRIA V2 — Moteur de conversion réel
 // ════════════════════════════════════════════════════════════
 export function PlanCafeteriaV2({s}){
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [budgetAn,setBudgetAn]=useState(6000);
   const [tab,setTab]=useState('simu');
   const B=+budgetAn||0;
@@ -1145,7 +1145,7 @@ export function PlanCafeteriaV2({s}){
 // COMPOSANT 8: CCT 90 BONUS V2 — Plan bonus + dépôt SPF
 // ════════════════════════════════════════════════════════════
 export function CCT90BonusV2({s}){
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const emps=(s?.clients||[]).flatMap(c=>c.emps||[]);const n=emps.length||1;
   const [montant,setMontant]=useState(3000);
   const [periodeRef,setPeriodeRef]=useState(12);
@@ -1298,7 +1298,7 @@ Signature employeur: ________________`}
 // COMPOSANT 9: NOTES DE FRAIS V2 — Saisie + approbation workflow
 // ════════════════════════════════════════════════════════════
 export function NoteFraisV2({s}){
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [tab,setTab]=useState('forfaits');
   const [notes,setNotes]=useState([]);
   const [newNote,setNewNote]=useState({date:'',desc:'',montant:0,cat:'transport',justif:false});
@@ -1423,7 +1423,7 @@ export function NoteFraisV2({s}){
 // COMPOSANT 10: CHÈQUES-REPAS V2
 // ════════════════════════════════════════════════════════════
 export function CheqRepasV2({s}){
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const emps=(s?.clients||[]).flatMap(c=>c.emps||[]);
   const [valFaciale,setValFaciale]=useState(8);
   const [partPatron,setPartPatron]=useState(6.91);
@@ -1550,4 +1550,4 @@ export function CheqRepasV2({s}){
 
 
 export default function PrimesAvantagesTabbed({ s, d, tab }) {
-  const { t, lang } = useLang(); return <PrimeCalculatorV2 s={s||{}} d={d||(()=>{})} props_tab={tab}/> }
+  const { t, lang, tText } = useLang(); return <PrimeCalculatorV2 s={s||{}} d={d||(()=>{})} props_tab={tab}/> }

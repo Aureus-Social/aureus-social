@@ -60,7 +60,7 @@ const generateDimonaPreview=(emp,company)=>{
 };
 
 export function OnboardingWizardV2({s,d}){
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [mode,setMode]=useState('choose'); // choose | wizard | reprise
   const [step,setStep]=useState(0);
   const [errors,setErrors]=useState([]);

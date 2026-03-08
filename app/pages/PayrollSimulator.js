@@ -16,7 +16,7 @@ const GOLD = '#c6a34e', GREEN = '#22c55e', RED = '#ef4444', BLUE = '#3b82f6';
 // NET → BRUT (Dichotomie haute précision)
 // ═══════════════════════════════════════════════════════════════════
 export function netToBrut(targetNet, calcPayrollFn, opts = {}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const { familial = 'isole', charges = 0, statut = 'employe', regime = 100 } = opts;
   let lo = targetNet * 0.5, hi = targetNet * 3.5;
   for (let i = 0; i < 120; i++) {
@@ -34,7 +34,7 @@ export function netToBrut(targetNet, calcPayrollFn, opts = {}) {
 // COÛT TOTAL → BRUT (Dichotomie)
 // ═══════════════════════════════════════════════════════════════════
 export function coûtToBrut(targetCoût, calcPayrollFn, opts = {}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const { familial = 'isole', charges = 0, statut = 'employe', regime = 100 } = opts;
   let lo = targetCoût * 0.3, hi = targetCoût * 0.95;
   for (let i = 0; i < 120; i++) {
@@ -53,7 +53,7 @@ export function coûtToBrut(targetCoût, calcPayrollFn, opts = {}) {
 // Calcul: salaire brut + chèques-repas + frais propres + éco-chèques
 // ═══════════════════════════════════════════════════════════════════
 export function optimizePackage(budgetMensuel, calcPayrollFn, LOIS_BELGES, opts = {}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const LB = LOIS_BELGES;
   const joursOuvrables = opts.joursOuvrables || 20;
   const { familial = 'isole', charges = 0, statut = 'employe', regime = 100 } = opts;
@@ -120,7 +120,7 @@ export function optimizePackage(budgetMensuel, calcPayrollFn, LOIS_BELGES, opts 
 // COMPOSANT: Simulateur Avancé Brut↔Net
 // ═══════════════════════════════════════════════════════════════════
 export function PayrollSimulatorAdvanced({ calcPayroll, LOIS_BELGES }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const TAB_MAP_PS = { couttotal:'cost2net', simulateurspro:'brut2net', simulicenciement:'net2brut',
     simupension:'package', comparateur:'compare', optifiscale:'package' };
   const [tab, setTab] = useState(TAB_MAP_PS[props_tab] || 'brut2net');
@@ -420,6 +420,6 @@ export function PayrollSimulatorAdvanced({ calcPayroll, LOIS_BELGES }) {
 }
 
 export default function PayrollSimPage({s, d, tab}) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   return <PayrollSimulatorAdvanced calcPayroll={calcPayroll} LOIS_BELGES={LOIS_BELGES} props_tab={tab} />;
 }

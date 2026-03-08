@@ -214,7 +214,7 @@ function sendPushNotification(title, options) {
 
 // ── Composant: Badge de notification ──
 export function NotifBadge({ count, onClick }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   if (!count) return null
   return (
     <button
@@ -240,7 +240,7 @@ export function NotifBadge({ count, onClick }) {
 
 // ── Composant: Mini-liste déroulante ──
 export function NotifDropdown({ notifications, onClose, onMarkRead, onViewAll }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const ref = useRef()
 
   useEffect(() => {
@@ -318,7 +318,7 @@ export function NotifDropdown({ notifications, onClose, onMarkRead, onViewAll })
 
 // ── Composant principal: Page Notifications ──
 export default function NotificationCenterWrapped({ s, d, tab }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const state = s || {};
   const dispatch = d || (() => {});
   if (tab === 'smartalerts') return <SmartAlertsPage state={state} />;
@@ -329,7 +329,7 @@ export default function NotificationCenterWrapped({ s, d, tab }) {
 }
 
 function NotificationCenter({ state, dispatch, defaultTab }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [filter, setFilter] = useState('all')
   const [readIds, setReadIds] = useState(() => {
     try { return new Set(JSON.parse(localStorage.getItem('aureus_notif_read') || '[]')) }
@@ -584,7 +584,7 @@ export { generateNotifications, NOTIF_TYPES, requestPushPermission, sendPushNoti
 // SMART ALERTS — Alertes intelligentes basées sur les données
 // ══════════════════════════════════════════════════════════════
 function SmartAlertsPage({ state }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const emps = (state?.emps || []).filter(e => e.status === 'active' || !e.status)
   const [dismissed, setDismissed] = useState(new Set())
   const f2 = v => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2 }).format(v)
@@ -732,7 +732,7 @@ function SmartAlertsPage({ state }) {
 // JOURNAL — Journal des activités
 // ══════════════════════════════════════════════════════════════
 function JournalPage({ state }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [typeFilter, setTypeFilter] = useState('all')
   const entries = useMemo(() => {
     const now = new Date()
@@ -804,7 +804,7 @@ function JournalPage({ state }) {
 // SUPPORT — Tickets support
 // ══════════════════════════════════════════════════════════════
 function SupportPage() {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [tickets] = useState([
     { id:'T001', subject:'Export WinBooks format incorrect', status:'open', prio:'high', ts:'07/03/2026 09:12' },
     { id:'T002', subject:'Dimona OUT non envoyé', status:'resolved', prio:'high', ts:'06/03/2026 14:30' },

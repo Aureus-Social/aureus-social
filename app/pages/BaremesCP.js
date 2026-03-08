@@ -383,7 +383,7 @@ export const AUTRES_CP={
 // COMPOSANT UI — BAREMES CP V2
 // ════════════════════════════════════════════════════════════
 export function BaremesCPV2({s,props_tab}){
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const clients= s?.clients||[];
   const allEmps=clients.flatMap(c=>(c.emps||[]).map(e=>({...e,_co:c.company?.name||'',_cp:c.company?.cp||'200'})));
@@ -594,6 +594,6 @@ export function BaremesCPV2({s,props_tab}){
 
 
 export default function BaremesCPWrapped({ s, d, tab }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   return <BaremesCPV2 s={s||{}} d={d||(()=>{})} props_tab={tab} />;
 }

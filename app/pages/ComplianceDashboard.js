@@ -308,6 +308,7 @@ function calculateScore(checklist) {
 
 // ── Composant: Jauge circulaire ──
 function ScoreGauge({ score, size, color }) {
+  const { t, lang, tText } = useLang();
   const s = size || 120
   const r = (s - 16) / 2
   const circ = 2 * Math.PI * r
@@ -336,6 +337,7 @@ function ScoreGauge({ score, size, color }) {
 
 // ── Composant principal ──
 function ComplianceDashboardInner({ state, initialFilter }) {
+  const { t, lang, tText } = useLang();
   const [expandedFramework, setExpandedFramework] = useState(null)
 
   const checklist = useMemo(() => generateChecklist(state), [state])
@@ -528,7 +530,7 @@ function ComplianceDashboardInner({ state, initialFilter }) {
 
 
 export default function ComplianceDashboard({ state, s, d, tab }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const actualState = state || s || {};
   return <ComplianceDashboardInner state={actualState} initialFilter={tab === 'rgpd' ? 'rgpd' : null} />;
 }

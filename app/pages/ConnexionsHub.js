@@ -142,7 +142,7 @@ const LS_KEY = 'aureus-hub-visits';
 const FAV_KEY = 'aureus-hub-favs';
 
 export default function ConnexionsHub({ s, d, tab }) {
-  const { t, lang } = useLang();
+  const { t, lang, tText } = useLang();
   const [search, setSearch]       = useState('');
   const [cat, setCat]             = useState('TOUS');
   const [prio, setPrio]           = useState('TOUS');
