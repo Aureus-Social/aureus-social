@@ -448,4 +448,7 @@ const ClotureMensuelle=({s,d,supabase,user})=>{
   </div>;
 };
 
-export default ClotureMensuelle;
+// Wrapper
+export default function ClotureMensuellePage({s, d, t, lang}) {
+  return <ClotureMensuelle s={s} d={d} supabase={supabase} />
+}

@@ -1,18 +1,16 @@
-'use client';
+"use client";
 import { useLang } from '../lib/lang-context';
-import { useState } from 'react';
+import React from 'react';
+import LoisWrapped from './lois';
+
 export function DashDelegation({s,d}){
-  const { t, lang, tText } = useLang();return <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Module DashDelegation</div>;}
-export function EgaliteHF({s,d}){
-  const { t, lang, tText } = useLang();return <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Module EgaliteHF</div>;}
-export function GestionElections({s,d}){
-  const { t, lang, tText } = useLang();return <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Module GestionElections</div>;}
-export function PlanDiversite({s,d}){
-  const { t, lang, tText } = useLang();return <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Module PlanDiversite</div>;}
-export function RapportCE({s,d}){
-  const { t, lang, tText } = useLang();return <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Module RapportCE</div>;}
+  return <LoisWrapped s={s} d={d} tab="seuilssociaux" />;
+}
+
 export function TableauSeuils({s,d}){
-  const { t, lang, tText } = useLang();return <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Module TableauSeuils</div>;}
+  return <LoisWrapped s={s} d={d} tab="seuilssociaux" />;
+}
 
-
-export default DashDelegation;
+export default function SeuilsSociauxPage({s, d}) {
+  return <LoisWrapped s={s} d={d} tab="seuilssociaux" />;
+}
