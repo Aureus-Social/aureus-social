@@ -327,6 +327,29 @@ export default function DashboardLayout({ user }) {
       if(ok) setCryptoKey(true);
       else console.warn('[Crypto] Chiffrement non disponible');
     });
+
+    // Backup automatique silencieux à chaque session (4.3)
+    if (user) {
+      const BACKUP_KEY = 'aureus_last_backup_' + (user.id || user.email);
+      const lastBackup = sessionStorage.getItem(BACKUP_KEY);
+      const now = Date.now();
+      const TWO_HOURS = 2 * 60 * 60 * 1000;
+      if (!lastBackup || (now - parseInt(lastBackup)) > TWO_HOURS) {
+        setTimeout(() => {
+          fetch('/api/backup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'silent', userEmail: user.email, userRole: user.user_metadata?.role || '' })
+          }).then(res => {
+            if (res.ok) {
+              sessionStorage.setItem(BACKUP_KEY, String(now));
+              const records = res.headers.get('X-Backup-Records');
+              console.log(`[Backup auto] ${records} enregistrements sauvegardés`);
+            }
+          }).catch(() => {});
+        }, 3000); // 3s après login pour ne pas bloquer le chargement
+      }
+    }
   },[user]);
 
     // Intercepte les dispatch NAV depuis les pages enfants
@@ -353,6 +376,7 @@ export default function DashboardLayout({ user }) {
       case 'payslip': return <PayslipsPage s={s} d={d} scrollAnchor={scrollAnchor} onAnchorHandled={()=>setScrollAnchor(null)} />;
       case 'declarations': case 'onss': return <DimonaPageComp s={s} d={d} />;
       case 'admin': return <AdminPage s={s} d={d} tab={page} />;
+      case 'backup': return <AdminPage s={s} d={d} tab='backup' />;
       case 'baremescp': return <BaremesCPPage s={s} d={d} />;
       case 'calcinstant': return <SimuNetBrutPage s={s} d={d} tab={page} />;
       case 'diagnostic': case 'diagnosticv': return <DiagnosticPage s={s} d={d} />;

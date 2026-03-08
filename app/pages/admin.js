@@ -44,6 +44,7 @@ function AdminDashboard({s,d,tab}){
   if(tab==='changelog') return <ChangelogPage s={s}/>;
   if(tab==='roadmapinfra') return <RoadmapPage s={s}/>;
   if(tab==='demodonnees') return <AdminDashboard_Main s={s} d={d}/>;
+  if(tab==='backup') return <BackupRestorePanel s={s} />;
   // Default: dashboard admin principal
   return <AdminDashboard_Main s={s} d={d}/>;
 }
@@ -411,7 +412,156 @@ function AdminDashboard_Main({s,d}){
       </div>
     </div>}
 
+    {sub==='admin_backup'&&<BackupRestorePanel s={s} />}
+
     </div>
+  </div>;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  BACKUP & RESTAURATION
+// ═══════════════════════════════════════════════════════════════
+
+function BackupRestorePanel({s}) {
+  const [restoreFile, setRestoreFile] = useState(null);
+  const [restoreData, setRestoreData] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [restoring, setRestoring] = useState(false);
+  const [result, setResult] = useState(null);
+  const [status, setStatus] = useState('');
+
+  const loadFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        setRestoreData(data);
+        setRestoreFile(file.name);
+        setPreview(null);
+        setResult(null);
+        setStatus('✅ Fichier chargé — ' + file.name);
+      } catch(err) {
+        setStatus('❌ Fichier invalide — ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const doPreview = async () => {
+    if (!restoreData) return;
+    setStatus('⏳ Analyse en cours...');
+    const res = await fetch('/api/restore', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ backupData: restoreData, userRole: 'admin', dryRun: true })
+    });
+    const data = await res.json();
+    if (data.ok) { setPreview(data.preview); setStatus('✅ Prévisualisation prête'); }
+    else setStatus('❌ ' + data.error);
+  };
+
+  const doRestore = async () => {
+    if (!restoreData || !preview) return;
+    if (!confirm('⚠️ ATTENTION
+Cette opération va écraser les données actuelles.
+
+Confirmer la restauration ?')) return;
+    setRestoring(true);
+    setStatus('⏳ Restauration en cours...');
+    try {
+      const res = await fetch('/api/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ backupData: restoreData, userRole: 'admin', dryRun: false })
+      });
+      const data = await res.json();
+      setResult(data);
+      setStatus(data.ok ? '✅ Restauration terminée' : '⚠️ Restauration partielle — ' + data.errors.length + ' erreur(s)');
+    } catch(e) {
+      setStatus('❌ Erreur: ' + e.message);
+    } finally {
+      setRestoring(false);
+    }
+  };
+
+  return <div>
+    <PH title="Backup & Restauration" sub="Sauvegarde manuelle et restauration des données" />
+
+    <C>
+      <ST>💾 Backup Manuel</ST>
+      <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+        <button onClick={async()=>{
+          const email = prompt('Email de réception ?', 'info@aureus-ia.com');
+          if(!email) return;
+          const res = await fetch('/api/backup', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'both', email, userRole:'admin'}) });
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = 'aureus-backup-admin-' + new Date().toISOString().split('T')[0] + '.json'; a.click();
+          URL.revokeObjectURL(url);
+          alert('✅ Backup téléchargé + email envoyé');
+        }} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'rgba(34,197,94,.15)',color:'#22c55e',fontSize:12,cursor:'pointer',fontWeight:600}}>
+          💾 Backup Admin Complet
+        </button>
+        <button onClick={async()=>{
+          const res = await fetch('/api/backup', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'silent', userRole:'admin'}) });
+          const data = await res.headers.get('X-Backup-Records');
+          alert('✅ Backup silencieux — ' + data + ' enregistrements sauvegardés');
+        }} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'rgba(96,165,250,.15)',color:'#60a5fa',fontSize:12,cursor:'pointer',fontWeight:600}}>
+          ☁️ Backup Silencieux Supabase
+        </button>
+      </div>
+    </C>
+
+    <C>
+      <ST>🔄 Restauration Guidée</ST>
+      <div style={{marginBottom:12,padding:12,background:'rgba(251,146,56,.06)',borderRadius:8,border:'1px solid rgba(251,146,56,.15)',fontSize:11,color:'#fb923c',lineHeight:1.6}}>
+        ⚠️ La restauration écrase les données actuelles. Faites un backup avant de restaurer.
+      </div>
+
+      <div style={{marginBottom:12}}>
+        <label style={{display:'block',fontSize:11,color:'#9e9b93',marginBottom:6}}>Étape 1 — Sélectionner le fichier backup</label>
+        <input type="file" accept=".json" onChange={loadFile} style={{fontSize:11,color:'#e8e6e0'}} />
+        {restoreFile && <div style={{fontSize:11,color:'#22c55e',marginTop:4}}>✅ {restoreFile}</div>}
+      </div>
+
+      {restoreData && !preview && (
+        <button onClick={doPreview} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'rgba(96,165,250,.15)',color:'#60a5fa',fontSize:12,cursor:'pointer',fontWeight:600,marginBottom:12}}>
+          🔍 Étape 2 — Analyser le fichier
+        </button>
+      )}
+
+      {preview && (
+        <div style={{marginBottom:12,padding:12,background:'rgba(34,197,94,.06)',borderRadius:8,border:'1px solid rgba(34,197,94,.15)'}}>
+          <div style={{fontSize:12,fontWeight:700,color:'#22c55e',marginBottom:8}}>📊 Prévisualisation</div>
+          <div style={{fontSize:11,color:'#9e9b93',marginBottom:4}}>Backup du: {new Date(preview.backup_date).toLocaleString('fr-BE')}</div>
+          <div style={{fontSize:11,color:'#9e9b93',marginBottom:8}}>Rôle backup: {preview.backup_role} | {preview.tables} tables | {preview.records} enregistrements</div>
+          {preview.tables_detail.map(t => (
+            <div key={t.table} style={{display:'flex',justifyContent:'space-between',fontSize:11,padding:'3px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
+              <span style={{color:'#e8e6e0'}}>{t.table}</span>
+              <span style={{color:'#c6a34e'}}>{t.records} enregistrements</span>
+            </div>
+          ))}
+          <button onClick={doRestore} disabled={restoring} style={{marginTop:12,padding:'8px 16px',borderRadius:8,border:'none',background:'rgba(239,68,68,.15)',color:'#ef4444',fontSize:12,cursor:'pointer',fontWeight:700}}>
+            {restoring ? '⏳ Restauration...' : '⚡ Étape 3 — Restaurer maintenant'}
+          </button>
+        </div>
+      )}
+
+      {result && (
+        <div style={{padding:12,background:result.ok?'rgba(34,197,94,.06)':'rgba(251,146,56,.06)',borderRadius:8,border:'1px solid '+(result.ok?'rgba(34,197,94,.15)':'rgba(251,146,56,.15)')}}>
+          <div style={{fontSize:12,fontWeight:700,color:result.ok?'#22c55e':'#fb923c',marginBottom:8}}>
+            {result.ok ? '✅ Restauration complète' : '⚠️ Restauration partielle'}
+          </div>
+          <div style={{fontSize:11,color:'#9e9b93'}}>📊 {result.summary.records_restored} enregistrements restaurés dans {result.summary.tables_restored} tables</div>
+          {result.errors.length > 0 && <div style={{fontSize:11,color:'#ef4444',marginTop:4}}>❌ {result.errors.join(', ')}</div>}
+        </div>
+      )}
+
+      {status && <div style={{marginTop:8,fontSize:11,color:'#9e9b93'}}>{status}</div>}
+    </C>
   </div>;
 }
 

@@ -73,6 +73,22 @@ export async function POST(request) {
     const jsonContent = JSON.stringify(backupPayload, null, 2);
     const totalRecords = backupPayload.metadata.total_records;
 
+    // Backup silencieux — persister dans Supabase sans email ni download
+    if (action === 'silent') {
+      await supabase.from('app_state').upsert({
+        key: 'last_backup_' + (role),
+        value: JSON.stringify({ timestamp: now.toISOString(), records: totalRecords, tables: Object.keys(backupData).length }),
+        updated_at: now.toISOString()
+      }, { onConflict: 'key' }).catch(() => {});
+      return new Response(jsonContent, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Backup-Role': role,
+          'X-Backup-Records': String(totalRecords),
+        },
+      });
+    }
+
     // Envoyer email
     if (action === 'email' || action === 'both') {
       const roleLabel = { admin:'Administrateur', comptable:'Comptable', rh:'Ressources Humaines', commercial:'Commercial', readonly:'Lecture seule' }[role] || role;

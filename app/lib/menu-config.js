@@ -127,6 +127,7 @@ export const MENU = [
   { id: '_g7', label: 'ADMINISTRATION', icon: '👑', group: true },
   { id: 'actionsrapides', label: 'Actions Rapides', icon: '⚡', g: 7 },
   { id: 'admin', label: 'Admin', icon: '👑', g: 7 },
+  { id: 'backup', label: 'Backup & Restore', icon: '💾', g: 7 },
   { id: 'adminbaremes', label: 'Admin Baremes', icon: '⚙️', g: 7 },
   { id: 'archives', label: 'Archives GED', icon: '🗄', g: 7 },
   { id: 'auditsecuritecode', label: 'Audit Securite Code', icon: '🛡', g: 7 },
