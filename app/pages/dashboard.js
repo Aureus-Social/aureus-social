@@ -158,22 +158,12 @@ function Dashboard({s,d}) {
             if(!data.ok) throw new Error(data.error);
             const {summary, alerts, checks} = data;
             const dbOk = checks.every(c=>c.ok);
-            let msg = '📊 Monitoring Aureus Social Pro
-';
-            msg += '═══════════════════════════
-';
-            msg += '🔴 Critiques: '+summary.criticals+'
-';
-            msg += '🟡 Warnings: '+summary.warnings+'
-';
-            msg += '✅ DB: '+(dbOk?'OK':'ERREUR')+'
-';
-            if(alerts.length>0){msg+='
-⚠️ Alertes:
-';alerts.slice(0,5).forEach(a=>msg+='• '+a.msg+'
-');}
-            else{msg+='
-✅ Aucune anomalie détectée';}
+            const msg = `📊 Monitoring Aureus Social Pro\n` +
+              `═══════════════════════════\n` +
+              `🔴 Critiques: ${summary.criticals}\n` +
+              `🟡 Warnings: ${summary.warnings}\n` +
+              `✅ DB: ${dbOk?'OK':'ERREUR'}\n` +
+              (alerts.length>0 ? `\n⚠️ Alertes:\n${alerts.slice(0,5).map(a=>'• '+a.msg).join('\n')}` : '\n✅ Aucune anomalie détectée');
             alert(msg);
           } catch(e){alert('❌ Erreur monitoring: '+e.message);}
           finally{if(btn){btn.textContent='📡 Monitor';btn.disabled=false;}}

@@ -97,8 +97,8 @@ export function DashboardRHV2({s,d,props_tab}){
       const hommes=emps.filter(e=>(e.gender||e.sexe||'').toLowerCase()==='m'||(e.gender||e.sexe||'').toLowerCase()==='homme');
       const femmes=emps.filter(e=>(e.gender||e.sexe||'').toLowerCase()==='f'||(e.gender||e.sexe||'').toLowerCase()==='femme');
       const handicap=emps.filter(e=>e.handicap||e.disabled||e.travailleurHandicape);
-      const mH=hommes.length>0?hommes.reduce((a,e)=>a++(e.monthlySalary||e.gross||0),0)/hommes.length:0;
-      const mF=femmes.length>0?femmes.reduce((a,e)=>a++(e.monthlySalary||e.gross||0),0)/femmes.length:0;
+      const mH=hommes.length>0?hommes.reduce((a,e)=>a+(e.monthlySalary||e.gross||0),0)/hommes.length:0;
+      const mF=femmes.length>0?femmes.reduce((a,e)=>a+(e.monthlySalary||e.gross||0),0)/femmes.length:0;
       const ecart=mH>0&&mF>0?Math.round((mH-mF)/mH*10000)/100:0;
       const quota1pct=Math.ceil(emps.length*0.01);
       const pctHandicap=emps.length>0?Math.round(handicap.length/emps.length*10000)/100:0;

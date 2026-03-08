@@ -235,8 +235,7 @@ export default function MandatsAdminPage({ s, d, tab }) {
       <PrecompteProfessionnel>${pp.toFixed(2)}</PrecompteProfessionnel>
       <CodeNatureSalaire>1</CodeNatureSalaire>
     </Fiche281_10>`;
-    }).join('
-');
+    }).join('\n');
     return `<?xml version="1.0" encoding="UTF-8"?>
 <Belcotax version="2.9">
   <Declarant>
@@ -526,8 +525,7 @@ ${clientForm.nom || ''}`;
                   <div style={{ marginTop: 12 }}>
                     <div style={{ fontSize: 10, color: '#c6a34e', marginBottom: 4, fontWeight: 700 }}>Aperçu XML (premiers 2000 caractères) :</div>
                     <pre style={{ fontSize: 9, color: '#9e9b93', background: 'rgba(0,0,0,.3)', padding: 12, borderRadius: 8, overflowX: 'auto', maxHeight: 200, overflowY: 'auto', fontFamily: 'monospace', lineHeight: 1.5 }}>
-                      {xmlGenerated.substring(0, 2000)}{xmlGenerated.length > 2000 ? '
-...' : ''}
+                      {xmlGenerated.substring(0, 2000)}{xmlGenerated.length > 2000 ? '\n...' : ''}
                     </pre>
                     <Btn onClick={() => copy(xmlGenerated, 'xml')} style={{ marginTop: 8 }}>
                       {copied === 'xml' ? '✅ Copié !' : '📋 Copier XML complet'}

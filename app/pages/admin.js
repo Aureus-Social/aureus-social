@@ -464,10 +464,7 @@ function BackupRestorePanel({s}) {
 
   const doRestore = async () => {
     if (!restoreData || !preview) return;
-    if (!confirm('⚠️ ATTENTION
-Cette opération va écraser les données actuelles.
-
-Confirmer la restauration ?')) return;
+    if (!confirm('⚠️ ATTENTION\nCette opération va écraser les données actuelles.\n\nConfirmer la restauration ?')) return;
     setRestoring(true);
     setStatus('⏳ Restauration en cours...');
     try {
