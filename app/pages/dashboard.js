@@ -149,6 +149,35 @@ function Dashboard({s,d}) {
             if(btn){btn.textContent='💾 Backup';btn.disabled=false;}
           }
         }} id="backup-btn" style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(34,197,94,.12)',color:'#22c55e',fontSize:11,cursor:'pointer',fontWeight:600}}>💾 Backup</button>
+        <button onClick={async()=>{
+          const btn = document.getElementById('monitor-btn');
+          if(btn){btn.textContent='⏳...';btn.disabled=true;}
+          try {
+            const res = await fetch('/api/monitoring');
+            const data = await res.json();
+            if(!data.ok) throw new Error(data.error);
+            const {summary, alerts, checks} = data;
+            const dbOk = checks.every(c=>c.ok);
+            let msg = '📊 Monitoring Aureus Social Pro
+';
+            msg += '═══════════════════════════
+';
+            msg += '🔴 Critiques: '+summary.criticals+'
+';
+            msg += '🟡 Warnings: '+summary.warnings+'
+';
+            msg += '✅ DB: '+(dbOk?'OK':'ERREUR')+'
+';
+            if(alerts.length>0){msg+='
+⚠️ Alertes:
+';alerts.slice(0,5).forEach(a=>msg+='• '+a.msg+'
+');}
+            else{msg+='
+✅ Aucune anomalie détectée';}
+            alert(msg);
+          } catch(e){alert('❌ Erreur monitoring: '+e.message);}
+          finally{if(btn){btn.textContent='📡 Monitor';btn.disabled=false;}}
+        }} id="monitor-btn" style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(96,165,250,.12)',color:'#60a5fa',fontSize:11,cursor:'pointer',fontWeight:600}}>📡 Monitor</button>
         <button onClick={()=>d({type:'NAV',page:'automatisation'})} style={{padding:'7px 14px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:500}}>Voir tout →</button>
       </div>
     </div>

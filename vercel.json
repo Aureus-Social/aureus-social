@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/baremes-cp",
       "schedule": "10 5 * * *"
+    },
+    {
+      "path": "/api/cron/monitoring",
+      "schedule": "0 6 * * *"
     }
   ]
 }
