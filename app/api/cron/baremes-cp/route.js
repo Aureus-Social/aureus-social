@@ -386,7 +386,7 @@ export async function GET(req) {
           headers: { 'Authorization': `Bearer ${RESEND}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             from: 'cron@aureussocial.be',
-            to: 'nourdin@aureus-ia.be',
+            to: 'info@aureus-ia.com',
             subject: `🚨 Aureus Social — Barèmes CP: variation anormale détectée`,
             html: `<h2>Variation barèmes CP > 5%</h2>
 <p>Le cron a détecté des variations importantes nécessitant validation:</p>
@@ -396,7 +396,7 @@ export async function GET(req) {
 <hr><small>Cron baremes-cp — Aureus Social Pro — ${new Date().toLocaleDateString('fr-BE')}</small>`
           })
         });
-        log.push(`📧 Email d'alerte envoyé à nourdin@aureus-ia.be`);
+        log.push(`📧 Email d'alerte envoyé à info@aureus-ia.com`);
       } catch (e) { log.push(`⚠️ Email échoué: ${e.message}`); }
     }
   }
