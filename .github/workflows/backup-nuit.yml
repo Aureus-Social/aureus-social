@@ -1,0 +1,50 @@
+name: Backup Supabase Nocturne
+
+on:
+  schedule:
+    - cron: "0 3 * * *"  # Chaque nuit 3h00 UTC (4h00 heure BE)
+  workflow_dispatch:       # Déclenchement manuel possible
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Installer PostgreSQL client
+        run: sudo apt-get install -y postgresql-client
+
+      - name: Dump base Supabase
+        run: |
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          pg_dump "${{ secrets.SUPABASE_DB_URL }}" \
+            --no-owner --no-acl \
+            | gzip > backup_${TIMESTAMP}.sql.gz
+          echo "BACKUP_FILE=backup_${TIMESTAMP}.sql.gz" >> $GITHUB_ENV
+
+      - name: Upload vers Backblaze B2
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl private
+        env:
+          AWS_S3_BUCKET: ${{ secrets.B2_BUCKET_NAME }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.B2_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.B2_APP_KEY }}
+          AWS_REGION: eu-central-003
+          AWS_S3_ENDPOINT: https://s3.eu-central-003.backblazeb2.com
+          SOURCE_DIR: ./
+
+      - name: Nettoyage local
+        run: echo "Backup terminé: ${{ env.BACKUP_FILE }}"
+
+      - name: Notification email si erreur
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USER }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          to: info@aureus-ia.com
+          subject: "🚨 ALERTE — Backup Aureus échoué"
+          body: "Le backup nocturne Supabase a échoué. Vérifier GitHub Actions."
