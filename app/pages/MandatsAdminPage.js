@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { useState, useEffect } from 'react';
 import { RMMMG } from '../lib/lois-belges';
 
@@ -180,6 +181,7 @@ const DOMICILIATION_TAUX = {
 // COMPOSANT PRINCIPAL
 // ══════════════════════════════════════════════════════════════
 export default function MandatsAdminPage({ s, d, tab }) {
+  const { t, lang } = useLang();
   const props_tab = tab || 'mandatonss';
   const [activeTab, setActiveTab] = useState(props_tab);
   const [copied, setCopied] = useState('');

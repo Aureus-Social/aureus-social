@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { B, BAREMES_CP_MIN, BONUS_MAX, BONUS_SEUIL1, BONUS_SEUIL2, C, CO2MIN, CR_MAX, CR_PAT, DPER, ECO_MAX, FORF_BUREAU, FORF_KM, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, AF_REGIONS, SAISIE_2026_TRAVAIL, SAISIE_IMMUN_ENFANT_2026, ST, TX_ONSS_E, TX_ONSS_W, TX_OUV108, Tbl, calc, f0, f2, fmt, generatePayslipPDF } from '@/app/lib/helpers';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
@@ -13,6 +14,7 @@ const MN = MN_FR;
 function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
+  const { t, lang } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const [eid,setEid]=useState(s.selectedEmpIdForPayslip||(s?.emps||[])[0]?.id||'');
   const [per,setPer]=useState({...DPER});

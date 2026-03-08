@@ -3,6 +3,7 @@ import React, { useState, useReducer, useMemo, useEffect, Suspense } from 'react
 import dynamic from 'next/dynamic';
 import { MENU, GROUPS, getGroupItems, SEARCH_SUBSECTIONS } from '../lib/menu-config';
 import { I18N } from '../lib/i18n';
+import { LangProvider, useLang } from '../lib/lang-context';
 import { supabase } from '../lib/supabase';
 import { initCryptoKey, encryptState, decryptState } from '../lib/crypto';
 import { setAuditUser, audit } from '../lib/audit';
@@ -300,17 +301,17 @@ function DashboardHome({ state, onNavigate }) {
   );
 }
 
-export default function DashboardLayout({ user }) {
+function DashboardLayoutInner({ user }) {
   const [page, setPage] = useState('dashboard');
   const [cryptoKey, setCryptoKey] = useState(null);
-  const [lang, setLang] = useState(() => (typeof window !== 'undefined' ? localStorage.getItem('aureus_lang') || 'fr' : 'fr'));
+  const { lang, setLang, t: tCtx } = useLang();
   const [theme, setTheme] = useState(() => (typeof window !== 'undefined' ? localStorage.getItem('aureus_theme') || 'dark' : 'dark'));
 
   // Traduction helper
-  const t = (key) => I18N[key]?.[lang] || I18N[key]?.['fr'] || key;
+  const t = tCtx;
 
   // Persister préférences
-  useEffect(() => { if (typeof window !== 'undefined') { localStorage.setItem('aureus_lang', lang); localStorage.setItem('aureus_theme', theme); } }, [lang, theme]);
+  useEffect(() => { if (typeof window !== 'undefined') localStorage.setItem('aureus_theme', theme); }, [theme]);
 
   // Couleurs selon thème
   const TH = {
@@ -419,36 +420,36 @@ export default function DashboardLayout({ user }) {
 
   const renderPage = () => {
     switch (page) {
-      case 'dashboard': return <DashboardPage s={s} d={d} onNavigate={setPage} />;
-      case 'employees': return <EmployeesPage s={s} d={d} />;
-      case 'payslip': return <PayslipsPage s={s} d={d} scrollAnchor={scrollAnchor} onAnchorHandled={()=>setScrollAnchor(null)} />;
-      case 'declarations': case 'onss': return <DimonaPageComp s={s} d={d} />;
-      case 'admin': return <AdminPage s={s} d={d} tab={page} />;
-      case 'backup': return <AdminPage s={s} d={d} tab='backup' />;
-      case 'permissions': return <RolesPermissionsPage s={s} d={d} />;
-      case 'baremescp': return <BaremesCPPage s={s} d={d} />;
-      case 'calcinstant': return <SimuNetBrutPage s={s} d={d} tab={page} />;
-      case 'diagnostic': case 'diagnosticv': return <DiagnosticPage s={s} d={d} />;
-      case 'seuilssociaux': return <SeuilsPage s={s} d={d} />;
-      case 'onboarding': case 'onboardwizard': return <OnboardingPage s={s} d={d} />;
-      case 'cloture': return <CloturePage s={s} d={d} />;
-      case 'analytics': return <AnalyticsPage s={s} d={d} tab={page} />;
-      case 'adminbaremes': return <AdminBaremesPageW s={s} d={d} />;
-      case 'auditsecuritecode': return <AuditCodePage s={s} d={d} tab={page} />;
-      case 'optifiscale': case 'couttotal': return <PayrollSimPage s={s} d={d} tab={page} />;
-      case 'aureussuite': return <AureusIAPage s={s} d={d} />;
-      case 'dashrh': return <EmployeeHubPage s={s} d={d} tab={page} />;
-      case 'commandcenter': return <SmartOpsPage s={s} d={d} tab={page} />;
-      case 'compliance': return <CompliancePage s={s} d={d} tab={page} />;
-      case 'securitedata': return <SecurityPage s={s} d={d} tab={page} />;
-      case 'facturation': return <RelancesPage s={s} d={d} />;
-      case 'gestionprimes': return <PrimesPage s={s} d={d} tab={page} />;
-      case 'seuilssociaux': return <LoisPage s={s} d={d} tab={page} />;
+      case 'dashboard': return <DashboardPage s={s} d={d} t={t} lang={lang} onNavigate={setPage} />;
+      case 'employees': return <EmployeesPage s={s} d={d} t={t} lang={lang} />;
+      case 'payslip': return <PayslipsPage s={s} d={d} t={t} lang={lang} scrollAnchor={scrollAnchor} onAnchorHandled={()=>setScrollAnchor(null)} />;
+      case 'declarations': case 'onss': return <DimonaPageComp s={s} d={d} t={t} lang={lang} />;
+      case 'admin': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'backup': return <AdminPage s={s} d={d} t={t} lang={lang} tab='backup' />;
+      case 'permissions': return <RolesPermissionsPage s={s} d={d} t={t} lang={lang} />;
+      case 'baremescp': return <BaremesCPPage s={s} d={d} t={t} lang={lang} />;
+      case 'calcinstant': return <SimuNetBrutPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'diagnostic': case 'diagnosticv': return <DiagnosticPage s={s} d={d} t={t} lang={lang} />;
+      case 'seuilssociaux': return <SeuilsPage s={s} d={d} t={t} lang={lang} />;
+      case 'onboarding': case 'onboardwizard': return <OnboardingPage s={s} d={d} t={t} lang={lang} />;
+      case 'cloture': return <CloturePage s={s} d={d} t={t} lang={lang} />;
+      case 'analytics': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'adminbaremes': return <AdminBaremesPageW s={s} d={d} t={t} lang={lang} />;
+      case 'auditsecuritecode': return <AuditCodePage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'optifiscale': case 'couttotal': return <PayrollSimPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'aureussuite': return <AureusIAPage s={s} d={d} t={t} lang={lang} />;
+      case 'dashrh': return <EmployeeHubPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'commandcenter': return <SmartOpsPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'compliance': return <CompliancePage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'securitedata': return <SecurityPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'facturation': return <RelancesPage s={s} d={d} t={t} lang={lang} />;
+      case 'gestionprimes': return <PrimesPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'seuilssociaux': return <LoisPage s={s} d={d} t={t} lang={lang} tab={page} />;
       // TABLEAU DE BORD
       case 'accidentTravail': return <AbsencesContratsV3Pg s={s} d={d} tab={page} />;
-      case 'actionsrapides': return <SmartOpsPage s={s} d={d} tab={page} />;
+      case 'actionsrapides': return <SmartOpsPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'journal': return <NotificationCenterPgW s={s} d={d} tab={page} />;
-      case 'tbdirection': return <AnalyticsPage s={s} d={d} tab={page} />;
+      case 'tbdirection': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'smartalerts': return <NotificationCenterPgW s={s} d={d} tab={page} />;
       case 'notifications': return <NotificationCenterPgW s={s} d={d} tab={page} />;
       // GESTION RH
@@ -463,14 +464,14 @@ export default function DashboardLayout({ user }) {
       case 'interimaires': return <EmployeePlanningPgW s={s} d={d} tab={page} />;
       case 'joursPrestes': return <EmployeePlanningPgW s={s} d={d} tab={page} />;
       case 'registrepersonnel': return <EmployeePlanningPgW s={s} d={d} tab={page} />;
-      case 'rh': return <EmployeeHubPage s={s} d={d} tab={page} />;
+      case 'rh': return <EmployeeHubPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'proceduresrh': return <ProceduresRHHubPgW s={s} d={d} />;
       case 'portail': return <PortalSystemPg s={s} d={d} tab={page} />;
       case 'portailclient': return <PortalSystemPg s={s} d={d} tab={page} />;
       case 'portalmanager': return <PortalSystemPg s={s} d={d} tab={page} />;
       case 'formC4': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
       // PAIE & CALCULS
-      case 'avantages': return <PrimesPage s={s} d={d} tab={page} />;
+      case 'avantages': return <PrimesPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'baremespp': return <TransversalCPPg s={s} d={d} tab={page} />;
       case 'budget': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'calcmaladie': return <PayrollGroupPg s={s} d={d} tab={page} />;
@@ -482,16 +483,16 @@ export default function DashboardLayout({ user }) {
       case 'joursPrestes': return <EmployeePlanningPgW s={s} d={d} tab={page} />;
       case 'regulPP': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'salaires': return <PayrollHubPg s={s} d={d} tab={page} />;
-      case 'simembauche': return <SimuNetBrutPage s={s} d={d} tab={page} />;
-      case 'simulateurspro': return <PayrollSimPage s={s} d={d} tab={page} />;
-      case 'simulicenciement': return <PayrollSimPage s={s} d={d} tab={page} />;
-      case 'simupension': return <PayrollSimPage s={s} d={d} tab={page} />;
-      case 'simutp': return <SimuNetBrutPage s={s} d={d} tab={page} />;
+      case 'simembauche': return <SimuNetBrutPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'simulateurspro': return <PayrollSimPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'simulicenciement': return <PayrollSimPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'simupension': return <PayrollSimPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'simutp': return <SimuNetBrutPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'soldetoutcompte': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'timeline': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'validation': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'vehiculesatn': return <PayrollGroupPg s={s} d={d} tab={page} />;
-      case 'comparateur': return <PayrollSimPage s={s} d={d} tab={page} />;
+      case 'comparateur': return <PayrollSimPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'compteIndividuel': return <PayrollGroupPg s={s} d={d} tab={page} />;
       // DECLARATIONS & COMPTABILITE
       case 'batchdecl': return <ModsBatch2Pg s={s} d={d} tab={page} />;
@@ -503,7 +504,7 @@ export default function DashboardLayout({ user }) {
         return <MandatsAdminPg s={s} d={d} tab={page} />;
       case 'connexionshub': case 'portailsbelges': case 'liensutiles':
         return <ConnexionsHubPg s={s} d={d} />;
-      case 'bilansocial': return <AnalyticsPage s={s} d={d} tab={page} />;
+      case 'bilansocial': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'chargessociales': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'chomagetemporaire': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'exportWinbooks': return <ModsBatch2Pg s={s} d={d} tab={page} />;
@@ -513,23 +514,23 @@ export default function DashboardLayout({ user }) {
       case 'exportcomptapro': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'fiscal': return <TransversalCPPg s={s} d={d} tab={page} />;
       case 'importcsv': return <ModsBatch2Pg s={s} d={d} tab={page} />;
-      case 'rapportce': return <AnalyticsPage s={s} d={d} tab={page} />;
-      case 'rapports': return <AnalyticsPage s={s} d={d} tab={page} />;
-      case 'rapportsrole': return <AnalyticsPage s={s} d={d} tab={page} />;
-      case 'reporting': return <AnalyticsPage s={s} d={d} tab={page} />;
-      case 'reportingpro': return <AnalyticsPage s={s} d={d} tab={page} />;
+      case 'rapportce': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'rapports': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'rapportsrole': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'reporting': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'reportingpro': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'sepa': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'compteindividuelannuel': return <PayrollGroupPg s={s} d={d} tab={page} />;
       // CONCERTATION SOCIALE
-      case 'ccts': return <LoisPage s={s} d={d} tab={page} />;
-      case 'delegations': return <LoisPage s={s} d={d} tab={page} />;
-      case 'delegationsyndicale': return <LoisPage s={s} d={d} tab={page} />;
-      case 'egalitehf': return <LoisPage s={s} d={d} tab={page} />;
-      case 'electionsociales': return <LoisPage s={s} d={d} tab={page} />;
-      case 'formationsec': return <LoisPage s={s} d={d} tab={page} />;
-      case 'lanceursalerte': return <LoisPage s={s} d={d} tab={page} />;
-      case 'plandiversite': return <LoisPage s={s} d={d} tab={page} />;
-      case 'social': return <LoisPage s={s} d={d} tab={page} />;
+      case 'ccts': return <LoisPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'delegations': return <LoisPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'delegationsyndicale': return <LoisPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'egalitehf': return <LoisPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'electionsociales': return <LoisPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'formationsec': return <LoisPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'lanceursalerte': return <LoisPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'plandiversite': return <LoisPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'social': return <LoisPage s={s} d={d} t={t} lang={lang} tab={page} />;
       // COMMERCIAL
       case 'checklistclient': return <CommissionsModulePgW s={s} d={d} tab={page} />;
       case 'comparatif': return <CommissionsModulePgW s={s} d={d} tab={page} />;
@@ -541,28 +542,28 @@ export default function DashboardLayout({ user }) {
       case 'parserConcurrent': return <CommissionsModulePgW s={s} d={d} tab={page} />;
       case 'repriseclient': return <CommissionsModulePgW s={s} d={d} tab={page} />;
       // ADMINISTRATION
-      case 'archives': return <SecurityPage s={s} d={d} tab={page} />;
-      case 'auditfiscale': return <AuditCodePage s={s} d={d} tab={page} />;
-      case 'audittrail': return <AuditCodePage s={s} d={d} tab={page} />;
-      case 'authroles': return <RolesPermissionsPage s={s} d={d} tab={page} />;
+      case 'archives': return <SecurityPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'auditfiscale': return <AuditCodePage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'audittrail': return <AuditCodePage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'authroles': return <RolesPermissionsPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'autoindex': return <PayrollGroupPg s={s} d={d} tab={page} />;
-      case 'autopilot': return <SmartOpsPage s={s} d={d} tab={page} />;
+      case 'autopilot': return <SmartOpsPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'cgvsaas': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
-      case 'changelog': return <AdminPage s={s} d={d} tab={page} />;
-      case 'demodonnees': return <AdminPage s={s} d={d} tab={page} />;
-      case 'ged': return <SecurityPage s={s} d={d} tab={page} />;
-      case 'historique': return <AdminPage s={s} d={d} tab={page} />;
-      case 'integrations': return <AdminPage s={s} d={d} tab={page} />;
+      case 'changelog': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'demodonnees': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'ged': return <SecurityPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'historique': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'integrations': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'massengine': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'mentionslegales': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
-      case 'monitoring': return <AdminPage s={s} d={d} tab={page} />;
-      case 'piloteauto': return <SmartOpsPage s={s} d={d} tab={page} />;
+      case 'monitoring': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'piloteauto': return <SmartOpsPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'queue': return <ModsBatch2Pg s={s} d={d} tab={page} />;
-      case 'rgpd': return <CompliancePage s={s} d={d} tab={page} />;
-      case 'roadmapinfra': return <AdminPage s={s} d={d} tab={page} />;
+      case 'rgpd': return <CompliancePage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'roadmapinfra': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'support': return <NotificationCenterPgW s={s} d={d} tab={page} />;
-      case 'team': return <EmployeeHubPage s={s} d={d} tab={page} />;
-      case 'testsuite': return <AuditCodePage s={s} d={d} tab={page} />;
+      case 'team': return <EmployeeHubPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'testsuite': return <AuditCodePage s={s} d={d} t={t} lang={lang} tab={page} />;
       default: return <PlaceholderPage id={page} label={currentItem.label} />;
     }
   };
@@ -736,5 +737,13 @@ export default function DashboardLayout({ user }) {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardLayout({ user }) {
+  return (
+    <LangProvider>
+      <DashboardLayoutInner user={user} />
+    </LangProvider>
   );
 }

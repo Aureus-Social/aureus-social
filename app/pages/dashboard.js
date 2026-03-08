@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { B, C, DPER, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, generatePayslipPDF, getAlertes, quickNet, quickPP, generateSEPAXML, generateDmfAXML } from '@/app/lib/helpers';
 const AUREUS_INFO = { name: 'Aureus IA SPRL', vat: 'BE 1028.230.781', version: 'v38', sprint: 'Sprint 38' };
@@ -15,6 +16,7 @@ const MN = MN_FR;
 function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function Dashboard({s,d}) {
+  const { t, lang } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const ae=(s?.emps||[]).filter(e=>e.status==='active'||!e.status||e.status===undefined);
   const sortie=(s?.emps||[]).filter(e=>e.status==='sorti');

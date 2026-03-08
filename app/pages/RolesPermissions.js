@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { useState } from 'react';
 import { PERMISSIONS, ROLES, KPI_SCOPE, hasPermission, getPermissionsForRole } from '@/app/lib/permissions';
 
@@ -19,6 +20,7 @@ function C({children,style}){return <div style={{padding:'16px 20px',background:
 function ST({children}){return <div style={{fontSize:13,fontWeight:700,color:'#c6a34e',marginBottom:10,paddingBottom:6,borderBottom:'1px solid rgba(198,163,78,.1)'}}>{children}</div>;}
 
 export default function RolesPermissions({ s }) {
+  const { t, lang } = useLang();
   const [selectedRole, setSelectedRole] = useState('admin');
   const [tab, setTab] = useState('matrice');
 

@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { C, TX_ONSS_E, TX_ONSS_W, fmt, quickPP } from '@/app/lib/helpers';
 import{useState,useMemo}from'react';
 
@@ -448,5 +449,6 @@ export function GestionInterimairesV2({s,d}){
 
 
 export default function EmployeeHubWrapped({ s, d, tab }) {
+  const { t, lang } = useLang();
   return <DashboardRHV2 s={s||{}} d={d||(()=>{})} props_tab={tab} />;
 }
