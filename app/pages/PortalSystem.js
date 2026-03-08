@@ -14,7 +14,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 const GOLD='#c6a34e',GREEN='#22c55e',BLUE='#3b82f6',RED='#ef4444',PURPLE='#a855f7';
 
 // ── Portal Detection ──
-export function usePortalMode() {
+export function usePortalMode(initialPortalTab) {
   const { t, lang, tText } = useLang();
   const TAB_TO_PORTAL = { portail:'admin', portailclient:'client', portalmanager:'employee' };
   const [portal, setPortal] = useState(TAB_TO_PORTAL[initialPortalTab] || 'admin');
@@ -861,7 +861,7 @@ export function PortalSwitcher({portal, switchPortal, userRole}) {
 
 function PortalSystemPage({ s, d, tab: initialPortalTab }) {
   const { t, lang, tText } = useLang();
-  const { portal, switchPortal } = usePortalMode();
+  const { portal, switchPortal } = usePortalMode(initialPortalTab);
   const cfg = PORTAL_CONFIG[portal] || PORTAL_CONFIG.admin;
   const GOLD = '#c6a34e';
 

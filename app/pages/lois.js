@@ -12,7 +12,7 @@ const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août
 
 function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function MoteurLoisBelges({s,d}){
+function MoteurLoisBelges({s,d,defaultTab}){
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
 const ae= s?.emps||[];
 const [tab,setTab]=useState(defaultTab||"dashboard");

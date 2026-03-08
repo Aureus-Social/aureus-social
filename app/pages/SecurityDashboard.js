@@ -10,7 +10,7 @@ const StatusDot=({ok})=><span style={{display:'inline-block',width:8,height:8,bo
 // ════════════════════════════════════════════════════════════
 // SECURITY DASHBOARD — Vue complète sécurité
 // ════════════════════════════════════════════════════════════
-export function SecurityDashboard({s,supabase,user}){
+export function SecurityDashboard({s,supabase,user,defaultTab}){
   const { t, lang, tText } = useLang();
   const [tab,setTab]=useState(defaultTab||'overview');
   const [pwTest,setPwTest]=useState('');

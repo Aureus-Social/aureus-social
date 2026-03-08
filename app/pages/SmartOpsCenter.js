@@ -20,15 +20,15 @@ const timeAgo=(t)=>{const d=Math.floor((Date.now()-new Date(t))/60000);if(d<1)re
 // ═══════════════════════════════════════════════════════════
 // 1. SMART ALERTS ENGINE — Moteur d'alertes intelligentes
 // ═══════════════════════════════════════════════════════════
-export function SmartAlertsEngine({s,d}){
+export function SmartAlertsEngine({s, d, state, dispatch, defaultTab}){
   const { t, lang, tText } = useLang();
-  s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
+  s=s||state||{}; d=d||dispatch||(()=>{});
   const clients= s?.clients||[];
   const now=new Date();
   const day=now.getDate();const month=now.getMonth();const yr=now.getFullYear();
   const quarter=Math.ceil((month+1)/3);
   const saValidTabs=['dashboard','calendar','rules','categories'];
-  const [tab,setTab]=useState(s.sub&&saValidTabs.includes(s.sub)?s.sub:'dashboard');
+  const [tab,setTab]=useState(defaultTab||(s.sub&&saValidTabs.includes(s.sub)?s.sub:'dashboard'));
   useEffect(()=>{if(s.sub&&saValidTabs.includes(s.sub))setTab(s.sub);},[s.sub]);
   const [filter,setFilter]=useState('all');
   const [selectedAlert,setSelectedAlert]=useState(null);

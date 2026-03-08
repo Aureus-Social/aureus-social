@@ -182,7 +182,8 @@ const DOMICILIATION_TAUX = {
 // ══════════════════════════════════════════════════════════════
 export default function MandatsAdminPage({ s, d, tab }) {
   const { t, lang, tText } = useLang();
-  const props_tab = tab || 'mandatonss';
+  const TAB_ALIAS_INIT = { activabruxelles:'primes', art60cpas:'primes', impulsion55:'primes', monbee:'primes', belcotaxmandat:'belcotax' };
+  const props_tab = TAB_ALIAS_INIT[tab] || tab || 'mandatonss';
   const [activeTab, setActiveTab] = useState(props_tab);
   const [copied, setCopied] = useState('');
   const [clientForm, setClientForm] = useState({
@@ -195,7 +196,8 @@ export default function MandatsAdminPage({ s, d, tab }) {
   const [xmlGenerated, setXmlGenerated] = useState('');
   const [egaliteData, setEgaliteData] = useState({ showReport: false });
 
-  useEffect(() => { if (tab) setActiveTab(tab); }, [tab]);
+  const TAB_ALIAS = { activabruxelles:'primes', art60cpas:'primes', impulsion55:'primes', monbee:'primes', belcotaxmandat:'belcotax' };
+  useEffect(() => { if (tab) setActiveTab(TAB_ALIAS[tab] || tab); }, [tab]);
 
   const tabs = [
     { k: 'mandatonss', l: '🏛 Mandat ONSS/Mahis' },
