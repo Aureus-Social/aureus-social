@@ -327,6 +327,9 @@ export const I18N = {
 
   // ── English translations (Sprint 49) ──
   'nav.back': { fr:'Retour aux clients', nl:'Terug naar klanten', en:'Back to clients', de:'Zurück zu Kunden' },
+  'nav.logout': { fr:'Déconnexion', nl:'Afmelden', en:'Log out', de:'Abmelden' },
+  'nav.theme_light': { fr:'Mode jour', nl:'Dagmodus', en:'Light mode', de:'Tagmodus' },
+  'nav.theme_dark': { fr:'Mode nuit', nl:'Nachtmodus', en:'Dark mode', de:'Nachtmodus' },
   'nav.search': { fr:'Rechercher...', nl:'Zoeken...', en:'Search...', de:'Suchen...' },
   'nav.cloture': { fr:'Clôture mensuelle', nl:'Maandafsluiting', en:'Monthly closing', de:'Monatsabschluss' },
   'nav.notifications': { fr:'Notifications', nl:'Meldingen', en:'Notifications', de:'Benachrichtigungen' },

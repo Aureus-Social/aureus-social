@@ -2,6 +2,7 @@
 import React, { useState, useReducer, useMemo, useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { MENU, GROUPS, getGroupItems, SEARCH_SUBSECTIONS } from '../lib/menu-config';
+import { I18N } from '../lib/i18n';
 import { supabase } from '../lib/supabase';
 import { initCryptoKey, encryptState, decryptState } from '../lib/crypto';
 import { setAuditUser, audit } from '../lib/audit';
@@ -303,6 +304,27 @@ function DashboardHome({ state, onNavigate }) {
 export default function DashboardLayout({ user }) {
   const [page, setPage] = useState('dashboard');
   const [cryptoKey, setCryptoKey] = useState(null);
+  const [lang, setLang] = useState(() => (typeof window !== 'undefined' ? localStorage.getItem('aureus_lang') || 'fr' : 'fr'));
+  const [theme, setTheme] = useState(() => (typeof window !== 'undefined' ? localStorage.getItem('aureus_theme') || 'dark' : 'dark'));
+
+  // Traduction helper
+  const t = (key) => I18N[key]?.[lang] || I18N[key]?.['fr'] || key;
+
+  // Persister préférences
+  useEffect(() => { if (typeof window !== 'undefined') { localStorage.setItem('aureus_lang', lang); localStorage.setItem('aureus_theme', theme); } }, [lang, theme]);
+
+  // Couleurs selon thème
+  const TH = {
+    bg: theme === 'dark' ? '#0a0908' : '#f5f3ef',
+    bg2: theme === 'dark' ? '#111009' : '#ede9e3',
+    sidebar: theme === 'dark' ? '#0e0d0b' : '#faf8f4',
+    border: theme === 'dark' ? 'rgba(198,163,78,.08)' : 'rgba(198,163,78,.2)',
+    text: theme === 'dark' ? '#e8e6e0' : '#1a1916',
+    text2: theme === 'dark' ? '#9e9b93' : '#6b6860',
+    text3: theme === 'dark' ? '#5e5c56' : '#9a978f',
+    surface: theme === 'dark' ? 'rgba(255,255,255,.03)' : 'rgba(0,0,0,.03)',
+    header: theme === 'dark' ? 'rgba(0,0,0,.2)' : 'rgba(255,255,255,.8)',
+  };
   const [collapsed, setCollapsed] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -676,24 +698,41 @@ export default function DashboardLayout({ user }) {
       {/* MAIN CONTENT */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Header */}
-        <div style={{ padding: '12px 24px', borderBottom: '1px solid rgba(198,163,78,.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,.2)' }}>
+        <div style={{ padding: '12px 24px', borderBottom: `1px solid ${TH.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: TH.header, backdropFilter: 'blur(8px)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button onClick={() => setSidebarOpen(!sidebarOpen)}
               style={{ background: 'none', border: 'none', color: '#5e5c56', cursor: 'pointer', fontSize: 16, padding: 4 }}>☰</button>
             <span style={{ fontSize: 13, fontWeight: 600, color: '#e8e6e0' }}>{currentItem.icon} {currentItem.label}</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <span style={{ fontSize: 11, color: '#9e9b93' }}>{user?.email || 'demo'}</span>
-            <span title={cryptoKey ? 'Chiffrement AES-256 actif' : 'Chiffrement inactif'} style={{ fontSize: 10, color: cryptoKey ? '#22c55e' : '#ef4444', marginLeft: 4 }}>{cryptoKey ? '🔒' : '🔓'}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {/* Sélecteur de langue */}
+            <div style={{ display: 'flex', gap: 2, background: TH.surface, borderRadius: 6, padding: 2, border: `1px solid ${TH.border}` }}>
+              {['fr','nl','en','de'].map(l => (
+                <button key={l} onClick={() => setLang(l)}
+                  style={{ padding: '3px 7px', borderRadius: 4, border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 10, fontWeight: lang === l ? 700 : 400, background: lang === l ? 'rgba(198,163,78,.2)' : 'transparent', color: lang === l ? '#c6a34e' : TH.text3, transition: 'all .15s', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  {l}
+                </button>
+              ))}
+            </div>
+
+            {/* Toggle dark/light */}
+            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+              title={theme === 'dark' ? 'Passer en mode jour' : 'Passer en mode nuit'}
+              style={{ width: 32, height: 32, borderRadius: 6, border: `1px solid ${TH.border}`, background: TH.surface, color: TH.text2, cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .2s' }}>
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+
+            <span title={cryptoKey ? 'Chiffrement AES-256 actif' : 'Chiffrement inactif'} style={{ fontSize: 12, color: cryptoKey ? '#22c55e' : '#ef4444' }}>{cryptoKey ? '🔒' : '🔓'}</span>
+            <span style={{ fontSize: 11, color: TH.text3, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email || 'demo'}</span>
             <button onClick={handleLogout}
               style={{ padding: '5px 12px', borderRadius: 6, border: '1px solid rgba(239,68,68,.15)', background: 'rgba(239,68,68,.05)', color: '#ef4444', fontSize: 10, cursor: 'pointer', fontFamily: 'inherit' }}>
-              Déconnexion
+              {t('nav.logout') || 'Déconnexion'}
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: 24, background: TH.bg, color: TH.text }}>
           <ErrorBoundary pageKey={page} label={currentItem?.label}>{renderPage()}</ErrorBoundary>
         </div>
       </div>
