@@ -19,9 +19,9 @@ export function LangProvider({ children, initialLang = 'fr' }) {
 
   const t = (key) => {
     const entry = I18N[key];
-    if (!entry) return key;
+    if (!entry) return null;
     if (Array.isArray(entry[lang])) return entry[lang];
-    return entry[lang] || entry['fr'] || key;
+    return entry[lang] || entry['fr'] || null;
   };
 
   return (
