@@ -827,7 +827,7 @@ function SupportPage() {
           <div style={{ fontSize:32, marginBottom:8 }}>📚</div>
           <div style={{ fontSize:13, fontWeight:700, color:'#e8e6e0', marginBottom:4 }}>Documentation</div>
           <div style={{ fontSize:11, color:'#3b82f6' }}>info@aureus-ia.com</div>
-          <div style={{ fontSize:10, color:'#5e5c56', marginTop:4 }}>Guides et tutoriels</div>
+          <div style={{ fontSize:10, color:'#5e5c56', marginTop:4 }}>Guides & support par email</div>
         </div>
       </div>
 
