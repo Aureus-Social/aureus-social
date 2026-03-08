@@ -530,6 +530,8 @@ function ComplianceDashboardInner({ state, initialFilter }) {
 
 
 export default function ComplianceDashboard({ state, s, d, tab }) {
+  s=s||{}; d=d||(()=>{});
+  const _emps=s?.emps||[]; const _clients=s?.clients||[];
   const { t, lang, tText } = useLang();
   const actualState = state || s || {};
   return <ComplianceDashboardInner state={actualState} initialFilter={tab === 'rgpd' ? 'rgpd' : null} />;

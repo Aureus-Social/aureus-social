@@ -45,6 +45,8 @@ export function BudgetPrev({s,d}){
 
 
 export default function PayrollGroupWrapped({s, d, tab}) {
+  s=s||{}; d=d||(()=>{});
+  const _emps=s?.emps||[]; const _clients=s?.clients||[];
   const { t, lang, tText } = useLang();
   if(tab==='echeancier') return <EcheancierPaiements s={s}/>;
   if(tab==='timeline') return <PayrollTimeline s={s} d={d}/>;

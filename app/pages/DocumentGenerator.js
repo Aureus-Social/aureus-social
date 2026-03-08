@@ -746,6 +746,8 @@ function documentToPrintHTML(content, title) {
 
 // ── Composant principal ──
 export default function DocumentGeneratorWrapped({ s, d, tab }) {
+  s=s||{}; d=d||(()=>{});
+  const _emps=s?.emps||[]; const _clients=s?.clients||[];
   const { t, lang, tText } = useLang();
   const TAB_TO_CAT = {'contratgen': 'contrat', 'contratsmenu': 'contrat', 'annexeReglement': 'reglementaire', 'gendocsjur': 'reglementaire', 'formC4': 'sortie', 'formC131': 'attestation', 'legal': 'reglementaire', 'cgvsaas': 'reglementaire', 'mentionslegales': 'reglementaire'};
   const initialCat = TAB_TO_CAT[tab] || null;

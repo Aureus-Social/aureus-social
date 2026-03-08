@@ -685,6 +685,8 @@ export function ContratsLegauxV3({s}){
 
 
 export default function AbsencesWrapped({ s, d, tab }) {
+  s=s||{}; d=d||(()=>{});
+  const _emps=s?.emps||[]; const _clients=s?.clients||[];
   const { t, lang, tText } = useLang();
   const TAB_MAP = {
     accidentTravail: 'regles',

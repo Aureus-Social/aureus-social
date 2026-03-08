@@ -82,6 +82,8 @@ function ChartCard({ title, children, height }) {
 }
 
 export default function AnalyticsDashboardWrapped({ s, d, tab }) {
+  s=s||{}; d=d||(()=>{});
+  const _emps=s?.emps||[]; const _clients=s?.clients||[];
   const { t, lang, tText } = useLang();
   // analytics et tbdirection → dashboard complet avec graphiques
   // autres tabs → vue dédiée avec titre contextuel + dashboard intégré

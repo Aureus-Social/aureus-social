@@ -664,4 +664,17 @@ export function SimuTempsPartielV2({s}){
 }
 
 
-export default ValidationPrePaieV2;
+export function PayrollHubWrapped({ s, d, tab }) {
+  s=s||{}; d=d||(()=>{});
+  if (tab === 'validation') return <ValidationPrePaieV2 s={s} d={d} />;
+  if (tab === 'timeline') return <TimelinePaieV2 s={s} />;
+  if (tab === 'soldetoutcompte') return <SoldeToutCompteV2 s={s} d={d} />;
+  if (tab === 'coutsannuel') return <CoutsAnnuelsV2 s={s} />;
+  if (tab === 'simulicenciement') return <SimuLicenciementV2 s={s} />;
+  if (tab === 'simupension') return <SimuPensionV2 s={s} />;
+  if (tab === 'simutp') return <SimuTempsPartielV2 s={s} />;
+  return <ValidationPrePaieV2 s={s} d={d} />;
+}
+
+export default PayrollHubWrapped;
+

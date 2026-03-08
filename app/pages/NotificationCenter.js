@@ -318,6 +318,8 @@ export function NotifDropdown({ notifications, onClose, onMarkRead, onViewAll })
 
 // ── Composant principal: Page Notifications ──
 export default function NotificationCenterWrapped({ s, d, tab }) {
+  s=s||{}; d=d||(()=>{});
+  const _emps=s?.emps||[]; const _clients=s?.clients||[];
   const { t, lang, tText } = useLang();
   const state = s || {};
   const dispatch = d || (() => {});

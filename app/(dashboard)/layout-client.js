@@ -16,17 +16,22 @@ class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false, error: null }; }
   static getDerivedStateFromError(error) { return { hasError: true, error }; }
   componentDidUpdate(prevProps) {
-    if (prevProps.pageKey !== this.props.pageKey && this.state.hasError) {
+    // Reset automatique à chaque changement de page
+    if (prevProps.pageKey !== this.props.pageKey) {
       this.setState({ hasError: false, error: null });
     }
+  }
+  componentDidCatch(error, info) {
+    console.error('[Aureus] Module crash:', error?.message, info?.componentStack?.split('\n')[1]);
   }
   render() {
     if (this.state.hasError) {
       const msg = this.state.error?.message || 'Erreur inconnue';
-      return <div style={{padding:40}}>
-        <div style={{fontSize:15,fontWeight:700,color:'#ef4444',marginBottom:8}}>❌ {this.props.label || 'Module'} — Erreur</div>
-        <div style={{fontSize:11,color:'#9e9b93',marginBottom:12,fontFamily:'monospace',background:'rgba(239,68,68,.06)',padding:'10px 14px',borderRadius:8,border:'1px solid rgba(239,68,68,.15)',wordBreak:'break-all'}}>{msg}</div>
-        <button onClick={()=>this.setState({hasError:false,error:null})} style={{padding:'8px 20px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>Réessayer</button>
+      return <div style={{padding:32,textAlign:'center'}}>
+        <div style={{fontSize:32,marginBottom:12}}>⚠️</div>
+        <div style={{fontSize:14,fontWeight:700,color:'#ef4444',marginBottom:8}}>{this.props.label || 'Module'} — Erreur de chargement</div>
+        <div style={{fontSize:10,color:'#5e5c56',marginBottom:16,fontFamily:'monospace',background:'rgba(239,68,68,.04)',padding:'8px 12px',borderRadius:6,border:'1px solid rgba(239,68,68,.1)',wordBreak:'break-all',maxWidth:500,margin:'0 auto 16px'}}>{msg}</div>
+        <button onClick={()=>this.setState({hasError:false,error:null})} style={{padding:'10px 24px',borderRadius:8,border:'1px solid rgba(198,163,78,.3)',background:'rgba(198,163,78,.08)',color:'#c6a34e',fontSize:12,cursor:'pointer',fontFamily:'inherit',fontWeight:600}}>🔄 Réessayer</button>
       </div>;
     }
     return this.props.children;
@@ -750,7 +755,7 @@ function DashboardLayoutInner({ user }) {
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: 24, background: TH.bg, color: TH.text }}>
+        <div key={page} style={{ flex: 1, overflowY: 'auto', padding: 24, background: TH.bg, color: TH.text }}>
           <ErrorBoundary pageKey={page} label={currentItem?.label}>{renderPage()}</ErrorBoundary>
         </div>
       </div>
