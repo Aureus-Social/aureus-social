@@ -819,7 +819,7 @@ function SupportPage() {
           border:'1px solid rgba(198,163,78,.1)', textAlign:'center' }}>
           <div style={{ fontSize:32, marginBottom:8 }}>📧</div>
           <div style={{ fontSize:13, fontWeight:700, color:'#e8e6e0', marginBottom:4 }}>Email support</div>
-          <div style={{ fontSize:11, color:'#c6a34e' }}>support@aureus-ia.be</div>
+          <div style={{ fontSize:11, color:'#c6a34e' }}>info@aureus-ia.com</div>
           <div style={{ fontSize:10, color:'#5e5c56', marginTop:4 }}>Réponse sous 24h ouvrables</div>
         </div>
         <div style={{ padding:'20px', background:'rgba(96,165,250,.03)', borderRadius:12,

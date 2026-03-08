@@ -59,7 +59,7 @@ ${preheader ? `<div style="display:none;max-height:0;overflow:hidden;font-size:1
       <p style="margin:0;">
         <a href="${BRAND.url}" style="color:${BRAND.gold};text-decoration:none;">app.aureussocial.be</a>
         &nbsp;|&nbsp;
-        <a href="mailto:support@aureussocial.be" style="color:${BRAND.gold};text-decoration:none;">Support</a>
+        <a href="mailto:info@aureus-ia.com" style="color:${BRAND.gold};text-decoration:none;">Support</a>
       </p>
       <p style="margin:8px 0 0 0;font-size:10px;">
         Cet email est confidentiel. S'il ne vous est pas destiné, merci de le supprimer.
