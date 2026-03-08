@@ -1,0 +1,213 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# AUREUS SOCIAL PRO — Backup Nocturne Automatique
+# GitHub Actions — chaque nuit à 02h00 CET (01h00 UTC)
+# Exporte toutes les tables Supabase → JSON → email Resend
+# Rétention : 30 jours (GitHub Actions artifacts)
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: Backup Nocturne Aureus
+
+on:
+  schedule:
+    - cron: '0 1 * * *'  # 02h00 CET chaque nuit
+  workflow_dispatch:       # Déclenchement manuel possible
+
+jobs:
+  backup:
+    name: Backup Supabase → Email
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Créer script de backup
+        run: |
+          cat > backup-runner.js << 'SCRIPT'
+          const https = require('https');
+
+          const SUPABASE_URL = process.env.SUPABASE_URL;
+          const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+          const RESEND_KEY = process.env.RESEND_API_KEY;
+          const ALERT_EMAIL = process.env.ALERT_EMAIL || 'info@aureus-ia.com';
+
+          const TABLES = [
+            'employees', 'travailleurs', 'fiches_paie', 'documents',
+            'audit_log', 'activity_log', 'app_state', 'payroll_history',
+            'dimona', 'dmfa', 'baremes_cp'
+          ];
+
+          async function fetchTable(table) {
+            return new Promise((resolve) => {
+              const url = new URL(`${SUPABASE_URL}/rest/v1/${table}?select=*`);
+              const options = {
+                hostname: url.hostname,
+                path: url.pathname + url.search,
+                headers: {
+                  'apikey': SUPABASE_KEY,
+                  'Authorization': `Bearer ${SUPABASE_KEY}`,
+                  'Content-Type': 'application/json'
+                }
+              };
+              https.get(options, (res) => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => {
+                  try { resolve({ table, data: JSON.parse(data), error: null }); }
+                  catch(e) { resolve({ table, data: [], error: e.message }); }
+                });
+              }).on('error', (e) => resolve({ table, data: [], error: e.message }));
+            });
+          }
+
+          async function sendEmail(subject, html, attachment) {
+            return new Promise((resolve) => {
+              const body = JSON.stringify({
+                from: 'Aureus Backup <noreply@aureussocial.be>',
+                to: [ALERT_EMAIL],
+                subject,
+                html,
+                attachments: attachment ? [attachment] : []
+              });
+              const options = {
+                hostname: 'api.resend.com',
+                path: '/emails',
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${RESEND_KEY}`,
+                  'Content-Type': 'application/json',
+                  'Content-Length': Buffer.byteLength(body)
+                }
+              };
+              const req = https.request(options, (res) => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => resolve(JSON.parse(data)));
+              });
+              req.on('error', resolve);
+              req.write(body);
+              req.end();
+            });
+          }
+
+          async function main() {
+            const startTime = Date.now();
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const timeStr = now.toISOString().split('T')[1].substring(0,5).replace(':','h');
+
+            console.log(`[Backup] Démarrage — ${now.toISOString()}`);
+
+            const results = await Promise.all(TABLES.map(fetchTable));
+            const backupData = {};
+            const errors = [];
+            let totalRecords = 0;
+
+            results.forEach(({ table, data, error }) => {
+              if (error) { errors.push(`${table}: ${error}`); backupData[table] = []; }
+              else { backupData[table] = data; totalRecords += data.length; }
+            });
+
+            const payload = {
+              metadata: {
+                generated_at: now.toISOString(),
+                source: 'GitHub Actions — Backup Nocturne',
+                project: 'Aureus Social Pro',
+                tables: Object.keys(backupData).length,
+                total_records: totalRecords,
+                duration_ms: Date.now() - startTime,
+                errors
+              },
+              data: backupData
+            };
+
+            const filename = `aureus-backup-${dateStr}-${timeStr}.json`;
+            const jsonContent = JSON.stringify(payload, null, 2);
+
+            // Sauvegarder localement pour artifact GitHub
+            require('fs').writeFileSync(filename, jsonContent);
+            console.log(`[Backup] Fichier créé: ${filename} (${Math.round(jsonContent.length/1024)}KB)`);
+
+            // Envoyer email
+            const subject = errors.length > 0
+              ? `⚠️ Backup Aureus ${dateStr} — ${errors.length} erreur(s)`
+              : `✅ Backup Aureus ${dateStr} — ${totalRecords} enregistrements`;
+
+            const html = `
+              <div style="font-family:Arial,sans-serif;max-width:600px;">
+                <div style="background:${errors.length>0?'#fb923c':'#1a1a2e'};color:white;padding:20px;border-radius:8px 8px 0 0;">
+                  <h2 style="margin:0;">🔒 Backup Nocturne Aureus Social Pro</h2>
+                  <p style="margin:6px 0 0;opacity:.9;">${dateStr} à ${timeStr} UTC</p>
+                </div>
+                <div style="background:#f8f9fa;padding:24px;border-radius:0 0 8px 8px;">
+                  <table style="width:100%;border-collapse:collapse;">
+                    <tr><td style="padding:8px;border-bottom:1px solid #e5e7eb;">📊 Tables</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;font-weight:700;">${Object.keys(backupData).length}</td></tr>
+                    <tr><td style="padding:8px;border-bottom:1px solid #e5e7eb;">📝 Enregistrements</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;font-weight:700;">${totalRecords}</td></tr>
+                    <tr><td style="padding:8px;border-bottom:1px solid #e5e7eb;">⚡ Durée</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;">${Date.now()-startTime}ms</td></tr>
+                    <tr><td style="padding:8px;">📁 Fichier</td><td style="padding:8px;">${filename}</td></tr>
+                  </table>
+                  ${Object.entries(backupData).map(([t,rows])=>`
+                    <div style="display:flex;justify-content:space-between;padding:4px 8px;font-size:12px;color:#6b7280;">
+                      <span>${t}</span><span>${rows.length} enregistrements</span>
+                    </div>`).join('')}
+                  ${errors.length>0?`<div style="background:#fee2e2;padding:12px;border-radius:6px;margin-top:12px;"><strong>⚠️ Erreurs:</strong><br>${errors.join('<br>')}</div>`:''}
+                  <p style="margin-top:16px;"><a href="https://github.com/Aureus-Social/aureus-social/actions" style="background:#1a1a2e;color:white;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:12px;">Voir sur GitHub Actions →</a></p>
+                </div>
+              </div>
+            `;
+
+            const emailResult = await sendEmail(subject, html, {
+              filename,
+              content: Buffer.from(jsonContent).toString('base64')
+            });
+
+            console.log(`[Backup] Email envoyé:`, emailResult.id ? '✅ OK' : '❌ Erreur');
+            console.log(`[Backup] Terminé — ${totalRecords} enregistrements, ${errors.length} erreurs`);
+
+            if (errors.length > 0) {
+              console.error('[Backup] Erreurs:', errors);
+              process.exit(1);
+            }
+          }
+
+          main().catch(e => { console.error('[Backup] FATAL:', e); process.exit(1); });
+          SCRIPT
+
+      - name: Exécuter le backup
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERT_EMAIL: info@aureus-ia.com
+        run: node backup-runner.js
+
+      - name: Upload artifact (rétention 30 jours)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aureus-backup-${{ github.run_number }}-${{ github.run_id }}
+          path: aureus-backup-*.json
+          retention-days: 30
+
+      - name: Notifier si échec
+        if: failure()
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: |
+          node -e "
+          const https = require('https');
+          const body = JSON.stringify({
+            from: 'Aureus Backup <noreply@aureussocial.be>',
+            to: ['info@aureus-ia.com'],
+            subject: '🚨 BACKUP ÉCHOUÉ — Aureus Social Pro',
+            html: '<h2 style=\"color:#ef4444;\">🚨 Le backup nocturne a échoué</h2><p>Date: $(date)</p><p><a href=\"https://github.com/Aureus-Social/aureus-social/actions\">Voir les logs GitHub Actions →</a></p>'
+          });
+          const req = https.request({hostname:'api.resend.com',path:'/emails',method:'POST',headers:{'Authorization':'Bearer '+process.env.RESEND_API_KEY,'Content-Type':'application/json','Content-Length':Buffer.byteLength(body)}},res=>{let d='';res.on('data',c=>d+=c);res.on('end',()=>console.log('Notif échec envoyée:',d))});
+          req.write(body);req.end();
+          "
