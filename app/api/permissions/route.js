@@ -1,11 +1,12 @@
 // API Permissions — vérifier et gérer les rôles utilisateurs
 import { createClient } from '@supabase/supabase-js';
+
+export const dynamic = 'force-dynamic';
 import { hasPermission, getRoleFromUser, getPermissionsForRole, PERMISSIONS } from '@/app/lib/permissions';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+  : null;
 
 // GET — récupérer les permissions d'un utilisateur
 export async function GET(request) {
