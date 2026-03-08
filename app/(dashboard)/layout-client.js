@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { MENU, GROUPS, getGroupItems, SEARCH_SUBSECTIONS } from '../lib/menu-config';
 import { supabase } from '../lib/supabase';
 import { initCryptoKey, encryptState, decryptState } from '../lib/crypto';
+import { setAuditUser, audit } from '../lib/audit';
 
 const Loading = () => <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Chargement...</div>;
 
@@ -100,6 +101,25 @@ const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 
 // Reducer pour le state global
 function reducer(state, action) {
+  // Audit trail serveur — actions sensibles tracées automatiquement
+  if (typeof window !== 'undefined') {
+    const sensitiveActions = ['ADD_EMP','UPD_EMP','DEL_EMP','ADD_P','ADD_DIM'];
+    if (sensitiveActions.includes(action.type)) {
+      const labels = { ADD_EMP:'CREATE_EMPLOYEE', UPD_EMP:'UPDATE_EMPLOYEE', DEL_EMP:'DELETE_EMPLOYEE', ADD_P:'GENERATE_PAYSLIP', ADD_DIM:'SUBMIT_DIMONA' };
+      const emp = action.d || (action.type === 'DEL_EMP' ? state.emps?.find(e => e.id === action.id) : null);
+      fetch('/api/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: labels[action.type],
+          table_name: action.type.includes('EMP') ? 'employees' : action.type === 'ADD_P' ? 'fiches_paie' : 'dimona',
+          record_id: emp?.id || null,
+          details: emp ? { name: (emp.first||emp.fn||'')+ ' ' +(emp.last||emp.ln||''), action_type: action.type } : null
+        })
+      }).catch(() => {});
+    }
+  }
+
   switch (action.type) {
     case 'NAV': return { ...state, _nav: action.page, _navSub: action.sub };
     case 'CLEAR_NAV': return { ...state, _nav: null, _navSub: null };
@@ -301,6 +321,8 @@ export default function DashboardLayout({ user }) {
   // Init chiffrement AES-256 au montage (RGPD Art. 32)
   useEffect(()=>{
     const userId = user?.id || user?.email || 'aureus-default-user';
+    setAuditUser(user);
+    audit.login(user?.email);
     initCryptoKey(userId).then(ok => {
       if(ok) setCryptoKey(true);
       else console.warn('[Crypto] Chiffrement non disponible');
@@ -319,6 +341,7 @@ export default function DashboardLayout({ user }) {
   const currentItem = MENU.find(m => m.id === page) || { label: 'Dashboard' };
 
   const handleLogout = async () => {
+    await audit.logout(user?.email);
     if (supabase) await supabase.auth.signOut();
     window.location.reload();
   };
