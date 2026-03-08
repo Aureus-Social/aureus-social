@@ -303,6 +303,7 @@ function DashboardHome({ state, onNavigate }) {
 
 function DashboardLayoutInner({ user }) {
   const [page, setPage] = useState('dashboard');
+  const [pageHistory, setPageHistory] = useState([]);
   const [cryptoKey, setCryptoKey] = useState(null);
   const { lang, setLang, t: tCtx } = useLang();
   const [theme, setTheme] = useState(() => (typeof window !== 'undefined' ? localStorage.getItem('aureus_theme') || 'dark' : 'dark'));
@@ -327,6 +328,16 @@ function DashboardLayoutInner({ user }) {
   };
   const [collapsed, setCollapsed] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const navigateTo = (newPage) => {
+    setPageHistory(h => newPage !== page ? [...h.slice(-19), page] : h);
+    setPage(newPage);
+  };
+  const navigateBack = () => {
+    if (pageHistory.length === 0) return;
+    const prev = pageHistory[pageHistory.length - 1];
+    setPageHistory(h => h.slice(0, -1));
+    setPage(prev);
+  };
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocus, setSearchFocus] = useState(false);
   const [scrollAnchor, setScrollAnchor] = useState(null);
@@ -624,7 +635,7 @@ function DashboardLayoutInner({ user }) {
                 {results.map((item, idx) => (
                   <div key={idx}
                     onClick={() => {
-                      setPage(item.id);
+                      navigateTo(item.id);
                       if (item.isSubsection && item.anchor) {
                         setScrollAnchor(item.anchor);
                       }
@@ -670,7 +681,7 @@ function DashboardLayoutInner({ user }) {
                   <span style={{ fontSize: 10, color: '#5e5c56', transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0)', transition: 'transform .15s' }}>▼</span>
                 </div>
                 {!isCollapsed && items.map(item => (
-                  <div key={item.id} onClick={() => setPage(item.id)}
+                  <div key={item.id} onClick={() => navigateTo(item.id)}
                     style={{
                       padding: '7px 18px 7px 24px', cursor: 'pointer', fontSize: 11.5, display: 'flex', alignItems: 'center', gap: 8,
                       background: page === item.id ? 'rgba(198,163,78,.08)' : 'transparent',
@@ -702,6 +713,13 @@ function DashboardLayoutInner({ user }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button onClick={() => setSidebarOpen(!sidebarOpen)}
               style={{ background: 'none', border: 'none', color: '#5e5c56', cursor: 'pointer', fontSize: 16, padding: 4 }}>☰</button>
+            {pageHistory.length > 0 && (
+              <button onClick={navigateBack}
+                title={t('ui.back') || 'Retour'}
+                style={{ background: 'rgba(198,163,78,.08)', border: '1px solid rgba(198,163,78,.2)', color: '#c6a34e', cursor: 'pointer', fontSize: 12, padding: '4px 10px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'inherit' }}>
+                ← <span style={{ fontSize: 11 }}>{t('ui.back') || 'Retour'}</span>
+              </button>
+            )}
             <span style={{ fontSize: 13, fontWeight: 600, color: '#e8e6e0' }}>{currentItem.icon} {t('menu.' + currentItem?.id) || currentItem?.label}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

@@ -124,12 +124,12 @@ function AdminDashboard_Main({s,d}){
   return <div>
     <div style={{padding:'18px 24px',borderBottom:'1px solid rgba(139,115,60,.15)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
       <div>
-        <div style={{fontSize:18,fontWeight:700,color:'#e8e6e0'}}>👑 Administration Aureus Social Pro</div>
-        <div style={{fontSize:11.5,color:'#9e9b93',marginTop:2}}>Panneau de controle — Vue globale plateforme</div>
+        <div style={{fontSize:18,fontWeight:700,color:'#e8e6e0'}}>{t('admin.title')||'Administration Aureus Social Pro'}</div>
+        <div style={{fontSize:11.5,color:'#9e9b93',marginTop:2}}>{t('admin.subtitle')||'Panneau de contrôle'}</div>
       </div>
       <div style={{display:'flex',gap:8,alignItems:'center'}}>
-        <button onClick={loadData} style={{padding:'6px 14px',borderRadius:8,border:'1px solid rgba(198,163,78,.3)',background:'rgba(198,163,78,.08)',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:600}}>🔄 Rafraichir</button>
-        <div style={{fontSize:10,color:loading?'#fb923c':'#4ade80'}}>● {loading?'Chargement...':'Connecte'}</div>
+        <button onClick={loadData} style={{padding:'6px 14px',borderRadius:8,border:'1px solid rgba(198,163,78,.3)',background:'rgba(198,163,78,.08)',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:600}}>{t('admin.refresh')||'Rafraîchir'}</button>
+        <div style={{fontSize:10,color:loading?'#fb923c':'#4ade80'}}>● {loading?t('admin.loading')||'Chargement...':t('admin.connected')||'Connecté'}</div>
       </div>
     </div>
     
@@ -139,25 +139,25 @@ function AdminDashboard_Main({s,d}){
     {sub==='admin_users'&&<div>
       {/* KPIs */}
       <div style={{display:'flex',gap:12,marginBottom:20,flexWrap:'wrap'}}>
-        <Stat icon="👤" label="Utilisateurs total" value={totalUsers} sub={`${activeUsers} actifs`} color="#c6a34e"/>
-        <Stat icon="🏢" label="Dossiers clients" value={totalClients} sub={`${activeClients} actifs`} color="#60a5fa"/>
-        <Stat icon="👥" label="Travailleurs" value={totalTrav} sub={`${activeTrav} actifs`} color="#4ade80"/>
-        <Stat icon="📄" label="Fiches de paie" value={totalFiches} sub={`${fichesMois} ce mois`} color="#a78bfa"/>
-        <Stat icon="💰" label="Revenu mensuel est." value={`€${revenuMensuelEstime.toLocaleString()}`} sub={`€${revenuAnnuelEstime.toLocaleString()}/an`} color="#c6a34e"/>
+        <Stat icon="👤" label={t('admin.users_total')||'Utilisateurs total'} value={totalUsers} sub={`${activeUsers} ${t('admin.active')||'actifs'}`} color="#c6a34e"/>
+        <Stat icon="🏢" label={t('admin.clients')||'Dossiers clients'} value={totalClients} sub={`${activeClients} actifs`} color="#60a5fa"/>
+        <Stat icon="👥" label={t('admin.workers')||'Travailleurs'} value={totalTrav} sub={`${activeTrav} actifs`} color="#4ade80"/>
+        <Stat icon="📄" label={t('admin.payslips')||'Fiches de paie'} value={totalFiches} sub={`${fichesMois} ${t('admin.this_month')||'ce mois'}`} color="#a78bfa"/>
+        <Stat icon="💰" label={t('admin.revenue')||'Revenu mensuel est.'} value={`€${revenuMensuelEstime.toLocaleString()}`} sub={`€${revenuAnnuelEstime.toLocaleString()}/an`} color="#c6a34e"/>
       </div>
 
       {/* Search */}
       <div style={{marginBottom:16}}>
-        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍 Rechercher un utilisateur (nom, email...)" style={{width:'100%',padding:'10px 14px',background:'rgba(255,255,255,.04)',border:'1px solid rgba(198,163,78,.15)',borderRadius:8,color:'#e8e6e0',fontSize:12,outline:'none',boxSizing:'border-box'}}/>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={`🔍 ${t('admin.search_user')||'Rechercher un utilisateur'}`} style={{width:'100%',padding:'10px 14px',background:'rgba(255,255,255,.04)',border:'1px solid rgba(198,163,78,.15)',borderRadius:8,color:'#e8e6e0',fontSize:12,outline:'none',boxSizing:'border-box'}}/>
       </div>
 
       {/* Users table */}
       <div style={{background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)",overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'2fr 2fr 1fr 1fr 1.5fr 1.5fr 1fr',padding:'10px 14px',background:"rgba(198,163,78,.06)",borderBottom:'1px solid rgba(198,163,78,.1)',fontSize:10,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:.5}}>
-          <div>Nom</div><div>Email</div><div>Role</div><div>Langue</div><div>Derniere connexion</div><div>Inscription</div><div>Statut</div>
+          <div>{t('ui.name')||'Nom'}</div><div>{t('ui.email')||'Email'}</div><div>{t('ui.role')||'Rôle'}</div><div>{t('ui.language')||'Langue'}</div><div>{t('ui.lastlogin')||'Dernière connexion'}</div><div>{t('ui.registration')||'Inscription'}</div><div>{t('ui.status')||'Statut'}</div>
         </div>
         {users.length===0?<div style={{padding:30,textAlign:'center',color:'#5e5c56',fontSize:12}}>
-          {loading?'Chargement...':'Aucun utilisateur inscrit. Les utilisateurs apparaitront ici apres inscription.'}
+          {loading?(t('admin.loading')||'Chargement...'):(t('admin.no_users')||'Aucun utilisateur inscrit.')}
         </div>:
         users.filter(u=>{
           if(!search)return true;
@@ -176,7 +176,7 @@ function AdminDashboard_Main({s,d}){
             <div style={{color:'#9e9b93',fontSize:11}}>{(u.lang||'fr').toUpperCase()}</div>
             <div style={{color:'#9e9b93',fontSize:10.5}}>{timeAgo(u.last_login)}</div>
             <div style={{color:'#9e9b93',fontSize:10.5}}>{fDate(u.created_at)}</div>
-            <div><Badge text={u.active?'Actif':'Inactif'} color={u.active?'#4ade80':'#f87171'}/></div>
+            <div><Badge text={u.active?(t('ui.active')||'Actif'):(t('ui.inactive')||'Inactif')} color={u.active?'#4ade80':'#f87171'}/></div>
           </div>;
         })}
         
