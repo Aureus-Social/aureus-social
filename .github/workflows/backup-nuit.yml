@@ -2,8 +2,8 @@ name: Backup Supabase Nocturne
 
 on:
   schedule:
-    - cron: "0 3 * * *"  # Chaque nuit 3h00 UTC (4h00 heure BE)
-  workflow_dispatch:       # Déclenchement manuel possible
+    - cron: "0 3 * * *"
+  workflow_dispatch:
 
 jobs:
   backup:
@@ -17,9 +17,7 @@ jobs:
       - name: Dump base Supabase
         run: |
           TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-          pg_dump "${{ secrets.SUPABASE_DB_URL }}" \
-            --no-owner --no-acl \
-            | gzip > backup_${TIMESTAMP}.sql.gz
+          pg_dump "${{ secrets.SUPABASE_DB_URL }}" --no-owner --no-acl | gzip > backup_${TIMESTAMP}.sql.gz
           echo "BACKUP_FILE=backup_${TIMESTAMP}.sql.gz" >> $GITHUB_ENV
 
       - name: Upload vers Backblaze B2
@@ -34,8 +32,8 @@ jobs:
           AWS_S3_ENDPOINT: https://s3.eu-central-003.backblazeb2.com
           SOURCE_DIR: ./
 
-      - name: Nettoyage local
-        run: echo "Backup terminé: ${{ env.BACKUP_FILE }}"
+      - name: Done
+        run: echo "Backup termine"
 
       - name: Notification email si erreur
         if: failure()
@@ -46,5 +44,5 @@ jobs:
           username: ${{ secrets.MAIL_USER }}
           password: ${{ secrets.MAIL_PASSWORD }}
           to: info@aureus-ia.com
-          subject: "ALERTE - Backup Aureus echoue"
-          body: "Le backup nocturne Supabase a échoué. Vérifier GitHub Actions."
+          subject: ALERTE - Backup Aureus echoue
+          body: Le backup nocturne Supabase a echoue. Verifier GitHub Actions.
