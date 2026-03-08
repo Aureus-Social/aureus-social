@@ -1,15 +1,12 @@
 name: Backup Supabase Nocturne
-
 on:
   schedule:
     - cron: "0 3 * * *"
   workflow_dispatch:
-
 jobs:
   backup:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
     steps:
       - name: Installer PostgreSQL client
         run: sudo apt-get install -y postgresql-client
@@ -22,21 +19,9 @@ jobs:
 
       - name: Upload vers Backblaze B2
         run: |
-          pip install b2sdk --quiet
-          python3 << 'PYEOF'
-          import os, b2sdk.v2 as b2
-          info = b2.InMemoryAccountInfo()
-          api = b2.B2Api(info)
-          api.authorize_account("production", os.environ["B2_KEY_ID"], os.environ["B2_APP_KEY"])
-          bucket = api.get_bucket_by_name(os.environ["B2_BUCKET_NAME"])
-          fname = os.environ["BACKUP_FILE"]
-          bucket.upload_local_file(local_file=fname, file_name="aureus-backups/" + fname)
-          print("Upload OK:", fname)
-          PYEOF
-        env:
-          B2_KEY_ID: ${{ secrets.B2_KEY_ID }}
-          B2_APP_KEY: ${{ secrets.B2_APP_KEY }}
-          B2_BUCKET_NAME: ${{ secrets.B2_BUCKET_NAME }}
+          pip install b2 --quiet
+          b2 authorize-account "${{ secrets.B2_KEY_ID }}" "${{ secrets.B2_APP_KEY }}"
+          b2 upload-file "${{ secrets.B2_BUCKET_NAME }}" "${{ env.BACKUP_FILE }}" "aureus-backups/${{ env.BACKUP_FILE }}"
 
       - name: Done
         run: echo "Backup termine avec succes"
