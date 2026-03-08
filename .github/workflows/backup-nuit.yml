@@ -20,7 +20,7 @@ jobs:
       - name: Upload vers Backblaze B2
         run: |
           pip install b2 --quiet
-          b2 authorize-account "${{ secrets.B2_KEY_ID }}" "${{ secrets.B2_APP_KEY }}"
+          b2 account authorize 0035f32946dbe520000000003 K0039jw8dQljNgddkpoHHQ2tahEZFnA
           b2 upload-file "${{ secrets.B2_BUCKET_NAME }}" "${{ env.BACKUP_FILE }}" "aureus-backups/${{ env.BACKUP_FILE }}"
 
       - name: Done
