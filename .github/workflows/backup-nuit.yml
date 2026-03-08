@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Installer PostgreSQL client
-        run: sudo apt-get install -y postgresql-client
+      - name: Installer outils
+        run: sudo apt-get install -y postgresql-client rclone
 
       - name: Dump base Supabase
         run: |
@@ -17,23 +17,19 @@ jobs:
           pg_dump "${{ secrets.SUPABASE_DB_URL }}" --no-owner --no-acl | gzip > backup_${TIMESTAMP}.sql.gz
           echo "BACKUP_FILE=backup_${TIMESTAMP}.sql.gz" >> $GITHUB_ENV
 
-      - name: Upload vers Backblaze B2
-        env:
-          B2_KEY_ID: ${{ secrets.B2_KEY_ID }}
-          B2_APP_KEY: ${{ secrets.B2_APP_KEY }}
+      - name: Configurer rclone
         run: |
-          AUTH=$(curl -s -u "${B2_KEY_ID}:${B2_APP_KEY}" https://api.backblazeb2.com/b2api/v2/b2_authorize_account)
-          echo $AUTH
-          API_URL=$(echo $AUTH | python3 -c "import sys,json; print(json.load(sys.stdin)['apiUrl'])")
-          AUTH_TOKEN=$(echo $AUTH | python3 -c "import sys,json; print(json.load(sys.stdin)['authorizationToken'])")
-          BUCKET_ID="a57fa352d9b4c6dd9bce0512"
-          UPLOAD_URL_RESP=$(curl -s -H "Authorization: $AUTH_TOKEN" "$API_URL/b2api/v2/b2_get_upload_url?bucketId=$BUCKET_ID")
-          UPLOAD_URL=$(echo $UPLOAD_URL_RESP | python3 -c "import sys,json; print(json.load(sys.stdin)['uploadUrl'])")
-          UPLOAD_TOKEN=$(echo $UPLOAD_URL_RESP | python3 -c "import sys,json; print(json.load(sys.stdin)['authorizationToken'])")
-          FILE=${{ env.BACKUP_FILE }}
-          SHA1=$(sha1sum $FILE | cut -d' ' -f1)
-          SIZE=$(wc -c < $FILE)
-          curl -s -H "Authorization: $UPLOAD_TOKEN" -H "X-Bz-File-Name: $FILE" -H "Content-Type: application/gzip" -H "Content-Length: $SIZE" -H "X-Bz-Content-Sha1: $SHA1" --data-binary @$FILE "$UPLOAD_URL"
+          mkdir -p ~/.config/rclone
+          cat > ~/.config/rclone/rclone.conf << EOF
+          [b2]
+          type = b2
+          account = ${{ secrets.B2_KEY_ID }}
+          key = ${{ secrets.B2_APP_KEY }}
+          EOF
+
+      - name: Upload vers Backblaze B2
+        run: |
+          rclone copy ${{ env.BACKUP_FILE }} b2:aureus-backups/ --b2-chunk-size 96M
           echo "Upload OK"
 
       - name: Done
