@@ -370,6 +370,32 @@ export default function DashboardLayout({ user }) {
     window.location.reload();
   };
 
+  // Déconnexion automatique après 30min d'inactivité (Couche 4)
+  useEffect(() => {
+    if (!user) return;
+    const TIMEOUT = 30 * 60 * 1000; // 30 minutes
+    let timer;
+
+    const resetTimer = () => {
+      clearTimeout(timer);
+      timer = setTimeout(async () => {
+        await audit.custom('AUTO_LOGOUT_INACTIVITY', 'auth', null, { email: user?.email, reason: '30min inactivité' });
+        if (supabase) await supabase.auth.signOut();
+        window.location.reload();
+      }, TIMEOUT);
+    };
+
+    // Réinitialiser le timer sur toute interaction utilisateur
+    const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
+    events.forEach(e => window.addEventListener(e, resetTimer, { passive: true }));
+    resetTimer(); // Démarrer le timer initial
+
+    return () => {
+      clearTimeout(timer);
+      events.forEach(e => window.removeEventListener(e, resetTimer));
+    };
+  }, [user]);
+
   const renderPage = () => {
     switch (page) {
       case 'dashboard': return <DashboardPage s={s} d={d} onNavigate={setPage} />;
