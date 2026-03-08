@@ -1,4 +1,5 @@
 "use client";
+import { useLang } from '../lib/lang-context';
 // ═══════════════════════════════════════════════════════════
 // Item #18 — SIMULATEUR NET ↔ BRUT INTERACTIF
 // Real-time slider: brut → net with ONSS, PP, bonus display
@@ -10,6 +11,7 @@ import { TX_ONSS_W, TX_ONSS_E, RMMMG, BONUS_MAX } from '@/app/lib/helpers';
 const GOLD='#c6a34e',GREEN='#22c55e';
 
 export function SimulateurNetBrut({ calcPaie, baremes, props_tab }) {
+  const { t, lang } = useLang();
   const [mode, setMode] = useState(props_tab === 'simutp' ? 'net' : 'brut'); // 'brut' or 'net'
   const [brutInput, setBrutInput] = useState(3500);
   const [netInput, setNetInput] = useState(2200);
@@ -121,5 +123,6 @@ export function SimulateurNetBrut({ calcPaie, baremes, props_tab }) {
 }
 
 export default function SimulateurNetBrutWrapped({ s, d, tab }) {
+  const { t, lang } = useLang();
   return <SimulateurNetBrut props_tab={tab} />;
 }

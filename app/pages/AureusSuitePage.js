@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { RMMMG, calc, TX_ONSS_E, TX_ONSS_W } from '@/app/lib/helpers';
 import { useState, useMemo } from 'react';
 
@@ -391,6 +392,7 @@ function KPIDashboardIA({ emps }) {
 
 // ═══ PAGE PRINCIPALE ═══
 export default function AureusSuitePage({ s, d }) {
+  const { t, lang } = useLang();
   const sub = s.sub || 'ia_turnover';
   const emps = s?.emps || s.employees || [];
 

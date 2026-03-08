@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { B, C, CR_PAT, I, LB, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, f0, f2, genDimonaXML, submitToONSS } from '@/app/lib/helpers';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
@@ -12,6 +13,7 @@ const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août
 function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function DimonaPage({s,d}) {
+  const { t, lang } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const [f,setF]=useState({eid:(s?.emps||[])[0]?.id||'',action:"IN",wtype:"OTH",start:new Date().toISOString().split('T')[0],end:"",hours:'',reason:'',dimonaP:'',planHrs:''});
   const [tab,setTab]=useState('new');

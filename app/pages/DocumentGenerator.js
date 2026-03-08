@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { B } from '@/app/lib/helpers';
 
 // ═══════════════════════════════════════════════════════
@@ -745,6 +746,7 @@ function documentToPrintHTML(content, title) {
 
 // ── Composant principal ──
 export default function DocumentGeneratorWrapped({ s, d, tab }) {
+  const { t, lang } = useLang();
   const TAB_TO_CAT = {'contratgen': 'contrat', 'contratsmenu': 'contrat', 'annexeReglement': 'reglementaire', 'gendocsjur': 'reglementaire', 'formC4': 'sortie', 'formC131': 'attestation', 'legal': 'reglementaire', 'cgvsaas': 'reglementaire', 'mentionslegales': 'reglementaire'};
   const initialCat = TAB_TO_CAT[tab] || null;
   return <DocumentGenerator state={s || {}} defaultTab={tab} initialCat={initialCat} />;
@@ -822,9 +824,9 @@ function DocumentGenerator({ state, defaultTab, initialCat }) {
 
   return (
     <div style={{ padding: 24 }}>
-      <h2 style={{ color: GOLD, margin: '0 0 4px 0', fontSize: 20 }}>Générateur de documents</h2>
+      <h2 style={{ color: GOLD, margin: '0 0 4px 0', fontSize: 20 }}>{t('docs.title')||'Générateur de documents'}</h2>
       <p style={{ color: MUTED, margin: '0 0 20px 0', fontSize: 13 }}>
-        Contrats, attestations, C4, préavis — conformes au droit du travail belge
+        {t('docs.subtitle')||'Contrats, attestations'}
       </p>
 
       {/* Filtres catégorie */}
@@ -961,7 +963,7 @@ function DocumentGenerator({ state, defaultTab, initialCat }) {
               <button onClick={handleDownloadPDF} style={{ ...btnStyle, background: GOLD, color: DARK, fontWeight: 600 }}>
                 📄 Télécharger PDF
               </button>
-              <button onClick={handlePrint} style={btnStyle}>Imprimer</button>
+              <button onClick={handlePrint} style={btnStyle}>{t('ui.print')||'Imprimer'}</button>
               <button
                 onClick={() => { navigator.clipboard?.writeText(generated.content) }}
                 style={btnStyle}

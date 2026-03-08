@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import{useState,useEffect,useCallback}from'react';
 
 const C=({children,title:t,sub,color})=><div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid '+(color||'rgba(198,163,78,.08)'),marginBottom:14}}>{t&&<div style={{fontSize:13,fontWeight:600,color:color||'#c6a34e',marginBottom:sub?2:10}}>{t}</div>}{sub&&<div style={{fontSize:10,color:'#888',marginBottom:10}}>{sub}</div>}{children}</div>;
@@ -10,6 +11,7 @@ const StatusDot=({ok})=><span style={{display:'inline-block',width:8,height:8,bo
 // SECURITY DASHBOARD — Vue complète sécurité
 // ════════════════════════════════════════════════════════════
 export function SecurityDashboard({s,supabase,user}){
+  const { t, lang } = useLang();
   const [tab,setTab]=useState(defaultTab||'overview');
   const [pwTest,setPwTest]=useState('');
   const [ipList,setIpList]=useState([
@@ -471,6 +473,7 @@ CREATE INDEX idx_ip_whitelist_tenant ON ip_whitelist(tenant_id, active);`}
 
 
 export default function SecurityDashboardWrapped({ s, d, tab }) {
+  const { t, lang } = useLang();
   const tabMap = { securitedata:'overview', archives:'niveau3', ged:'rgpddocs' };
   const mappedTab = tabMap[tab] || tab || 'overview';
   return <SecurityDashboard state={s || {}} dispatch={d || (() => {})} defaultTab={mappedTab} />;

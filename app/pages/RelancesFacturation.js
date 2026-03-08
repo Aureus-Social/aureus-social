@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { supabase } from '@/app/lib/supabase';
 import { useState, useEffect, useCallback } from 'react';
 
@@ -65,6 +66,7 @@ const DEMO_FACTURES = [
 ];
 
 export default function RelancesFacturation({ supabase, user, clients = [] }) {
+  const { t, lang } = useLang();
   const [factures, setFactures] = useState([]);
   const [tab, setTab] = useState('retard');
   const [sending, setSending] = useState(null);
@@ -208,7 +210,7 @@ export default function RelancesFacturation({ supabase, user, clients = [] }) {
     <div>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: '#c6a34e' }}>⚠ Relances Facturation</h2>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: '#c6a34e' }}>⚠ {t('relances.title')||'Relances Facturation'}</h2>
         <p style={{ margin: '4px 0 0', fontSize: 13, color: '#9e9b93' }}>Gestion automatisée des factures impayées — Secrétariat social</p>
       </div>
 

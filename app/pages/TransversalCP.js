@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import{useState,useMemo}from'react';
 
 const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);

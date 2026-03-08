@@ -1,4 +1,5 @@
 'use client'
+import { useLang } from '../lib/lang-context';
 
 // ═══════════════════════════════════════════════════════
 //  AUREUS SOCIAL PRO — Module: Dashboard Analytics Avancé
@@ -78,6 +79,7 @@ function ChartCard({ title, children, height }) {
 }
 
 export default function AnalyticsDashboardWrapped({ s, d, tab }) {
+  const { t, lang } = useLang();
   // analytics et tbdirection → dashboard complet avec graphiques
   // autres tabs → vue dédiée avec titre contextuel + dashboard intégré
   const meta = TAB_META[tab] || TAB_META['analytics'];
@@ -96,6 +98,7 @@ export default function AnalyticsDashboardWrapped({ s, d, tab }) {
 }
 
 function AnalyticsDashboard({ state, defaultTab }) {
+  const { t, lang } = useLang();
   const [period, setPeriod] = useState('12m')
   const [activeTab, setActiveTab] = useState(defaultTab || 'analytics')
   const employees = state?.employees || []
@@ -166,8 +169,8 @@ function AnalyticsDashboard({ state, defaultTab }) {
     <div style={{ padding: 24 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
-          <h2 style={{ color: GOLD, margin: '0 0 4px 0', fontSize: 20 }}>Analytics & KPIs</h2>
-          <p style={{ color: MUTED, margin: 0, fontSize: 13 }}>{company.name || 'Employeur'} — Tableau de bord analytique</p>
+          <h2 style={{ color: GOLD, margin: '0 0 4px 0', fontSize: 20 }}>{t('analytics.title')||'Analytics & KPIs'}</h2>
+          <p style={{ color: MUTED, margin: 0, fontSize: 13 }}>{company.name || 'Employeur'} — {t('menu.dashboard')||'Tableau de bord'} analytique</p>
         </div>
         <select
           value={period}

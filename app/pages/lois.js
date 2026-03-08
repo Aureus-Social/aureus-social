@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { C, CR_PAT, LB, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, f0, f2, fmt, quickPP, safeLS } from '@/app/lib/helpers';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
@@ -491,6 +492,7 @@ updateHistory.map((h,i)=><div key={i} style={{display:"flex",gap:10,padding:"10p
 
 
 export default function LoisWrapped({ s, d, tab }) {
+  const { t, lang } = useLang();
   // Mapper nos tabs menu vers les onglets internes du moteur lois
   const TAB_MAP = {
     seuilssociaux:       'parametres',

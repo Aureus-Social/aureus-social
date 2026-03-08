@@ -1,7 +1,8 @@
 'use client'
+import { useLang } from '../lib/lang-context';
 
 // ═══════════════════════════════════════════════════════
-//  AUREUS SOCIAL PRO — Module: Tableau de Bord Conformité
+//  AUREUS SOCIAL PRO — Module: Tableau de Bord {t('compliance.title')||'Conformité'}
 //  Vérification RGPD, ISO 27001, SOC 2
 //  Checklist automatisée + score de conformité
 // ═══════════════════════════════════════════════════════
@@ -359,7 +360,7 @@ function ComplianceDashboardInner({ state, initialFilter }) {
 
   return (
     <div style={{ padding: 24 }}>
-      <h2 style={{ color: GOLD, margin: '0 0 4px 0', fontSize: 20 }}>Conformité & Compliance</h2>
+      <h2 style={{ color: GOLD, margin: '0 0 4px 0', fontSize: 20 }}>{t('compliance.title')||'Conformité'} & Compliance</h2>
       <p style={{ color: MUTED, margin: '0 0 24px 0', fontSize: 13 }}>
         Vérification automatisée RGPD, ISO 27001, SOC 2 et obligations sociales belges
       </p>
@@ -527,6 +528,7 @@ function ComplianceDashboardInner({ state, initialFilter }) {
 
 
 export default function ComplianceDashboard({ state, s, d, tab }) {
+  const { t, lang } = useLang();
   const actualState = state || s || {};
   return <ComplianceDashboardInner state={actualState} initialFilter={tab === 'rgpd' ? 'rgpd' : null} />;
 }

@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { useState, useCallback } from 'react';
 import { C, B, ST, PH, Tbl, fmt, f2, f0 } from '@/app/lib/helpers';
 
@@ -254,6 +255,7 @@ function TestSuiteTab({s}) {
 // COMPOSANT PRINCIPAL
 // ════════════════════════════
 export default function AuditSecuriteCode({s, d, tab: props_tab}) {
+  const { t, lang } = useLang();
   const TAB_MAP = { auditsecuritecode:'securite', auditfiscale:'securite', audittrail:'trail', testsuite:'tests' };
   const [tab, setTab] = useState(TAB_MAP[props_tab] || 'securite');
 

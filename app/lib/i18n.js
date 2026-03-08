@@ -627,5 +627,74 @@ export const I18N = {
   'month.10': { fr:'Octobre', nl:'Oktober', en:'October', de:'Oktober' },
   'month.11': { fr:'Novembre', nl:'November', en:'November', de:'November' },
   'month.12': { fr:'Décembre', nl:'December', en:'December', de:'Dezember' },
+
+  // ── Documents ──
+  'docs.title': { fr:'Générateur de documents', nl:'Documentengenerator', en:'Document Generator', de:'Dokumentengenerator' },
+  'docs.subtitle': { fr:'Contrats, attestations, C4, préavis — conformes au droit du travail belge', nl:'Contracten, attesten, C4, opzeggingen — conform Belgisch arbeidsrecht', en:'Contracts, certificates, C4, notices — compliant with Belgian labour law', de:'Verträge, Bescheinigungen, C4, Kündigungen — gemäß belgischem Arbeitsrecht' },
+  'docs.all': { fr:'Tout', nl:'Alles', en:'All', de:'Alle' },
+  'docs.contracts': { fr:'Contrats', nl:'Contracten', en:'Contracts', de:'Verträge' },
+  'docs.certs': { fr:'Attestations', nl:'Attesten', en:'Certificates', de:'Bescheinigungen' },
+  'docs.exit': { fr:'Sortie / Fin contrat', nl:'Uitdiensttreding', en:'Exit / End of contract', de:'Austritt / Vertragsende' },
+  'docs.regulatory': { fr:'Réglementaire', nl:'Reglementair', en:'Regulatory', de:'Regulatorisch' },
+  'docs.cdi': { fr:'Contrat CDI', nl:'Contract onbepaalde duur', en:'Permanent contract', de:'Unbefristeter Vertrag' },
+  'docs.cdi_desc': { fr:'Contrat à durée indéterminée — employé ou ouvrier', nl:'Contract onbepaalde duur — bediende of arbeider', en:'Open-ended contract — employee or worker', de:'Unbefristeter Vertrag — Angestellter oder Arbeiter' },
+  'docs.cdd': { fr:'Contrat CDD', nl:'Contract bepaalde duur', en:'Fixed-term contract', de:'Befristeter Vertrag' },
+  'docs.student': { fr:'Convention étudiant', nl:'Studentenovereenkomst', en:'Student agreement', de:'Studentenvereinbarung' },
+  'docs.student_desc': { fr:"Convention d'occupation étudiant — max 600 h/an, cotisations réduites 2,71 %", nl:'Studentenwerkovereenkomst — max 600 u/jaar, verlaagde bijdragen 2,71 %', en:'Student employment agreement — max 600 h/year, reduced contributions 2.71%', de:'Studentenbeschäftigungsvertrag — max. 600 Std./Jahr, ermäßigte Beiträge 2,71 %' },
+  'docs.avenant': { fr:'Avenant au contrat', nl:'Addendum aan contract', en:'Contract amendment', de:'Vertragsänderung' },
+  'docs.parttime': { fr:'Contrat temps partiel', nl:'Deeltijdse arbeidsovereenkomst', en:'Part-time contract', de:'Teilzeitarbeitsvertrag' },
+  // ── Absences ──
+  'abs.title': { fr:'Gestion des Absences', nl:'Afwezigheidsbeheer', en:'Absence Management', de:'Abwesenheitsverwaltung' },
+  'abs.planning': { fr:'Planning & Congés', nl:'Planning & Verlof', en:'Planning & Leave', de:'Planung & Urlaub' },
+  // ── Simulateur ──
+  'sim.title': { fr:'Simulateur Net/Brut', nl:'Net/Bruto Simulator', en:'Net/Gross Simulator', de:'Netto/Brutto-Simulator' },
+  // ── Barèmes ──
+  'bar.title': { fr:'Barèmes CP', nl:"PC-barema's", en:'JC Pay Scales', de:'PC-Gehaltstabellen' },
+  // ── Lois ──
+  'lois.title': { fr:'Veille Légale', nl:'Juridische Monitoring', en:'Legal Watch', de:'Rechtsüberwachung' },
+  // ── ONSS ──
+  'onss.title': { fr:'Déclarations ONSS', nl:'RSZ-aangiften', en:'NSSO Declarations', de:'LSS-Erklärungen' },
+  'onss.dimona': { fr:'Dimona', nl:'Dimona', en:'Dimona', de:'Dimona' },
+  'onss.dimona_in': { fr:'Dimona IN', nl:'Dimona IN', en:'Dimona IN', de:'Dimona IN' },
+  'onss.dimona_out': { fr:'Dimona OUT', nl:'Dimona OUT', en:'Dimona OUT', de:'Dimona OUT' },
+  'onss.dmfa': { fr:'DmfA Trimestrielle', nl:'Kwartaal DmfA', en:'Quarterly DmfA', de:'Quartals-DmfA' },
+  // ── Primes ──
+  'primes.title': { fr:'Primes & Avantages', nl:'Premies & Voordelen', en:'Bonuses & Benefits', de:'Prämien & Leistungen' },
+  // ── Analytics ──
+  'analytics.title': { fr:'Analytics & KPIs', nl:'Analytiek & KPIs', en:'Analytics & KPIs', de:'Analytik & KPIs' },
+  // ── Diagnostic ──
+  'diag.title': { fr:'Diagnostic Commercial', nl:'Commerciële Diagnose', en:'Commercial Diagnostic', de:'Kommerzielle Diagnose' },
+  // ── Sécurité ──
+  'sec.title': { fr:'Sécurité des Données', nl:'Gegevensbeveiliging', en:'Data Security', de:'Datensicherheit' },
+  // ── Relances ──
+  'relances.title': { fr:'Relances Facturation', nl:'Factuurherinneringen', en:'Invoice Reminders', de:'Rechnungserinnerungen' },
+  // ── Paie générale ──
+  'pay.gross': { fr:'Salaire brut', nl:'Brutoloon', en:'Gross salary', de:'Bruttogehalt' },
+  'pay.net': { fr:'Salaire net', nl:'Nettoloon', en:'Net salary', de:'Nettogehalt' },
+  'pay.cost': { fr:'Coût employeur', nl:'Werkgeverskosten', en:'Employer cost', de:'Arbeitgeberkosten' },
+  'pay.period': { fr:'Période', nl:'Periode', en:'Period', de:'Zeitraum' },
+  'pay.month': { fr:'Mois', nl:'Maand', en:'Month', de:'Monat' },
+  'pay.year': { fr:'Année', nl:'Jaar', en:'Year', de:'Jahr' },
+
+  'support.title': { fr:'Tickets & Assistance', nl:'Tickets & Ondersteuning', en:'Tickets & Support', de:'Tickets & Support' },
+  'support.email': { fr:'Email support', nl:'E-mail ondersteuning', en:'Email support', de:'E-Mail-Support' },
+  'support.docs': { fr:'Documentation', nl:'Documentatie', en:'Documentation', de:'Dokumentation' },
+  'support.guides': { fr:'Guides et tutoriels', nl:'Gidsen en tutorials', en:'Guides and tutorials', de:'Anleitungen und Tutorials' },
+  'support.recent': { fr:'Tickets récents', nl:'Recente tickets', en:'Recent tickets', de:'Aktuelle Tickets' },
+  'support.open': { fr:'ouvert(s)', nl:'open', en:'open', de:'offen' },
+  'support.status_open': { fr:'Ouvert', nl:'Open', en:'Open', de:'Offen' },
+  'support.status_resolved': { fr:'Résolu', nl:'Opgelost', en:'Resolved', de:'Gelöst' },
+  'support.response': { fr:'Réponse sous 24h ouvrables', nl:'Reactie binnen 24 werkuren', en:'Response within 24 business hours', de:'Antwort innerhalb von 24 Arbeitsstunden' },
+  'ui.next': { fr:'Suivant', nl:'Volgende', en:'Next', de:'Weiter' },
+  'ui.prev': { fr:'Précédent', nl:'Vorige', en:'Previous', de:'Zurück' },
+  'ui.finish': { fr:'Terminer', nl:'Voltooien', en:'Finish', de:'Fertigstellen' },
+  'ui.reset': { fr:'Réinitialiser', nl:'Resetten', en:'Reset', de:'Zurücksetzen' },
+  'ui.preview': { fr:'Aperçu', nl:'Voorbeeld', en:'Preview', de:'Vorschau' },
+  'ui.validate': { fr:'Valider', nl:'Valideren', en:'Validate', de:'Validieren' },
+  'ui.analyze': { fr:'Analyser', nl:'Analyseren', en:'Analyze', de:'Analysieren' },
+  'ui.check': { fr:'Vérifier', nl:'Controleren', en:'Check', de:'Prüfen' },
+  'ui.close_month': { fr:'Clôturer', nl:'Afsluiten', en:'Close', de:'Abschließen' },
+  'compliance.title': { fr:'Conformité Réglementaire', nl:'Regelgevingsconformiteit', en:'Regulatory Compliance', de:'Regulatorische Compliance' },
+  'docs.avenant_desc': { fr:'Modification du contrat de travail existant', nl:'Wijziging van het bestaande arbeidscontract', en:'Amendment to existing employment contract', de:'Änderung des bestehenden Arbeitsvertrags' },
 };
 

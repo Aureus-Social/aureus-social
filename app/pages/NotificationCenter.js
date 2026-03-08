@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { LEGAL, RMMMG } from '@/app/lib/helpers';
 
 // ═══════════════════════════════════════════════════════
@@ -213,6 +214,7 @@ function sendPushNotification(title, options) {
 
 // ── Composant: Badge de notification ──
 export function NotifBadge({ count, onClick }) {
+  const { t, lang } = useLang();
   if (!count) return null
   return (
     <button
@@ -238,6 +240,7 @@ export function NotifBadge({ count, onClick }) {
 
 // ── Composant: Mini-liste déroulante ──
 export function NotifDropdown({ notifications, onClose, onMarkRead, onViewAll }) {
+  const { t, lang } = useLang();
   const ref = useRef()
 
   useEffect(() => {
@@ -260,7 +263,7 @@ export function NotifDropdown({ notifications, onClose, onMarkRead, onViewAll })
         padding: '12px 16px', borderBottom: `1px solid ${BORDER}`,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
-        <span style={{ fontWeight: 600, color: GOLD, fontSize: 14 }}>Notifications</span>
+        <span style={{ fontWeight: 600, color: GOLD, fontSize: 14 }}>{t('set.notifications')||'Notifications'}</span>
         <span style={{ fontSize: 11, color: MUTED }}>{unread.length} non lue(s)</span>
       </div>
 
@@ -315,6 +318,7 @@ export function NotifDropdown({ notifications, onClose, onMarkRead, onViewAll })
 
 // ── Composant principal: Page Notifications ──
 export default function NotificationCenterWrapped({ s, d, tab }) {
+  const { t, lang } = useLang();
   const state = s || {};
   const dispatch = d || (() => {});
   if (tab === 'smartalerts') return <SmartAlertsPage state={state} />;
@@ -325,6 +329,7 @@ export default function NotificationCenterWrapped({ s, d, tab }) {
 }
 
 function NotificationCenter({ state, dispatch, defaultTab }) {
+  const { t, lang } = useLang();
   const [filter, setFilter] = useState('all')
   const [readIds, setReadIds] = useState(() => {
     try { return new Set(JSON.parse(localStorage.getItem('aureus_notif_read') || '[]')) }
@@ -579,6 +584,7 @@ export { generateNotifications, NOTIF_TYPES, requestPushPermission, sendPushNoti
 // SMART ALERTS — Alertes intelligentes basées sur les données
 // ══════════════════════════════════════════════════════════════
 function SmartAlertsPage({ state }) {
+  const { t, lang } = useLang();
   const emps = (state?.emps || []).filter(e => e.status === 'active' || !e.status)
   const [dismissed, setDismissed] = useState(new Set())
   const f2 = v => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2 }).format(v)
@@ -726,6 +732,7 @@ function SmartAlertsPage({ state }) {
 // JOURNAL — Journal des activités
 // ══════════════════════════════════════════════════════════════
 function JournalPage({ state }) {
+  const { t, lang } = useLang();
   const [typeFilter, setTypeFilter] = useState('all')
   const entries = useMemo(() => {
     const now = new Date()
@@ -797,6 +804,7 @@ function JournalPage({ state }) {
 // SUPPORT — Tickets support
 // ══════════════════════════════════════════════════════════════
 function SupportPage() {
+  const { t, lang } = useLang();
   const [tickets] = useState([
     { id:'T001', subject:'Export WinBooks format incorrect', status:'open', prio:'high', ts:'07/03/2026 09:12' },
     { id:'T002', subject:'Dimona OUT non envoyé', status:'resolved', prio:'high', ts:'06/03/2026 14:30' },
@@ -818,14 +826,14 @@ function SupportPage() {
         <div style={{ padding:'20px', background:'rgba(198,163,78,.03)', borderRadius:12,
           border:'1px solid rgba(198,163,78,.1)', textAlign:'center' }}>
           <div style={{ fontSize:32, marginBottom:8 }}>📧</div>
-          <div style={{ fontSize:13, fontWeight:700, color:'#e8e6e0', marginBottom:4 }}>Email support</div>
+          <div style={{ fontSize:13, fontWeight:700, color:'#e8e6e0', marginBottom:4 }}>{t('support.email')||'Email support'}</div>
           <div style={{ fontSize:11, color:'#c6a34e' }}>info@aureus-ia.com</div>
-          <div style={{ fontSize:10, color:'#5e5c56', marginTop:4 }}>Réponse sous 24h ouvrables</div>
+          <div style={{ fontSize:10, color:'#5e5c56', marginTop:4 }}>{t('support.response')||'Réponse sous 24h ouvrables'}</div>
         </div>
         <div style={{ padding:'20px', background:'rgba(96,165,250,.03)', borderRadius:12,
           border:'1px solid rgba(96,165,250,.1)', textAlign:'center' }}>
           <div style={{ fontSize:32, marginBottom:8 }}>📚</div>
-          <div style={{ fontSize:13, fontWeight:700, color:'#e8e6e0', marginBottom:4 }}>Documentation</div>
+          <div style={{ fontSize:13, fontWeight:700, color:'#e8e6e0', marginBottom:4 }}>{t('support.docs')||'Documentation'}</div>
           <div style={{ fontSize:11, color:'#3b82f6' }}>info@aureus-ia.com</div>
           <div style={{ fontSize:10, color:'#5e5c56', marginTop:4 }}>Guides & support par email</div>
         </div>
@@ -833,8 +841,8 @@ function SupportPage() {
 
       <div style={{ background:'rgba(198,163,78,.02)', borderRadius:12, border:'1px solid rgba(198,163,78,.06)' }}>
         <div style={{ padding:'12px 16px', borderBottom:'1px solid rgba(198,163,78,.08)', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-          <span style={{ fontSize:12, fontWeight:700, color:'#e8e6e0' }}>Tickets récents</span>
-          <span style={{ fontSize:10, color:'#5e5c56' }}>{tickets.filter(t=>t.status==='open').length} ouvert(s)</span>
+          <span style={{ fontSize:12, fontWeight:700, color:'#e8e6e0' }}>{t('support.recent')||'Tickets récents'}</span>
+          <span style={{ fontSize:10, color:'#5e5c56' }}>{tickets.filter(t=>t.status==='open').length} {t('support.open')||'ouvert(s)'}</span>
         </div>
         {tickets.map((t,i) => (
           <div key={t.id} style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px',

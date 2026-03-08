@@ -1,4 +1,5 @@
 'use client'
+import { useLang } from '../lib/lang-context';
 
 // ═══════════════════════════════════════════════════════
 //  AUREUS SOCIAL PRO — Module: Planning & Calendrier
@@ -174,6 +175,7 @@ function EmployeeRow({ employee, year, month, absences, joursFeries, onCellClick
 
 // ── Composant principal ──
 export default function EmployeePlanningWrapped({ s, d, tab }) {
+  const { t, lang } = useLang();
   const viewMap = { interimaires:'interimaires', joursPrestes:'joursPrestes', registrepersonnel:'registrepersonnel' };
   return <EmployeePlanning state={s || {}} dispatch={d || (() => {})} defaultTab={tab} initialView={viewMap[tab] || 'team'} />;
 }

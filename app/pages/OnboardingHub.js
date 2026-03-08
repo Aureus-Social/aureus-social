@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import{useState,useMemo,useEffect}from'react';
 import{TX_ONSS_E,TX_ONSS_W,RMMMG,CR_MAX,CR_PAT,FORF_BUREAU}from'@/app/lib/helpers';
 
@@ -59,6 +60,7 @@ const generateDimonaPreview=(emp,company)=>{
 };
 
 export function OnboardingWizardV2({s,d}){
+  const { t, lang } = useLang();
   const [mode,setMode]=useState('choose'); // choose | wizard | reprise
   const [step,setStep]=useState(0);
   const [errors,setErrors]=useState([]);
@@ -141,7 +143,7 @@ export function OnboardingWizardV2({s,d}){
 
   // ═══ CHOOSE MODE ═══
   if(mode==='choose')return <div style={{padding:24}}>
-    <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>🚀 Onboarding Client</h2>
+    <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>🚀 {t('menu.onboarding')||'Onboarding'} Client</h2>
     <p style={{fontSize:12,color:'#888',margin:'0 0 24px'}}>Choisissez le mode d'integration</p>
     <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
       <div onClick={()=>setMode('wizard')} style={{padding:30,background:'linear-gradient(135deg,#0d1117,#131820)',border:'2px solid rgba(198,163,78,.15)',borderRadius:16,cursor:'pointer',textAlign:'center',transition:'all .2s'}} onMouseEnter={e=>e.currentTarget.style.borderColor='rgba(198,163,78,.4)'} onMouseLeave={e=>e.currentTarget.style.borderColor='rgba(198,163,78,.15)'}>
@@ -221,7 +223,7 @@ export function OnboardingWizardV2({s,d}){
   return <div style={{padding:24}}>
     <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:20}}>
       <button onClick={()=>setMode('choose')} style={{background:'none',border:'none',color:'#888',fontSize:18,cursor:'pointer'}}>←</button>
-      <div><h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:0}}>🚀 Onboarding — {data.company.name||'Nouveau Client'}</h2></div>
+      <div><h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:0}}>🚀 {t('menu.onboarding')||'Onboarding'} — {data.company.name||'Nouveau Client'}</h2></div>
     </div>
 
     {/* PROGRESS BAR */}

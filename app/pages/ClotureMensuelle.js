@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { supabase } from '@/app/lib/supabase';
 import { useState } from 'react';
 import { TX_ONSS_W, TX_ONSS_E } from '@/app/lib/lois-belges';
@@ -284,7 +285,7 @@ const ClotureMensuelle=({s,d,supabase,user})=>{
   return <div style={{padding:24}}>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
       <div>
-        <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:0}}>🔄 Clôture Mensuelle</h2>
+        <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:0}}>🔄 {t('menu.cloture')||'Clôture Mensuelle'}</h2>
         <p style={{fontSize:12,color:'#888',margin:'4px 0 0'}}>Workflow complet : Vérifier → Calculer → Générer → Valider → Envoyer → Clôturer</p>
       </div>
       <div style={{display:'flex',gap:8}}>

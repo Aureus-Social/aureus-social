@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { C, CR_PAT, DPER, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, obf, quickNet, quickPP } from '@/app/lib/helpers';
 import{useState,useEffect,useMemo,useCallback,useRef}from'react';
 
@@ -20,6 +21,7 @@ const timeAgo=(t)=>{const d=Math.floor((Date.now()-new Date(t))/60000);if(d<1)re
 // 1. SMART ALERTS ENGINE — Moteur d'alertes intelligentes
 // ═══════════════════════════════════════════════════════════
 export function SmartAlertsEngine({s,d}){
+  const { t, lang } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const clients= s?.clients||[];
   const now=new Date();
@@ -264,6 +266,7 @@ export function SmartAlertsEngine({s,d}){
 // 2. NOTIFICATION CENTER — Hub unifie avec preferences
 // ═══════════════════════════════════════════════════════════
 export function NotificationCenterV2({s,d}){
+  const { t, lang } = useLang();
   const clients= s?.clients||[];
   const now=new Date();
   const day=now.getDate();const month=now.getMonth();const yr=now.getFullYear();
@@ -418,6 +421,7 @@ export function NotificationCenterV2({s,d}){
 // 3. JOURNAL ACTIVITE — Audit trail complet qui/quoi/quand
 // ═══════════════════════════════════════════════════════════
 export function JournalActiviteV2({s,d}){
+  const { t, lang } = useLang();
   const clients= s?.clients||[];
   const now=new Date();
   const jaValidTabs=['timeline','bytype','byuser'];
@@ -622,6 +626,7 @@ export function JournalActiviteV2({s,d}){
 
 
 export default function SmartOpsWrapped({ s, d, tab }) {
+  const { t, lang } = useLang();
   const tabMap = {
     commandcenter:  'dashboard',
     actionsrapides: 'calendar',

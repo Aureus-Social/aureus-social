@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 
 // ═══ CATÉGORIES DE PARAMÈTRES ÉDITABLES ═══
@@ -110,6 +111,7 @@ function setNestedValue(obj, path, value) {
 }
 
 export default function AdminBaremes({ loisBelges, loisTimeline, loisCurrent, onUpdate }) {
+  const { t, lang } = useLang();
   const [tab, setTab] = useState('current');
   const [editValues, setEditValues] = useState({});
   const [dirty, setDirty] = useState({});

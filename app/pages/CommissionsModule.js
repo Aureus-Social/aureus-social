@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { C, CR_PAT, DPER, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, obf, quickNet, quickPP } from '@/app/lib/helpers';
 import { useState, useEffect, useCallback } from 'react';
 
@@ -244,6 +245,7 @@ function generateMiseEnDemeurePDF(facture, relancesData) {
 
 // ═══ MODULE RELANCES ═══
 function RelancesModule({ factures, sendEmailFn }) {
+  const { t, lang } = useLang();
   const [relances, setRelances] = useState({});
   const [filter, setFilter] = useState('all');
   const [sending, setSending] = useState(null);
@@ -530,6 +532,7 @@ function RelancesModule({ factures, sendEmailFn }) {
 
 
 export default function CommissionsModuleWrapped({ s, d, tab }) {
+  const { t, lang } = useLang();
   const TAB_META = {
     checklistclient:  { icon:'✅', title:'Checklist Client',      sub:'Vérifications onboarding nouveau client', mainTab:'commissions' },
     comparatif:       { icon:'⚔️', title:'Comparatif Marché',     sub:'Analyse concurrentielle secrétariats sociaux', mainTab:'commissions' },
@@ -557,6 +560,7 @@ export default function CommissionsModuleWrapped({ s, d, tab }) {
 }
 
 function CommissionsModule({ userRole, user, factures, sendEmailFn, defaultTab }) {
+  const { t, lang } = useLang();
   const [commissions, setCommissions] = useState({});
   const [selectedCommercial, setSelectedCommercial] = useState(null);
   const [tab, setTab] = useState('pending');

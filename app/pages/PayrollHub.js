@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { C, PV_DOUBLE, PV_SIMPLE, RMMMG, TX_ONSS_E, TX_ONSS_W, fmt, quickPP } from '@/app/lib/helpers';
 import{useState,useMemo}from'react';
 
@@ -12,6 +13,7 @@ const moisN=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août',
 // 1. VALIDATION PRE-PAIE — Vrais controles automatiques
 // ═══════════════════════════════════════════════════════════
 export function ValidationPrePaieV2({s,d}){
+  const { t, lang } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const clients= s?.clients||[];const now=new Date();
   const allEmps=clients.flatMap(c=>(c.emps||[]).map(e=>({...e,_co:c.company?.name||c.id,_cp:c.company?.cp||'200'})));
@@ -100,6 +102,7 @@ export function ValidationPrePaieV2({s,d}){
 // 2. TIMELINE PAIE — Liee aux vrais deadlines ONSS/SPF
 // ═══════════════════════════════════════════════════════════
 export function TimelinePaieV2({s}){
+  const { t, lang } = useLang();
   const now=new Date();const yr=now.getFullYear();const m=now.getMonth();const d=now.getDate();
   const [selMonth,setSelMonth]=useState(m);
 
@@ -193,6 +196,7 @@ export function TimelinePaieV2({s}){
 // 3. SOLDE TOUT COMPTE V2 — Prorata complet
 // ═══════════════════════════════════════════════════════════
 export function SoldeToutCompteV2({s,d}){
+  const { t, lang } = useLang();
   const clients= s?.clients||[];const allEmps=clients.flatMap(c=>(c.emps||[]).map(e=>({...e,_co:c.company?.name||'',_cp:c.company?.cp||'200'})));
   const [selEmp,setSelEmp]=useState('');const [dateSortie,setDateSortie]=useState(new Date().toISOString().slice(0,10));
   const [motif,setMotif]=useState('employeur');const [result,setResult]=useState(null);
@@ -287,7 +291,7 @@ export function SoldeToutCompteV2({s,d}){
           <option value="abus">Licenciement abusif (CCT 109)</option>
           <option value="faute">Faute grave (Art. 35)</option>
         </select></div>
-      <button onClick={calcul} style={{padding:'10px 24px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:13,cursor:'pointer',height:42}}>Calculer</button>
+      <button onClick={calcul} style={{padding:'10px 24px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:13,cursor:'pointer',height:42}}>{t('ui.calculate')||'Calculer'}</button>
     </div>
 
     {result&&<div>
@@ -334,6 +338,7 @@ export function SoldeToutCompteV2({s,d}){
 // 4. COUTS ANNUELS V2 — Saisonnalite + primes sectorielles
 // ═══════════════════════════════════════════════════════════
 export function CoutsAnnuelsV2({s}){
+  const { t, lang } = useLang();
   const clients= s?.clients||[];
   const allEmps=clients.flatMap(c=>(c.emps||[]).map(e=>({...e,_cp:c.company?.cp||'200'})));
   const n=allEmps.length;const mb=allEmps.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||e.brut||0)),0);
@@ -418,6 +423,7 @@ export function CoutsAnnuelsV2({s}){
 // 5. SIMU LICENCIEMENT V2 — Outplacement + indemnites speciales
 // ═══════════════════════════════════════════════════════════
 export function SimuLicenciementV2({s}){
+  const { t, lang } = useLang();
   const clients= s?.clients||[];
   const allEmps=clients.flatMap(c=>(c.emps||[]).map(e=>({...e,_co:c.company?.name||''})));
   const [selEmp,setSelEmp]=useState(null);const [motif,setMotif]=useState('employeur');
@@ -504,6 +510,7 @@ export function SimuLicenciementV2({s}){
 // 6. SIMU PENSION V2 — Formules SdPSP/SFPD branchees
 // ═══════════════════════════════════════════════════════════
 export function SimuPensionV2({s}){
+  const { t, lang } = useLang();
   const [age,setAge]=useState(35);const [brut,setBrut]=useState(3500);const [annees,setAnnees]=useState(15);
   const [statut,setStatut]=useState('isole');const [ag,setAg]=useState(true);const [cotAG,setCotAG]=useState(3);
   const [epargne,setEpargne]=useState(0);
@@ -593,6 +600,7 @@ export function SimuPensionV2({s}){
 // 7. TEMPS PARTIEL V2 — Credit heures + heures complementaires
 // ═══════════════════════════════════════════════════════════
 export function SimuTempsPartielV2({s}){
+  const { t, lang } = useLang();
   const [brutFT,setBrutFT]=useState(3500);const [heures,setHeures]=useState(19);const [hCompl,setHCompl]=useState(0);
   const regime=38;const fraction=heures/regime;
   const brutTP=Math.round(brutFT*fraction*100)/100;

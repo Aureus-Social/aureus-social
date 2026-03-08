@@ -1,4 +1,5 @@
 'use client';
+import { useLang } from '../lib/lang-context';
 import { C, CR_PAT, DPER, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, obf, quickNet, quickPP } from '@/app/lib/helpers';
 import{useState,useMemo}from'react';
 
@@ -10,6 +11,7 @@ const Badge=({text,color})=><span style={{padding:'2px 7px',borderRadius:5,fontS
 // 1. PLANNING CONGÉS V3 — Chevauchements + règles min présence
 // ════════════════════════════════════════════════════════════
 export function PlanningCongesV3({s, defaultTab}){
+  const { t, lang } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const emps=(s?.clients||[]).flatMap(c=>(c.emps||[]).map(e=>({...e,_cl:c.company?.name||'Client'})));
   const [month,setMonth]=useState(new Date().getMonth());
@@ -153,6 +155,7 @@ export function PlanningCongesV3({s, defaultTab}){
 // 2. BILAN SOCIAL V3 — Calcul automatique indicateurs BNB
 // ════════════════════════════════════════════════════════════
 export function BilanSocialV3({s}){
+  const { t, lang } = useLang();
   const emps=(s?.clients||[]).flatMap(c=>(c.emps||[]).map(e=>({...e,_cl:c.company?.name||''})));
   const [tab,setTab]=useState('indicateurs');
   const n=emps.length;
@@ -283,6 +286,7 @@ export function BilanSocialV3({s}){
 // 3. ANALYTICS V3 — Vrais analytics sur données réelles
 // ════════════════════════════════════════════════════════════
 export function AnalyticsV3({s}){
+  const { t, lang } = useLang();
   const emps=(s?.clients||[]).flatMap(c=>(c.emps||[]).map(e=>({...e,_cl:c.company?.name||''})));
   const clients= s?.clients||[];
   const [tab,setTab]=useState('dashboard');
@@ -412,6 +416,7 @@ export function AnalyticsV3({s}){
 // 4. IMPORT CSV V3 — Mapping colonnes + validation + preview
 // ════════════════════════════════════════════════════════════
 export function ImportCSVV3({s}){
+  const { t, lang } = useLang();
   const [tab,setTab]=useState('upload');
   const [csvText,setCsvText]=useState('');
   const [headers,setHeaders]=useState([]);
@@ -586,6 +591,7 @@ const CONTRAT_TYPES=[
 ];
 
 export function ContratsLegauxV3({s}){
+  const { t, lang } = useLang();
   const [selType,setSelType]=useState('cdi');
   const [tab,setTab]=useState('contrats');
   const [expanded,setExpanded]=useState({});
@@ -679,6 +685,7 @@ export function ContratsLegauxV3({s}){
 
 
 export default function AbsencesWrapped({ s, d, tab }) {
+  const { t, lang } = useLang();
   const TAB_MAP = {
     accidentTravail: 'regles',
     dashabsent:      'soldes',
