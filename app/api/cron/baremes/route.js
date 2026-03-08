@@ -42,7 +42,7 @@ const FB = {
 async function fetchSafe(url, ms=10000) {
   const c=new AbortController(), t=setTimeout(()=>c.abort(),ms);
   try {
-    const r=await fetch(url,{signal:c.signal,headers:{'User-Agent':'AureusSocialPro/2026 (compliance-bot; nourdin@aureussocial.be)'}});
+    const r=await fetch(url,{signal:c.signal,headers:{'User-Agent':'AureusSocialPro/2026 (compliance-bot; info@aureus-ia.com)'}});
     clearTimeout(t);
     return r.ok ? await r.text() : null;
   } catch { clearTimeout(t); return null; }

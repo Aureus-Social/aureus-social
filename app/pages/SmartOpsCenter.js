@@ -434,7 +434,7 @@ export function JournalActiviteV2({s,d}){
     const add=(type,icon,action,target,detail,user,who,clientName,ts,meta)=>entries.push({
       id:'AUD-'+Math.random().toString(36).substr(2,8),
       type,icon,action,target,detail,
-      user:user||'admin',who:who||s.user?.email||'admin@aureussocial.be',
+      user:user||'admin',who:who||s.user?.email||'info@aureus-ia.com',
       client:clientName||'',
       time:ts||now.toISOString(),
       meta:meta||{}
@@ -485,8 +485,8 @@ export function JournalActiviteV2({s,d}){
     });
 
     // System entries
-    add('system','🚀','DEPLOY','Systeme','Sprint 37 deploye — Smart Alerts + Journal Audit','system','system@aureussocial.be','',now.toISOString());
-    if(clients.length>0) add('system','📊','SCAN','Systeme','Scan automatique: '+clients.length+' clients — '+clients.reduce((a,c)=>a+(c.emps||[]).length,0)+' employes','system','system@aureussocial.be','',now.toISOString());
+    add('system','🚀','DEPLOY','Systeme','Sprint 37 deploye — Smart Alerts + Journal Audit','system','system@aureus-ia.com','',now.toISOString());
+    if(clients.length>0) add('system','📊','SCAN','Systeme','Scan automatique: '+clients.length+' clients — '+clients.reduce((a,c)=>a+(c.emps||[]).length,0)+' employes','system','system@aureus-ia.com','',now.toISOString());
 
     entries.sort((a,b)=>new Date(b.time)-new Date(a.time));
     return entries;
@@ -577,7 +577,7 @@ export function JournalActiviteV2({s,d}){
                 {Object.entries(e.meta).map(([k,v])=>v?<div key={k} style={{color:'#888'}}><b style={{color:'#c6a34e'}}>{k}:</b> {String(v)}</div>:null)}
               </div>}
             </div>
-            <div style={{fontSize:10,color:'#888'}}>{e.who==='system@aureussocial.be'?'⚙️ Systeme':e.who?.split('@')[0]||e.user}</div>
+            <div style={{fontSize:10,color:'#888'}}>{e.who==='system@aureus-ia.com'?'⚙️ Systeme':e.who?.split('@')[0]||e.user}</div>
             <div style={{fontSize:10,color:typeColors[e.type]||'#888'}}>{e.client||'—'}</div>
           </div>;
         })}
@@ -606,7 +606,7 @@ export function JournalActiviteV2({s,d}){
     {tab==='byuser'&&<div>
       {[...new Set(auditTrail.map(e=>e.who))].map(user=>{
         const userEntries=dateFiltered.filter(e=>e.who===user);
-        return <C key={user} title={(user==='system@aureussocial.be'?'⚙️ Systeme':'👤 '+(user?.split('@')[0]||user))+' ('+userEntries.length+' actions)'}>
+        return <C key={user} title={(user==='system@aureus-ia.com'?'⚙️ Systeme':'👤 '+(user?.split('@')[0]||user))+' ('+userEntries.length+' actions)'}>
           {userEntries.slice(0,8).map((e,i)=><div key={e.id} style={{display:'flex',alignItems:'center',gap:8,padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.02)'}}>
             <span style={{fontSize:12}}>{e.icon}</span>
             <Badge text={e.action} color={actionColors[e.action]}/>

@@ -97,7 +97,7 @@ export async function POST(request) {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: 'Aureus Social Pro <noreply@aureussocial.be>',
+          from: 'Aureus Social Pro <noreply@aureus-ia.com>',
           to: [email || 'info@aureus-ia.com'],
           subject: `🔒 Backup Aureus [${roleLabel}] — ${dateStr}`,
           html: `

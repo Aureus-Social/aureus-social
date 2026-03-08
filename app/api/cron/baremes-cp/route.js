@@ -30,7 +30,7 @@ async function fetchSafe(url, ms = 12000) {
   try {
     const r = await fetch(url, {
       signal: c.signal,
-      headers: { 'User-Agent': 'AureusSocialPro/2026 (baremes-cp-bot; nourdin@aureussocial.be)' }
+      headers: { 'User-Agent': 'AureusSocialPro/2026 (baremes-cp-bot; info@aureus-ia.com)' }
     });
     clearTimeout(t);
     return r.ok ? await r.text() : null;
@@ -385,7 +385,7 @@ export async function GET(req) {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${RESEND}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            from: 'cron@aureussocial.be',
+            from: 'cron@aureus-ia.com',
             to: 'info@aureus-ia.com',
             subject: `🚨 Aureus Social — Barèmes CP: variation anormale détectée`,
             html: `<h2>Variation barèmes CP > 5%</h2>

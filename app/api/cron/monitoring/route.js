@@ -26,7 +26,7 @@ async function sendAlertEmail(subject, htmlContent, severity = 'warning') {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      from: 'Aureus Monitoring <noreply@aureussocial.be>',
+      from: 'Aureus Monitoring <noreply@aureus-ia.com>',
       to: [ALERT_EMAIL],
       subject: `${severity === 'critical' ? '🚨' : severity === 'warning' ? '⚠️' : 'ℹ️'} ${subject}`,
       html: `

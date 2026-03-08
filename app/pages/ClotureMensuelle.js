@@ -10,7 +10,7 @@ const ClotureMensuelle=({s,d,supabase,user})=>{
   const [progress,setProgress]=useState({});
   const [logs,setLogs]=useState([]);
   const [emailMode,setEmailMode]=useState('simulate');
-  const [emailConfig,setEmailConfig]=useState({apiKey:'',fromEmail:'paie@aureussocial.be',fromName:'Aureus Social Pro'});
+  const [emailConfig,setEmailConfig]=useState({apiKey:'',fromEmail:'info@aureus-ia.com',fromName:'Aureus Social Pro'});
   const [notifSettings,setNotifSettings]=useState({onssReminder:true,dimonaReminder:true,prestationReminder:true,payslipReminder:true});
   const now=new Date();
   const mois=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];

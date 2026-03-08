@@ -538,7 +538,7 @@ export function EmployeeProfile({s, d, employee}) {
     
     // Privacy notice
     React.createElement('div',{style:{padding:16,borderRadius:12,background:'rgba(59,130,246,.04)',border:'1px solid rgba(59,130,246,.08)',fontSize:11,color:'#7ba3d6'}},
-      '🔒 Vos données sont protégées conformément au RGPD. Pour toute modification ou exercice de vos droits (accès, rectification, effacement), contactez votre DPO : dpo@aureussocial.be')
+      '🔒 Vos données sont protégées conformément au RGPD. Pour toute modification ou exercice de vos droits (accès, rectification, effacement), contactez votre DPO : info@aureus-ia.com')
   );
 }
 

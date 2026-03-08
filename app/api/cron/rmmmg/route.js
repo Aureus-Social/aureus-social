@@ -15,7 +15,7 @@ async function fetchWithTimeout(url, ms = 8000) {
   try {
     const res = await fetch(url, {
       signal: ctrl.signal,
-      headers: { 'User-Agent': 'AureusSocialPro/2026 (compliance-bot; nourdin@aureussocial.be)' }
+      headers: { 'User-Agent': 'AureusSocialPro/2026 (compliance-bot; info@aureus-ia.com)' }
     });
     clearTimeout(t);
     return res;
