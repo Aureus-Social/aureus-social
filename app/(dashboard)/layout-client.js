@@ -37,6 +37,7 @@ const EmployeesPage = dynamic(() => import('../pages/employees'), { ssr: false, 
 const PayslipsPage = dynamic(() => import('../pages/payslips'), { ssr: false, loading: Loading });
 const DimonaPageComp = dynamic(() => import('../pages/dimona'), { ssr: false, loading: Loading });
 const AdminPage = dynamic(() => import('../pages/admin'), { ssr: false, loading: Loading });
+const RolesPermissionsPage = dynamic(() => import('../pages/RolesPermissions'), { ssr: false, loading: Loading });
 const SettingsPageComp = dynamic(() => import('../pages/settings'), { ssr: false, loading: Loading });
 const LoisPage = dynamic(() => import('../pages/lois'), { ssr: false, loading: Loading });
 const BaremesCPPage = dynamic(() => import('../pages/BaremesCP'), { ssr: false, loading: Loading });
@@ -377,6 +378,7 @@ export default function DashboardLayout({ user }) {
       case 'declarations': case 'onss': return <DimonaPageComp s={s} d={d} />;
       case 'admin': return <AdminPage s={s} d={d} tab={page} />;
       case 'backup': return <AdminPage s={s} d={d} tab='backup' />;
+      case 'permissions': return <RolesPermissionsPage s={s} d={d} />;
       case 'baremescp': return <BaremesCPPage s={s} d={d} />;
       case 'calcinstant': return <SimuNetBrutPage s={s} d={d} tab={page} />;
       case 'diagnostic': case 'diagnosticv': return <DiagnosticPage s={s} d={d} />;

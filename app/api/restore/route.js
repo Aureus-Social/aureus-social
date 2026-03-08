@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { hasPermission } from '@/app/lib/permissions';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -17,6 +18,11 @@ const ROLE_RESTORE = {
 export async function POST(request) {
   try {
     const { backupData, userRole, dryRun } = await request.json();
+
+    // Vérifier permission
+    if (!hasPermission(userRole || 'readonly', 'exporter_donnees')) {
+      return Response.json({ error: 'Permission refusée — exporter_donnees requis' }, { status: 403 });
+    }
 
     if (!backupData || !backupData.metadata || !backupData.data) {
       return Response.json({ error: 'Fichier backup invalide — format incorrect' }, { status: 400 });
