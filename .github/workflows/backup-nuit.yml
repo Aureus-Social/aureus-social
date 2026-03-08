@@ -17,11 +17,21 @@ jobs:
           pg_dump "${{ secrets.SUPABASE_DB_URL }}" --no-owner --no-acl | gzip > backup_${TIMESTAMP}.sql.gz
           echo "BACKUP_FILE=backup_${TIMESTAMP}.sql.gz" >> $GITHUB_ENV
 
-      - name: Upload vers Backblaze B2
+      - name: Upload vers Backblaze B2 via curl
         run: |
-          pip install b2 --quiet
-          b2 account authorize 0035f32946dbe520000000003 K0039jw8dQljNgddkpoHHQ2tahEZFnA
-          b2 upload-file "${{ secrets.B2_BUCKET_NAME }}" "${{ env.BACKUP_FILE }}" "aureus-backups/${{ env.BACKUP_FILE }}"
+          AUTH=$(curl -s -u "0035f32946dbe520000000003:K0039jw8dQljNgddkpoHHQ2tahEZFnA" https://api.backblazeb2.com/b2api/v2/b2_authorize_account)
+          echo $AUTH
+          API_URL=$(echo $AUTH | python3 -c "import sys,json; print(json.load(sys.stdin)['apiUrl'])")
+          AUTH_TOKEN=$(echo $AUTH | python3 -c "import sys,json; print(json.load(sys.stdin)['authorizationToken'])")
+          BUCKET_ID="a57fa352d9b4c6dd9bce0512"
+          UPLOAD_URL_RESP=$(curl -s -H "Authorization: $AUTH_TOKEN" "$API_URL/b2api/v2/b2_get_upload_url?bucketId=$BUCKET_ID" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['uploadUrl']+'|'+d['authorizationToken'])")
+          UPLOAD_URL=$(echo $UPLOAD_URL_RESP | cut -d'|' -f1)
+          UPLOAD_TOKEN=$(echo $UPLOAD_URL_RESP | cut -d'|' -f2)
+          FILE=${{ env.BACKUP_FILE }}
+          SHA1=$(sha1sum $FILE | cut -d' ' -f1)
+          SIZE=$(wc -c < $FILE)
+          curl -s -H "Authorization: $UPLOAD_TOKEN" -H "X-Bz-File-Name: $FILE" -H "Content-Type: application/gzip" -H "Content-Length: $SIZE" -H "X-Bz-Content-Sha1: $SHA1" --data-binary @$FILE "$UPLOAD_URL"
+          echo "Upload OK"
 
       - name: Done
         run: echo "Backup termine avec succes"
