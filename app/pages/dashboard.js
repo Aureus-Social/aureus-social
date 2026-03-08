@@ -131,7 +131,7 @@ function Dashboard({s,d}) {
           const btn = document.getElementById('backup-btn');
           if(btn){btn.textContent='⏳ En cours...';btn.disabled=true;}
           try {
-            const res = await fetch('/api/backup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'both',email})});
+            const res = await fetch('/api/backup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'both',email,userEmail:s?.user?.email||'',userRole:s?.user?.user_metadata?.role||''})});
             if(!res.ok) throw new Error('Erreur serveur');
             const blob = await res.blob();
             const emailSent = res.headers.get('X-Backup-Email-Sent');
@@ -142,7 +142,7 @@ function Dashboard({s,d}) {
             const dateStr = now.toISOString().split('T')[0];
             a.href = url; a.download = `aureus-backup-${dateStr}.json`; a.click();
             URL.revokeObjectURL(url);
-            alert(`✅ Backup OK !\n📥 Fichier téléchargé\n📧 Email envoyé à ${email}\n📊 ${records} enregistrements sauvegardés`);
+            const role = res.headers.get('X-Backup-Role')||'admin'; const tables = res.headers.get('X-Backup-Tables')||'?'; alert(`✅ Backup OK !\n👤 Rôle: ${role}\n📊 ${records} enregistrements (${tables} tables)\n📥 Fichier téléchargé\n📧 Email envoyé à ${email}`);
           } catch(e) {
             alert('❌ Erreur backup : '+e.message);
           } finally {
