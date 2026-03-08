@@ -564,7 +564,7 @@ function DashboardLayoutInner({ user }) {
       case 'support': return <NotificationCenterPgW s={s} d={d} tab={page} />;
       case 'team': return <EmployeeHubPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'testsuite': return <AuditCodePage s={s} d={d} t={t} lang={lang} tab={page} />;
-      default: return <PlaceholderPage id={page} label={currentItem.label} />;
+      default: return <PlaceholderPage id={page} label={t('menu.' + currentItem?.id) || currentItem?.label} />;
     }
   };
 
@@ -606,7 +606,7 @@ function DashboardLayoutInner({ user }) {
             const q = searchQuery.toLowerCase();
             // Résultats pages menu
             const menuResults = MENU.filter(m => !m.group && (
-              m.label.toLowerCase().includes(q) || m.id.toLowerCase().includes(q)
+              (t('menu.' + m.id) || m.label).toLowerCase().includes(q) || m.id.toLowerCase().includes(q)
             )).slice(0, 5).map(m => ({ ...m, isSubsection: false }));
             // Résultats sous-sections (paramètres légaux fiche de paie)
             const subResults = (SEARCH_SUBSECTIONS || []).filter(s =>
@@ -637,7 +637,7 @@ function DashboardLayoutInner({ user }) {
                   >
                     <span style={{ fontSize: 13, width: 18, textAlign: 'center' }}>{item.icon}</span>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 11.5, color: '#e8e6e0', fontWeight: 500 }}>{item.label}</div>
+                      <div style={{ fontSize: 11.5, color: '#e8e6e0', fontWeight: 500 }}>{t('menu.' + item.id) || item.label}</div>
                       <div style={{ fontSize: 9.5, color: item.isSubsection ? '#c6a34e' : '#5e5c56', marginTop: 1 }}>{item.isSubsection ? item.sub : groupName(item.g)}</div>
                     </div>
                     {item.isSubsection && <span style={{ fontSize: 9, color: '#c6a34e', opacity: 0.7 }}>↗ section</span>}
