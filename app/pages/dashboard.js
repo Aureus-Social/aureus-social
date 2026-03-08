@@ -125,6 +125,30 @@ function Dashboard({s,d}) {
         <button onClick={()=>{if(confirm('Générer toutes les fiches de paie ?')){(s?.emps||[]).forEach(e=>generatePayslipPDF(e,s.co));alert(s.emps.length+' fiches de paie générées')}}} style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(198,163,78,.15)',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:600}}>📄 Fiches</button>
         <button onClick={()=>{if(confirm('Générer SEPA ?')){generateSEPAXML(s.emps||[],s.co);alert('Fichier SEPA pain.001 généré')}}} style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(34,197,94,.12)',color:'#22c55e',fontSize:11,cursor:'pointer',fontWeight:600}}>💸 SEPA</button>
         <button onClick={()=>{if(confirm('Générer DmfA ?')){generateDmfAXML(s.emps||[],Math.ceil((new Date().getMonth()+1)/3),new Date().getFullYear(),s.co);alert('DmfA trimestrielle générée')}}} style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(168,85,247,.12)',color:'#a855f7',fontSize:11,cursor:'pointer',fontWeight:600}}>📊 DmfA</button>
+        <button onClick={async()=>{
+          const email = prompt('Email de réception du backup ?','info@aureus-ia.com');
+          if(!email) return;
+          const btn = document.getElementById('backup-btn');
+          if(btn){btn.textContent='⏳ En cours...';btn.disabled=true;}
+          try {
+            const res = await fetch('/api/backup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'both',email})});
+            if(!res.ok) throw new Error('Erreur serveur');
+            const blob = await res.blob();
+            const emailSent = res.headers.get('X-Backup-Email-Sent');
+            const records = res.headers.get('X-Backup-Records');
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            a.href = url; a.download = `aureus-backup-${dateStr}.json`; a.click();
+            URL.revokeObjectURL(url);
+            alert(`✅ Backup OK !\n📥 Fichier téléchargé\n📧 Email envoyé à ${email}\n📊 ${records} enregistrements sauvegardés`);
+          } catch(e) {
+            alert('❌ Erreur backup : '+e.message);
+          } finally {
+            if(btn){btn.textContent='💾 Backup';btn.disabled=false;}
+          }
+        }} id="backup-btn" style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(34,197,94,.12)',color:'#22c55e',fontSize:11,cursor:'pointer',fontWeight:600}}>💾 Backup</button>
         <button onClick={()=>d({type:'NAV',page:'automatisation'})} style={{padding:'7px 14px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:500}}>Voir tout →</button>
       </div>
     </div>
