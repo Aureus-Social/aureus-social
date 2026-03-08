@@ -3,6 +3,7 @@ import React, { useState, useReducer, useMemo, useEffect, Suspense } from 'react
 import dynamic from 'next/dynamic';
 import { MENU, GROUPS, getGroupItems, SEARCH_SUBSECTIONS } from '../lib/menu-config';
 import { supabase } from '../lib/supabase';
+import { initCryptoKey, encryptState, decryptState } from '../lib/crypto';
 
 const Loading = () => <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Chargement...</div>;
 
@@ -280,6 +281,7 @@ function DashboardHome({ state, onNavigate }) {
 
 export default function DashboardLayout({ user }) {
   const [page, setPage] = useState('dashboard');
+  const [cryptoKey, setCryptoKey] = useState(null);
   const [collapsed, setCollapsed] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -296,7 +298,16 @@ export default function DashboardLayout({ user }) {
   const s = state;
   const d = dispatch;
 
-  // Intercepte les dispatch NAV depuis les pages enfants
+  // Init chiffrement AES-256 au montage (RGPD Art. 32)
+  useEffect(()=>{
+    const userId = user?.id || user?.email || 'aureus-default-user';
+    initCryptoKey(userId).then(ok => {
+      if(ok) setCryptoKey(true);
+      else console.warn('[Crypto] Chiffrement non disponible');
+    });
+  },[user]);
+
+    // Intercepte les dispatch NAV depuis les pages enfants
   useEffect(()=>{
     if(s._nav){
       setPage(s._nav);
@@ -598,6 +609,7 @@ export default function DashboardLayout({ user }) {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <span style={{ fontSize: 11, color: '#9e9b93' }}>{user?.email || 'demo'}</span>
+            <span title={cryptoKey ? 'Chiffrement AES-256 actif' : 'Chiffrement inactif'} style={{ fontSize: 10, color: cryptoKey ? '#22c55e' : '#ef4444', marginLeft: 4 }}>{cryptoKey ? '🔒' : '🔓'}</span>
             <button onClick={handleLogout}
               style={{ padding: '5px 12px', borderRadius: 6, border: '1px solid rgba(239,68,68,.15)', background: 'rgba(239,68,68,.05)', color: '#ef4444', fontSize: 10, cursor: 'pointer', fontFamily: 'inherit' }}>
               Déconnexion
