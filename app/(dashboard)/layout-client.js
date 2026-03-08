@@ -584,7 +584,7 @@ function DashboardLayoutInner({ user }) {
             <span style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: '#5e5c56', pointerEvents: 'none' }}>🔍</span>
             <input
               type="text"
-              placeholder="Rechercher..."
+              placeholder={t('nav.search') || "Rechercher..."}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               onFocus={() => setSearchFocus(true)}
@@ -649,7 +649,7 @@ function DashboardLayoutInner({ user }) {
                 position: 'absolute', left: 12, right: 12, top: '100%', zIndex: 999,
                 background: '#111009', border: '1px solid rgba(198,163,78,.2)',
                 borderRadius: 8, padding: '10px 12px', fontSize: 11, color: '#5e5c56', textAlign: 'center',
-              }}>Aucun résultat</div>
+              }}>{t('nav.noresult') || 'Aucun résultat'}</div>
             );
           })()}
         </div>
@@ -665,7 +665,7 @@ function DashboardLayoutInner({ user }) {
                 <div onClick={() => toggleGroup(gNum)}
                   style={{ padding: '10px 18px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 10, fontWeight: 700, color: '#5e5c56', letterSpacing: '.5px', textTransform: 'uppercase' }}>
-                    {group?.icon} {group?.label}
+                    {group?.icon} {t('menu.' + group?.id) || group?.label}
                   </span>
                   <span style={{ fontSize: 10, color: '#5e5c56', transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0)', transition: 'transform .15s' }}>▼</span>
                 </div>
@@ -680,7 +680,7 @@ function DashboardLayoutInner({ user }) {
                     onMouseEnter={e => { if (page !== item.id) e.currentTarget.style.background = 'rgba(255,255,255,.02)'; }}
                     onMouseLeave={e => { if (page !== item.id) e.currentTarget.style.background = 'transparent'; }}>
                     <span style={{ fontSize: 13, width: 20, textAlign: 'center' }}>{item.icon}</span>
-                    <span>{item.label}</span>
+                    <span>{t('menu.' + item.id) || item.label}</span>
                   </div>
                 ))}
               </div>
@@ -702,7 +702,7 @@ function DashboardLayoutInner({ user }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button onClick={() => setSidebarOpen(!sidebarOpen)}
               style={{ background: 'none', border: 'none', color: '#5e5c56', cursor: 'pointer', fontSize: 16, padding: 4 }}>☰</button>
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#e8e6e0' }}>{currentItem.icon} {currentItem.label}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#e8e6e0' }}>{currentItem.icon} {t('menu.' + currentItem?.id) || currentItem?.label}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {/* Sélecteur de langue */}
