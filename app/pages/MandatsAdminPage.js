@@ -54,7 +54,7 @@ const AUREUS = {
   bce: '1028.230.781',
   adresse: 'Place Marcel Broodthaers 8, 1060 Saint-Gilles',
   matriculeONSS: '51357716-02',
-  gerant: 'Nourdin Moussati',
+  gerant: 'Gérant',
   coGerant: 'Salem Abdellah',
   mahisRef: 'DGIII/MAHI011/1028.230.781',
   csamRef1: '22A00LCY0E8HZ',
@@ -296,7 +296,7 @@ Fait à Bruxelles, le ${date}
 
 Le Mandant :                    Le Mandataire :
 _____________________          _____________________
-${clientForm.gerant || ''}                     Nourdin MOUSSATI
+${clientForm.gerant || ''}                     Le Gérant
                                Aureus IA SPRL`;
   };
 

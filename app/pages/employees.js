@@ -205,27 +205,27 @@ function Employees({s,d}) {
   const sortiCount=(s?.emps||[]).filter(e=>e.status==='sorti').length;
   const studentCount=(s?.emps||[]).filter(e=>e.contract==='student').length;
 
-  // Exemple Activa — Nourdin MOUSSATI (attestation Activa.brussels AP 350/800/350) — fiche complète
+  // Exemple Activa — Jean DUPONT (attestation Activa.brussels AP 350/800/350) — fiche complète
   // CDD 3 mois : entrée 2 mars 2026, fin 1er juin 2026 ; fiche de paie pour fin mars 2026
-  const addExempleActivaNordin=()=>{
+  const addExempleActiva=()=>{
     const startDate='2026-03-02';
     const endDate='2026-06-01';
     const exemple={...empty,
-      id:'E-Activa-Nourdin',
-      first:'Nourdin',last:'MOUSSATI',niss:'83.09.30.133.94',birth:'1983-09-30',
+      id:'E-Activa-Demo',
+      first:'Jean',last:'DUPONT',niss:'00.01.01.000.00',birth:'2000-01-01',
       fn:'Assistant administratif',function:'Assistant administratif',dept:tText('Administration'),
       contract:tText('CDD'),regime:'full',whWeek:38,monthlySalary:2800,
       cp:'200',dmfaCode:'495',dimType:'OTH',
       startD:startDate,startDate:startDate,endD:endDate,endDate:endDate,
       addr:'Avenue Princesse Elisabeth 5 Bte 1',zip:'1030',city:'Schaerbeek',
-      email:'nourdin.moussati@example.com',phone:'+32 2 123 45 67',
+      email:'demo.activa@example.com',phone:'+32 2 123 45 67',
       civil:'single',depChildren:0,sexe:'M',statut:'employe',status:'active',
       iban:'BE71 0961 2345 6769',mvT:10,mvW:CR_TRAV,mvE:8.91,expense:0,
     };
     d({type:'ADD_E',d:exemple});
-    d({type:'NAV',page:'payslip',sub:null,selectedEmpIdForPayslip:'E-Activa-Nourdin'});
-    if(typeof addToast==='function')addToast('Nourdin MOUSSATI ajouté. Dans Fiches de Paie : choisir « Activa.brussels AP (350→800→350) » pour l\'allocation.');
-    else alert('Nourdin MOUSSATI ajouté. Allez dans Fiches de Paie → sélectionnez-le → Activation ONEM : Activa.brussels AP (350→800→350).');
+    d({type:'NAV',page:'payslip',sub:null,selectedEmpIdForPayslip:'E-Activa-Demo'});
+    if(typeof addToast==='function')addToast('Jean DUPONT ajouté. Dans Fiches de Paie : choisir « Activa.brussels AP (350→800→350) » pour l\'allocation.');
+    else alert('Jean DUPONT ajouté. Allez dans Fiches de Paie → sélectionnez-le → Activation ONEM : Activa.brussels AP (350→800→350).');
   };
 
   return <div>
@@ -236,13 +236,13 @@ function Employees({s,d}) {
       </label>
       <B v="outline" onClick={()=>setShowROI(!showROI)} style={{padding:'8px 14px',fontSize:11}}>💰 ROI</B>
       <B v="outline" onClick={exportCSV} style={{padding:'8px 14px',fontSize:11}}>⬇ CSV</B>
-      <B v="outline" onClick={addExempleActivaNordin} style={{padding:'8px 14px',fontSize:11}}>💼 Exemple Activa Nourdin</B>
+      <B v="outline" onClick={addExempleActiva} style={{padding:'8px 14px',fontSize:11}}>💼 Exemple Activa</B>
       <B onClick={()=>{setF({...empty});setEd(false);}}>+ Nouvel employé</B>
     </div>}/>
     {/* Barre visible Exemple Activa — toujours affichée sous le titre */}
     <div style={{marginBottom:16,padding:'12px 16px',background:'linear-gradient(135deg,rgba(34,197,94,.08),rgba(34,197,94,.03))',border:'1px solid rgba(34,197,94,.2)',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
-      <span style={{fontSize:12,color:'#86efac'}}>💼 Plan Activa (attestation Actiris) — Exemple Nourdin MOUSSATI : ajout en 1 clic + redirection Fiches de Paie</span>
-      <button onClick={addExempleActivaNordin} style={{padding:'10px 18px',borderRadius:8,border:'none',background:'#22c55e',color:'#fff',fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap'}}>💼 Créer Nourdin MOUSSATI (Activa)</button>
+      <span style={{fontSize:12,color:'#86efac'}}>💼 Plan Activa (attestation Actiris) — Exemple Jean DUPONT : ajout en 1 clic + redirection Fiches de Paie</span>
+      <button onClick={addExempleActiva} style={{padding:'10px 18px',borderRadius:8,border:'none',background:'#22c55e',color:'#fff',fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap'}}>💼 Créer Jean DUPONT (Activa)</button>
     </div>
     {/* Search and filters bar */}
     <div style={{display:'flex',gap:10,marginBottom:16,alignItems:'center',flexWrap:'wrap'}}>

@@ -9,7 +9,7 @@ const T = {
     nav: { connect:'Se connecter', items:[['Services','#services'],['Modules','#modules'],['À propos','#apropos']] },
     hero: {
       badge:'Version 18 — Live en production',
-      by:'Nourdin Moussati · Aureus IA SPRL',
+      by:'Aureus IA SPRL',
       h1:'L\'administration sociale,\ngérée avec',
       words:['précision.','conformité.','efficacité.','confiance.'],
       sub:'Consultant indépendant en gestion sociale et paie belge. Moteur de paie conforme SPF, déclarations ONSS automatiques, portails multi-tenant, sécurité de niveau bancaire.',
@@ -205,7 +205,7 @@ T.nl = {
   nav: { connect:'Inloggen', items:[['Diensten','#services'],['Modules','#modules'],['Over ons','#apropos']] },
   hero: {
     badge:'Versie 18 — Live in productie',
-    by:'Nourdin Moussati · Aureus IA SPRL',
+    by:'Aureus IA SPRL',
     h1:'Sociaal beheer,\nbeheerd met',
     words:['precisie.','conformiteit.','efficiëntie.','vertrouwen.'],
     sub:'Onafhankelijk consultant in sociaal beheer en Belgische loonverwerking. SPF-conform loonadministratiesysteem, automatische ONSS-aangiften, multi-tenant portalen, bankbeveiliging.',
@@ -391,7 +391,7 @@ T.en = {
   nav:{ connect:'Log in', items:[['Services','#services'],['Modules','#modules'],['About','#apropos']] },
   hero:{
     badge:'Version 18 — Live in production',
-    by:'Nourdin Moussati · Aureus IA SPRL',
+    by:'Aureus IA SPRL',
     h1:'Social administration,\nmanaged with',
     words:['precision.','compliance.','efficiency.','confidence.'],
     sub:'Independent consultant in social management and Belgian payroll. SPF-compliant payroll engine, automatic ONSS declarations, multi-tenant portals, bank-level security.',
@@ -577,7 +577,7 @@ T.de = {
   nav:{ connect:'Anmelden', items:[['Dienstleistungen','#services'],['Module','#modules'],['Über uns','#apropos']] },
   hero:{
     badge:'Version 18 — Live in Produktion',
-    by:'Nourdin Moussati · Aureus IA SPRL',
+    by:'Aureus IA SPRL',
     h1:'Sozialverwaltung,\nverwaltet mit',
     words:['Präzision.','Konformität.','Effizienz.','Vertrauen.'],
     sub:'Unabhängiger Berater für Sozialverwaltung und belgische Lohnbuchhaltung. SPF-konformes Lohnberechnungssystem, automatische ONSS-Meldungen, Multi-Tenant-Portale, Banksicherheit.',

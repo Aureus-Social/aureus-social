@@ -83,7 +83,7 @@ function AuditTrailTab({s}) {
   const events = [
     {type:'auth',icon:'🔐',user:'info@aureus-ia.com',action:'Connexion réussie',ip:'91.183.xx.xx',ts:new Date(now-300000)},
     {type:'data',icon:'✏️',user:'info@aureus-ia.com',action:'Employé modifié — Salem Abdellah (NISS, salaire)',ip:'91.183.xx.xx',ts:new Date(now-600000)},
-    {type:'payroll',icon:'💰',user:'info@aureus-ia.com',action:'Fiche de paie générée — Moussati N. Mars 2026',ip:'91.183.xx.xx',ts:new Date(now-900000)},
+    {type:'payroll',icon:'💰',user:'info@aureus-ia.com',action:'Fiche de paie générée — Dupont J. Mars 2026',ip:'91.183.xx.xx',ts:new Date(now-900000)},
     {type:'dimona',icon:'📤',user:'info@aureus-ia.com',action:'Dimona IN simulée — ref SIM-1741360000',ip:'91.183.xx.xx',ts:new Date(now-1800000)},
     {type:'auth',icon:'🔐',user:'salem@aureus-ia.com',action:'Connexion réussie',ip:'92.104.xx.xx',ts:new Date(now-3600000)},
     {type:'admin',icon:'⚙️',user:'info@aureus-ia.com',action:tText('Paramètres société mis à jour'),ip:'91.183.xx.xx',ts:new Date(now-7200000)},
