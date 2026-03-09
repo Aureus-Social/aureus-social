@@ -50,7 +50,7 @@ const Field = ({ label, value, onChange, type = 'text', options, readonly }) => 
 
 // ══ DONNÉES FIXES AUREUS ══
 const AUREUS = {
-  nom: 'Aureus IA SPRL',
+  nom: tText('Aureus IA SPRL'),
   bce: '1028.230.781',
   adresse: 'Place Marcel Broodthaers 8, 1060 Saint-Gilles',
   matriculeONSS: '51357716-02',
@@ -79,7 +79,7 @@ const REDUCTIONS_PREMIERS_EMPLOYES = [
 const PRIMES_EMPLOI = [
   {
     id: 'activa_bxl',
-    label: 'Activa.brussels',
+    label:tText('Activa.brussels'),
     montant: '350 EUR/mois',
     duree: '24 mois',
     region: 'Bruxelles',
@@ -91,7 +91,7 @@ const PRIMES_EMPLOI = [
   },
   {
     id: 'activa_bxl_ap',
-    label: 'Activa.brussels AP (Allocations de Passage)',
+    label:tText('Activa.brussels AP (Allocations de Passage)'),
     montant: '350 → 800 → 350 EUR/mois',
     duree: '24 mois (phases variables)',
     region: 'Bruxelles',
@@ -115,7 +115,7 @@ const PRIMES_EMPLOI = [
   },
   {
     id: 'activa_jeune',
-    label: 'Activa Jeunes < 30 ans',
+    label:tText('Activa Jeunes < 30 ans'),
     montant: '350 EUR/mois',
     duree: '12–24 mois',
     region: 'Bruxelles / Flandre / Wallonie',
@@ -127,7 +127,7 @@ const PRIMES_EMPLOI = [
   },
   {
     id: 'impulsion_55',
-    label: 'Impulsion 55+',
+    label:tText('Impulsion 55+'),
     montant: '500 EUR/mois',
     duree: '36 mois',
     region: 'Bruxelles',
@@ -244,7 +244,7 @@ export default function MandatsAdminPage({ s, d, tab }) {
 <Belcotax version="2.9">
   <Declarant>
     <NumeroEntreprise>${bce}</NumeroEntreprise>
-    <Denomination>Aureus IA SPRL</Denomination>
+    <Denomination>{tText('Aureus IA SPRL')}</Denomination>
     <DateEnvoi>${now}</DateEnvoi>
     <Annee>${y}</Annee>
     <NombreRecords>${emps.length}</NombreRecords>
@@ -545,7 +545,7 @@ ${clientForm.nom || ''}`;
                 <div style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                     <thead>
-                      <tr>{['Travailleur','NISS','Brut annuel','ONSS trav.','Imposable','PP'].map(h => (
+                      <tr>{['Travailleur','NISS',tText('Brut annuel'),'ONSS trav.','Imposable','PP'].map(h => (
                         <th key={h} style={{ padding: '8px', textAlign: 'left', color: '#c6a34e', borderBottom: '2px solid rgba(198,163,78,.2)', fontSize: 10 }}>{h}</th>
                       ))}</tr>
                     </thead>
@@ -699,7 +699,7 @@ est interrompue pendant plus de 2 mois consécutifs.`}
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                 <thead>
                   <tr>
-                    {['Employé', 'Réduction', 'Durée', 'Économie totale', 'Base légale'].map(h => (
+                    {['Employé', 'Réduction', 'Durée', 'Économie totale', tText('Base légale')].map(h => (
                       <th key={h} style={{ padding: '8px', textAlign: 'left', color: '#c6a34e',
                         borderBottom: '2px solid rgba(198,163,78,0.2)', fontSize: 10 }}>{h}</th>
                     ))}
@@ -752,7 +752,7 @@ est interrompue pendant plus de 2 mois consécutifs.`}
                   {[
                     { l: tText('Montant'), v: prime.montant, c: '#22c55e' },
                     { l: 'Durée', v: prime.duree, c: '#c6a34e' },
-                    { l: 'Organisme', v: prime.organisme, c: '#a78bfa' },
+                    { l:tText('Organisme'), v: prime.organisme, c: '#a78bfa' },
                   ].map((k, i) => (
                     <div key={i} style={{ padding: '12px', background: 'rgba(255,255,255,0.03)',
                       borderRadius: 10, border: `1px solid ${k.c}30` }}>
@@ -882,7 +882,7 @@ est interrompue pendant plus de 2 mois consécutifs.`}
           <C>
             <ST>📊 Barèmes RMMMG par Âge</ST>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
-              <thead><tr>{['Âge', tText('Ancienneté'), 'Montant/mois', 'Base légale', 'Notes'].map(h => (
+              <thead><tr>{['Âge', tText('Ancienneté'), 'Montant/mois', tText('Base légale'), 'Notes'].map(h => (
                 <th key={h} style={{ padding: '8px', textAlign: 'left', color: '#c6a34e',
                   borderBottom: '2px solid rgba(198,163,78,0.2)', fontSize: 10 }}>{h}</th>
               ))}</tr></thead>
@@ -923,9 +923,9 @@ est interrompue pendant plus de 2 mois consécutifs.`}
                 { l: 'CNT — CCT & RMMMG', url: 'https://www.cnt-nar.be', desc: 'CCT 43/15 — Salaire minimum 2.070,48 EUR' },
               ]},
               { cat: '💼 Primes Emploi Bruxelles', color: '#22c55e', links: [
-                { l: 'Actiris — Activa.brussels', url: 'https://www.actiris.brussels/fr/employeurs/activa-brussels/', desc: 'Attestation, suivi N° 829605' },
-                { l: 'Actiris — Impulsion 55+', url: 'https://www.actiris.brussels/fr/employeurs/impulsion/', desc: '500 EUR/mois — 36 mois' },
-                { l: 'Actiris — Activa Jeunes', url: 'https://www.actiris.brussels/fr/employeurs/activa-jeunes/', desc: 'Prime < 30 ans' },
+                { l:tText('Actiris — Activa.brussels'), url: 'https://www.actiris.brussels/fr/employeurs/activa-brussels/', desc: 'Attestation, suivi N° 829605' },
+                { l:tText('Actiris — Impulsion 55+'), url: 'https://www.actiris.brussels/fr/employeurs/impulsion/', desc: '500 EUR/mois — 36 mois' },
+                { l:tText('Actiris — Activa Jeunes'), url: 'https://www.actiris.brussels/fr/employeurs/activa-jeunes/', desc: 'Prime < 30 ans' },
                 { l: '⚠ MonBEE — deadline 01/06/2026', url: 'https://environnement.brussels/monbee', desc: 'Primes énergie bruxelloises' },
               ]},
               { cat: '📋 Réglementations & Barèmes', color: '#a78bfa', links: [
@@ -938,7 +938,7 @@ est interrompue pendant plus de 2 mois consécutifs.`}
                 { l: 'BCE.be — Banque-Carrefour', url: 'https://economie.fgov.be/fr/themes/entreprises/banque-carrefour-des/rechercher-dans-la-banque', desc: 'Vérifier BCE, statuts, mandats' },
                 { l: 'Peppol — Facturation électronique', url: 'https://peppol.eu', desc: 'ID Aureus : 0208:1028230781' },
                 { l: 'Isabel 6 — Virements SEPA', url: 'https://www.isabel.eu', desc: 'Paiements SEPA pain.001' },
-                { l: 'APD — Protection données', url: 'https://www.autoriteprotectiondonnees.be', desc: 'RGPD — plainte, DPA' },
+                { l:tText('APD — Protection données'), url: 'https://www.autoriteprotectiondonnees.be', desc: 'RGPD — plainte, DPA' },
               ]},
               { cat: '📊 Références Salariales', color: '#ec4899', links: [
                 { l: 'RMMMG — CCT 43 coordonnée', url: 'https://www.cnt-nar.be/CCT-COORD/cct-043.pdf', desc: 'Évolutions historiques RMMMG' },

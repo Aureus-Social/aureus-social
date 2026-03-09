@@ -20,8 +20,8 @@ const DAYS_SHORT = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']
 
 // ── Types d'absence belges ──
 const ABSENCE_TYPES = {
-  CONGE: { label: 'Congé annuel', short: 'CA', color: '#3b82f6', legal: '20 jours/an (régime 5j)' },
-  MALADIE: { label: 'Maladie', short: 'M', color: '#ef4444', legal: 'Salaire garanti: 30j employé / 7j ouvrier' },
+  CONGE: { label:tText('Congé annuel'), short: 'CA', color: '#3b82f6', legal: '20 jours/an (régime 5j)' },
+  MALADIE: { label:tText('Maladie'), short: 'M', color: '#ef4444', legal: 'Salaire garanti: 30j employé / 7j ouvrier' },
   CTM: { label: 'Congé thématique', short: 'CT', color: '#8b5cf6', legal: 'Crédit-temps, congé parental, etc.' },
   FORMATION: { label: 'Formation', short: 'F', color: '#06b6d4', legal: 'Congé-éducation payé: max 125h/an' },
   PETIT_CHOMAGE: { label: 'Petit chômage', short: 'PC', color: '#f59e0b', legal: 'Événements familiaux (mariage, décès, etc.)' },
@@ -546,7 +546,7 @@ function EmployeePlanning({ state, dispatch, defaultTab, initialView }) {
         return (s.getMonth() <= month && e.getMonth() >= month && s.getFullYear() <= year && e.getFullYear() >= year)
       }).length > 0 && (
         <div style={{ marginTop: 20 }}>
-          <h3 style={{ color: GOLD, fontSize: 14, margin: '0 0 12px 0' }}>Absences du mois</h3>
+          <h3 style={{ color: GOLD, fontSize: 14, margin: '0 0 12px 0' }}>{tText('Absences du mois')}</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {absences.filter(a => {
               const s = new Date(a.startDate)

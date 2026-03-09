@@ -379,14 +379,14 @@ intemperies:{
 export const INDEXATION_CP={
 '200':{mecanisme:'Index santé lissé',date:'Janvier',coefficient:'Automatique dès dépassement pivot',frequence:'Annuelle',dernier:'01/01/2026',pctDernier:2.0,note:'Application automatique au 1er janvier'},
 '118':{mecanisme:'Index santé sectoriel',date:'Selon CCT',coefficient:'Négociation sectorielle',frequence:'Variable',dernier:'01/01/2026',pctDernier:2.0,note:'Peut être différé par accord sectoriel'},
-'119':{mecanisme:'Index santé',date:'Janvier/Juillet',coefficient:'Automatique',frequence:'Semestrielle',dernier:'01/01/2026',pctDernier:2.0,note:'Double vérification annuelle'},
-'302':{mecanisme:'Index santé',date:'Janvier',coefficient:'Automatique',frequence:'Annuelle',dernier:'01/01/2026',pctDernier:2.0,note:'Application en janvier'},
-'124':{mecanisme:'Index santé',date:'Janvier/Juillet',coefficient:'Automatique',frequence:'Semestrielle',dernier:'01/01/2026',pctDernier:2.0,note:'Révision semestrielle des barèmes'},
+'119':{mecanisme:tText('Index santé'),date:'Janvier/Juillet',coefficient:'Automatique',frequence:'Semestrielle',dernier:'01/01/2026',pctDernier:2.0,note:'Double vérification annuelle'},
+'302':{mecanisme:tText('Index santé'),date:'Janvier',coefficient:'Automatique',frequence:'Annuelle',dernier:'01/01/2026',pctDernier:2.0,note:'Application en janvier'},
+'124':{mecanisme:tText('Index santé'),date:'Janvier/Juillet',coefficient:'Automatique',frequence:'Semestrielle',dernier:'01/01/2026',pctDernier:2.0,note:'Révision semestrielle des barèmes'},
 '322.01':{mecanisme:'Index santé automatique',date:'Lors du dépassement',coefficient:'2%',frequence:'Au dépassement du pivot',dernier:'01/01/2026',pctDernier:2.0,note:'Application immédiate au dépassement'},
 '330':{mecanisme:'Index santé — Protocole non-marchand',date:'Selon protocole',coefficient:'Négocié',frequence:'Variable',dernier:'01/01/2026',pctDernier:2.0,note:'Suivi des accords du non-marchand'},
 '111':{mecanisme:'Index santé sectoriel',date:'Janvier/Juillet',coefficient:'Automatique',frequence:'Semestrielle',dernier:'01/01/2026',pctDernier:2.0,note:'Révision semestrielle'},
-'140':{mecanisme:'Index santé',date:'Janvier',coefficient:'Automatique',frequence:'Annuelle',dernier:'01/01/2026',pctDernier:2.0,note:'Application annuelle'},
-'121':{mecanisme:'Index santé',date:'Janvier',coefficient:'Automatique',frequence:'Annuelle',dernier:'01/01/2026',pctDernier:2.0,note:'Application annuelle'},
+'140':{mecanisme:tText('Index santé'),date:'Janvier',coefficient:'Automatique',frequence:'Annuelle',dernier:'01/01/2026',pctDernier:2.0,note:'Application annuelle'},
+'121':{mecanisme:tText('Index santé'),date:'Janvier',coefficient:'Automatique',frequence:'Annuelle',dernier:'01/01/2026',pctDernier:2.0,note:'Application annuelle'},
 '152':{mecanisme:'Index fonction publique',date:'Lors du dépassement',coefficient:'2%',frequence:'Au pivot',dernier:'01/01/2026',pctDernier:2.0,note:'Suit le mécanisme de la fonction publique'},
 };
 
@@ -452,7 +452,7 @@ export function TransversalCPView({cp,initialTab,barData}){
         {['nuit','equipe','conditions','annuelle','avantage','pension','syndicale'].map(cat=>{
           const catPrimes=primes.filter(p=>p.cat===cat);
           if(catPrimes.length===0)return null;
-          const catNames={nuit:'Majorations horaires',equipe:'Primes d\'équipe',conditions:'Conditions de travail',annuelle:'Primes annuelles',avantage:'Avantages',pension:'Pension',syndicale:'Prime syndicale'};
+          const catNames={nuit:'Majorations horaires',equipe:'Primes d\'équipe',conditions:'Conditions de travail',annuelle:'Primes annuelles',avantage:tText('Avantages'),pension:'Pension',syndicale:'Prime syndicale'};
           return <C key={cat} title={catNames[cat]||cat} color={catColors[cat]}>
             {catPrimes.map((p,i)=>{const k=cat+'-'+i;const isExp=expanded[k];const d=p.details;return <div key={i} style={{borderBottom:'1px solid rgba(255,255,255,.03)'}}>
               <div onClick={()=>d&&setExpanded(prev=>({...prev,[k]:!prev[k]}))} style={{padding:'10px 0',cursor:d?'pointer':'default',display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
@@ -471,7 +471,7 @@ export function TransversalCPView({cp,initialTab,barData}){
                   {d.exoneration&&<div style={{marginBottom:10}}><div style={{fontSize:9,fontWeight:700,color:'#a855f7',textTransform:'uppercase',letterSpacing:1,marginBottom:4}}>Exonération ONSS/IPP</div><div style={{fontSize:11,color:'#e8e6e0'}}>{d.exoneration}</div></div>}
                   {d.fiscal&&<div style={{marginBottom:10}}><div style={{fontSize:9,fontWeight:700,color:'#fb923c',textTransform:'uppercase',letterSpacing:1,marginBottom:4}}>{tText('Traitement fiscal')}</div><div style={{fontSize:11,color:'#e8e6e0'}}>{d.fiscal}</div></div>}
                   {d.paiement&&<div style={{marginBottom:10}}><div style={{fontSize:9,fontWeight:700,color:'#06b6d4',textTransform:'uppercase',letterSpacing:1,marginBottom:4}}>{tText('Paiement')}</div><div style={{fontSize:11,color:'#e8e6e0'}}>{d.paiement}</div></div>}
-                  {d.organisme&&<div style={{marginBottom:10}}><div style={{fontSize:9,fontWeight:700,color:'#06b6d4',textTransform:'uppercase',letterSpacing:1,marginBottom:4}}>Organisme</div><div style={{fontSize:11,color:'#e8e6e0'}}>{d.organisme}</div></div>}
+                  {d.organisme&&<div style={{marginBottom:10}}><div style={{fontSize:9,fontWeight:700,color:'#06b6d4',textTransform:'uppercase',letterSpacing:1,marginBottom:4}}>{tText('Organisme')}</div><div style={{fontSize:11,color:'#e8e6e0'}}>{d.organisme}</div></div>}
                   {d.cumul&&<div style={{marginBottom:10}}><div style={{fontSize:9,fontWeight:700,color:'#888',textTransform:'uppercase',letterSpacing:1,marginBottom:4}}>{tText('Cumul')}</div><div style={{fontSize:11,color:'#e8e6e0'}}>{d.cumul}</div></div>}
                   {d.special&&<div style={{marginBottom:0}}><div style={{fontSize:9,fontWeight:700,color:'#ef4444',textTransform:'uppercase',letterSpacing:1,marginBottom:4}}>⚠ Attention</div><div style={{fontSize:11,color:'#e8e6e0'}}>{d.special}</div></div>}
                 </div>
@@ -517,7 +517,7 @@ export function TransversalCPView({cp,initialTab,barData}){
         {oblig.hygiene&&<C title={'🧼 Hygiène'+(oblig.hygiene.haccp?' & HACCP':'')}>
           {oblig.hygiene.haccp&&<Row l="Certification HACCP" v="Obligatoire" c="#ef4444"/>}
           {oblig.hygiene.certificat_medical&&<Row l="Certificat médical" v="Obligatoire" c="#ef4444"/>}
-          <div style={{marginTop:8,fontSize:11,fontWeight:600,color:'#c6a34e'}}>Formations obligatoires:</div>
+          <div style={{marginTop:8,fontSize:11,fontWeight:600,color:'#c6a34e'}}>{tText('Formations obligatoires:')}</div>
           {oblig.hygiene.formations.map((f,i)=><div key={i} style={{fontSize:10,color:'#888',padding:'2px 0'}}>• {f}</div>)}
         </C>}
         <C title="⚠️ Sécurité">
@@ -533,7 +533,7 @@ export function TransversalCPView({cp,initialTab,barData}){
         <Row l="Taux cotisation patronale" v={pension.taux+'%'} c="#c6a34e"/>
         <Row l="Base de calcul" v={pension.base}/>
         <Row l="Organisme" v={pension.organisme}/>
-        <Row l="Obligatoire" v={pension.obligatoire?'Oui':'Non'} c={pension.obligatoire?'#4ade80':'#888'}/>
+        <Row l="Obligatoire" v={pension.obligatoire?tText('Oui'):tText('Non')} c={pension.obligatoire?'#4ade80':'#888'}/>
         <div style={{marginTop:8,fontSize:10,color:'#888'}}>{pension.note}</div>
         <div style={{marginTop:12,padding:10,background:'rgba(198,163,78,.04)',borderRadius:6,fontSize:10}}>
           <div style={{color:'#c6a34e',fontWeight:600}}>Exemple pour un brut de 3.000 EUR/mois:</div>
@@ -547,7 +547,7 @@ export function TransversalCPView({cp,initialTab,barData}){
       {fonds?<C title="🏛 Fonds de sécurité d'existence">
         <Row l="Nom" v={fonds.nom}/>
         <Row l="Cotisation" v={fonds.cotisation}/>
-        <div style={{marginTop:8,fontSize:11,fontWeight:600,color:'#c6a34e'}}>Services:</div>
+        <div style={{marginTop:8,fontSize:11,fontWeight:600,color:'#c6a34e'}}>{tText('Services:')}</div>
         {fonds.services.map((s,i)=><div key={i} style={{fontSize:10,color:'#888',padding:'3px 0'}}>• {s}</div>)}
       </C>:<div style={{padding:20,textAlign:'center',color:'#888'}}>Pas de fonds sectoriel spécifique identifié.</div>}
       {cp==='124'&&<div>
@@ -556,13 +556,13 @@ export function TransversalCPView({cp,initialTab,barData}){
           <Row l="Paiement" v={TIMBRES.fidelite.paiement}/>
           <Row l="Montant indicatif" v={TIMBRES.fidelite.montant_indicatif} c="#22c55e"/>
           <Row l="Fiscalité" v={TIMBRES.fidelite.fiscalite} c="#ef4444"/>
-          <div style={{marginTop:8,fontSize:11,fontWeight:600,color:'#c6a34e'}}>Conditions:</div>
+          <div style={{marginTop:8,fontSize:11,fontWeight:600,color:'#c6a34e'}}>{tText('Conditions:')}</div>
           {TIMBRES.fidelite.conditions.map((c,i)=><div key={i} style={{fontSize:10,color:'#888',padding:'2px 0'}}>• {c}</div>)}
         </C>
         <C title="🌧 Timbres intempéries (Construction)" color="#3b82f6">
           <Row l="Calcul" v={TIMBRES.intemperies.calcul}/>
           <Row l="Paiement" v={TIMBRES.intemperies.paiement}/>
-          <div style={{marginTop:8,fontSize:11,fontWeight:600,color:'#3b82f6'}}>Conditions:</div>
+          <div style={{marginTop:8,fontSize:11,fontWeight:600,color:'#3b82f6'}}>{tText('Conditions:')}</div>
           {TIMBRES.intemperies.conditions.map((c,i)=><div key={i} style={{fontSize:10,color:'#888',padding:'2px 0'}}>• {c}</div>)}
         </C>
       </div>}
@@ -595,9 +595,9 @@ export function TransversalCPView({cp,initialTab,barData}){
     {tab==='apprentis'&&<div>
       {Object.values(STATUTS_APPRENTIS).map((st,idx)=><C key={idx} title={'🎓 '+st.nom} sub={st.base_legale}>
         <Row l="Durée" v={st.duree}/><Row l="Âge" v={st.age}/><Row l="Formation" v={st.formation}/><Row l="Cotisations" v={st.cotisations}/><Row l="Congés" v={st.conges}/>
-        <div style={{marginTop:8,fontSize:11,fontWeight:600,color:'#c6a34e'}}>Rémunération:</div>
+        <div style={{marginTop:8,fontSize:11,fontWeight:600,color:'#c6a34e'}}>{tText('Rémunération:')}</div>
         {st.remuneration.map((r,i)=><Row key={i} l={r.annee} v={typeof r.montant==='number'?fmt(r.montant)+' EUR/mois':r.montant} c="#22c55e" sub/>)}
-        <div style={{marginTop:8,fontSize:11,fontWeight:600,color:'#c6a34e'}}>Particularités:</div>
+        <div style={{marginTop:8,fontSize:11,fontWeight:600,color:'#c6a34e'}}>{tText('Particularités:')}</div>
         {st.particularites.map((p,i)=><div key={i} style={{fontSize:10,color:'#888',padding:'2px 0'}}>• {p}</div>)}
       </C>)}
     </div>}

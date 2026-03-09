@@ -3,14 +3,14 @@ import { useLang } from '../lib/lang-context';
 import { useState } from 'react';
 import { PERMISSIONS, ROLES, KPI_SCOPE, hasPermission, getPermissionsForRole } from '@/app/lib/permissions';
 
-const ROLE_LABELS = { admin:'Administrateur', comptable:'Comptable', rh:'Ressources Humaines', commercial:'Commercial', readonly:'Lecture seule' };
+const ROLE_LABELS = { admin:tText('Administrateur'), comptable:'Comptable', rh:tText('Ressources Humaines'), commercial:tText('Commercial'), readonly:tText('Lecture seule') };
 const ROLE_COLORS = { admin:'#c6a34e', comptable:'#60a5fa', rh:'#22c55e', commercial:'#a78bfa', readonly:'#5e5c56' };
 const PERM_LABELS = {
   voir_fiches_paie:'Voir fiches de paie', calculer_paie:'Calculer la paie',
   exporter_comptabilite:'Exporter comptabilité', soumettre_dimona:'Soumettre Dimona',
   modifier_travailleurs:'Modifier travailleurs', voir_travailleurs:'Voir travailleurs',
   gerer_contrats:'Gérer contrats', voir_clients_entreprises:'Voir clients/entreprises',
-  gerer_facturation:'Gérer facturation', acces_audit_trail:'Accès audit trail',
+  gerer_facturation:'Gérer facturation', acces_audit_trail:tText('Accès audit trail'),
   gerer_utilisateurs:'Gérer utilisateurs', configuration_app:'Configuration app',
   exporter_donnees:'Exporter ses données', voir_dashboard_kpis:'Voir dashboard KPIs',
 };

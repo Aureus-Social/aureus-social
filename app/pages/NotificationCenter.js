@@ -20,7 +20,7 @@ const MUTED = '#8b95a5'
 const NOTIF_TYPES = {
   DEADLINE: { label: 'Échéance', color: '#ef4444', icon: '⏰' },
   PAYROLL: { label: 'Paie', color: '#22c55e', icon: '💰' },
-  ONSS: { label: 'ONSS', color: '#3b82f6', icon: '🏛' },
+  ONSS: { label:tText('ONSS'), color: '#3b82f6', icon: '🏛' },
   FISCAL: { label: 'Fiscal', color: '#f59e0b', icon: '📋' },
   LEGAL: { label: 'Légal', color: '#8b5cf6', icon: '⚖️' },
   HR: { label: 'RH', color: '#ec4899', icon: '👥' },
@@ -34,31 +34,31 @@ const PRIORITY = { HIGH: 3, MEDIUM: 2, LOW: 1 }
 function generateLegalDeadlines(year = 2026) {
   return [
     { month: 1, day: 15, label: `PP décembre ${year - 1}`, type: 'FISCAL', priority: 'HIGH' },
-    { month: 1, day: 31, label: 'ONSS T4 — acompte', type: 'ONSS', priority: 'HIGH' },
-    { month: 1, day: 31, label: `DmfA T4/${year - 1} — délai de soumission`, type: 'ONSS', priority: 'HIGH' },
+    { month: 1, day: 31, label: 'ONSS T4 — acompte', type: tText('ONSS'), priority: 'HIGH' },
+    { month: 1, day: 31, label: `DmfA T4/${year - 1} — délai de soumission`, type: tText('ONSS'), priority: 'HIGH' },
     { month: 2, day: 15, label: 'PP janvier', type: 'FISCAL', priority: 'HIGH' },
     { month: 2, day: 28, label: `Pécule de vacances (calcul anticipé) — ouvriers`, type: 'PAYROLL', priority: 'MEDIUM' },
     { month: 3, day: 1, label: `Belcotax 281.10/20/50 — année ${year - 1}`, type: 'FISCAL', priority: 'HIGH' },
     { month: 3, day: 15, label: 'PP février', type: 'FISCAL', priority: 'HIGH' },
-    { month: 3, day: 31, label: 'ONSS T1 — déclaration + solde', type: 'ONSS', priority: 'HIGH' },
+    { month: 3, day: 31, label: 'ONSS T1 — déclaration + solde', type: tText('ONSS'), priority: 'HIGH' },
     { month: 4, day: 15, label: 'PP mars', type: 'FISCAL', priority: 'HIGH' },
-    { month: 4, day: 30, label: 'DmfA T1 — délai de soumission', type: 'ONSS', priority: 'HIGH' },
+    { month: 4, day: 30, label: 'DmfA T1 — délai de soumission', type: tText('ONSS'), priority: 'HIGH' },
     { month: 5, day: 15, label: 'PP avril', type: 'FISCAL', priority: 'HIGH' },
     { month: 5, day: 31, label: 'Bilan social — dépôt BNB', type: 'LEGAL', priority: 'MEDIUM' },
     { month: 6, day: 15, label: 'PP mai', type: 'FISCAL', priority: 'HIGH' },
-    { month: 6, day: 30, label: 'ONSS T2 — déclaration + solde', type: 'ONSS', priority: 'HIGH' },
+    { month: 6, day: 30, label: 'ONSS T2 — déclaration + solde', type: tText('ONSS'), priority: 'HIGH' },
     { month: 6, day: 30, label: 'Pécule de vacances — calcul et paiement employés', type: 'PAYROLL', priority: 'HIGH' },
     { month: 7, day: 15, label: 'PP juin', type: 'FISCAL', priority: 'HIGH' },
-    { month: 7, day: 31, label: 'DmfA T2 — délai de soumission', type: 'ONSS', priority: 'HIGH' },
+    { month: 7, day: 31, label: 'DmfA T2 — délai de soumission', type: tText('ONSS'), priority: 'HIGH' },
     { month: 8, day: 15, label: 'PP juillet', type: 'FISCAL', priority: 'HIGH' },
     { month: 9, day: 15, label: 'PP août', type: 'FISCAL', priority: 'HIGH' },
-    { month: 9, day: 30, label: 'ONSS T3 — déclaration + solde', type: 'ONSS', priority: 'HIGH' },
+    { month: 9, day: 30, label: 'ONSS T3 — déclaration + solde', type: tText('ONSS'), priority: 'HIGH' },
     { month: 10, day: 15, label: 'PP septembre', type: 'FISCAL', priority: 'HIGH' },
-    { month: 10, day: 31, label: 'DmfA T3 — délai de soumission', type: 'ONSS', priority: 'HIGH' },
+    { month: 10, day: 31, label: 'DmfA T3 — délai de soumission', type: tText('ONSS'), priority: 'HIGH' },
     { month: 11, day: 15, label: 'PP octobre', type: 'FISCAL', priority: 'HIGH' },
     { month: 12, day: 15, label: 'PP novembre', type: 'FISCAL', priority: 'HIGH' },
     { month: 12, day: 20, label: '13ème mois — calcul et paiement', type: 'PAYROLL', priority: 'HIGH' },
-    { month: 12, day: 31, label: 'ONSS T4 — déclaration + solde', type: 'ONSS', priority: 'HIGH' },
+    { month: 12, day: 31, label: 'ONSS T4 — déclaration + solde', type: tText('ONSS'), priority: 'HIGH' },
     { month: 12, day: 31, label: 'Clôture annuelle paie', type: 'PAYROLL', priority: 'HIGH' },
   ]
 }
@@ -263,7 +263,7 @@ export function NotifDropdown({ notifications, onClose, onMarkRead, onViewAll })
         padding: '12px 16px', borderBottom: `1px solid ${BORDER}`,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
-        <span style={{ fontWeight: 600, color: GOLD, fontSize: 14 }}>{t('set.notifications')||'Notifications'}</span>
+        <span style={{ fontWeight: 600, color: GOLD, fontSize: 14 }}>{t('set.notifications')||tText('Notifications')}</span>
         <span style={{ fontSize: 11, color: MUTED }}>{unread.length} non lue(s)</span>
       </div>
 
@@ -606,7 +606,7 @@ function SmartAlertsPage({ state }) {
           action:'Corriger le salaire', ref:'CCT 43' })
       }
       if (!e.niss) {
-        list.push({ id:'niss_'+e.id, sev:'critical', icon:'⚠️', cat:'ONSS',
+        list.push({ id:'niss_'+e.id, sev:'critical', icon:'⚠️', cat:tText('ONSS'),
           title:'NISS manquant', msg:nm + ' — Numéro registre national absent, Dimona impossible',
           action:'Encoder le NISS', ref:'AR 05/11/2002' })
       }
@@ -625,20 +625,20 @@ function SmartAlertsPage({ state }) {
         action:'Générer SEPA', ref:'ISO 20022' })
     }
     if (day >= 1 && day <= 5) {
-      list.push({ id:'onss_month', sev:'info', icon:'📊', cat:'ONSS',
+      list.push({ id:'onss_month', sev:'info', icon:'📊', cat:tText('ONSS'),
         title:'Provision ONSS à comptabiliser', msg:'Début de mois — Provision cotisations ONSS à enregistrer',
         action:'Voir écheancier', ref:'LSS Art. 23' })
     }
     if ([2,5,8,11].includes(now.getMonth()) && day >= 20) {
-      list.push({ id:'dmfa_q', sev:'critical', icon:'📋', cat:'Déclarations',
+      list.push({ id:'dmfa_q', sev:'critical', icon:'📋', cat:tText('Déclarations'),
         title:'DmfA trimestrielle imminente', msg:'Deadline fin du mois — Déclaration ONSS Q' + (Math.floor(now.getMonth()/3)+1),
-        action:'Préparer DmfA', ref:'ONSS' })
+        action:'Préparer DmfA', ref:tText('ONSS') })
     }
 
     // Info générale
     list.push({ id:'activa', sev:'info', icon:'💼', cat:'Subsides',
       title:'Attestation Activa active', msg:'N°829605 — Prime mensuelle 350 EUR jusqu\'au 01/06/2026',
-      action:'Voir MonBEE', ref:'Activa.brussels' })
+      action:'Voir MonBEE', ref:tText('Activa.brussels') })
 
     return list.filter(a => !dismissed.has(a.id))
   }, [emps, dismissed])
@@ -680,7 +680,7 @@ function SmartAlertsPage({ state }) {
         <div style={{ textAlign:'center', padding:40, color:'#5e5c56',
           background:'rgba(34,197,94,.03)', borderRadius:12, border:'1px solid rgba(34,197,94,.1)' }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
-          <div style={{ fontSize: 16, fontWeight: 700, color:'#22c55e' }}>Aucune alerte active</div>
+          <div style={{ fontSize: 16, fontWeight: 700, color:'#22c55e' }}>{tText('Aucune alerte active')}</div>
           <div style={{ fontSize: 12, marginTop: 4 }}>Toutes les vérifications sont passées</div>
         </div>
       ) : (
@@ -814,7 +814,7 @@ function SupportPage() {
   ])
   const prioColor = { high:'#ef4444', medium:'#f97316', low:'#3b82f6' }
   const statusColor = { open:'#22c55e', resolved:'#5e5c56', pending:'#f97316' }
-  const statusLabel = { open:'Ouvert', resolved:'Résolu', pending:'En attente' }
+  const statusLabel = { open:'Ouvert', resolved:'Résolu', pending:tText('En attente') }
 
   return (
     <div>

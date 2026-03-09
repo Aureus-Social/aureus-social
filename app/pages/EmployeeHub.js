@@ -69,7 +69,7 @@ export function DashboardRHV2({s,d,props_tab}){
       <KPI l="Alertes" v={noNISS+noIBAN+noSalary} c={noNISS+noIBAN+noSalary>0?'#ef4444':'#4ade80'} sub={noNISS+' NISS, '+noIBAN+' IBAN'}/>
     </div>
 
-    <div style={{display:'flex',gap:4,marginBottom:16}}>{[{v:'overview',l:'Vue globale'},{v:'events',l:'Evenements'},{v:'alerts',l:'Alertes donnees'},{v:'costs',l:'Analyse couts'},{v:'egalite',l:'⚖ Égalité & Handicap'}].map(t=>
+    <div style={{display:'flex',gap:4,marginBottom:16}}>{[{v:'overview',l:'Vue globale'},{v:'events',l:'Evenements'},{v:'alerts',l:tText('Alertes donnees')},{v:'costs',l:tText('Analyse couts')},{v:'egalite',l:'⚖ Égalité & Handicap'}].map(t=>
       <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 14px',borderRadius:8,border:'none',cursor:'pointer',fontSize:11,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}</div>
 
     {tab==='overview'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
@@ -269,7 +269,7 @@ export function PortailEmployeV2({s,d}){
   const [newDem,setNewDem]=useState({type:'conge',dateDebut:'',dateFin:'',motif:''});
   const mois=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
   const cl=clients[selC]||{emps:[]};const emp=(cl.emps||[])[selE];
-  if(!emp)return <div style={{padding:24,textAlign:'center',color:'#888'}}>Ajoutez des clients et employés pour accéder au portail.</div>;
+  if(!emp)return <div style={{padding:24,textAlign:'center',color:'#888'}}>{tText('Ajoutez des clients et employés pour accéder au portail.')}</div>;
 
   const name=(emp.first||emp.fn||'')+' '+(emp.last||emp.ln||'');
   const brut=+(emp.monthlySalary||emp.gross||0);
@@ -349,7 +349,7 @@ export function PortailEmployeV2({s,d}){
       <C title={"Mes demandes ("+demandes.length+")"}>
         {demandes.map((dm,i)=><div key={dm.id} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
           <Badge text={dm.type} color="#c6a34e"/><span style={{color:'#e8e6e0',fontSize:11,flex:1}}>{dm.dateDebut}{dm.dateFin?' → '+dm.dateFin:''} {dm.motif&&'— '+dm.motif}</span>
-          <Badge text={dm.status==='en_attente'?'En attente':dm.status==='approuve'?'Approuve':'Refuse'} color={dm.status==='en_attente'?'#eab308':dm.status==='approuve'?'#4ade80':'#ef4444'}/>
+          <Badge text={dm.status==='en_attente'?tText('En attente'):dm.status==='approuve'?'Approuve':'Refuse'} color={dm.status==='en_attente'?'#eab308':dm.status==='approuve'?'#4ade80':'#ef4444'}/>
         </div>)}
         {demandes.length===0&&<div style={{textAlign:'center',padding:20,color:'#888',fontSize:11}}>Aucune demande</div>}
       </C>
@@ -394,7 +394,7 @@ export function GestionInterimairesV2({s,d}){
 
     {tab==='liste'&&<div style={{border:'1px solid rgba(198,163,78,.1)',borderRadius:14,overflow:'hidden'}}>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 100px 70px 60px 80px 80px 30px',padding:'8px 12px',background:'rgba(198,163,78,.06)',fontSize:9,fontWeight:600,color:'#c6a34e'}}>
-        <div>{tText('Nom')}</div><div>Agence</div><div>{tText('NISS')}</div><div>Heures</div><div>Coeff</div><div style={{textAlign:'right'}}>{tText('Brut')}</div><div style={{textAlign:'right'}}>Cout</div><div/>
+        <div>{tText('Nom')}</div><div>{tText('Agence')}</div><div>{tText('NISS')}</div><div>Heures</div><div>Coeff</div><div style={{textAlign:'right'}}>{tText('Brut')}</div><div style={{textAlign:'right'}}>Cout</div><div/>
       </div>
       {ints.map((it,i)=>{const ag=agences.find(a=>a.id===it.agence);return <div key={it.id} style={{display:'grid',gridTemplateColumns:'1fr 1fr 100px 70px 60px 80px 80px 30px',padding:'6px 12px',borderBottom:'1px solid rgba(255,255,255,.02)',fontSize:11,alignItems:'center'}}>
         <span style={{color:'#e8e6e0',fontWeight:500}}>{it.first} {it.last}</span>
@@ -436,10 +436,10 @@ export function GestionInterimairesV2({s,d}){
       <div onClick={e=>e.stopPropagation()} style={{background:'#0d1117',border:'1px solid rgba(198,163,78,.2)',borderRadius:16,padding:24,width:500}}>
         <h3 style={{fontSize:16,fontWeight:700,color:'#c6a34e',marginBottom:14}}>Nouvel interimaire</h3>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-          {[{l:'Prenom',k:'first'},{l:'Nom',k:'last'},{l:'NISS',k:'niss'},{l:'Brut/h (€)',k:'brutH',t:'number'},{l:'Heures/mois',k:'heures',t:'number'},{l:'Coefficient',k:'coeff',t:'number'},{l:'Date debut',k:'debut',t:'date'},{l:'Date fin',k:'fin',t:'date'},{l:'Motif',k:'motif'}].map((f,i)=>
+          {[{l:'Prenom',k:'first'},{l:tText('Nom'),k:'last'},{l:'NISS',k:'niss'},{l:'Brut/h (€)',k:'brutH',t:'number'},{l:'Heures/mois',k:'heures',t:'number'},{l:'Coefficient',k:'coeff',t:'number'},{l:'Date debut',k:'debut',t:'date'},{l:'Date fin',k:'fin',t:'date'},{l:'Motif',k:'motif'}].map((f,i)=>
             <div key={i}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{f.l}</label><input type={f.t||'text'} value={ni[f.k]} onChange={e=>setNi(p=>({...p,[f.k]:f.t==='number'?+e.target.value:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit',boxSizing:'border-box'}}/></div>
           )}
-          <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Agence</label><select value={ni.agence} onChange={e=>setNi(p=>({...p,agence:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>{agences.map(a=><option key={a.id} value={a.id}>{a.n}</option>)}</select></div>
+          <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Agence')}</label><select value={ni.agence} onChange={e=>setNi(p=>({...p,agence:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>{agences.map(a=><option key={a.id} value={a.id}>{a.n}</option>)}</select></div>
         </div>
         <div style={{display:'flex',gap:8,marginTop:14}}><button onClick={addI} style={{flex:1,padding:'10px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:12,cursor:'pointer'}}>{tText('Ajouter')}</button><button onClick={()=>setShowAdd(false)} style={{padding:'10px 16px',borderRadius:8,border:'1px solid rgba(255,255,255,.1)',background:'transparent',color:'#888',fontSize:12,cursor:'pointer'}}>{tText('Annuler')}</button></div>
       </div>

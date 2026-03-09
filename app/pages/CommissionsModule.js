@@ -130,7 +130,7 @@ function emailMiseEnDemeure(clientNom, factureId, montant, dateEcheance, joursRe
           — Clause pénale : Art. 1226 et s. Code Civil (max 10% + min. €20)<br>
           — Prescription : Art. 2262bis C.C. (5 ans créances commerciales)
         </p>
-        <p style="margin-top:20px">Veuillez agréer nos salutations distinguées.<br><b>Aureus IA SPRL</b><br>BCE BE 1028.230.781 · Saint-Gilles, Bruxelles</p>
+        <p style="margin-top:20px">Veuillez agréer nos salutations distinguées.<br><b>{tText('Aureus IA SPRL')}</b><br>BCE BE 1028.230.781 · Saint-Gilles, Bruxelles</p>
       </div>
     </div>`
   };
@@ -165,7 +165,7 @@ function generateMiseEnDemeurePDF(facture, relancesData) {
     <div style="display:flex;justify-content:space-between;align-items:flex-start">
       <div>
         <div class="logo">AUREUS SOCIAL PRO</div>
-        <div class="sub">Aureus IA SPRL</div>
+        <div class="sub">{tText('Aureus IA SPRL')}</div>
         <div class="sub">BCE BE 1028.230.781</div>
         <div class="sub">Saint-Gilles, Bruxelles</div>
         <div class="sub">info@aureus-ia.com</div>
@@ -369,7 +369,7 @@ function RelancesModule({ factures, sendEmailFn }) {
           { l:'Total impayé', v:fmt(totalImpaye), c: totalImpaye > 0 ? '#ef4444' : '#22c55e' },
           { l:'Relance 1', v:nbRelance1, c:'#eab308' },
           { l:'Relance 2', v:nbRelance2, c:'#f97316' },
-          { l:'Mise en demeure', v:nbMED, c:'#ef4444' },
+          { l:tText('Mise en demeure'), v:nbMED, c:'#ef4444' },
           { l:'Payé', v:nbPaye, c:'#22c55e' },
           { l:'Taux recouvrement', v:tauxRecouvrement+'%', c: tauxRecouvrement >= 80 ? '#22c55e' : tauxRecouvrement >= 50 ? '#eab308' : '#ef4444' },
         ].map((k,i) => (
@@ -385,10 +385,10 @@ function RelancesModule({ factures, sendEmailFn }) {
         {[
           { v:'all', l:'Toutes', c:allFactures.length },
           { v:'retard', l:'En retard', c:allFactures.filter(f=>f.joursRetard>0&&f.statut!=='paye').length },
-          { v:'attente', l:'En attente', c:allFactures.filter(f=>f.statut==='attente').length },
+          { v:'attente', l:tText('En attente'), c:allFactures.filter(f=>f.statut==='attente').length },
           { v:'relance1', l:'Relance 1', c:nbRelance1 },
           { v:'relance2', l:'Relance 2', c:nbRelance2 },
-          { v:'miseEnDemeure', l:'Mise en demeure', c:nbMED },
+          { v:'miseEnDemeure', l:tText('Mise en demeure'), c:nbMED },
           { v:'paye', l:'Payé', c:nbPaye },
         ].map(t => (
           <button key={t.v} onClick={() => setFilter(t.v)} style={{
@@ -535,12 +535,12 @@ export default function CommissionsModuleWrapped({ s, d, tab }) {
   const { t, lang, tText } = useLang();
   const TAB_META = {
     checklistclient:  { icon:'✅', title:'Checklist Client',      sub:'Vérifications onboarding nouveau client', mainTab:'commissions' },
-    comparatif:       { icon:'⚔️', title:'Comparatif Marché',     sub:'Analyse concurrentielle secrétariats sociaux', mainTab:'commissions' },
+    comparatif:       { icon:'⚔️', title:'Comparatif Marché',     sub:tText('Analyse concurrentielle secrétariats sociaux'), mainTab:'commissions' },
     fiduciaire:       { icon:'🏢', title:'Hub Fiduciaire',        sub:'Gestion du portefeuille fiduciaire', mainTab:'commissions' },
     guidecommercial:  { icon:'📊', title:'Guide Commercial',      sub:'Scripts et argumentaires de vente', mainTab:'commissions' },
     guidefiduciaire:  { icon:'📖', title:'Guide Fiduciaire',      sub:'Guide d\'intégration pour fiduciaires', mainTab:'commissions' },
     landing:          { icon:'🌐', title:'Page Commerciale',      sub:'Landing page et matériaux marketing', mainTab:'commissions' },
-    parserConcurrent: { icon:'🔍', title:'Audit Concurrent',      sub:'Analyse des contrats concurrents', mainTab:'relances' },
+    parserConcurrent: { icon:'🔍', title:'Audit Concurrent',      sub:tText('Analyse des contrats concurrents'), mainTab:'relances' },
     repriseclient:    { icon:'🔄', title:'Reprise Concurrent',    sub:'Processus de reprise client SD Worx / Securex', mainTab:'relances' },
   };
   const meta = TAB_META[tab];
@@ -704,7 +704,7 @@ function CommissionsModule({ userRole, user, factures, sendEmailFn, defaultTab }
           { l:'Total gagné', v:fmt(data.total), c:'#f97316' },
           { l:'À recevoir', v:fmt(pending), c: pending>0?'#eab308':'#22c55e' },
           { l:'Déjà payé', v:fmt(data.paid), c:'#22c55e' },
-          { l:'Fiches générées', v:data.entries.reduce((a,e)=>a+e.fichesCount,0), c:'#60a5fa' },
+          { l:tText('Fiches générées'), v:data.entries.reduce((a,e)=>a+e.fichesCount,0), c:'#60a5fa' },
         ])}
         {pendingEntries.length>0 && <>
           <h3 style={{ fontSize:14, color:'#eab308', fontWeight:600, marginBottom:10 }}>🟡 En attente de paiement client ({pendingEntries.length})</h3>

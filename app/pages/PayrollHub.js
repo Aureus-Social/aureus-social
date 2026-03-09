@@ -49,7 +49,7 @@ export function ValidationPrePaieV2({s,d}){
     r.push({id:'pp',cat:'Fiscal',title:'Baremes PP SPF 2026',desc:'4 tranches appliquees correctement',pass:true,count:n,total:n,sev:'ok',items:[]});
     // 10. Dimona
     const noDimona=allEmps.filter(e=>!e.dimonaDone&&(new Date(e.startDate||e.start||'2020-01-01')>new Date('2024-01-01')));
-    r.push({id:'dimona',cat:'ONSS',title:'Dimona IN effectuees',desc:'Declarations electroniques',pass:noDimona.length===0,count:n-noDimona.length,total:n,sev:noDimona.length>0?'medium':'ok',items:noDimona.map(e=>e.first+' '+e.last)});
+    r.push({id:'dimona',cat:tText('ONSS'),title:'Dimona IN effectuees',desc:'Declarations electroniques',pass:noDimona.length===0,count:n-noDimona.length,total:n,sev:noDimona.length>0?'medium':'ok',items:noDimona.map(e=>e.first+' '+e.last)});
     return r;
   },[allEmps]);
 
@@ -110,13 +110,13 @@ export function TimelinePaieV2({s}){
     const dl=[];
     for(let mi=0;mi<12;mi++){
       const my=moisN[mi]+' '+yr;
-      dl.push({month:mi,day:5,title:'Provision ONSS',desc:'Paiement provisions mensuelles ONSS',cat:'ONSS',c:'#ef4444',recurring:true});
+      dl.push({month:mi,day:5,title:'Provision ONSS',desc:'Paiement provisions mensuelles ONSS',cat:tText('ONSS'),c:'#ef4444',recurring:true});
       dl.push({month:mi,day:15,title:tText('Précompte professionnel'),desc:'Declaration + paiement PP (formulaire 274)',cat:'Fiscal',c:'#a855f7',recurring:true});
       dl.push({month:mi,day:25,title:'Virements salaires SEPA',desc:'Exécution virements nets employés',cat:'Paie',c:'#22c55e',recurring:true});
-      dl.push({month:mi,day:28,title:'Distribution fiches de paie',desc:'Envoi fiches par email / portail',cat:'Paie',c:'#3b82f6',recurring:true});
+      dl.push({month:mi,day:28,title:tText('Distribution fiches de paie'),desc:'Envoi fiches par email / portail',cat:'Paie',c:'#3b82f6',recurring:true});
     }
     // Quarterly DmfA
-    [0,3,6,9].forEach(mi=>dl.push({month:mi,day:10,title:'DmfA T'+Math.ceil((mi+1)/3),desc:'Declaration trimestrielle ONSS',cat:'ONSS',c:'#ef4444'}));
+    [0,3,6,9].forEach(mi=>dl.push({month:mi,day:10,title:'DmfA T'+Math.ceil((mi+1)/3),desc:'Declaration trimestrielle ONSS',cat:tText('ONSS'),c:'#ef4444'}));
     // Annual
     dl.push({month:1,day:28,title:'Belcotax 281.10/281.20',desc:'Fiches fiscales annuelles au SPF',cat:'Fiscal',c:'#a855f7'});
     dl.push({month:2,day:1,title:'Deadline Belcotax',desc:'Transmission XML au SPF Finances',cat:'Fiscal',c:'#ef4444'});
@@ -291,7 +291,7 @@ export function SoldeToutCompteV2({s,d}){
           <option value="abus">Licenciement abusif (CCT 109)</option>
           <option value="faute">Faute grave (Art. 35)</option>
         </select></div>
-      <button onClick={calcul} style={{padding:'10px 24px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:13,cursor:'pointer',height:42}}>{t('ui.calculate')||'Calculer'}</button>
+      <button onClick={calcul} style={{padding:'10px 24px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:13,cursor:'pointer',height:42}}>{t('ui.calculate')||tText('Calculer')}</button>
     </div>
 
     {result&&<div>
@@ -481,7 +481,7 @@ export function SimuLicenciementV2({s}){
         <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,marginBottom:14}}>
           <KPI l="Preavis" v={semaines+' sem.'} c="#3b82f6" sub={fi(indemPreavis)+' €'}/>
           <KPI l="Cout total employeur" v={fi(coutTotal)+' €'} c="#ef4444"/>
-          <KPI l={outplacement?'Outplacement obligatoire':'Outplacement'} v={outplacement?'OUI':'Non'} c={outplacement?'#fb923c':'#4ade80'}/>
+          <KPI l={outplacement?'Outplacement obligatoire':'Outplacement'} v={outplacement?'OUI':tText('Non')} c={outplacement?'#fb923c':'#4ade80'}/>
         </div>
         <C title="Detail">
           <Row l="Indemnite preavis" v={fmt(indemPreavis)+' €'} c="#3b82f6"/>

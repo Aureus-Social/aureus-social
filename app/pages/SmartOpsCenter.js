@@ -42,14 +42,14 @@ export function SmartAlertsEngine({s, d, state, dispatch, defaultTab}){
 
     // ── RULE 1: DEADLINES LEGALES ──
     if(rulesEnabled.deadlines){
-      if(day<=5) a.push({id:'DL-ONSS-'+month,sev:'critical',cat:'ONSS',rule:'deadline',title:'ONSS provisions mensuelles',desc:'Paiement provisions ONSS du avant le 5 '+mois[month]+' '+yr,deadline:5-day,icon:'🏛',action:{page:'onss'},remedy:'Acceder au module ONSS → Generer virement provision'});
+      if(day<=5) a.push({id:'DL-ONSS-'+month,sev:'critical',cat:tText('ONSS'),rule:'deadline',title:'ONSS provisions mensuelles',desc:'Paiement provisions ONSS du avant le 5 '+mois[month]+' '+yr,deadline:5-day,icon:'🏛',action:{page:'onss'},remedy:'Acceder au module ONSS → Generer virement provision'});
       if(day<=15) a.push({id:'DL-PP-'+month,sev:day<=5?'critical':'high',cat:'Fiscal',rule:'deadline',title:'Precompte professionnel 274',desc:'Declaration + paiement PP avant le 15 '+mois[month],deadline:15-day,icon:'💰',action:{page:'fiscal'},remedy:'Module Fiscal → Generer declaration 274'});
       if(day<=25) a.push({id:'DL-SEPA-'+month,sev:day<=20?'medium':'high',cat:'Paie',rule:'deadline',title:'Virements SEPA salaires',desc:'Virements nets a executer avant le 25 '+mois[month],deadline:25-day,icon:'💳',action:{page:'sepa'},remedy:'Module SEPA → Lancer batch virements'});
-      if(day<=28) a.push({id:'DL-FICHE-'+month,sev:'low',cat:'Paie',rule:'deadline',title:'Distribution fiches de paie',desc:'Fiches a distribuer avant fin '+mois[month],deadline:28-day,icon:'📄',action:{page:'payslip'},remedy:'Module Paie → Distribuer par email'});
+      if(day<=28) a.push({id:'DL-FICHE-'+month,sev:'low',cat:'Paie',rule:'deadline',title:tText('Distribution fiches de paie'),desc:'Fiches a distribuer avant fin '+mois[month],deadline:28-day,icon:'📄',action:{page:'payslip'},remedy:'Module Paie → Distribuer par email'});
       // Quarterly
-      if([0,3,6,9].includes(month)&&day<=10) a.push({id:'DL-DMFA-Q'+quarter,sev:'critical',cat:'ONSS',rule:'deadline',title:'DmfA trimestrielle T'+quarter,desc:'Declaration DmfA Q'+quarter+'/'+yr+' — Delai: 10 '+mois[month],deadline:10-day,icon:'🏛',action:{page:'onss'},remedy:'Module ONSS → Batch DmfA → Generer XML'});
+      if([0,3,6,9].includes(month)&&day<=10) a.push({id:'DL-DMFA-Q'+quarter,sev:'critical',cat:tText('ONSS'),rule:'deadline',title:'DmfA trimestrielle T'+quarter,desc:'Declaration DmfA Q'+quarter+'/'+yr+' — Delai: 10 '+mois[month],deadline:10-day,icon:'🏛',action:{page:'onss'},remedy:'Module ONSS → Batch DmfA → Generer XML'});
       // Annual
-      if(month===1&&day<=28) a.push({id:'DL-BELCOTAX',sev:'critical',cat:'Fiscal',rule:'deadline',title:'Belcotax 281.10 / 281.20',desc:'Fiches fiscales annuelles — Deadline 1er mars',deadline:28-day,icon:'🧾',action:{page:'fiscal'},remedy:'Module Fiscal → Generer fiches 281'});
+      if(month===1&&day<=28) a.push({id:'DL-BELCOTAX',sev:'critical',cat:'Fiscal',rule:'deadline',title:tText('Belcotax 281.10 / 281.20'),desc:'Fiches fiscales annuelles — Deadline 1er mars',deadline:28-day,icon:'🧾',action:{page:'fiscal'},remedy:'Module Fiscal → Generer fiches 281'});
       if(month===11&&day<=20) a.push({id:'DL-13MOIS',sev:'critical',cat:'Paie',rule:'deadline',title:'13eme mois / Prime fin annee',desc:'Versement avant le 20 decembre',deadline:20-day,icon:'🎄',action:{page:'payslip'},remedy:'Calculer prime fin annee par CP sectorielle'});
       // Pécule vacances
       if((month===3||month===4)&&day<=30) a.push({id:'DL-PECULE',sev:'high',cat:'Paie',rule:'deadline',title:'Pecule vacances employes',desc:'Versement pecule entre mai et juin',deadline:(month===3?30-day:60-day),icon:'🌴',action:{page:'payslip'},remedy:'Calculer pecule simple + double vacation'});
@@ -188,7 +188,7 @@ export function SmartAlertsEngine({s, d, state, dispatch, defaultTab}){
           <div style={{fontSize:10.5,color:'#888',marginTop:2}}>{a.desc}</div>
           {/* Expanded detail */}
           {selectedAlert===a.id&&<div style={{marginTop:10,padding:10,background:'rgba(198,163,78,.04)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
-            {a.remedy&&<div style={{fontSize:11,color:'#4ade80',marginBottom:6}}>💡 <b>Action recommandee:</b> {a.remedy}</div>}
+            {a.remedy&&<div style={{fontSize:11,color:'#4ade80',marginBottom:6}}>💡 <b>{tText('Action recommandee:')}</b> {a.remedy}</div>}
             {a.action&&<button onClick={(ev)=>{ev.stopPropagation();if(a.action.client)d&&d({type:'SELECT_CLIENT',id:a.action.client});setTimeout(()=>d&&d({type:'NAV',page:a.action.page,sub:a.action.sub||null}),a.action.client?80:0);}} style={{padding:'6px 14px',borderRadius:6,border:'none',background:'rgba(198,163,78,.12)',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:600,fontFamily:'inherit'}}>→ Traiter maintenant</button>}
           </div>}
         </div>
@@ -228,7 +228,7 @@ export function SmartAlertsEngine({s, d, state, dispatch, defaultTab}){
     {tab==='rules'&&<C title="Moteur de regles" sub="Activez/desactivez les categories d'alertes">
       {[{id:'deadlines',l:'Deadlines legales',desc:'ONSS, PP, DmfA, Belcotax, 13eme mois, pecule vacances',icon:'📅',count:alerts.filter(a=>a.rule==='deadline').length},
         {id:'compliance',l:'Conformite',desc:'TVA, ONSS, reglement travail, CPPT, CE',icon:'⚖️',count:alerts.filter(a=>a.rule==='compliance').length},
-        {id:'contracts',l:'Contrats',desc:'CDD expirant, evaluations, anniversaires',icon:'📝',count:alerts.filter(a=>a.rule==='contracts').length},
+        {id:'contracts',l:tText('Contrats'),desc:'CDD expirant, evaluations, anniversaires',icon:'📝',count:alerts.filter(a=>a.rule==='contracts').length},
         {id:'payroll',l:'Paie',desc:'Salaire=0, IBAN manquant, NISS manquant',icon:'💰',count:alerts.filter(a=>a.rule==='payroll').length},
         {id:'trends',l:'Tendances RH',desc:'Turnover, absenteisme, couts',icon:'📊',count:alerts.filter(a=>a.rule==='trends').length},
       ].map((r,i)=><div key={r.id} style={{display:'flex',alignItems:'center',gap:14,padding:'12px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
@@ -283,10 +283,10 @@ export function NotificationCenterV2({s,d}){
 
     // DEADLINE NOTIFICATIONS
     if(prefs.deadlines){
-      if(day<=5) addN('deadline','🏛','ONSS provisions dues le 5','Paiement ONSS du avant le 5 '+mois[month],'ONSS','critical',{page:'onss'});
+      if(day<=5) addN('deadline','🏛','ONSS provisions dues le 5','Paiement ONSS du avant le 5 '+mois[month],tText('ONSS'),'critical',{page:'onss'});
       if(day<=15) addN('deadline','💰','Precompte professionnel','Declaration PP avant le 15 '+mois[month],'Fiscal',day<=5?'critical':'high',{page:'fiscal'});
       if(day<=25) addN('deadline','💳','Virements SEPA salaires','SEPA a executer avant le 25','Paie','medium',{page:'sepa'});
-      if([0,3,6,9].includes(month)&&day<=10) addN('deadline','🏛','DmfA T'+Math.ceil((month+1)/3),'Declaration trimestrielle','ONSS','critical',{page:'onss'});
+      if([0,3,6,9].includes(month)&&day<=10) addN('deadline','🏛','DmfA T'+Math.ceil((month+1)/3),'Declaration trimestrielle',tText('ONSS'),'critical',{page:'onss'});
     }
 
     // EMPLOYEE NOTIFICATIONS
@@ -391,7 +391,7 @@ export function NotificationCenterV2({s,d}){
     {tab==='prefs'&&<C title="Preferences de declenchement" sub="Choisissez quelles notifications vous souhaitez recevoir">
       {[{id:'deadlines',l:'Deadlines legales',desc:'ONSS, PP, DmfA, Belcotax, pecule, 13eme mois',icon:'📅'},
         {id:'compliance',l:'Conformite',desc:'TVA, ONSS, NISS manquants, reglement travail',icon:'⚖️'},
-        {id:'contracts',l:'Contrats',desc:'CDD expirant, evaluations, renouvellements',icon:'📝'},
+        {id:'contracts',l:tText('Contrats'),desc:'CDD expirant, evaluations, renouvellements',icon:'📝'},
         {id:'payroll',l:'Paie',desc:'Salaire=0, IBAN manquant, virements',icon:'💰'},
         {id:'rh',l:'Tendances RH',desc:'Turnover, absenteisme, alertes tendances',icon:'📊'},
       ].map((r,i)=><div key={r.id} style={{display:'flex',alignItems:'center',gap:14,padding:'12px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
@@ -474,7 +474,7 @@ export function JournalActiviteV2({s,d}){
 
       // Dimona
       (cl.dims||[]).forEach(dm=>{
-        add('dimona','📡','SUBMIT','Dimona '+(dm.type||'IN')+': '+(dm.empName||'Employe'),'Declaration Dimona '+(dm.type||'')+' soumise'+(dm.niss?' — NISS: '+dm.niss:''),'admin',s.user?.email,cname,dm.date||dm.createdAt||now.toISOString(),{entity:'dimona',type:dm.type});
+        add('dimona','📡','SUBMIT','Dimona '+(dm.type||tText('IN'))+': '+(dm.empName||'Employe'),'Declaration Dimona '+(dm.type||'')+' soumise'+(dm.niss?' — NISS: '+dm.niss:''),'admin',s.user?.email,cname,dm.date||dm.createdAt||now.toISOString(),{entity:'dimona',type:dm.type});
       });
 
       // SEPA

@@ -20,14 +20,14 @@ const MUTED = '#8b95a5'
 // ── Types de documents ──
 const DOC_TYPES = {
   CONTRAT_CDI: {
-    label: 'Contrat CDI',
+    label:tText('Contrat CDI'),
     category: 'contrat',
     icon: '📄',
     description: 'Contrat à durée indéterminée — employé ou ouvrier',
     required: ['name', 'startDate', 'salary', 'function', 'cp'],
   },
   CONTRAT_CDD: {
-    label: 'Contrat CDD',
+    label:tText('Contrat CDD'),
     category: 'contrat',
     icon: '📄',
     description: 'Contrat à durée déterminée',
@@ -90,7 +90,7 @@ const DOC_TYPES = {
     required: ['name', 'startDate', 'noticeWeeks'],
   },
   REGLEMENT_TRAVAIL: {
-    label: 'Règlement de travail',
+    label:tText('Règlement de travail'),
     category: 'reglementaire',
     icon: '📋',
     description: 'Règlement de travail conforme à la loi du 8 avril 1965',
@@ -106,7 +106,7 @@ const DOC_TYPES = {
 }
 
 const CATEGORIES = {
-  contrat: { label: 'Contrats', icon: '📄', color: '#3b82f6' },
+  contrat: { label:tText('Contrats'), icon: '📄', color: '#3b82f6' },
   attestation: { label: 'Attestations', icon: '✅', color: '#22c55e' },
   sortie: { label: 'Sortie / Fin contrat', icon: '🔴', color: '#ef4444' },
   reglementaire: { label: 'Réglementaire', icon: '📋', color: '#f59e0b' },
@@ -119,7 +119,7 @@ const REFERENCE_LOIS = [
   { abbr: 'Loi du 3 juillet 1978', full: 'Loi relative aux contrats de travail (M.B. 22 août 1978)', arts: 'Art. 2, 7, 11, 32' },
   { abbr: 'Loi du 26 décembre 2013', full: 'Statut unique — préavis', arts: 'Art. 67 à 82' },
   { abbr: 'AR du 25 juin 1990', full: 'Temps partiel, équipes, week-end', arts: 'Mentions obligatoires' },
-  { abbr: 'Loi du 8 avril 1965', full: 'Règlement de travail', arts: 'Art. 3 et suivants' },
+  { abbr: 'Loi du 8 avril 1965', full: tText('Règlement de travail'), arts: 'Art. 3 et suivants' },
   { abbr: 'Code civil', full: 'Obligations contractuelles', arts: 'Art. 1134' },
   { abbr: 'CCT et CP', full: 'Conventions collectives et commission paritaire', arts: 'Conformité CP' },
 ]

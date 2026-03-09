@@ -2,7 +2,7 @@
 import { useLang } from '../lib/lang-context';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { B, C, DPER, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, generatePayslipPDF, getAlertes, quickNet, quickPP, generateSEPAXML, generateDmfAXML } from '@/app/lib/helpers';
-const AUREUS_INFO = { name: 'Aureus IA SPRL', vat: 'BE 1028.230.781', version: 'v38', sprint: 'Sprint 38' };
+const AUREUS_INFO = { name:tText('Aureus IA SPRL'), vat: 'BE 1028.230.781', version: 'v38', sprint: 'Sprint 38' };
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
 const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
@@ -79,7 +79,7 @@ function Dashboard({s,d}) {
         if(days<=3)alerts.push({type:'info',icon:'📋',msg:`${eName(e)}: période d'essai étudiant (3 premiers jours)`,cat:'Contrat'});
       }
       // NISS manquant
-      if(!e.niss)alerts.push({type:'warning',icon:'🆔',msg:`NISS manquant pour ${eName(e)}`,cat:'Identité'});
+      if(!e.niss)alerts.push({type:'warning',icon:'🆔',msg:`NISS manquant pour ${eName(e)}`,cat:tText('Identité')});
       // IBAN manquant
       if(!e.iban)alerts.push({type:'info',icon:'🏦',msg:`IBAN manquant pour ${eName(e)}`,cat:'Financier'});
       // Salaire à 0
@@ -94,14 +94,14 @@ function Dashboard({s,d}) {
     const q=Math.floor(today.getMonth()/3)+1;
     const qEnd=new Date(today.getFullYear(),q*3,0);
     const daysToDmfa=Math.ceil((qEnd-today)/(1000*60*60*24));
-    if(daysToDmfa<=14)alerts.push({type:'warning',icon:'📡',msg:`DmfA T${q}/${today.getFullYear()} à déposer dans ${daysToDmfa} jours`,cat:'ONSS'});
+    if(daysToDmfa<=14)alerts.push({type:'warning',icon:'📡',msg:`DmfA T${q}/${today.getFullYear()} à déposer dans ${daysToDmfa} jours`,cat:tText('ONSS')});
     return alerts.sort((a,b)=>a.type==='error'?-1:b.type==='error'?1:a.type==='warning'?-1:1);
   };
   const alerts=getAlerts();
 
   // Dept breakdown
   const depts={};
-  ae.forEach(e=>{const dp=e.dept||'Non défini';if(!depts[dp])depts[dp]={count:0,mass:0};depts[dp].count++;depts[dp].mass+=(e.monthlySalary||0);});
+  ae.forEach(e=>{const dp=e.dept||tText('Non défini');if(!depts[dp])depts[dp]={count:0,mass:0};depts[dp].count++;depts[dp].mass+=(e.monthlySalary||0);});
 
   return <div>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:24}}>
@@ -200,7 +200,7 @@ function Dashboard({s,d}) {
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:18}}>
           <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Évolution coût salarial — 12 mois</div>
           <div style={{display:'flex',gap:14}}>
-            {[{l:"Coût total",c:'#a78bfa'},{l:"Masse brute",c:'#c6a34e'},{l:"Net",c:'#4ade80'}].map(x=>
+            {[{l:tText('Coût total'),c:'#a78bfa'},{l:"Masse brute",c:'#c6a34e'},{l:"Net",c:'#4ade80'}].map(x=>
               <div key={x.l} style={{display:'flex',alignItems:'center',gap:5,fontSize:10,color:'#5e5c56'}}>
                 <span style={{width:8,height:3,borderRadius:2,background:x.c,display:'inline-block'}}/>{x.l}
               </div>
@@ -264,12 +264,12 @@ function Dashboard({s,d}) {
         {[
           {v:'v37',title:'Sprint 9',items:['⚙️ 13 automatisations (validation obligatoire)','📅 Gestion absences pré-paie','⚡ 8 actions en masse multi-clients','🏥 Audit santé global','📋 Planificateur 14 tâches','📑 15 Modèles documents','🔍 Filtres score santé'],color:'#06b6d4'},
           {v:'v36',title:'Sprint 8',items:['📊 Budget Auto','🔮 Simulateur What-If','📈 KPI + Equal Pay'],color:'#f472b6'},
-          {v:'v35',title:'Sprint 7',items:['🏪 Marketplace 12 modules','🔗 Intégrations 25+ connecteurs','🔔 Webhook Manager'],color:'#a78bfa'},
-          {v:'v34',title:'Sprint 6',items:['🌐 4 langues (FR/NL/EN/DE)','🔌 API Documentation','💱 Multi-Devises'],color:'#fb923c'},
-          {v:'v33',title:'Sprint 5',items:['🧠 Prédiction Turnover','💡 Reco Salariales IA','📈 Prévision Masse','🔍 Détection Anomalies','🏥 Score Santé Dossier'],color:'#f87171'},
-          {v:'v32',title:'Sprint 4',items:['⚡ Batch Processing','🔔 Alertes intelligentes','🔐 2FA (TOTP)','📡 DmfA améliorée'],color:'#a78bfa'},
-          {v:'v31',title:'Sprint 3',items:['⚡ Workflow Embauche','⚡ Workflow Licenciement','⚡ Workflow Maladie','📂 Export 11 formats + ClearFact'],color:'#60a5fa'},
-          {v:'v30',title:'Sprint 2',items:['📥 Import Excel','💰 ROI Calculator','🔒 Validation NISS/IBAN','🧠 153 CP pré-remplissage'],color:'#4ade80'},
+          {v:'v35',title:tText('Sprint 7'),items:['🏪 Marketplace 12 modules','🔗 Intégrations 25+ connecteurs','🔔 Webhook Manager'],color:'#a78bfa'},
+          {v:'v34',title:tText('Sprint 6'),items:['🌐 4 langues (FR/NL/EN/DE)','🔌 API Documentation','💱 Multi-Devises'],color:'#fb923c'},
+          {v:'v33',title:tText('Sprint 5'),items:['🧠 Prédiction Turnover','💡 Reco Salariales IA','📈 Prévision Masse','🔍 Détection Anomalies','🏥 Score Santé Dossier'],color:'#f87171'},
+          {v:'v32',title:tText('Sprint 4'),items:['⚡ Batch Processing','🔔 Alertes intelligentes','🔐 2FA (TOTP)','📡 DmfA améliorée'],color:'#a78bfa'},
+          {v:'v31',title:tText('Sprint 3'),items:['⚡ Workflow Embauche','⚡ Workflow Licenciement','⚡ Workflow Maladie','📂 Export 11 formats + ClearFact'],color:'#60a5fa'},
+          {v:'v30',title:tText('Sprint 2'),items:['📥 Import Excel','💰 ROI Calculator','🔒 Validation NISS/IBAN','🧠 153 CP pré-remplissage'],color:'#4ade80'},
         ].map((sp,i)=><div key={i} style={{padding:12,borderRadius:10,background:'rgba(198,163,78,.02)',border:'1px solid rgba(198,163,78,.08)'}}>
           <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:6}}>
             <span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:`${sp.color}22`,color:sp.color,fontWeight:700}}>{sp.v}</span>
@@ -349,7 +349,7 @@ function Dashboard({s,d}) {
 
       {/* DEPARTMENT BREAKDOWN */}
       <C style={{padding:'20px 18px'}}>
-        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0',marginBottom:16}}>Répartition par département</div>
+        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0',marginBottom:16}}>{tText('Répartition par département')}</div>
         {Object.entries(depts).sort((a,b)=>b[1].mass-a[1].mass).map(([dp,data],i)=>{
           const pct=tm>0?Math.round(data.mass/tm*100):0;
           return <div key={dp} style={{marginBottom:12,animation:`fadeIn .3s ease ${i*0.06}s both`}}>
@@ -366,11 +366,11 @@ function Dashboard({s,d}) {
         {Object.keys(depts).length===0&&<div style={{textAlign:'center',color:'#5e5c56',fontSize:12,padding:20}}>{tText('Aucun employé')}</div>}
         <div style={{marginTop:16,padding:'12px 14px',background:"rgba(198,163,78,.03)",borderRadius:8,border:'1px solid rgba(198,163,78,.06)'}}>
           <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
-            <span style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'1px'}}>Ratio net/brut</span>
+            <span style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'1px'}}>{tText('Ratio net/brut')}</span>
             <span style={{fontSize:13,fontWeight:700,color:'#4ade80'}}>{tm>0?Math.round(tn/tm*100):0}%</span>
           </div>
           <div style={{display:'flex',justifyContent:'space-between'}}>
-            <span style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'1px'}}>Coût/brut</span>
+            <span style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'1px'}}>{tText('Coût/brut')}</span>
             <span style={{fontSize:13,fontWeight:700,color:'#a78bfa'}}>{tm>0?((tc/tm)*100).toFixed(0):0}%</span>
           </div>
         </div>

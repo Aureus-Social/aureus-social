@@ -84,7 +84,7 @@ const pct=v=>(v*100).toFixed(2)+'%';
 // Catégories de paramètres
 const categories=[
 {id:'onss',nom:'ONSS / Cotisations',icon:'🏛',color:'#ef4444',params:[
-  {k:'onss.travailleur',l:'ONSS travailleur',v:pct(L.onss.travailleur),t:'pct'},
+  {k:'onss.travailleur',l:tText('ONSS travailleur'),v:pct(L.onss.travailleur),t:'pct'},
   {k:'onss.employeur.total',l:'ONSS employeur total',v:pct(L.onss.employeur.total),t:'pct'},
   {k:'onss.employeur.detail.pension',l:'  └ Pension',v:pct(L.onss.employeur.detail.pension),t:'pct'},
   {k:'onss.employeur.detail.maladie',l:'  └ Maladie-invalidite',v:pct(L.onss.employeur.detail.maladie),t:'pct'},
@@ -120,12 +120,12 @@ const categories=[
   {k:'fraisPropres.forfaitDeplacement.voiture',l:'Indemnite km voiture',v:fmt(L.fraisPropres.forfaitDeplacement.voiture)+' EUR/km',t:'num'},
 ]},
 {id:'atn',nom:'ATN / Avantages',icon:'🚗',color:'#3b82f6',params:[
-  {k:'atn.voiture.min',l:'ATN voiture minimum',v:fmt(L.atn.voiture.min)+' EUR/an',t:'num'},
-  {k:'atn.gsm.forfait',l:'ATN GSM/tablette',v:fmt(L.atn.gsm.forfait)+' EUR/mois',t:'num'},
-  {k:'atn.pc.forfait',l:'ATN PC/laptop',v:fmt(L.atn.pc.forfait)+' EUR/mois',t:'num'},
-  {k:'atn.internet.forfait',l:'ATN Internet',v:fmt(L.atn.internet.forfait)+' EUR/mois',t:'num'},
-  {k:'atn.electricite.cadre',l:'ATN electricite (cadre)',v:fmt(L.atn.electricite.cadre)+' EUR/an',t:'num'},
-  {k:'atn.chauffage.cadre',l:'ATN chauffage (cadre)',v:fmt(L.atn.chauffage.cadre)+' EUR/an',t:'num'},
+  {k:'atn.voiture.min',l:tText('ATN voiture minimum'),v:fmt(L.atn.voiture.min)+' EUR/an',t:'num'},
+  {k:'atn.gsm.forfait',l:tText('ATN GSM/tablette'),v:fmt(L.atn.gsm.forfait)+' EUR/mois',t:'num'},
+  {k:'atn.pc.forfait',l:tText('ATN PC/laptop'),v:fmt(L.atn.pc.forfait)+' EUR/mois',t:'num'},
+  {k:'atn.internet.forfait',l:tText('ATN Internet'),v:fmt(L.atn.internet.forfait)+' EUR/mois',t:'num'},
+  {k:'atn.electricite.cadre',l:tText('ATN electricite (cadre)'),v:fmt(L.atn.electricite.cadre)+' EUR/an',t:'num'},
+  {k:'atn.chauffage.cadre',l:tText('ATN chauffage (cadre)'),v:fmt(L.atn.chauffage.cadre)+' EUR/an',t:'num'},
 ]},
 {id:'travail',nom:'Temps de travail',icon:'⏰',color:'#eab308',params:[
   {k:'tempsTravail.dureeHebdoLegale',l:'Duree hebdo legale',v:L.tempsTravail.dureeHebdoLegale+'h',t:'num'},
@@ -207,7 +207,7 @@ return <div>
   {l:"Categories",v:categories.length,c:"#60a5fa"},
   {l:"Sources surveillees",v:L.sources.length,c:"#a855f7"},
   {l:"Version",v:L._meta.version,c:"#4ade80"},
-  {l:"Statut",v:checking?"Verification...":lastCheck?"A jour":"Non verifie",c:lastCheck?"#4ade80":"#fb923c"},
+  {l:tText('Statut'),v:checking?"Verification...":lastCheck?"A jour":"Non verifie",c:lastCheck?"#4ade80":"#fb923c"},
 ].map((k,i)=><div key={i} style={{padding:"12px 14px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}>
   <div style={{fontSize:9,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div>
   <div style={{fontSize:17,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
@@ -338,7 +338,7 @@ updateHistory.map((h,i)=><div key={i} style={{display:"flex",gap:10,padding:"10p
         <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
       </div>)}
     </div>
-    <Tbl cols={[{k:"r",l:"Rubrique",b:1},{k:"v",l:"Montant",a:"right",r:r=><span style={{color:r.c,fontWeight:600}}>{r.montant}</span>},{k:"s",l:"Source legale",r:r=><span style={{fontSize:10,color:"#5e5c56"}}>{r.source}</span>}]}
+    <Tbl cols={[{k:"r",l:"Rubrique",b:1},{k:"v",l:tText('Montant'),a:"right",r:r=><span style={{color:r.c,fontWeight:600}}>{r.montant}</span>},{k:"s",l:"Source legale",r:r=><span style={{fontSize:10,color:"#5e5c56"}}>{r.source}</span>}]}
     data={[
       {r:"Salaire brut",montant:fmt(brut)+" EUR",c:"#c6a34e",source:"Contrat de travail"},
       {r:"ONSS travailleur ("+pct(L.onss.travailleur)+")",montant:"- "+fmt(onssW)+" EUR",c:"#f87171",source:"Loi 27/06/1969"},
@@ -368,7 +368,7 @@ updateHistory.map((h,i)=><div key={i} style={{display:"flex",gap:10,padding:"10p
     <div style={{fontSize:24}}>📊</div><div style={{fontWeight:600,fontSize:12,marginTop:6}}>CSV parametres</div><div style={{fontSize:10,color:"#9e9b93"}}>Pour Excel/Sheets</div>
   </button>
   <button onClick={()=>{const txt='LOIS BELGES '+L._meta.annee+'\nVersion: '+L._meta.version+'\n'+'='.repeat(50)+'\n\n'+categories.map(cat=>cat.icon+' '+cat.nom.toUpperCase()+'\n'+'-'.repeat(40)+'\n'+cat.params.map(p=>'  '+p.l+': '+p.v).join('\n')+'\n').join('\n');const escaped=(txt||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>\n');const html='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Résumé lois '+L._meta.annee+'</title><style>body{font-family:system-ui,sans-serif;font-size:12px;padding:24px;max-width:800px;margin:0 auto;line-height:1.5;color:#1a1a1a}</style></head><body><div>'+escaped+'</div><p style="margin-top:20px;font-size:10px;color:#666">Document généré par Aureus Social Pro</p></body></html>';openForPDF(html,'Resume_lois_'+L._meta.annee);}} style={{padding:16,borderRadius:10,border:"1px solid rgba(198,163,78,.2)",cursor:"pointer",fontFamily:"inherit",background:"rgba(198,163,78,.04)",color:"#c6a34e",textAlign:"center"}}>
-    <div style={{fontSize:24}}>📄</div><div style={{fontWeight:600,fontSize:12,marginTop:6}}>{tText('Résumé PDF')}</div><div style={{fontSize:10,color:"#9e9b93"}}>Imprimer / Enregistrer en PDF</div>
+    <div style={{fontSize:24}}>📄</div><div style={{fontWeight:600,fontSize:12,marginTop:6}}>Résumé PDF</div><div style={{fontSize:10,color:"#9e9b93"}}>Imprimer / Enregistrer en PDF</div>
   </button>
 </div>
 <div style={{marginTop:16,padding:16,background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.12)"}}>

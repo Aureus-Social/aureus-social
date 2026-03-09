@@ -357,7 +357,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
             <div>
               <div style={{fontSize:9.5,fontWeight:600,color:'#555',marginBottom:4}}>🎄 Prime de fin d'année (13ème mois)</div>
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:4,fontSize:9.5,color:'#777'}}>
-                <span>Brut:</span><span style={{fontWeight:600,textAlign:'right'}}>{fmt(res.y13Calc?.montant||0)}</span>
+                <span>{tText('Brut:')}</span><span style={{fontWeight:600,textAlign:'right'}}>{fmt(res.y13Calc?.montant||0)}</span>
                 <span>ONSS (13,07%):</span><span style={{fontWeight:600,textAlign:'right',color:'#f87171'}}>-{fmt(res.y13Calc?.onss||0)}</span>
                 <span>PP exceptionnel:</span><span style={{fontWeight:600,textAlign:'right',color:'#f87171'}}>-{fmt(res.y13Calc?.ppExcep||0)} ({Math.round((res.y13Calc?.ppExcepRate||0)*100)}%)</span>
                 <span style={{borderTop:'1px solid #ddd',paddingTop:3}}>Net estimé:</span><span style={{fontWeight:700,textAlign:'right',color:'#16a34a',borderTop:'1px solid #ddd',paddingTop:3}}>{fmt(res.y13Calc?.netEstime||0)}</span>
@@ -367,7 +367,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
           </div>
         </div>
         <div style={{marginTop:18,padding:14,background:"#f0efea",borderRadius:8,display:'grid',gridTemplateColumns:res.atnCar>0?'repeat(5,1fr)':'repeat(4,1fr)',gap:10}}>
-          {[{l:"Brut",v:res.gross},{l:`ONSS empl. (${(res.onssE_rate*100).toFixed(0)}%)`,v:res.onssE},...(res.cotisVacOuv>0?[{l:"Cot. vac. ouvrier (15,84%)",v:res.cotisVacOuv}]:[]),...(res.atnCar>0?[{l:"Cot. CO2",v:res.cotCO2}]:[]),...(res.pensionComplEmpl>0?[{l:"Pension compl. empl.",v:res.pensionComplEmpl}]:[]),...(res.ecoCheques>0?[{l:"Éco-chèques",v:res.ecoCheques}]:[]),...(res.dispensePPTotal>0?[{l:"Dispense PP (nuit/HS)",v:-res.dispensePPTotal}]:[]),...(res.redGCPremier>0?[{l:`Réd. ${res.redGCPremierLabel||'1er eng.'} (Art.336 LP)`,v:-res.redGCPremier}]:[]),...(res.redGCAge>0?[{l:"Réd. trav. âgé 55+",v:-res.redGCAge}]:[]),...(res.redGCJeune>0?[{l:"Réd. jeune <26",v:-res.redGCJeune}]:[]),...(res.redGCHandicap>0?[{l:"Réd. handicap",v:-res.redGCHandicap}]:[]),...(res.allocTravail>0?[{l:`Alloc. ONEM ${res.allocTravailLabel}`,v:-res.allocTravail}]:[]),{l:"Avantages",v:res.mvEmployer+res.expense+res.transport+res.indemTeletravail+res.indemBureau},{l:"COÛT TOTAL",v:res.costTotal,g:1}].map((x,i)=>
+          {[{l:"Brut",v:res.gross},{l:`ONSS empl. (${(res.onssE_rate*100).toFixed(0)}%)`,v:res.onssE},...(res.cotisVacOuv>0?[{l:"Cot. vac. ouvrier (15,84%)",v:res.cotisVacOuv}]:[]),...(res.atnCar>0?[{l:"Cot. CO2",v:res.cotCO2}]:[]),...(res.pensionComplEmpl>0?[{l:"Pension compl. empl.",v:res.pensionComplEmpl}]:[]),...(res.ecoCheques>0?[{l:"Éco-chèques",v:res.ecoCheques}]:[]),...(res.dispensePPTotal>0?[{l:"Dispense PP (nuit/HS)",v:-res.dispensePPTotal}]:[]),...(res.redGCPremier>0?[{l:`Réd. ${res.redGCPremierLabel||'1er eng.'} (Art.336 LP)`,v:-res.redGCPremier}]:[]),...(res.redGCAge>0?[{l:"Réd. trav. âgé 55+",v:-res.redGCAge}]:[]),...(res.redGCJeune>0?[{l:"Réd. jeune <26",v:-res.redGCJeune}]:[]),...(res.redGCHandicap>0?[{l:"Réd. handicap",v:-res.redGCHandicap}]:[]),...(res.allocTravail>0?[{l:`Alloc. ONEM ${res.allocTravailLabel}`,v:-res.allocTravail}]:[]),{l:tText('Avantages'),v:res.mvEmployer+res.expense+res.transport+res.indemTeletravail+res.indemBureau},{l:"COÛT TOTAL",v:res.costTotal,g:1}].map((x,i)=>
             <div key={i} style={{textAlign:'center'}}><div style={{fontSize:9.5,color:'#999',textTransform:'uppercase'}}>{x.l}</div><div style={{fontSize:13,fontWeight:x.g?800:600,marginTop:3,color:x.g?'#c6a34e':'#333'}}>{fmt(x.v)}</div></div>
           )}
         </div>
@@ -400,7 +400,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
               <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>{tText('Montant')}</th>
               <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>{tText('ONSS')}</th>
               <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>PP</th>
-              <th style={{textAlign:'left',padding:'6px 8px',color:'#999',fontSize:9}}>Base légale</th>
+              <th style={{textAlign:'left',padding:'6px 8px',color:'#999',fontSize:9}}>{tText('Base légale')}</th>
             </tr></thead>
             <tbody>
               {[
@@ -417,13 +417,13 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
                 ...(res.empBonus>0?[{l:"  └ Bonus à l\'emploi social (volet A+B)",m:res.empBonus,onss:'Réduction',pp:'—',ref:"AR 01/06/1999 Art.2",hl:"green"}]:[]),
                 ...(res.empBonusFisc>0?[{l:"  └ Bonus emploi fiscal (PP)",m:res.empBonusFisc,onss:'—',pp:'Réduction',ref:"Art. 289ter CIR 92",hl:"green"}]:[]),
                 {l:"ONSS net retenu",m:res.onssNet,onss:'—',pp:'—',ref:"",neg:true,bold:true},
-                {l:"Précompte professionnel",m:res.tax,onss:'—',pp:'—',ref:"AR/CIR 92 annexe III",neg:true},
+                {l:tText('Précompte professionnel'),m:res.tax,onss:'—',pp:'—',ref:"AR/CIR 92 annexe III",neg:true},
                 ...(res.ppVolontaire>0?[{l:"PP volontaire",m:res.ppVolontaire,onss:'—',pp:'—',ref:"Art. 275§1 CIR 92",neg:true}]:[]),
                 {l:"Cotisation spéciale SS",m:res.css,onss:'—',pp:'—',ref:"Loi 30/03/1994",neg:true},
                 ...(res.atnCar>0?[{l:"ATN Voiture de société",m:res.atnCar,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 36 CIR 92"}]:[]),
                 ...(res.atnGSM>0?[{l:"ATN GSM",m:res.atnGSM,onss:'❌ Non',pp:'✅ Oui',ref:"AR 18/12/2024 forfait"}]:[]),
                 ...(res.atnPC>0?[{l:"ATN PC",m:res.atnPC,onss:'❌ Non',pp:'✅ Oui',ref:"AR 18/12/2024 forfait"}]:[]),
-                ...(res.atnInternet>0?[{l:"ATN Internet",m:res.atnInternet,onss:'❌ Non',pp:'✅ Oui',ref:"AR 18/12/2024 forfait"}]:[]),
+                ...(res.atnInternet>0?[{l:tText('ATN Internet'),m:res.atnInternet,onss:'❌ Non',pp:'✅ Oui',ref:"AR 18/12/2024 forfait"}]:[]),
                 ...(res.atnLogement>0?[{l:"ATN Logement",m:res.atnLogement,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 18 AR/CIR 92"}]:[]),
                 ...(res.atnChauffage>0?[{l:"ATN Chauffage",m:res.atnChauffage,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 18 AR/CIR 92"}]:[]),
                 ...(res.atnElec>0?[{l:"ATN Électricité",m:res.atnElec,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 18 AR/CIR 92"}]:[]),
@@ -472,7 +472,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
           <table style={{width:'100%',borderCollapse:'collapse',fontSize:10.5}}>
             <thead><tr style={{borderBottom:'2px solid #c6a34e'}}>
               <th style={{textAlign:'left',padding:'6px 8px',color:'#999',fontSize:9,textTransform:'uppercase'}}>Avantage</th>
-              <th style={{textAlign:'right',padding:'6px 8px',color:'#999',fontSize:9}}>ATN / Charge</th>
+              <th style={{textAlign:'right',padding:'6px 8px',color:'#999',fontSize:9}}>{tText('ATN / Charge')}</th>
               <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>ONSS empl.</th>
               <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>PP trav.</th>
               <th style={{textAlign:'right',padding:'6px 8px',color:'#999',fontSize:9}}>Coût empl./mois</th>
@@ -606,8 +606,8 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
             <div id='section-onss-cotisations' style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>ONSS & Cotisations</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:6}}>
               {[
-                {l:'ONSS travailleur',v:`${(TX_ONSS_W*100).toFixed(2)}%`,ref:'Loi 29/06/1981',ok:true},
-                {l:'ONSS patronal',v:`${(TX_ONSS_E*100).toFixed(2)}%`,ref:'Loi 29/06/1981',ok:true},
+                {l:tText('ONSS travailleur'),v:`${(TX_ONSS_W*100).toFixed(2)}%`,ref:'Loi 29/06/1981',ok:true},
+                {l:tText('ONSS patronal'),v:`${(TX_ONSS_E*100).toFixed(2)}%`,ref:'Loi 29/06/1981',ok:true},
                 ...(emp.statut==='ouvrier'?[{l:'Majoration ouvrier',v:'× 108%',ref:'AR 28/11/1969 Art.23',ok:true}]:[]),
                 {l:'RMMMG (CCT 43)',v:`${fmt(RMMMG)}`,ref:'CNT CCT 43/15',ok:!!(res.gross>=RMMMG),warn:res.gross<RMMMG},
                 {l:'Cot. CO2 min',v:`${fmt(CO2MIN)}`,ref:'AR ATN voiture',ok:true},
@@ -778,8 +778,8 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
         </div>
       </div>
       <Tbl cols={[
-        {k:'p',l:"Période",b:1,c:'#c6a34e',r:r=>r.period},{k:'e',l:"Employé",r:r=>r.ename},
-        {k:'g',l:"Brut",a:'right',r:r=>fmt(r.gross)},{k:'o',l:"ONSS",a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.onssNet)}</span>},
+        {k:'p',l:tText('Période'),b:1,c:'#c6a34e',r:r=>r.period},{k:'e',l:"Employé",r:r=>r.ename},
+        {k:'g',l:"Brut",a:'right',r:r=>fmt(r.gross)},{k:'o',l:tText('ONSS'),a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.onssNet)}</span>},
         {k:'t',l:"Précompte",a:'right',r:r=><span style={{color:'#f87171'}}>{fmt(r.tax)}</span>},
         {k:'n',l:"Net",a:'right',r:r=><span style={{fontWeight:700,color:'#4ade80'}}>{fmt(r.net)}</span>},
         {k:'c',l:"Coût",a:'right',r:r=><span style={{color:'#a78bfa'}}>{fmt(r.costTotal)}</span>},

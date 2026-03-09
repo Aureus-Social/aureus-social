@@ -60,7 +60,7 @@ export function PlanningCongesV3({s, defaultTab}){
     <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>Chevauchements + règles minimum présence + calendrier équipe</p>
 
     <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,marginBottom:18}}>
-      {[{l:'Effectif',v:n,c:'#3b82f6'},{l:'Min présence',v:minPresence+'%',c:'#c6a34e'},{l:'Jours alerte',v:alertDays,c:alertDays>0?'#f87171':'#22c55e'},{l:'Mois',v:moisNoms[month],c:'#c6a34e'},{l:'Jours ouvrables',v:days.filter(d=>{const dow=new Date(year,month,d).getDay();return dow>0&&dow<6;}).length,c:'#888'}].map((k,i)=><div key={i} style={{padding:'12px 14px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}><div style={{fontSize:9,color:'#5e5c56',textTransform:'uppercase'}}>{k.l}</div><div style={{fontSize:17,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}
+      {[{l:'Effectif',v:n,c:'#3b82f6'},{l:'Min présence',v:minPresence+'%',c:'#c6a34e'},{l:'Jours alerte',v:alertDays,c:alertDays>0?'#f87171':'#22c55e'},{l:tText('Mois'),v:moisNoms[month],c:'#c6a34e'},{l:'Jours ouvrables',v:days.filter(d=>{const dow=new Date(year,month,d).getDay();return dow>0&&dow<6;}).length,c:'#888'}].map((k,i)=><div key={i} style={{padding:'12px 14px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}><div style={{fontSize:9,color:'#5e5c56',textTransform:'uppercase'}}>{k.l}</div><div style={{fontSize:17,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}
     </div>
 
     <div style={{display:'flex',gap:6,marginBottom:16}}>
@@ -145,7 +145,7 @@ export function PlanningCongesV3({s, defaultTab}){
           <div style={{fontFamily:'monospace',color:'#3b82f6'}}>{extra}j</div>
           <div style={{fontFamily:'monospace',color:'#f87171'}}>{pris}j</div>
           <div style={{fontFamily:'monospace',fontWeight:700,color:solde>10?'#22c55e':solde>5?'#eab308':'#f87171'}}>{solde}j</div>
-          <Badge text={solde>10?'OK':solde>5?'Attention':'Critique'} color={solde>10?'#22c55e':solde>5?'#eab308':'#f87171'}/>
+          <Badge text={solde>10?'OK':solde>5?'Attention':tText('Critique')} color={solde>10?'#22c55e':solde>5?'#eab308':'#f87171'}/>
         </div>})}
     </C>}
   </div>;
@@ -213,7 +213,7 @@ export function BilanSocialV3({s}){
     <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>Calcul automatique des indicateurs — Format Banque Nationale de Belgique</p>
 
     <div style={{display:'grid',gridTemplateColumns:'repeat(6,1fr)',gap:10,marginBottom:18}}>
-      {[{l:'Effectif',v:n,c:'#3b82f6'},{l:'CDI/CDD',v:cdi+'/'+cdd,c:'#22c55e'},{l:'H/F',v:hommes+'/'+femmes,c:'#a855f7'},{l:'Âge moyen',v:avgAge.toFixed(1)+' ans',c:'#fb923c'},{l:'Ancienneté moy.',v:avgAnc.toFixed(1)+' ans',c:'#c6a34e'},{l:'Masse salariale/an',v:fmt(masseBrut*12)+' €',c:'#f87171'}].map((k,i)=><div key={i} style={{padding:'10px 12px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}><div style={{fontSize:8,color:'#5e5c56',textTransform:'uppercase'}}>{k.l}</div><div style={{fontSize:14,fontWeight:700,color:k.c,marginTop:3}}>{k.v}</div></div>)}
+      {[{l:'Effectif',v:n,c:'#3b82f6'},{l:'CDI/CDD',v:cdi+'/'+cdd,c:'#22c55e'},{l:'H/F',v:hommes+'/'+femmes,c:'#a855f7'},{l:'Âge moyen',v:avgAge.toFixed(1)+' ans',c:'#fb923c'},{l:tText('Ancienneté moy.'),v:avgAnc.toFixed(1)+' ans',c:'#c6a34e'},{l:'Masse salariale/an',v:fmt(masseBrut*12)+' €',c:'#f87171'}].map((k,i)=><div key={i} style={{padding:'10px 12px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}><div style={{fontSize:8,color:'#5e5c56',textTransform:'uppercase'}}>{k.l}</div><div style={{fontSize:14,fontWeight:700,color:k.c,marginTop:3}}>{k.v}</div></div>)}
     </div>
 
     <div style={{display:'flex',gap:6,marginBottom:16}}>{[{v:'indicateurs',l:'📊 Indicateurs ('+sections.length+')'},{v:'pyramide',l:'👥 Pyramide'},{v:'genre',l:'⚧ Genre'},{v:'bnb',l:'🏦 Format BNB'},{v:'legal',l:'📜 Base légale'}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}</div>
@@ -376,7 +376,7 @@ export function AnalyticsV3({s}){
 
     {tab==='clients'&&<C title="Analyse par client">
       <div style={{display:'grid',gridTemplateColumns:'200px repeat(4,1fr)',gap:4,padding:'6px 0',borderBottom:'2px solid rgba(198,163,78,.15)',fontSize:9,fontWeight:700,color:'#c6a34e'}}>
-        <div>Client</div><div>Effectif</div><div>{tText('Masse salariale')}</div><div>Coût total</div><div>Salaire moyen</div>
+        <div>Client</div><div>Effectif</div><div>{tText('Masse salariale')}</div><div>{tText('Coût total')}</div><div>Salaire moyen</div>
       </div>
       {clientStats.sort((a,b)=>b.masse-a.masse).map((c,i)=><div key={i} style={{display:'grid',gridTemplateColumns:'200px repeat(4,1fr)',gap:4,padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:11}}>
         <div style={{color:'#e8e6e0',fontWeight:600}}>{c.nom}</div>
@@ -654,7 +654,7 @@ export function ContratsLegauxV3({s}){
 
     {tab==='clauses'&&<C title="📎 Clauses spéciales applicables">
       {[
-        {nom:'Clause de non-concurrence',conditions:'Salaire annuel brut > 41.969 € (2026). Durée max 12 mois. Indemnité compensatoire = 50% salaire brut de la période.',base:'Art. 65 § 2 Loi 03/07/1978'},
+        {nom:tText('Clause de non-concurrence'),conditions:'Salaire annuel brut > 41.969 € (2026). Durée max 12 mois. Indemnité compensatoire = 50% salaire brut de la période.',base:'Art. 65 § 2 Loi 03/07/1978'},
         {nom:'Clause d\'écolage',conditions:'Formation spécifique ≥ 80h ou valeur > seuil. Remboursement dégressif: 80% (1ère année), 50% (2ème), 20% (3ème).',base:'Art. 22bis Loi 03/07/1978'},
         {nom:'Clause de confidentialité',conditions:'Applicable à tous les contrats. Survit à la fin du contrat. Pas de durée maximale légale.',base:'Art. 17 §3 Loi 03/07/1978'},
         {nom:'Clause de propriété intellectuelle',conditions:'Inventions et créations dans le cadre du contrat: propriété de l\'employeur. Hors cadre: négociable.',base:'Loi 30/06/1994 droits d\'auteur + XI.332 Code de droit économique'},

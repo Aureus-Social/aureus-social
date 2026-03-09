@@ -7,7 +7,7 @@ import { LOIS_BELGES, LB, RMMMG, TX_ONSS_W, TX_ONSS_E, NET_FACTOR, PV_DOUBLE, PV
 const fmt = n => new Intl.NumberFormat('fr-BE', { style: 'currency', currency: 'EUR' }).format(n || 0);
 const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
-const AUREUS_INFO = { name: 'Aureus IA SPRL', vat: 'BE 1028.230.781', version: 'v38', sprint: 'Sprint 38' };
+const AUREUS_INFO = { name:tText('Aureus IA SPRL'), vat: 'BE 1028.230.781', version: 'v38', sprint: 'Sprint 38' };
 const LEGAL = { WD: 21.67, WHD: 7.6 };
 const DPER = { month: new Date().getMonth()+1, year: new Date().getFullYear(), days: 21.67 };
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
@@ -119,7 +119,7 @@ function SettingsPage({s,d}) {
             <span style={{fontSize:24}}>🔒</span>
             <div>
               <div style={{fontSize:13,fontWeight:600,color:'#4ade80'}}>2FA disponible via Supabase</div>
-              <div style={{fontSize:10.5,color:'#5e5c56',marginTop:2}}>Activez la vérification en deux étapes pour sécuriser votre compte</div>
+              <div style={{fontSize:10.5,color:'#5e5c56',marginTop:2}}>{tText('Activez la vérification en deux étapes pour sécuriser votre compte')}</div>
             </div>
           </div>
           <div style={{marginTop:12}}>
@@ -143,7 +143,7 @@ function SettingsPage({s,d}) {
               <span>📧</span>
               <div style={{flex:1}}>
                 <div style={{fontSize:11.5,color:'#e8e6e0'}}>{tText('Email de confirmation')}</div>
-                <div style={{fontSize:9.5,color:'#5e5c56'}}>Requis à l'inscription</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>{tText('Requis à l\'inscription')}</div>
               </div>
               <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>{tText('Actif ✓')}</span>
             </div>

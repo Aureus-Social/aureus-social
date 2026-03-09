@@ -111,17 +111,17 @@ function Employees({s,d}) {
       for(const r of rows){
         const emp={
           ...empty,
-          first:r['Prénom']||r['Prenom']||r['prenom']||r['first']||r['First']||'',
-          last:r['Nom']||r['nom']||r['last']||r['Last']||'',
+          first:r[tText('Prénom')]||r['Prenom']||r['prenom']||r['first']||r['First']||'',
+          last:r[tText('Nom')]||r['nom']||r['last']||r['Last']||'',
           niss:String(r['NISS']||r['niss']||r['Registre national']||''),
           fn:r['Fonction']||r['fonction']||r['function']||'',
-          dept:r['Département']||r['Departement']||r['dept']||'',
-          contract:r['Contrat']||r['contrat']||r['Type']||'CDI',
-          cp:String(r['CP']||r['cp']||r['Commission paritaire']||'200'),
+          dept:r[tText('Département')]||r['Departement']||r['dept']||'',
+          contract:r['Contrat']||r['contrat']||r[tText('Type')]||'CDI',
+          cp:String(r['CP']||r['cp']||r[tText('Commission paritaire')]||'200'),
           monthlySalary:parseFloat(r['Brut']||r['brut']||r['Salaire']||r['salaire']||0),
           startD:r['Entrée']||r['Entree']||r['Date entrée']||r['startD']||'',
           iban:r['IBAN']||r['iban']||'',
-          statut:r['Statut']||r['statut']||'employe',
+          statut:r[tText('Statut')]||r['statut']||'employe',
           sexe:r['Sexe']||r['sexe']||'M',
           status:'active',
         };
@@ -192,7 +192,7 @@ function Employees({s,d}) {
 
   // CSV Export
   const exportCSV=()=>{
-    const headers=['Prénom',"Nom","NISS","Fonction","Département","Contrat","CP","Brut","Statut","Entrée","IBAN"];
+    const headers=[tText('Prénom'),"Nom","NISS","Fonction","Département","Contrat","CP","Brut","Statut","Entrée","IBAN"];
     const rows=filtered.map(e=>[e.first,e.last,e.niss,e.fn,e.dept,e.contract,e.cp,e.monthlySalary,e.status||'active',e.startD,e.iban]);
     const csv=[headers,...rows].map(r=>r.map(c=>`"${(c||'').toString().replace(/"/g,'""')}"`).join(';')).join('\n');
     const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
@@ -213,7 +213,7 @@ function Employees({s,d}) {
     const exemple={...empty,
       id:'E-Activa-Nourdin',
       first:'Nourdin',last:'MOUSSATI',niss:'83.09.30.133.94',birth:'1983-09-30',
-      fn:'Assistant administratif',function:'Assistant administratif',dept:'Administration',
+      fn:'Assistant administratif',function:'Assistant administratif',dept:tText('Administration'),
       contract:'CDD',regime:'full',whWeek:38,monthlySalary:2800,
       cp:'200',dmfaCode:'495',dimType:'OTH',
       startD:startDate,startDate:startDate,endD:endDate,endDate:endDate,
@@ -292,7 +292,7 @@ function Employees({s,d}) {
       </div>
     </C>}
     {form&&<C style={{marginBottom:20}}>
-      <h2 style={{fontSize:17,fontWeight:600,color:'#e8e6e0',margin:'0 0 16px',fontFamily:"'Cormorant Garamond',serif"}}>{ed?'Modifier':'Nouvel employé'}</h2>
+      <h2 style={{fontSize:17,fontWeight:600,color:'#e8e6e0',margin:'0 0 16px',fontFamily:"'Cormorant Garamond',serif"}}>{ed?tText('Modifier'):'Nouvel employé'}</h2>
       <ST>{tText('Identité')}</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
         <I label="Prénom" value={form.first} onChange={v=>setF({...form,first:v})}/>
@@ -338,7 +338,7 @@ function Employees({s,d}) {
         <I label="Rang engagement" value={form.nrEngagement||0} onChange={v=>setF({...form,nrEngagement:parseInt(v)||0})} options={[{v:0,l:"— Pas de réduction —"},{v:1,l:"1er employé (exo totale)"},{v:2,l:"2è employé"},{v:3,l:"3è employé"},{v:4,l:"4è employé"},{v:5,l:"5è employé"},{v:6,l:"6è employé"}]}/>
         {form.nrEngagement>0&&<I label="Trimestre depuis eng." type="number" value={form.engagementTrimestre||1} onChange={v=>setF({...form,engagementTrimestre:parseInt(v)||1})}/>}
       </div>
-      <ST style={{marginTop:14}}>Activation ONEM (comme dans Fiches de Paie)</ST>
+      <ST style={{marginTop:14}}>{tText('Activation ONEM (comme dans Fiches de Paie)')}</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:8,padding:12,background:'rgba(34,197,94,.04)',border:'1px solid rgba(34,197,94,.15)',borderRadius:8}}>
         <I label="Activation ONEM" value={form.allocTravailType||'none'} onChange={v=>setF({...form,allocTravailType:v,allocTravail:v!=='none'?(form.allocTravail||0):0})} options={[{v:"none",l:"— Aucune —"},{v:"activa_bxl",l:"Activa.brussels (€350/m)"},{v:"activa_bxl_ap",l:"Activa.brussels AP (350→800→350)"},{v:"activa_jeune",l:"Activa Jeunes <30 (€350/m)"},{v:"impulsion_wal",l:"Impulsion Wallonie (€500/m)"},{v:"impulsion55",l:"Impulsion 55+ (€500/m)"},{v:"sine",l:"SINE écon. sociale (€500/m)"},{v:"vdab",l:"VDAB (prime directe)"},{v:"art60",l:"Art. 60 §7 (1er emploi)"}]}/>
         {form.allocTravailType&&form.allocTravailType!=='none'&&<I label="Montant alloc. ONEM (€)" type="number" value={form.allocTravail||0} onChange={v=>setF({...form,allocTravail:parseFloat(v)||0})}/>}
@@ -349,7 +349,7 @@ function Employees({s,d}) {
       <ST>Grille horaire (Loi 16/03/1971 + Règlement de travail)</ST>
       <div style={{padding:10,background:"rgba(198,163,78,.03)",borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
         <div style={{display:'flex',gap:6,marginBottom:8,alignItems:'center'}}>
-          <span style={{fontSize:11,color:'#9e9b93',fontWeight:600,width:70}}>Fraction:</span>
+          <span style={{fontSize:11,color:'#9e9b93',fontWeight:600,width:70}}>{tText('Fraction:')}</span>
           <span style={{fontSize:13,fontWeight:700,color:(form.whWeek||38)>=38?'#4ade80':'#fb923c'}}>{Math.round((form.whWeek||38)/38*100)}%</span>
           <span style={{fontSize:10.5,color:'#5e5c56',marginLeft:6}}>({form.whWeek||38}h / 38h réf.) — {(form.whWeek||38)>=38?'Temps plein':'Temps partiel'}</span>
           <span style={{fontSize:10.5,color:'#5e5c56',marginLeft:'auto'}}>{((form.whWeek||38)/5).toFixed(2)}h/jour · Pause: 30min (si {'>'} 6h)</span>
@@ -360,7 +360,7 @@ function Employees({s,d}) {
           </tr></thead>
           <tbody>
             <tr>
-              <td style={{padding:'4px 6px',fontSize:10,color:'#9e9b93'}}>Début</td>
+              <td style={{padding:'4px 6px',fontSize:10,color:'#9e9b93'}}>{tText('Début')}</td>
               {['lu',"ma","me","je","ve","sa"].map(d=><td key={d}><input type="time" defaultValue={d==='sa'?'':'09:00'} style={{width:'100%',background:"rgba(198,163,78,.05)",border:'1px solid rgba(198,163,78,.1)',borderRadius:4,padding:'3px 4px',fontSize:10,color:'#e8e6e0',textAlign:'center'}} onChange={e=>setF({...form,[`h_${d}_de`]:e.target.value})}/></td>)}
               <td rowSpan={2} style={{textAlign:'center',verticalAlign:'middle'}}>
                 <div style={{fontSize:16,fontWeight:700,color:'#c6a34e'}}>{form.whWeek||38}h</div>
@@ -384,7 +384,7 @@ function Employees({s,d}) {
         <I label="CR part trav. (€)" type="number" value={form.mvW} onChange={v=>setF({...form,mvW:v})}/>
         <I label="CR part empl. (€)" type="number" value={form.mvE} onChange={v=>setF({...form,mvE:v})}/>
         <I label="Frais propres (€)" type="number" value={form.expense} onChange={v=>setF({...form,expense:v})}/>
-        <I label="Transport domicile-travail" value={form.commType} onChange={v=>setF({...form,commType:v})} options={[{v:"none",l:"Aucun"},{v:"train",l:"🚆 Train (SNCB)"},{v:"bus",l:"🚌 Bus/Tram/Métro (STIB/TEC/De Lijn)"},{v:"bike",l:"🚲 Vélo"},{v:"car",l:"🚗 Voiture privée"},{v:"carpool",l:"🚗 Covoiturage"},{v:"mixed",l:"🔄 Combiné (train+autre)"},{v:"company_car",l:"🏢 Voiture de société (pas d\'interv.)"}]}/>
+        <I label="Transport domicile-travail" value={form.commType} onChange={v=>setF({...form,commType:v})} options={[{v:"none",l:tText('Aucun')},{v:"train",l:"🚆 Train (SNCB)"},{v:"bus",l:"🚌 Bus/Tram/Métro (STIB/TEC/De Lijn)"},{v:"bike",l:"🚲 Vélo"},{v:"car",l:"🚗 Voiture privée"},{v:"carpool",l:"🚗 Covoiturage"},{v:"mixed",l:"🔄 Combiné (train+autre)"},{v:"company_car",l:"🏢 Voiture de société (pas d\'interv.)"}]}/>
         {form.commType!=='none'&&form.commType!=='company_car'&&<I label="Distance simple (km)" type="number" value={form.commDist} onChange={v=>setF({...form,commDist:v})}/>}
         {(form.commType==='train'||form.commType==='bus'||form.commType==='mixed')&&<I label="Abonnement mensuel (€)" type="number" value={form.commMonth} onChange={v=>setF({...form,commMonth:v})}/>}
       </div>
@@ -419,7 +419,7 @@ function Employees({s,d}) {
           {v:"",l:"— Sélectionner —"},...((CAR_MODELS[form.carBrand]||[]).map(m=>({v:m,l:m}))),{v:"_autre",l:"Autre modèle"}
         ]}/>
       </div>
-      <ST>Avantages en nature (ATN)</ST>
+      <ST>{tText('Avantages en nature (ATN)')}</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
         <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>📱 GSM/Téléphone (36€/an)</div>
           <div onClick={()=>setF({...form,atnGSM:!form.atnGSM})} style={{padding:'8px 12px',borderRadius:6,cursor:'pointer',fontSize:11,
@@ -474,7 +474,7 @@ function Employees({s,d}) {
       {form.veloSociete&&<div style={{marginTop:8,padding:10,background:"rgba(74,222,128,.04)",borderRadius:8,fontSize:10.5,color:'#4ade80',lineHeight:1.6}}>
         🚲 <b>Vélo de société</b> — ATN = 0€ (Art. 38§1er 14°a CIR — exonéré ONSS et IPP depuis 01/01/2024). Leasing vélo déductible 100% pour l'employeur. Cumulable avec l'indemnité vélo 0,27€/km. Le speed pedelec est assimilé à un vélo.
       </div>}
-      <ST>Moto de société (ATN)</ST>
+      <ST>{tText('Moto de société (ATN)')}</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
         <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>🏍 Moto de société</div>
           <div onClick={()=>setF({...form,motoSociete:!form.motoSociete})} style={{padding:'8px 12px',borderRadius:6,cursor:'pointer',fontSize:11,
@@ -489,7 +489,7 @@ function Employees({s,d}) {
         {form.motoSociete&&<I label="Modèle moto" value={form.motoModel||''} onChange={v=>setF({...form,motoModel:v})}/>}
       </div>
       {form.motoSociete&&<div style={{marginTop:8,padding:10,background:"rgba(251,146,60,.04)",borderRadius:8,fontSize:10.5,color:'#fb923c',lineHeight:1.6}}>
-        🏍 <b>Moto de société</b> — ATN = valeur catalogue × (6/7) × taux CO2 / 12. Même formule que la voiture (Art. 36 CIR 92). Cotisation CO2 patronale applicable. ATN imposable PP, non soumis ONSS.
+        🏍 <b>{tText('Moto de société')}</b> — ATN = valeur catalogue × (6/7) × taux CO2 / 12. Même formule que la voiture (Art. 36 CIR 92). Cotisation CO2 patronale applicable. ATN imposable PP, non soumis ONSS.
       </div>}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginTop:10}}>
         <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>⛽ Carte carburant / recharge</div>
@@ -508,7 +508,7 @@ function Employees({s,d}) {
         {form.borneRecharge&&<I label="Coût mensuel borne+élec (€)" type="number" value={form.borneRechargeCoût} onChange={v=>setF({...form,borneRechargeCoût:v})}/>}
       </div>
       {form.carteCarburant&&!form.carFuel!=='none'&&<div style={{marginTop:8,padding:10,background:"rgba(251,146,60,.04)",borderRadius:8,fontSize:10.5,color:'#fb923c',lineHeight:1.6}}>
-        ⚠ <b>Carte carburant sans voiture de société</b> — L'avantage est imposable à 100% (ATN = montant total de la carte). Si voiture de société: inclus dans l'ATN voiture (Art. 36§2 CIR).
+        ⚠ <b>{tText('Carte carburant sans voiture de société')}</b> — L'avantage est imposable à 100% (ATN = montant total de la carte). Si voiture de société: inclus dans l'ATN voiture (Art. 36§2 CIR).
       </div>}
       <ST>Travailleur frontalier (Règl. 883/2004)</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
@@ -527,7 +527,7 @@ function Employees({s,d}) {
             {form.frontalierA1?'✅ A1 en cours':"❌ Pas d'A1"}
           </div>
         </div>
-        <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>Exonération PP (ancien régime FR)</div>
+        <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>{tText('Exonération PP (ancien régime FR)')}</div>
           <div onClick={()=>setF({...form,frontalierExoPP:!form.frontalierExoPP})} style={{padding:'8px 12px',borderRadius:6,cursor:'pointer',fontSize:11,
             background:form.frontalierExoPP?'rgba(239,68,68,.12)':'rgba(198,163,78,.04)',color:form.frontalierExoPP?'#ef4444':'#5e5c56',border:'1px solid '+(form.frontalierExoPP?'rgba(239,68,68,.25)':'rgba(198,163,78,.1)'),textAlign:'center'}}>
             {form.frontalierExoPP?'✅ Exonéré PP (très rare)':'❌ PP retenu en Belgique (normal)'}
@@ -559,7 +559,7 @@ function Employees({s,d}) {
         <I label="Pension mensuelle (€)" type="number" value={form.pensionMontant} onChange={v=>setF({...form,pensionMontant:v})}/>
       </div>}
       {form.pensionné&&<div style={{marginTop:8,padding:10,background:"rgba(251,191,36,.04)",borderRadius:8,fontSize:10.5,color:'#fbbf24',lineHeight:1.7}}>
-        👴 <b>Cumul pension-travail</b><br/>
+        👴 <b>{tText('Cumul pension-travail')}</b><br/>
         {(form.pensionType==='legal'&&(form.pensionAge||0)>=66)||
          (form.pensionType==='anticipee'&&(form.pensionCarriere||0)>=45)||
          (form.pensionType==='survie'&&(form.pensionAge||0)>=65)
@@ -592,7 +592,7 @@ function Employees({s,d}) {
       </div>
       <div style={{display:'flex',gap:10,justifyContent:'flex-end',marginTop:20}}>
         <B v="outline" onClick={()=>{setF(null);setEd(false);}}>{tText('Annuler')}</B>
-        <B onClick={save}>{ed?'Mettre à jour':'Enregistrer'}</B>
+        <B onClick={save}>{ed?'Mettre à jour':tText('Enregistrer')}</B>
       </div>
     </C>}
     {/* GRID VIEW */}
@@ -616,8 +616,8 @@ function Employees({s,d}) {
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,fontSize:11}}>
             <div><span style={{color:'#5e5c56'}}>CP:</span> <span style={{color:'#d4d0c8'}}>{r.cp}</span></div>
             <div><span style={{color:'#5e5c56'}}>Contrat:</span> <span style={{color:'#d4d0c8'}}>{r.contract}</span></div>
-            <div><span style={{color:'#5e5c56'}}>Brut:</span> <span style={{color:'#c6a34e',fontWeight:600}}>{fmt(r.monthlySalary)}</span></div>
-            <div><span style={{color:'#5e5c56'}}>Net:</span> <span style={{color:'#4ade80',fontWeight:600}}>{fmt(p.net)}</span></div>
+            <div><span style={{color:'#5e5c56'}}>{tText('Brut:')}</span> <span style={{color:'#c6a34e',fontWeight:600}}>{fmt(r.monthlySalary)}</span></div>
+            <div><span style={{color:'#5e5c56'}}>{tText('Net:')}</span> <span style={{color:'#4ade80',fontWeight:600}}>{fmt(p.net)}</span></div>
           </div>
           <div style={{marginTop:10,display:'flex',gap:6,justifyContent:'flex-end'}}>
             <B v="ghost" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();setF({...r});setEd(true);}}>✎ Modifier</B>

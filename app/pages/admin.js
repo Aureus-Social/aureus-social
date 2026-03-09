@@ -7,7 +7,7 @@ import { LOIS_BELGES, LB, RMMMG, TX_ONSS_W, TX_ONSS_E, NET_FACTOR, PV_DOUBLE, PV
 const fmt = n => new Intl.NumberFormat('fr-BE', { style: 'currency', currency: 'EUR' }).format(n || 0);
 const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
-const AUREUS_INFO = { name: 'Aureus IA SPRL', vat: 'BE 1028.230.781', version: 'v38', sprint: 'Sprint 38' };
+const AUREUS_INFO = { name:tText('Aureus IA SPRL'), vat: 'BE 1028.230.781', version: 'v38', sprint: 'Sprint 38' };
 const LEGAL = { WD: 21.67, WHD: 7.6 };
 const DPER = { month: new Date().getMonth()+1, year: new Date().getFullYear(), days: 21.67 };
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
@@ -129,7 +129,7 @@ function AdminDashboard_Main({s,d}){
       </div>
       <div style={{display:'flex',gap:8,alignItems:'center'}}>
         <button onClick={loadData} style={{padding:'6px 14px',borderRadius:8,border:'1px solid rgba(198,163,78,.3)',background:'rgba(198,163,78,.08)',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:600}}>{t('admin.refresh')||'Rafraîchir'}</button>
-        <div style={{fontSize:10,color:loading?'#fb923c':'#4ade80'}}>● {loading?t('admin.loading')||'Chargement...':t('admin.connected')||'Connecté'}</div>
+        <div style={{fontSize:10,color:loading?'#fb923c':'#4ade80'}}>● {loading?t('admin.loading')||tText('Chargement...'):t('admin.connected')||tText('Connecté')}</div>
       </div>
     </div>
     
@@ -142,7 +142,7 @@ function AdminDashboard_Main({s,d}){
         <Stat icon="👤" label={t('admin.users_total')||'Utilisateurs total'} value={totalUsers} sub={`${activeUsers} ${t('admin.active')||'actifs'}`} color="#c6a34e"/>
         <Stat icon="🏢" label={t('admin.clients')||'Dossiers clients'} value={totalClients} sub={`${activeClients} actifs`} color="#60a5fa"/>
         <Stat icon="👥" label={t('admin.workers')||'Travailleurs'} value={totalTrav} sub={`${activeTrav} actifs`} color="#4ade80"/>
-        <Stat icon="📄" label={t('admin.payslips')||'Fiches de paie'} value={totalFiches} sub={`${fichesMois} ${t('admin.this_month')||'ce mois'}`} color="#a78bfa"/>
+        <Stat icon="📄" label={t('admin.payslips')||tText('Fiches de paie')} value={totalFiches} sub={`${fichesMois} ${t('admin.this_month')||'ce mois'}`} color="#a78bfa"/>
         <Stat icon="💰" label={t('admin.revenue')||'Revenu mensuel est.'} value={`€${revenuMensuelEstime.toLocaleString()}`} sub={`€${revenuAnnuelEstime.toLocaleString()}/an`} color="#c6a34e"/>
       </div>
 
@@ -154,10 +154,10 @@ function AdminDashboard_Main({s,d}){
       {/* Users table */}
       <div style={{background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)",overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'2fr 2fr 1fr 1fr 1.5fr 1.5fr 1fr',padding:'10px 14px',background:"rgba(198,163,78,.06)",borderBottom:'1px solid rgba(198,163,78,.1)',fontSize:10,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:.5}}>
-          <div>{t('ui.name')||'Nom'}</div><div>{t('ui.email')||'Email'}</div><div>{t('ui.role')||'Rôle'}</div><div>{t('ui.language')||'Langue'}</div><div>{t('ui.lastlogin')||'Dernière connexion'}</div><div>{t('ui.registration')||'Inscription'}</div><div>{t('ui.status')||'Statut'}</div>
+          <div>{t('ui.name')||tText('Nom')}</div><div>{t('ui.email')||tText('Email')}</div><div>{t('ui.role')||tText('Rôle')}</div><div>{t('ui.language')||'Langue'}</div><div>{t('ui.lastlogin')||'Dernière connexion'}</div><div>{t('ui.registration')||'Inscription'}</div><div>{t('ui.status')||tText('Statut')}</div>
         </div>
         {users.length===0?<div style={{padding:30,textAlign:'center',color:'#5e5c56',fontSize:12}}>
-          {loading?(t('admin.loading')||'Chargement...'):(t('admin.no_users')||'Aucun utilisateur inscrit.')}
+          {loading?(t('admin.loading')||tText('Chargement...')):(t('admin.no_users')||'Aucun utilisateur inscrit.')}
         </div>:
         users.filter(u=>{
           if(!search)return true;
@@ -176,7 +176,7 @@ function AdminDashboard_Main({s,d}){
             <div style={{color:'#9e9b93',fontSize:11}}>{(u.lang||'fr').toUpperCase()}</div>
             <div style={{color:'#9e9b93',fontSize:10.5}}>{timeAgo(u.last_login)}</div>
             <div style={{color:'#9e9b93',fontSize:10.5}}>{fDate(u.created_at)}</div>
-            <div><Badge text={u.active?(t('ui.active')||'Actif'):(t('ui.inactive')||'Inactif')} color={u.active?'#4ade80':'#f87171'}/></div>
+            <div><Badge text={u.active?(t('ui.active')||tText('Actif')):(t('ui.inactive')||tText('Inactif'))} color={u.active?'#4ade80':'#f87171'}/></div>
           </div>;
         })}
         
@@ -205,7 +205,7 @@ function AdminDashboard_Main({s,d}){
                   <div style={{fontSize:10,color:'#9e9b93'}}>ONSS: {c.onss||'-'}</div>
                   <div style={{fontSize:10,color:'#9e9b93'}}>CP: {c.cp_number||'-'}</div>
                   <div style={{fontSize:10,color:'#9e9b93'}}>{travParClient[c.id]||0} trav.</div>
-                  <Badge text={c.active?'Actif':'Inactif'} color={c.active?'#4ade80':'#f87171'}/>
+                  <Badge text={c.active?tText('Actif'):tText('Inactif')} color={c.active?'#4ade80':'#f87171'}/>
                 </div>)}
               </div>}
             </div>;
@@ -249,7 +249,7 @@ function AdminDashboard_Main({s,d}){
             <div style={{fontSize:10.5,color:'#9e9b93'}}>{c.secteur||'-'}</div>
             <div style={{fontWeight:600,color:nb>0?'#4ade80':'#5e5c56'}}>{nb}</div>
             <div style={{fontSize:10.5,color:'#9e9b93'}}>{fDate(c.created_at)}</div>
-            <div><Badge text={c.active?'Actif':'Inactif'} color={c.active?'#4ade80':'#f87171'}/></div>
+            <div><Badge text={c.active?tText('Actif'):tText('Inactif')} color={c.active?'#4ade80':'#f87171'}/></div>
           </div>;
         })}
       </div>
@@ -325,7 +325,7 @@ function AdminDashboard_Main({s,d}){
         <div style={{fontSize:12,fontWeight:600,color:'#c6a34e',marginBottom:10}}>💰 Projection revenus (modele €12/fiche/mois)</div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}}>
           {[
-            {l:'Actuel',users:totalUsers,trav:totalTrav},
+            {l:tText('Actuel'),users:totalUsers,trav:totalTrav},
             {l:'+3 mois',users:Math.ceil(totalUsers*1.5)||5,trav:Math.ceil(totalTrav*1.5)||50},
             {l:'+6 mois',users:Math.ceil(totalUsers*3)||15,trav:Math.ceil(totalTrav*3)||150},
             {l:'+12 mois',users:Math.ceil(totalUsers*8)||50,trav:Math.ceil(totalTrav*8)||500},
@@ -348,7 +348,7 @@ function AdminDashboard_Main({s,d}){
       
       <div style={{background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)",overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'1.5fr 1.5fr 2fr 2fr 2fr',padding:'10px 14px',background:"rgba(198,163,78,.06)",borderBottom:'1px solid rgba(198,163,78,.1)',fontSize:10,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:.5}}>
-          <div>{tText('Date')}</div><div>Utilisateur</div><div>Action</div><div>Table</div><div>Details</div>
+          <div>{tText('Date')}</div><div>Utilisateur</div><div>{tText('Action')}</div><div>Table</div><div>Details</div>
         </div>
         {audit.length===0?<div style={{padding:30,textAlign:'center',color:'#5e5c56',fontSize:12}}>
           Aucune entree dans le journal d'audit. Les actions seront enregistrees automatiquement.
@@ -612,7 +612,7 @@ function IntegrationsPage({s}) {
     {name:'ONSS / WIDE',icon:'🏛️',desc:'Déclarations sociales belges',status:'partial',detail:'Matricule provisoire 51357716-02 · validation en cours'},
     {name:'Dimona REST API',icon:'📤',desc:'Déclarations travailleurs',status:'simulation',detail:'Mode simulation — credentials prod à configurer'},
     {name:'DmfA / Belcotax',icon:'📊',desc:'Déclarations trimestrielles & fiches fiscales',status:'pending',detail:'XML généré — soumission manuelle'},
-    {name:'Activa.brussels',icon:'💼',desc:'Primes emploi bruxelloises',status:'active',detail:'Attestation N°829605 · deadline MonBEE 01/06/2026'},
+    {name:tText('Activa.brussels'),icon:'💼',desc:'Primes emploi bruxelloises',status:'active',detail:'Attestation N°829605 · deadline MonBEE 01/06/2026'},
     {name:'Peppol e-invoicing',icon:'📧',desc:'Facturation électronique',status:'active',detail:'ID: 0208:1028230781'},
     {name:'WinBooks / BOB / Exact',icon:'💹',desc:'Export comptable',status:'ready',detail:'6 formats disponibles — PCMN mappings Supabase'},
     {name:'SEPA XML',icon:'🏦',desc:'Virements salaires',status:'ready',detail:'Format ISO 20022 · pain.001.003.03'},

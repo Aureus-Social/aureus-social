@@ -27,16 +27,16 @@ function AuditSecuriteTab({s}) {
       { id:'data4', label:'Logs d\'accès aux données', status:'warning', detail:'Table audit_log à créer' },
     ]},
     { cat:'API & Réseau', items:[
-      { id:'api1', label:'HTTPS forcé (Vercel)', status:'ok', detail:'TLS 1.3 via Vercel Edge' },
-      { id:'api2', label:'CORS configuré', status:'ok', detail:'Next.js headers config en place' },
+      { id:'api1', label:tText('HTTPS forcé (Vercel)'), status:'ok', detail:'TLS 1.3 via Vercel Edge' },
+      { id:'api2', label:tText('CORS configuré'), status:'ok', detail:'Next.js headers config en place' },
       { id:'api3', label:'Rate limiting API', status:'error', detail:'Aucun rate limit sur /api/* — risque DDoS' },
       { id:'api4', label:'Validation input server-side', status:'warning', detail:'Zod schemas à ajouter sur les routes API' },
     ]},
     { cat:'Code', items:[
       { id:'code1', label:'eval() supprimé', status:'error', detail:'4 occurrences détectées — XSS critique' },
-      { id:'code2', label:'Dépendances auditées (npm audit)', status:'warning', detail:'Lancer npm audit avant production' },
+      { id:'code2', label:tText('Dépendances auditées (npm audit)'), status:'warning', detail:'Lancer npm audit avant production' },
       { id:'code3', label:'Variables d\'env sécurisées', status:'ok', detail:'NEXT_PUBLIC_ uniquement pour le client' },
-      { id:'code4', label:'Error boundaries en place', status:'ok', detail:'ErrorBoundary dans layout-client.js' },
+      { id:'code4', label:tText('Error boundaries en place'), status:'ok', detail:'ErrorBoundary dans layout-client.js' },
     ]},
   ];
 
@@ -91,7 +91,7 @@ function AuditTrailTab({s}) {
     {type:'auth',icon:'❌',user:'unknown@test.com',action:'Tentative de connexion échouée',ip:'185.220.xx.xx',ts:new Date(now-172800000)},
   ];
 
-  const types = [{v:'all',l:'Tous'},{v:'auth',l:'Auth'},{v:'data',l:'Données'},{v:'payroll',l:'Paie'},{v:'dimona',l:'Dimona'},{v:'export',l:'Exports'},{v:'admin',l:'Admin'}];
+  const types = [{v:'all',l:tText('Tous')},{v:'auth',l:'Auth'},{v:'data',l:'Données'},{v:'payroll',l:'Paie'},{v:'dimona',l:'Dimona'},{v:'export',l:'Exports'},{v:'admin',l:tText('Admin')}];
   const filtered = filter==='all' ? events : events.filter(e=>e.type===filter);
   const typeColor = t => ({auth:BLUE,data:GOLD,payroll:GREEN,dimona:ORANGE,export:'#a855f7',admin:'#6366f1'}[t]||'#888');
 
@@ -127,15 +127,15 @@ function AuditTrailTab({s}) {
 // ════════════════════════════
 function AuditFiscalTab({s}) {
   const items = [
-    {ref:'ART.315 CIR92',label:'Conservation documents fiscaux',detail:'7 ans minimum — fiches de paie, fiches fiscales 281.10',status:'ok'},
-    {ref:'ART.315bis CIR92',label:'Documents électroniques acceptés',detail:'PDF signés numériquement valables si intégrité garantie',status:'ok'},
-    {ref:'ART.57 CIR92',label:'Dépenses professionnelles documentées',detail:'Frais propres forfaitaires — justificatifs requis si dépassement',status:'warning'},
+    {ref:'ART.315 CIR92',label:tText('Conservation documents fiscaux'),detail:'7 ans minimum — fiches de paie, fiches fiscales 281.10',status:'ok'},
+    {ref:'ART.315bis CIR92',label:tText('Documents électroniques acceptés'),detail:'PDF signés numériquement valables si intégrité garantie',status:'ok'},
+    {ref:'ART.57 CIR92',label:tText('Dépenses professionnelles documentées'),detail:'Frais propres forfaitaires — justificatifs requis si dépassement',status:'warning'},
     {ref:'ART.274 CIR92',label:'Précompte professionnel (274.10)',detail:'Versement mensuel SPF Finances avant le 15 du mois suivant',status:'ok'},
-    {ref:'LOIS 27/06/1969',label:'Déclaration ONSS trimestrielle (DmfA)',detail:'T1/2026 — deadline 30/04/2026',status:'warning'},
+    {ref:'LOIS 27/06/1969',label:tText('Déclaration ONSS trimestrielle (DmfA)'),detail:'T1/2026 — deadline 30/04/2026',status:'warning'},
     {ref:'AR 28/11/1969',label:'Dimona — déclaration immédiate',detail:'Avant la mise au travail — pénalité €1,800 par travailleur',status:'ok'},
     {ref:'CCT 90',label:'Plan de bonus — objectifs chiffrés',detail:'Dépôt au SPF ETCS avant le début de la période',status:'warning'},
     {ref:'RGPD Art.30',label:'Registre des activités de traitement',detail:'Tenu et disponible pour inspection APD',status:'ok'},
-    {ref:'RGPD Art.28',label:'DPA avec sous-traitants (Supabase, Vercel)',detail:'Contrats DPA signés — conservation obligatoire',status:'ok'},
+    {ref:'RGPD Art.28',label:tText('DPA avec sous-traitants (Supabase, Vercel)'),detail:'Contrats DPA signés — conservation obligatoire',status:'ok'},
     {ref:'CODE PÉNAL SOCIAL',label:'Infractions sociales — conservation 5 ans',detail:'Dimona, DmfA, contrats, règlement de travail',status:'ok'},
   ];
 
@@ -187,7 +187,7 @@ function TestSuiteTab({s}) {
     { id:'t7', suite:'UI', label:'Composant I (Input) — rendu correct', fn: () => {
       return {ok:true,val:'Input avec label, value, onChange OK'};
     }},
-    { id:'t8', suite:'UI', label:'Helpers — 50+ exports disponibles', fn: () => {
+    { id:'t8', suite:'UI', label:tText('Helpers — 50+ exports disponibles'), fn: () => {
       return {ok:true,val:'C,B,I,ST,PH,Tbl,fmt,calc,quickPP... OK'};
     }},
     { id:'t9', suite:'Legal', label:'TX_ONSS_W 2026 = 13.07%', fn: () => {
@@ -196,10 +196,10 @@ function TestSuiteTab({s}) {
     { id:'t10', suite:'Legal', label:'PP barème 2026 — tranche 1 correcte', fn: () => {
       return {ok:true,val:'Exonération < 1110€ imposable OK'};
     }},
-    { id:'t11', suite:'Sécurité', label:'Aucune clé API exposée côté client', fn: () => {
+    { id:'t11', suite:'Sécurité', label:tText('Aucune clé API exposée côté client'), fn: () => {
       return {ok:true,val:'NEXT_PUBLIC_ uniquement'};
     }},
-    { id:'t12', suite:'Sécurité', label:'ErrorBoundary — crash isolé par module', fn: () => {
+    { id:'t12', suite:'Sécurité', label:tText('ErrorBoundary — crash isolé par module'), fn: () => {
       return {ok:true,val:'ErrorBoundary avec pageKey reset OK'};
     }},
   ];
@@ -260,7 +260,7 @@ export default function AuditSecuriteCode({s, d, tab: props_tab}) {
   const [tab, setTab] = useState(TAB_MAP[props_tab] || 'securite');
 
   const tabs = [
-    {id:'securite', label:'🛡 Sécurité Code', subtitle:'Audit OWASP'},
+    {id:'securite', label:'🛡 Sécurité Code', subtitle:tText('Audit OWASP')},
     {id:'trail', label:'🔍 Audit Trail', subtitle:'Historique accès'},
     {id:'fiscal', label:'📋 Piste Audit SPF', subtitle:'Obligations légales'},
     {id:'tests', label:'🧪 Test Suite', subtitle:'Tests unitaires'},

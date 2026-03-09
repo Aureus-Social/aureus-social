@@ -48,7 +48,7 @@ export function usePortalMode(initialPortalTab) {
 // ── Portal Configuration ──
 export const PORTAL_CONFIG = {
   admin: {
-    label: 'Administration',
+    label:tText('Administration'),
     subtitle: 'SECRÉTARIAT SOCIAL',
     icon: '👑',
     color: GOLD,
@@ -102,9 +102,9 @@ export const CLIENT_NAV = [
   {id:"echeancier",l:"Échéancier",i:'📆'},
   
   {id:"_gc3",l:"GESTION RH",grp:true},
-  {id:"contratsmenu",l:"Contrats",i:'📝',sub:[{id:"contrats",l:"📝 Contrats"},{id:"contratgen",l:"📝 Générer Contrat"}]},
+  {id:"contratsmenu",l:tText('Contrats'),i:'📝',sub:[{id:"contrats",l:"📝 Contrats"},{id:"contratgen",l:"📝 Générer Contrat"}]},
   {id:"rh",l:"Absences & Congés",i:'🏖',sub:[{id:"gestionabs",l:"🗓 Absences"},{id:"planifconges",l:"📅 Planning Congés"}]},
-  {id:"formationsuivi",l:"Formations",i:'🎓'},
+  {id:"formationsuivi",l:tText('Formations'),i:'🎓'},
   
   {id:"_gc4",l:"DOCUMENTS",grp:true},
   {id:"ged",l:"Documents (GED)",i:'📁'},
@@ -117,7 +117,7 @@ export const EMPLOYEE_NAV = [
   {id:"_ge1",l:"MON ESPACE",grp:true},
   {id:"emp_dashboard",l:"Mon Tableau de Bord",i:'◫'},
   {id:"emp_payslips",l:"Mes Fiches de Paie",i:'◈'},
-  {id:"emp_leave",l:"Congés & Absences",i:'🏖'},
+  {id:"emp_leave",l:tText('Congés & Absences'),i:'🏖'},
 
   {id:"_ge2",l:"MES DOCUMENTS",grp:true},
   {id:"emp_documents",l:"Mes Documents",i:'📁'},
@@ -140,9 +140,9 @@ export function EmployeeDashboard({s, d, employee}) {
   const cs = {padding:'20px',borderRadius:'14px',border:'1px solid rgba(59,130,246,.06)',background:'rgba(255,255,255,.01)'};
   const stats = [
     {l:'Solde Congés',v: emp.congesRestants || '20',u:'jours',c:BLUE,i:'🏖'},
-    {l:'Ancienneté',v: emp.anciennete || '2 ans',u:'',c:GREEN,i:'📅'},
+    {l:tText('Ancienneté'),v: emp.anciennete || '2 ans',u:'',c:GREEN,i:'📅'},
     {l:'Dernier Net',v: lastPay ? `€${lastPay.net?.toFixed(2)}` : '—',u:'',c:GOLD,i:'💶'},
-    {l:'Documents',v: '12',u:'fichiers',c:PURPLE,i:'📁'},
+    {l:tText('Documents'),v: '12',u:'fichiers',c:PURPLE,i:'📁'},
   ];
 
   return React.createElement('div',{style:{maxWidth:960,margin:'0 auto'}},
@@ -166,7 +166,7 @@ export function EmployeeDashboard({s, d, employee}) {
     
     // Quick actions
     React.createElement('div',{style:{...cs,marginBottom:24}},
-      React.createElement('div',{style:{fontSize:11,color:'#555',letterSpacing:'1.5px',textTransform:'uppercase',marginBottom:16}},'Actions rapides'),
+      React.createElement('div',{style:{fontSize:11,color:'#555',letterSpacing:'1.5px',textTransform:'uppercase',marginBottom:16}},tText('Actions rapides')),
       React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}},
         [{i:'📄',l:'Dernière fiche',a:'emp_payslips',c:'rgba(198,163,78,.08)',bc:'rgba(198,163,78,.12)'},
          {i:'🏖',l:'Demander un congé',a:'emp_leave',c:'rgba(59,130,246,.08)',bc:'rgba(59,130,246,.12)'},
@@ -273,16 +273,16 @@ export function EmployeeLeave({s, d, employee}) {
   const soldes = [
     {l:'Congés annuels',total:20,pris:8,c:BLUE,i:'🏖'},
     {l:'Récupération',total:6,pris:2,c:GREEN,i:'🔄'},
-    {l:'Maladie',total:'-',pris:3,c:RED,i:'🏥'},
+    {l:tText('Maladie'),total:'-',pris:3,c:RED,i:'🏥'},
     {l:'Formation',total:5,pris:1,c:PURPLE,i:'🎓'},
   ];
 
-  const typeLabels={annuel:'Congé annuel',recup:'Récupération',formation:'Formation',sans_solde:'Sans solde'};
+  const typeLabels={annuel:tText('Congé annuel'),recup:'Récupération',formation:'Formation',sans_solde:'Sans solde'};
 
   const [demandes, setDemandes] = useState([
-    {id:1,type:'Congé annuel',debut:'2026-03-15',fin:'2026-03-19',jours:5,status:'approuvé',by:'Marie D.'},
+    {id:1,type:tText('Congé annuel'),debut:'2026-03-15',fin:'2026-03-19',jours:5,status:'approuvé',by:'Marie D.'},
     {id:2,type:'Récupération',debut:'2026-02-14',fin:'2026-02-14',jours:1,status:'approuvé',by:'Marie D.'},
-    {id:3,type:'Congé annuel',debut:'2026-04-21',fin:'2026-04-25',jours:5,status:'en_attente',by:null},
+    {id:3,type:tText('Congé annuel'),debut:'2026-04-21',fin:'2026-04-25',jours:5,status:'en_attente',by:null},
   ]);
 
   const submitLeave=()=>{
@@ -305,7 +305,7 @@ export function EmployeeLeave({s, d, employee}) {
 
   return React.createElement('div',{style:{maxWidth:960,margin:'0 auto'}},
     React.createElement('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}},
-      React.createElement('div',{style:{fontSize:22,fontWeight:300,color:'#e5e5e5'}},'Congés & Absences'),
+      React.createElement('div',{style:{fontSize:22,fontWeight:300,color:'#e5e5e5'}},tText('Congés & Absences')),
       React.createElement('button',{onClick:()=>setShowForm(!showForm),
         style:{padding:'10px 20px',borderRadius:10,border:'none',background:'linear-gradient(135deg,#3b82f6,#2563eb)',color:'#fff',fontWeight:600,fontSize:12,cursor:'pointer',fontFamily:'inherit'}},
         showForm ? '✕ Annuler' : '+ Nouvelle demande')
@@ -316,10 +316,10 @@ export function EmployeeLeave({s, d, employee}) {
       React.createElement('div',{style:{fontSize:14,fontWeight:600,color:BLUE,marginBottom:16}},'📝 Nouvelle demande de congé'),
       React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}},
         React.createElement('div',null,
-          React.createElement('label',{style:{display:'block',fontSize:10,color:'#888',marginBottom:4}},'Type'),
+          React.createElement('label',{style:{display:'block',fontSize:10,color:'#888',marginBottom:4}},tText('Type')),
           React.createElement('select',{value:form.type,onChange:e=>setForm({...form,type:e.target.value}),
             style:{width:'100%',padding:'8px',borderRadius:8,border:'1px solid rgba(59,130,246,.15)',background:'rgba(0,0,0,.2)',color:'#e5e5e5',fontSize:12,fontFamily:'inherit'}},
-            React.createElement('option',{value:'annuel'},'Congé annuel'),
+            React.createElement('option',{value:'annuel'},tText('Congé annuel')),
             React.createElement('option',{value:'recup'},'Récupération'),
             React.createElement('option',{value:'formation'},'Formation'),
             React.createElement('option',{value:'sans_solde'},'Sans solde')
@@ -369,7 +369,7 @@ export function EmployeeLeave({s, d, employee}) {
     tab==='demandes' && React.createElement('div',{style:cs},
       React.createElement('table',{style:{width:'100%',borderCollapse:'collapse'}},
         React.createElement('thead',null,React.createElement('tr',{style:{borderBottom:'1px solid rgba(59,130,246,.08)'}},
-          ['Type','Début','Fin','Jours','Statut','Validé par'].map((h,i) =>
+          [tText('Type'),tText('Début'),'Fin','Jours',tText('Statut'),'Validé par'].map((h,i) =>
             React.createElement('th',{key:i,style:{padding:'10px 12px',textAlign:'left',fontSize:10,color:BLUE,letterSpacing:'1px',textTransform:'uppercase'}},h))
         )),
         React.createElement('tbody',null,demandes.map((r,i) =>
@@ -407,7 +407,7 @@ export function EmployeeLeave({s, d, employee}) {
         })
       ),
       React.createElement('div',{style:{display:'flex',gap:16,marginTop:16,justifyContent:'center'}},
-        [{c:GREEN,l:'Approuvé'},{c:'#eab308',l:'En attente'},{c:RED,l:'Refusé'}].map(x=>
+        [{c:GREEN,l:'Approuvé'},{c:'#eab308',l:tText('En attente')},{c:RED,l:'Refusé'}].map(x=>
           React.createElement('div',{key:x.l,style:{display:'flex',alignItems:'center',gap:4,fontSize:10}},
             React.createElement('div',{style:{width:10,height:10,borderRadius:3,background:x.c}}),
             React.createElement('span',{style:{color:'#888'}},x.l)
@@ -425,13 +425,13 @@ export function EmployeeDocuments({s, d, employee}) {
   const emp = employee || s.emps?.[0] || {};
   
   const docs = [
-    {id:1,name:'Contrat de travail',cat:'Contrat',date:'2024-01-15',size:'245 Ko',i:'📝'},
+    {id:1,name:tText('Contrat de travail'),cat:'Contrat',date:'2024-01-15',size:'245 Ko',i:'📝'},
     {id:2,name:'Avenant salaire 2025',cat:'Contrat',date:'2025-01-01',size:'128 Ko',i:'📝'},
     {id:3,name:'Fiche paie Janvier 2026',cat:'Paie',date:'2026-01-31',size:'89 Ko',i:'💶'},
     {id:4,name:'Fiche paie Février 2026',cat:'Paie',date:'2026-02-28',size:'91 Ko',i:'💶'},
     {id:5,name:'Attestation de travail',cat:'Administratif',date:'2025-06-15',size:'56 Ko',i:'📄'},
     {id:6,name:'Fiche 281.10 (2025)',cat:'Fiscal',date:'2026-02-15',size:'134 Ko',i:'💰'},
-    {id:7,name:'Règlement de travail',cat:'Entreprise',date:'2024-01-01',size:'890 Ko',i:'📋'},
+    {id:7,name:tText('Règlement de travail'),cat:'Entreprise',date:'2024-01-01',size:'890 Ko',i:'📋'},
     {id:8,name:'Convention CCT',cat:'Entreprise',date:'2024-03-01',size:'456 Ko',i:'⚖️'},
     {id:9,name:'Attestation médecine du travail',cat:'Santé',date:'2025-09-20',size:'78 Ko',i:'🏥'},
     {id:10,name:'Certificat formation sécurité',cat:'Formation',date:'2025-11-10',size:'112 Ko',i:'🎓'},
@@ -450,7 +450,7 @@ export function EmployeeDocuments({s, d, employee}) {
         React.createElement('div',{style:{fontSize:12,color:'#888',marginTop:4}},`${docs.length} documents disponibles`)
       ),
       React.createElement('div',{style:{display:'flex',gap:6,flexWrap:'wrap'}},
-        [{id:'all',l:'Tous'},...cats.map(c=>({id:c,l:c}))].map(f =>
+        [{id:'all',l:tText('Tous')},...cats.map(c=>({id:c,l:c}))].map(f =>
           React.createElement('button',{key:f.id,onClick:()=>setFilter(f.id),
             style:{padding:'5px 12px',borderRadius:6,border:filter===f.id?'1px solid rgba(59,130,246,.3)':'1px solid rgba(255,255,255,.06)',
               background:filter===f.id?'rgba(59,130,246,.12)':'transparent',color:filter===f.id?BLUE:'#666',fontSize:10,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}},f.l))
@@ -459,7 +459,7 @@ export function EmployeeDocuments({s, d, employee}) {
     React.createElement('div',{style:cs},
       React.createElement('table',{style:{width:'100%',borderCollapse:'collapse'}},
         React.createElement('thead',null,React.createElement('tr',{style:{borderBottom:'1px solid rgba(59,130,246,.08)'}},
-          ['','Document','Catégorie','Date','Taille',''].map((h,i) =>
+          ['','Document','Catégorie',tText('Date'),'Taille',''].map((h,i) =>
             React.createElement('th',{key:i,style:{padding:'10px 12px',textAlign:'left',fontSize:10,color:BLUE,letterSpacing:'1px',textTransform:'uppercase'}},h))
         )),
         React.createElement('tbody',null,filtered.map((doc,i) =>
@@ -491,19 +491,19 @@ export function EmployeeProfile({s, d, employee}) {
   const cs = {padding:'20px',borderRadius:'14px',border:'1px solid rgba(59,130,246,.06)',background:'rgba(255,255,255,.01)'};
   
   const fields = [
-    {section:'Identité',items:[
-      {l:'Nom',v:emp.nom||'—'},{l:'Prénom',v:emp.prenom||'—'},
-      {l:'NISS',v:emp.niss||'XX.XX.XX-XXX.XX'},{l:'Date de naissance',v:emp.dateNaissance||'—'},
-      {l:'Nationalité',v:emp.nationalite||'Belge'},{l:'État civil',v:emp.etatCivil||'—'}
+    {section:tText('Identité'),items:[
+      {l:tText('Nom'),v:emp.nom||'—'},{l:tText('Prénom'),v:emp.prenom||'—'},
+      {l:'NISS',v:emp.niss||'XX.XX.XX-XXX.XX'},{l:tText('Date de naissance'),v:emp.dateNaissance||'—'},
+      {l:tText('Nationalité'),v:emp.nationalite||'Belge'},{l:'État civil',v:emp.etatCivil||'—'}
     ]},
     {section:'Contrat',items:[
-      {l:'Type de contrat',v:emp.typeContrat||'CDI'},{l:'Fonction',v:emp.fonction||'—'},
-      {l:'Date d\'entrée',v:emp.dateEntree||'—'},{l:'Commission paritaire',v:co.cp?`CP ${co.cp}`:'—'},
+      {l:tText('Type de contrat'),v:emp.typeContrat||'CDI'},{l:'Fonction',v:emp.fonction||'—'},
+      {l:'Date d\'entrée',v:emp.dateEntree||'—'},{l:tText('Commission paritaire'),v:co.cp?`CP ${co.cp}`:'—'},
       {l:'Régime horaire',v:emp.regime||'Temps plein'},{l:'Catégorie',v:emp.categorie||'Employé'}
     ]},
     {section:'Coordonnées',items:[
-      {l:'Adresse',v:emp.adresse||'—'},{l:'Email',v:emp.email||'—'},
-      {l:'Téléphone',v:emp.tel||'—'},{l:'Personne de contact urgence',v:emp.contactUrgence||'—'}
+      {l:tText('Adresse'),v:emp.adresse||'—'},{l:tText('Email'),v:emp.email||'—'},
+      {l:tText('Téléphone'),v:emp.tel||'—'},{l:'Personne de contact urgence',v:emp.contactUrgence||'—'}
     ]},
     {section:'Bancaire',items:[
       {l:'IBAN',v:emp.iban?emp.iban.substring(0,8)+'••••••••••':'—'},{l:'BIC',v:emp.bic||'—'}
@@ -587,7 +587,7 @@ export function EmployeeTimesheet({s, d, employee}) {
     
     // Summary KPIs
     React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:20},className:'aureus-kpi-grid'},
-      [{l:'Heures prestées',v:`${totalH.toFixed(1)}h`,c:BLUE},{l:'Jours ouvrés',v:days.filter(d=>!d.isWE).length,c:GREEN},{l:'Heures supplémentaires',v:'0h',c:GOLD},{l:'Régime',v:'38h/sem',c:PURPLE}].map((k,i) =>
+      [{l:'Heures prestées',v:`${totalH.toFixed(1)}h`,c:BLUE},{l:'Jours ouvrés',v:days.filter(d=>!d.isWE).length,c:GREEN},{l:'Heures supplémentaires',v:'0h',c:GOLD},{l:tText('Régime'),v:'38h/sem',c:PURPLE}].map((k,i) =>
         React.createElement('div',{key:i,style:cs},
           React.createElement('div',{style:{fontSize:10,color:'#555',letterSpacing:'1.5px',textTransform:'uppercase',marginBottom:6}},k.l),
           React.createElement('div',{style:{fontSize:20,fontWeight:300,color:k.c}},k.v)
@@ -598,7 +598,7 @@ export function EmployeeTimesheet({s, d, employee}) {
     React.createElement('div',{style:cs},
       React.createElement('table',{style:{width:'100%',borderCollapse:'collapse'}},
         React.createElement('thead',null,React.createElement('tr',{style:{borderBottom:'1px solid rgba(59,130,246,.08)'}},
-          ['Date','Jour','Début','Fin','Pause','Heures'].map((h,i) =>
+          [tText('Date'),tText('Jour'),tText('Début'),'Fin','Pause','Heures'].map((h,i) =>
             React.createElement('th',{key:i,style:{padding:'8px 12px',textAlign:'left',fontSize:10,color:BLUE,letterSpacing:'1px',textTransform:'uppercase'}},h))
         )),
         React.createElement('tbody',null,days.slice(0,28).map((r,i) =>
@@ -714,12 +714,12 @@ export function ClientDashboard({s, d}) {
     
     // Quick actions
     React.createElement('div',{style:{...cs,marginBottom:24}},
-      React.createElement('div',{style:{fontSize:11,color:'#555',letterSpacing:'1.5px',textTransform:'uppercase',marginBottom:16}},'Accès rapide'),
+      React.createElement('div',{style:{fontSize:11,color:'#555',letterSpacing:'1.5px',textTransform:'uppercase',marginBottom:16}},tText('Accès rapide')),
       React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}},
         [{i:'👥',l:'Travailleurs',a:'employees',c:'rgba(34,197,94,.08)',bc:'rgba(34,197,94,.12)'},
-         {i:'◈',l:'Fiches de paie',a:'payslip',c:'rgba(198,163,78,.08)',bc:'rgba(198,163,78,.12)'},
+         {i:'◈',l:tText('Fiches de paie'),a:'payslip',c:'rgba(198,163,78,.08)',bc:'rgba(198,163,78,.12)'},
          {i:'🏛',l:'Déclarations ONSS',a:'onss',c:'rgba(59,130,246,.08)',bc:'rgba(59,130,246,.12)'},
-         {i:'📁',l:'Documents',a:'ged',c:'rgba(168,85,247,.08)',bc:'rgba(168,85,247,.12)'}
+         {i:'📁',l:tText('Documents'),a:'ged',c:'rgba(168,85,247,.08)',bc:'rgba(168,85,247,.12)'}
         ].map((a,i) => React.createElement('button',{key:i,onClick:()=>d({type:'NAV',page:a.a}),
           style:{padding:16,borderRadius:12,border:'1px solid '+a.bc,background:a.c,cursor:'pointer',textAlign:'center',fontFamily:'inherit',transition:'all .2s'}},
           React.createElement('div',{style:{fontSize:24,marginBottom:6}},a.i),
@@ -797,7 +797,7 @@ export function ClientFactures({s}) {
     React.createElement('div',{style:cs},
       React.createElement('table',{style:{width:'100%',borderCollapse:'collapse'}},
         React.createElement('thead',null,React.createElement('tr',{style:{borderBottom:'1px solid rgba(34,197,94,.08)'}},
-          ['Référence','Description','Date','Montant','Statut',''].map((h,i) =>
+          [tText('Référence'),tText('Description'),tText('Date'),tText('Montant'),tText('Statut'),''].map((h,i) =>
             React.createElement('th',{key:i,style:{padding:'10px 12px',textAlign:'left',fontSize:10,color:GREEN,letterSpacing:'1px',textTransform:'uppercase'}},h))
         )),
         React.createElement('tbody',null,factures.map((f,i) =>
@@ -903,7 +903,7 @@ function PortalSystemPage({ s, d, tab: initialPortalTab }) {
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
         <div>
           <div style={{ fontSize:18, fontWeight:800, color:GOLD }}>🏛️ Gestion des Portails</div>
-          <div style={{ fontSize:11, color:'#5e5c56', marginTop:2 }}>{cfg?.label || 'Admin'} — Aureus Social Pro</div>
+          <div style={{ fontSize:11, color:'#5e5c56', marginTop:2 }}>{cfg?.label || tText('Admin')} — Aureus Social Pro</div>
         </div>
         <PortalSwitcher portal={portal} switchPortal={switchPortal} userRole="admin" />
       </div>
