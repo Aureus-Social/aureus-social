@@ -363,7 +363,7 @@ const DRS_DOCS={
     {code:'C4-P',l:"C4 DRS (papier)",f:['motif']},
     {code:'C4-RCC-P',l:"C4 DRS-RCC (papier)",f:['motif']},
     {code:'ATT-PV',l:"Attestation Pécules de vacances",f:['annee',"simple","double"]},
-    {code:'ATT-TRAV',l:"Attestation de travail",f:['debut',"fin","fonction"]},
+    {code:'ATT-TRAV',l:tText('Attestation de travail'),f:['debut',"fin","fonction"]},
     {code:'ATT-276',l:"Attestation 276 frontaliers",f:['pays',"annee"]},
   ],
 };

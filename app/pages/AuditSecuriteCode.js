@@ -22,7 +22,7 @@ function AuditSecuriteTab({s}) {
     ]},
     { cat:'Données sensibles', items:[
       { id:'data1', label:'NISS chiffré en base', status:'error', detail:'AES-256 non implémenté — obligation RGPD Art.32' },
-      { id:'data2', label:'IBAN masqué dans les vues', status:'warning', detail:'Afficher BE76 **** **** 3456 uniquement' },
+      { id:'data2', label:tText('IBAN masqué dans les vues'), status:'warning', detail:'Afficher BE76 **** **** 3456 uniquement' },
       { id:'data3', label:'RLS Supabase (multi-tenant)', status:'error', detail:'Row Level Security non configuré — isolation des données clients' },
       { id:'data4', label:'Logs d\'accès aux données', status:'warning', detail:'Table audit_log à créer' },
     ]},
@@ -52,7 +52,7 @@ function AuditSecuriteTab({s}) {
   return <div>
     <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:20}}>
       {[{l:'Score sécurité',v:score+'%',c:score>=70?GREEN:score>=40?ORANGE:RED},
-        {l:'Contrôles OK',v:ok,c:GREEN},{l:'Avertissements',v:warn,c:ORANGE},{l:'Critiques',v:err,c:RED}
+        {l:tText('Contrôles OK'),v:ok,c:GREEN},{l:tText('Avertissements'),v:warn,c:ORANGE},{l:tText('Critiques'),v:err,c:RED}
       ].map((k,i)=><div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.03)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
         <div style={{fontSize:9,color:'#5e5c56',textTransform:'uppercase',marginBottom:6}}>{k.l}</div>
         <div style={{fontSize:22,fontWeight:800,color:k.c}}>{k.v}</div>
@@ -91,7 +91,7 @@ function AuditTrailTab({s}) {
     {type:'auth',icon:'❌',user:'unknown@test.com',action:'Tentative de connexion échouée',ip:'185.220.xx.xx',ts:new Date(now-172800000)},
   ];
 
-  const types = [{v:'all',l:tText('Tous')},{v:'auth',l:'Auth'},{v:'data',l:'Données'},{v:'payroll',l:'Paie'},{v:'dimona',l:'Dimona'},{v:'export',l:'Exports'},{v:'admin',l:tText('Admin')}];
+  const types = [{v:'all',l:tText('Tous')},{v:'auth',l:tText('Auth')},{v:'data',l:tText('Données')},{v:'payroll',l:'Paie'},{v:'dimona',l:'Dimona'},{v:'export',l:tText('Exports')},{v:'admin',l:tText('Admin')}];
   const filtered = filter==='all' ? events : events.filter(e=>e.type===filter);
   const typeColor = t => ({auth:BLUE,data:GOLD,payroll:GREEN,dimona:ORANGE,export:'#a855f7',admin:'#6366f1'}[t]||'#888');
 
@@ -136,7 +136,7 @@ function AuditFiscalTab({s}) {
     {ref:'CCT 90',label:'Plan de bonus — objectifs chiffrés',detail:'Dépôt au SPF ETCS avant le début de la période',status:'warning'},
     {ref:'RGPD Art.30',label:'Registre des activités de traitement',detail:'Tenu et disponible pour inspection APD',status:'ok'},
     {ref:'RGPD Art.28',label:tText('DPA avec sous-traitants (Supabase, Vercel)'),detail:'Contrats DPA signés — conservation obligatoire',status:'ok'},
-    {ref:'CODE PÉNAL SOCIAL',label:'Infractions sociales — conservation 5 ans',detail:'Dimona, DmfA, contrats, règlement de travail',status:'ok'},
+    {ref:'CODE PÉNAL SOCIAL',label:tText('Infractions sociales — conservation 5 ans'),detail:'Dimona, DmfA, contrats, règlement de travail',status:'ok'},
   ];
 
   const col = s => s==='ok'?GREEN:s==='warning'?ORANGE:RED;

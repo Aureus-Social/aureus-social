@@ -36,10 +36,10 @@ export function ValidationPrePaieV2({s,d}){
     r.push({id:'rmmmg',cat:'Remuneration',title:'RMMMG respecte ('+fmt(RMMMG)+' EUR)',desc:'Salaire minimum garanti',pass:underRMMMG.length===0,count:n-underRMMMG.length,total:n,sev:underRMMMG.length>0?'critical':'ok',items:underRMMMG.map(e=>e.first+' '+e.last+': '+fmt(+(e.monthlySalary||e.gross||0))+' EUR')});
     // 5. Date debut
     const noStart=allEmps.filter(e=>!e.startDate&&!e.start);
-    r.push({id:'debut',cat:'Contrat',title:'Dates debut renseignees',desc:'Anciennete calculable',pass:noStart.length===0,count:n-noStart.length,total:n,sev:noStart.length>0?'high':'ok',items:noStart.map(e=>e.first+' '+e.last)});
+    r.push({id:'debut',cat:tText('Contrat'),title:'Dates debut renseignees',desc:'Anciennete calculable',pass:noStart.length===0,count:n-noStart.length,total:n,sev:noStart.length>0?'high':'ok',items:noStart.map(e=>e.first+' '+e.last)});
     // 6. CDD echeance
     const cddExpiring=allEmps.filter(e=>{if((e.contractType||'').toUpperCase()!=='CDD')return false;const end=new Date(e.endDate||e.end||'2099-12-31');return Math.ceil((end-now)/86400000)<=30;});
-    r.push({id:'cdd',cat:'Contrat',title:'CDD a echeance (<30j)',desc:'Renouvellement ou fin',pass:cddExpiring.length===0,count:cddExpiring.length,total:allEmps.filter(e=>(e.contractType||'').toUpperCase()==='CDD').length,sev:cddExpiring.length>0?'high':'ok',items:cddExpiring.map(e=>{const end=new Date(e.endDate||e.end);return e.first+' '+e.last+': fin '+end.toLocaleDateString('fr-BE');})});
+    r.push({id:'cdd',cat:tText('Contrat'),title:'CDD a echeance (<30j)',desc:'Renouvellement ou fin',pass:cddExpiring.length===0,count:cddExpiring.length,total:allEmps.filter(e=>(e.contractType||'').toUpperCase()==='CDD').length,sev:cddExpiring.length>0?'high':'ok',items:cddExpiring.map(e=>{const end=new Date(e.endDate||e.end);return e.first+' '+e.last+': fin '+end.toLocaleDateString('fr-BE');})});
     // 7. Email pour distribution
     const noEmail=allEmps.filter(e=>!e.email);
     r.push({id:'email',cat:'Distribution',title:'Emails pour fiches de paie',desc:'Distribution electronique possible',pass:noEmail.length===0,count:n-noEmail.length,total:n,sev:noEmail.length>0?'medium':'ok',items:noEmail.map(e=>e.first+' '+e.last)});
@@ -124,7 +124,7 @@ export function TimelinePaieV2({s}){
     dl.push({month:5,day:30,title:'Pécule vacances double',desc:'Versement pécule double',cat:'Paie',c:'#06b6d4'});
     dl.push({month:11,day:20,title:'13eme mois / Prime fin annee',desc:'Versement prime fin annee',cat:'Paie',c:'#c6a34e'});
     dl.push({month:0,day:31,title:'Indexation CP 200',desc:'Verification et application index sante',cat:'RH',c:'#fb923c'});
-    dl.push({month:5,day:30,title:'Bilan social BNB',desc:'Depot si >= 20 ETP',cat:'Compliance',c:'#fb923c'});
+    dl.push({month:5,day:30,title:tText('Bilan social BNB'),desc:'Depot si >= 20 ETP',cat:'Compliance',c:'#fb923c'});
     dl.push({month:2,day:31,title:'Plan formation',desc:'Depot plan annuel si >= 20 travailleurs',cat:'RH',c:'#3b82f6'});
     return dl;
   },[yr]);
@@ -282,7 +282,7 @@ export function SoldeToutCompteV2({s,d}){
         </select></div>
       <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Date sortie</label>
         <input type="date" value={dateSortie} onChange={e=>setDateSortie(e.target.value)} style={{padding:'10px 12px',borderRadius:8,background:'#090c16',border:'1px solid rgba(139,115,60,.15)',color:'#e5e5e5',fontSize:12,fontFamily:'inherit'}}/></div>
-      <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Motif</label>
+      <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Motif')}</label>
         <select value={motif} onChange={e=>setMotif(e.target.value)} style={{padding:'10px 12px',borderRadius:8,background:'#090c16',border:'1px solid rgba(139,115,60,.15)',color:'#e5e5e5',fontSize:12,fontFamily:'inherit'}}>
           <option value="employeur">Licenciement employeur</option>
           <option value="travailleur">Demission travailleur</option>
@@ -362,7 +362,7 @@ export function CoutsAnnuelsV2({s}){
     {cp:'200',prime:'Eco-cheques',montant:'Max 250 EUR/an',mois:'Juin'},
     {cp:'124',prime:'Timbre fidelite',montant:'Variable',mois:'Juin-Juillet'},
     {cp:'302',prime:'Prime horeca',montant:'Selon heures',mois:'Variable'},
-    {cp:'330',prime:'Prime IFIC/attractivite',montant:'Grille IFIC',mois:'Mensuel'},
+    {cp:'330',prime:'Prime IFIC/attractivite',montant:'Grille IFIC',mois:tText('Mensuel')},
   ];
 
   return <div style={{padding:24}}>
@@ -472,7 +472,7 @@ export function SimuLicenciementV2({s}){
           </select></div>
         <div style={{marginBottom:10}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Brut mensuel: {fmt(brut)} €</label><input type="range" min={1800} max={10000} step={50} value={brut} onChange={e=>setManualBrut(e.target.value)} style={{width:'100%',accentColor:'#c6a34e'}}/></div>
         <div style={{marginBottom:10}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Anciennete: {manualAnc||Math.round(ancAnnees*10)/10} ans</label><input type="range" min={0} max={40} step={0.5} value={manualAnc||ancAnnees} onChange={e=>setManualAnc(e.target.value)} style={{width:'100%',accentColor:'#c6a34e'}}/></div>
-        <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Motif</label>
+        <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Motif')}</label>
           <select value={motif} onChange={e=>setMotif(e.target.value)} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
             <option value="employeur">Licenciement employeur</option><option value="travailleur">Demission</option><option value="protege">Travailleur protege</option><option value="abus">Licenciement abusif</option><option value="faute">Faute grave</option>
           </select></div>

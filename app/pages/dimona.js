@@ -133,7 +133,7 @@ function DimonaPage({s,d}) {
         </div>
       </div>
       <div style={{display:"flex",gap:6}}>
-        <button onClick={()=>fetch('/api/onss/status?test=true').then(r=>r.json()).then(r=>{setOnssStatus(r);alert(r.readiness?.oauthToken?'✅ Token OAuth OK — Dimona prêt':'❌ Token échoué: '+(r.configuration?.oauthError||'Vérifiez les env vars'))})} style={{padding:"6px 14px",borderRadius:8,border:"none",background:"rgba(96,165,250,.15)",color:"#60a5fa",fontSize:10,cursor:"pointer",fontWeight:600}}>Tester connexion</button>
+        <button onClick={()=>fetch('/api/onss/status?test=true').then(r=>r.json()).then(r=>{setOnssStatus(r);alert(r.readiness?.oauthToken?'✅ Token OAuth OK — Dimona prêt':'❌ Token échoué: '+(r.configuration?.oauthError||'Vérifiez les env vars'))})} style={{padding:"6px 14px",borderRadius:8,border:"none",background:"rgba(96,165,250,.15)",color:"#60a5fa",fontSize:10,cursor:"pointer",fontWeight:600}}>{tText('Tester connexion')}</button>
         <span style={{fontSize:9,padding:"4px 10px",borderRadius:6,background:"rgba(198,163,78,.08)",color:"#c6a34e",display:"flex",alignItems:"center"}}>{submitting?"⏳ Envoi en cours...":"REST v2 / OAuth2 JWT"}</span>
       </div>
     </div>
@@ -177,11 +177,11 @@ function DimonaPage({s,d}) {
         <C><ST>Info type: {f.wtype}</ST>
           <div style={{fontSize:12,color:'#9e9b93',lineHeight:1.7}}>
             {f.wtype==='OTH'&&<>Type ordinaire — contrat à durée déterminée ou indéterminée. Pas de champs spécifiques supplémentaires.</>}
-            {f.wtype==='STU'&&<><b style={{color:'#c6a34e'}}>Étudiant:</b> Max 600h/an exonérées cotisations ONSS normales (cotis solidarité 5,42% + 2,71%). Heures planifiées obligatoires. Vérifier compteur Student@Work.</>}
+            {f.wtype==='STU'&&<><b style={{color:'#c6a34e'}}>{tText('Étudiant:')}</b> Max 600h/an exonérées cotisations ONSS normales (cotis solidarité 5,42% + 2,71%). Heures planifiées obligatoires. Vérifier compteur Student@Work.</>}
             {f.wtype==='FLX'&&<><b style={{color:'#c6a34e'}}>{tText('Flexi-job:')}</b> Exclusivement pour secteurs autorisés (Horeca CP 302, Commerce CP 201/202, etc.). Travailleur doit avoir un emploi principal à min 4/5. Net = Brut (pas d'ONSS/PP). Cotis patronale 28%.</>}
             {f.wtype==='EXT'&&<><b style={{color:'#c6a34e'}}>{tText('Extra Horeca:')}</b> Maximum 50 jours/an. Forfait journalier ONSS. Uniquement CP 302.</>}
-            {f.wtype==='DWD'&&<><b style={{color:'#c6a34e'}}>Occasionnel:</b> Travailleurs occasionnels agriculture/horticulture. Forfait journalier.</>}
-            {f.wtype==='IVT'&&<><b style={{color:'#c6a34e'}}>Stagiaire:</b> Convention d'immersion professionnelle (CIP). Pas de cotisations ONSS normales si indemnité ≤ plafond.</>}
+            {f.wtype==='DWD'&&<><b style={{color:'#c6a34e'}}>{tText('Occasionnel:')}</b> Travailleurs occasionnels agriculture/horticulture. Forfait journalier.</>}
+            {f.wtype==='IVT'&&<><b style={{color:'#c6a34e'}}>{tText('Stagiaire:')}</b> Convention d'immersion professionnelle (CIP). Pas de cotisations ONSS normales si indemnité ≤ plafond.</>}
             {f.wtype==='APP'&&<><b style={{color:'#c6a34e'}}>{tText('Apprenti:')}</b> Contrat d'apprentissage (IFAPME/EFP/VDAB/Syntra). Cotisations réduites.</>}
             {f.wtype==='ART'&&<><b style={{color:'#c6a34e'}}>{tText('Artiste:')}</b> Visa artiste ou déclaration d'activité artistique. Régime spécifique.</>}
             {!['OTH',"STU","FLX","EXT","DWD","IVT","APP","ART"].includes(f.wtype)&&<>Type spécifique — consultez la documentation ONSS.</>}
@@ -194,7 +194,7 @@ function DimonaPage({s,d}) {
             <div style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
               <b style={{color:'#f87171'}}>{tText('OUT:')}</b> Au plus tard le <b>dernier jour</b> de travail</div>
             <div style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
-              <b style={{color:'#60a5fa'}}>UPDATE:</b> Dès que la modification est connue</div>
+              <b style={{color:'#60a5fa'}}>{tText('UPDATE:')}</b> Dès que la modification est connue</div>
             <div style={{padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
               <b style={{color:'#a78bfa'}}>{tText('CANCEL:')}</b> Si le travailleur ne se présente pas</div>
             <div style={{padding:'6px 0',marginTop:6,background:"rgba(239,68,68,.06)",borderRadius:6,paddingLeft:8}}>
@@ -252,7 +252,7 @@ function DimonaPage({s,d}) {
           )}
         </div>
         <div style={{marginTop:14,padding:10,background:"rgba(96,165,250,.06)",borderRadius:8,fontSize:10.5,color:'#60a5fa',lineHeight:1.5}}>
-          <b>Portail:</b> www.socialsecurity.be → Dimona Web<br/>
+          <b>{tText('Portail:')}</b> www.socialsecurity.be → Dimona Web<br/>
           <b>{tText('Batch:')}</b> Envoi XML via canal sécurisé (FTP/MQ)<br/>
           <b>{tText('Helpdesk:')}</b> Contact Center ONSS — 02/509 59 59
         </div>

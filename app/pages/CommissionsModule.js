@@ -68,7 +68,7 @@ function emailRelance1(clientNom, factureId, montant, dateEcheance) {
         </table>
         <p>Nous vous saurions gré de bien vouloir procéder au règlement dans les meilleurs délais.</p>
         <p>Si le paiement a déjà été effectué, nous vous prions de ne pas tenir compte de ce rappel.</p>
-        <p style="margin-top:20px">Cordialement,<br><b>Aureus Social Pro</b><br>Aureus IA SPRL — BCE BE 1028.230.781</p>
+        <p style="margin-top:20px">Cordialement,<br><b>{tText('Aureus Social Pro')}</b><br>Aureus IA SPRL — BCE BE 1028.230.781</p>
       </div>
       <div style="background:#f8f7f4;padding:12px;text-align:center;font-size:11px;color:#999">
         IBAN: BE00 0000 0000 0000 · Communication: ${factureId}
@@ -96,7 +96,7 @@ function emailRelance2(clientNom, factureId, montant, dateEcheance, joursRetard)
         </table>
         <p>Conformément à la <b>Loi du 02/08/2002</b> concernant la lutte contre le retard de paiement dans les transactions commerciales (Art. 5), des <b>intérêts de retard au taux légal de 8% l'an</b> sont applicables de plein droit.</p>
         <p>Nous vous invitons à régulariser cette situation dans les plus brefs délais afin d'éviter toute procédure complémentaire.</p>
-        <p style="margin-top:20px">Cordialement,<br><b>Aureus Social Pro</b><br>Aureus IA SPRL — BCE BE 1028.230.781</p>
+        <p style="margin-top:20px">Cordialement,<br><b>{tText('Aureus Social Pro')}</b><br>Aureus IA SPRL — BCE BE 1028.230.781</p>
       </div>
     </div>`
   };
@@ -120,12 +120,12 @@ function emailMiseEnDemeure(clientNom, factureId, montant, dateEcheance, joursRe
           <tr style="background:#fef2f2"><td style="padding:10px;font-weight:600">Facture</td><td style="padding:10px">${factureId}</td></tr>
           <tr><td style="padding:10px;font-weight:600">Principal</td><td style="padding:10px;font-weight:700">${f2(montant)} EUR</td></tr>
           <tr style="background:#fef2f2"><td style="padding:10px;font-weight:600">Intérêts de retard (8% — ${joursRetard}j)</td><td style="padding:10px;color:#ef4444">${f2(interets)} EUR</td></tr>
-          <tr><td style="padding:10px;font-weight:600">Clause pénale (10%)</td><td style="padding:10px;color:#ef4444">${f2(penalite)} EUR</td></tr>
+          <tr><td style="padding:10px;font-weight:600">{tText('Clause pénale (10%)')}</td><td style="padding:10px;color:#ef4444">${f2(penalite)} EUR</td></tr>
           <tr style="background:#ef4444;color:#fff"><td style="padding:12px;font-weight:700;font-size:14px">TOTAL DÛ</td><td style="padding:12px;font-weight:700;font-size:14px">${f2(total)} EUR</td></tr>
         </table>
         <p><b>Faute de paiement dans les 8 jours calendrier</b> à compter de la réception de la présente, nous nous verrons dans l'obligation de procéder au <b>recouvrement judiciaire</b> de la créance, majorée de tous frais et dépens.</p>
         <p style="font-size:12px;color:#666;margin-top:16px">
-          <b>Base légale :</b><br>
+          <b>{tText('Base légale :')}</b><br>
           — Intérêts : Loi du 02/08/2002, Art. 5 (taux légal 8% B2B)<br>
           — Clause pénale : Art. 1226 et s. Code Civil (max 10% + min. €20)<br>
           — Prescription : Art. 2262bis C.C. (5 ans créances commerciales)
@@ -213,9 +213,9 @@ function generateMiseEnDemeurePDF(facture, relancesData) {
     </table>
 
     <div class="legal">
-      <b>Base légale applicable :</b><br>
+      <b>{tText('Base légale applicable :')}</b><br>
       — <b>Intérêts de retard :</b> Loi du 02/08/2002 concernant la lutte contre le retard de paiement dans les transactions commerciales, Art. 5 — Taux d'intérêt légal B2B : 8% l'an.<br>
-      — <b>Clause pénale :</b> Art. 1226 et suivants du Code Civil — Indemnité forfaitaire de 10% du montant principal impayé avec un minimum de €20,00.<br>
+      — <b>{tText('Clause pénale :')}</b> Art. 1226 et suivants du Code Civil — Indemnité forfaitaire de 10% du montant principal impayé avec un minimum de €20,00.<br>
       — <b>Prescription :</b> Art. 2262bis du Code Civil — Les créances commerciales se prescrivent par 5 ans.<br>
       — <b>Délai mise en demeure :</b> 8 jours calendrier (usage commercial belge).
     </div>
@@ -383,7 +383,7 @@ function RelancesModule({ factures, sendEmailFn }) {
       {/* Filtres */}
       <div style={{ display:'flex', gap:6, marginBottom:16, flexWrap:'wrap' }}>
         {[
-          { v:'all', l:'Toutes', c:allFactures.length },
+          { v:'all', l:tText('Toutes'), c:allFactures.length },
           { v:'retard', l:'En retard', c:allFactures.filter(f=>f.joursRetard>0&&f.statut!=='paye').length },
           { v:'attente', l:tText('En attente'), c:allFactures.filter(f=>f.statut==='attente').length },
           { v:'relance1', l:'Relance 1', c:nbRelance1 },
@@ -534,13 +534,13 @@ function RelancesModule({ factures, sendEmailFn }) {
 export default function CommissionsModuleWrapped({ s, d, tab }) {
   const { t, lang, tText } = useLang();
   const TAB_META = {
-    checklistclient:  { icon:'✅', title:'Checklist Client',      sub:'Vérifications onboarding nouveau client', mainTab:'commissions' },
+    checklistclient:  { icon:'✅', title:tText('Checklist Client'),      sub:'Vérifications onboarding nouveau client', mainTab:'commissions' },
     comparatif:       { icon:'⚔️', title:'Comparatif Marché',     sub:tText('Analyse concurrentielle secrétariats sociaux'), mainTab:'commissions' },
     fiduciaire:       { icon:'🏢', title:'Hub Fiduciaire',        sub:'Gestion du portefeuille fiduciaire', mainTab:'commissions' },
     guidecommercial:  { icon:'📊', title:'Guide Commercial',      sub:'Scripts et argumentaires de vente', mainTab:'commissions' },
     guidefiduciaire:  { icon:'📖', title:'Guide Fiduciaire',      sub:'Guide d\'intégration pour fiduciaires', mainTab:'commissions' },
     landing:          { icon:'🌐', title:'Page Commerciale',      sub:'Landing page et matériaux marketing', mainTab:'commissions' },
-    parserConcurrent: { icon:'🔍', title:'Audit Concurrent',      sub:tText('Analyse des contrats concurrents'), mainTab:'relances' },
+    parserConcurrent: { icon:'🔍', title:tText('Audit Concurrent'),      sub:tText('Analyse des contrats concurrents'), mainTab:'relances' },
     repriseclient:    { icon:'🔄', title:'Reprise Concurrent',    sub:'Processus de reprise client SD Worx / Securex', mainTab:'relances' },
   };
   const meta = TAB_META[tab];
@@ -784,7 +784,7 @@ function CommissionsModule({ userRole, user, factures, sendEmailFn, defaultTab }
           </div>
         )}
 
-        {commercials.length===0 && !showAddTest && <div style={{ background:'rgba(198,163,78,0.03)', border:'1px solid rgba(198,163,78,0.1)', borderRadius:12, textAlign:'center', padding:60, color:'#5e5c56' }}><div style={{ fontSize:48, marginBottom:12 }}>💰</div><div style={{ fontSize:16, fontWeight:600 }}>Aucune commission</div><div style={{ fontSize:13, marginTop:8 }}>Ajoutez manuellement ou elles seront créées lors de la distribution des fiches.</div></div>}
+        {commercials.length===0 && !showAddTest && <div style={{ background:'rgba(198,163,78,0.03)', border:'1px solid rgba(198,163,78,0.1)', borderRadius:12, textAlign:'center', padding:60, color:'#5e5c56' }}><div style={{ fontSize:48, marginBottom:12 }}>💰</div><div style={{ fontSize:16, fontWeight:600 }}>{tText('Aucune commission')}</div><div style={{ fontSize:13, marginTop:8 }}>Ajoutez manuellement ou elles seront créées lors de la distribution des fiches.</div></div>}
 
         {/* Liste commerciaux + détail */}
         <div style={{ display:'grid', gridTemplateColumns: selectedCommercial ? '1fr 1.2fr' : '1fr', gap:20 }}>

@@ -135,7 +135,7 @@ export function PlanningCongesV3({s, defaultTab}){
 
     {tab==='soldes'&&<C title="📊 Soldes congés par employé">
       <div style={{display:'grid',gridTemplateColumns:'180px repeat(5,1fr)',gap:4,padding:'6px 0',borderBottom:'2px solid rgba(198,163,78,.15)',fontSize:9,fontWeight:700,color:'#c6a34e'}}>
-        <div>Employé</div><div>Légaux</div><div>Extra-lég.</div><div>Pris</div><div>Solde</div><div>{tText('Statut')}</div>
+        <div>Employé</div><div>Légaux</div><div>Extra-lég.</div><div>Pris</div><div>{tText('Solde')}</div><div>{tText('Statut')}</div>
       </div>
       {emps.slice(0,20).map((e,i)=>{
         const legal=20;const extra=Math.floor(Math.random()*5);const pris=Math.floor(Math.random()*15);const solde=legal+extra-pris;
@@ -194,16 +194,16 @@ export function BilanSocialV3({s}){
     {num:'III',titre:'Utilisation de mesures en faveur de l\'emploi',rubrique:'Rubrique 300',items:[
       {code:'3001',label:'Premiers engagements (réduction ONSS)',value:n<=6?n:0,unit:''},
       {code:'3002',label:'Plans d\'embauche jeunes',value:Math.round(n*0.05),unit:''},
-      {code:'3003',label:'Chômeurs longue durée',value:Math.round(n*0.03),unit:''},
-      {code:'3004',label:'Convention premier emploi',value:Math.round(n*0.02),unit:''},
+      {code:'3003',label:tText('Chômeurs longue durée'),value:Math.round(n*0.03),unit:''},
+      {code:'3004',label:tText('Convention premier emploi'),value:Math.round(n*0.02),unit:''},
       {code:'3005',label:'Stages',value:Math.round(n*0.04),unit:''},
     ]},
-    {num:'IV',titre:'Formation',rubrique:'Rubrique 580',items:[
+    {num:'IV',titre:tText('Formation'),rubrique:'Rubrique 580',items:[
       {code:'5801',label:'Nombre de travailleurs ayant suivi une formation',value:Math.round(n*0.7),unit:''},
       {code:'5801a',label:'→ Hommes',value:Math.round(hommes*0.7),unit:''},
       {code:'5801b',label:'→ Femmes',value:Math.round(femmes*0.7),unit:''},
       {code:'5802',label:'Heures de formation',value:fi(Math.round(n*0.7)*24),unit:'h'},
-      {code:'5803',label:'Coût net formation',value:fmt(Math.round(n*0.7)*24*50)+' €',unit:''},
+      {code:'5803',label:tText('Coût net formation'),value:fmt(Math.round(n*0.7)*24*50)+' €',unit:''},
       {code:'5804',label:'Ratio formation / masse salariale',value:masseBrut>0?((Math.round(n*0.7)*24*50)/(masseBrut*12)*100).toFixed(2)+'%':'0%',unit:''},
     ]},
   ];
@@ -213,7 +213,7 @@ export function BilanSocialV3({s}){
     <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>Calcul automatique des indicateurs — Format Banque Nationale de Belgique</p>
 
     <div style={{display:'grid',gridTemplateColumns:'repeat(6,1fr)',gap:10,marginBottom:18}}>
-      {[{l:'Effectif',v:n,c:'#3b82f6'},{l:'CDI/CDD',v:cdi+'/'+cdd,c:'#22c55e'},{l:'H/F',v:hommes+'/'+femmes,c:'#a855f7'},{l:'Âge moyen',v:avgAge.toFixed(1)+' ans',c:'#fb923c'},{l:tText('Ancienneté moy.'),v:avgAnc.toFixed(1)+' ans',c:'#c6a34e'},{l:'Masse salariale/an',v:fmt(masseBrut*12)+' €',c:'#f87171'}].map((k,i)=><div key={i} style={{padding:'10px 12px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}><div style={{fontSize:8,color:'#5e5c56',textTransform:'uppercase'}}>{k.l}</div><div style={{fontSize:14,fontWeight:700,color:k.c,marginTop:3}}>{k.v}</div></div>)}
+      {[{l:'Effectif',v:n,c:'#3b82f6'},{l:tText('CDI/CDD'),v:cdi+'/'+cdd,c:'#22c55e'},{l:'H/F',v:hommes+'/'+femmes,c:'#a855f7'},{l:'Âge moyen',v:avgAge.toFixed(1)+' ans',c:'#fb923c'},{l:tText('Ancienneté moy.'),v:avgAnc.toFixed(1)+' ans',c:'#c6a34e'},{l:'Masse salariale/an',v:fmt(masseBrut*12)+' €',c:'#f87171'}].map((k,i)=><div key={i} style={{padding:'10px 12px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}><div style={{fontSize:8,color:'#5e5c56',textTransform:'uppercase'}}>{k.l}</div><div style={{fontSize:14,fontWeight:700,color:k.c,marginTop:3}}>{k.v}</div></div>)}
     </div>
 
     <div style={{display:'flex',gap:6,marginBottom:16}}>{[{v:'indicateurs',l:'📊 Indicateurs ('+sections.length+')'},{v:'pyramide',l:'👥 Pyramide'},{v:'genre',l:'⚧ Genre'},{v:'bnb',l:'🏦 Format BNB'},{v:'legal',l:'📜 Base légale'}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}</div>
@@ -319,7 +319,7 @@ export function AnalyticsV3({s}){
     <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>Données réelles — {n} travailleurs, {clients.length} clients</p>
 
     <div style={{display:'grid',gridTemplateColumns:'repeat(6,1fr)',gap:10,marginBottom:18}}>
-      {[{l:'Effectif total',v:n,c:'#3b82f6'},{l:'Masse salariale/mois',v:fmt(masseBrut)+' €',c:'#c6a34e'},{l:'Coût total/mois',v:fmt(masseBrut*(1+TX_ONSS_E))+' €',c:'#f87171'},{l:'Salaire médian',v:fmt(median)+' €',c:'#22c55e'},{l:'CDI / CDD',v:cdi+' / '+(n-cdi),c:'#a855f7'},{l:'Temps partiel',v:tp+' ('+Math.round(tp/Math.max(n,1)*100)+'%)',c:'#06b6d4'}].map((k,i)=><div key={i} style={{padding:'10px 12px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}><div style={{fontSize:8,color:'#5e5c56',textTransform:'uppercase'}}>{k.l}</div><div style={{fontSize:14,fontWeight:700,color:k.c,marginTop:3}}>{k.v}</div></div>)}
+      {[{l:'Effectif total',v:n,c:'#3b82f6'},{l:'Masse salariale/mois',v:fmt(masseBrut)+' €',c:'#c6a34e'},{l:'Coût total/mois',v:fmt(masseBrut*(1+TX_ONSS_E))+' €',c:'#f87171'},{l:'Salaire médian',v:fmt(median)+' €',c:'#22c55e'},{l:tText('CDI / CDD'),v:cdi+' / '+(n-cdi),c:'#a855f7'},{l:'Temps partiel',v:tp+' ('+Math.round(tp/Math.max(n,1)*100)+'%)',c:'#06b6d4'}].map((k,i)=><div key={i} style={{padding:'10px 12px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}><div style={{fontSize:8,color:'#5e5c56',textTransform:'uppercase'}}>{k.l}</div><div style={{fontSize:14,fontWeight:700,color:k.c,marginTop:3}}>{k.v}</div></div>)}
     </div>
 
     <div style={{display:'flex',gap:6,marginBottom:16}}>{[{v:'dashboard',l:'📊 Dashboard'},{v:'salaires',l:'💰 Distribution salariale'},{v:'clients',l:'🏢 Par client'},{v:'anciennete',l:'⏱ Ancienneté'},{v:'kpi',l:'📈 KPIs'}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}</div>
@@ -398,7 +398,7 @@ export function AnalyticsV3({s}){
       {[
         {l:'Taux de rotation estimé',v:n>0?(Math.round(n*0.10)/(n)*100).toFixed(1)+'%':'0%',c:'#fb923c',b:'< 10% = bon, 10-15% = attention, > 15% = critique'},
         {l:'Taux d\'encadrement',v:n>0?Math.round(n*0.15)+' managers / '+n+' total = '+(15).toFixed(0)+'%':'N/A',c:'#a855f7',b:'Norme: 10-20%'},
-        {l:'Coût moyen par ETP/mois',v:fmt(n>0?masseBrut*(1+TX_ONSS_E)/n:0)+' €',c:'#c6a34e',b:'Charge totale employeur par ETP'},
+        {l:tText('Coût moyen par ETP/mois'),v:fmt(n>0?masseBrut*(1+TX_ONSS_E)/n:0)+' €',c:'#c6a34e',b:'Charge totale employeur par ETP'},
         {l:'Ratio ONSS / masse salariale',v:(TX_ONSS_E*100).toFixed(2)+'%',c:'#f87171',b:'Taux légal 2026'},
         {l:'Taux temps partiel',v:n>0?Math.round(tp/n*100)+'%':'0%',c:'#06b6d4',b:'Tendance Belgique: ~25%'},
         {l:'Taux CDI',v:n>0?Math.round(cdi/n*100)+'%':'0%',c:'#22c55e',b:'Norme: > 85% = stabilité'},
@@ -485,7 +485,7 @@ export function ImportCSVV3({s}){
     <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>Mapping colonnes intelligent + validation NISS/dates + preview erreurs</p>
 
     <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:18}}>
-      {[{l:'Colonnes détectées',v:headers.length,c:'#3b82f6'},{l:'Lignes',v:rows.length,c:'#c6a34e'},{l:'Champs mappés',v:Object.keys(mapping).length+'/'+targetFields.length,c:'#22c55e'},{l:'Erreurs',v:errors.length,c:errors.length>0?'#f87171':'#22c55e'}].map((k,i)=><div key={i} style={{padding:'12px 14px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}><div style={{fontSize:9,color:'#5e5c56',textTransform:'uppercase'}}>{k.l}</div><div style={{fontSize:17,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}
+      {[{l:tText('Colonnes détectées'),v:headers.length,c:'#3b82f6'},{l:'Lignes',v:rows.length,c:'#c6a34e'},{l:tText('Champs mappés'),v:Object.keys(mapping).length+'/'+targetFields.length,c:'#22c55e'},{l:'Erreurs',v:errors.length,c:errors.length>0?'#f87171':'#22c55e'}].map((k,i)=><div key={i} style={{padding:'12px 14px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}><div style={{fontSize:9,color:'#5e5c56',textTransform:'uppercase'}}>{k.l}</div><div style={{fontSize:17,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}
     </div>
 
     <div style={{display:'flex',gap:6,marginBottom:16}}>{[{v:'upload',l:'📄 Upload'},{v:'mapping',l:'🔗 Mapping ('+Object.keys(mapping).length+')'},{v:'preview',l:'👁 Preview'},{v:'erreurs',l:'⚠ Erreurs ('+errors.length+')'},{v:'format',l:'📋 Format attendu'}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}</div>
@@ -613,7 +613,7 @@ export function ContratsLegauxV3({s}){
           <Row l="ONSS" v={ct.onss}/>
           <Row l="Précompte professionnel" v={ct.pp}/>
           <Row l="Durée" v={ct.duree}/>
-          <div style={{marginTop:10}}><div style={{fontSize:9,fontWeight:700,color:'#c6a34e',textTransform:'uppercase',marginBottom:4}}>Clauses spécifiques</div>
+          <div style={{marginTop:10}}><div style={{fontSize:9,fontWeight:700,color:'#c6a34e',textTransform:'uppercase',marginBottom:4}}>{tText('Clauses spécifiques')}</div>
             {ct.clauses.map((c,j)=><div key={j} style={{fontSize:10.5,color:'#ccc',padding:'2px 0',paddingLeft:10,borderLeft:'2px solid rgba(198,163,78,.2)'}}>• {c}</div>)}</div>
           <div style={{marginTop:10}}><div style={{fontSize:9,fontWeight:700,color:'#3b82f6',textTransform:'uppercase',marginBottom:4}}>Spécificités</div>
             {ct.specificites.map((sp,j)=><div key={j} style={{fontSize:10.5,color:'#ccc',padding:'2px 0',paddingLeft:10,borderLeft:'2px solid rgba(59,130,246,.2)'}}>• {sp}</div>)}</div>
@@ -628,7 +628,7 @@ export function ContratsLegauxV3({s}){
       <Row l="PP" v={sel.pp}/>
       <Row l="Durée" v={sel.duree}/>
       <Row l="Base légale" v={sel.base} c="#888"/>
-      <div style={{marginTop:12}}><div style={{fontSize:11,fontWeight:700,color:'#c6a34e',marginBottom:6}}>Clauses</div>{sel.clauses.map((c,j)=><div key={j} style={{fontSize:11,color:'#ccc',padding:'3px 0'}}>• {c}</div>)}</div>
+      <div style={{marginTop:12}}><div style={{fontSize:11,fontWeight:700,color:'#c6a34e',marginBottom:6}}>{tText('Clauses')}</div>{sel.clauses.map((c,j)=><div key={j} style={{fontSize:11,color:'#ccc',padding:'3px 0'}}>• {c}</div>)}</div>
       <div style={{marginTop:12}}><div style={{fontSize:11,fontWeight:700,color:'#3b82f6',marginBottom:6}}>Spécificités</div>{sel.specificites.map((c,j)=><div key={j} style={{fontSize:11,color:'#ccc',padding:'3px 0'}}>• {c}</div>)}</div>
     </C>}
 

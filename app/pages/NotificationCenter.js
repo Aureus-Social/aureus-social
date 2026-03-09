@@ -42,24 +42,24 @@ function generateLegalDeadlines(year = 2026) {
     { month: 3, day: 15, label: 'PP février', type: 'FISCAL', priority: 'HIGH' },
     { month: 3, day: 31, label: 'ONSS T1 — déclaration + solde', type: tText('ONSS'), priority: 'HIGH' },
     { month: 4, day: 15, label: 'PP mars', type: 'FISCAL', priority: 'HIGH' },
-    { month: 4, day: 30, label: 'DmfA T1 — délai de soumission', type: tText('ONSS'), priority: 'HIGH' },
+    { month: 4, day: 30, label:tText('DmfA T1 — délai de soumission'), type: tText('ONSS'), priority: 'HIGH' },
     { month: 5, day: 15, label: 'PP avril', type: 'FISCAL', priority: 'HIGH' },
-    { month: 5, day: 31, label: 'Bilan social — dépôt BNB', type: 'LEGAL', priority: 'MEDIUM' },
+    { month: 5, day: 31, label:tText('Bilan social — dépôt BNB'), type: 'LEGAL', priority: 'MEDIUM' },
     { month: 6, day: 15, label: 'PP mai', type: 'FISCAL', priority: 'HIGH' },
     { month: 6, day: 30, label: 'ONSS T2 — déclaration + solde', type: tText('ONSS'), priority: 'HIGH' },
     { month: 6, day: 30, label: 'Pécule de vacances — calcul et paiement employés', type: 'PAYROLL', priority: 'HIGH' },
     { month: 7, day: 15, label: 'PP juin', type: 'FISCAL', priority: 'HIGH' },
-    { month: 7, day: 31, label: 'DmfA T2 — délai de soumission', type: tText('ONSS'), priority: 'HIGH' },
+    { month: 7, day: 31, label:tText('DmfA T2 — délai de soumission'), type: tText('ONSS'), priority: 'HIGH' },
     { month: 8, day: 15, label: 'PP juillet', type: 'FISCAL', priority: 'HIGH' },
     { month: 9, day: 15, label: 'PP août', type: 'FISCAL', priority: 'HIGH' },
     { month: 9, day: 30, label: 'ONSS T3 — déclaration + solde', type: tText('ONSS'), priority: 'HIGH' },
     { month: 10, day: 15, label: 'PP septembre', type: 'FISCAL', priority: 'HIGH' },
-    { month: 10, day: 31, label: 'DmfA T3 — délai de soumission', type: tText('ONSS'), priority: 'HIGH' },
+    { month: 10, day: 31, label:tText('DmfA T3 — délai de soumission'), type: tText('ONSS'), priority: 'HIGH' },
     { month: 11, day: 15, label: 'PP octobre', type: 'FISCAL', priority: 'HIGH' },
     { month: 12, day: 15, label: 'PP novembre', type: 'FISCAL', priority: 'HIGH' },
     { month: 12, day: 20, label: '13ème mois — calcul et paiement', type: 'PAYROLL', priority: 'HIGH' },
     { month: 12, day: 31, label: 'ONSS T4 — déclaration + solde', type: tText('ONSS'), priority: 'HIGH' },
-    { month: 12, day: 31, label: 'Clôture annuelle paie', type: 'PAYROLL', priority: 'HIGH' },
+    { month: 12, day: 31, label:tText('Clôture annuelle paie'), type: 'PAYROLL', priority: 'HIGH' },
   ]
 }
 
@@ -174,7 +174,7 @@ function generateNotifications(state, now) {
       id: 'config-company',
       type: 'SYSTEM',
       priority: 'MEDIUM',
-      title: 'Configuration société incomplète',
+      title:tText('Configuration société incomplète'),
       message: 'Complétez les informations de votre société (nom, BCE, ONSS, etc.)',
       date: now,
       daysUntil: 0,
@@ -443,7 +443,7 @@ function NotificationCenter({ state, dispatch, defaultTab }) {
                   const result = await requestPushPermission()
                   setPushStatus(result)
                   if (result === 'granted') {
-                    sendPushNotification('Aureus Social Pro', {
+                    sendPushNotification(tText('Aureus Social Pro'), {
                       body: 'Les notifications push sont maintenant activées !',
                     })
                   }
@@ -611,8 +611,8 @@ function SmartAlertsPage({ state }) {
           action:'Encoder le NISS', ref:'AR 05/11/2002' })
       }
       if (!e.startDate && !e.start) {
-        list.push({ id:'date_'+e.id, sev:'warning', icon:'📅', cat:'Contrat',
-          title:'Date entrée manquante', msg:nm + ' — impossible calculer ancienneté et préavis',
+        list.push({ id:'date_'+e.id, sev:'warning', icon:'📅', cat:tText('Contrat'),
+          title:tText('Date entrée manquante'), msg:nm + ' — impossible calculer ancienneté et préavis',
           action:'Compléter le dossier', ref:'Loi 03/07/1978' })
       }
     })
@@ -631,13 +631,13 @@ function SmartAlertsPage({ state }) {
     }
     if ([2,5,8,11].includes(now.getMonth()) && day >= 20) {
       list.push({ id:'dmfa_q', sev:'critical', icon:'📋', cat:tText('Déclarations'),
-        title:'DmfA trimestrielle imminente', msg:'Deadline fin du mois — Déclaration ONSS Q' + (Math.floor(now.getMonth()/3)+1),
+        title:tText('DmfA trimestrielle imminente'), msg:'Deadline fin du mois — Déclaration ONSS Q' + (Math.floor(now.getMonth()/3)+1),
         action:'Préparer DmfA', ref:tText('ONSS') })
     }
 
     // Info générale
     list.push({ id:'activa', sev:'info', icon:'💼', cat:'Subsides',
-      title:'Attestation Activa active', msg:'N°829605 — Prime mensuelle 350 EUR jusqu\'au 01/06/2026',
+      title:tText('Attestation Activa active'), msg:'N°829605 — Prime mensuelle 350 EUR jusqu\'au 01/06/2026',
       action:'Voir MonBEE', ref:tText('Activa.brussels') })
 
     return list.filter(a => !dismissed.has(a.id))
@@ -663,9 +663,9 @@ function SmartAlertsPage({ state }) {
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
         {[
-          { l:'Critiques', v:criticals.length, c:'#ef4444' },
-          { l:'Avertissements', v:warnings.length, c:'#f97316' },
-          { l:'Informations', v:infos.length, c:'#3b82f6' },
+          { l:tText('Critiques'), v:criticals.length, c:'#ef4444' },
+          { l:tText('Avertissements'), v:warnings.length, c:'#f97316' },
+          { l:tText('Informations'), v:infos.length, c:'#3b82f6' },
         ].map((k,i) => (
           <div key={i} style={{ padding:'14px 16px', background:'rgba(198,163,78,.03)',
             borderRadius:10, border:'1px solid rgba(198,163,78,.08)', textAlign:'center' }}>

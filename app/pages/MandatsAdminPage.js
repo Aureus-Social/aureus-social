@@ -153,7 +153,7 @@ const PRIMES_EMPLOI = [
     id: 'monbee',
     label: 'MonBEE (Économie d\'énergie employeur)',
     montant: 'Variable selon investissements',
-    duree: 'Annuel',
+    duree: tText('Annuel'),
     region: 'Bruxelles',
     organisme: 'Bruxelles Environnement',
     conditions: 'Employeur bruxellois réalisant des investissements verts.',
@@ -353,7 +353,7 @@ ${clientForm.nom || ''}`;
             <ST>🏛 Statut Mandat ONSS/Mahis — Aureus IA SPRL</ST>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 16 }}>
               {[
-                { l: 'Matricule provisoire', v: AUREUS.matriculeONSS, c: '#f97316' },
+                { l:tText('Matricule provisoire'), v: AUREUS.matriculeONSS, c: '#f97316' },
                 { l: 'Réf. Mahis', v: AUREUS.mahisRef, c: '#22c55e' },
                 { l: 'CSAM GAP réf. 1', v: AUREUS.csamRef1, c: '#60a5fa' },
               ].map((k, i) => (
@@ -431,7 +431,7 @@ ${clientForm.nom || ''}`;
             <ST>📄 Belcotax-on-web — Fiches 281 (Précompte Professionnel)</ST>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 16 }}>
               {[
-                { l: 'Fiche 281.10', v: 'Salariés', desc: 'Tous les travailleurs sous contrat de travail', icon: '👔', deadline: '1er mars' },
+                { l:tText('Fiche 281.10'), v: 'Salariés', desc: 'Tous les travailleurs sous contrat de travail', icon: '👔', deadline: '1er mars' },
                 { l: 'Fiche 281.20', v: 'Dirigeants', desc: 'Administrateurs, gérants rémunérés', icon: '👔', deadline: '1er mars' },
                 { l: 'Fiche 281.30', v: 'Honoraires', desc: 'Indépendants, free-lances', icon: '🧾', deadline: '1er mars' },
               ].map((f, i) => (
@@ -527,7 +527,7 @@ ${clientForm.nom || ''}`;
                 </div>
                 {xmlGenerated && (
                   <div style={{ marginTop: 12 }}>
-                    <div style={{ fontSize: 10, color: '#c6a34e', marginBottom: 4, fontWeight: 700 }}>Aperçu XML (premiers 2000 caractères) :</div>
+                    <div style={{ fontSize: 10, color: '#c6a34e', marginBottom: 4, fontWeight: 700 }}>{tText('Aperçu XML (premiers 2000 caractères) :')}</div>
                     <pre style={{ fontSize: 9, color: '#9e9b93', background: 'rgba(0,0,0,.3)', padding: 12, borderRadius: 8, overflowX: 'auto', maxHeight: 200, overflowY: 'auto', fontFamily: 'monospace', lineHeight: 1.5 }}>
                       {xmlGenerated.substring(0, 2000)}{xmlGenerated.length > 2000 ? '\n...' : ''}
                     </pre>
@@ -699,7 +699,7 @@ est interrompue pendant plus de 2 mois consécutifs.`}
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                 <thead>
                   <tr>
-                    {['Employé', 'Réduction', 'Durée', 'Économie totale', tText('Base légale')].map(h => (
+                    {['Employé', 'Réduction', tText('Durée'), 'Économie totale', tText('Base légale')].map(h => (
                       <th key={h} style={{ padding: '8px', textAlign: 'left', color: '#c6a34e',
                         borderBottom: '2px solid rgba(198,163,78,0.2)', fontSize: 10 }}>{h}</th>
                     ))}
@@ -751,7 +751,7 @@ est interrompue pendant plus de 2 mois consécutifs.`}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 14 }}>
                   {[
                     { l: tText('Montant'), v: prime.montant, c: '#22c55e' },
-                    { l: 'Durée', v: prime.duree, c: '#c6a34e' },
+                    { l:tText('Durée'), v: prime.duree, c: '#c6a34e' },
                     { l:tText('Organisme'), v: prime.organisme, c: '#a78bfa' },
                   ].map((k, i) => (
                     <div key={i} style={{ padding: '12px', background: 'rgba(255,255,255,0.03)',
@@ -860,7 +860,7 @@ est interrompue pendant plus de 2 mois consécutifs.`}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 14 }}>
               {[
                 { l: 'Montant mensuel', v: `${RMMMG_M} EUR`, sub: '≥ 18 ans — taux plein', c: '#22c55e' },
-                { l: 'Montant horaire (38h/sem)', v: `${RMMMG_H} EUR/h`, sub: 'Base 38h hebdomadaires', c: '#c6a34e' },
+                { l: 'Montant horaire (38h/sem)', v: `${RMMMG_H} EUR/h`, sub:tText('Base 38h hebdomadaires'), c: '#c6a34e' },
                 { l: 'Montant annuel brut', v: `${RMMMG_AN} EUR`, sub: '× 12 mensualités', c: '#a78bfa' },
               ].map((k, i) => (
                 <div key={i} style={{ padding: '14px', background: 'rgba(255,255,255,0.04)',
@@ -918,7 +918,7 @@ est interrompue pendant plus de 2 mois consécutifs.`}
               ]},
               { cat: '💰 SPF Finances & Fiscal', color: '#60a5fa', links: [
                 { l: 'MyMinfin — Espace professionnel', url: 'https://eservices.minfin.fgov.be', desc: 'TVA, PP, Belcotax, taxe' },
-                { l: 'Belcotax-on-web', url: 'https://eservices.minfin.fgov.be/belcotax-on-web', desc: 'Fiches 281.10/20/30 mandataire' },
+                { l:tText('Belcotax-on-web'), url: 'https://eservices.minfin.fgov.be/belcotax-on-web', desc: 'Fiches 281.10/20/30 mandataire' },
                 { l: 'SPF Finances — Barèmes PP 2026', url: 'https://finances.belgium.be/fr/entreprises/personnel_et_remuneration/precompte_professionnel/baremes', desc: 'Tables officielles précompte' },
                 { l: 'CNT — CCT & RMMMG', url: 'https://www.cnt-nar.be', desc: 'CCT 43/15 — Salaire minimum 2.070,48 EUR' },
               ]},
@@ -931,7 +931,7 @@ est interrompue pendant plus de 2 mois consécutifs.`}
               { cat: '📋 Réglementations & Barèmes', color: '#a78bfa', links: [
                 { l: 'CCT 43/15 — RMMMG officiel', url: 'https://www.cnt-nar.be/CCT-ORIG/cct-043-15.pdf', desc: '2.070,48 EUR — texte CCT complet' },
                 { l: 'ONSS — Cotisations 2026', url: 'https://www.socialsecurity.be/site_fr/employer/general/contributions/index.htm', desc: 'Taux patronaux, réductions' },
-                { l: 'Fedris — Accidents du travail', url: 'https://www.fedris.be', desc: 'Taux cotisation AT par secteur' },
+                { l:tText('Fedris — Accidents du travail'), url: 'https://www.fedris.be', desc: 'Taux cotisation AT par secteur' },
                 { l: 'SPF ETCS — Barèmes salaires CP', url: 'https://emploi.belgique.be/fr/themes/remunerations/baremes-de-salaires', desc: '228 CP — barèmes officiels' },
               ]},
               { cat: '🔌 Outils Administratifs', color: '#f97316', links: [

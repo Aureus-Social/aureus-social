@@ -45,7 +45,7 @@ export const PRIMES_SECTORIELLES={
     details:{base_legale:'CCT CP 118',conditions:['Ancienneté minimum 6 mois','Prorata si entrée/sortie en cours d\'année','Non due si licenciement faute grave','Due si licenciement par l\'employeur (prorata)'],calcul:'Salaire brut mensuel × (mois prestés / 12)',paiement:'Décembre, via fonds sectoriel ou employeur',fiscal:'Taxé comme rémunération — ONSS 13.07% + PP'}},
   {nom:'Eco-chèques',montant:'250 EUR/an',condition:'Au prorata si temps partiel',cat:'avantage',
     details:{base_legale:'CCT 98 CNT + CCT CP 118',conditions:['Max 250 EUR/an temps plein','Prorata temps partiel et ancienneté','Validité 24 mois','Produits écologiques uniquement (liste SPF)'],exoneration:'Exonéré ONSS + IPP si conditions respectées',paiement:'Juin-juillet'}},
-  {nom:'Prime syndicale',montant:'~135 EUR/an',condition:'Membre syndicat',cat:'syndicale',
+  {nom:tText('Prime syndicale'),montant:'~135 EUR/an',condition:'Membre syndicat',cat:'syndicale',
     details:{base_legale:'CCT CP 118 — Fonds social alimentaire',conditions:['Affilié syndicat reconnu','Min 1 jour presté dans la période','Formulaire via syndicat'],paiement:'Annuel via syndicat (mars-avril)',fiscal:'Non imposable'}},
 ],
 '119':[
@@ -59,7 +59,7 @@ export const PRIMES_SECTORIELLES={
     details:{base_legale:'CCT CP 119',conditions:['Ancienneté min 6 mois au 31/12','Prorata entrée/sortie','Non due si faute grave'],calcul:'Salaire brut mensuel × (mois prestés / 12)',paiement:'Décembre',fiscal:'Taxé ONSS 13.07% + PP barème annualisé'}},
   {nom:'Eco-chèques',montant:'250 EUR/an',condition:'Temps plein',cat:'avantage',
     details:{base_legale:'CCT 98 CNT + CCT CP 119',conditions:['250 EUR temps plein, prorata temps partiel','Validité 24 mois','Produits écologiques (liste SPF)'],exoneration:'Exonéré ONSS + IPP',paiement:'Juin-juillet'}},
-  {nom:'Prime syndicale',montant:'~135 EUR/an',condition:'Membre syndicat',cat:'syndicale',
+  {nom:tText('Prime syndicale'),montant:'~135 EUR/an',condition:'Membre syndicat',cat:'syndicale',
     details:{base_legale:'CCT CP 119',conditions:['Affilié syndicat reconnu','Formulaire annuel'],paiement:'Via syndicat mars-avril',fiscal:'Non imposable'}},
 ],
 '200':[
@@ -71,7 +71,7 @@ export const PRIMES_SECTORIELLES={
     details:{base_legale:'AR 28/11/1969 + CCT sectorielle/entreprise',conditions:['1 chèque par jour effectivement presté','Part patronale max 6.91 EUR (exonérée ONSS)','Part travailleur min 1.09 EUR (retenue sur salaire)','Valeur faciale max 8.00 EUR','Pas de cumul avec indemnité repas forfaitaire','Validité 12 mois'],calcul:'Environ 20 jours/mois × valeur faciale. Part patronale: coût employeur déductible. Exemple: 8 EUR × 220 jours = 1,760 EUR/an dont 1,520 EUR patronal.',exoneration:'Part patronale exonérée ONSS + IPP si toutes conditions remplies (1 chèque/jour, part worker ≥ 1.09, nominatif)',paiement:'Mensuel, via émetteur agréé (Sodexo, Edenred, Monizze)'}},
   {nom:'Pension complémentaire PCLI',montant:'1.5% du salaire annuel',condition:'Obligatoire secteur',cat:'pension',
     details:{base_legale:'CCT CP 200 + Loi 28/04/2003 (LPC)',conditions:['Obligatoire pour tous les employeurs CP 200','Organisme: assureur sectoriel ou fonds de pension','Contribution uniquement patronale (pas de part travailleur)','Acquis après 1 an d\'affiliation','Droit au transfert en cas de changement d\'employeur'],calcul:'1.5% × salaire annuel brut. Ex: 3,000 EUR/mois × 12 = 36,000 EUR × 1.5% = 540 EUR/an. Capital estimé après 20 ans (rendement 2%): ~13,176 EUR.',organisme:'Fonds sectoriel CP 200 ou assureur groupe',fiscal:'Taxe Wyninckx si capital > seuil (actuellement ~32,472 EUR). Taxe finale: 10.09% (anticipative) ou 16.66% à 60 ans.'}},
-  {nom:'Prime syndicale',montant:'~145 EUR/an',condition:'Membre syndicat',cat:'syndicale',
+  {nom:tText('Prime syndicale'),montant:'~145 EUR/an',condition:'Membre syndicat',cat:'syndicale',
     details:{base_legale:'CCT sectorielle CP 200',conditions:['Être affilié à un syndicat reconnu (FGTB, CSC, CGSLB)','Avoir presté au moins 1 jour dans la période de référence','Introduire formulaire via le syndicat','Non cumulable entre syndicats'],montants:'FGTB/CSC: ~145 EUR — CGSLB: ~135 EUR',paiement:'Annuel, via le syndicat (généralement mars-avril pour l\'année précédente)',fiscal:'Non imposable (prime syndicale forfaitaire)'}},
 ],
 '302':[
@@ -89,7 +89,7 @@ export const PRIMES_SECTORIELLES={
     details:{base_legale:'CCT CP 302',conditions:['Ancienneté min 6 mois','Prorata entrée/sortie','Versé via fonds sectoriel Horeca Forma ou employeur'],paiement:'Décembre',fiscal:'Taxé ONSS + PP'}},
   {nom:'Chèques-repas',montant:'8 EUR/jour',condition:'Si pas de repas en nature',cat:'avantage',
     details:{base_legale:'CCT CP 302 + AR 28/11/1969',conditions:['Uniquement si l\'employeur ne fournit PAS de repas en nature','Part patronale max 6.91 EUR','Part travailleur min 1.09 EUR','1 chèque par jour presté'],exoneration:'Exonéré ONSS + IPP si conditions remplies',cumul:'NON cumulable avec repas en nature'}},
-  {nom:'Prime syndicale',montant:'~135 EUR/an',condition:'Membre syndicat',cat:'syndicale',
+  {nom:tText('Prime syndicale'),montant:'~135 EUR/an',condition:'Membre syndicat',cat:'syndicale',
     details:{base_legale:'CCT CP 302',conditions:['Affilié syndicat reconnu','Formulaire annuel via syndicat'],paiement:'Mars-avril via syndicat',fiscal:'Non imposable'}},
 ],
 '124':[
@@ -107,7 +107,7 @@ export const PRIMES_SECTORIELLES={
     details:{base_legale:'CCT CP 124',conditions:['Ancienneté dans le secteur','Prorata prestations','Via fonds sectoriel Constructiv'],paiement:'Décembre via Constructiv ou employeur',fiscal:'ONSS + PP'}},
   {nom:'Eco-chèques',montant:'250 EUR/an',condition:'Temps plein',cat:'avantage',
     details:{base_legale:'CCT 98 CNT + CCT CP 124',conditions:['250 EUR temps plein, prorata temps partiel','Validité 24 mois'],exoneration:'Exonéré ONSS + IPP',paiement:'Juin-juillet'}},
-  {nom:'Prime syndicale',montant:'~145 EUR/an',condition:'Membre syndicat',cat:'syndicale',
+  {nom:tText('Prime syndicale'),montant:'~145 EUR/an',condition:'Membre syndicat',cat:'syndicale',
     details:{base_legale:'CCT CP 124 — Constructiv',conditions:['Affilié syndicat reconnu','Construction: prime parmi les plus élevées'],paiement:'Mars-avril via syndicat',fiscal:'Non imposable'}},
   {nom:'Indemnité outillage',montant:'~0.60 EUR/jour',condition:'Si outils propres',cat:'conditions',
     details:{base_legale:'CCT CP 124',conditions:['Le travailleur utilise ses propres outils','Indemnité forfaitaire par jour presté','Exonérée ONSS si montant raisonnable'],calcul:'~0.60 EUR/jour presté. ~132 EUR/an (220 jours).',exoneration:'Exonéré ONSS comme frais propres à l\'employeur'}},
@@ -123,7 +123,7 @@ export const PRIMES_SECTORIELLES={
     details:{base_legale:'CCT CP 322.01 — Déplacements titres-services',conditions:['Remboursement des déplacements ENTRE clients','Le trajet domicile → 1er client n\'est PAS remboursé','Le trajet dernier client → domicile n\'est PAS remboursé','Transport en commun: remboursement abonnement (80-100% selon CCT)'],calcul:'Véhicule privé: 0.15 EUR/km entre clients. Transport en commun: abonnement remboursé.',fiscal:'Exonéré ONSS comme frais de déplacement professionnel'}},
   {nom:'Indemnité vêtements',montant:'~1.64 EUR/jour',condition:'Ou fourniture vêtements',cat:'conditions',
     details:{base_legale:'CCT CP 322.01 — Vêtements de travail',conditions:['Soit l\'employeur fournit les vêtements de travail + entretien','Soit indemnité forfaitaire ~1.64 EUR/jour presté','Le travailleur ne peut pas être obligé de fournir ses propres vêtements'],calcul:'~1.64 EUR × 220 jours = ~361 EUR/an',exoneration:'Exonéré ONSS si forfait raisonnable (frais propres employeur)'}},
-  {nom:'Prime syndicale',montant:'~100 EUR/an',condition:'Membre syndicat',cat:'syndicale',
+  {nom:tText('Prime syndicale'),montant:'~100 EUR/an',condition:'Membre syndicat',cat:'syndicale',
     details:{base_legale:'CCT CP 322.01',conditions:['Affilié syndicat reconnu'],paiement:'Via syndicat mars-avril',fiscal:'Non imposable'}},
 ],
 '330':[
@@ -141,7 +141,7 @@ export const PRIMES_SECTORIELLES={
     details:{base_legale:'CCT CP 330',conditions:['Ancienneté min 6 mois','Prorata entrée/sortie'],paiement:'Décembre',fiscal:'ONSS + PP'}},
   {nom:'Prime d\'attractivité Maribel',montant:'Variable selon fonds',condition:'Via Fonds Maribel',cat:'avantage',
     details:{base_legale:'Fonds Maribel Social — Accords non-marchand',conditions:['Financement via réduction structurelle ONSS','Varie selon sous-secteur et disponibilités du fonds','Peut inclure: prime annuelle, complément barémique'],special:'Le Maribel social finance aussi la création d\'emplois supplémentaires dans le secteur.'}},
-  {nom:'Prime syndicale',montant:'~135 EUR/an',condition:'Membre syndicat',cat:'syndicale',
+  {nom:tText('Prime syndicale'),montant:'~135 EUR/an',condition:'Membre syndicat',cat:'syndicale',
     details:{base_legale:'CCT CP 330',conditions:['Affilié syndicat reconnu'],paiement:'Mars-avril via syndicat',fiscal:'Non imposable'}},
 ],
 '111':[
@@ -157,7 +157,7 @@ export const PRIMES_SECTORIELLES={
     details:{base_legale:'CCT CP 111',conditions:['Ancienneté min 6 mois','Prorata prestations'],paiement:'Décembre',fiscal:'ONSS + PP'}},
   {nom:'Eco-chèques',montant:'250 EUR/an',condition:'Temps plein',cat:'avantage',
     details:{base_legale:'CCT 98 CNT + CCT CP 111',conditions:['250 EUR temps plein, prorata','Validité 24 mois'],exoneration:'Exonéré ONSS + IPP'}},
-  {nom:'Prime syndicale',montant:'~135 EUR/an',condition:'Membre syndicat',cat:'syndicale',
+  {nom:tText('Prime syndicale'),montant:'~135 EUR/an',condition:'Membre syndicat',cat:'syndicale',
     details:{base_legale:'CCT CP 111 — Fonds social métallurgie',conditions:['Affilié syndicat reconnu'],paiement:'Mars-avril',fiscal:'Non imposable'}},
 ],
 '140':[
@@ -177,7 +177,7 @@ export const PRIMES_SECTORIELLES={
     details:{base_legale:'CCT CP 140',conditions:['Ancienneté min 6 mois','Prorata'],paiement:'Décembre',fiscal:'ONSS + PP'}},
   {nom:'Chèques-repas',montant:'7-8 EUR/jour',condition:'Par jour presté',cat:'avantage',
     details:{base_legale:'CCT CP 140 + AR 28/11/1969',conditions:['1 chèque par jour presté','Part patronale 5.91-6.91 EUR','Part travailleur min 1.09 EUR'],exoneration:'Exonéré ONSS + IPP si conditions',cumul:'Non cumulable avec indemnité séjour pour le même jour'}},
-  {nom:'Prime syndicale',montant:'~135 EUR/an',condition:'Membre syndicat',cat:'syndicale',
+  {nom:tText('Prime syndicale'),montant:'~135 EUR/an',condition:'Membre syndicat',cat:'syndicale',
     details:{base_legale:'CCT CP 140 — Fonds social transport',conditions:['Affilié syndicat reconnu'],paiement:'Mars-avril',fiscal:'Non imposable'}},
 ],
 '121':[
@@ -191,7 +191,7 @@ export const PRIMES_SECTORIELLES={
     details:{base_legale:'CCT CP 121 — Frais de déplacement',conditions:['Déplacement entre chantiers/sites de nettoyage','Domicile-1er site: intervention transport en commun','Véhicule privé entre sites: 0.15 EUR/km'],exoneration:'Exonéré ONSS comme frais professionnels'}},
   {nom:'Prime fin d\'année',montant:'Selon ancienneté',condition:'Au 31/12',cat:'annuelle',
     details:{base_legale:'CCT CP 121',conditions:['Variable selon ancienneté et CCT entreprise','Prorata prestations'],paiement:'Décembre',fiscal:'ONSS + PP'}},
-  {nom:'Prime syndicale',montant:'~100 EUR/an',condition:'Membre syndicat',cat:'syndicale',
+  {nom:tText('Prime syndicale'),montant:'~100 EUR/an',condition:'Membre syndicat',cat:'syndicale',
     details:{base_legale:'CCT CP 121',conditions:['Affilié syndicat reconnu'],paiement:'Mars-avril',fiscal:'Non imposable'}},
 ],
 '152':[
@@ -199,7 +199,7 @@ export const PRIMES_SECTORIELLES={
     details:{base_legale:'Statut pécuniaire personnel enseignement subventionné',conditions:['Allocation de foyer: si conjoint ne bénéficie pas d\'une allocation similaire','Allocation de résidence: si pas de conjoint ou conjoint bénéficie déjà','Montants indexés selon barèmes fonction publique'],calcul:'Foyer: ~250-350 EUR/mois selon ancienneté. Résidence: ~125-175 EUR/mois. Indexé avec le pivot.'}},
   {nom:'Prime fin d\'année',montant:'1 mois brut',condition:'Au 31/12',cat:'annuelle',
     details:{base_legale:'CCT CP 152 / Statut enseignement',conditions:['Ancienneté dans le secteur','Prorata prestations'],paiement:'Décembre',fiscal:'ONSS + PP'}},
-  {nom:'Prime syndicale',montant:'~100 EUR/an',condition:'Membre syndicat',cat:'syndicale',
+  {nom:tText('Prime syndicale'),montant:'~100 EUR/an',condition:'Membre syndicat',cat:'syndicale',
     details:{base_legale:'CCT CP 152',conditions:['Affilié syndicat reconnu'],paiement:'Mars-avril',fiscal:'Non imposable'}},
 ],
 };
@@ -343,12 +343,12 @@ export const PENSION_SECTORIELLE={
 export const FONDS_SECTORIELS={
 '124':{nom:'Constructiv (ex-FBZ-FSE)',url:'constructiv.be',cotisation:'~12% masse salariale',services:['Timbres fidélité','Timbres intempéries','Formation sectorielle','Pension complémentaire','Prévention sécurité','Carte C3.2A']},
 '302':{nom:'Horeca Forma',url:'horecaforma.be',cotisation:'Variable',services:['Formation sectorielle','Aide à l\'emploi','Information juridique','Prime de fin d\'année (via fonds)']},
-'330':{nom:'Fonds Maribel Social',url:'maribel.be',cotisation:'Réduction structurelle',services:['Création d\'emplois supplémentaires','Formation','Prime d\'attractivité','Pension complémentaire']},
-'200':{nom:'Fonds social CP 200',url:'fs200.be',cotisation:'0.10% masse salariale',services:['Formation','Outplacement','Groupes à risque','Pension complémentaire PCLI']},
-'111':{nom:'Fonds social Métal',url:'fondsmetallurgie.be',cotisation:'Variable',services:['Formation technique','Prime syndicale','Prépension sectorielle','Complément chômage']},
-'118':{nom:'Fonds social Alimentaire',url:'fondsalimentaire.be',cotisation:'Variable',services:['Formation HACCP','Prime syndicale','Pension complémentaire','Prévention']},
-'140':{nom:'Fonds social Transport',url:'fondstransport.be',cotisation:'Variable',services:['Formation Code 95','Prime syndicale','Pension complémentaire','Outplacement']},
-'121':{nom:'Fonds social Nettoyage',url:'fondsnettoyage.be',cotisation:'Variable',services:['Formation','Prime syndicale','Vêtements de travail','Pension complémentaire']},
+'330':{nom:'Fonds Maribel Social',url:'maribel.be',cotisation:'Réduction structurelle',services:['Création d\'emplois supplémentaires',tText('Formation'),'Prime d\'attractivité','Pension complémentaire']},
+'200':{nom:'Fonds social CP 200',url:'fs200.be',cotisation:'0.10% masse salariale',services:[tText('Formation'),'Outplacement','Groupes à risque','Pension complémentaire PCLI']},
+'111':{nom:'Fonds social Métal',url:'fondsmetallurgie.be',cotisation:'Variable',services:['Formation technique',tText('Prime syndicale'),'Prépension sectorielle','Complément chômage']},
+'118':{nom:'Fonds social Alimentaire',url:'fondsalimentaire.be',cotisation:'Variable',services:['Formation HACCP',tText('Prime syndicale'),'Pension complémentaire','Prévention']},
+'140':{nom:'Fonds social Transport',url:'fondstransport.be',cotisation:'Variable',services:['Formation Code 95',tText('Prime syndicale'),'Pension complémentaire','Outplacement']},
+'121':{nom:'Fonds social Nettoyage',url:'fondsnettoyage.be',cotisation:'Variable',services:[tText('Formation'),tText('Prime syndicale'),'Vêtements de travail','Pension complémentaire']},
 };
 
 // ════════════════════════════════════════════════════════════
@@ -396,14 +396,14 @@ export const INDEXATION_CP={
 export const JOURS_FERIES_2026=[
   {date:'01/01/2026',nom:'Jour de l\'An',jour:'Jeudi'},
   {date:'05/04/2026',nom:'Lundi de Pâques',jour:'Lundi'},
-  {date:'01/05/2026',nom:'Fête du Travail',jour:'Vendredi'},
-  {date:'14/05/2026',nom:'Ascension',jour:'Jeudi'},
+  {date:'01/05/2026',nom:tText('Fête du Travail'),jour:'Vendredi'},
+  {date:'14/05/2026',nom:tText('Ascension'),jour:'Jeudi'},
   {date:'25/05/2026',nom:'Lundi de Pentecôte',jour:'Lundi'},
-  {date:'21/07/2026',nom:'Fête nationale',jour:'Mardi'},
-  {date:'15/08/2026',nom:'Assomption',jour:'Samedi'},
-  {date:'01/11/2026',nom:'Toussaint',jour:'Dimanche'},
-  {date:'11/11/2026',nom:'Armistice',jour:'Mercredi'},
-  {date:'25/12/2026',nom:'Noël',jour:'Vendredi'},
+  {date:'21/07/2026',nom:tText('Fête nationale'),jour:'Mardi'},
+  {date:'15/08/2026',nom:tText('Assomption'),jour:'Samedi'},
+  {date:'01/11/2026',nom:tText('Toussaint'),jour:'Dimanche'},
+  {date:'11/11/2026',nom:tText('Armistice'),jour:'Mercredi'},
+  {date:'25/12/2026',nom:tText('Noël'),jour:'Vendredi'},
 ];
 
 // ════════════════════════════════════════════════════════════
@@ -452,7 +452,7 @@ export function TransversalCPView({cp,initialTab,barData}){
         {['nuit','equipe','conditions','annuelle','avantage','pension','syndicale'].map(cat=>{
           const catPrimes=primes.filter(p=>p.cat===cat);
           if(catPrimes.length===0)return null;
-          const catNames={nuit:'Majorations horaires',equipe:'Primes d\'équipe',conditions:'Conditions de travail',annuelle:'Primes annuelles',avantage:tText('Avantages'),pension:'Pension',syndicale:'Prime syndicale'};
+          const catNames={nuit:'Majorations horaires',equipe:'Primes d\'équipe',conditions:'Conditions de travail',annuelle:'Primes annuelles',avantage:tText('Avantages'),pension:'Pension',syndicale:tText('Prime syndicale')};
           return <C key={cat} title={catNames[cat]||cat} color={catColors[cat]}>
             {catPrimes.map((p,i)=>{const k=cat+'-'+i;const isExp=expanded[k];const d=p.details;return <div key={i} style={{borderBottom:'1px solid rgba(255,255,255,.03)'}}>
               <div onClick={()=>d&&setExpanded(prev=>({...prev,[k]:!prev[k]}))} style={{padding:'10px 0',cursor:d?'pointer':'default',display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
@@ -468,7 +468,7 @@ export function TransversalCPView({cp,initialTab,barData}){
                   {d.conditions&&<div style={{marginBottom:10}}><div style={{fontSize:9,fontWeight:700,color:'#3b82f6',textTransform:'uppercase',letterSpacing:1,marginBottom:4}}>{tText('Conditions')}</div>{d.conditions.map((c,j)=><div key={j} style={{fontSize:10.5,color:'#ccc',padding:'2px 0',paddingLeft:10,borderLeft:'2px solid rgba(59,130,246,.2)'}}>• {c}</div>)}</div>}
                   {d.calcul&&<div style={{marginBottom:10}}><div style={{fontSize:9,fontWeight:700,color:'#22c55e',textTransform:'uppercase',letterSpacing:1,marginBottom:4}}>{tText('Calcul')}</div><div style={{fontSize:11,color:'#e8e6e0',lineHeight:1.5}}>{d.calcul}</div></div>}
                   {d.montants&&<div style={{marginBottom:10}}><div style={{fontSize:9,fontWeight:700,color:'#eab308',textTransform:'uppercase',letterSpacing:1,marginBottom:4}}>{tText('Montants')}</div><div style={{fontSize:11,color:'#e8e6e0'}}>{d.montants}</div></div>}
-                  {d.exoneration&&<div style={{marginBottom:10}}><div style={{fontSize:9,fontWeight:700,color:'#a855f7',textTransform:'uppercase',letterSpacing:1,marginBottom:4}}>Exonération ONSS/IPP</div><div style={{fontSize:11,color:'#e8e6e0'}}>{d.exoneration}</div></div>}
+                  {d.exoneration&&<div style={{marginBottom:10}}><div style={{fontSize:9,fontWeight:700,color:'#a855f7',textTransform:'uppercase',letterSpacing:1,marginBottom:4}}>{tText('Exonération ONSS/IPP')}</div><div style={{fontSize:11,color:'#e8e6e0'}}>{d.exoneration}</div></div>}
                   {d.fiscal&&<div style={{marginBottom:10}}><div style={{fontSize:9,fontWeight:700,color:'#fb923c',textTransform:'uppercase',letterSpacing:1,marginBottom:4}}>{tText('Traitement fiscal')}</div><div style={{fontSize:11,color:'#e8e6e0'}}>{d.fiscal}</div></div>}
                   {d.paiement&&<div style={{marginBottom:10}}><div style={{fontSize:9,fontWeight:700,color:'#06b6d4',textTransform:'uppercase',letterSpacing:1,marginBottom:4}}>{tText('Paiement')}</div><div style={{fontSize:11,color:'#e8e6e0'}}>{d.paiement}</div></div>}
                   {d.organisme&&<div style={{marginBottom:10}}><div style={{fontSize:9,fontWeight:700,color:'#06b6d4',textTransform:'uppercase',letterSpacing:1,marginBottom:4}}>{tText('Organisme')}</div><div style={{fontSize:11,color:'#e8e6e0'}}>{d.organisme}</div></div>}
@@ -536,7 +536,7 @@ export function TransversalCPView({cp,initialTab,barData}){
         <Row l="Obligatoire" v={pension.obligatoire?tText('Oui'):tText('Non')} c={pension.obligatoire?'#4ade80':'#888'}/>
         <div style={{marginTop:8,fontSize:10,color:'#888'}}>{pension.note}</div>
         <div style={{marginTop:12,padding:10,background:'rgba(198,163,78,.04)',borderRadius:6,fontSize:10}}>
-          <div style={{color:'#c6a34e',fontWeight:600}}>Exemple pour un brut de 3.000 EUR/mois:</div>
+          <div style={{color:'#c6a34e',fontWeight:600}}>{tText('Exemple pour un brut de 3.000 EUR/mois:')}</div>
           <div style={{color:'#888',marginTop:4}}>Cotisation annuelle: {fmt(3000*12*pension.taux/100)} EUR — Capital après 20 ans (2% rendement): ~{fi(3000*12*pension.taux/100*20*1.22)} EUR</div>
         </div>
       </C>:<div style={{padding:20,textAlign:'center',color:'#888'}}>Pas de plan de pension sectoriel obligatoire identifié pour cette CP. L'employeur peut mettre en place un plan d'entreprise (LPC).</div>}

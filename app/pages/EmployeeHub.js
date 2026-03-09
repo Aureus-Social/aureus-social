@@ -84,7 +84,7 @@ export function DashboardRHV2({s,d,props_tab}){
         <div style={{flex:1}}><div style={{fontSize:11,color:'#e8e6e0'}}>{ev.name}</div><div style={{fontSize:9,color:'#888'}}>{ev.co}</div></div>
         <Badge text={ev.event} color={ev.c}/>
       </div>)}
-      {events.length===0&&<div style={{textAlign:'center',color:'#888',padding:20}}>Aucun evenement a venir</div>}
+      {events.length===0&&<div style={{textAlign:'center',color:'#888',padding:20}}>{tText('Aucun evenement a venir')}</div>}
     </C>}
     {tab==='alerts'&&<C title="Donnees incompletes">
       {noNISS>0&&<Row l={'NISS manquants: '+noNISS+' employe(s)'} v="⚠️" c="#ef4444"/>}
@@ -238,7 +238,7 @@ td{padding:4px;border:1px solid #ddd;font-size:8.5px}
 
     <div style={{border:'1px solid rgba(198,163,78,.1)',borderRadius:14,overflow:'hidden'}}>
       <div style={{display:'grid',gridTemplateColumns:'40px 1fr 1fr 120px 60px 80px 80px 80px',padding:'8px 12px',background:'rgba(198,163,78,.06)',fontSize:8,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'.5px'}}>
-        <div>N°</div><div>{tText('Nom')}</div><div>Prenom</div><div>{tText('NISS')}</div><div>Contrat</div><div>Debut</div><div>Fonction</div><div style={{textAlign:'right'}}>{tText('Brut')}</div>
+        <div>N°</div><div>{tText('Nom')}</div><div>Prenom</div><div>{tText('NISS')}</div><div>{tText('Contrat')}</div><div>Debut</div><div>Fonction</div><div style={{textAlign:'right'}}>{tText('Brut')}</div>
       </div>
       <div style={{maxHeight:500,overflowY:'auto'}}>
         {emps.map((e,i)=><div key={i} style={{display:'grid',gridTemplateColumns:'40px 1fr 1fr 120px 60px 80px 80px 80px',padding:'6px 12px',borderBottom:'1px solid rgba(255,255,255,.02)',fontSize:11,alignItems:'center'}}>
@@ -251,7 +251,7 @@ td{padding:4px;border:1px solid #ddd;font-size:8.5px}
           <span style={{fontSize:10,color:'#888'}}>{e.function||e.titre||'—'}</span>
           <span style={{textAlign:'right',fontFamily:'monospace',color:'#c6a34e'}}>{fmt(+(e.monthlySalary||e.gross||0))}</span>
         </div>)}
-        {emps.length===0&&<div style={{padding:30,textAlign:'center',color:'#888'}}>Aucun employé pour ce client</div>}
+        {emps.length===0&&<div style={{padding:30,textAlign:'center',color:'#888'}}>{tText('Aucun employé pour ce client')}</div>}
       </div>
     </div>
     <div style={{marginTop:12,padding:10,background:'rgba(198,163,78,.03)',borderRadius:8,fontSize:10,color:'#888'}}>
@@ -339,10 +339,10 @@ export function PortailEmployeV2({s,d}){
     {tab==='demandes'&&<div>
       <C title="Nouvelle demande">
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:8,marginBottom:10}}>
-          <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Type')}</label><select value={newDem.type} onChange={e=>setNewDem(p=>({...p,type:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}><option value="conge">Conge</option><option value="maladie">{tText('Maladie')}</option><option value="formation">Formation</option><option value="teletravail">Teletravail</option><option value="attestation">Attestation</option><option value="autre">Autre</option></select></div>
+          <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Type')}</label><select value={newDem.type} onChange={e=>setNewDem(p=>({...p,type:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}><option value="conge">Conge</option><option value="maladie">{tText('Maladie')}</option><option value="formation">{tText('Formation')}</option><option value="teletravail">Teletravail</option><option value="attestation">Attestation</option><option value="autre">{tText('Autre')}</option></select></div>
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Date debut</label><input type="date" value={newDem.dateDebut} onChange={e=>setNewDem(p=>({...p,dateDebut:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}/></div>
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Date fin</label><input type="date" value={newDem.dateFin} onChange={e=>setNewDem(p=>({...p,dateFin:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}/></div>
-          <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Motif</label><input value={newDem.motif} onChange={e=>setNewDem(p=>({...p,motif:e.target.value}))} placeholder="Optionnel" style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}/></div>
+          <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Motif')}</label><input value={newDem.motif} onChange={e=>setNewDem(p=>({...p,motif:e.target.value}))} placeholder="Optionnel" style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}/></div>
         </div>
         <button onClick={submitDemande} style={{padding:'8px 20px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:12,cursor:'pointer'}}>📝 Soumettre</button>
       </C>
@@ -351,12 +351,12 @@ export function PortailEmployeV2({s,d}){
           <Badge text={dm.type} color="#c6a34e"/><span style={{color:'#e8e6e0',fontSize:11,flex:1}}>{dm.dateDebut}{dm.dateFin?' → '+dm.dateFin:''} {dm.motif&&'— '+dm.motif}</span>
           <Badge text={dm.status==='en_attente'?tText('En attente'):dm.status==='approuve'?'Approuve':'Refuse'} color={dm.status==='en_attente'?'#eab308':dm.status==='approuve'?'#4ade80':'#ef4444'}/>
         </div>)}
-        {demandes.length===0&&<div style={{textAlign:'center',padding:20,color:'#888',fontSize:11}}>Aucune demande</div>}
+        {demandes.length===0&&<div style={{textAlign:'center',padding:20,color:'#888',fontSize:11}}>{tText('Aucune demande')}</div>}
       </C>
     </div>}
 
     {tab==='absences'&&<C title="Historique absences">
-      {(emp.absences||[]).length===0&&<div style={{textAlign:'center',padding:20,color:'#888'}}>Aucune absence enregistree</div>}
+      {(emp.absences||[]).length===0&&<div style={{textAlign:'center',padding:20,color:'#888'}}>{tText('Aucune absence enregistree')}</div>}
       {(emp.absences||[]).map((ab,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
         <Badge text={ab.type} color={ab.type==='maladie'?'#ef4444':ab.type==='conge'?'#22c55e':'#3b82f6'}/>
         <span style={{fontSize:11,color:'#e8e6e0',flex:1}}>{ab.dateDebut||ab.from||'—'} → {ab.dateFin||ab.to||'—'}</span>
@@ -394,7 +394,7 @@ export function GestionInterimairesV2({s,d}){
 
     {tab==='liste'&&<div style={{border:'1px solid rgba(198,163,78,.1)',borderRadius:14,overflow:'hidden'}}>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 100px 70px 60px 80px 80px 30px',padding:'8px 12px',background:'rgba(198,163,78,.06)',fontSize:9,fontWeight:600,color:'#c6a34e'}}>
-        <div>{tText('Nom')}</div><div>{tText('Agence')}</div><div>{tText('NISS')}</div><div>Heures</div><div>Coeff</div><div style={{textAlign:'right'}}>{tText('Brut')}</div><div style={{textAlign:'right'}}>Cout</div><div/>
+        <div>{tText('Nom')}</div><div>{tText('Agence')}</div><div>{tText('NISS')}</div><div>Heures</div><div>{tText('Coeff')}</div><div style={{textAlign:'right'}}>{tText('Brut')}</div><div style={{textAlign:'right'}}>{tText('Cout')}</div><div/>
       </div>
       {ints.map((it,i)=>{const ag=agences.find(a=>a.id===it.agence);return <div key={it.id} style={{display:'grid',gridTemplateColumns:'1fr 1fr 100px 70px 60px 80px 80px 30px',padding:'6px 12px',borderBottom:'1px solid rgba(255,255,255,.02)',fontSize:11,alignItems:'center'}}>
         <span style={{color:'#e8e6e0',fontWeight:500}}>{it.first} {it.last}</span>
@@ -419,7 +419,7 @@ export function GestionInterimairesV2({s,d}){
           </div>
         </div>
       </div>)}
-      {ints.length===0&&<div style={{textAlign:'center',padding:20,color:'#888'}}>Aucun contrat interimaire</div>}
+      {ints.length===0&&<div style={{textAlign:'center',padding:20,color:'#888'}}>{tText('Aucun contrat interimaire')}</div>}
     </C>}
 
     {tab==='couts'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
@@ -436,7 +436,7 @@ export function GestionInterimairesV2({s,d}){
       <div onClick={e=>e.stopPropagation()} style={{background:'#0d1117',border:'1px solid rgba(198,163,78,.2)',borderRadius:16,padding:24,width:500}}>
         <h3 style={{fontSize:16,fontWeight:700,color:'#c6a34e',marginBottom:14}}>Nouvel interimaire</h3>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-          {[{l:'Prenom',k:'first'},{l:tText('Nom'),k:'last'},{l:'NISS',k:'niss'},{l:'Brut/h (€)',k:'brutH',t:'number'},{l:'Heures/mois',k:'heures',t:'number'},{l:'Coefficient',k:'coeff',t:'number'},{l:'Date debut',k:'debut',t:'date'},{l:'Date fin',k:'fin',t:'date'},{l:'Motif',k:'motif'}].map((f,i)=>
+          {[{l:'Prenom',k:'first'},{l:tText('Nom'),k:'last'},{l:'NISS',k:'niss'},{l:tText('Brut/h (€)'),k:'brutH',t:'number'},{l:'Heures/mois',k:'heures',t:'number'},{l:tText('Coefficient'),k:'coeff',t:'number'},{l:'Date debut',k:'debut',t:'date'},{l:'Date fin',k:'fin',t:'date'},{l:tText('Motif'),k:'motif'}].map((f,i)=>
             <div key={i}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{f.l}</label><input type={f.t||'text'} value={ni[f.k]} onChange={e=>setNi(p=>({...p,[f.k]:f.t==='number'?+e.target.value:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit',boxSizing:'border-box'}}/></div>
           )}
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Agence')}</label><select value={ni.agence} onChange={e=>setNi(p=>({...p,agence:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>{agences.map(a=><option key={a.id} value={a.id}>{a.n}</option>)}</select></div>

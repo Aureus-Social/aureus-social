@@ -692,7 +692,7 @@ function FloatingLegalAgent({onAction}){
             display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,fontWeight:800,color:'#0d0d0d'}}>⚖️</div>
           <div>
             <div style={{fontSize:14,fontWeight:700,color:'#c6a34e'}}>{lb.title}</div>
-            <div style={{fontSize:10,color:'rgba(198,163,78,.5)'}}>Aureus Social Pro</div>
+            <div style={{fontSize:10,color:'rgba(198,163,78,.5)'}}>{tText('Aureus Social Pro')}</div>
           </div>
         </div>
         <div style={{display:'flex',gap:6,alignItems:'center'}}>

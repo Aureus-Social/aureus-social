@@ -141,7 +141,7 @@ function AdminDashboard_Main({s,d}){
       <div style={{display:'flex',gap:12,marginBottom:20,flexWrap:'wrap'}}>
         <Stat icon="👤" label={t('admin.users_total')||'Utilisateurs total'} value={totalUsers} sub={`${activeUsers} ${t('admin.active')||'actifs'}`} color="#c6a34e"/>
         <Stat icon="🏢" label={t('admin.clients')||'Dossiers clients'} value={totalClients} sub={`${activeClients} actifs`} color="#60a5fa"/>
-        <Stat icon="👥" label={t('admin.workers')||'Travailleurs'} value={totalTrav} sub={`${activeTrav} actifs`} color="#4ade80"/>
+        <Stat icon="👥" label={t('admin.workers')||tText('Travailleurs')} value={totalTrav} sub={`${activeTrav} actifs`} color="#4ade80"/>
         <Stat icon="📄" label={t('admin.payslips')||tText('Fiches de paie')} value={totalFiches} sub={`${fichesMois} ${t('admin.this_month')||'ce mois'}`} color="#a78bfa"/>
         <Stat icon="💰" label={t('admin.revenue')||'Revenu mensuel est.'} value={`€${revenuMensuelEstime.toLocaleString()}`} sub={`€${revenuAnnuelEstime.toLocaleString()}/an`} color="#c6a34e"/>
       </div>
@@ -229,9 +229,9 @@ function AdminDashboard_Main({s,d}){
 
       <div style={{background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)",overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'2.5fr 1.5fr 1fr 1fr 1fr 1fr 1fr',padding:'10px 14px',background:"rgba(198,163,78,.06)",borderBottom:'1px solid rgba(198,163,78,.1)',fontSize:10,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:.5}}>
-          <div>{tText('Société')}</div><div>TVA / ONSS</div><div>CP</div><div>{tText('Secteur')}</div><div>Travailleurs</div><div>Inscription</div><div>{tText('Statut')}</div>
+          <div>{tText('Société')}</div><div>TVA / ONSS</div><div>CP</div><div>{tText('Secteur')}</div><div>{tText('Travailleurs')}</div><div>Inscription</div><div>{tText('Statut')}</div>
         </div>
-        {clients.length===0?<div style={{padding:30,textAlign:'center',color:'#5e5c56',fontSize:12}}>Aucun dossier client.</div>:
+        {clients.length===0?<div style={{padding:30,textAlign:'center',color:'#5e5c56',fontSize:12}}>{tText('Aucun dossier client.')}</div>:
         clients.filter(c=>{
           if(!search)return true;
           const s=search.toLowerCase();
@@ -348,7 +348,7 @@ function AdminDashboard_Main({s,d}){
       
       <div style={{background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)",overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'1.5fr 1.5fr 2fr 2fr 2fr',padding:'10px 14px',background:"rgba(198,163,78,.06)",borderBottom:'1px solid rgba(198,163,78,.1)',fontSize:10,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:.5}}>
-          <div>{tText('Date')}</div><div>Utilisateur</div><div>{tText('Action')}</div><div>Table</div><div>Details</div>
+          <div>{tText('Date')}</div><div>Utilisateur</div><div>{tText('Action')}</div><div>Table</div><div>{tText('Details')}</div>
         </div>
         {audit.length===0?<div style={{padding:30,textAlign:'center',color:'#5e5c56',fontSize:12}}>
           Aucune entree dans le journal d'audit. Les actions seront enregistrees automatiquement.
@@ -382,7 +382,7 @@ function AdminDashboard_Main({s,d}){
       {/* Facturation par client */}
       <div style={{background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)",overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'2.5fr 1fr 1fr 1fr 1fr 1fr',padding:'10px 14px',background:"rgba(198,163,78,.06)",borderBottom:'1px solid rgba(198,163,78,.1)',fontSize:10,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:.5}}>
-          <div>Client</div><div>Travailleurs</div><div>Tarif/fiche</div><div>Mensuel</div><div>Annuel</div><div>Entree</div>
+          <div>Client</div><div>{tText('Travailleurs')}</div><div>Tarif/fiche</div><div>{tText('Mensuel')}</div><div>{tText('Annuel')}</div><div>Entree</div>
         </div>
         {clients.filter(c=>c.active).map((c,i)=>{
           const nb=travParClient[c.id]||0;
@@ -580,11 +580,11 @@ function HistoriquePage({s}) {
   const now = new Date();
   const events = [
     {icon:'💰',label:'Fiche de paie générée',detail:'Salem Abdellah — Mars 2026 — 2,800€ brut',ts:'07/03/2026 14:32',type:'paie'},
-    {icon:'📤',label:'Dimona IN simulée',detail:'Réf SIM-1741360000 — Salem Abdellah',ts:'07/03/2026 09:15',type:'dimona'},
+    {icon:'📤',label:tText('Dimona IN simulée'),detail:'Réf SIM-1741360000 — Salem Abdellah',ts:'07/03/2026 09:15',type:'dimona'},
     {icon:'✏️',label:'Employé modifié',detail:'Salem Abdellah — NISS, salaire mis à jour',ts:'06/03/2026 16:44',type:'rh'},
     {icon:'⚙️',label:'Paramètres société mis à jour',detail:'Aureus IA SPRL — BCE, ONSS, adresse',ts:'05/03/2026 11:20',type:'admin'},
     {icon:'📥',label:'Import CSV travailleurs',detail:'3 enregistrements importés',ts:'04/03/2026 09:00',type:'import'},
-    {icon:'📋',label:'DmfA T4/2025 préparée',detail:'0 travailleur déclaré — période test',ts:'01/03/2026 08:30',type:'onss'},
+    {icon:'📋',label:tText('DmfA T4/2025 préparée'),detail:'0 travailleur déclaré — période test',ts:'01/03/2026 08:30',type:'onss'},
     {icon:'🔐',label:'Première connexion admin',detail:'info@aureus-ia.com — IP 91.183.xx.xx',ts:'02/02/2026 10:00',type:'auth'},
   ];
   const GOLD='#c6a34e';
@@ -610,8 +610,8 @@ function IntegrationsPage({s}) {
     {name:'Supabase',icon:'🗄️',desc:'Base de données & Auth',status:'connected',detail:'Instance: qcunxnadjxggizdksvay · Frankfurt'},
     {name:'Vercel',icon:'▲',desc:'Déploiement & Edge Functions',status:'connected',detail:'www.aureussocial.be · auto-deploy main'},
     {name:'ONSS / WIDE',icon:'🏛️',desc:'Déclarations sociales belges',status:'partial',detail:'Matricule provisoire 51357716-02 · validation en cours'},
-    {name:'Dimona REST API',icon:'📤',desc:'Déclarations travailleurs',status:'simulation',detail:'Mode simulation — credentials prod à configurer'},
-    {name:'DmfA / Belcotax',icon:'📊',desc:'Déclarations trimestrielles & fiches fiscales',status:'pending',detail:'XML généré — soumission manuelle'},
+    {name:tText('Dimona REST API'),icon:'📤',desc:'Déclarations travailleurs',status:'simulation',detail:'Mode simulation — credentials prod à configurer'},
+    {name:tText('DmfA / Belcotax'),icon:'📊',desc:'Déclarations trimestrielles & fiches fiscales',status:'pending',detail:'XML généré — soumission manuelle'},
     {name:tText('Activa.brussels'),icon:'💼',desc:'Primes emploi bruxelloises',status:'active',detail:'Attestation N°829605 · deadline MonBEE 01/06/2026'},
     {name:'Peppol e-invoicing',icon:'📧',desc:'Facturation électronique',status:'active',detail:'ID: 0208:1028230781'},
     {name:'WinBooks / BOB / Exact',icon:'💹',desc:'Export comptable',status:'ready',detail:'6 formats disponibles — PCMN mappings Supabase'},
@@ -621,7 +621,7 @@ function IntegrationsPage({s}) {
   const statusInfo = {
     connected:{label:tText('Connecté'),color:GREEN},partial:{label:'Partiel',color:ORANGE},
     simulation:{label:'Simulation',color:'#a855f7'},pending:{label:'À configurer',color:'#5e5c56'},
-    active:{label:tText('Actif'),color:GREEN},ready:{label:'Prêt',color:'#3b82f6'}
+    active:{label:tText('Actif'),color:GREEN},ready:{label:tText('Prêt'),color:'#3b82f6'}
   };
   return <div>
     <div style={{fontSize:18,fontWeight:800,color:GOLD,marginBottom:4}}>🔌 Intégrations</div>
@@ -651,11 +651,11 @@ function MonitoringPage({s}) {
   const GOLD='#c6a34e',GREEN='#22c55e',RED='#ef4444';
   const metrics = [
     {label:'Uptime Vercel (30j)',val:'99.98%',color:GREEN,icon:'▲'},
-    {label:'Build time moyen',val:'32s',color:GOLD,icon:'⏱'},
-    {label:'Bundle size',val:'2.1 MB',color:GOLD,icon:'📦'},
+    {label:tText('Build time moyen'),val:'32s',color:GOLD,icon:'⏱'},
+    {label:tText('Bundle size'),val:'2.1 MB',color:GOLD,icon:'📦'},
     {label:'Modules actifs',val:'100',color:GREEN,icon:'🧩'},
     {label:'Erreurs ErrorBoundary (24h)',val:'0',color:GREEN,icon:'🛡'},
-    {label:'Dernier déploiement',val:'il y a <1h',color:GREEN,icon:'🚀'},
+    {label:tText('Dernier déploiement'),val:'il y a <1h',color:GREEN,icon:'🚀'},
   ];
   return <div>
     <div style={{fontSize:18,fontWeight:800,color:GOLD,marginBottom:4}}>📡 Monitoring</div>

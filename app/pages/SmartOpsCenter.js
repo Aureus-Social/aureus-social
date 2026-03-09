@@ -78,10 +78,10 @@ export function SmartAlertsEngine({s, d, state, dispatch, defaultTab}){
           if((e.contractType||e.contrat||'').toString().toUpperCase()==='CDD'){
             const end=new Date(e.endDate||e.end||'2099-12-31');
             const daysLeft=Math.ceil((end-now)/86400000);
-            if(daysLeft<0) a.push({id:'CDD-EXP-'+e.id,sev:'critical',cat:'Contrat',rule:'contracts',title:'CDD EXPIRE — '+name,desc:(co.name||'')+' — Expire depuis '+Math.abs(daysLeft)+' jours. Risque requalification CDI!',deadline:daysLeft,icon:'🔴',action:{page:'employees',client:cl.id},remedy:'Generer C4 + Dimona OUT immediatement ou avenant CDI',emp:name});
-            else if(daysLeft<=7) a.push({id:'CDD-7J-'+e.id,sev:'critical',cat:'Contrat',rule:'contracts',title:'CDD expire dans '+daysLeft+'j — '+name,desc:(co.name||'')+' — Fin: '+end.toLocaleDateString('fr-BE'),deadline:daysLeft,icon:'🟠',action:{page:'employees',client:cl.id},remedy:'Decision: renouvellement, CDI ou fin de contrat',emp:name});
-            else if(daysLeft<=30) a.push({id:'CDD-30J-'+e.id,sev:'high',cat:'Contrat',rule:'contracts',title:'CDD expire dans '+daysLeft+'j — '+name,desc:(co.name||'')+' — Preparer decision',deadline:daysLeft,icon:'🟡',action:{page:'employees',client:cl.id},remedy:'Planifier entretien evaluation + decision renouvellement',emp:name});
-            else if(daysLeft<=90) a.push({id:'CDD-90J-'+e.id,sev:'low',cat:'Contrat',rule:'contracts',title:'CDD a surveiller — '+name,desc:(co.name||'')+' — '+daysLeft+' jours restants',deadline:daysLeft,icon:'🔵',action:{page:'employees',client:cl.id},remedy:'Planifier evaluation mi-contrat'});
+            if(daysLeft<0) a.push({id:'CDD-EXP-'+e.id,sev:'critical',cat:tText('Contrat'),rule:'contracts',title:'CDD EXPIRE — '+name,desc:(co.name||'')+' — Expire depuis '+Math.abs(daysLeft)+' jours. Risque requalification CDI!',deadline:daysLeft,icon:'🔴',action:{page:'employees',client:cl.id},remedy:'Generer C4 + Dimona OUT immediatement ou avenant CDI',emp:name});
+            else if(daysLeft<=7) a.push({id:'CDD-7J-'+e.id,sev:'critical',cat:tText('Contrat'),rule:'contracts',title:'CDD expire dans '+daysLeft+'j — '+name,desc:(co.name||'')+' — Fin: '+end.toLocaleDateString('fr-BE'),deadline:daysLeft,icon:'🟠',action:{page:'employees',client:cl.id},remedy:'Decision: renouvellement, CDI ou fin de contrat',emp:name});
+            else if(daysLeft<=30) a.push({id:'CDD-30J-'+e.id,sev:'high',cat:tText('Contrat'),rule:'contracts',title:'CDD expire dans '+daysLeft+'j — '+name,desc:(co.name||'')+' — Preparer decision',deadline:daysLeft,icon:'🟡',action:{page:'employees',client:cl.id},remedy:'Planifier entretien evaluation + decision renouvellement',emp:name});
+            else if(daysLeft<=90) a.push({id:'CDD-90J-'+e.id,sev:'low',cat:tText('Contrat'),rule:'contracts',title:'CDD a surveiller — '+name,desc:(co.name||'')+' — '+daysLeft+' jours restants',deadline:daysLeft,icon:'🔵',action:{page:'employees',client:cl.id},remedy:'Planifier evaluation mi-contrat'});
           }
           // Période essai 6 mois
           const start=new Date(e.startDate||e.start||'2020-01-01');
@@ -114,15 +114,15 @@ export function SmartAlertsEngine({s, d, state, dispatch, defaultTab}){
       const totalEmps=allEmps.length;
       const totalSortis=allEmps.filter(e=>{const ds=e.dateSortie||e.endDate;return ds&&new Date(ds).getFullYear()===yr;}).length;
       const turnover=totalEmps>0?Math.round(totalSortis/totalEmps*100):0;
-      if(turnover>15) a.push({id:'TREND-TURNOVER',sev:'critical',cat:'Tendance',rule:'trends',title:'Turnover eleve: '+turnover+'%',desc:'Seuil d\'alerte: 15% — '+totalSortis+' depart(s) en '+yr,icon:'📉',action:{page:'tableaudirection',sub:'rh'},remedy:'Analyser causes departs + mettre en place plan de retention'});
-      else if(turnover>8) a.push({id:'TREND-TURNOVER',sev:'medium',cat:'Tendance',rule:'trends',title:'Turnover modere: '+turnover+'%',desc:totalSortis+' depart(s) en '+yr,icon:'📊',action:{page:'tableaudirection',sub:'rh'}});
+      if(turnover>15) a.push({id:'TREND-TURNOVER',sev:'critical',cat:tText('Tendance'),rule:'trends',title:'Turnover eleve: '+turnover+'%',desc:'Seuil d\'alerte: 15% — '+totalSortis+' depart(s) en '+yr,icon:'📉',action:{page:'tableaudirection',sub:'rh'},remedy:'Analyser causes departs + mettre en place plan de retention'});
+      else if(turnover>8) a.push({id:'TREND-TURNOVER',sev:'medium',cat:tText('Tendance'),rule:'trends',title:'Turnover modere: '+turnover+'%',desc:totalSortis+' depart(s) en '+yr,icon:'📊',action:{page:'tableaudirection',sub:'rh'}});
       const totalAbsDays=allEmps.reduce((acc,e)=>acc+(+(e.joursMaladie||e.sickDays||0))+(+(e.joursAbsence||e.absDays||0)),0);
       const absRate=totalEmps>0?Math.round(totalAbsDays/(totalEmps*220)*10000)/100:0;
-      if(absRate>5) a.push({id:'TREND-ABS',sev:'high',cat:'Tendance',rule:'trends',title:'Absenteisme eleve: '+absRate+'%',desc:totalAbsDays+' jours — Seuil Belgique: 5.8%',icon:'📊',action:{page:'tableaudirection',sub:'bradford'},remedy:'Analyser Bradford + entretiens retour + plan bien-etre'});
+      if(absRate>5) a.push({id:'TREND-ABS',sev:'high',cat:tText('Tendance'),rule:'trends',title:'Absenteisme eleve: '+absRate+'%',desc:totalAbsDays+' jours — Seuil Belgique: 5.8%',icon:'📊',action:{page:'tableaudirection',sub:'bradford'},remedy:'Analyser Bradford + entretiens retour + plan bien-etre'});
       const masseBrute=allEmps.reduce((acc,e)=>acc+(+(e.monthlySalary||e.gross||e.brut||0)),0);
       if(masseBrute>0&&totalEmps>0){
         const coutMoyen=masseBrute*(1+TX_ONSS_E)/totalEmps;
-        if(coutMoyen>5000) a.push({id:'TREND-COUT',sev:'medium',cat:'Tendance',rule:'trends',title:'Cout moyen eleve: '+fi(coutMoyen)+' €/emp/mois',desc:'Masse brute: '+fi(masseBrute)+' €/mois pour '+totalEmps+' employes',icon:'💸',action:{page:'tableaudirection',sub:'kpi'}});
+        if(coutMoyen>5000) a.push({id:'TREND-COUT',sev:'medium',cat:tText('Tendance'),rule:'trends',title:'Cout moyen eleve: '+fi(coutMoyen)+' €/emp/mois',desc:'Masse brute: '+fi(masseBrute)+' €/mois pour '+totalEmps+' employes',icon:'💸',action:{page:'tableaudirection',sub:'kpi'}});
       }
     }
 
@@ -157,7 +157,7 @@ export function SmartAlertsEngine({s, d, state, dispatch, defaultTab}){
 
     {/* SEVERITY KPIS */}
     <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,marginBottom:16}}>
-      {[{l:'Critiques',v:sevCounts.critical,c:'#ef4444',f:'critical'},{l:'Hautes',v:sevCounts.high,c:'#fb923c',f:'high'},{l:'Moyennes',v:sevCounts.medium,c:'#eab308',f:'medium'},{l:'Basses',v:sevCounts.low,c:'#3b82f6',f:'low'},{l:'Info',v:sevCounts.info,c:'#888',f:'info'}].map((k,i)=>
+      {[{l:tText('Critiques'),v:sevCounts.critical,c:'#ef4444',f:'critical'},{l:'Hautes',v:sevCounts.high,c:'#fb923c',f:'high'},{l:'Moyennes',v:sevCounts.medium,c:'#eab308',f:'medium'},{l:tText('Basses'),v:sevCounts.low,c:'#3b82f6',f:'low'},{l:'Info',v:sevCounts.info,c:'#888',f:'info'}].map((k,i)=>
         <KPI key={i} l={k.l} v={k.v} c={k.c} onClick={()=>setFilter(filter===k.f?'all':k.f)}/>
       )}
     </div>
@@ -227,7 +227,7 @@ export function SmartAlertsEngine({s, d, state, dispatch, defaultTab}){
     {/* TAB: RULES */}
     {tab==='rules'&&<C title="Moteur de regles" sub="Activez/desactivez les categories d'alertes">
       {[{id:'deadlines',l:'Deadlines legales',desc:'ONSS, PP, DmfA, Belcotax, 13eme mois, pecule vacances',icon:'📅',count:alerts.filter(a=>a.rule==='deadline').length},
-        {id:'compliance',l:'Conformite',desc:'TVA, ONSS, reglement travail, CPPT, CE',icon:'⚖️',count:alerts.filter(a=>a.rule==='compliance').length},
+        {id:'compliance',l:tText('Conformite'),desc:'TVA, ONSS, reglement travail, CPPT, CE',icon:'⚖️',count:alerts.filter(a=>a.rule==='compliance').length},
         {id:'contracts',l:tText('Contrats'),desc:'CDD expirant, evaluations, anniversaires',icon:'📝',count:alerts.filter(a=>a.rule==='contracts').length},
         {id:'payroll',l:'Paie',desc:'Salaire=0, IBAN manquant, NISS manquant',icon:'💰',count:alerts.filter(a=>a.rule==='payroll').length},
         {id:'trends',l:'Tendances RH',desc:'Turnover, absenteisme, couts',icon:'📊',count:alerts.filter(a=>a.rule==='trends').length},
@@ -311,8 +311,8 @@ export function NotificationCenterV2({s,d}){
           if((e.contractType||'').toUpperCase()==='CDD'){
             const end=new Date(e.endDate||e.end||'2099-12-31');
             const daysLeft=Math.ceil((end-now)/86400000);
-            if(daysLeft<0) addN('error','🔴','CDD EXPIRE — '+name,(co.name||'')+' — '+Math.abs(daysLeft)+'j de retard','Contrat','critical',{page:'employees',client:cl.id});
-            else if(daysLeft<=30) addN('warning','🟡','CDD expire dans '+daysLeft+'j — '+name,(co.name||''),'Contrat','high',{page:'employees',client:cl.id});
+            if(daysLeft<0) addN('error','🔴','CDD EXPIRE — '+name,(co.name||'')+' — '+Math.abs(daysLeft)+'j de retard',tText('Contrat'),'critical',{page:'employees',client:cl.id});
+            else if(daysLeft<=30) addN('warning','🟡','CDD expire dans '+daysLeft+'j — '+name,(co.name||''),tText('Contrat'),'high',{page:'employees',client:cl.id});
           }
         });
       });
@@ -323,7 +323,7 @@ export function NotificationCenterV2({s,d}){
       const allEmps=clients.flatMap(c=>c.emps||[]);
       const sortis=allEmps.filter(e=>{const ds=e.dateSortie||e.endDate;return ds&&new Date(ds).getFullYear()===yr;});
       const turnover=allEmps.length>0?Math.round(sortis.length/allEmps.length*100):0;
-      if(turnover>15) addN('trend','📉','Turnover eleve: '+turnover+'%',sortis.length+' depart(s) en '+yr,'Tendance','critical',{page:'tableaudirection',sub:'rh'});
+      if(turnover>15) addN('trend','📉','Turnover eleve: '+turnover+'%',sortis.length+' depart(s) en '+yr,tText('Tendance'),'critical',{page:'tableaudirection',sub:'rh'});
     }
 
     // SYSTEM
@@ -390,7 +390,7 @@ export function NotificationCenterV2({s,d}){
     {/* PREFERENCES */}
     {tab==='prefs'&&<C title="Preferences de declenchement" sub="Choisissez quelles notifications vous souhaitez recevoir">
       {[{id:'deadlines',l:'Deadlines legales',desc:'ONSS, PP, DmfA, Belcotax, pecule, 13eme mois',icon:'📅'},
-        {id:'compliance',l:'Conformite',desc:'TVA, ONSS, NISS manquants, reglement travail',icon:'⚖️'},
+        {id:'compliance',l:tText('Conformite'),desc:'TVA, ONSS, NISS manquants, reglement travail',icon:'⚖️'},
         {id:'contracts',l:tText('Contrats'),desc:'CDD expirant, evaluations, renouvellements',icon:'📝'},
         {id:'payroll',l:'Paie',desc:'Salaire=0, IBAN manquant, virements',icon:'💰'},
         {id:'rh',l:'Tendances RH',desc:'Turnover, absenteisme, alertes tendances',icon:'📊'},
@@ -541,7 +541,7 @@ export function JournalActiviteV2({s,d}){
         <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 14px',borderRadius:8,border:'none',cursor:'pointer',fontSize:11,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
       )}
       <div style={{marginLeft:'auto',display:'flex',gap:6}}>
-        {[{id:'all',l:'Tout'},{id:'today',l:'Auj.'},{id:'week',l:'7j'},{id:'month',l:'30j'}].map(dr=>
+        {[{id:'all',l:'Tout'},{id:'today',l:tText('Auj.')},{id:'week',l:'7j'},{id:'month',l:'30j'}].map(dr=>
           <button key={dr.id} onClick={()=>setDateRange(dr.id)} style={{padding:'5px 10px',borderRadius:6,border:'none',background:dateRange===dr.id?'rgba(198,163,78,.15)':'transparent',color:dateRange===dr.id?'#c6a34e':'#888',fontSize:10,cursor:'pointer',fontFamily:'inherit'}}>{dr.l}</button>
         )}
       </div>

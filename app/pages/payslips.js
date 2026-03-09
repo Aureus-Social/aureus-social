@@ -80,7 +80,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
         <div>
           <div style={{fontSize:15,fontWeight:600,color:'#c6a34e'}}>⚡ Batch Processing — Calcul en masse</div>
-          <div style={{fontSize:11,color:'#5e5c56',marginTop:2}}>Calcule toutes les fiches de paie des travailleurs actifs en 1 clic</div>
+          <div style={{fontSize:11,color:'#5e5c56',marginTop:2}}>{tText('Calcule toutes les fiches de paie des travailleurs actifs en 1 clic')}</div>
         </div>
         <B onClick={runBatch} disabled={batchRunning} style={{fontSize:13,padding:'12px 24px'}}>
           {batchRunning?'⏳ Calcul en cours...':'⚡ Lancer le batch ('+(s?.emps||[]).filter(e=>e.status==='active'||!e.status).length+' fiches)'}
@@ -173,11 +173,11 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
       {res&&emp&&<div data-payslip style={{background:"#fffef9",borderRadius:14,padding:'32px 36px',color:'#1a1a18',fontFamily:"'Outfit',sans-serif",boxShadow:'0 4px 30px rgba(0,0,0,.3)'}}><div style={{textAlign:"right",marginBottom:12}}><button onClick={()=>generatePayslipPDF(emp,res,per,s.co)} style={{background:"#c6a34e",color:"#fff",border:"none",padding:"8px 20px",borderRadius:6,cursor:"pointer",fontSize:12,fontWeight:600}}>Imprimer / PDF</button></div>
         <div style={{display:'flex',justifyContent:'space-between',paddingBottom:18,borderBottom:'3px solid #c6a34e',marginBottom:22}}>
           <div><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:20,fontWeight:700}}>{s.co.name}</div><div style={{fontSize:10.5,color:'#888',marginTop:2}}>{s.co.addr}</div><div style={{fontSize:10.5,color:'#888'}}>TVA: {s.co.vat} · BCE: {s.co.bce||s.co.vat?.replace(/^BE\s?/,"")||'—'} · ONSS: {s.co.onss}</div><div style={{fontSize:10.5,color:'#888'}}>CP: {emp.cp||s.co.cp||'200'} — {LEGAL.CP[emp.cp||s.co.cp||'200']||''}</div></div>
-          <div style={{textAlign:'right'}}><div style={{fontSize:14,fontWeight:700,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'2px'}}>Fiche de Paie</div><div style={{fontSize:12.5,color:'#888',marginTop:3}}>{MN[per.month-1]} {per.year}</div><div style={{fontSize:10,color:'#aaa',marginTop:2}}>Période du 01/{String(per.month).padStart(2,"0")}/{per.year} au {new Date(per.year,per.month,0).getDate()}/{String(per.month).padStart(2,"0")}/{per.year}</div><div style={{fontSize:10,color:'#aaa'}}>Date de paiement: dernier jour ouvrable du mois</div></div>
+          <div style={{textAlign:'right'}}><div style={{fontSize:14,fontWeight:700,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'2px'}}>{tText('Fiche de Paie')}</div><div style={{fontSize:12.5,color:'#888',marginTop:3}}>{MN[per.month-1]} {per.year}</div><div style={{fontSize:10,color:'#aaa',marginTop:2}}>Période du 01/{String(per.month).padStart(2,"0")}/{per.year} au {new Date(per.year,per.month,0).getDate()}/{String(per.month).padStart(2,"0")}/{per.year}</div><div style={{fontSize:10,color:'#aaa'}}>{tText('Date de paiement: dernier jour ouvrable du mois')}</div></div>
         </div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18,marginBottom:20,padding:14,background:"#f5f4ef",borderRadius:8}}>
           <div><div style={{fontSize:9.5,color:'#aaa',textTransform:'uppercase',letterSpacing:'1px',marginBottom:3}}>Travailleur</div><div style={{fontWeight:600,fontSize:13.5}}>{emp.first} {emp.last}</div><div style={{fontSize:10.5,color:'#666'}}>{emp.fn} — {emp.dept}</div><div style={{fontSize:10.5,color:'#666'}}>NISS: {emp.niss}{emp.birth?` · Né(e) le ${emp.birth}`:''}</div><div style={{fontSize:10.5,color:'#666'}}>{emp.addr?`${emp.addr}, ${emp.zip||''} ${emp.city||''}`:''}</div></div>
-          <div><div style={{fontSize:9.5,color:'#aaa',textTransform:'uppercase',letterSpacing:'1px',marginBottom:3}}>Contrat & Barème</div><div style={{fontSize:10.5,color:'#555'}}>{emp.contract} · CP {emp.cp} · {emp.whWeek}h/sem · {emp.statut==='ouvrier'?'Ouvrier':'Employé'}</div><div style={{fontSize:10.5,color:'#555'}}>Entrée: {emp.startD} · Ancienneté: {emp.anciennete||0} an(s)</div><div style={{fontSize:10.5,color:'#555'}}>Sit: {emp.civil==='single'?'Isolé':emp.civil==='married_1'?'Marié (1 revenu)':emp.civil==='married_2'?'Marié (2 revenus)':emp.civil==='cohabit'?'Cohabitant':emp.civil==='widowed'?'Veuf/ve':emp.civil}{emp.depChildren>0?` · ${emp.depChildren} enfant(s)`:''}</div><div style={{fontSize:10.5,color:'#555'}}>Barème: {fmt(emp.monthlySalary)}/mois · {fmt(Math.round((emp.monthlySalary||0)/(emp.whWeek||38)/4.33*100)/100)}/h · {per.days||0}j / {Math.round((per.days||0)*(emp.whWeek||38)/5*100)/100}h prestées</div>
+          <div><div style={{fontSize:9.5,color:'#aaa',textTransform:'uppercase',letterSpacing:'1px',marginBottom:3}}>{tText('Contrat & Barème')}</div><div style={{fontSize:10.5,color:'#555'}}>{emp.contract} · CP {emp.cp} · {emp.whWeek}h/sem · {emp.statut==='ouvrier'?'Ouvrier':'Employé'}</div><div style={{fontSize:10.5,color:'#555'}}>Entrée: {emp.startD} · Ancienneté: {emp.anciennete||0} an(s)</div><div style={{fontSize:10.5,color:'#555'}}>Sit: {emp.civil==='single'?tText('Isolé'):emp.civil==='married_1'?'Marié (1 revenu)':emp.civil==='married_2'?'Marié (2 revenus)':emp.civil==='cohabit'?'Cohabitant':emp.civil==='widowed'?'Veuf/ve':emp.civil}{emp.depChildren>0?` · ${emp.depChildren} enfant(s)`:''}</div><div style={{fontSize:10.5,color:'#555'}}>Barème: {fmt(emp.monthlySalary)}/mois · {fmt(Math.round((emp.monthlySalary||0)/(emp.whWeek||38)/4.33*100)/100)}/h · {per.days||0}j / {Math.round((per.days||0)*(emp.whWeek||38)/5*100)/100}h prestées</div>
             {emp.frontalier&&<div style={{fontSize:10.5,color:'#a855f7',fontWeight:600}}>🌍 Frontalier — Réside: {emp.frontalierPays==='FR'?'France':emp.frontalierPays==='NL'?'Pays-Bas':emp.frontalierPays==='DE'?'Allemagne':emp.frontalierPays==='LU'?'Luxembourg':emp.frontalierPays} · ONSS: Belgique · PP: {emp.frontalierExoPP?'Exonéré (276 Front.)':'Retenu en Belgique'}</div>}
             {emp.pensionné&&<div style={{fontSize:10.5,color:'#fbbf24',fontWeight:600}}>👴 Pensionné ({emp.pensionType==='legal'?'pension légale':emp.pensionType==='anticipee'?'pension anticipée':emp.pensionType==='survie'?'pension de survie':'pension invalidité'}) — Cumul: {res.pensionCumulIllimite?'ILLIMITÉ':'LIMITÉ (plafond '+fmt(res.pensionPlafond)+'/an)'}{res.pensionDepassement?' ⚠ DÉPASSEMENT ESTIMÉ: '+res.pensionDepassPct+'%':''}</div>}
           </div>
@@ -347,7 +347,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
               <div style={{fontSize:9.5,fontWeight:600,color:'#555',marginBottom:4}}>🏖 Pécule de vacances ({res.peculeVacCalc?.type==='ouvrier'?'Ouvrier — ONVA':'Employé — Employeur'})</div>
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:4,fontSize:9.5,color:'#777'}}>
                 <span>Simple:</span><span style={{fontWeight:600,textAlign:'right'}}>{fmt(res.peculeVacCalc?.simple||0)}</span>
-                <span>Double (92%):</span><span style={{fontWeight:600,textAlign:'right'}}>{fmt(res.peculeVacCalc?.double||0)}</span>
+                <span>{tText('Double (92%):')}</span><span style={{fontWeight:600,textAlign:'right'}}>{fmt(res.peculeVacCalc?.double||0)}</span>
                 <span>ONSS 2è partie:</span><span style={{fontWeight:600,textAlign:'right',color:'#f87171'}}>-{fmt(res.peculeVacCalc?.onss2emePartie||0)}</span>
                 <span>PP exceptionnel:</span><span style={{fontWeight:600,textAlign:'right',color:'#f87171'}}>-{fmt(res.peculeVacCalc?.ppExcep||0)} ({Math.round((res.peculeVacCalc?.ppExcepRate||0)*100)}%)</span>
                 <span style={{borderTop:'1px solid #ddd',paddingTop:3}}>Total estimé:</span><span style={{fontWeight:700,textAlign:'right',color:'#16a34a',borderTop:'1px solid #ddd',paddingTop:3}}>{fmt(res.peculeVacCalc?.total||0)}</span>
@@ -374,7 +374,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
         <div style={{marginTop:10,fontSize:10.5,color:'#bbb'}}>Versement: {emp.iban}</div>
         {/* CONDITIONS GÉNÉRALES INSTITUTIONNELLES */}
         <div  style={{marginTop:18,paddingTop:14,borderTop:'1px solid #e0dfda'}}>
-          <div style={{fontSize:8.5,color:'#bbb',textTransform:'uppercase',letterSpacing:'1.5px',fontWeight:600,marginBottom:8}}>Conditions générales</div>
+          <div style={{fontSize:8.5,color:'#bbb',textTransform:'uppercase',letterSpacing:'1.5px',fontWeight:600,marginBottom:8}}>{tText('Conditions générales')}</div>
           <div style={{fontSize:8,color:'#aaa',lineHeight:1.7,columnCount:2,columnGap:20}}>
             <p style={{margin:'0 0 4px'}}><b style={{color:'#999'}}>1. Confidentialité</b> — La présente fiche de paie est un document strictement confidentiel destiné exclusivement au travailleur mentionné ci-dessus. Toute reproduction, diffusion ou communication à des tiers est interdite sauf accord écrit de l'employeur.</p>
             <p style={{margin:'0 0 4px'}}><b style={{color:'#999'}}>2. Base légale</b> — Ce document est établi conformément à la loi du 12 avril 1965 concernant la protection de la rémunération des travailleurs et à l'arrêté royal du 27 septembre 1966 déterminant les mentions obligatoires du décompte de rémunération.</p>
@@ -471,11 +471,11 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
           </div>
           <table style={{width:'100%',borderCollapse:'collapse',fontSize:10.5}}>
             <thead><tr style={{borderBottom:'2px solid #c6a34e'}}>
-              <th style={{textAlign:'left',padding:'6px 8px',color:'#999',fontSize:9,textTransform:'uppercase'}}>Avantage</th>
+              <th style={{textAlign:'left',padding:'6px 8px',color:'#999',fontSize:9,textTransform:'uppercase'}}>{tText('Avantage')}</th>
               <th style={{textAlign:'right',padding:'6px 8px',color:'#999',fontSize:9}}>{tText('ATN / Charge')}</th>
               <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>ONSS empl.</th>
               <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>PP trav.</th>
-              <th style={{textAlign:'right',padding:'6px 8px',color:'#999',fontSize:9}}>Coût empl./mois</th>
+              <th style={{textAlign:'right',padding:'6px 8px',color:'#999',fontSize:9}}>{tText('Coût empl./mois')}</th>
               <th style={{textAlign:'left',padding:'6px 8px',color:'#999',fontSize:9}}>{tText('Référence')}</th>
             </tr></thead>
             <tbody>
@@ -575,7 +575,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
                 <td style={{padding:'8px',textAlign:'right',fontWeight:800,fontSize:12,color:'#fb923c'}}>{fmt(res.atnTotal||0)}</td>
                 <td colSpan={2} style={{padding:'8px',textAlign:'center',fontSize:10,color:'#888'}}>Soumis PP uniquement</td>
                 <td style={{padding:'8px',textAlign:'right',fontWeight:700,fontSize:11,color:'#c6a34e'}}>{fmt((res.cotCO2||0)+(res.cotCO2Moto||0)+(res.veloLeasingMois||0))}/mois charges</td>
-                <td style={{padding:'8px',fontSize:9,color:'#999'}}>Art. 36 + 38 CIR 92</td>
+                <td style={{padding:'8px',fontSize:9,color:'#999'}}>{tText('Art. 36 + 38 CIR 92')}</td>
               </tr>
             </tbody>
           </table>
@@ -610,7 +610,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
                 {l:tText('ONSS patronal'),v:`${(TX_ONSS_E*100).toFixed(2)}%`,ref:'Loi 29/06/1981',ok:true},
                 ...(emp.statut==='ouvrier'?[{l:'Majoration ouvrier',v:'× 108%',ref:'AR 28/11/1969 Art.23',ok:true}]:[]),
                 {l:'RMMMG (CCT 43)',v:`${fmt(RMMMG)}`,ref:'CNT CCT 43/15',ok:!!(res.gross>=RMMMG),warn:res.gross<RMMMG},
-                {l:'Cot. CO2 min',v:`${fmt(CO2MIN)}`,ref:'AR ATN voiture',ok:true},
+                {l:tText('Cot. CO2 min'),v:`${fmt(CO2MIN)}`,ref:'AR ATN voiture',ok:true},
               ].map((x,i)=><div key={i} style={{background:x.warn?'rgba(239,68,68,.08)':'rgba(198,163,78,.04)',borderRadius:6,padding:'6px 8px',border:`1px solid ${x.warn?'rgba(239,68,68,.2)':'rgba(198,163,78,.08)'}`}}>
                 <div style={{fontSize:7.5,color:x.warn?'#f87171':'#888'}}>{x.l}</div>
                 <div style={{fontSize:11,fontWeight:700,color:x.warn?'#f87171':'#e8e6e0',marginTop:1}}>{x.v}</div>
@@ -673,10 +673,10 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
 
           {/* Ligne 4 — Avantages & Frais */}
           <div style={{marginBottom:8}}>
-            <div id='section-avantages' style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>Avantages exonérés & Frais propres</div>
+            <div id='section-avantages' style={{fontSize:8.5,color:'#c6a34e',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',marginBottom:5,paddingBottom:3,borderBottom:'1px solid rgba(198,163,78,.1)'}}>{tText('Avantages exonérés & Frais propres')}</div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:6}}>
               {[
-                {l:'Chèques-repas max',v:`${fmt(CR_MAX)}/jour`,ref:'CCT nat. + AR',used:res.mvDays>0},
+                {l:tText('Chèques-repas max'),v:`${fmt(CR_MAX)}/jour`,ref:'CCT nat. + AR',used:res.mvDays>0},
                 {l:'Part patronale CR max',v:`${fmt(CR_PAT)}/jour`,ref:'AR 28/11/1969 Art.19bis',used:res.mvEmployer>0},
                 {l:'Éco-chèques max',v:`${fmt(ECO_MAX)}/an`,ref:'CCT 98 — 20/02/2009',used:res.ecoCheques>0},
                 {l:'Forfait bureau/télétravail',v:`${fmt(FORF_BUREAU)}/mois`,ref:'Circ. 2021/C/20',used:res.indemTeletravail>0||res.indemBureau>0},

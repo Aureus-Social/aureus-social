@@ -22,16 +22,16 @@ const DAYS_SHORT = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']
 const ABSENCE_TYPES = {
   CONGE: { label:tText('Congé annuel'), short: 'CA', color: '#3b82f6', legal: '20 jours/an (régime 5j)' },
   MALADIE: { label:tText('Maladie'), short: 'M', color: '#ef4444', legal: 'Salaire garanti: 30j employé / 7j ouvrier' },
-  CTM: { label: 'Congé thématique', short: 'CT', color: '#8b5cf6', legal: 'Crédit-temps, congé parental, etc.' },
-  FORMATION: { label: 'Formation', short: 'F', color: '#06b6d4', legal: 'Congé-éducation payé: max 125h/an' },
+  CTM: { label:tText('Congé thématique'), short: 'CT', color: '#8b5cf6', legal: 'Crédit-temps, congé parental, etc.' },
+  FORMATION: { label:tText('Formation'), short: 'F', color: '#06b6d4', legal: 'Congé-éducation payé: max 125h/an' },
   PETIT_CHOMAGE: { label: 'Petit chômage', short: 'PC', color: '#f59e0b', legal: 'Événements familiaux (mariage, décès, etc.)' },
-  CHOMAGE_TEMP: { label: 'Chômage temporaire', short: 'TE', color: '#ef4444', legal: 'Force majeure, économique, etc.' },
+  CHOMAGE_TEMP: { label:tText('Chômage temporaire'), short: 'TE', color: '#ef4444', legal: 'Force majeure, économique, etc.' },
   MATERNITE: { label: 'Maternité', short: 'MA', color: '#ec4899', legal: '15 semaines (105 jours)' },
   PATERNITE: { label: 'Paternité', short: 'PA', color: '#3b82f6', legal: '20 jours (2025+)' },
   SANS_SOLDE: { label: 'Sans solde', short: 'SS', color: '#6b7280', legal: 'Convention avec employeur' },
   TELETRAVAIL: { label: 'Télétravail', short: 'TT', color: '#22c55e', legal: 'Selon convention d\'entreprise' },
-  FERIE: { label: 'Jour férié', short: 'JF', color: '#c6a34e', legal: '10 jours fériés légaux/an' },
-  DEMI_JOUR: { label: 'Demi-jour', short: '½', color: '#f59e0b', legal: 'Demi-journée de congé' },
+  FERIE: { label:tText('Jour férié'), short: 'JF', color: '#c6a34e', legal: '10 jours fériés légaux/an' },
+  DEMI_JOUR: { label:tText('Demi-jour'), short: '½', color: '#f59e0b', legal: 'Demi-journée de congé' },
 }
 
 // ── Jours fériés belges 2026 ──
@@ -43,16 +43,16 @@ function getJoursFeries(year) {
 
   return [
     { date: new Date(year, 0, 1), label: 'Jour de l\'An' },
-    { date: paq, label: 'Pâques' },
+    { date: paq, label:tText('Pâques') },
     { date: lunPaq, label: 'Lundi de Pâques' },
-    { date: new Date(year, 4, 1), label: 'Fête du Travail' },
-    { date: ascension, label: 'Ascension' },
+    { date: new Date(year, 4, 1), label:tText('Fête du Travail') },
+    { date: ascension, label:tText('Ascension') },
     { date: lunPent, label: 'Lundi de Pentecôte' },
-    { date: new Date(year, 6, 21), label: 'Fête nationale' },
-    { date: new Date(year, 7, 15), label: 'Assomption' },
-    { date: new Date(year, 10, 1), label: 'Toussaint' },
-    { date: new Date(year, 10, 11), label: 'Armistice' },
-    { date: new Date(year, 11, 25), label: 'Noël' },
+    { date: new Date(year, 6, 21), label:tText('Fête nationale') },
+    { date: new Date(year, 7, 15), label:tText('Assomption') },
+    { date: new Date(year, 10, 1), label:tText('Toussaint') },
+    { date: new Date(year, 10, 11), label:tText('Armistice') },
+    { date: new Date(year, 11, 25), label:tText('Noël') },
   ]
 }
 

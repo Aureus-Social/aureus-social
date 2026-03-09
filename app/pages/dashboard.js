@@ -69,14 +69,14 @@ function Dashboard({s,d}) {
       if(e.endD){
         const end=new Date(e.endD);
         const days=Math.ceil((end-today)/(1000*60*60*24));
-        if(days>0&&days<=30)alerts.push({type:'warning',icon:'⏰',msg:`CDD de ${eName(e)} expire dans ${days} jours (${e.endD})`,cat:'Contrat'});
-        if(days<=0)alerts.push({type:'error',icon:'🔴',msg:`CDD de ${eName(e)} expiré depuis ${Math.abs(days)} jours !`,cat:'Contrat'});
+        if(days>0&&days<=30)alerts.push({type:'warning',icon:'⏰',msg:`CDD de ${eName(e)} expire dans ${days} jours (${e.endD})`,cat:tText('Contrat')});
+        if(days<=0)alerts.push({type:'error',icon:'🔴',msg:`CDD de ${eName(e)} expiré depuis ${Math.abs(days)} jours !`,cat:tText('Contrat')});
       }
       // Période d'essai (si entrée < 14 jours pour étudiant)
       if(e.contract==='student'&&e.startD){
         const start=new Date(e.startD);
         const days=Math.ceil((today-start)/(1000*60*60*24));
-        if(days<=3)alerts.push({type:'info',icon:'📋',msg:`${eName(e)}: période d'essai étudiant (3 premiers jours)`,cat:'Contrat'});
+        if(days<=3)alerts.push({type:'info',icon:'📋',msg:`${eName(e)}: période d'essai étudiant (3 premiers jours)`,cat:tText('Contrat')});
       }
       // NISS manquant
       if(!e.niss)alerts.push({type:'warning',icon:'🆔',msg:`NISS manquant pour ${eName(e)}`,cat:tText('Identité')});
@@ -262,8 +262,8 @@ function Dashboard({s,d}) {
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
         {[
-          {v:'v37',title:'Sprint 9',items:['⚙️ 13 automatisations (validation obligatoire)','📅 Gestion absences pré-paie','⚡ 8 actions en masse multi-clients','🏥 Audit santé global','📋 Planificateur 14 tâches','📑 15 Modèles documents','🔍 Filtres score santé'],color:'#06b6d4'},
-          {v:'v36',title:'Sprint 8',items:['📊 Budget Auto','🔮 Simulateur What-If','📈 KPI + Equal Pay'],color:'#f472b6'},
+          {v:'v37',title:tText('Sprint 9'),items:['⚙️ 13 automatisations (validation obligatoire)','📅 Gestion absences pré-paie','⚡ 8 actions en masse multi-clients','🏥 Audit santé global','📋 Planificateur 14 tâches','📑 15 Modèles documents','🔍 Filtres score santé'],color:'#06b6d4'},
+          {v:'v36',title:tText('Sprint 8'),items:['📊 Budget Auto','🔮 Simulateur What-If','📈 KPI + Equal Pay'],color:'#f472b6'},
           {v:'v35',title:tText('Sprint 7'),items:['🏪 Marketplace 12 modules','🔗 Intégrations 25+ connecteurs','🔔 Webhook Manager'],color:'#a78bfa'},
           {v:'v34',title:tText('Sprint 6'),items:['🌐 4 langues (FR/NL/EN/DE)','🔌 API Documentation','💱 Multi-Devises'],color:'#fb923c'},
           {v:'v33',title:tText('Sprint 5'),items:['🧠 Prédiction Turnover','💡 Reco Salariales IA','📈 Prévision Masse','🔍 Détection Anomalies','🏥 Score Santé Dossier'],color:'#f87171'},

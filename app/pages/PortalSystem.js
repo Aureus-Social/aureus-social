@@ -92,7 +92,7 @@ export const PORTAL_CONFIG = {
 export const CLIENT_NAV = [
   {id:"_gc1",l:"MON ENTREPRISE",grp:true},
   {id:"client_dashboard",l:"Tableau de Bord",i:'◫'},
-  {id:"employees",l:"Travailleurs",i:'👥'},
+  {id:"employees",l:tText('Travailleurs'),i:'👥'},
   {id:"payslip",l:"Fiches de Paie",i:'◈'},
   
   {id:"_gc2",l:"DÉCLARATIONS",grp:true},
@@ -169,8 +169,8 @@ export function EmployeeDashboard({s, d, employee}) {
       React.createElement('div',{style:{fontSize:11,color:'#555',letterSpacing:'1.5px',textTransform:'uppercase',marginBottom:16}},tText('Actions rapides')),
       React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}},
         [{i:'📄',l:'Dernière fiche',a:'emp_payslips',c:'rgba(198,163,78,.08)',bc:'rgba(198,163,78,.12)'},
-         {i:'🏖',l:'Demander un congé',a:'emp_leave',c:'rgba(59,130,246,.08)',bc:'rgba(59,130,246,.12)'},
-         {i:'📁',l:'Mes documents',a:'emp_documents',c:'rgba(34,197,94,.08)',bc:'rgba(34,197,94,.12)'},
+         {i:'🏖',l:tText('Demander un congé'),a:'emp_leave',c:'rgba(59,130,246,.08)',bc:'rgba(59,130,246,.12)'},
+         {i:'📁',l:tText('Mes documents'),a:'emp_documents',c:'rgba(34,197,94,.08)',bc:'rgba(34,197,94,.12)'},
          {i:'👤',l:'Mon profil',a:'emp_profile',c:'rgba(168,85,247,.08)',bc:'rgba(168,85,247,.12)'}
         ].map((a,i) => React.createElement('button',{key:i,onClick:()=>d({type:'NAV',page:a.a}),
           style:{padding:16,borderRadius:12,border:'1px solid '+a.bc,background:a.c,cursor:'pointer',textAlign:'center',fontFamily:'inherit',transition:'all .2s'}},
@@ -271,13 +271,13 @@ export function EmployeeLeave({s, d, employee}) {
     background:a?'rgba(59,130,246,.15)':'rgba(255,255,255,.03)',color:a?BLUE:'#9e9b93',transition:'all .3s'});
 
   const soldes = [
-    {l:'Congés annuels',total:20,pris:8,c:BLUE,i:'🏖'},
+    {l:tText('Congés annuels'),total:20,pris:8,c:BLUE,i:'🏖'},
     {l:'Récupération',total:6,pris:2,c:GREEN,i:'🔄'},
     {l:tText('Maladie'),total:'-',pris:3,c:RED,i:'🏥'},
-    {l:'Formation',total:5,pris:1,c:PURPLE,i:'🎓'},
+    {l:tText('Formation'),total:5,pris:1,c:PURPLE,i:'🎓'},
   ];
 
-  const typeLabels={annuel:tText('Congé annuel'),recup:'Récupération',formation:'Formation',sans_solde:'Sans solde'};
+  const typeLabels={annuel:tText('Congé annuel'),recup:'Récupération',formation:tText('Formation'),sans_solde:'Sans solde'};
 
   const [demandes, setDemandes] = useState([
     {id:1,type:tText('Congé annuel'),debut:'2026-03-15',fin:'2026-03-19',jours:5,status:'approuvé',by:'Marie D.'},
@@ -321,7 +321,7 @@ export function EmployeeLeave({s, d, employee}) {
             style:{width:'100%',padding:'8px',borderRadius:8,border:'1px solid rgba(59,130,246,.15)',background:'rgba(0,0,0,.2)',color:'#e5e5e5',fontSize:12,fontFamily:'inherit'}},
             React.createElement('option',{value:'annuel'},tText('Congé annuel')),
             React.createElement('option',{value:'recup'},'Récupération'),
-            React.createElement('option',{value:'formation'},'Formation'),
+            React.createElement('option',{value:'formation'},tText('Formation')),
             React.createElement('option',{value:'sans_solde'},'Sans solde')
           )
         ),
@@ -407,7 +407,7 @@ export function EmployeeLeave({s, d, employee}) {
         })
       ),
       React.createElement('div',{style:{display:'flex',gap:16,marginTop:16,justifyContent:'center'}},
-        [{c:GREEN,l:'Approuvé'},{c:'#eab308',l:tText('En attente')},{c:RED,l:'Refusé'}].map(x=>
+        [{c:GREEN,l:tText('Approuvé')},{c:'#eab308',l:tText('En attente')},{c:RED,l:'Refusé'}].map(x=>
           React.createElement('div',{key:x.l,style:{display:'flex',alignItems:'center',gap:4,fontSize:10}},
             React.createElement('div',{style:{width:10,height:10,borderRadius:3,background:x.c}}),
             React.createElement('span',{style:{color:'#888'}},x.l)
@@ -425,16 +425,16 @@ export function EmployeeDocuments({s, d, employee}) {
   const emp = employee || s.emps?.[0] || {};
   
   const docs = [
-    {id:1,name:tText('Contrat de travail'),cat:'Contrat',date:'2024-01-15',size:'245 Ko',i:'📝'},
-    {id:2,name:'Avenant salaire 2025',cat:'Contrat',date:'2025-01-01',size:'128 Ko',i:'📝'},
+    {id:1,name:tText('Contrat de travail'),cat:tText('Contrat'),date:'2024-01-15',size:'245 Ko',i:'📝'},
+    {id:2,name:tText('Avenant salaire 2025'),cat:tText('Contrat'),date:'2025-01-01',size:'128 Ko',i:'📝'},
     {id:3,name:'Fiche paie Janvier 2026',cat:'Paie',date:'2026-01-31',size:'89 Ko',i:'💶'},
     {id:4,name:'Fiche paie Février 2026',cat:'Paie',date:'2026-02-28',size:'91 Ko',i:'💶'},
-    {id:5,name:'Attestation de travail',cat:'Administratif',date:'2025-06-15',size:'56 Ko',i:'📄'},
+    {id:5,name:tText('Attestation de travail'),cat:'Administratif',date:'2025-06-15',size:'56 Ko',i:'📄'},
     {id:6,name:'Fiche 281.10 (2025)',cat:'Fiscal',date:'2026-02-15',size:'134 Ko',i:'💰'},
     {id:7,name:tText('Règlement de travail'),cat:'Entreprise',date:'2024-01-01',size:'890 Ko',i:'📋'},
-    {id:8,name:'Convention CCT',cat:'Entreprise',date:'2024-03-01',size:'456 Ko',i:'⚖️'},
-    {id:9,name:'Attestation médecine du travail',cat:'Santé',date:'2025-09-20',size:'78 Ko',i:'🏥'},
-    {id:10,name:'Certificat formation sécurité',cat:'Formation',date:'2025-11-10',size:'112 Ko',i:'🎓'},
+    {id:8,name:tText('Convention CCT'),cat:'Entreprise',date:'2024-03-01',size:'456 Ko',i:'⚖️'},
+    {id:9,name:tText('Attestation médecine du travail'),cat:'Santé',date:'2025-09-20',size:'78 Ko',i:'🏥'},
+    {id:10,name:tText('Certificat formation sécurité'),cat:tText('Formation'),date:'2025-11-10',size:'112 Ko',i:'🎓'},
   ];
   
   const [filter, setFilter] = useState('all');
@@ -459,7 +459,7 @@ export function EmployeeDocuments({s, d, employee}) {
     React.createElement('div',{style:cs},
       React.createElement('table',{style:{width:'100%',borderCollapse:'collapse'}},
         React.createElement('thead',null,React.createElement('tr',{style:{borderBottom:'1px solid rgba(59,130,246,.08)'}},
-          ['','Document','Catégorie',tText('Date'),'Taille',''].map((h,i) =>
+          ['','Document',tText('Catégorie'),tText('Date'),'Taille',''].map((h,i) =>
             React.createElement('th',{key:i,style:{padding:'10px 12px',textAlign:'left',fontSize:10,color:BLUE,letterSpacing:'1px',textTransform:'uppercase'}},h))
         )),
         React.createElement('tbody',null,filtered.map((doc,i) =>
@@ -496,10 +496,10 @@ export function EmployeeProfile({s, d, employee}) {
       {l:'NISS',v:emp.niss||'XX.XX.XX-XXX.XX'},{l:tText('Date de naissance'),v:emp.dateNaissance||'—'},
       {l:tText('Nationalité'),v:emp.nationalite||'Belge'},{l:'État civil',v:emp.etatCivil||'—'}
     ]},
-    {section:'Contrat',items:[
+    {section:tText('Contrat'),items:[
       {l:tText('Type de contrat'),v:emp.typeContrat||'CDI'},{l:'Fonction',v:emp.fonction||'—'},
       {l:'Date d\'entrée',v:emp.dateEntree||'—'},{l:tText('Commission paritaire'),v:co.cp?`CP ${co.cp}`:'—'},
-      {l:'Régime horaire',v:emp.regime||'Temps plein'},{l:'Catégorie',v:emp.categorie||'Employé'}
+      {l:'Régime horaire',v:emp.regime||'Temps plein'},{l:tText('Catégorie'),v:emp.categorie||'Employé'}
     ]},
     {section:'Coordonnées',items:[
       {l:tText('Adresse'),v:emp.adresse||'—'},{l:tText('Email'),v:emp.email||'—'},
@@ -699,10 +699,10 @@ export function ClientDashboard({s, d}) {
     
     // KPIs
     React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:24},className:'aureus-kpi-grid'},
-      [{l:'Travailleurs',v:emps.length,c:GREEN,i:'👥'},
+      [{l:tText('Travailleurs'),v:emps.length,c:GREEN,i:'👥'},
        {l:'Masse salariale brute',v:totalBrut>0?`€${totalBrut.toFixed(0)}`:'—',c:GOLD,i:'💶'},
        {l:'Total Net',v:totalNet>0?`€${totalNet.toFixed(0)}`:'—',c:BLUE,i:'💳'},
-       {l:'Charges ONSS',v:totalONSS>0?`€${totalONSS.toFixed(0)}`:'—',c:RED,i:'🏛'}
+       {l:tText('Charges ONSS'),v:totalONSS>0?`€${totalONSS.toFixed(0)}`:'—',c:RED,i:'🏛'}
       ].map((k,i) => React.createElement('div',{key:i,style:cs},
         React.createElement('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}},
           React.createElement('div',{style:{fontSize:10,color:'#555',letterSpacing:'1.5px',textTransform:'uppercase'}},k.l),
@@ -716,7 +716,7 @@ export function ClientDashboard({s, d}) {
     React.createElement('div',{style:{...cs,marginBottom:24}},
       React.createElement('div',{style:{fontSize:11,color:'#555',letterSpacing:'1.5px',textTransform:'uppercase',marginBottom:16}},tText('Accès rapide')),
       React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}},
-        [{i:'👥',l:'Travailleurs',a:'employees',c:'rgba(34,197,94,.08)',bc:'rgba(34,197,94,.12)'},
+        [{i:'👥',l:tText('Travailleurs'),a:'employees',c:'rgba(34,197,94,.08)',bc:'rgba(34,197,94,.12)'},
          {i:'◈',l:tText('Fiches de paie'),a:'payslip',c:'rgba(198,163,78,.08)',bc:'rgba(198,163,78,.12)'},
          {i:'🏛',l:'Déclarations ONSS',a:'onss',c:'rgba(59,130,246,.08)',bc:'rgba(59,130,246,.12)'},
          {i:'📁',l:tText('Documents'),a:'ged',c:'rgba(168,85,247,.08)',bc:'rgba(168,85,247,.12)'}
@@ -731,7 +731,7 @@ export function ClientDashboard({s, d}) {
     // Workers list preview
     React.createElement('div',{style:cs},
       React.createElement('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}},
-        React.createElement('div',{style:{fontSize:11,color:'#555',letterSpacing:'1.5px',textTransform:'uppercase'}},'Travailleurs'),
+        React.createElement('div',{style:{fontSize:11,color:'#555',letterSpacing:'1.5px',textTransform:'uppercase'}},tText('Travailleurs')),
         React.createElement('button',{onClick:()=>d({type:'NAV',page:'employees'}),style:{fontSize:10,color:GREEN,background:'none',border:'none',cursor:'pointer',fontFamily:'inherit',fontWeight:600}},'Voir tout →')
       ),
       emps.length > 0
@@ -877,8 +877,8 @@ function PortalSystemPage({ s, d, tab: initialPortalTab }) {
         { id:'emp-docs', label:tText('Documents'), icon:'📁' },
         { id:'emp-profile', label:'Profil', icon:'⚙️' },
         { id:'emp-timesheet', label:'Pointage', icon:'⏱️' },
-        { id:'emp-training', label:'Formation', icon:'🎓' },
-        { id:'client-fac', label:'Facturation', icon:'💶' },
+        { id:'emp-training', label:tText('Formation'), icon:'🎓' },
+        { id:'client-fac', label:tText('Facturation'), icon:'💶' },
       ];
 
   const [tab, setTab] = React.useState(tabs[0]?.id || 'emp-dash');
