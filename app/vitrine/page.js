@@ -533,7 +533,47 @@ function PageExp({t,go}){const d=t.exp;return(<><section style={{background:CREA
 
 function PageForm({t,go}){const d=t.form;return(<><section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div><div style={{display:'flex',alignItems:'center',gap:8,fontSize:12,color:MIST,marginBottom:20}}>{'Accueil'} <span style={{color:G}}>›</span> {d.bc}</div><div className="vt-ey">{d.ey}</div><h1 style={{marginBottom:18,whiteSpace:'pre-line'}}>{d.h.split('\n').map((l,i)=>(<span key={i}>{i>0&&<br/>}{i===2?<em>{l}</em>:l}</span>))}</h1><p style={{fontSize:18,color:STONE,marginBottom:28,fontWeight:300}}>{d.sub}</p><div style={{display:'flex',gap:12,flexWrap:'wrap'}}><button className="btn-p" onClick={()=>go('contact')}>{d.c1}</button><button className="btn-s" onClick={()=>go('contact')}>{d.c2}</button></div></div><DkCard {...d.card}/></div></div></section><section className="vt-sec" style={{background:CREAM}}><div className="vt-wrap"><div style={{marginBottom:48}}><div className="vt-ey">{d.mods.ey}</div><h2>{d.mods.h}</h2></div><div className="sol-grid">{d.mods.items.map(m=>(<div key={m.t} className={`sol-card${m.f?' featured':''}`} onClick={()=>go('contact')}><div className="sol-ico">{m.ico}</div><h4>{m.t}</h4><p className="sdesc">{m.d}</p><div className="slink">{t.discover} <Arr/></div></div>))}</div></div></section><section className="vt-sec"><div className="vt-wrap"><div style={{marginBottom:48}}><div className="vt-ey">{d.arts.ey}</div><h2>{d.arts.h}</h2></div><div className="tc-grid">{d.arts.items.map(a=>(<div key={a.t} className="tc"><div className="tc-img">{a.ico}</div><div className="tc-body"><span className="tc-tag">{a.tag}</span><h4>{a.t}</h4><p>{a.d}</p><div className="tc-cta">{t.readmore} <Arr/></div></div></div>))}</div></div></section><Newsletter t={t} go={go}/><CtaBand h={d.cta.h} sub={d.cta.sub} btn={d.cta.btn} go={go}/><Footer t={t} go={go}/></>);}
 
-function PageCon({t,go}){const d=t.con;const[sent,setSent]=useState(false);return(<><section className="vt-sec"><div className="vt-wrap"><div style={{display:'grid',gridTemplateColumns:'1fr 1.3fr',gap:72,alignItems:'start'}}><div><div className="vt-ey">{d.ey}</div><h2 style={{whiteSpace:'pre-line'}}>{d.h}</h2><p style={{margin:'16px 0 28px',fontSize:17}}>{d.sub}</p>{d.ch.map(([ico,l,v])=>(<div key={l} className="ch"><div style={{width:40,height:40,borderRadius:9,background:WHITE,border:`1px solid ${BORDER}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>{ico}</div><div><div style={{fontSize:13,fontWeight:600,color:INK,marginBottom:2}}>{l}</div><div style={{fontSize:14,color:STONE}}>{v}</div></div></div>))}<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginTop:8}}>{d.cr.map(([l,v])=>(<div key={l} style={{background:CREAM,border:`1px solid ${BORDER}`,borderRadius:5,padding:14}}><div style={{fontSize:10,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:MIST,marginBottom:6}}>{l}</div><div style={{fontFamily:"'Fira Code',monospace",fontSize:12,color:INK}}>{v}</div></div>))}</div></div><div style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:10,padding:'36px 32px',boxShadow:'0 8px 40px rgba(14,13,10,.12)'}}><div style={{fontFamily:"'Fraunces',serif",fontSize:24,color:INK,marginBottom:6,fontWeight:400}}>{d.f.t}</div><div style={{fontSize:14,color:MIST,marginBottom:28}}>{d.f.s}</div>{sent?(<div style={{padding:'20px',borderRadius:10,background:'rgba(34,197,94,.1)',border:'1px solid rgba(34,197,94,.3)',color:'#166534',fontSize:16,textAlign:'center'}}>{d.f.ok}</div>):(<><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>{[[d.f.fn,'text',d.f.fnp],[d.f.ln,'text',d.f.lnp]].map(([l,,ph])=>(<div key={l} style={{display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{l}</label><input className="fi" type="text" placeholder={ph}/></div>))}<div style={{gridColumn:'1/-1',display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.em}</label><input className="fi" type="email" placeholder={d.f.emp}/></div><div style={{gridColumn:'1/-1',display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.co}</label><input className="fi" type="text" placeholder={d.f.cop}/></div><div style={{gridColumn:'1/-1',display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.ro}</label><select className="fse">{d.f.roles.map(o=>(<option key={o}>{o}</option>))}</select></div><div style={{gridColumn:'1/-1',display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.ms}</label><textarea className="fta" placeholder={d.f.msp}/></div></div><button onClick={()=>setSent(true)} style={{width:'100%',marginTop:6,padding:14,borderRadius:5,border:'none',background:INK,color:WHITE,fontFamily:"'Cabinet Grotesk',sans-serif",fontSize:15,fontWeight:600,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,transition:'all .22s'}} onMouseOver={e=>e.currentTarget.style.background='#252320'} onMouseOut={e=>e.currentTarget.style.background=INK}>{d.f.sub} <Arr/></button><p style={{fontSize:11,color:MIST,textAlign:'center',marginTop:10,lineHeight:1.6}}>{d.f.note}</p></>)}</div></div></div></section><Footer t={t} go={go}/></>);}
+function PageCon({t,go,lang}){
+  const d=t.con;
+  const[sent,setSent]=useState(false);
+  const[loading,setLoading]=useState(false);
+  const[errMsg,setErrMsg]=useState('');
+  const rPrenom=useRef(null),rNom=useRef(null),rEmail=useRef(null),rSociete=useRef(null),rRole=useRef(null),rMsg=useRef(null);
+
+  const handleSubmit=async()=>{
+    const prenom=rPrenom.current?.value?.trim();
+    const email=rEmail.current?.value?.trim();
+    if(!prenom||!email){setErrMsg('Prénom et e-mail sont requis.');return;}
+    setLoading(true);setErrMsg('');
+    try{
+      const res=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({prenom,nom:rNom.current?.value,email,societe:rSociete.current?.value,role:rRole.current?.value,message:rMsg.current?.value,lang})});
+      if(res.ok){setSent(true);}else{setErrMsg('Erreur lors de l\'envoi. Veuillez réessayer.');}
+    }catch(e){setErrMsg('Erreur réseau. Veuillez réessayer.');}
+    setLoading(false);
+  };
+
+  return(<><section className="vt-sec"><div className="vt-wrap"><div style={{display:'grid',gridTemplateColumns:'1fr 1.3fr',gap:72,alignItems:'start'}}><div><div className="vt-ey">{d.ey}</div><h2 style={{whiteSpace:'pre-line'}}>{d.h}</h2><p style={{margin:'16px 0 28px',fontSize:17}}>{d.sub}</p>{d.ch.map(([ico,l,v])=>(<div key={l} className="ch"><div style={{width:40,height:40,borderRadius:9,background:WHITE,border:`1px solid ${BORDER}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>{ico}</div><div><div style={{fontSize:13,fontWeight:600,color:INK,marginBottom:2}}>{l}</div><div style={{fontSize:14,color:STONE}}>{v}</div></div></div>))}<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginTop:8}}>{d.cr.map(([l,v])=>(<div key={l} style={{background:CREAM,border:`1px solid ${BORDER}`,borderRadius:5,padding:14}}><div style={{fontSize:10,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:MIST,marginBottom:6}}>{l}</div><div style={{fontFamily:"'Fira Code',monospace",fontSize:12,color:INK}}>{v}</div></div>))}</div></div>
+  <div style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:10,padding:'36px 32px',boxShadow:'0 8px 40px rgba(14,13,10,.12)'}}>
+    <div style={{fontFamily:"'Fraunces',serif",fontSize:24,color:INK,marginBottom:6,fontWeight:400}}>{d.f.t}</div>
+    <div style={{fontSize:14,color:MIST,marginBottom:28}}>{d.f.s}</div>
+    {sent?(<div style={{padding:'20px',borderRadius:10,background:'rgba(34,197,94,.1)',border:'1px solid rgba(34,197,94,.3)',color:'#166534',fontSize:16,textAlign:'center'}}>{d.f.ok}</div>):(<>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+        <div style={{display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.fn}</label><input ref={rPrenom} className="fi" type="text" placeholder={d.f.fnp}/></div>
+        <div style={{display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.ln}</label><input ref={rNom} className="fi" type="text" placeholder={d.f.lnp}/></div>
+        <div style={{gridColumn:'1/-1',display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.em}</label><input ref={rEmail} className="fi" type="email" placeholder={d.f.emp}/></div>
+        <div style={{gridColumn:'1/-1',display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.co}</label><input ref={rSociete} className="fi" type="text" placeholder={d.f.cop}/></div>
+        <div style={{gridColumn:'1/-1',display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.ro}</label><select ref={rRole} className="fse">{d.f.roles.map(o=>(<option key={o}>{o}</option>))}</select></div>
+        <div style={{gridColumn:'1/-1',display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.ms}</label><textarea ref={rMsg} className="fta" placeholder={d.f.msp}/></div>
+      </div>
+      {errMsg&&<div style={{marginTop:10,padding:'10px 14px',borderRadius:6,background:'rgba(239,68,68,.1)',border:'1px solid rgba(239,68,68,.3)',color:'#b91c1c',fontSize:13}}>{errMsg}</div>}
+      <button onClick={handleSubmit} disabled={loading} style={{width:'100%',marginTop:14,padding:14,borderRadius:5,border:'none',background:loading?'#9A968E':INK,color:WHITE,fontFamily:"'Cabinet Grotesk',sans-serif",fontSize:15,fontWeight:600,cursor:loading?'not-allowed':'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,transition:'all .22s'}} onMouseOver={e=>{if(!loading)e.currentTarget.style.background='#252320';}} onMouseOut={e=>{if(!loading)e.currentTarget.style.background=INK;}}>
+        {loading?'Envoi en cours…':<>{d.f.sub} <Arr/></>}
+      </button>
+      <p style={{fontSize:11,color:MIST,textAlign:'center',marginTop:10,lineHeight:1.6}}>{d.f.note}</p>
+    </>)}
+  </div></div></div></section><Footer t={t} go={go}/></>);
+});}
 
 const PAGES={home:PageHome,independant:PageInd,employeur:PageEmp,employeurs:PageEmps,experts:PageExp,formations:PageForm,contact:PageCon};
 
@@ -612,7 +652,7 @@ export default function VitrinePage(){
       </nav>
 
       <div style={{paddingTop:36+64}}>
-        <PageComp t={t} go={go}/>
+        <PageComp t={t} go={go} lang={lang}/>
       </div>
     </div>
   );
