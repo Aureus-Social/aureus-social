@@ -431,6 +431,290 @@ function About() {
   );
 }
 
+/* ── TROIS PORTAILS ──────────────────────────────────────────── */
+function Portails() {
+  const [ref,v]=useInView();
+  const portails=[
+    { icon:'🏢', title:'Cabinet / Fiduciaire', sub:'?portal=admin', desc:'Gestion multi-clients, tableaux de bord consolidés, facturation cabinet, mandats ONSS, exports comptables.', color:G },
+    { icon:'🏭', title:'Client Employeur', sub:'?portal=client', desc:'Dashboard, travailleurs, fiches de paie, déclarations, documents, factures.', color:'#60a5fa' },
+    { icon:'👤', title:'Employé', sub:'?portal=employee', desc:'Fiches PDF, demandes de congé, documents personnels, informations.', color:'#a78bfa' },
+  ];
+  return (
+    <section ref={ref} style={{padding:'80px 24px 100px',background:`${G}04`}}>
+      <div style={{maxWidth:1000,margin:'0 auto'}}>
+        <div style={{textAlign:'center',marginBottom:56,opacity:v?1:0,transition:'all .7s'}}>
+          <div style={{fontSize:11,color:G,letterSpacing:'3px',textTransform:'uppercase',marginBottom:14}}>— Multi-tenant</div>
+          <h2 style={{fontSize:'clamp(28px,4vw,48px)',fontWeight:800,color:W,margin:'0 0 12px',letterSpacing:'-1px'}}>
+            Trois portails, <span style={{color:G,fontStyle:'italic'}}>une plateforme</span>
+          </h2>
+          <p style={{fontSize:15,color:W2}}>Isolation totale des données. Chaque utilisateur accède exactement à ce dont il a besoin.</p>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16}}>
+          {portails.map((p,i)=>(
+            <div key={i} style={{padding:'32px 24px',border:`1px solid ${p.color}25`,borderRadius:8,background:`${p.color}06`,textAlign:'center',opacity:v?1:0,transform:v?'none':'translateY(20px)',transition:`all .6s ease ${i*.12}s`}}>
+              <div style={{fontSize:36,marginBottom:16}}>{p.icon}</div>
+              <h3 style={{fontSize:18,fontWeight:700,color:W,margin:'0 0 8px'}}>{p.title}</h3>
+              <code style={{fontSize:10,color:p.color,background:`${p.color}15`,padding:'3px 8px',borderRadius:3,display:'inline-block',marginBottom:14}}>{p.sub}</code>
+              <p style={{fontSize:13,color:W2,lineHeight:1.6,margin:0}}>{p.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── TÉMOIGNAGES ─────────────────────────────────────────────── */
+function Temoignages() {
+  const [ref,v]=useInView();
+  const temos=[
+    { stars:5, text:"L'interface est années-lumière devant ce qu'on utilisait avec notre ancien secrétariat social. Le calcul de paie est précis, les 229 CP sont là, et le portail employé fait gagner un temps fou.", name:'Sophie V.', role:'Gestionnaire de paie, Fiduciaire Bruxelles', initial:'S' },
+    { stars:5, text:"La DmfA XML se génère en un clic, le précompte est conforme SPF, et les fiches de paie sont impeccables. On a migré 85 dossiers depuis notre ancien prestataire en une semaine.", name:'Nathalie C.', role:'Gestionnaire de paie senior, Cabinet comptable Liège', initial:'N' },
+    { stars:5, text:"On paye 4x moins qu'avec notre ancien secrétariat social et on a plus de fonctionnalités. Le Belcotax, le SEPA, les déclarations DIMONA — tout est automatisé. Un vrai gain de temps.", name:'Karim B.', role:'Gestionnaire de paie, Secrétariat social Anvers', initial:'K' },
+  ];
+  return (
+    <section ref={ref} style={{padding:'80px 24px 100px'}}>
+      <div style={{maxWidth:900,margin:'0 auto'}}>
+        <div style={{textAlign:'center',marginBottom:56,opacity:v?1:0,transition:'all .7s'}}>
+          <div style={{fontSize:11,color:G,letterSpacing:'3px',textTransform:'uppercase',marginBottom:14}}>— Témoignages</div>
+          <h2 style={{fontSize:'clamp(28px,4vw,48px)',fontWeight:800,color:W,margin:'0 0 12px',letterSpacing:'-1px'}}>
+            Ce qu'en disent nos <span style={{color:G,fontStyle:'italic'}}>bêta-testeurs</span>
+          </h2>
+          <p style={{fontSize:15,color:W2}}>Retours des premiers fiduciaires à tester la plateforme.</p>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:20}}>
+          {temos.map((t,i)=>(
+            <div key={i} style={{padding:'32px',border:`1px solid ${G}15`,borderRadius:8,background:`${G}04`,opacity:v?1:0,transform:v?'none':'translateY(16px)',transition:`all .6s ease ${i*.15}s`}}>
+              <div style={{color:G,fontSize:18,marginBottom:16}}>{'★'.repeat(t.stars)}</div>
+              <p style={{fontSize:15,color:W,lineHeight:1.75,margin:'0 0 24px',fontStyle:'italic'}}>"{t.text}"</p>
+              <div style={{display:'flex',alignItems:'center',gap:12}}>
+                <div style={{width:40,height:40,borderRadius:'50%',background:`${G}30`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,fontWeight:700,color:G}}>{t.initial}</div>
+                <div>
+                  <div style={{fontSize:14,fontWeight:700,color:W}}>{t.name}</div>
+                  <div style={{fontSize:12,color:W2}}>{t.role}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── TARIFS ──────────────────────────────────────────────────── */
+function Tarifs({onLogin}) {
+  const [ref,v]=useInView();
+  return (
+    <section ref={ref} style={{padding:'80px 24px 100px',background:`${G}04`}}>
+      <div style={{maxWidth:800,margin:'0 auto'}}>
+        <div style={{textAlign:'center',marginBottom:56,opacity:v?1:0,transition:'all .7s'}}>
+          <div style={{fontSize:11,color:G,letterSpacing:'3px',textTransform:'uppercase',marginBottom:14}}>— Tarifs</div>
+          <h2 style={{fontSize:'clamp(28px,4vw,48px)',fontWeight:800,color:W,margin:'0 0 12px',letterSpacing:'-1px'}}>
+            Transparent et <span style={{color:G,fontStyle:'italic'}}>compétitif</span>
+          </h2>
+          <p style={{fontSize:15,color:W2}}>Pas de frais cachés. Pas d'engagement longue durée. Essai gratuit 30 jours.</p>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20}}>
+          {/* STARTER */}
+          <div style={{padding:'36px 28px',border:`1px solid ${G}20`,borderRadius:8,background:`${G}05`,opacity:v?1:0,transform:v?'none':'translateY(20px)',transition:'all .6s ease .1s'}}>
+            <div style={{fontSize:11,color:W2,letterSpacing:'3px',textTransform:'uppercase',marginBottom:12}}>Starter</div>
+            <div style={{fontSize:36,fontWeight:900,color:W,margin:'0 0 4px'}}>À consulter</div>
+            <div style={{fontSize:13,color:W2,marginBottom:28}}>Tarif adapté à votre entreprise</div>
+            {['Calcul de paie complet','DmfA + Belcotax XML','Portail employé','Fiches de paie PDF','GED documents','Support email'].map(f=>(
+              <div key={f} style={{display:'flex',gap:10,alignItems:'center',marginBottom:10}}>
+                <span style={{color:G,fontSize:14}}>✓</span>
+                <span style={{fontSize:13,color:W2}}>{f}</span>
+              </div>
+            ))}
+            <button onClick={onLogin} style={{width:'100%',padding:'14px',marginTop:24,borderRadius:6,border:`1px solid ${G}30`,background:'transparent',color:G,fontSize:13,cursor:'pointer',fontFamily:'inherit',letterSpacing:'1px',transition:'all .2s'}}
+              onMouseEnter={e=>e.currentTarget.style.background=`${G}10`}
+              onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+              Commencer
+            </button>
+          </div>
+          {/* PRO */}
+          <div style={{padding:'36px 28px',border:`2px solid ${G}`,borderRadius:8,background:`${G}08`,position:'relative',opacity:v?1:0,transform:v?'none':'translateY(20px)',transition:'all .6s ease .2s'}}>
+            <div style={{position:'absolute',top:-14,left:'50%',transform:'translateX(-50%)',background:G,color:'#07060a',fontSize:10,fontWeight:800,padding:'4px 16px',borderRadius:99,letterSpacing:'2px'}}>POPULAIRE</div>
+            <div style={{fontSize:11,color:G,letterSpacing:'3px',textTransform:'uppercase',marginBottom:12}}>Pro</div>
+            <div style={{fontSize:36,fontWeight:900,color:W,margin:'0 0 4px'}}>À consulter</div>
+            <div style={{fontSize:13,color:W2,marginBottom:28}}>Tout inclus — sur mesure</div>
+            {['Tout Starter inclus','DIMONA + SEPA automatiques','Signature électronique','API REST + Webhooks','Reporting avancé','Multi-devise & expats','Import concurrent','Support prioritaire'].map(f=>(
+              <div key={f} style={{display:'flex',gap:10,alignItems:'center',marginBottom:10}}>
+                <span style={{color:G,fontSize:14}}>✓</span>
+                <span style={{fontSize:13,color:W2}}>{f}</span>
+              </div>
+            ))}
+            <button onClick={onLogin} style={{width:'100%',padding:'14px',marginTop:24,borderRadius:6,border:'none',background:`linear-gradient(135deg,${G3},${G})`,color:'#07060a',fontSize:13,fontWeight:800,cursor:'pointer',fontFamily:'inherit',letterSpacing:'1px',transition:'all .2s'}}
+              onMouseEnter={e=>e.currentTarget.style.transform='translateY(-1px)'}
+              onMouseLeave={e=>e.currentTarget.style.transform='translateY(0)'}>
+              Essai gratuit 30j
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── CALCULATEUR ROI ─────────────────────────────────────────── */
+function ROICalculator({onLogin}) {
+  const [ref,v]=useInView();
+  const [etp,setEtp]=useState(30);
+  const [provider,setProvider]=useState('Grand SS');
+  const [modules,setModules]=useState({portail:true,signature:false,api:false});
+  const rates={'Grand SS':95,'SS régional':75,'Petit SS':60,'Legacy':50};
+  const currentCost=Math.round(etp*rates[provider]*(1+(modules.portail?0.15:0)+(modules.signature?0.12:0)+(modules.api?0.08:0)));
+  return (
+    <section ref={ref} style={{padding:'80px 24px 100px'}}>
+      <div style={{maxWidth:700,margin:'0 auto',opacity:v?1:0,transition:'all .8s'}}>
+        <div style={{textAlign:'center',marginBottom:48}}>
+          <div style={{fontSize:11,color:G,letterSpacing:'3px',textTransform:'uppercase',marginBottom:14}}>— Calculateur ROI</div>
+          <h2 style={{fontSize:'clamp(26px,4vw,44px)',fontWeight:800,color:W,margin:'0 0 12px',letterSpacing:'-1px'}}>
+            Combien <span style={{color:G,fontStyle:'italic'}}>économisez-vous</span> ?
+          </h2>
+          <p style={{fontSize:15,color:W2}}>Comparez votre coût actuel avec Aureus Social Pro en quelques clics.</p>
+        </div>
+        {/* Formulaire */}
+        <div style={{padding:'32px',border:`1px solid ${G}15`,borderRadius:8,background:`${G}04`,marginBottom:20}}>
+          <div style={{marginBottom:28}}>
+            <label style={{fontSize:13,color:W2,display:'block',marginBottom:12}}>Nombre de travailleurs (ETP)</label>
+            <input type="range" min={5} max={200} value={etp} onChange={e=>setEtp(+e.target.value)}
+              style={{width:'100%',accentColor:G,height:4,cursor:'pointer'}}/>
+            <div style={{display:'flex',justifyContent:'space-between',marginTop:8}}>
+              <span style={{fontSize:11,color:W2}}>5</span>
+              <span style={{fontSize:22,fontWeight:900,color:G}}>{etp}</span>
+              <span style={{fontSize:11,color:W2}}>200</span>
+            </div>
+          </div>
+          <div style={{marginBottom:24}}>
+            <label style={{fontSize:13,color:W2,display:'block',marginBottom:12}}>Votre prestataire actuel</label>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+              {Object.keys(rates).map(p=>(
+                <button key={p} onClick={()=>setProvider(p)} style={{padding:'10px',borderRadius:6,border:`1px solid ${provider===p?G:`${G}20`}`,background:provider===p?`${G}15`:'transparent',color:provider===p?G:W2,fontSize:13,cursor:'pointer',fontFamily:'inherit',transition:'all .2s'}}>
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label style={{fontSize:13,color:W2,display:'block',marginBottom:12}}>Modules supplémentaires ?</label>
+            {[['portail','Portail employé'],['signature','Signature électronique'],['api','API / Intégration ERP']].map(([k,l])=>(
+              <label key={k} style={{display:'flex',alignItems:'center',gap:10,marginBottom:10,cursor:'pointer'}}>
+                <input type="checkbox" checked={modules[k]} onChange={e=>setModules(m=>({...m,[k]:e.target.checked}))} style={{accentColor:G,width:16,height:16}}/>
+                <span style={{fontSize:13,color:W2}}>{l}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+        {/* Résultats */}
+        <div style={{display:'grid',gap:12,marginBottom:20}}>
+          <div style={{padding:'24px',border:`1px solid #ef444430`,borderRadius:8,background:'#ef444408'}}>
+            <div style={{fontSize:10,color:W2,letterSpacing:'2px',marginBottom:8}}>COÛT ACTUEL ESTIMÉ</div>
+            <div style={{fontSize:'clamp(28px,5vw,44px)',fontWeight:900,color:'#ef4444',textDecoration:'line-through',letterSpacing:'-1px'}}>€ {currentCost.toLocaleString('fr-BE')}</div>
+            <div style={{fontSize:12,color:W2,marginTop:4}}>par mois · Base: ~€{rates[provider]}/ETP · {etp} ETP · {provider}</div>
+          </div>
+          <div style={{textAlign:'center',fontSize:13,color:W2}}>VS</div>
+          <div style={{padding:'24px',border:`2px solid ${G}30`,borderRadius:8,background:`${G}08`}}>
+            <div style={{fontSize:10,color:G,letterSpacing:'2px',marginBottom:8}}>AVEC AUREUS SOCIAL PRO</div>
+            <div style={{fontSize:'clamp(28px,5vw,44px)',fontWeight:900,color:G,letterSpacing:'-1px'}}>À consulter</div>
+            <div style={{fontSize:12,color:W2,marginTop:4}}>Tarif adapté · {etp} ETP · Tout inclus</div>
+          </div>
+          <div style={{padding:'24px',border:`1px solid #22c55e30`,borderRadius:8,background:'#22c55e08',textAlign:'center'}}>
+            <div style={{fontSize:10,color:W2,letterSpacing:'2px',marginBottom:8}}>ÉCONOMIE POTENTIELLE</div>
+            <div style={{fontSize:'clamp(22px,4vw,36px)',fontWeight:900,color:'#22c55e'}}>Contactez-nous</div>
+            <div style={{fontSize:12,color:W2,marginTop:4}}>pour un devis personnalisé gratuit</div>
+          </div>
+        </div>
+        <button onClick={onLogin} style={{width:'100%',padding:'16px',borderRadius:6,border:'none',background:`linear-gradient(135deg,${G3},${G},${G2})`,color:'#07060a',fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'1px',textTransform:'uppercase',fontFamily:'inherit',boxShadow:`0 0 40px ${G}30`,transition:'all .3s'}}
+          onMouseEnter={e=>e.currentTarget.style.transform='translateY(-2px)'}
+          onMouseLeave={e=>e.currentTarget.style.transform='translateY(0)'}>
+          Obtenir mon devis gratuit →
+        </button>
+      </div>
+    </section>
+  );
+}
+
+/* ── MIGRATION 7 JOURS ───────────────────────────────────────── */
+function Migration() {
+  const [ref,v]=useInView();
+  const steps=[
+    { n:1, period:'JOUR 1-2', title:'Import & Analyse', desc:'Export CSV depuis votre prestataire actuel. Notre parseur détecte automatiquement le format et importe travailleurs, contrats, historiques de paie, soldes de congés.', tags:['📥 Import CSV','📊 Analyse auto','✅ Validation NISS'] },
+    { n:2, period:'JOUR 3-5', title:'Vérification & Paramétrage', desc:'Vérification croisée de toutes les données importées : commissions paritaires, barèmes, taux ONSS sectoriels. Paramétrage des règles de votre entreprise.', tags:['⚖️ CP & barèmes','🔍 Contrôle croisé','⚙️ Config règles'] },
+    { n:3, period:'JOUR 6-7', title:'Go Live & Formation', desc:"Première paie calculée en direct, Dimona soumise, DmfA prête. Formation de vos équipes sur la plateforme. Support dédié les 30 premiers jours.", tags:['🚀 Première paie','📡 Dimona live','🎓 Formation incluse'] },
+  ];
+  return (
+    <section ref={ref} style={{padding:'80px 24px 100px',background:`${G}04`}}>
+      <div style={{maxWidth:900,margin:'0 auto'}}>
+        <div style={{textAlign:'center',marginBottom:56,opacity:v?1:0,transition:'all .7s'}}>
+          <div style={{fontSize:11,color:G,letterSpacing:'3px',textTransform:'uppercase',marginBottom:14}}>— Migration</div>
+          <h2 style={{fontSize:'clamp(28px,4vw,48px)',fontWeight:800,color:W,margin:'0 0 12px',letterSpacing:'-1px'}}>
+            Migrez en <span style={{color:G,fontStyle:'italic'}}>7 jours</span>, pas 7 mois
+          </h2>
+          <p style={{fontSize:15,color:W2}}>Un processus clair, accompagné, sans interruption de votre activité.</p>
+        </div>
+        <div style={{position:'relative'}}>
+          <div style={{position:'absolute',left:24,top:0,bottom:0,width:1,background:`${G}20`}}/>
+          {steps.map((s,i)=>(
+            <div key={i} style={{display:'flex',gap:32,marginBottom:32,opacity:v?1:0,transform:v?'none':'translateX(-20px)',transition:`all .6s ease ${i*.15}s`}}>
+              <div style={{width:48,height:48,borderRadius:'50%',border:`2px solid ${G}`,background:BG,display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,fontWeight:900,color:G,flexShrink:0,zIndex:1}}>{s.n}</div>
+              <div style={{padding:'24px',border:`1px solid ${G}12`,borderRadius:8,background:`${G}04`,flex:1}}>
+                <div style={{fontSize:10,color:G,letterSpacing:'2px',marginBottom:8}}>{s.period}</div>
+                <h3 style={{fontSize:20,fontWeight:700,color:W,margin:'0 0 12px'}}>{s.title}</h3>
+                <p style={{fontSize:14,color:W2,lineHeight:1.7,margin:'0 0 16px'}}>{s.desc}</p>
+                <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+                  {s.tags.map(t=><span key={t} style={{fontSize:11,color:G2,background:`${G}10`,border:`1px solid ${G}20`,padding:'4px 12px',borderRadius:3,fontFamily:'monospace'}}>{t}</span>)}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── FAQ ─────────────────────────────────────────────────────── */
+function FAQ() {
+  const [ref,v]=useInView();
+  const [open,setOpen]=useState(null);
+  const faqs=[
+    { q:"Est-ce conforme à la législation belge ?", a:"Oui. La plateforme intègre nativement les 229 commissions paritaires, les barèmes sectoriels 2024-2026, et se conforme aux schémas XML ONSS pour Dimona et DmfA. Le calcul du précompte professionnel suit l'Annexe III AR. Mises à jour légales automatiques." },
+    { q:"Comment migrer depuis un secrétariat social traditionnel ?", a:"Notre parseur CSV multi-format importe automatiquement vos données depuis SD Worx, Partena, Securex ou tout autre prestataire. Le processus prend 7 jours : import → vérification → go live. Support dédié inclus." },
+    { q:"Les données sont-elles sécurisées ?", a:"Oui. Chiffrement AES-256-GCM pour NISS et IBAN, Row Level Security Supabase (isolation totale entre clients), HSTS + CSP Headers, anti-brute force, détection géo-intrusion, OWASP ZAP CI/CD. RGPD Art. 32 natif." },
+    { q:"Puis-je tester gratuitement ?", a:"Oui. Essai gratuit 30 jours, sans carte de crédit, sans engagement. Accès complet à toutes les fonctionnalités Pro. Contactez-nous à info@aureus-ia.com pour démarrer." },
+    { q:"Y a-t-il une API pour mon ERP / logiciel comptable ?", a:"Oui. API REST v1 avec 4 endpoints documentés. Webhooks HMAC-SHA256 pour intégrations en temps réel. Compatible BOB, WinBooks, Exact Online, Octopus, Horus. Documentation disponible après connexion." },
+    { q:"L'application fonctionne-t-elle sur mobile ?", a:"Oui. PWA (Progressive Web App) installable sur iOS et Android. Push notifications, mode offline pour consultation des fiches. Interface responsive optimisée pour tous les écrans." },
+  ];
+  return (
+    <section ref={ref} style={{padding:'80px 24px 100px'}}>
+      <div style={{maxWidth:760,margin:'0 auto'}}>
+        <div style={{marginBottom:48,opacity:v?1:0,transition:'all .7s'}}>
+          <div style={{fontSize:11,color:G,letterSpacing:'3px',textTransform:'uppercase',marginBottom:14}}>— FAQ</div>
+          <h2 style={{fontSize:'clamp(28px,4vw,48px)',fontWeight:800,color:W,margin:'0 0 12px',letterSpacing:'-1px'}}>
+            Questions <span style={{color:G,fontStyle:'italic'}}>fréquentes</span>
+          </h2>
+          <p style={{fontSize:15,color:W2}}>Tout ce que vous devez savoir avant de commencer.</p>
+        </div>
+        <div>
+          {faqs.map((f,i)=>(
+            <div key={i} style={{borderBottom:`1px solid ${G}12`,opacity:v?1:0,transition:`all .5s ease ${i*.07}s`}}>
+              <button onClick={()=>setOpen(open===i?null:i)} style={{width:'100%',padding:'20px 0',display:'flex',justifyContent:'space-between',alignItems:'center',background:'none',border:'none',cursor:'pointer',textAlign:'left',fontFamily:'inherit'}}>
+                <span style={{fontSize:15,color:W,fontWeight:500,paddingRight:16}}>{f.q}</span>
+                <span style={{color:G,fontSize:20,flexShrink:0,transition:'transform .3s',transform:open===i?'rotate(45deg)':'none'}}>+</span>
+              </button>
+              {open===i && (
+                <div style={{padding:'0 0 20px',fontSize:14,color:W2,lineHeight:1.75}}>{f.a}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ── CTA FINAL ───────────────────────────────────────────────── */
 function CTA({onLogin}) {
   const [ref,v]=useInView();
@@ -532,6 +816,12 @@ export default function LandingPage() {
         <DashboardPreview/>
         <Compare/>
         <Security/>
+        <Portails/>
+        <Temoignages/>
+        <Tarifs onLogin={handleLogin}/>
+        <ROICalculator onLogin={handleLogin}/>
+        <Migration/>
+        <FAQ/>
         <About/>
         <CTA onLogin={handleLogin}/>
         <Footer onLogin={handleLogin}/>
@@ -539,3 +829,5 @@ export default function LandingPage() {
     </>
   );
 }
+
+// PATCH — sections manquantes injectées via script séparé
