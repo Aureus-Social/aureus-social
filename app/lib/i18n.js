@@ -811,5 +811,19 @@ export const I18N = {
   'x.trimestriel': { fr:'Trimestriel', nl:'Kwartaal', en:'Quarterly', de:'Vierteljährlich' },
   'x.hebdomadaire': { fr:'Hebdomadaire', nl:'Wekelijks', en:'Weekly', de:'Wöchentlich' },
   'x.quotidien': { fr:'Quotidien', nl:'Dagelijks', en:'Daily', de:'Täglich' },
-};
 
+  // ── Messages interface pages orphelines ──
+  'Le popup a été bloqué. Autorisez les popups pour générer le PDF de mise en demeure.': { fr:'Le popup a été bloqué. Autorisez les popups pour générer le PDF de mise en demeure.', nl:'De popup werd geblokkeerd. Sta popups toe om de aanmaning-PDF te genereren.', en:'Popup was blocked. Allow popups to generate the formal notice PDF.', de:'Das Popup wurde blockiert. Erlauben Sie Popups, um das Mahnungs-PDF zu erstellen.' },
+  'Aucune facture à relancer.': { fr:'Aucune facture à relancer.', nl:'Geen facturen om op te volgen.', en:'No invoices to follow up.', de:'Keine Rechnungen zur Nachverfolgung.' },
+  'Email commercial + nom client requis': { fr:'Email commercial + nom client requis', nl:'Commerciële e-mail + klantnaam vereist', en:'Sales email + client name required', de:'Vertriebs-E-Mail + Kundenname erforderlich' },
+  'Grille tarifaire copiée !': { fr:'Grille tarifaire copiée !', nl:'Tariefgrid gekopieerd!', en:'Rate grid copied!', de:'Preisraster kopiert!' },
+  'Copié !': { fr:'Copié !', nl:'Gekopieerd!', en:'Copied!', de:'Kopiert!' },
+  '💾 Brouillon sauvegardé': { fr:'💾 Brouillon sauvegardé', nl:'💾 Concept opgeslagen', en:'💾 Draft saved', de:'💾 Entwurf gespeichert' },
+  'XML PEPPOL copié !': { fr:'XML PEPPOL copié !', nl:'PEPPOL XML gekopieerd!', en:'PEPPOL XML copied!', de:'PEPPOL XML kopiert!' },
+  'Veuillez sélectionner les dates de début et fin.': { fr:'Veuillez sélectionner les dates de début et fin.', nl:'Selecteer begin- en einddatum.', en:'Please select start and end dates.', de:'Bitte Anfangs- und Enddatum auswählen.' },
+  'La date de fin doit être après la date de début.': { fr:'La date de fin doit être après la date de début.', nl:'De einddatum moet na de begindatum liggen.', en:'End date must be after start date.', de:'Das Enddatum muss nach dem Startdatum liegen.' },
+  'Aucune sauvegarde automatique trouvée': { fr:'Aucune sauvegarde automatique trouvée', nl:'Geen automatische back-up gevonden', en:'No automatic backup found', de:'Keine automatische Sicherung gefunden' },
+  '✅ Restauration auto-backup réussie': { fr:'✅ Restauration auto-backup réussie', nl:'✅ Automatische herstel geslaagd', en:'✅ Auto-backup restored successfully', de:'✅ Automatische Wiederherstellung erfolgreich' },
+  'Sauvegardé !': { fr:'Sauvegardé !', nl:'Opgeslagen!', en:'Saved!', de:'Gespeichert!' },
+  '2FA via TOTP — Activez dans Supabase Dashboard > Authentication > MFA': { fr:'2FA via TOTP — Activez dans Supabase Dashboard > Authentication > MFA', nl:'2FA via TOTP — Activeer in Supabase Dashboard > Authentication > MFA', en:'2FA via TOTP — Enable in Supabase Dashboard > Authentication > MFA', de:'2FA via TOTP — Aktivieren Sie im Supabase Dashboard > Authentication > MFA' },
+};
