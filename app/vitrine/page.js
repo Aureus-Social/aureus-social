@@ -76,12 +76,12 @@ fr:{
       {n:6,t:'Déclarations trimestrielles ONSS',b:"DmfA XML Q1–Q4 avec toutes les réductions applicables.",tags:['DmfA · Q1–Q4'],tc:''},
     ]},
     av:{ey:'Avantages 2026',h:"Exonérations & primes à l'embauche",items:[
-      ['🎁','Exemption 1er employé',"Exonération totale des cotisations patronales ONSS pendant 5 ans."],
-      ['💼','Activa.brussels',"Prime mensuelle jusqu'à 350 € pour un demandeur d'emploi bruxellois."],
-      ['📉','Réduction bas salaire',"Réduction ONSS patronale pour salaires inférieurs à 3 100 €/mois."],
-      ['🎓','SINE & plan Activa',"Réductions pour l'engagement de personnes éloignées du marché de l'emploi."],
-      ['👶','Congé parental',"Gestion des suspensions de contrat et déclarations ONSS spécifiques."],
-      ['📋','MonBEE recrutement',"Prime à l'embauche via MonBEE. Délais et documents générés automatiquement."],
+      ['🎁','Exemption 1er employé',"Exonération totale des cotisations patronales ONSS pendant 5 ans.","En engageant votre premier travailleur, vous bénéficiez d'une exonération totale et définitive des cotisations patronales ONSS — pour toute la durée de cet emploi. Pour les employés suivants (2e au 6e), l'exonération est partielle et dégressive. Conditions : le travailleur doit être en CDI ou CDD > 3 mois, et aucun licenciement dans les 6 mois précédents. Aureus calcule automatiquement l'exonération applicable."],
+      ['💼','Activa.brussels',"Prime mensuelle jusqu'à 350 € pour un demandeur d'emploi bruxellois.","Activa.brussels est une prime d'activation à l'emploi bruxelloise. L'employeur reçoit jusqu'à 350 €/mois pendant 12 à 30 mois selon le profil du travailleur. Conditions : le travailleur doit être inscrit comme demandeur d'emploi auprès d'Actiris, résider en Région de Bruxelles-Capitale, et être engagé en CDI ou CDD > 6 mois. Attestation N° à conserver. Aureus génère le suivi automatique des primes et des délais MonBEE."],
+      ['📉','Réduction bas salaire',"Réduction ONSS patronale pour salaires inférieurs à 3 100 €/mois.","La réduction structurelle 'bas salaire' est une réduction des cotisations patronales ONSS pour les travailleurs dont le salaire trimestriel est inférieur à un certain seuil (environ 9.300 € brut/trimestre pour 2026). Elle peut atteindre 438,00 €/trimestre pour les très bas salaires. Elle est cumulable avec l'exonération 1er employé. Aureus applique automatiquement la formule ONSS dans le calcul de la DmfA."],
+      ['🎓','SINE & plan Activa',"Réductions pour l'engagement de personnes éloignées du marché de l'emploi.","Le plan SINE (Secteur de l'Insertion socioprofessionnelle et de l'Économie sociale) et le plan Activa permettent d'engager des personnes très éloignées du marché du travail avec des réductions de cotisations ONSS importantes. Pour SINE : exonération totale des cotisations patronales pendant 4 trimestres, puis 50% les 4 suivants. Pour Activa : réduction de 1.000 €/trimestre pendant 5 trimestres. Conditions strictes sur le profil du travailleur — Aureus vérifie l'éligibilité automatiquement."],
+      ['👶','Congé parental',"Gestion des suspensions de contrat et déclarations ONSS spécifiques.","Le congé parental permet à un travailleur de suspendre ou réduire son contrat pour s'occuper d'un enfant de moins de 12 ans (ou 21 ans si handicapé). Durée : 4 mois temps plein équivalent, pouvant être pris en temps plein, mi-temps ou 1/5. Pendant le congé, l'INAMI verse une allocation. L'employeur doit déclarer la suspension via des codes ONSS spécifiques dans la DmfA. Aureus gère les codes 70, 71, 72 et l'impact sur le calcul du salaire garanti."],
+      ['📋','MonBEE recrutement',"Prime à l'embauche via MonBEE. Délais et documents générés automatiquement.","MonBEE (Mon Bureau d'Emploi et d'Économie) est la plateforme bruxelloise centralisant les primes à l'embauche. Pour bénéficier des primes Activa.brussels, l'employeur doit introduire une demande via MonBEE dans les 30 jours suivant l'engagement. Documents requis : contrat de travail, attestation de chômage, formulaire C4. Aureus génère automatiquement un rappel 5 jours avant la deadline et prépare les documents nécessaires."],
     ]},
     cta:{h:"Engagez votre premier collaborateur dès demain.",sub:'Démo gratuite · Accompagnement complet · Premier mois offert',btn:'Démarrer →'}},
   emps:{ey:'Employeurs',bc:'Employeurs',h:'Votre paie,\nvos déclarations,\nautomatisées.',sub:'166 commissions paritaires, DmfA XML, Belcotax, export WinBooks/BOB — 132 modules.',c1:'Accéder à la plateforme',c2:'Demander une démo',
@@ -949,6 +949,22 @@ function PageHome({t,go,lang}) {
   </>);
 }
 
+function AvCards({items}) {
+  const [open,setOpen]=React.useState(null);
+  return(<>{items.map(([ico,tt,desc,detail],i)=>(<div key={tt} className="ic-c" onClick={()=>setOpen(open===i?null:i)} style={{cursor:detail?'pointer':'default',transition:'box-shadow .2s'}}>
+    <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:8}}>
+      <div>
+        <div style={{fontSize:28,marginBottom:12}}>{ico}</div>
+        <h4 style={{fontFamily:"'Cabinet Grotesk',sans-serif",fontSize:16,fontWeight:700,color:INK,marginBottom:6}}>{tt}</h4>
+        <p style={{fontSize:14,color:STONE}}>{desc}</p>
+      </div>
+      {detail&&<div style={{fontSize:18,color:GOLD,flexShrink:0,marginTop:4,transition:'transform .2s',transform:open===i?'rotate(180deg)':'rotate(0deg)'}}>▾</div>}
+    </div>
+    {detail&&open===i&&(<div style={{marginTop:14,paddingTop:14,borderTop:`1px solid ${BORDER}`,fontSize:13,color:STONE,lineHeight:1.7}}>{detail}</div>)}
+  </div>))}</>);
+}
+
+
 function PageInd({t,go,goBack}) {
   const d=t.ind;const[openFaq,setOpenFaq]=useState(null);useFadeIn();
   return(<>
@@ -993,7 +1009,7 @@ function PageEmp({t,go,goBack}) {
     </div></section>
     <section className="vt-sec" style={{background:CREAM}}><div className="vt-wrap">
       <div style={{textAlign:'center',marginBottom:48}} className="fade-in"><div className="vt-ey">{d.av.ey}</div><h2>{d.av.h}</h2></div>
-      <div className="ic">{d.av.items.map(([ico,tt,desc])=>(<div key={tt} className="ic-c"><div style={{fontSize:28,marginBottom:14}}>{ico}</div><h4 style={{fontFamily:"'Cabinet Grotesk',sans-serif",fontSize:16,fontWeight:700,color:INK,marginBottom:8}}>{tt}</h4><p style={{fontSize:14}}>{desc}</p></div>))}</div>
+      <div className="ic"><AvCards items={d.av.items}/></div>
     </div></section>
     <CtaBand h={d.cta.h} sub={d.cta.sub} btn={d.cta.btn} go={go}/><Footer t={t} go={go}/>
   </>);
