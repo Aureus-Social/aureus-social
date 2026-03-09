@@ -1057,7 +1057,7 @@ function PageExp({t,go,goBack}) {
   </>);
 }
 
-function PageForm({t,go,goBack}) {
+function PageForm({t,go,goBack,lang}) {
   const d=t.form;useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
