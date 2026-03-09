@@ -1,5 +1,5 @@
 // Pages registry - auto-generated
-// 19 pages disponibles
+// 37 pages disponibles
 const dashboardPage = dynamic(() => import('../pages/dashboard'), { ssr: false, loading: () => <Loading /> });
 const employeesPage = dynamic(() => import('../pages/employees'), { ssr: false, loading: () => <Loading /> });
 const payslipsPage = dynamic(() => import('../pages/payslips'), { ssr: false, loading: () => <Loading /> });
@@ -19,6 +19,25 @@ const AdminBaremesPage = dynamic(() => import('../pages/AdminBaremes'), { ssr: f
 const RelancesFacturationPage = dynamic(() => import('../pages/RelancesFacturation'), { ssr: false, loading: () => <Loading /> });
 const AureusSuitePagePage = dynamic(() => import('../pages/AureusSuitePage'), { ssr: false, loading: () => <Loading /> });
 const PayrollSimulatorPage = dynamic(() => import('../pages/PayrollSimulator'), { ssr: false, loading: () => <Loading /> });
+
+const AbsencesContratsV3Page = dynamic(() => import('../pages/AbsencesContratsV3'), { ssr: false, loading: () => <Loading /> });
+const AuditSecuriteCodePage = dynamic(() => import('../pages/AuditSecuriteCode'), { ssr: false, loading: () => <Loading /> });
+const CommissionsModulePage = dynamic(() => import('../pages/CommissionsModule'), { ssr: false, loading: () => <Loading /> });
+const ConnexionsHubPage = dynamic(() => import('../pages/ConnexionsHub'), { ssr: false, loading: () => <Loading /> });
+const DocumentGeneratorPage = dynamic(() => import('../pages/DocumentGenerator'), { ssr: false, loading: () => <Loading /> });
+const EmployeeHubPage = dynamic(() => import('../pages/EmployeeHub'), { ssr: false, loading: () => <Loading /> });
+const EmployeePlanningPage = dynamic(() => import('../pages/EmployeePlanning'), { ssr: false, loading: () => <Loading /> });
+const FloatingLegalAgentPage = dynamic(() => import('../pages/FloatingLegalAgent'), { ssr: false, loading: () => <Loading /> });
+const MandatsAdminPagePage = dynamic(() => import('../pages/MandatsAdminPage'), { ssr: false, loading: () => <Loading /> });
+const ModsBatch2Page = dynamic(() => import('../pages/ModsBatch2'), { ssr: false, loading: () => <Loading /> });
+const NotificationCenterPage = dynamic(() => import('../pages/NotificationCenter'), { ssr: false, loading: () => <Loading /> });
+const PayrollHubPage = dynamic(() => import('../pages/PayrollHub'), { ssr: false, loading: () => <Loading /> });
+const PortalSystemPage = dynamic(() => import('../pages/PortalSystem'), { ssr: false, loading: () => <Loading /> });
+const RolesPermissionsPage = dynamic(() => import('../pages/RolesPermissions'), { ssr: false, loading: () => <Loading /> });
+const SmartOpsCenterPage = dynamic(() => import('../pages/SmartOpsCenter'), { ssr: false, loading: () => <Loading /> });
+const TransversalCPPage = dynamic(() => import('../pages/TransversalCP'), { ssr: false, loading: () => <Loading /> });
+const LoisPage = dynamic(() => import('../pages/lois'), { ssr: false, loading: () => <Loading /> });
+const SettingsPage = dynamic(() => import('../pages/settings'), { ssr: false, loading: () => <Loading /> });
 
 // Router
 export function routePage(page, state, dispatch) {
@@ -42,6 +61,39 @@ export function routePage(page, state, dispatch) {
     case 'facturation': return <RelancesFacturationPage s={state} d={dispatch} />;
     case 'aureussuite': return <AureusSuitePagePage s={state} d={dispatch} />;
     case 'optifiscale': return <PayrollSimulatorPage s={state} d={dispatch} />;
+    case 'gestionabs': return <AbsencesContratsV3Page s={state} d={dispatch} />;
+    case 'workflowAbs': return <AbsencesContratsV3Page s={state} d={dispatch} />;
+    case 'dashabsent': return <AbsencesContratsV3Page s={state} d={dispatch} />;
+    case 'auditsecuritecode': return <AuditSecuriteCodePage s={state} d={dispatch} />;
+    case 'guidecommercial': return <CommissionsModulePage s={state} d={dispatch} />;
+    case 'connexionshub': return <ConnexionsHubPage s={state} d={dispatch} />;
+    case 'integrations': return <ConnexionsHubPage s={state} d={dispatch} />;
+    case 'ged': return <DocumentGeneratorPage s={state} d={dispatch} />;
+    case 'gendocsjur': return <DocumentGeneratorPage s={state} d={dispatch} />;
+    case 'contratgen': return <DocumentGeneratorPage s={state} d={dispatch} />;
+    case 'contratsmenu': return <DocumentGeneratorPage s={state} d={dispatch} />;
+    case 'dashrh': return <EmployeeHubPage s={state} d={dispatch} />;
+    case 'planifconges': return <EmployeePlanningPage s={state} d={dispatch} />;
+    case 'legal': return <FloatingLegalAgentPage s={state} d={dispatch} />;
+    case 'mandatonss': return <MandatsAdminPagePage s={state} d={dispatch} />;
+    case 'belcotaxmandat': return <MandatsAdminPagePage s={state} d={dispatch} />;
+    case 'batchdecl': return <ModsBatch2Page s={state} d={dispatch} />;
+    case 'exportbatch': return <ModsBatch2Page s={state} d={dispatch} />;
+    case 'massengine': return <ModsBatch2Page s={state} d={dispatch} />;
+    case 'notifications': return <NotificationCenterPage s={state} d={dispatch} />;
+    case 'smartalerts': return <NotificationCenterPage s={state} d={dispatch} />;
+    case 'payrollhub': return <PayrollHubPage s={state} d={dispatch} />;
+    case 'portailclient': return <PortalSystemPage s={state} d={dispatch} />;
+    case 'portalmanager': return <PortalSystemPage s={state} d={dispatch} />;
+    case 'authroles': return <RolesPermissionsPage s={state} d={dispatch} />;
+    case 'permissions': return <RolesPermissionsPage s={state} d={dispatch} />;
+    case 'smartops': return <SmartOpsCenterPage s={state} d={dispatch} />;
+    case 'autopilot': return <SmartOpsCenterPage s={state} d={dispatch} />;
+    case 'piloteauto': return <SmartOpsCenterPage s={state} d={dispatch} />;
+    case 'transversalcp': return <TransversalCPPage s={state} d={dispatch} />;
+    case 'lois': return <LoisPage s={state} d={dispatch} />;
+    case 'settings': return <SettingsPage s={state} d={dispatch} />;
+    case 'team': return <SettingsPage s={state} d={dispatch} />;
     default: return null;
   }
 }
