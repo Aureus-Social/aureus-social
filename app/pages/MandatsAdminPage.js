@@ -50,7 +50,7 @@ const Field = ({ label, value, onChange, type = 'text', options, readonly }) => 
 
 // ══ DONNÉES FIXES AUREUS ══
 const AUREUS = {
-  nom: tText('Aureus IA SPRL'),
+  nom: 'Aureus IA SPRL',
   bce: '1028.230.781',
   adresse: 'Place Marcel Broodthaers 8, 1060 Saint-Gilles',
   matriculeONSS: '51357716-02',
@@ -67,31 +67,31 @@ const AUREUS = {
 
 // ══ RÉDUCTIONS PREMIER(S) EMPLOYÉ(S) 2026 ══
 const REDUCTIONS_PREMIERS_EMPLOYES = [
-  { rang: 1, label:tText('1er employé'), exo: 'TOTALE', montant: null, duree: tText('Illimitée'), detail: 'Exonération totale des cotisations patronales de base. Art. 334 Loi 22/12/2003. Aucune limite dans le temps. Montant moyen économisé : ~8.000–12.000 EUR/an selon salaire.' },
+  { rang: 1, label:'1er employé', exo: 'TOTALE', montant: null, duree: 'Illimitée', detail: 'Exonération totale des cotisations patronales de base. Art. 334 Loi 22/12/2003. Aucune limite dans le temps. Montant moyen économisé : ~8.000–12.000 EUR/an selon salaire.' },
   { rang: 2, label: '2e employé', exo: 'PARTIELLE', montant: 3100, duree: '13 trimestres', detail: 'Réduction forfaitaire 3.100 EUR/trimestre pendant 13 trimestres (3,25 ans). Art. 2 §2 Loi 27/06/1969. Économie totale : ~40.300 EUR.' },
   { rang: 3, label: '3e employé', exo: 'PARTIELLE', montant: 1000, duree: '13 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 13 trimestres. Économie totale : ~13.000 EUR.' },
-  { rang: 4, label: tText('4e employé'), exo: 'PARTIELLE', montant: 1000, duree: '8 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 8 trimestres (2 ans). Économie totale : ~8.000 EUR.' },
-  { rang: 5, label: tText('5e employé'), exo: 'PARTIELLE', montant: 1000, duree: '8 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 8 trimestres. Économie totale : ~8.000 EUR.' },
-  { rang: 6, label: tText('6e employé'), exo: 'PARTIELLE', montant: 1000, duree: '4 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 4 trimestres (1 an). Économie totale : ~4.000 EUR.' },
+  { rang: 4, label: '4e employé', exo: 'PARTIELLE', montant: 1000, duree: '8 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 8 trimestres (2 ans). Économie totale : ~8.000 EUR.' },
+  { rang: 5, label: '5e employé', exo: 'PARTIELLE', montant: 1000, duree: '8 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 8 trimestres. Économie totale : ~8.000 EUR.' },
+  { rang: 6, label: '6e employé', exo: 'PARTIELLE', montant: 1000, duree: '4 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 4 trimestres (1 an). Économie totale : ~4.000 EUR.' },
 ];
 
 // ══ PRIMES ACTIVA / ART.60 2026 ══
 const PRIMES_EMPLOI = [
   {
     id: 'activa_bxl',
-    label:tText('Activa.brussels'),
-    montant: tText('350 EUR/mois'),
-    duree: tText('24 mois'),
+    label:'Activa.brussels',
+    montant: '350 EUR/mois',
+    duree: '24 mois',
     region: 'Bruxelles',
     organisme: 'Actiris',
     conditions: 'Demandeur d\'emploi bruxellois inoccupé ≥ 6 mois. 18–64 ans.',
     demarches: 'Attestation Actiris + formulaire C53W chez l\'employeur. Actiris verse directement.',
     base_legale: 'Ord. 22/12/2016',
-    calcul: tText('350 EUR/mois × 24 mois = 8.400 EUR total'),
+    calcul: '350 EUR/mois × 24 mois = 8.400 EUR total',
   },
   {
     id: 'activa_bxl_ap',
-    label:tText('Activa.brussels AP (Allocations de Passage)'),
+    label:'Activa.brussels AP (Allocations de Passage)',
     montant: '350 → 800 → 350 EUR/mois',
     duree: '24 mois (phases variables)',
     region: 'Bruxelles',
@@ -103,7 +103,7 @@ const PRIMES_EMPLOI = [
   },
   {
     id: 'art60',
-    label:tText('Art. 60 §7 — CPAS (Premier emploi CPAS)'),
+    label:'Art. 60 §7 — CPAS (Premier emploi CPAS)',
     montant: '100% salaire + cotisations',
     duree: 'Variable (6–24 mois)',
     region: 'National',
@@ -111,13 +111,13 @@ const PRIMES_EMPLOI = [
     conditions: 'Bénéficiaire du revenu d\'intégration sociale (RIS). Contrat via CPAS qui le met à disposition d\'un tiers employeur.',
     demarches: 'Contact CPAS de la commune + convention de mise à disposition.',
     base_legale: 'Art. 60 §7 Loi CPAS 08/07/1976',
-    calcul: tText('CPAS prend en charge 100% du coût salarial pendant la durée convenue.'),
+    calcul: 'CPAS prend en charge 100% du coût salarial pendant la durée convenue.',
   },
   {
     id: 'activa_jeune',
-    label:tText('Activa Jeunes < 30 ans'),
-    montant: tText('350 EUR/mois'),
-    duree: tText('12–24 mois'),
+    label:'Activa Jeunes < 30 ans',
+    montant: '350 EUR/mois',
+    duree: '12–24 mois',
     region: 'Bruxelles / Flandre / Wallonie',
     organisme: 'Actiris / VDAB / FOREM',
     conditions: 'Moins de 30 ans. Chercheur d\'emploi. Diplôme max CESS.',
@@ -127,9 +127,9 @@ const PRIMES_EMPLOI = [
   },
   {
     id: 'impulsion_55',
-    label:tText('Impulsion 55+'),
+    label:'Impulsion 55+',
     montant: '500 EUR/mois',
-    duree: tText('36 mois'),
+    duree: '36 mois',
     region: 'Bruxelles',
     organisme: 'Actiris',
     conditions: 'Chercheur d\'emploi ≥ 55 ans. Inoccupé ≥ 6 mois.',
@@ -139,9 +139,9 @@ const PRIMES_EMPLOI = [
   },
   {
     id: 'sine',
-    label:tText('SINE — Économie Sociale'),
+    label:'SINE — Économie Sociale',
     montant: '500 EUR/mois',
-    duree: tText('24 mois'),
+    duree: '24 mois',
     region: 'National',
     organisme: 'ONEM',
     conditions: 'Très difficile d\'insertion. RSI ou équivalent. Engagement en économie sociale agréée.',
@@ -153,20 +153,20 @@ const PRIMES_EMPLOI = [
     id: 'monbee',
     label: tText('MonBEE (Économie d\'énergie employeur)'),
     montant: 'Variable selon investissements',
-    duree: tText('Annuel'),
+    duree: 'Annuel',
     region: 'Bruxelles',
     organisme: 'Bruxelles Environnement',
     conditions: 'Employeur bruxellois réalisant des investissements verts.',
     demarches: 'Dossier MonBEE avant le 01/06/2026 (deadline active).',
     base_legale: 'Ord. Bruxelloise sur les primes énergie',
-    calcul: tText('Variable selon investissements énergétiques'),
+    calcul: 'Variable selon investissements énergétiques',
   },
 ];
 
 // ══ TAUX DOMICILIATION 2026 ══
 const DOMICILIATION_TAUX = {
   tauxRistourne: 0.05,
-  label:tText('Ristourne domiciliation 5%'),
+  label:'Ristourne domiciliation 5%',
   description: 'En contrepartie de la domiciliation de tous les paiements sociaux (cotisations ONSS, versements PP, virements salaires) sur le compte bancaire d\'Aureus IA SPRL référencé, le client bénéficie d\'une ristourne de 5% sur les honoraires mensuels Aureus Social Pro.',
   conditionsAppliquer: [
     'Domiciliation des virements SEPA salaires depuis Aureus',
@@ -174,7 +174,7 @@ const DOMICILIATION_TAUX = {
     'Versements précompte professionnel via Aureus',
     'Minimum 3 mois consécutifs de domiciliation active',
   ],
-  calcul: tText('Honoraires bruts × 0,95 = honoraires avec ristourne'),
+  calcul: 'Honoraires bruts × 0,95 = honoraires avec ristourne',
 };
 
 // ══════════════════════════════════════════════════════════════

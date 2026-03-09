@@ -18,14 +18,14 @@ const MUTED = '#8b95a5'
 
 // ── Types de notification ──
 const NOTIF_TYPES = {
-  DEADLINE: { label:tText('Échéance'), color: '#ef4444', icon: '⏰' },
-  PAYROLL: { label:tText('Paie'), color: '#22c55e', icon: '💰' },
-  ONSS: { label:tText('ONSS'), color: '#3b82f6', icon: '🏛' },
-  FISCAL: { label:tText('Fiscal'), color: '#f59e0b', icon: '📋' },
-  LEGAL: { label:tText('Légal'), color: '#8b5cf6', icon: '⚖️' },
+  DEADLINE: { label:'Échéance', color: '#ef4444', icon: '⏰' },
+  PAYROLL: { label:'Paie', color: '#22c55e', icon: '💰' },
+  ONSS: { label:'ONSS', color: '#3b82f6', icon: '🏛' },
+  FISCAL: { label:'Fiscal', color: '#f59e0b', icon: '📋' },
+  LEGAL: { label:'Légal', color: '#8b5cf6', icon: '⚖️' },
   HR: { label: 'RH', color: '#ec4899', icon: '👥' },
-  SYSTEM: { label:tText('Système'), color: '#6b7280', icon: '⚙️' },
-  DIMONA: { label:tText('Dimona'), color: '#06b6d4', icon: '📡' },
+  SYSTEM: { label:'Système', color: '#6b7280', icon: '⚙️' },
+  DIMONA: { label:'Dimona', color: '#06b6d4', icon: '📡' },
 }
 
 const PRIORITY = { HIGH: 3, MEDIUM: 2, LOW: 1 }

@@ -7,7 +7,7 @@ const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0
 const KPI=({l,v,c,sub})=><div style={{padding:14,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid '+(c||'#c6a34e')+'20',borderRadius:12,textAlign:'center',flex:1,minWidth:100}}><div style={{fontSize:18,fontWeight:800,color:c||'#c6a34e'}}>{v}</div><div style={{fontSize:9,color:'#888',marginTop:3}}>{l}</div>{sub&&<div style={{fontSize:8,color:'#5e5c56',marginTop:2}}>{sub}</div>}</div>;
 const Row=({l,v,c,b})=><div style={{display:'flex',justifyContent:'space-between',padding:'7px 0',borderBottom:b?'2px solid rgba(198,163,78,.2)':'1px solid rgba(255,255,255,.03)',fontWeight:b?700:400}}><span style={{color:b?'#e8e6e0':'#e8e6e0',fontSize:11.5}}>{l}</span><span style={{color:c||'#c6a34e',fontWeight:600,fontSize:12}}>{v}</span></div>;
 const Badge=({text,color})=><span style={{padding:'2px 7px',borderRadius:5,fontSize:8,fontWeight:600,background:(color||'#888')+'15',color:color||'#888'}}>{text}</span>;
-const moisN=[tText('Janvier'),tText('Février'),tText('Mars'),tText('Avril'),tText('Mai'),tText('Juin'),tText('Juillet'),tText('Août'),tText('Septembre'),tText('Octobre'),tText('Novembre'),tText('Décembre')];
+const moisN=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
 // ═══════════════════════════════════════════════════════════
 // 1. VALIDATION PRE-PAIE — Vrais controles automatiques

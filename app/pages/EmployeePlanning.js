@@ -15,23 +15,23 @@ const BORDER = '#1e2633'
 const TEXT = '#e0e0e0'
 const MUTED = '#8b95a5'
 
-const MONTHS = [tText('Janvier'), tText('Février'), tText('Mars'), tText('Avril'), tText('Mai'), tText('Juin'), tText('Juillet'), tText('Août'), tText('Septembre'), tText('Octobre'), tText('Novembre'), tText('Décembre')]
+const MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
 const DAYS_SHORT = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']
 
 // ── Types d'absence belges ──
 const ABSENCE_TYPES = {
-  CONGE: { label:tText('Congé annuel'), short: 'CA', color: '#3b82f6', legal: '20 jours/an (régime 5j)' },
-  MALADIE: { label:tText('Maladie'), short: 'M', color: '#ef4444', legal: 'Salaire garanti: 30j employé / 7j ouvrier' },
-  CTM: { label:tText('Congé thématique'), short: 'CT', color: '#8b5cf6', legal: tText('Crédit-temps, congé parental, etc.') },
-  FORMATION: { label:tText('Formation'), short: 'F', color: '#06b6d4', legal: tText('Congé-éducation payé: max 125h/an') },
-  PETIT_CHOMAGE: { label:tText('Petit chômage'), short: 'PC', color: '#f59e0b', legal: 'Événements familiaux (mariage, décès, etc.)' },
-  CHOMAGE_TEMP: { label:tText('Chômage temporaire'), short: 'TE', color: '#ef4444', legal: tText('Force majeure, économique, etc.') },
-  MATERNITE: { label:tText('Maternité'), short: 'MA', color: '#ec4899', legal: '15 semaines (105 jours)' },
-  PATERNITE: { label:tText('Paternité'), short: 'PA', color: '#3b82f6', legal: '20 jours (2025+)' },
-  SANS_SOLDE: { label:tText('Sans solde'), short: 'SS', color: '#6b7280', legal: tText('Convention avec employeur') },
-  TELETRAVAIL: { label:tText('Télétravail'), short: 'TT', color: '#22c55e', legal: 'Selon convention d\'entreprise' },
-  FERIE: { label:tText('Jour férié'), short: 'JF', color: '#c6a34e', legal: '10 jours fériés légaux/an' },
-  DEMI_JOUR: { label:tText('Demi-jour'), short: '½', color: '#f59e0b', legal: tText('Demi-journée de congé') },
+  CONGE: { label:'Congé annuel', short: 'CA', color: '#3b82f6', legal: '20 jours/an (régime 5j)' },
+  MALADIE: { label:'Maladie', short: 'M', color: '#ef4444', legal: 'Salaire garanti: 30j employé / 7j ouvrier' },
+  CTM: { label:'Congé thématique', short: 'CT', color: '#8b5cf6', legal: 'Crédit-temps, congé parental, etc.' },
+  FORMATION: { label:'Formation', short: 'F', color: '#06b6d4', legal: 'Congé-éducation payé: max 125h/an' },
+  PETIT_CHOMAGE: { label:'Petit chômage', short: 'PC', color: '#f59e0b', legal: 'Événements familiaux (mariage, décès, etc.)' },
+  CHOMAGE_TEMP: { label:'Chômage temporaire', short: 'TE', color: '#ef4444', legal: 'Force majeure, économique, etc.' },
+  MATERNITE: { label:'Maternité', short: 'MA', color: '#ec4899', legal: '15 semaines (105 jours)' },
+  PATERNITE: { label:'Paternité', short: 'PA', color: '#3b82f6', legal: '20 jours (2025+)' },
+  SANS_SOLDE: { label:'Sans solde', short: 'SS', color: '#6b7280', legal: 'Convention avec employeur' },
+  TELETRAVAIL: { label:'Télétravail', short: 'TT', color: '#22c55e', legal: 'Selon convention d\'entreprise' },
+  FERIE: { label:'Jour férié', short: 'JF', color: '#c6a34e', legal: '10 jours fériés légaux/an' },
+  DEMI_JOUR: { label:'Demi-jour', short: '½', color: '#f59e0b', legal: 'Demi-journée de congé' },
 }
 
 // ── Jours fériés belges 2026 ──

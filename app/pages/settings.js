@@ -7,7 +7,7 @@ import { LOIS_BELGES, LB, RMMMG, TX_ONSS_W, TX_ONSS_E, NET_FACTOR, PV_DOUBLE, PV
 const fmt = n => new Intl.NumberFormat('fr-BE', { style: 'currency', currency: 'EUR' }).format(n || 0);
 const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
-const AUREUS_INFO = { name:tText('Aureus IA SPRL'), vat: 'BE 1028.230.781', version: 'v38', sprint: 'Sprint 38' };
+const AUREUS_INFO = { name:'Aureus IA SPRL', vat: 'BE 1028.230.781', version: 'v38', sprint: 'Sprint 38' };
 const LEGAL = { WD: 21.67, WHD: 7.6 };
 const DPER = { month: new Date().getMonth()+1, year: new Date().getFullYear(), days: 21.67 };
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];

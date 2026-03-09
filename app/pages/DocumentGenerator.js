@@ -20,43 +20,43 @@ const MUTED = '#8b95a5'
 // ── Types de documents ──
 const DOC_TYPES = {
   CONTRAT_CDI: {
-    label:tText('Contrat CDI'),
-    category: tText('contrat'),
+    label:'Contrat CDI',
+    category: 'contrat',
     icon: '📄',
     description: 'Contrat à durée indéterminée — employé ou ouvrier',
     required: ['name', 'startDate', 'salary', 'function', 'cp'],
   },
   CONTRAT_CDD: {
-    label:tText('Contrat CDD'),
-    category: tText('contrat'),
+    label:'Contrat CDD',
+    category: 'contrat',
     icon: '📄',
     description: 'Contrat à durée déterminée',
     required: ['name', 'startDate', 'endDate', 'salary', 'function', 'cp'],
   },
   CONTRAT_STUDENT: {
-    label:tText('Convention étudiant'),
-    category: tText('contrat'),
+    label:'Convention étudiant',
+    category: 'contrat',
     icon: '🎓',
     description: 'Convention d\'occupation étudiant — max 600 h/an, cotisations réduites 2,71 %',
     required: ['name', 'startDate', 'endDate', 'salary'],
   },
   AVENANT: {
-    label:tText('Avenant au contrat'),
-    category: tText('contrat'),
+    label:'Avenant au contrat',
+    category: 'contrat',
     icon: '📝',
     description: 'Modification du contrat de travail existant',
     required: ['name', 'modification'],
   },
   CONVENTION_RUPTURE: {
-    label:tText('Convention de rupture'),
+    label:'Convention de rupture',
     category: 'sortie',
     icon: '🤝',
     description: 'Rupture d\'un commun accord — pas de préavis (Art. 32 Loi 03/07/1978)',
     required: ['name', 'endDate'],
   },
   CONTRAT_TEMPS_PARTIEL: {
-    label:tText('Contrat temps partiel'),
-    category: tText('contrat'),
+    label:'Contrat temps partiel',
+    category: 'contrat',
     icon: '📄',
     description: 'AR 25/06/1990 — Mentions obligatoires: régime, horaire',
     required: ['name', 'startDate', 'salary', 'function', 'hoursPerWeek'],
@@ -69,35 +69,35 @@ const DOC_TYPES = {
     required: ['name', 'startDate', 'function'],
   },
   ATTESTATION_SALAIRE: {
-    label:tText('Attestation de salaire'),
+    label:'Attestation de salaire',
     category: 'attestation',
     icon: '💰',
     description: 'Attestation du montant du salaire (pour banque, propriétaire, etc.)',
     required: ['name', 'salary'],
   },
   C4: {
-    label:tText('Formulaire C4'),
+    label:'Formulaire C4',
     category: 'sortie',
     icon: '🔴',
     description: 'Certificat de chômage — fin de contrat',
     required: ['name', 'startDate', 'endDate', 'motif'],
   },
   PREAVIS: {
-    label:tText('Lettre de préavis'),
+    label:'Lettre de préavis',
     category: 'sortie',
     icon: '⏳',
     description: 'Notification de préavis selon la loi belge',
     required: ['name', 'startDate', 'noticeWeeks'],
   },
   REGLEMENT_TRAVAIL: {
-    label:tText('Règlement de travail'),
+    label:'Règlement de travail',
     category: 'reglementaire',
     icon: '📋',
     description: 'Règlement de travail conforme à la loi du 8 avril 1965',
     required: ['companyName'],
   },
   ATTESTATION_VACANCES: {
-    label:tText('Attestation de vacances'),
+    label:'Attestation de vacances',
     category: 'attestation',
     icon: '🏖',
     description: 'Attestation de vacances annuelles (pécule)',
@@ -106,22 +106,22 @@ const DOC_TYPES = {
 }
 
 const CATEGORIES = {
-  contrat: { label:tText('Contrats'), icon: '📄', color: '#3b82f6' },
-  attestation: { label:tText('Attestations'), icon: '✅', color: '#22c55e' },
-  sortie: { label:tText('Sortie / Fin contrat'), icon: '🔴', color: '#ef4444' },
-  reglementaire: { label:tText('Réglementaire'), icon: '📋', color: '#f59e0b' },
+  contrat: { label:'Contrats', icon: '📄', color: '#3b82f6' },
+  attestation: { label:'Attestations', icon: '✅', color: '#22c55e' },
+  sortie: { label:'Sortie / Fin contrat', icon: '🔴', color: '#ef4444' },
+  reglementaire: { label:'Réglementaire', icon: '📋', color: '#f59e0b' },
 }
 
 // Types « contrat de travail » (layout avec logo + références légales)
 const CONTRACT_TYPES = ['CONTRAT_CDI', 'CONTRAT_CDD', 'CONTRAT_STUDENT', 'CONTRAT_TEMPS_PARTIEL', 'AVENANT', 'CONVENTION_RUPTURE']
 
 const REFERENCE_LOIS = [
-  { abbr: 'Loi du 3 juillet 1978', full: tText('Loi relative aux contrats de travail (M.B. 22 août 1978)'), arts: 'Art. 2, 7, 11, 32' },
-  { abbr: 'Loi du 26 décembre 2013', full: tText('Statut unique — préavis'), arts: 'Art. 67 à 82' },
-  { abbr: 'AR du 25 juin 1990', full: tText('Temps partiel, équipes, week-end'), arts: 'Mentions obligatoires' },
-  { abbr: 'Loi du 8 avril 1965', full: tText('Règlement de travail'), arts: 'Art. 3 et suivants' },
-  { abbr: 'Code civil', full: tText('Obligations contractuelles'), arts: 'Art. 1134' },
-  { abbr: 'CCT et CP', full: tText('Conventions collectives et commission paritaire'), arts: 'Conformité CP' },
+  { abbr: 'Loi du 3 juillet 1978', full: 'Loi relative aux contrats de travail (M.B. 22 août 1978)', arts: 'Art. 2, 7, 11, 32' },
+  { abbr: 'Loi du 26 décembre 2013', full: 'Statut unique — préavis', arts: 'Art. 67 à 82' },
+  { abbr: 'AR du 25 juin 1990', full: 'Temps partiel, équipes, week-end', arts: 'Mentions obligatoires' },
+  { abbr: 'Loi du 8 avril 1965', full: 'Règlement de travail', arts: 'Art. 3 et suivants' },
+  { abbr: 'Code civil', full: 'Obligations contractuelles', arts: 'Art. 1134' },
+  { abbr: 'CCT et CP', full: 'Conventions collectives et commission paritaire', arts: 'Conformité CP' },
 ]
 
 function escapeHtml(s) {
