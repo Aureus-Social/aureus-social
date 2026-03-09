@@ -132,7 +132,7 @@ fr:{
   con:{ey:'Contact',h:'Comment pouvons-nous\nvous aider ?',sub:'Notre équipe répond sous 4h ouvrables. Pas de chatbot — de vrais experts en droit social belge.',
     ch:[['✉️','E-mail','info@aureus-ia.com'],['💻','Application','app.aureussocial.be'],['📍','Adresse','Place Marcel Broodthaers 8, 1060 Saint-Gilles, Bruxelles']],
     cr:[['BCE','BE 1028.230.781'],['Mahis','DGIII/MAHI011'],['Peppol','0208:1028230781'],['Réponse','< 4h ouvrables']],
-    f:{t:'Demande de démo',s:'Réponse garantie sous 4h ouvrables.',fn:'Prénom *',ln:'Nom *',em:'E-mail professionnel *',co:'Société',ro:'Vous êtes *',ms:'Message',fnp:'Jean',lnp:'Dupont',emp:'jean.dupont@fiduciaire.be',cop:'Cabinet Dupont & Associés',msp:'Décrivez votre situation…',sub:'Envoyer la demande',note:'En soumettant ce formulaire, vous acceptez notre politique RGPD.',ok:'✓ Message envoyé — nous vous répondrons sous 4h ouvrables.',roles:['Sélectionnez...','Indépendant / Starter','Fiduciaire / Expert-comptable','Employeur direct','Secrétariat social','Courtier / Partenaire','Autre']}},
+    f:{t:'Demande de démo',s:'Réponse garantie sous 4h ouvrables.',fn:'Prénom *',ln:'Nom *',em:'E-mail professionnel *',ph:'Téléphone',co:'Société',ro:'Vous êtes *',ms:'Message',fnp:'Jean',lnp:'Dupont',emp:'jean.dupont@fiduciaire.be',php:'+32 2 000 00 00',cop:'Cabinet Dupont & Associés',msp:'Décrivez votre situation…',sub:'Envoyer la demande',note:'En soumettant ce formulaire, vous acceptez notre politique RGPD.',ok:'✓ Message envoyé — nous vous répondrons sous 4h ouvrables.',roles:['Sélectionnez...','Indépendant / Starter','Fiduciaire / Expert-comptable','Employeur direct','Secrétariat social','Courtier / Partenaire','Autre']}},
   },
   articles:{
     'baremes-2026':{tag:'Paie',ico:'🧮',title:'Barèmes sectoriels 2026 : ce qui change',slug:'baremes-2026',date:'1 janvier 2026',readTime:'5 min',intro:"Chaque début d'année, les conventions collectives de travail (CCT) sont négociées au sein des commissions paritaires. Pour 2026, Aureus Social Pro a intégré les nouvelles grilles avant le 1er janvier.",sections:[{h:"Qu'est-ce qu'un barème sectoriel ?",p:"Un barème sectoriel est la grille de salaires minimums fixée par la commission paritaire (CP) applicable à votre secteur. Il définit le salaire minimum légal par catégorie de fonction et ancienneté. En Belgique, il existe 166 commissions paritaires, chacune pouvant avoir ses propres barèmes."},{h:'Les changements clés en 2026',p:"L'index santé a été dépassé à 1,59% en décembre 2025, entraînant une adaptation automatique des barèmes.\n\nCP 200 — Employés : catégorie 1 passe de 2.180€ à 2.215€/mois brut. CP 226 — Commerce de détail : barème A porté à 1.990€/mois. CP 319 — Services de proximité : adaptation de +1,8%."},{h:'Comment Aureus gère-t-il les mises à jour ?',p:"Aureus Social Pro dispose d'un système de veille législative automatique. Un cron quotidien à 6h00 CET scrape les 8 sources officielles belges (Moniteur belge, SPF Emploi, ONSS…). Dès qu'une modification est détectée, une alerte email HTML est envoyée aux gestionnaires concernés.\n\nLes 166 CP sont encodées avec leurs barèmes, primes et règles spécifiques. Le calcul de paie applique automatiquement la bonne grille selon la CP de chaque travailleur."},{h:'Que faire si votre CP a changé ?',p:"1. Vérifiez dans Aureus la CP attribuée à chaque travailleur (Travailleurs → Fiche)\n\n2. Le recalcul est automatique lors de la prochaine fiche de paie\n\n3. En cas de régularisation rétroactive, utilisez l'outil Correction paie dans Gestion Paie\n\n4. Pour toute question : info@aureus-ia.com"}],cta:{title:"Votre CP est-elle à jour dans Aureus ?",sub:"Notre équipe vérifie votre configuration sans frais.",btn:"Vérifier maintenant"}},
@@ -223,7 +223,7 @@ T.nl={
   con:{ey:'Contact',h:'Hoe kunnen wij\nu helpen?',sub:'Ons team antwoordt binnen 4 werkuren. Geen chatbot \u2014 echte experts in Belgisch sociaal recht.',
     ch:[['\u2709\uFE0F','E-mail','info@aureus-ia.com'],['\u{1F4BB}','Applicatie','app.aureussocial.be'],['\u{1F4CD}','Adres','Place Marcel Broodthaers 8, 1060 Sint-Gillis, Brussel']],
     cr:[['KBO','BE 1028.230.781'],['Mahis','DGIII/MAHI011'],['Peppol','0208:1028230781'],['Reactie','< 4 werkuren']],
-    f:{t:'Demo aanvragen',s:'Antwoord gegarandeerd binnen 4 werkuren.',fn:'Voornaam *',ln:'Achternaam *',em:'Professioneel e-mail *',co:'Bedrijf',ro:'U bent *',ms:'Bericht',fnp:'Jan',lnp:'Janssen',emp:'jan.janssen@fiduciaire.be',cop:'Kantoor Janssen',msp:'Beschrijf uw situatie\u2026',sub:'Aanvraag verzenden',note:'Door dit formulier in te dienen gaat u akkoord met ons GDPR-beleid.',ok:'\u2713 Bericht verzonden \u2014 we antwoorden binnen 4 werkuren.',roles:['Selecteer...','Zelfstandige / Starter','Fiduciaire / Accountant','Directe werkgever','Sociaal secretariaat','Makelaar / Partner','Andere']}},
+    f:{t:'Demo aanvragen',s:'Antwoord gegarandeerd binnen 4 werkuren.',fn:'Voornaam *',ln:'Achternaam *',em:'Professioneel e-mail *',ph:'Telefoonnummer',co:'Bedrijf',ro:'U bent *',ms:'Bericht',fnp:'Jan',lnp:'Janssen',emp:'jan.janssen@fiduciaire.be',php:'+32 2 000 00 00',cop:'Kantoor Janssen',msp:'Beschrijf uw situatie\u2026',sub:'Aanvraag verzenden',note:'Door dit formulier in te dienen gaat u akkoord met ons GDPR-beleid.',ok:'\u2713 Bericht verzonden \u2014 we antwoorden binnen 4 werkuren.',roles:['Selecteer...','Zelfstandige / Starter','Fiduciaire / Accountant','Directe werkgever','Sociaal secretariaat','Makelaar / Partner','Andere']}},
 };
 
 T.en={
@@ -294,7 +294,7 @@ T.en={
   con:{ey:'Contact',h:'How can we\nhelp you?',sub:'Our team responds within 4 working hours. No chatbot \u2014 real Belgian social law experts.',
     ch:[['\u2709\uFE0F','Email','info@aureus-ia.com'],['\u{1F4BB}','Application','app.aureussocial.be'],['\u{1F4CD}','Address','Place Marcel Broodthaers 8, 1060 Saint-Gilles, Brussels']],
     cr:[['VAT','BE 1028.230.781'],['Mahis','DGIII/MAHI011'],['Peppol','0208:1028230781'],['Response','< 4 working hours']],
-    f:{t:'Book a demo',s:'Response guaranteed within 4 working hours.',fn:'First name *',ln:'Last name *',em:'Professional email *',co:'Company',ro:'You are *',ms:'Message',fnp:'John',lnp:'Smith',emp:'john.smith@fiduciary.com',cop:'Smith & Partners',msp:'Describe your situation\u2026',sub:'Send request',note:'By submitting this form you agree to our GDPR policy.',ok:'\u2713 Message sent \u2014 we will reply within 4 working hours.',roles:['Select...','Freelancer / Starter','Fiduciary / Accountant','Direct employer','Social secretariat','Broker / Partner','Other']}},
+    f:{t:'Book a demo',s:'Response guaranteed within 4 working hours.',fn:'First name *',ln:'Last name *',em:'Professional email *',ph:'Phone number',co:'Company',ro:'You are *',ms:'Message',fnp:'John',lnp:'Smith',emp:'john.smith@fiduciary.com',php:'+32 2 000 00 00',cop:'Smith & Partners',msp:'Describe your situation\u2026',sub:'Send request',note:'By submitting this form you agree to our GDPR policy.',ok:'\u2713 Message sent \u2014 we will reply within 4 working hours.',roles:['Select...','Freelancer / Starter','Fiduciary / Accountant','Direct employer','Social secretariat','Broker / Partner','Other']}},
 };
 
 T.de={
@@ -365,7 +365,7 @@ T.de={
   con:{ey:'Kontakt',h:'Wie k\u00f6nnen wir\nIhnen helfen?',sub:'Unser Team antwortet innerhalb von 4 Arbeitsstunden. Kein Chatbot \u2014 echte Experten.',
     ch:[['\u2709\uFE0F','E-Mail','info@aureus-ia.com'],['\u{1F4BB}','Anwendung','app.aureussocial.be'],['\u{1F4CD}','Adresse','Place Marcel Broodthaers 8, 1060 Saint-Gilles, Br\u00fcssel']],
     cr:[['USt','BE 1028.230.781'],['Mahis','DGIII/MAHI011'],['Peppol','0208:1028230781'],['Antwort','< 4 Arbeitsstunden']],
-    f:{t:'Demo anfordern',s:'Antwort garantiert innerhalb von 4 Arbeitsstunden.',fn:'Vorname *',ln:'Nachname *',em:'Gesch\u00e4ftliche E-Mail *',co:'Unternehmen',ro:'Sie sind *',ms:'Nachricht',fnp:'Max',lnp:'M\u00fcller',emp:'max.mueller@kanzlei.de',cop:'Kanzlei M\u00fcller & Partner',msp:'Beschreiben Sie Ihre Situation\u2026',sub:'Anfrage senden',note:'Mit dem Absenden stimmen Sie unserer DSGVO-Richtlinie zu.',ok:'\u2713 Nachricht gesendet \u2014 wir antworten innerhalb von 4 Arbeitsstunden.',roles:['Ausw\u00e4hlen...','Selbst\u00e4ndig / Starter','Fiduziaire / Buchhalter','Direkter Arbeitgeber','Sozialsekretariat','Makler / Partner','Andere']}},
+    f:{t:'Demo anfordern',s:'Antwort garantiert innerhalb von 4 Arbeitsstunden.',fn:'Vorname *',ln:'Nachname *',em:'Gesch\u00e4ftliche E-Mail *',ph:'Telefonnummer',co:'Unternehmen',ro:'Sie sind *',ms:'Nachricht',fnp:'Max',lnp:'M\u00fcller',emp:'max.mueller@kanzlei.de',php:'+32 2 000 00 00',cop:'Kanzlei M\u00fcller & Partner',msp:'Beschreiben Sie Ihre Situation\u2026',sub:'Anfrage senden',note:'Mit dem Absenden stimmen Sie unserer DSGVO-Richtlinie zu.',ok:'\u2713 Nachricht gesendet \u2014 wir antworten innerhalb von 4 Arbeitsstunden.',roles:['Ausw\u00e4hlen...','Selbst\u00e4ndig / Starter','Fiduziaire / Buchhalter','Direkter Arbeitgeber','Sozialsekretariat','Makler / Partner','Andere']}},
 };
 
 
@@ -1023,7 +1023,7 @@ function PageCon({t,go,goBack,lang}) {
   const[sent,setSent]=useState(false);
   const[loading,setLoading]=useState(false);
   const[errMsg,setErrMsg]=useState('');
-  const rPrenom=useRef(null),rNom=useRef(null),rEmail=useRef(null),rSociete=useRef(null),rRole=useRef(null),rMsg=useRef(null);
+  const rPrenom=useRef(null),rNom=useRef(null),rEmail=useRef(null),rTel=useRef(null),rSociete=useRef(null),rRole=useRef(null),rMsg=useRef(null);
   useFadeIn();
 
   const handleSubmit=async()=>{
@@ -1033,7 +1033,7 @@ function PageCon({t,go,goBack,lang}) {
     setLoading(true);setErrMsg('');
     try{
       const res=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({prenom,nom:rNom.current?.value,email,societe:rSociete.current?.value,role:rRole.current?.value,message:rMsg.current?.value,lang})});
+        body:JSON.stringify({prenom,nom:rNom.current?.value,email,tel:rTel.current?.value,societe:rSociete.current?.value,role:rRole.current?.value,message:rMsg.current?.value,lang})});
       if(res.ok){setSent(true);}else{setErrMsg("Erreur lors de l'envoi. Veuillez réessayer.");}
     }catch(e){setErrMsg('Erreur réseau. Veuillez réessayer.');}
     setLoading(false);
@@ -1060,6 +1060,7 @@ function PageCon({t,go,goBack,lang}) {
               <div style={{display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.fn}</label><input ref={rPrenom} className="fi" type="text" placeholder={d.f.fnp}/></div>
               <div style={{display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.ln}</label><input ref={rNom} className="fi" type="text" placeholder={d.f.lnp}/></div>
               <div style={{gridColumn:'1/-1',display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.em}</label><input ref={rEmail} className="fi" type="email" placeholder={d.f.emp}/></div>
+              <div style={{gridColumn:'1/-1',display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.ph}</label><input ref={rTel} className="fi" type="tel" placeholder={d.f.php}/></div>
               <div style={{gridColumn:'1/-1',display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.co}</label><input ref={rSociete} className="fi" type="text" placeholder={d.f.cop}/></div>
               <div style={{gridColumn:'1/-1',display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.ro}</label><select ref={rRole} className="fse">{d.f.roles.map(o=>(<option key={o}>{o}</option>))}</select></div>
               <div style={{gridColumn:'1/-1',display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.ms}</label><textarea ref={rMsg} className="fta" placeholder={d.f.msp}/></div>
