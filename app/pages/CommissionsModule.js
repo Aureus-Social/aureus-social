@@ -63,7 +63,7 @@ function emailRelance1(clientNom, factureId, montant, dateEcheance) {
         <p>Nous n'avons pas encore reçu votre paiement concernant la facture ci-dessous :</p>
         <table style="width:100%;border-collapse:collapse;margin:16px 0">
           <tr style="background:#f8f7f4"><td style="padding:10px;font-weight:600">Facture</td><td style="padding:10px">${factureId}</td></tr>
-          <tr><td style="padding:10px;font-weight:600">Montant</td><td style="padding:10px;color:#c6a34e;font-weight:700">${f2(montant)} EUR</td></tr>
+          <tr><td style="padding:10px;font-weight:600">{tText('Montant')}</td><td style="padding:10px;color:#c6a34e;font-weight:700">${f2(montant)} EUR</td></tr>
           <tr style="background:#f8f7f4"><td style="padding:10px;font-weight:600">Date d'échéance</td><td style="padding:10px">${new Date(dateEcheance).toLocaleDateString('fr-BE')}</td></tr>
         </table>
         <p>Nous vous saurions gré de bien vouloir procéder au règlement dans les meilleurs délais.</p>
@@ -190,7 +190,7 @@ function generateMiseEnDemeurePDF(facture, relancesData) {
 
     <h2>DÉTAIL DE LA CRÉANCE</h2>
     <table>
-      <tr><th>Description</th><th class="r">Montant</th></tr>
+      <tr><th>{tText('Description')}</th><th class="r">{tText('Montant')}</th></tr>
       <tr><td>Facture ${factureId} — Échéance ${new Date(dateEcheance).toLocaleDateString('fr-BE')}</td><td class="r">${f2(montant)} EUR</td></tr>
       <tr><td>Intérêts de retard — ${joursRetard} jours × 8% l'an (Loi 02/08/2002, Art. 5)</td><td class="r">${f2(interets)} EUR</td></tr>
       <tr><td>Clause pénale — 10% du principal (min. €20,00)</td><td class="r">${f2(penalite)} EUR</td></tr>
@@ -206,7 +206,7 @@ function generateMiseEnDemeurePDF(facture, relancesData) {
 
     <h2>MODALITÉS DE PAIEMENT</h2>
     <table>
-      <tr><td style="font-weight:600">IBAN</td><td>${typeof window !== 'undefined' && window.__AUREUS_IBAN || 'À configurer dans les paramètres'}</td></tr>
+      <tr><td style="font-weight:600">{tText('IBAN')}</td><td>${typeof window !== 'undefined' && window.__AUREUS_IBAN || 'À configurer dans les paramètres'}</td></tr>
       <tr><td style="font-weight:600">BIC</td><td>${typeof window !== 'undefined' && window.__AUREUS_BIC || 'À configurer dans les paramètres'}</td></tr>
       <tr><td style="font-weight:600">Communication</td><td>${factureId}</td></tr>
       <tr><td style="font-weight:600">Montant à virer</td><td style="font-weight:700;color:#ef4444">${f2(total)} EUR</td></tr>
@@ -405,7 +405,7 @@ function RelancesModule({ factures, sendEmailFn }) {
       {/* Tableau */}
       <div style={{ border:'1px solid rgba(198,163,78,0.1)', borderRadius:14, overflow:'hidden' }}>
         <div style={{ display:'grid', gridTemplateColumns:'180px 120px 100px 100px 90px 130px 1fr', padding:'10px 12px', background:'rgba(198,163,78,0.04)', fontSize:9, fontWeight:600, color:'#888', textTransform:'uppercase', letterSpacing:0.5 }}>
-          <div>Client</div><div>Facture</div><div>Montant</div><div>Échéance</div><div>Jours retard</div><div>Statut relance</div><div>Actions</div>
+          <div>Client</div><div>Facture</div><div>{tText('Montant')}</div><div>Échéance</div><div>Jours retard</div><div>Statut relance</div><div>{tText('Actions')}</div>
         </div>
 
         {filtered.length === 0 && (
@@ -771,7 +771,7 @@ function CommissionsModule({ userRole, user, factures, sendEmailFn, defaultTab }
               <div><label style={{ fontSize:11, color:'#9e9b93', display:'block', marginBottom:4 }}>Email commercial *</label><input value={testData.email} onChange={e=>setTestData({...testData,email:e.target.value})} placeholder="commercial@email.be" style={iS}/></div>
               <div><label style={{ fontSize:11, color:'#9e9b93', display:'block', marginBottom:4 }}>Nom client *</label><input value={testData.client} onChange={e=>setTestData({...testData,client:e.target.value})} placeholder="SPRL Dupont" style={iS}/></div>
               <div><label style={{ fontSize:11, color:'#9e9b93', display:'block', marginBottom:4 }}>Nombre fiches</label><input type="number" value={testData.fiches} onChange={e=>setTestData({...testData,fiches:e.target.value})} min="1" style={iS}/></div>
-              <div><label style={{ fontSize:11, color:'#9e9b93', display:'block', marginBottom:4 }}>Période</label><input value={testData.period} onChange={e=>setTestData({...testData,period:e.target.value})} placeholder="Février 2026" style={iS}/></div>
+              <div><label style={{ fontSize:11, color:'#9e9b93', display:'block', marginBottom:4 }}>{tText('Période')}</label><input value={testData.period} onChange={e=>setTestData({...testData,period:e.target.value})} placeholder="Février 2026" style={iS}/></div>
             </div>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
               <div style={{ fontSize:12, color:'#f97316', fontWeight:600 }}>

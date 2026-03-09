@@ -135,7 +135,7 @@ export function PlanningCongesV3({s, defaultTab}){
 
     {tab==='soldes'&&<C title="📊 Soldes congés par employé">
       <div style={{display:'grid',gridTemplateColumns:'180px repeat(5,1fr)',gap:4,padding:'6px 0',borderBottom:'2px solid rgba(198,163,78,.15)',fontSize:9,fontWeight:700,color:'#c6a34e'}}>
-        <div>Employé</div><div>Légaux</div><div>Extra-lég.</div><div>Pris</div><div>Solde</div><div>Statut</div>
+        <div>Employé</div><div>Légaux</div><div>Extra-lég.</div><div>Pris</div><div>Solde</div><div>{tText('Statut')}</div>
       </div>
       {emps.slice(0,20).map((e,i)=>{
         const legal=20;const extra=Math.floor(Math.random()*5);const pris=Math.floor(Math.random()*15);const solde=legal+extra-pris;

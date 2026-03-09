@@ -374,7 +374,7 @@ function Employees({s,d}) {
           </tbody>
         </table>
         <div style={{marginTop:8,fontSize:9.5,color:'#5e5c56',lineHeight:1.5}}>
-          ⏱ <b>Temps plein</b> = 38h/sem (Art. 19 Loi 16/03/1971). <b>Temps partiel</b> = min. 1/3 temps plein (≥12h40). Horaire variable possible (Art. 11bis). Dérogation samedi/dimanche = CCT sectorielle ou accord d'entreprise.
+          ⏱ <b>{tText('Temps plein')}</b> = 38h/sem (Art. 19 Loi 16/03/1971). <b>{tText('Temps partiel')}</b> = min. 1/3 temps plein (≥12h40). Horaire variable possible (Art. 11bis). Dérogation samedi/dimanche = CCT sectorielle ou accord d'entreprise.
         </div>
       </div>
       <ST>Rémunération</ST>
@@ -591,7 +591,7 @@ function Employees({s,d}) {
         </div>
       </div>
       <div style={{display:'flex',gap:10,justifyContent:'flex-end',marginTop:20}}>
-        <B v="outline" onClick={()=>{setF(null);setEd(false);}}>Annuler</B>
+        <B v="outline" onClick={()=>{setF(null);setEd(false);}}>{tText('Annuler')}</B>
         <B onClick={save}>{ed?'Mettre à jour':'Enregistrer'}</B>
       </div>
     </C>}

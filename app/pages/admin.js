@@ -229,7 +229,7 @@ function AdminDashboard_Main({s,d}){
 
       <div style={{background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)",overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'2.5fr 1.5fr 1fr 1fr 1fr 1fr 1fr',padding:'10px 14px',background:"rgba(198,163,78,.06)",borderBottom:'1px solid rgba(198,163,78,.1)',fontSize:10,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:.5}}>
-          <div>Société</div><div>TVA / ONSS</div><div>CP</div><div>Secteur</div><div>Travailleurs</div><div>Inscription</div><div>Statut</div>
+          <div>{tText('Société')}</div><div>TVA / ONSS</div><div>CP</div><div>Secteur</div><div>Travailleurs</div><div>Inscription</div><div>{tText('Statut')}</div>
         </div>
         {clients.length===0?<div style={{padding:30,textAlign:'center',color:'#5e5c56',fontSize:12}}>Aucun dossier client.</div>:
         clients.filter(c=>{
@@ -348,7 +348,7 @@ function AdminDashboard_Main({s,d}){
       
       <div style={{background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)",overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'1.5fr 1.5fr 2fr 2fr 2fr',padding:'10px 14px',background:"rgba(198,163,78,.06)",borderBottom:'1px solid rgba(198,163,78,.1)',fontSize:10,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:.5}}>
-          <div>Date</div><div>Utilisateur</div><div>Action</div><div>Table</div><div>Details</div>
+          <div>{tText('Date')}</div><div>Utilisateur</div><div>Action</div><div>Table</div><div>Details</div>
         </div>
         {audit.length===0?<div style={{padding:30,textAlign:'center',color:'#5e5c56',fontSize:12}}>
           Aucune entree dans le journal d'audit. Les actions seront enregistrees automatiquement.

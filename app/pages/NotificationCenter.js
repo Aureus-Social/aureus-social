@@ -397,7 +397,7 @@ function NotificationCenter({ state, dispatch, defaultTab }) {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
-          <h2 style={{ color: GOLD, margin: '0 0 4px 0', fontSize: 20 }}>Centre de notifications</h2>
+          <h2 style={{ color: GOLD, margin: '0 0 4px 0', fontSize: 20 }}>{tText('Centre de notifications')}</h2>
           <p style={{ color: MUTED, margin: 0, fontSize: 13 }}>
             {unreadCount} notification(s) non lue(s) — {enriched.length} au total
           </p>

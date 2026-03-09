@@ -420,7 +420,7 @@ function EmployeePlanning({ state, dispatch, defaultTab, initialView }) {
         </div>
         <div style={{ padding: 12, background: DARK, borderRadius: 8, border: `1px solid ${BORDER}`, textAlign: 'center' }}>
           <div style={{ fontSize: 20, fontWeight: 700, color: '#ef4444' }}>{monthStats.totalAbsences}</div>
-          <div style={{ fontSize: 11, color: MUTED }}>Absences</div>
+          <div style={{ fontSize: 11, color: MUTED }}>{tText('Absences')}</div>
         </div>
         {Object.entries(monthStats.byType).map(([type, count]) => {
           const t = ABSENCE_TYPES[type]

@@ -106,7 +106,7 @@ function Dashboard({s,d}) {
   return <div>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:24}}>
       <div>
-        <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:28,fontWeight:700,color:'#e8e6e0',margin:0}}>Tableau de bord</h1>
+        <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:28,fontWeight:700,color:'#e8e6e0',margin:0}}>{tText('Tableau de bord')}</h1>
         <div style={{fontSize:12.5,color:'#8b7340',marginTop:4}}>{MN[curMonth]} {curYear} — {s.co.name||'—'} {s.co.vat?`· ${s.co.vat}`:''}</div>
       </div>
       {urgentCount>0&&<div style={{padding:'8px 16px',background:"rgba(248,113,113,.08)",border:'1px solid rgba(248,113,113,.2)',borderRadius:10,display:'flex',alignItems:'center',gap:8,animation:'pulse 2s infinite'}}>
@@ -121,7 +121,7 @@ function Dashboard({s,d}) {
     <div style={{marginBottom:20,padding:16,background:'linear-gradient(135deg,rgba(198,163,78,.06),rgba(198,163,78,.02))',border:'1px solid rgba(198,163,78,.15)',borderRadius:12,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
       <div style={{display:'flex',alignItems:'center',gap:10}}>
         <span style={{fontSize:18}}>⚡</span>
-        <div><div style={{fontSize:13,fontWeight:600,color:'#c6a34e'}}>Automatisation</div><div style={{fontSize:10,color:'#888'}}>Actions rapides</div></div>
+        <div><div style={{fontSize:13,fontWeight:600,color:'#c6a34e'}}>{tText('Automatisation')}</div><div style={{fontSize:10,color:'#888'}}>Actions rapides</div></div>
       </div>
       <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
         <button onClick={()=>{if(confirm('Générer toutes les fiches de paie ?')){(s?.emps||[]).forEach(e=>generatePayslipPDF(e,s.co));alert(s.emps.length+' fiches de paie générées')}}} style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(198,163,78,.15)',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:600}}>📄 Fiches</button>

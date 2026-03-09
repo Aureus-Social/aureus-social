@@ -111,7 +111,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
     </C>}
     <div style={{display:'grid',gridTemplateColumns:res?'360px 1fr':'1fr',gap:18}}>
       <C>
-        <ST>Paramètres</ST>
+        <ST>{tText('Paramètres')}</ST>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9}}>
           <I label="Employé" value={eid} onChange={setEid} options={(s?.emps||[]).map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''}`}))} span={2}/>
           <I label="Mois" value={per.month} onChange={v=>setPer({...per,month:parseInt(v)})} options={MN.map((m,i)=>({v:i+1,l:m}))}/>
@@ -183,7 +183,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
           </div>
         </div>
         <table style={{width:'100%',borderCollapse:'collapse',fontSize:12}}>
-          <thead><tr style={{borderBottom:'2px solid #c6a34e'}}><th style={{textAlign:'left',padding:'7px 0',fontSize:9.5,textTransform:'uppercase',letterSpacing:'1px',color:'#999'}}>Description</th><th style={{textAlign:'right',padding:'7px 0',fontSize:9.5,textTransform:'uppercase',letterSpacing:'1px',color:'#999'}}>Taux</th><th style={{textAlign:'right',padding:'7px 0',fontSize:9.5,textTransform:'uppercase',letterSpacing:'1px',color:'#999'}}>Montant</th></tr></thead>
+          <thead><tr style={{borderBottom:'2px solid #c6a34e'}}><th style={{textAlign:'left',padding:'7px 0',fontSize:9.5,textTransform:'uppercase',letterSpacing:'1px',color:'#999'}}>{tText('Description')}</th><th style={{textAlign:'right',padding:'7px 0',fontSize:9.5,textTransform:'uppercase',letterSpacing:'1px',color:'#999'}}>Taux</th><th style={{textAlign:'right',padding:'7px 0',fontSize:9.5,textTransform:'uppercase',letterSpacing:'1px',color:'#999'}}>{tText('Montant')}</th></tr></thead>
           <tbody>
             <PS t="Rémunération brute"/>
             {res.isFlexiJob&&<tr><td colSpan={3} style={{padding:'6px 0 8px',fontSize:11,color:'#4ade80',fontWeight:600,background:"rgba(74,222,128,.05)",borderRadius:4}}>🔄 FLEXI-JOB — Loi 16/11/2015 · Net = Brut · ONSS trav. 0% · PP 0% · ONSS empl. 28%</td></tr>}
@@ -397,7 +397,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
           <table style={{width:'100%',borderCollapse:'collapse',fontSize:10.5}}>
             <thead><tr style={{borderBottom:'2px solid #c6a34e'}}>
               <th style={{textAlign:'left',padding:'6px 8px',color:'#999',fontSize:9}}>Élément</th>
-              <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>Montant</th>
+              <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>{tText('Montant')}</th>
               <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>ONSS</th>
               <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>PP</th>
               <th style={{textAlign:'left',padding:'6px 8px',color:'#999',fontSize:9}}>Base légale</th>

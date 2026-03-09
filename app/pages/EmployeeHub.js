@@ -190,11 +190,11 @@ td{padding:4px;border:1px solid #ddd;font-size:8.5px}
   <tr><td style="font-weight:bold">N° BCE / TVA</td><td>${co.vat||'—'}</td></tr>
   <tr><td style="font-weight:bold">N° ONSS</td><td>${co.onss||'—'}</td></tr>
   <tr><td style="font-weight:bold">Siege social</td><td>${co.address||''} ${co.zip||''} ${co.city||''}</td></tr>
-  <tr><td style="font-weight:bold">Commission paritaire</td><td>CP ${co.cp||'200'}</td></tr>
+  <tr><td style="font-weight:bold">{tText('Commission paritaire')}</td><td>CP ${co.cp||'200'}</td></tr>
   <tr><td style="font-weight:bold">Date impression</td><td>${now.toLocaleDateString('fr-BE')} a ${now.toLocaleTimeString('fr-BE')}</td></tr>
 </table>
 <table>
-  <tr><th>N° ordre</th><th>Nom</th><th>Prenom</th><th>NISS</th><th>Sexe</th><th>Nationalite</th><th>Date naiss.</th><th>Domicile</th><th>Debut</th><th>Fin</th><th>Type contrat</th><th>Regime</th><th>Fonction</th><th>Brut mensuel</th></tr>`;
+  <tr><th>N° ordre</th><th>Nom</th><th>Prenom</th><th>{tText('NISS')}</th><th>Sexe</th><th>Nationalite</th><th>Date naiss.</th><th>Domicile</th><th>Debut</th><th>Fin</th><th>Type contrat</th><th>Regime</th><th>Fonction</th><th>{tText('Brut mensuel')}</th></tr>`;
     emps.forEach((e,i)=>{
       html+=`<tr>
         <td style="text-align:center;font-weight:bold">${String(i+1).padStart(3,'0')}</td>
@@ -238,7 +238,7 @@ td{padding:4px;border:1px solid #ddd;font-size:8.5px}
 
     <div style={{border:'1px solid rgba(198,163,78,.1)',borderRadius:14,overflow:'hidden'}}>
       <div style={{display:'grid',gridTemplateColumns:'40px 1fr 1fr 120px 60px 80px 80px 80px',padding:'8px 12px',background:'rgba(198,163,78,.06)',fontSize:8,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'.5px'}}>
-        <div>N°</div><div>Nom</div><div>Prenom</div><div>NISS</div><div>Contrat</div><div>Debut</div><div>Fonction</div><div style={{textAlign:'right'}}>Brut</div>
+        <div>N°</div><div>Nom</div><div>Prenom</div><div>{tText('NISS')}</div><div>Contrat</div><div>Debut</div><div>Fonction</div><div style={{textAlign:'right'}}>{tText('Brut')}</div>
       </div>
       <div style={{maxHeight:500,overflowY:'auto'}}>
         {emps.map((e,i)=><div key={i} style={{display:'grid',gridTemplateColumns:'40px 1fr 1fr 120px 60px 80px 80px 80px',padding:'6px 12px',borderBottom:'1px solid rgba(255,255,255,.02)',fontSize:11,alignItems:'center'}}>
@@ -323,7 +323,7 @@ export function PortailEmployeV2({s,d}){
     {tab==='fiches'&&<C title="Historique fiches de paie">
       <div style={{border:'1px solid rgba(198,163,78,.08)',borderRadius:10,overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'1fr 80px 80px 80px 80px 60px',padding:'8px 12px',background:'rgba(198,163,78,.06)',fontSize:9,fontWeight:600,color:'#c6a34e'}}>
-          <div>Periode</div><div style={{textAlign:'right'}}>Brut</div><div style={{textAlign:'right'}}>ONSS</div><div style={{textAlign:'right'}}>PP</div><div style={{textAlign:'right'}}>Net</div><div/>
+          <div>Periode</div><div style={{textAlign:'right'}}>{tText('Brut')}</div><div style={{textAlign:'right'}}>ONSS</div><div style={{textAlign:'right'}}>PP</div><div style={{textAlign:'right'}}>Net</div><div/>
         </div>
         {payHistory.map((p,i)=><div key={i} style={{display:'grid',gridTemplateColumns:'1fr 80px 80px 80px 80px 60px',padding:'6px 12px',borderBottom:'1px solid rgba(255,255,255,.02)',fontSize:11,alignItems:'center'}}>
           <span style={{color:'#e8e6e0',fontWeight:500}}>{p.month} {p.year}</span>
@@ -339,7 +339,7 @@ export function PortailEmployeV2({s,d}){
     {tab==='demandes'&&<div>
       <C title="Nouvelle demande">
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:8,marginBottom:10}}>
-          <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Type</label><select value={newDem.type} onChange={e=>setNewDem(p=>({...p,type:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}><option value="conge">Conge</option><option value="maladie">Maladie</option><option value="formation">Formation</option><option value="teletravail">Teletravail</option><option value="attestation">Attestation</option><option value="autre">Autre</option></select></div>
+          <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Type</label><select value={newDem.type} onChange={e=>setNewDem(p=>({...p,type:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}><option value="conge">Conge</option><option value="maladie">{tText('Maladie')}</option><option value="formation">Formation</option><option value="teletravail">Teletravail</option><option value="attestation">Attestation</option><option value="autre">Autre</option></select></div>
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Date debut</label><input type="date" value={newDem.dateDebut} onChange={e=>setNewDem(p=>({...p,dateDebut:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}/></div>
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Date fin</label><input type="date" value={newDem.dateFin} onChange={e=>setNewDem(p=>({...p,dateFin:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}/></div>
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Motif</label><input value={newDem.motif} onChange={e=>setNewDem(p=>({...p,motif:e.target.value}))} placeholder="Optionnel" style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}/></div>
@@ -394,7 +394,7 @@ export function GestionInterimairesV2({s,d}){
 
     {tab==='liste'&&<div style={{border:'1px solid rgba(198,163,78,.1)',borderRadius:14,overflow:'hidden'}}>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 100px 70px 60px 80px 80px 30px',padding:'8px 12px',background:'rgba(198,163,78,.06)',fontSize:9,fontWeight:600,color:'#c6a34e'}}>
-        <div>Nom</div><div>Agence</div><div>NISS</div><div>Heures</div><div>Coeff</div><div style={{textAlign:'right'}}>Brut</div><div style={{textAlign:'right'}}>Cout</div><div/>
+        <div>Nom</div><div>Agence</div><div>{tText('NISS')}</div><div>Heures</div><div>Coeff</div><div style={{textAlign:'right'}}>{tText('Brut')}</div><div style={{textAlign:'right'}}>Cout</div><div/>
       </div>
       {ints.map((it,i)=>{const ag=agences.find(a=>a.id===it.agence);return <div key={it.id} style={{display:'grid',gridTemplateColumns:'1fr 1fr 100px 70px 60px 80px 80px 30px',padding:'6px 12px',borderBottom:'1px solid rgba(255,255,255,.02)',fontSize:11,alignItems:'center'}}>
         <span style={{color:'#e8e6e0',fontWeight:500}}>{it.first} {it.last}</span>
@@ -441,7 +441,7 @@ export function GestionInterimairesV2({s,d}){
           )}
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Agence</label><select value={ni.agence} onChange={e=>setNi(p=>({...p,agence:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>{agences.map(a=><option key={a.id} value={a.id}>{a.n}</option>)}</select></div>
         </div>
-        <div style={{display:'flex',gap:8,marginTop:14}}><button onClick={addI} style={{flex:1,padding:'10px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:12,cursor:'pointer'}}>Ajouter</button><button onClick={()=>setShowAdd(false)} style={{padding:'10px 16px',borderRadius:8,border:'1px solid rgba(255,255,255,.1)',background:'transparent',color:'#888',fontSize:12,cursor:'pointer'}}>Annuler</button></div>
+        <div style={{display:'flex',gap:8,marginTop:14}}><button onClick={addI} style={{flex:1,padding:'10px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:12,cursor:'pointer'}}>{tText('Ajouter')}</button><button onClick={()=>setShowAdd(false)} style={{padding:'10px 16px',borderRadius:8,border:'1px solid rgba(255,255,255,.1)',background:'transparent',color:'#888',fontSize:12,cursor:'pointer'}}>{tText('Annuler')}</button></div>
       </div>
     </div>}
   </div>;
