@@ -64,7 +64,7 @@ const T = {
       sub:'Comparaison objective avec les solutions traditionnelles du marché belge.',
       cols:['Critère','Aureus Social Pro','Grand SS traditionnel','SS régional'],
       rows:[
-        ['Tarif mensuel (10 ETP)','Sur mesure','€ 800–1 200','€ 600–900'],
+        ['Tarif mensuel (10 ETP)','Sur devis','€ 800–1 200','€ 600–900'],
         ['Interface moderne (React / Next.js 15)','✓','✗','✗'],
         ['API REST publique','✓','✗','✗'],
         ['Portail employé inclus','✓','Option payante','Option payante'],
@@ -104,9 +104,9 @@ const T = {
     tarifs: {
       label:'Tarifs', title:'Transparent et', italic:'compétitif',
       sub:'Pas de frais cachés. Pas d\'engagement longue durée. Essai gratuit 30 jours.',
-      starter:{ nom:'Starter', prix:'Sur mesure', desc:'Tarif adapté à votre entreprise',
+      starter:{ nom:'Starter', contact:'Contactez-nous', prix:'', desc:'Tarif adapté à votre entreprise',
         feats:['Calcul de paie complet','DmfA + Belcotax XML','Portail employé','Fiches de paie PDF','GED documents','Support e-mail'], btn:'Commencer' },
-      pro:{ nom:'Pro', badge:'POPULAIRE', prix:'Sur mesure', desc:'Tout inclus — sur mesure',
+      pro:{ nom:'Pro', badge:'POPULAIRE', contact:'Contactez-nous', prix:'', desc:'Tout inclus, sur devis',
         feats:['Tout Starter inclus','DIMONA + SEPA automatiques','Signature électronique','API REST + Webhooks','Reporting avancé','Multi-devise & expats','Import concurrent','Support prioritaire'], btn:'Essai gratuit 30 j' },
     },
     roi: {
@@ -260,7 +260,7 @@ T.nl = {
     sub:'Objectieve vergelijking met de traditionele oplossingen op de Belgische markt.',
     cols:['Criterium','Aureus Social Pro','Groot traditioneel SS','Regionaal SS'],
     rows:[
-      ['Maandtarief (10 VTE)','Op maat','€ 800–1 200','€ 600–900'],
+      ['Maandtarief (10 VTE)','Op offerte','€ 800–1 200','€ 600–900'],
       ['Modern interface (React / Next.js 15)','✓','✗','✗'],
       ['Publieke REST-API','✓','✗','✗'],
       ['Werknemersportaal inbegrepen','✓','Betalende optie','Betalende optie'],
@@ -297,9 +297,9 @@ T.nl = {
   tarifs:{
     label:'Tarieven', title:'Transparant en', italic:'competitief',
     sub:'Geen verborgen kosten. Geen langetermijnverbintenis. 30 dagen gratis proef.',
-    starter:{ nom:'Starter', prix:'Op maat', desc:'Tarief aangepast aan uw bedrijf',
+    starter:{ nom:'Starter', contact:'Contacteer ons', prix:'', desc:'Tarief aangepast aan uw bedrijf',
       feats:['Volledige loonberekening','DmfA + Belcotax XML','Werknemersportaal','PDF-loonfiches','GED documenten','E-mailondersteuning'], btn:'Beginnen' },
-    pro:{ nom:'Pro', badge:'POPULAIR', prix:'Op maat', desc:'Alles inbegrepen — op maat',
+    pro:{ nom:'Pro', badge:'POPULAIR', contact:'Contacteer ons', prix:'', desc:'Alles inbegrepen, op offerte',
       feats:['Alles van Starter inbegrepen','Automatisch DIMONA + SEPA','Elektronische handtekening','REST-API + Webhooks','Geavanceerde rapportage','Multi-valuta & expats','Concurrent import','Prioriteitsondersteuning'], btn:'Gratis proef 30 d' },
   },
   roi:{
@@ -446,7 +446,7 @@ T.en = {
     sub:'Objective comparison with traditional solutions on the Belgian market.',
     cols:['Criterion','Aureus Social Pro','Large traditional SS','Regional SS'],
     rows:[
-      ['Monthly fee (10 FTE)','Bespoke','€ 800–1 200','€ 600–900'],
+      ['Monthly fee (10 FTE)','Get a quote','€ 800–1 200','€ 600–900'],
       ['Modern interface (React / Next.js 15)','✓','✗','✗'],
       ['Public REST API','✓','✗','✗'],
       ['Employee portal included','✓','Paid option','Paid option'],
@@ -483,9 +483,9 @@ T.en = {
   tarifs:{
     label:'Pricing', title:'Transparent and', italic:'competitive',
     sub:'No hidden fees. No long-term commitment. 30-day free trial.',
-    starter:{ nom:'Starter', prix:'Bespoke', desc:'Pricing adapted to your business',
+    starter:{ nom:'Starter', contact:'Contact us', prix:'', desc:'Pricing adapted to your business',
       feats:['Complete payroll calculation','DmfA + Belcotax XML','Employee portal','PDF payslips','Document management','Email support'], btn:'Get started' },
-    pro:{ nom:'Pro', badge:'POPULAR', prix:'Bespoke', desc:'All inclusive — bespoke',
+    pro:{ nom:'Pro', badge:'POPULAR', contact:'Contact us', prix:'', desc:'All inclusive, get a quote',
       feats:['Everything in Starter','Automatic DIMONA + SEPA','Electronic signature','REST API + Webhooks','Advanced reporting','Multi-currency & expats','Concurrent import','Priority support'], btn:'Free trial 30 d' },
   },
   roi:{
@@ -632,7 +632,7 @@ T.de = {
     sub:'Objektiver Vergleich mit traditionellen Lösungen auf dem belgischen Markt.',
     cols:['Kriterium','Aureus Social Pro','Großes traditionelles SS','Regionales SS'],
     rows:[
-      ['Monatstarif (10 VZÄ)','Maßgeschneidert','€ 800–1 200','€ 600–900'],
+      ['Monatstarif (10 VZÄ)','Auf Anfrage','€ 800–1 200','€ 600–900'],
       ['Moderne Oberfläche (React / Next.js 15)','✓','✗','✗'],
       ['Öffentliche REST-API','✓','✗','✗'],
       ['Mitarbeiterportal inbegriffen','✓','Kostenpflichtige Option','Kostenpflichtige Option'],
@@ -669,9 +669,9 @@ T.de = {
   tarifs:{
     label:'Preise', title:'Transparent und', italic:'wettbewerbsfähig',
     sub:'Keine versteckten Kosten. Keine langfristige Bindung. 30 Tage kostenlose Testversion.',
-    starter:{ nom:'Starter', prix:'Maßgeschneidert', desc:'Preis angepasst an Ihr Unternehmen',
+    starter:{ nom:'Starter', contact:'Kontakt aufnehmen', prix:'', desc:'Preis angepasst an Ihr Unternehmen',
       feats:['Vollständige Lohnberechnung','DmfA + Belcotax XML','Mitarbeiterportal','PDF-Lohnzettel','Dokumentenverwaltung','E-Mail-Support'], btn:'Beginnen' },
-    pro:{ nom:'Pro', badge:'BELIEBT', prix:'Maßgeschneidert', desc:'Alles inklusive — maßgeschneidert',
+    pro:{ nom:'Pro', badge:'BELIEBT', contact:'Kontakt aufnehmen', prix:'', desc:'Alles inklusive, auf Anfrage',
       feats:['Alles von Starter inklusive','Automatisches DIMONA + SEPA','Elektronische Signatur','REST-API + Webhooks','Erweiterte Berichterstattung','Multi-Währung & Expats','Gleichzeitiger Import','Prioritätssupport'], btn:'Kostenlose Testversion 30 T' },
   },
   roi:{
@@ -1210,7 +1210,11 @@ export default function LandingPage(){
               <Fade delay={.1}>
                 <div style={{padding:'30px 24px',border:`1px solid ${G}20`,borderRadius:8,background:`${G}05`}}>
                   <div style={{fontSize:9,color:W2,letterSpacing:'3px',textTransform:'uppercase',marginBottom:9}}>{t.tarifs.starter.nom}</div>
-                  <div style={{fontSize:30,fontWeight:900,color:W,marginBottom:3}}>{t.tarifs.starter.prix}</div>
+                  <a href="mailto:info@aureus-ia.com" style={{display:'inline-flex',alignItems:'center',gap:7,padding:'9px 18px',marginBottom:14,borderRadius:4,border:`1px solid ${G}30`,background:`${G}08`,textDecoration:'none',color:G,fontSize:12,fontWeight:700,letterSpacing:'.5px',transition:'all .2s'}}
+                    onMouseEnter={e=>e.currentTarget.style.background=`${G}18`}
+                    onMouseLeave={e=>e.currentTarget.style.background=`${G}08`}>
+                    <span>✉</span> {t.tarifs.starter.contact||'Contactez-nous'}
+                  </a>
                   <div style={{fontSize:11,color:W2,marginBottom:22}}>{t.tarifs.starter.desc}</div>
                   {t.tarifs.starter.feats.map(f=>(
                     <div key={f} style={{display:'flex',gap:8,alignItems:'center',marginBottom:8}}>
@@ -1228,7 +1232,11 @@ export default function LandingPage(){
                 <div style={{padding:'30px 24px',border:`2px solid ${G}`,borderRadius:8,background:`${G}08`,position:'relative'}}>
                   <div style={{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',background:G,color:'#07060a',fontSize:9,fontWeight:800,padding:'3px 13px',borderRadius:99,letterSpacing:'2px'}}>{t.tarifs.pro.badge}</div>
                   <div style={{fontSize:9,color:G,letterSpacing:'3px',textTransform:'uppercase',marginBottom:9}}>{t.tarifs.pro.nom}</div>
-                  <div style={{fontSize:30,fontWeight:900,color:W,marginBottom:3}}>{t.tarifs.pro.prix}</div>
+                  <a href="mailto:info@aureus-ia.com" style={{display:'inline-flex',alignItems:'center',gap:7,padding:'9px 18px',marginBottom:14,borderRadius:4,border:`1px solid ${G}`,background:`${G}15`,textDecoration:'none',color:G,fontSize:12,fontWeight:800,letterSpacing:'.5px',transition:'all .2s'}}
+                    onMouseEnter={e=>e.currentTarget.style.background=`${G}28`}
+                    onMouseLeave={e=>e.currentTarget.style.background=`${G}15`}>
+                    <span>✉</span> {t.tarifs.pro.contact||'Contactez-nous'}
+                  </a>
                   <div style={{fontSize:11,color:W2,marginBottom:22}}>{t.tarifs.pro.desc}</div>
                   {t.tarifs.pro.feats.map(f=>(
                     <div key={f} style={{display:'flex',gap:8,alignItems:'center',marginBottom:8}}>
