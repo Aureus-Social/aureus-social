@@ -18,14 +18,14 @@ const MUTED = '#8b95a5'
 
 // ── Types de notification ──
 const NOTIF_TYPES = {
-  DEADLINE: { label: 'Échéance', color: '#ef4444', icon: '⏰' },
-  PAYROLL: { label: 'Paie', color: '#22c55e', icon: '💰' },
+  DEADLINE: { label:tText('Échéance'), color: '#ef4444', icon: '⏰' },
+  PAYROLL: { label:tText('Paie'), color: '#22c55e', icon: '💰' },
   ONSS: { label:tText('ONSS'), color: '#3b82f6', icon: '🏛' },
-  FISCAL: { label: 'Fiscal', color: '#f59e0b', icon: '📋' },
-  LEGAL: { label: 'Légal', color: '#8b5cf6', icon: '⚖️' },
+  FISCAL: { label:tText('Fiscal'), color: '#f59e0b', icon: '📋' },
+  LEGAL: { label:tText('Légal'), color: '#8b5cf6', icon: '⚖️' },
   HR: { label: 'RH', color: '#ec4899', icon: '👥' },
-  SYSTEM: { label: 'Système', color: '#6b7280', icon: '⚙️' },
-  DIMONA: { label: 'Dimona', color: '#06b6d4', icon: '📡' },
+  SYSTEM: { label:tText('Système'), color: '#6b7280', icon: '⚙️' },
+  DIMONA: { label:tText('Dimona'), color: '#06b6d4', icon: '📡' },
 }
 
 const PRIORITY = { HIGH: 3, MEDIUM: 2, LOW: 1 }
@@ -34,31 +34,31 @@ const PRIORITY = { HIGH: 3, MEDIUM: 2, LOW: 1 }
 function generateLegalDeadlines(year = 2026) {
   return [
     { month: 1, day: 15, label: `PP décembre ${year - 1}`, type: 'FISCAL', priority: 'HIGH' },
-    { month: 1, day: 31, label: 'ONSS T4 — acompte', type: tText('ONSS'), priority: 'HIGH' },
+    { month: 1, day: 31, label:tText('ONSS T4 — acompte'), type: tText('ONSS'), priority: 'HIGH' },
     { month: 1, day: 31, label: `DmfA T4/${year - 1} — délai de soumission`, type: tText('ONSS'), priority: 'HIGH' },
-    { month: 2, day: 15, label: 'PP janvier', type: 'FISCAL', priority: 'HIGH' },
+    { month: 2, day: 15, label:tText('PP janvier'), type: 'FISCAL', priority: 'HIGH' },
     { month: 2, day: 28, label: `Pécule de vacances (calcul anticipé) — ouvriers`, type: 'PAYROLL', priority: 'MEDIUM' },
     { month: 3, day: 1, label: `Belcotax 281.10/20/50 — année ${year - 1}`, type: 'FISCAL', priority: 'HIGH' },
-    { month: 3, day: 15, label: 'PP février', type: 'FISCAL', priority: 'HIGH' },
-    { month: 3, day: 31, label: 'ONSS T1 — déclaration + solde', type: tText('ONSS'), priority: 'HIGH' },
-    { month: 4, day: 15, label: 'PP mars', type: 'FISCAL', priority: 'HIGH' },
+    { month: 3, day: 15, label:tText('PP février'), type: 'FISCAL', priority: 'HIGH' },
+    { month: 3, day: 31, label:tText('ONSS T1 — déclaration + solde'), type: tText('ONSS'), priority: 'HIGH' },
+    { month: 4, day: 15, label:tText('PP mars'), type: 'FISCAL', priority: 'HIGH' },
     { month: 4, day: 30, label:tText('DmfA T1 — délai de soumission'), type: tText('ONSS'), priority: 'HIGH' },
-    { month: 5, day: 15, label: 'PP avril', type: 'FISCAL', priority: 'HIGH' },
+    { month: 5, day: 15, label:tText('PP avril'), type: 'FISCAL', priority: 'HIGH' },
     { month: 5, day: 31, label:tText('Bilan social — dépôt BNB'), type: 'LEGAL', priority: 'MEDIUM' },
-    { month: 6, day: 15, label: 'PP mai', type: 'FISCAL', priority: 'HIGH' },
-    { month: 6, day: 30, label: 'ONSS T2 — déclaration + solde', type: tText('ONSS'), priority: 'HIGH' },
-    { month: 6, day: 30, label: 'Pécule de vacances — calcul et paiement employés', type: 'PAYROLL', priority: 'HIGH' },
-    { month: 7, day: 15, label: 'PP juin', type: 'FISCAL', priority: 'HIGH' },
+    { month: 6, day: 15, label:tText('PP mai'), type: 'FISCAL', priority: 'HIGH' },
+    { month: 6, day: 30, label:tText('ONSS T2 — déclaration + solde'), type: tText('ONSS'), priority: 'HIGH' },
+    { month: 6, day: 30, label:tText('Pécule de vacances — calcul et paiement employés'), type: 'PAYROLL', priority: 'HIGH' },
+    { month: 7, day: 15, label:tText('PP juin'), type: 'FISCAL', priority: 'HIGH' },
     { month: 7, day: 31, label:tText('DmfA T2 — délai de soumission'), type: tText('ONSS'), priority: 'HIGH' },
-    { month: 8, day: 15, label: 'PP juillet', type: 'FISCAL', priority: 'HIGH' },
-    { month: 9, day: 15, label: 'PP août', type: 'FISCAL', priority: 'HIGH' },
-    { month: 9, day: 30, label: 'ONSS T3 — déclaration + solde', type: tText('ONSS'), priority: 'HIGH' },
-    { month: 10, day: 15, label: 'PP septembre', type: 'FISCAL', priority: 'HIGH' },
+    { month: 8, day: 15, label:tText('PP juillet'), type: 'FISCAL', priority: 'HIGH' },
+    { month: 9, day: 15, label:tText('PP août'), type: 'FISCAL', priority: 'HIGH' },
+    { month: 9, day: 30, label:tText('ONSS T3 — déclaration + solde'), type: tText('ONSS'), priority: 'HIGH' },
+    { month: 10, day: 15, label:tText('PP septembre'), type: 'FISCAL', priority: 'HIGH' },
     { month: 10, day: 31, label:tText('DmfA T3 — délai de soumission'), type: tText('ONSS'), priority: 'HIGH' },
-    { month: 11, day: 15, label: 'PP octobre', type: 'FISCAL', priority: 'HIGH' },
-    { month: 12, day: 15, label: 'PP novembre', type: 'FISCAL', priority: 'HIGH' },
-    { month: 12, day: 20, label: '13ème mois — calcul et paiement', type: 'PAYROLL', priority: 'HIGH' },
-    { month: 12, day: 31, label: 'ONSS T4 — déclaration + solde', type: tText('ONSS'), priority: 'HIGH' },
+    { month: 11, day: 15, label:tText('PP octobre'), type: 'FISCAL', priority: 'HIGH' },
+    { month: 12, day: 15, label:tText('PP novembre'), type: 'FISCAL', priority: 'HIGH' },
+    { month: 12, day: 20, label:tText('13ème mois — calcul et paiement'), type: 'PAYROLL', priority: 'HIGH' },
+    { month: 12, day: 31, label:tText('ONSS T4 — déclaration + solde'), type: tText('ONSS'), priority: 'HIGH' },
     { month: 12, day: 31, label:tText('Clôture annuelle paie'), type: 'PAYROLL', priority: 'HIGH' },
   ]
 }
@@ -263,7 +263,7 @@ export function NotifDropdown({ notifications, onClose, onMarkRead, onViewAll })
         padding: '12px 16px', borderBottom: `1px solid ${BORDER}`,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
-        <span style={{ fontWeight: 600, color: GOLD, fontSize: 14 }}>{t('set.notifications')||tText('Notifications')}</span>
+        <span style={{ fontWeight: 600, color: GOLD, fontSize: 14 }}>{t(tText('set.notifications'))||tText('Notifications')}</span>
         <span style={{ fontSize: 11, color: MUTED }}>{unread.length} non lue(s)</span>
       </div>
 
@@ -384,9 +384,9 @@ function NotificationCenter({ state, dispatch, defaultTab }) {
   }, [])
 
   const filters = [
-    { key: 'all', label: 'Tout', count: enriched.length },
-    { key: 'unread', label: 'Non lues', count: unreadCount },
-    { key: 'high', label: 'Urgentes', count: enriched.filter(n => n.priority === 'HIGH' && !n.read).length },
+    { key: 'all', label:tText('Tout'), count: enriched.length },
+    { key: 'unread', label:tText('Non lues'), count: unreadCount },
+    { key: 'high', label:tText('Urgentes'), count: enriched.filter(n => n.priority === 'HIGH' && !n.read).length },
     ...Object.entries(NOTIF_TYPES).map(([key, val]) => ({
       key, label: `${val.icon} ${val.label}`, count: enriched.filter(n => n.type === key).length,
     })).filter(f => f.count > 0),
@@ -432,7 +432,7 @@ function NotificationCenter({ state, dispatch, defaultTab }) {
           padding: 16, background: DARK, borderRadius: 8, border: `1px solid ${BORDER}`,
           marginBottom: 20,
         }}>
-          <h3 style={{ color: TEXT, margin: '0 0 12px 0', fontSize: 14 }}>Notifications Push</h3>
+          <h3 style={{ color: TEXT, margin: '0 0 12px 0', fontSize: 14 }}>{tText('Notifications Push')}</h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ fontSize: 13, color: MUTED }}>
               Statut : {pushStatus === 'granted' ? '✅ Activées' : pushStatus === 'denied' ? '❌ Refusées' : '⏸ Non configurées'}
@@ -601,13 +601,13 @@ function SmartAlertsPage({ state }) {
       const brut = +(e.gross || 0)
       const nm = (e.first || e.fn || '') + ' ' + (e.last || e.ln || '')
       if (brut > 0 && brut < RMMMG) {
-        list.push({ id:'rmmmg_'+e.id, sev:'critical', icon:'🚨', cat:'Paie',
-          title:'Salaire sous RMMMG', msg:nm + ' — ' + f2(brut) + ' EUR < ' + f2(RMMMG) + ' EUR (RMMMG 2026)',
+        list.push({ id:'rmmmg_'+e.id, sev:'critical', icon:'🚨', cat:tText('Paie'),
+          title:tText('Salaire sous RMMMG'), msg:nm + ' — ' + f2(brut) + ' EUR < ' + f2(RMMMG) + ' EUR (RMMMG 2026)',
           action:'Corriger le salaire', ref:'CCT 43' })
       }
       if (!e.niss) {
         list.push({ id:'niss_'+e.id, sev:'critical', icon:'⚠️', cat:tText('ONSS'),
-          title:'NISS manquant', msg:nm + ' — Numéro registre national absent, Dimona impossible',
+          title:tText('NISS manquant'), msg:nm + ' — Numéro registre national absent, Dimona impossible',
           action:'Encoder le NISS', ref:'AR 05/11/2002' })
       }
       if (!e.startDate && !e.start) {
@@ -620,13 +620,13 @@ function SmartAlertsPage({ state }) {
     // Alertes calendrier
     const day = now.getDate()
     if (day >= 20 && day <= 31) {
-      list.push({ id:'sepa_month', sev:'warning', icon:'🏦', cat:'Paie',
-        title:'Virements SEPA à préparer', msg:'Clôture du mois — Préparer pain.001 pour le 25/' + (now.getMonth()+1),
+      list.push({ id:'sepa_month', sev:'warning', icon:'🏦', cat:tText('Paie'),
+        title:tText('Virements SEPA à préparer'), msg:'Clôture du mois — Préparer pain.001 pour le 25/' + (now.getMonth()+1),
         action:'Générer SEPA', ref:'ISO 20022' })
     }
     if (day >= 1 && day <= 5) {
       list.push({ id:'onss_month', sev:'info', icon:'📊', cat:tText('ONSS'),
-        title:'Provision ONSS à comptabiliser', msg:'Début de mois — Provision cotisations ONSS à enregistrer',
+        title:tText('Provision ONSS à comptabiliser'), msg:'Début de mois — Provision cotisations ONSS à enregistrer',
         action:'Voir écheancier', ref:'LSS Art. 23' })
     }
     if ([2,5,8,11].includes(now.getMonth()) && day >= 20) {
@@ -644,7 +644,7 @@ function SmartAlertsPage({ state }) {
   }, [emps, dismissed])
 
   const sevColor = { critical:'#ef4444', warning:'#f97316', info:'#3b82f6' }
-  const sevLabel = { critical:'CRITIQUE', warning:'ATTENTION', info:'INFO' }
+  const sevLabel = { critical:tText('CRITIQUE'), warning:'ATTENTION', info:'INFO' }
   const criticals = alerts.filter(a => a.sev === 'critical')
   const warnings = alerts.filter(a => a.sev === 'warning')
   const infos = alerts.filter(a => a.sev === 'info')
@@ -681,7 +681,7 @@ function SmartAlertsPage({ state }) {
           background:'rgba(34,197,94,.03)', borderRadius:12, border:'1px solid rgba(34,197,94,.1)' }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
           <div style={{ fontSize: 16, fontWeight: 700, color:'#22c55e' }}>{tText('Aucune alerte active')}</div>
-          <div style={{ fontSize: 12, marginTop: 4 }}>Toutes les vérifications sont passées</div>
+          <div style={{ fontSize: 12, marginTop: 4 }}>{tText('Toutes les vérifications sont passées')}</div>
         </div>
       ) : (
         ['critical','warning','info'].map(sev => {
@@ -743,18 +743,18 @@ function JournalPage({ state }) {
       { id:1, type:'paie',   icon:'💰', user:'info@aureus-ia.com', action:'Calcul paie Février 2026', detail:'3 travailleurs — Masse 8.400 EUR', ts:ago(1), status:'ok' },
       { id:2, type:'dimona', icon:'📤', user:'salem@aureus-ia.com', action:'Dimona IN envoyé', detail:'NISS 85.04.23-123-45 — CDI CP200', ts:ago(2,30), status:'ok' },
       { id:3, type:'export', icon:'📥', user:'info@aureus-ia.com', action:'Export WinBooks généré', detail:'winbooks_2026-02.txt — 18 lignes', ts:ago(4), status:'ok' },
-      { id:4, type:'auth',   icon:'🔐', user:'info@aureus-ia.com', action:'Connexion réussie', detail:'IP 87.67.45.12 — Brussels', ts:ago(6), status:'ok' },
+      { id:4, type:'auth',   icon:'🔐', user:'info@aureus-ia.com', action:'Connexion réussie', detail:tText('IP 87.67.45.12 — Brussels'), ts:ago(6), status:'ok' },
       { id:5, type:'doc',    icon:'📄', user:'salem@aureus-ia.com', action:'Contrat CDI généré', detail:'Salem Abdellah — CP200 — 2.800 EUR brut', ts:ago(8), status:'ok' },
       { id:6, type:'paie',   icon:'💰', user:'info@aureus-ia.com', action:'Fiches de paie PDF', detail:'3 fiches générées — Janvier 2026', ts:ago(24), status:'ok' },
-      { id:7, type:'onss',   icon:'📋', user:'info@aureus-ia.com', action:'DmfA Q4 2025 soumise', detail:'Matricule 51357716-02 — 3 travailleurs', ts:ago(48), status:'ok' },
+      { id:7, type:'onss',   icon:'📋', user:'info@aureus-ia.com', action:'DmfA Q4 2025 soumise', detail:tText('Matricule 51357716-02 — 3 travailleurs'), ts:ago(48), status:'ok' },
       { id:8, type:'auth',   icon:'⚠️', user:'inconnu@test.com', action:'Tentative connexion échouée', detail:'Mot de passe incorrect — 3 tentatives', ts:ago(72), status:'warn' },
       { id:9, type:'export', icon:'📥', user:'info@aureus-ia.com', action:'Export SEPA pain.001', detail:'SEPA_2026-01.xml — 2.100 EUR', ts:ago(96), status:'ok' },
-      { id:10, type:'dimona',icon:'📤', user:'salem@aureus-ia.com', action:'Dimona OUT envoyé', detail:'Fin CDD — 31/01/2026', ts:ago(120), status:'ok' },
+      { id:10, type:'dimona',icon:'📤', user:'salem@aureus-ia.com', action:'Dimona OUT envoyé', detail:tText('Fin CDD — 31/01/2026'), ts:ago(120), status:'ok' },
     ]
   }, [])
 
   const types = ['all','paie','dimona','export','auth','doc','onss','onss']
-  const typeLabels = { all:'Tout', paie:'💰 Paie', dimona:'📤 Dimona', export:'📥 Exports', auth:'🔐 Auth', doc:'📄 Docs', onss:'📋 ONSS' }
+  const typeLabels = { all:tText('Tout'), paie:'💰 Paie', dimona:'📤 Dimona', export:'📥 Exports', auth:'🔐 Auth', doc:'📄 Docs', onss:'📋 ONSS' }
   const filtered = typeFilter === 'all' ? entries : entries.filter(e => e.type === typeFilter)
 
   return (
@@ -821,30 +821,30 @@ function SupportPage() {
       <div style={{ marginBottom:16, padding:'14px 18px', background:'rgba(198,163,78,.03)',
         borderRadius:12, border:'1px solid rgba(198,163,78,.08)' }}>
         <h2 style={{ color:'#c6a34e', margin:'0 0 4px', fontSize:18 }}>🎯 Support</h2>
-        <p style={{ color:'#5e5c56', margin:0, fontSize:12 }}>Tickets et assistance — Aureus IA SPRL</p>
+        <p style={{ color:'#5e5c56', margin:0, fontSize:12 }}>{tText('Tickets et assistance — Aureus IA SPRL')}</p>
       </div>
 
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:20 }}>
         <div style={{ padding:'20px', background:'rgba(198,163,78,.03)', borderRadius:12,
           border:'1px solid rgba(198,163,78,.1)', textAlign:'center' }}>
           <div style={{ fontSize:32, marginBottom:8 }}>📧</div>
-          <div style={{ fontSize:13, fontWeight:700, color:'#e8e6e0', marginBottom:4 }}>{t('support.email')||'Email support'}</div>
+          <div style={{ fontSize:13, fontWeight:700, color:'#e8e6e0', marginBottom:4 }}>{t(tText('support.email'))||'Email support'}</div>
           <div style={{ fontSize:11, color:'#c6a34e' }}>info@aureus-ia.com</div>
-          <div style={{ fontSize:10, color:'#5e5c56', marginTop:4 }}>{t('support.response')||'Réponse sous 24h ouvrables'}</div>
+          <div style={{ fontSize:10, color:'#5e5c56', marginTop:4 }}>{t(tText('support.response'))||'Réponse sous 24h ouvrables'}</div>
         </div>
         <div style={{ padding:'20px', background:'rgba(96,165,250,.03)', borderRadius:12,
           border:'1px solid rgba(96,165,250,.1)', textAlign:'center' }}>
           <div style={{ fontSize:32, marginBottom:8 }}>📚</div>
-          <div style={{ fontSize:13, fontWeight:700, color:'#e8e6e0', marginBottom:4 }}>{t('support.docs')||'Documentation'}</div>
+          <div style={{ fontSize:13, fontWeight:700, color:'#e8e6e0', marginBottom:4 }}>{t(tText('support.docs'))||'Documentation'}</div>
           <div style={{ fontSize:11, color:'#3b82f6' }}>info@aureus-ia.com</div>
-          <div style={{ fontSize:10, color:'#5e5c56', marginTop:4 }}>Guides & support par email</div>
+          <div style={{ fontSize:10, color:'#5e5c56', marginTop:4 }}>{tText('Guides & support par email')}</div>
         </div>
       </div>
 
       <div style={{ background:'rgba(198,163,78,.02)', borderRadius:12, border:'1px solid rgba(198,163,78,.06)' }}>
         <div style={{ padding:'12px 16px', borderBottom:'1px solid rgba(198,163,78,.08)', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-          <span style={{ fontSize:12, fontWeight:700, color:'#e8e6e0' }}>{t('support.recent')||'Tickets récents'}</span>
-          <span style={{ fontSize:10, color:'#5e5c56' }}>{tickets.filter(t=>t.status==='open').length} {t('support.open')||'ouvert(s)'}</span>
+          <span style={{ fontSize:12, fontWeight:700, color:'#e8e6e0' }}>{t(tText('support.recent'))||'Tickets récents'}</span>
+          <span style={{ fontSize:10, color:'#5e5c56' }}>{tickets.filter(t=>t.status==='open').length} {t(tText('support.open'))||'ouvert(s)'}</span>
         </div>
         {tickets.map((t,i) => (
           <div key={t.id} style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px',

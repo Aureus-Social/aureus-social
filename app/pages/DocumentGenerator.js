@@ -21,28 +21,28 @@ const MUTED = '#8b95a5'
 const DOC_TYPES = {
   CONTRAT_CDI: {
     label:tText('Contrat CDI'),
-    category: 'contrat',
+    category: tText('contrat'),
     icon: '📄',
     description: 'Contrat à durée indéterminée — employé ou ouvrier',
     required: ['name', 'startDate', 'salary', 'function', 'cp'],
   },
   CONTRAT_CDD: {
     label:tText('Contrat CDD'),
-    category: 'contrat',
+    category: tText('contrat'),
     icon: '📄',
     description: 'Contrat à durée déterminée',
     required: ['name', 'startDate', 'endDate', 'salary', 'function', 'cp'],
   },
   CONTRAT_STUDENT: {
     label:tText('Convention étudiant'),
-    category: 'contrat',
+    category: tText('contrat'),
     icon: '🎓',
     description: 'Convention d\'occupation étudiant — max 600 h/an, cotisations réduites 2,71 %',
     required: ['name', 'startDate', 'endDate', 'salary'],
   },
   AVENANT: {
     label:tText('Avenant au contrat'),
-    category: 'contrat',
+    category: tText('contrat'),
     icon: '📝',
     description: 'Modification du contrat de travail existant',
     required: ['name', 'modification'],
@@ -56,13 +56,13 @@ const DOC_TYPES = {
   },
   CONTRAT_TEMPS_PARTIEL: {
     label:tText('Contrat temps partiel'),
-    category: 'contrat',
+    category: tText('contrat'),
     icon: '📄',
     description: 'AR 25/06/1990 — Mentions obligatoires: régime, horaire',
     required: ['name', 'startDate', 'salary', 'function', 'hoursPerWeek'],
   },
   ATTESTATION_EMPLOI: {
-    label: 'Attestation d\'emploi',
+    label: tText('Attestation d\'emploi'),
     category: 'attestation',
     icon: '✅',
     description: 'Certificat confirmant l\'emploi actuel du travailleur',
@@ -83,7 +83,7 @@ const DOC_TYPES = {
     required: ['name', 'startDate', 'endDate', 'motif'],
   },
   PREAVIS: {
-    label: 'Lettre de préavis',
+    label:tText('Lettre de préavis'),
     category: 'sortie',
     icon: '⏳',
     description: 'Notification de préavis selon la loi belge',
@@ -108,20 +108,20 @@ const DOC_TYPES = {
 const CATEGORIES = {
   contrat: { label:tText('Contrats'), icon: '📄', color: '#3b82f6' },
   attestation: { label:tText('Attestations'), icon: '✅', color: '#22c55e' },
-  sortie: { label: 'Sortie / Fin contrat', icon: '🔴', color: '#ef4444' },
-  reglementaire: { label: 'Réglementaire', icon: '📋', color: '#f59e0b' },
+  sortie: { label:tText('Sortie / Fin contrat'), icon: '🔴', color: '#ef4444' },
+  reglementaire: { label:tText('Réglementaire'), icon: '📋', color: '#f59e0b' },
 }
 
 // Types « contrat de travail » (layout avec logo + références légales)
 const CONTRACT_TYPES = ['CONTRAT_CDI', 'CONTRAT_CDD', 'CONTRAT_STUDENT', 'CONTRAT_TEMPS_PARTIEL', 'AVENANT', 'CONVENTION_RUPTURE']
 
 const REFERENCE_LOIS = [
-  { abbr: 'Loi du 3 juillet 1978', full: 'Loi relative aux contrats de travail (M.B. 22 août 1978)', arts: 'Art. 2, 7, 11, 32' },
-  { abbr: 'Loi du 26 décembre 2013', full: 'Statut unique — préavis', arts: 'Art. 67 à 82' },
-  { abbr: 'AR du 25 juin 1990', full: 'Temps partiel, équipes, week-end', arts: 'Mentions obligatoires' },
+  { abbr: 'Loi du 3 juillet 1978', full: tText('Loi relative aux contrats de travail (M.B. 22 août 1978)'), arts: 'Art. 2, 7, 11, 32' },
+  { abbr: 'Loi du 26 décembre 2013', full: tText('Statut unique — préavis'), arts: 'Art. 67 à 82' },
+  { abbr: 'AR du 25 juin 1990', full: tText('Temps partiel, équipes, week-end'), arts: 'Mentions obligatoires' },
   { abbr: 'Loi du 8 avril 1965', full: tText('Règlement de travail'), arts: 'Art. 3 et suivants' },
-  { abbr: 'Code civil', full: 'Obligations contractuelles', arts: 'Art. 1134' },
-  { abbr: 'CCT et CP', full: 'Conventions collectives et commission paritaire', arts: 'Conformité CP' },
+  { abbr: 'Code civil', full: tText('Obligations contractuelles'), arts: 'Art. 1134' },
+  { abbr: 'CCT et CP', full: tText('Conventions collectives et commission paritaire'), arts: 'Conformité CP' },
 ]
 
 function escapeHtml(s) {
@@ -160,7 +160,7 @@ function buildContractHTML(type, data) {
 
   const loisBlock = `
     <footer class="contract-lois">
-      <strong>Références légales</strong>
+      <strong>{tText('Références légales')}</strong>
       <ul>${REFERENCE_LOIS.map(l => `<li><strong>${escapeHtml(l.abbr)}</strong> — ${escapeHtml(l.full)} (${escapeHtml(l.arts)})</li>`).join('')}</ul>
       <p class="contract-generated">Document généré par Aureus Social Pro — ${dateStr}</p>
     </footer>`
@@ -169,10 +169,10 @@ function buildContractHTML(type, data) {
     <div class="contract-signatures">
       <p>Fait en double exemplaire à ${city}, le ${dateStr}.</p>
       <table class="sign-table"><tr>
-        <td><strong>L'employeur</strong><br/>${coName}<br/><em>(signature)</em></td>
-        <td><strong>Le travailleur</strong><br/>${workerName}<br/><em>(signature)</em></td>
+        <td><strong>{tText('L\'employeur')}</strong><br/>${coName}<br/><em>(signature)</em></td>
+        <td><strong>{tText('Le travailleur')}</strong><br/>${workerName}<br/><em>(signature)</em></td>
       </tr></table>
-      <p class="exemplaire">Chaque partie reconnaît avoir reçu un exemplaire du présent contrat.</p>
+      <p class="exemplaire">{tText('Chaque partie reconnaît avoir reçu un exemplaire du présent contrat.')}</p>
     </div>`
 
   let titleDoc = ''; let lawRef = ''; let bodyArticles = ''
@@ -180,59 +180,59 @@ function buildContractHTML(type, data) {
     case 'CONTRAT_CDI':
       titleDoc = 'CONTRAT DE TRAVAIL À DURÉE INDÉTERMINÉE'; lawRef = 'Article 7 de la loi du 3 juillet 1978'
       bodyArticles = `
-        <article class="contract-article"><strong>Article 1 — Objet</strong><br/>Le travailleur est engagé en qualité de ${workerFn}, contrat à durée indéterminée, à temps ${regime}.</article>
-        <article class="contract-article"><strong>Article 2 — Date d'entrée</strong><br/>Le présent contrat prend effet le ${startDate}.</article>
-        <article class="contract-article"><strong>Article 3 — Fonction et lieu</strong><br/>Fonction : ${workerFn}. Lieu : ${workplace}.</article>
-        <article class="contract-article"><strong>Article 4 — Rémunération</strong><br/>Salaire mensuel brut : ${salary} EUR pour ${hours} h/semaine.</article>
-        <article class="contract-article"><strong>Article 5 — Horaire</strong><br/>Conforme au règlement de travail. Régime : ${hours} h/semaine.</article>
-        <article class="contract-article"><strong>Article 6 — Commission paritaire</strong><br/>CP n° ${cp}.</article>
-        <article class="contract-article"><strong>Article 7 — Période d'essai</strong><br/>Conformément à la loi du 26 décembre 2013, plus de clause d'essai depuis le 1er janvier 2014.</article>
-        <article class="contract-article"><strong>Article 8 — Préavis</strong><br/>Délais prévus par la loi du 26 décembre 2013 (statut unique).</article>
-        <article class="contract-article"><strong>Article 9 — Divers</strong><br/>Respect du règlement de travail et secret professionnel.</article>`
+        <article class="contract-article"><strong>{tText('Article 1 — Objet')}</strong><br/>Le travailleur est engagé en qualité de ${workerFn}, contrat à durée indéterminée, à temps ${regime}.</article>
+        <article class="contract-article"><strong>{tText('Article 2 — Date d\'entrée')}</strong><br/>Le présent contrat prend effet le ${startDate}.</article>
+        <article class="contract-article"><strong>{tText('Article 3 — Fonction et lieu')}</strong><br/>Fonction : ${workerFn}. Lieu : ${workplace}.</article>
+        <article class="contract-article"><strong>{tText('Article 4 — Rémunération')}</strong><br/>Salaire mensuel brut : ${salary} EUR pour ${hours} h/semaine.</article>
+        <article class="contract-article"><strong>{tText('Article 5 — Horaire')}</strong><br/>Conforme au règlement de travail. Régime : ${hours} h/semaine.</article>
+        <article class="contract-article"><strong>{tText('Article 6 — Commission paritaire')}</strong><br/>CP n° ${cp}.</article>
+        <article class="contract-article"><strong>{tText('Article 7 — Période d\'essai')}</strong><br/>Conformément à la loi du 26 décembre 2013, plus de clause d'essai depuis le 1er janvier 2014.</article>
+        <article class="contract-article"><strong>{tText('Article 8 — Préavis')}</strong><br/>Délais prévus par la loi du 26 décembre 2013 (statut unique).</article>
+        <article class="contract-article"><strong>{tText('Article 9 — Divers')}</strong><br/>Respect du règlement de travail et secret professionnel.</article>`
       break
     case 'CONTRAT_CDD':
       titleDoc = 'CONTRAT DE TRAVAIL À DURÉE DÉTERMINÉE'; lawRef = 'Article 7 de la loi du 3 juillet 1978'
       bodyArticles = `
-        <article class="contract-article"><strong>Article 1</strong><br/>Engagement en qualité de ${workerFn}, CDD du ${startDate} au ${endDate}.</article>
-        <article class="contract-article"><strong>Article 2 — Rémunération</strong><br/>${salary} EUR brut/mois, ${hours} h/semaine. CP n° ${cp}.</article>
-        <article class="contract-article"><strong>Article 3 — Fin</strong><br/>Fin de plein droit à l'échéance. Résiliation anticipée : motif grave ou indemnité compensatoire (loi 3 juillet 1978).</article>`
+        <article class="contract-article"><strong>{tText('Article 1')}</strong><br/>Engagement en qualité de ${workerFn}, CDD du ${startDate} au ${endDate}.</article>
+        <article class="contract-article"><strong>{tText('Article 2 — Rémunération')}</strong><br/>${salary} EUR brut/mois, ${hours} h/semaine. CP n° ${cp}.</article>
+        <article class="contract-article"><strong>{tText('Article 3 — Fin')}</strong><br/>Fin de plein droit à l'échéance. Résiliation anticipée : motif grave ou indemnité compensatoire (loi 3 juillet 1978).</article>`
       break
     case 'CONTRAT_STUDENT':
       titleDoc = "CONVENTION D'OCCUPATION ÉTUDIANT"; lawRef = 'Titre VII loi du 3 juillet 1978 — AR du 8 mars 2023'
       bodyArticles = `
-        <article class="contract-article"><strong>Article 1 — Parties</strong><br/>Employeur : ${coName}. Étudiant : ${workerName} — NISS : ${workerNiss}.</article>
-        <article class="contract-article"><strong>Article 2 — Période</strong><br/>Du ${startDate} au ${endDate}. Fonction : ${workerFn}. Rémunération : ${salary} EUR brut/heure. ${hours} h/semaine.</article>
-        <article class="contract-article"><strong>Article 3 — Mentions obligatoires (AR 8 mars 2023)</strong><br/>Lieu : ${workplace}, préavis, etc.</article>
-        <article class="contract-article"><strong>Article 4 — Cotisations réduites</strong><br/>2,71 % / 5,42 % dans la limite de 600 h/an (Loi 03/07/1978, Titre VII).</article>`
+        <article class="contract-article"><strong>{tText('Article 1 — Parties')}</strong><br/>Employeur : ${coName}. Étudiant : ${workerName} — NISS : ${workerNiss}.</article>
+        <article class="contract-article"><strong>{tText('Article 2 — Période')}</strong><br/>Du ${startDate} au ${endDate}. Fonction : ${workerFn}. Rémunération : ${salary} EUR brut/heure. ${hours} h/semaine.</article>
+        <article class="contract-article"><strong>{tText('Article 3 — Mentions obligatoires (AR 8 mars 2023)')}</strong><br/>Lieu : ${workplace}, préavis, etc.</article>
+        <article class="contract-article"><strong>{tText('Article 4 — Cotisations réduites')}</strong><br/>2,71 % / 5,42 % dans la limite de 600 h/an (Loi 03/07/1978, Titre VII).</article>`
       break
     case 'CONTRAT_TEMPS_PARTIEL':
       titleDoc = 'CONTRAT DE TRAVAIL À TEMPS PARTIEL'; lawRef = 'AR du 25 juin 1990 — Art. 11bis loi du 3 juillet 1978'
       bodyArticles = `
-        <article class="contract-article"><strong>Article 1 — Régime</strong><br/>Temps partiel : ${hours} h/semaine.</article>
-        <article class="contract-article"><strong>Article 2 — Entrée</strong><br/>Effet le ${startDate}.</article>
-        <article class="contract-article"><strong>Article 3 — Fonction et rémunération</strong><br/>${workerFn} — ${salary} EUR (prorata). CP n° ${cp}.</article>
-        <article class="contract-article"><strong>Article 4 — Art. 11bis</strong><br/>Dérogations régies par le règlement de travail et la loi.</article>`
+        <article class="contract-article"><strong>{tText('Article 1 — Régime')}</strong><br/>Temps partiel : ${hours} h/semaine.</article>
+        <article class="contract-article"><strong>{tText('Article 2 — Entrée')}</strong><br/>Effet le ${startDate}.</article>
+        <article class="contract-article"><strong>{tText('Article 3 — Fonction et rémunération')}</strong><br/>${workerFn} — ${salary} EUR (prorata). CP n° ${cp}.</article>
+        <article class="contract-article"><strong>{tText('Article 4 — Art. 11bis')}</strong><br/>Dérogations régies par le règlement de travail et la loi.</article>`
       break
     case 'AVENANT':
       titleDoc = 'AVENANT AU CONTRAT DE TRAVAIL'; lawRef = 'Art. 1134 Code civil'
       const modif = escapeHtml(data.modification || '___'); const effDate = escapeHtml(data.effectiveDate || data.startDate || dateStr)
-      bodyArticles = `<article class="contract-article"><strong>Article 1 — Modifications</strong><br/>Effet le ${effDate} :<br/>${modif}</article>`
+      bodyArticles = `<article class="contract-article"><strong>{tText('Article 1 — Modifications')}</strong><br/>Effet le ${effDate} :<br/>${modif}</article>`
       break
     case 'CONVENTION_RUPTURE':
       titleDoc = 'CONVENTION DE RUPTURE DE COMMUN ACCORD'; lawRef = 'Art. 32 de la loi du 3 juillet 1978'
-      bodyArticles = `<article class="contract-article"><strong>Article 1</strong><br/>Fin du contrat sans préavis le ${endDate}. Rupture libre et éclairée. Aucune indemnité de préavis. Information sur les conséquences chômage.</article>`
+      bodyArticles = `<article class="contract-article"><strong>{tText('Article 1')}</strong><br/>Fin du contrat sans préavis le ${endDate}. Rupture libre et éclairée. Aucune indemnité de préavis. Information sur les conséquences chômage.</article>`
       break
     default: return ''
   }
 
   const partiesBlock = (type === 'CONVENTION_RUPTURE' || type === 'AVENANT') ? `
     <div class="contract-parties">
-      <p><strong>L'employeur :</strong> ${coName} — BCE : ${coBce}<br/>${coAddr}</p>
-      <p><strong>Le travailleur :</strong> ${workerName}<br/>NISS : ${workerNiss}${type === 'CONVENTION_RUPTURE' ? `<br/>Domicile : ${workerAddr}` : ''}</p>
+      <p><strong>{tText('L\'employeur :')}</strong> ${coName} — BCE : ${coBce}<br/>${coAddr}</p>
+      <p><strong>{tText('Le travailleur :')}</strong> ${workerName}<br/>NISS : ${workerNiss}${type === 'CONVENTION_RUPTURE' ? `<br/>Domicile : ${workerAddr}` : ''}</p>
     </div>` : `
     <div class="contract-parties">
-      <p><strong>L'employeur :</strong> ${coName}, siège ${coAddr}, BCE ${coBce}.</p>
-      <p><strong>Le travailleur :</strong> ${workerName}<br/>Domicile : ${workerAddr}<br/>NISS : ${workerNiss}${workerBirth !== '___' ? `<br/>Né(e) le : ${workerBirth}` : ''}</p>
+      <p><strong>{tText('L\'employeur :')}</strong> ${coName}, siège ${coAddr}, BCE ${coBce}.</p>
+      <p><strong>{tText('Le travailleur :')}</strong> ${workerName}<br/>Domicile : ${workerAddr}<br/>NISS : ${workerNiss}${workerBirth !== '___' ? `<br/>Né(e) le : ${workerBirth}` : ''}</p>
     </div>`
 
   return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>${titleDoc} — ${workerName}</title>
@@ -255,12 +255,12 @@ function buildContractHTML(type, data) {
   .no-print{display:none!important}
   @media print{.no-print{display:none!important}}
 </style></head><body>
-<div class="no-print" style="margin-bottom:12px;padding:10px;background:#f0f0f0;border-radius:6px;font-size:11px;">Pour enregistrer en PDF : <strong>Ctrl+P</strong> (ou Cmd+P) puis « Enregistrer au format PDF ».</div>
+<div class="no-print" style="margin-bottom:12px;padding:10px;background:#f0f0f0;border-radius:6px;font-size:11px;">Pour enregistrer en PDF : <strong>{tText('Ctrl+P')}</strong> (ou Cmd+P) puis « Enregistrer au format PDF ».</div>
 ${headerBlock}
 <h1 class="contract-title">${titleDoc}</h1>
 <p class="contract-law-ref">${lawRef}</p>
 ${partiesBlock}
-<p><strong>Il est convenu ce qui suit :</strong></p>
+<p><strong>{tText('Il est convenu ce qui suit :')}</strong></p>
 ${bodyArticles}
 ${signaturesBlock}
 ${loisBlock}
@@ -461,8 +461,8 @@ TRAVAILLEUR :
 OCCUPATION :
   Du : ${data.startDate || '___'}
   Au : ${data.endDate || '___'}
-  Statut : ${data.statut || 'Employé'}
-  Régime : ${data.regime || 'Temps plein'} — ${data.hoursPerWeek || '38'}h/semaine
+  Statut : ${data.statut || tText('Employé')}
+  Régime : ${data.regime || tText('Temps plein')} — ${data.hoursPerWeek || '38'}h/semaine
   CP n° ${data.cp || '200'}
 
 MOTIF DE FIN DE CONTRAT :
@@ -573,7 +573,7 @@ Madame/Monsieur ${data.name || '___'} perçoit une rémunération mensuelle
 brute de ${data.salary || '___'} EUR, soit un salaire net mensuel estimé
 à ${data.netSalary || '___'} EUR.
 
-Contrat : ${data.contractType || 'CDI'} depuis le ${data.startDate || '___'}.
+Contrat : ${data.contractType || tText('CDI')} depuis le ${data.startDate || '___'}.
 Fonction : ${data.function || '___'}.
 Régime : temps ${data.regime || 'plein'} (${data.hoursPerWeek || '38'}h/semaine).
 ${data.additionalBenefits ? `Avantages extra-légaux : ${data.additionalBenefits}` : ''}
@@ -737,7 +737,7 @@ function documentToPrintHTML(content, title) {
   @media print { body { padding: 0; } .no-print { display: none !important; } }
 </style></head><body>
 <div class="no-print" style="margin-bottom:16px;padding:12px;background:#f0f0f0;border-radius:8px;font-size:12px;">
-  Pour enregistrer en PDF : <strong>Ctrl+P</strong> (ou Cmd+P) puis choisir « Enregistrer au format PDF ».
+  Pour enregistrer en PDF : <strong>{tText('Ctrl+P')}</strong> (ou Cmd+P) puis choisir « Enregistrer au format PDF ».
 </div>
 <div class="content">${escaped}</div>
 <div class="footer">Document généré par Aureus Social Pro — ${new Date().toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
@@ -749,7 +749,7 @@ export default function DocumentGeneratorWrapped({ s, d, tab }) {
   s=s||{}; d=d||(()=>{});
   const _emps=s?.emps||[]; const _clients=s?.clients||[];
   const { t, lang, tText } = useLang();
-  const TAB_TO_CAT = {'contratgen': 'contrat', 'contratsmenu': 'contrat', 'annexeReglement': 'reglementaire', 'gendocsjur': 'reglementaire', 'formC4': 'sortie', 'formC131': 'attestation', 'legal': 'reglementaire', 'cgvsaas': 'reglementaire', 'mentionslegales': 'reglementaire'};
+  const TAB_TO_CAT = {'contratgen': tText('contrat'), 'contratsmenu': tText('contrat'), 'annexeReglement': 'reglementaire', 'gendocsjur': 'reglementaire', 'formC4': 'sortie', 'formC131': 'attestation', 'legal': 'reglementaire', 'cgvsaas': 'reglementaire', 'mentionslegales': 'reglementaire'};
   const initialCat = TAB_TO_CAT[tab] || null;
   return <DocumentGenerator state={s || {}} defaultTab={tab} initialCat={initialCat} />;
 }
@@ -827,9 +827,9 @@ function DocumentGenerator({ state, defaultTab, initialCat }) {
 
   return (
     <div style={{ padding: 24 }}>
-      <h2 style={{ color: GOLD, margin: '0 0 4px 0', fontSize: 20 }}>{t('docs.title')||'Générateur de documents'}</h2>
+      <h2 style={{ color: GOLD, margin: '0 0 4px 0', fontSize: 20 }}>{t(tText('docs.title'))||'Générateur de documents'}</h2>
       <p style={{ color: MUTED, margin: '0 0 20px 0', fontSize: 13 }}>
-        {t('docs.subtitle')||'Contrats, attestations'}
+        {t(tText('docs.subtitle'))||'Contrats, attestations'}
       </p>
 
       {/* Filtres catégorie */}
@@ -893,7 +893,7 @@ function DocumentGenerator({ state, defaultTab, initialCat }) {
           {/* Sélection employé */}
           {employees.length > 0 && (
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 12, color: MUTED, display: 'block', marginBottom: 4 }}>Travailleur</label>
+              <label style={{ fontSize: 12, color: MUTED, display: 'block', marginBottom: 4 }}>{tText('Travailleur')}</label>
               <select
                 value={selectedEmployee || ''}
                 onChange={e => setSelectedEmployee(e.target.value || null)}
@@ -966,7 +966,7 @@ function DocumentGenerator({ state, defaultTab, initialCat }) {
               <button onClick={handleDownloadPDF} style={{ ...btnStyle, background: GOLD, color: DARK, fontWeight: 600 }}>
                 📄 Télécharger PDF
               </button>
-              <button onClick={handlePrint} style={btnStyle}>{t('ui.print')||'Imprimer'}</button>
+              <button onClick={handlePrint} style={btnStyle}>{t(tText('ui.print'))||'Imprimer'}</button>
               <button
                 onClick={() => { navigator.clipboard?.writeText(generated.content) }}
                 style={btnStyle}

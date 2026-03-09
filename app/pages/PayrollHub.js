@@ -7,7 +7,7 @@ const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0
 const KPI=({l,v,c,sub})=><div style={{padding:14,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid '+(c||'#c6a34e')+'20',borderRadius:12,textAlign:'center',flex:1,minWidth:100}}><div style={{fontSize:18,fontWeight:800,color:c||'#c6a34e'}}>{v}</div><div style={{fontSize:9,color:'#888',marginTop:3}}>{l}</div>{sub&&<div style={{fontSize:8,color:'#5e5c56',marginTop:2}}>{sub}</div>}</div>;
 const Row=({l,v,c,b})=><div style={{display:'flex',justifyContent:'space-between',padding:'7px 0',borderBottom:b?'2px solid rgba(198,163,78,.2)':'1px solid rgba(255,255,255,.03)',fontWeight:b?700:400}}><span style={{color:b?'#e8e6e0':'#e8e6e0',fontSize:11.5}}>{l}</span><span style={{color:c||'#c6a34e',fontWeight:600,fontSize:12}}>{v}</span></div>;
 const Badge=({text,color})=><span style={{padding:'2px 7px',borderRadius:5,fontSize:8,fontWeight:600,background:(color||'#888')+'15',color:color||'#888'}}>{text}</span>;
-const moisN=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const moisN=[tText('Janvier'),tText('Février'),tText('Mars'),tText('Avril'),tText('Mai'),tText('Juin'),tText('Juillet'),tText('Août'),tText('Septembre'),tText('Octobre'),tText('Novembre'),tText('Décembre')];
 
 // ═══════════════════════════════════════════════════════════
 // 1. VALIDATION PRE-PAIE — Vrais controles automatiques
@@ -24,32 +24,32 @@ export function ValidationPrePaieV2({s,d}){
     const r=[];
     // 1. NISS
     const noNiss=allEmps.filter(e=>!e.niss&&!e.NISS);
-    r.push({id:'niss',cat:'Identite',title:'NISS renseignes',desc:'Tous les numéros de registre national',pass:noNiss.length===0,count:n-noNiss.length,total:n,sev:noNiss.length>0?'critical':'ok',items:noNiss.map(e=>e.first+' '+e.last+' ('+e._co+')')});
+    r.push({id:'niss',cat:'Identite',title:tText('NISS renseignes'),desc:tText('Tous les numéros de registre national'),pass:noNiss.length===0,count:n-noNiss.length,total:n,sev:noNiss.length>0?'critical':'ok',items:noNiss.map(e=>e.first+' '+e.last+' ('+e._co+')')});
     // 2. IBAN
     const noIban=allEmps.filter(e=>!e.iban&&!e.IBAN);
-    r.push({id:'iban',cat:'Bancaire',title:'IBAN renseignes',desc:'Virements SEPA possibles',pass:noIban.length===0,count:n-noIban.length,total:n,sev:noIban.length>0?'high':'ok',items:noIban.map(e=>e.first+' '+e.last)});
+    r.push({id:'iban',cat:'Bancaire',title:tText('IBAN renseignes'),desc:'Virements SEPA possibles',pass:noIban.length===0,count:n-noIban.length,total:n,sev:noIban.length>0?'high':'ok',items:noIban.map(e=>e.first+' '+e.last)});
     // 3. Salaire > 0
     const noSal=allEmps.filter(e=>!(+(e.monthlySalary||e.gross||e.brut||0)));
-    r.push({id:'salaire',cat:'Remuneration',title:'Salaires bruts definis',desc:'Tous les bruts > 0',pass:noSal.length===0,count:n-noSal.length,total:n,sev:noSal.length>0?'critical':'ok',items:noSal.map(e=>e.first+' '+e.last)});
+    r.push({id:'salaire',cat:'Remuneration',title:tText('Salaires bruts definis'),desc:'Tous les bruts > 0',pass:noSal.length===0,count:n-noSal.length,total:n,sev:noSal.length>0?'critical':'ok',items:noSal.map(e=>e.first+' '+e.last)});
     // 4. RMMMG check — valeur depuis lois-belges (auto-maj par cron 06h00)
     const underRMMMG=allEmps.filter(e=>{const b=+(e.monthlySalary||e.gross||0);return b>0&&b<RMMMG&&(e.regime||100)>=100;});
-    r.push({id:'rmmmg',cat:'Remuneration',title:'RMMMG respecte ('+fmt(RMMMG)+' EUR)',desc:'Salaire minimum garanti',pass:underRMMMG.length===0,count:n-underRMMMG.length,total:n,sev:underRMMMG.length>0?'critical':'ok',items:underRMMMG.map(e=>e.first+' '+e.last+': '+fmt(+(e.monthlySalary||e.gross||0))+' EUR')});
+    r.push({id:'rmmmg',cat:'Remuneration',title:tText('RMMMG respecte (')+fmt(RMMMG)+' EUR)',desc:'Salaire minimum garanti',pass:underRMMMG.length===0,count:n-underRMMMG.length,total:n,sev:underRMMMG.length>0?'critical':'ok',items:underRMMMG.map(e=>e.first+' '+e.last+': '+fmt(+(e.monthlySalary||e.gross||0))+' EUR')});
     // 5. Date debut
     const noStart=allEmps.filter(e=>!e.startDate&&!e.start);
-    r.push({id:'debut',cat:tText('Contrat'),title:'Dates debut renseignees',desc:'Anciennete calculable',pass:noStart.length===0,count:n-noStart.length,total:n,sev:noStart.length>0?'high':'ok',items:noStart.map(e=>e.first+' '+e.last)});
+    r.push({id:'debut',cat:tText('Contrat'),title:tText('Dates debut renseignees'),desc:'Anciennete calculable',pass:noStart.length===0,count:n-noStart.length,total:n,sev:noStart.length>0?'high':'ok',items:noStart.map(e=>e.first+' '+e.last)});
     // 6. CDD echeance
-    const cddExpiring=allEmps.filter(e=>{if((e.contractType||'').toUpperCase()!=='CDD')return false;const end=new Date(e.endDate||e.end||'2099-12-31');return Math.ceil((end-now)/86400000)<=30;});
-    r.push({id:'cdd',cat:tText('Contrat'),title:'CDD a echeance (<30j)',desc:'Renouvellement ou fin',pass:cddExpiring.length===0,count:cddExpiring.length,total:allEmps.filter(e=>(e.contractType||'').toUpperCase()==='CDD').length,sev:cddExpiring.length>0?'high':'ok',items:cddExpiring.map(e=>{const end=new Date(e.endDate||e.end);return e.first+' '+e.last+': fin '+end.toLocaleDateString('fr-BE');})});
+    const cddExpiring=allEmps.filter(e=>{if((e.contractType||'').toUpperCase()!==tText('CDD'))return false;const end=new Date(e.endDate||e.end||'2099-12-31');return Math.ceil((end-now)/86400000)<=30;});
+    r.push({id:'cdd',cat:tText('Contrat'),title:tText('CDD a echeance (<30j)'),desc:'Renouvellement ou fin',pass:cddExpiring.length===0,count:cddExpiring.length,total:allEmps.filter(e=>(e.contractType||'').toUpperCase()===tText('CDD')).length,sev:cddExpiring.length>0?'high':'ok',items:cddExpiring.map(e=>{const end=new Date(e.endDate||e.end);return e.first+' '+e.last+': fin '+end.toLocaleDateString('fr-BE');})});
     // 7. Email pour distribution
     const noEmail=allEmps.filter(e=>!e.email);
-    r.push({id:'email',cat:'Distribution',title:'Emails pour fiches de paie',desc:'Distribution electronique possible',pass:noEmail.length===0,count:n-noEmail.length,total:n,sev:noEmail.length>0?'medium':'ok',items:noEmail.map(e=>e.first+' '+e.last)});
+    r.push({id:tText('email'),cat:'Distribution',title:tText('Emails pour fiches de paie'),desc:'Distribution electronique possible',pass:noEmail.length===0,count:n-noEmail.length,total:n,sev:noEmail.length>0?'medium':'ok',items:noEmail.map(e=>e.first+' '+e.last)});
     // 8. ONSS coherence
-    r.push({id:'onss',cat:'Cotisations',title:'Taux ONSS valides',desc:'Patronal 25,07% + Personnel 13,07%',pass:true,count:n,total:n,sev:'ok',items:[]});
+    r.push({id:'onss',cat:'Cotisations',title:tText('Taux ONSS valides'),desc:'Patronal 25,07% + Personnel 13,07%',pass:true,count:n,total:n,sev:'ok',items:[]});
     // 9. PP baremes
-    r.push({id:'pp',cat:'Fiscal',title:'Baremes PP SPF 2026',desc:'4 tranches appliquees correctement',pass:true,count:n,total:n,sev:'ok',items:[]});
+    r.push({id:'pp',cat:tText('Fiscal'),title:tText('Baremes PP SPF 2026'),desc:'4 tranches appliquees correctement',pass:true,count:n,total:n,sev:'ok',items:[]});
     // 10. Dimona
     const noDimona=allEmps.filter(e=>!e.dimonaDone&&(new Date(e.startDate||e.start||'2020-01-01')>new Date('2024-01-01')));
-    r.push({id:'dimona',cat:tText('ONSS'),title:'Dimona IN effectuees',desc:'Declarations electroniques',pass:noDimona.length===0,count:n-noDimona.length,total:n,sev:noDimona.length>0?'medium':'ok',items:noDimona.map(e=>e.first+' '+e.last)});
+    r.push({id:'dimona',cat:tText('ONSS'),title:tText('Dimona IN effectuees'),desc:'Declarations electroniques',pass:noDimona.length===0,count:n-noDimona.length,total:n,sev:noDimona.length>0?'medium':'ok',items:noDimona.map(e=>e.first+' '+e.last)});
     return r;
   },[allEmps]);
 
@@ -80,7 +80,7 @@ export function ValidationPrePaieV2({s,d}){
         <div style={{display:'flex',alignItems:'center',gap:6}}>
           <span style={{fontSize:12,fontWeight:600,color:c.pass?'#e8e6e0':sevColors[c.sev]}}>{c.title}</span>
           <Badge text={c.cat} color="#888"/>
-          {!c.pass&&<Badge text={c.sev==='critical'?'CRITIQUE':c.sev==='high'?'HAUTE':'MOYENNE'} color={sevColors[c.sev]}/>}
+          {!c.pass&&<Badge text={c.sev==='critical'?tText('CRITIQUE'):c.sev==='high'?'HAUTE':'MOYENNE'} color={sevColors[c.sev]}/>}
           <span style={{fontSize:10,color:'#888',marginLeft:'auto'}}>{c.count}/{c.total}</span>
         </div>
         <div style={{fontSize:10,color:'#888',marginTop:2}}>{c.desc}</div>
@@ -110,22 +110,22 @@ export function TimelinePaieV2({s}){
     const dl=[];
     for(let mi=0;mi<12;mi++){
       const my=moisN[mi]+' '+yr;
-      dl.push({month:mi,day:5,title:'Provision ONSS',desc:'Paiement provisions mensuelles ONSS',cat:tText('ONSS'),c:'#ef4444',recurring:true});
-      dl.push({month:mi,day:15,title:tText('Précompte professionnel'),desc:'Declaration + paiement PP (formulaire 274)',cat:'Fiscal',c:'#a855f7',recurring:true});
-      dl.push({month:mi,day:25,title:'Virements salaires SEPA',desc:'Exécution virements nets employés',cat:'Paie',c:'#22c55e',recurring:true});
-      dl.push({month:mi,day:28,title:tText('Distribution fiches de paie'),desc:'Envoi fiches par email / portail',cat:'Paie',c:'#3b82f6',recurring:true});
+      dl.push({month:mi,day:5,title:tText('Provision ONSS'),desc:'Paiement provisions mensuelles ONSS',cat:tText('ONSS'),c:'#ef4444',recurring:true});
+      dl.push({month:mi,day:15,title:tText('Précompte professionnel'),desc:'Declaration + paiement PP (formulaire 274)',cat:tText('Fiscal'),c:'#a855f7',recurring:true});
+      dl.push({month:mi,day:25,title:tText('Virements salaires SEPA'),desc:'Exécution virements nets employés',cat:tText('Paie'),c:'#22c55e',recurring:true});
+      dl.push({month:mi,day:28,title:tText('Distribution fiches de paie'),desc:'Envoi fiches par email / portail',cat:tText('Paie'),c:'#3b82f6',recurring:true});
     }
     // Quarterly DmfA
-    [0,3,6,9].forEach(mi=>dl.push({month:mi,day:10,title:'DmfA T'+Math.ceil((mi+1)/3),desc:'Declaration trimestrielle ONSS',cat:tText('ONSS'),c:'#ef4444'}));
+    [0,3,6,9].forEach(mi=>dl.push({month:mi,day:10,title:tText('DmfA T')+Math.ceil((mi+1)/3),desc:'Declaration trimestrielle ONSS',cat:tText('ONSS'),c:'#ef4444'}));
     // Annual
-    dl.push({month:1,day:28,title:'Belcotax 281.10/281.20',desc:'Fiches fiscales annuelles au SPF',cat:'Fiscal',c:'#a855f7'});
-    dl.push({month:2,day:1,title:'Deadline Belcotax',desc:'Transmission XML au SPF Finances',cat:'Fiscal',c:'#ef4444'});
-    dl.push({month:4,day:30,title:'Pécule vacances simple',desc:'Versement pécule simple employés',cat:'Paie',c:'#06b6d4'});
-    dl.push({month:5,day:30,title:'Pécule vacances double',desc:'Versement pécule double',cat:'Paie',c:'#06b6d4'});
-    dl.push({month:11,day:20,title:'13eme mois / Prime fin annee',desc:'Versement prime fin annee',cat:'Paie',c:'#c6a34e'});
-    dl.push({month:0,day:31,title:'Indexation CP 200',desc:'Verification et application index sante',cat:'RH',c:'#fb923c'});
-    dl.push({month:5,day:30,title:tText('Bilan social BNB'),desc:'Depot si >= 20 ETP',cat:'Compliance',c:'#fb923c'});
-    dl.push({month:2,day:31,title:'Plan formation',desc:'Depot plan annuel si >= 20 travailleurs',cat:'RH',c:'#3b82f6'});
+    dl.push({month:1,day:28,title:tText('Belcotax 281.10/281.20'),desc:'Fiches fiscales annuelles au SPF',cat:tText('Fiscal'),c:'#a855f7'});
+    dl.push({month:2,day:1,title:tText('Deadline Belcotax'),desc:'Transmission XML au SPF Finances',cat:tText('Fiscal'),c:'#ef4444'});
+    dl.push({month:4,day:30,title:tText('Pécule vacances simple'),desc:tText('Versement pécule simple employés'),cat:tText('Paie'),c:'#06b6d4'});
+    dl.push({month:5,day:30,title:tText('Pécule vacances double'),desc:tText('Versement pécule double'),cat:tText('Paie'),c:'#06b6d4'});
+    dl.push({month:11,day:20,title:tText('13ème mois / Prime fin annee'),desc:'Versement prime fin annee',cat:tText('Paie'),c:'#c6a34e'});
+    dl.push({month:0,day:31,title:tText('Indexation CP 200'),desc:'Verification et application index sante',cat:'RH',c:'#fb923c'});
+    dl.push({month:5,day:30,title:tText('Bilan social BNB'),desc:'Depot si >= 20 ETP',cat:tText('Compliance'),c:'#fb923c'});
+    dl.push({month:2,day:31,title:tText('Plan formation'),desc:'Depot plan annuel si >= 20 travailleurs',cat:'RH',c:'#3b82f6'});
     return dl;
   },[yr]);
 
@@ -251,15 +251,15 @@ export function SoldeToutCompteV2({s,d}){
 
     // Totaux
     const details=[
-      {label:'Prorata salaire mois en cours',brut:prorataMois,note:jourMois+'/'+totalJoursMois+' jours'},
-      {label:'Indemnite compensatoire de preavis',brut:indemPreavis,note:semPreavis+' semaines'},
-      {label:'Pécule vacances simple (prorata)',brut:peculeSimple,note:moisPrestes+'/12 mois'},
-      {label:'Pécule vacances double (prorata)',brut:peculeDouble,note:moisPrestes+'/12 mois'},
+      {label:tText('Prorata salaire mois en cours'),brut:prorataMois,note:jourMois+'/'+totalJoursMois+' jours'},
+      {label:tText('Indemnite compensatoire de preavis'),brut:indemPreavis,note:semPreavis+' semaines'},
+      {label:tText('Pécule vacances simple (prorata)'),brut:peculeSimple,note:moisPrestes+'/12 mois'},
+      {label:tText('Pécule vacances double (prorata)'),brut:peculeDouble,note:moisPrestes+'/12 mois'},
       {label:'13eme mois prorata',brut:treizieme,note:moisPrestes+'/12 mois'},
     ];
-    if(outplacement) details.push({label:'Provision outplacement (4 sem.)',brut:coutOutplacement,note:'Obligatoire si preavis >= 30 sem.'});
-    if(indemProtection>0) details.push({label:'Indemnite de protection',brut:indemProtection,note:'6 mois brut'});
-    if(indemAbus>0) details.push({label:'Indemnite licenciement abusif',brut:indemAbus,note:'3-17 semaines (CCT 109)'});
+    if(outplacement) details.push({label:tText('Provision outplacement (4 sem.)'),brut:coutOutplacement,note:'Obligatoire si preavis >= 30 sem.'});
+    if(indemProtection>0) details.push({label:tText('Indemnite de protection'),brut:indemProtection,note:'6 mois brut'});
+    if(indemAbus>0) details.push({label:tText('Indemnite licenciement abusif'),brut:indemAbus,note:'3-17 semaines (CCT 109)'});
 
     const brutTotal=details.reduce((a,d2)=>a+d2.brut,0);
     const onssT=Math.round(brutTotal*TX_ONSS_W*100)/100;
@@ -272,15 +272,15 @@ export function SoldeToutCompteV2({s,d}){
 
   return <div style={{padding:24}}>
     <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>💼 Solde de Tout Compte</h2>
-    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>Preavis + pecule prorata + 13eme + outplacement + indemnites speciales</p>
+    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>{tText('Preavis + pecule prorata + 13eme + outplacement + indemnites speciales')}</p>
 
     <div style={{display:'flex',gap:10,marginBottom:20,flexWrap:'wrap',alignItems:'flex-end'}}>
-      <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Employe</label>
+      <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Employe')}</label>
         <select value={selEmp} onChange={e=>setSelEmp(e.target.value)} style={{padding:'10px 12px',borderRadius:8,background:'#090c16',border:'1px solid rgba(139,115,60,.15)',color:'#e5e5e5',fontSize:12,fontFamily:'inherit',minWidth:200}}>
           <option value="">-- Selectionner --</option>
           {allEmps.map((e,i)=><option key={e.id||i} value={e.id||i}>{(e.first||'?')+' '+(e.last||'?')+' — '+e._co}</option>)}
         </select></div>
-      <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Date sortie</label>
+      <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Date sortie')}</label>
         <input type="date" value={dateSortie} onChange={e=>setDateSortie(e.target.value)} style={{padding:'10px 12px',borderRadius:8,background:'#090c16',border:'1px solid rgba(139,115,60,.15)',color:'#e5e5e5',fontSize:12,fontFamily:'inherit'}}/></div>
       <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Motif')}</label>
         <select value={motif} onChange={e=>setMotif(e.target.value)} style={{padding:'10px 12px',borderRadius:8,background:'#090c16',border:'1px solid rgba(139,115,60,.15)',color:'#e5e5e5',fontSize:12,fontFamily:'inherit'}}>
@@ -291,7 +291,7 @@ export function SoldeToutCompteV2({s,d}){
           <option value="abus">Licenciement abusif (CCT 109)</option>
           <option value="faute">Faute grave (Art. 35)</option>
         </select></div>
-      <button onClick={calcul} style={{padding:'10px 24px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:13,cursor:'pointer',height:42}}>{t('ui.calculate')||tText('Calculer')}</button>
+      <button onClick={calcul} style={{padding:'10px 24px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:13,cursor:'pointer',height:42}}>{t(tText('ui.calculate'))||tText('Calculer')}</button>
     </div>
 
     {result&&<div>
@@ -367,7 +367,7 @@ export function CoutsAnnuelsV2({s}){
 
   return <div style={{padding:24}}>
     <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>📊 Couts Annuels</h2>
-    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>Projection avec saisonnalite, pecule, 13eme mois, primes sectorielles</p>
+    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>{tText('Projection avec saisonnalite, pecule, 13eme mois, primes sectorielles')}</p>
 
     <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:20}}>
       <KPI l="Cout annuel total" v={fi(totalAnnuel)+' €'} c="#c6a34e"/>
@@ -462,11 +462,11 @@ export function SimuLicenciementV2({s}){
 
   return <div style={{padding:24}}>
     <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>⚖️ Simulateur Licenciement</h2>
-    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>Preavis + outplacement + indemnites speciales — Loi 26/12/2013</p>
+    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>{tText('Preavis + outplacement + indemnites speciales — Loi 26/12/2013')}</p>
 
     <div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:16}}>
       <div style={{padding:18,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.1)',borderRadius:14}}>
-        <div style={{marginBottom:10}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Employe (optionnel)</label>
+        <div style={{marginBottom:10}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Employe (optionnel)')}</label>
           <select value={selEmp||''} onChange={e=>setSelEmp(e.target.value||null)} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>
             <option value="">Calcul libre</option>{allEmps.map((e,i)=><option key={e.id||i} value={e.id}>{e.first+' '+e.last+' — '+e._co}</option>)}
           </select></div>
@@ -558,8 +558,8 @@ export function SimuPensionV2({s}){
         {[{l:'Age: '+age+' ans',v:age,set:setAge,min:20,max:65},{l:'Brut: '+fmt(brut)+' €',v:brut,set:setBrut,min:1800,max:10000,step:50},{l:'Annees carriere: '+annees,v:annees,set:setAnnees,min:0,max:45}].map((sl,i)=>
           <div key={i} style={{marginBottom:12}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{sl.l}</label><input type="range" min={sl.min} max={sl.max} step={sl.step||1} value={sl.v} onChange={e=>sl.set(+e.target.value)} style={{width:'100%',accentColor:'#c6a34e'}}/></div>
         )}
-        <div style={{marginBottom:10}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Situation familiale</label>
-          <div style={{display:'flex',gap:4}}>{[{id:'isole',l:'Isole (60%)'},{id:'menage',l:'Menage (75%)'}].map(o=><button key={o.id} onClick={()=>setStatut(o.id)} style={{flex:1,padding:'6px',borderRadius:6,border:'none',background:statut===o.id?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:statut===o.id?'#c6a34e':'#888',fontSize:10,cursor:'pointer',fontFamily:'inherit'}}>{o.l}</button>)}</div></div>
+        <div style={{marginBottom:10}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Situation familiale')}</label>
+          <div style={{display:'flex',gap:4}}>{[{id:'isole',l:tText('Isole (60%)')},{id:'menage',l:tText('Menage (75%)')}].map(o=><button key={o.id} onClick={()=>setStatut(o.id)} style={{flex:1,padding:'6px',borderRadius:6,border:'none',background:statut===o.id?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:statut===o.id?'#c6a34e':'#888',fontSize:10,cursor:'pointer',fontFamily:'inherit'}}>{o.l}</button>)}</div></div>
         <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',marginBottom:8}}><input type="checkbox" checked={ag} onChange={e=>setAg(e.target.checked)} style={{accentColor:'#c6a34e'}}/><span style={{fontSize:11,color:'#e5e5e5'}}>2e pilier ({cotAG}%)</span></label>
         {ag&&<input type="range" min={1} max={8} step={0.5} value={cotAG} onChange={e=>setCotAG(+e.target.value)} style={{width:'100%',accentColor:'#c6a34e',marginBottom:8}}/>}
         <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Epargne pension/mois: {fi(epargne)} €</label><input type="range" min={0} max={300} step={25} value={epargne} onChange={e=>setEpargne(+e.target.value)} style={{width:'100%',accentColor:'#c6a34e'}}/></div>
@@ -610,7 +610,7 @@ export function SimuTempsPartielV2({s}){
   const net=Math.round((brutTotal-onssW-pp)*100)/100;const coutE=Math.round(brutTotal*(1+TX_ONSS_E)*100)/100;
   const netFT=Math.round((brutFT-brutFT*TX_ONSS_W-quickPP(brutFT))*100)/100;
 
-  const regimes=[{h:38,l:'Temps plein',f:'100%'},{h:30.4,l:'4/5eme',f:'80%'},{h:28.5,l:'3/4',f:'75%'},{h:19,l:'Mi-temps',f:'50%'},{h:12.67,l:'1/3',f:'33%'},{h:7.6,l:'1/5eme',f:'20%'}];
+  const regimes=[{h:38,l:tText('Temps plein'),f:'100%'},{h:30.4,l:'4/5eme',f:'80%'},{h:28.5,l:'3/4',f:'75%'},{h:19,l:tText('Mi-temps'),f:'50%'},{h:12.67,l:'1/3',f:'33%'},{h:7.6,l:'1/5eme',f:'20%'}];
 
   // Credit-temps
   const creditTemps=[
@@ -622,13 +622,13 @@ export function SimuTempsPartielV2({s}){
 
   return <div style={{padding:24}}>
     <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>⏱ Simulateur Temps Partiel</h2>
-    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>Prorata + credit heures + heures complementaires + droits sociaux</p>
+    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>{tText('Prorata + credit heures + heures complementaires + droits sociaux')}</p>
 
     <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:16}}>
       <div style={{padding:18,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.1)',borderRadius:14}}>
         <div style={{marginBottom:12}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Brut temps plein: {fmt(brutFT)} €</label>
           <input type="range" min={1800} max={8000} step={50} value={brutFT} onChange={e=>setBrutFT(+e.target.value)} style={{width:'100%',accentColor:'#c6a34e'}}/></div>
-        <div style={{fontSize:10,color:'#888',marginBottom:6}}>Regime horaire</div>
+        <div style={{fontSize:10,color:'#888',marginBottom:6}}>{tText('Regime horaire')}</div>
         {regimes.map(r=><button key={r.h} onClick={()=>setHeures(r.h)} style={{display:'block',width:'100%',padding:'6px 10px',marginBottom:3,borderRadius:6,border:heures===r.h?'1px solid #c6a34e':'1px solid rgba(255,255,255,.05)',background:heures===r.h?'rgba(198,163,78,.08)':'transparent',color:heures===r.h?'#c6a34e':'#888',fontSize:10,cursor:'pointer',textAlign:'left',fontFamily:'inherit'}}>{r.l} ({r.h}h — {r.f})</button>)}
         <div style={{marginTop:12}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Heures complementaires/sem: {hCompl}h</label>
           <input type="range" min={0} max={12} step={1} value={hCompl} onChange={e=>setHCompl(+e.target.value)} style={{width:'100%',accentColor:'#fb923c'}}/></div>
@@ -641,11 +641,11 @@ export function SimuTempsPartielV2({s}){
         </div>
 
         <C title="Impact droits sociaux">
-          {[{l:'Conges payes',v:Math.round(20*fraction)+'j / 20j',p:fraction*100,c:fraction>=0.5?'#4ade80':'#eab308'},
-            {l:'Pecule vacances',v:fmt(brutTP*0.1538*12)+' €/an',p:fraction*100,c:'#06b6d4'},
-            {l:'Pension legale',v:'Prorata '+Math.round(fraction*100)+'%',p:fraction*100,c:'#3b82f6'},
-            {l:'Chomage',v:fraction>=0.33?'Droits maintenus':'⚠️ Risque perte',p:fraction>=0.33?100:30,c:fraction>=0.33?'#4ade80':'#ef4444'},
-            {l:'Maladie (salaire garanti)',v:fraction>=0.5?'30 jours complets':'Prorata',p:fraction>=0.5?100:fraction*100,c:fraction>=0.5?'#4ade80':'#eab308'},
+          {[{l:tText('Conges payes'),v:Math.round(20*fraction)+'j / 20j',p:fraction*100,c:fraction>=0.5?'#4ade80':'#eab308'},
+            {l:tText('Pecule vacances'),v:fmt(brutTP*0.1538*12)+' €/an',p:fraction*100,c:'#06b6d4'},
+            {l:tText('Pension legale'),v:'Prorata '+Math.round(fraction*100)+'%',p:fraction*100,c:'#3b82f6'},
+            {l:tText('Chomage'),v:fraction>=0.33?'Droits maintenus':'⚠️ Risque perte',p:fraction>=0.33?100:30,c:fraction>=0.33?'#4ade80':'#ef4444'},
+            {l:tText('Maladie (salaire garanti)'),v:fraction>=0.5?'30 jours complets':'Prorata',p:fraction>=0.5?100:fraction*100,c:fraction>=0.5?'#4ade80':'#eab308'},
           ].map((r,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
             <span style={{fontSize:11,color:'#e8e6e0',flex:1}}>{r.l}</span>
             <span style={{fontSize:11,color:r.c,fontWeight:600}}>{r.v}</span>

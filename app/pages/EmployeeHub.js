@@ -20,8 +20,8 @@ export function DashboardRHV2({s,d,props_tab}){
   const coutTotal=mb*(1+TX_ONSS_E);
 
   // Real calcs
-  const cdi=allEmps.filter(e=>!e.contractType||(e.contractType||'').toUpperCase()==='CDI').length;
-  const cdd=allEmps.filter(e=>(e.contractType||'').toUpperCase()==='CDD').length;
+  const cdi=allEmps.filter(e=>!e.contractType||(e.contractType||'').toUpperCase()===tText('CDI')).length;
+  const cdd=allEmps.filter(e=>(e.contractType||'').toUpperCase()===tText('CDD')).length;
   const tp=allEmps.filter(e=>(e.regime||100)<100).length;
   const sortis=allEmps.filter(e=>{const ds=e.dateSortie||e.endDate;return ds&&new Date(ds).getFullYear()===yr;}).length;
   const entres=allEmps.filter(e=>{const de=e.dateEntree||e.startDate||e.start;return de&&new Date(de).getFullYear()===yr;}).length;
@@ -40,7 +40,7 @@ export function DashboardRHV2({s,d,props_tab}){
   const events=[];
   allEmps.forEach(e=>{
     const name=(e.first||e.fn||'?')+' '+(e.last||e.ln||'?');
-    if((e.contractType||'').toUpperCase()==='CDD'){
+    if((e.contractType||'').toUpperCase()===tText('CDD')){
       const end=new Date(e.endDate||e.end||'2099-12-31');
       const d2=Math.ceil((end-now)/86400000);
       if(d2<=90&&d2>-30) events.push({name,event:d2<0?'CDD expire!':'Fin CDD J-'+d2,c:d2<0?'#ef4444':d2<30?'#eab308':'#3b82f6',co:e._co,days:d2});
@@ -69,11 +69,11 @@ export function DashboardRHV2({s,d,props_tab}){
       <KPI l="Alertes" v={noNISS+noIBAN+noSalary} c={noNISS+noIBAN+noSalary>0?'#ef4444':'#4ade80'} sub={noNISS+' NISS, '+noIBAN+' IBAN'}/>
     </div>
 
-    <div style={{display:'flex',gap:4,marginBottom:16}}>{[{v:'overview',l:'Vue globale'},{v:'events',l:'Evenements'},{v:'alerts',l:tText('Alertes donnees')},{v:'costs',l:tText('Analyse couts')},{v:'egalite',l:'⚖ Égalité & Handicap'}].map(t=>
+    <div style={{display:'flex',gap:4,marginBottom:16}}>{[{v:'overview',l:tText('Vue globale')},{v:'events',l:tText('Evenements')},{v:'alerts',l:tText('Alertes donnees')},{v:'costs',l:tText('Analyse couts')},{v:'egalite',l:'⚖ Égalité & Handicap'}].map(t=>
       <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 14px',borderRadius:8,border:'none',cursor:'pointer',fontSize:11,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}</div>
 
     {tab==='overview'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
-      <C title="Repartition contrats">{[{l:'CDI',v:cdi,c:'#4ade80'},{l:'CDD',v:cdd,c:'#f87171'},{l:'Temps partiel',v:tp,c:'#60a5fa'}].map((r,i)=><Row key={i} l={r.l+' ('+( n>0?Math.round(r.v/n*100):0)+'%)'} v={r.v} c={r.c}/>)}</C>
+      <C title="Repartition contrats">{[{l:tText('CDI'),v:cdi,c:'#4ade80'},{l:tText('CDD'),v:cdd,c:'#f87171'},{l:tText('Temps partiel'),v:tp,c:'#60a5fa'}].map((r,i)=><Row key={i} l={r.l+' ('+( n>0?Math.round(r.v/n*100):0)+'%)'} v={r.v} c={r.c}/>)}</C>
       <C title="Top 5 salaires">{[...allEmps].sort((a,b)=>(+(b.monthlySalary||b.gross||0))-(+(a.monthlySalary||a.gross||0))).slice(0,5).map((e,i)=><Row key={i} l={(e.first||'?')+' '+(e.last||'?')+' — '+e._co} v={fmt(+(e.monthlySalary||e.gross||0))+' €'}/>)}</C>
       <C title="Par client">{clients.map((c,i)=>{const ce=(c.emps||[]);return <Row key={i} l={(c.company?.name||'Client '+(i+1))+' ('+ce.length+' emp.)'} v={fi(ce.reduce((a,e)=>a+(+(e.monthlySalary||e.gross||0)),0)*(1+TX_ONSS_E))+' €/m'}/>;})}</C>
       <C title="Projections annuelles"><Row l="Masse brute annuelle" v={fi(mb*12)+' €'}/><Row l="Cout employeur annuel" v={fi(coutTotal*12)+' €'} c="#f87171"/><Row l="ONSS total" v={fi(mb*12*(TX_ONSS_W+TX_ONSS_E))+' €'} c="#fb923c"/><Row l="Pécule vacances (15.38%)" v={fi(mb*12*0.1538)+' €'} c="#4ade80"/><Row l="13eme mois" v={fi(mb)+' €'} c="#60a5fa"/></C>
@@ -108,9 +108,9 @@ export function DashboardRHV2({s,d,props_tab}){
       return <div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:14}}>
           {[
-            {l:'Travailleurs H',v:hommes.length,sub:'Salaire moy: '+f2(mH)+' €',c:'#60a5fa'},
-            {l:'Travailleurs F',v:femmes.length,sub:'Salaire moy: '+f2(mF)+' €',c:'#f472b6'},
-            {l:'Travailleur·s handicapé·s',v:handicap.length,sub:'Quota légal: '+quota1pct+' (1%)',c:pctHandicap>=1?'#22c55e':'#f87171'},
+            {l:tText('Travailleurs H'),v:hommes.length,sub:tText('Salaire moy:')+' '+f2(mH)+' €',c:'#60a5fa'},
+            {l:tText('Travailleurs F'),v:femmes.length,sub:tText('Salaire moy:')+' '+f2(mF)+' €',c:'#f472b6'},
+            {l:tText('Travailleur·s handicapé·s'),v:handicap.length,sub:tText('Quota légal:')+' '+quota1pct+' (1%)',c:pctHandicap>=1?'#22c55e':'#f87171'},
           ].map((k,i)=><div key={i} style={{padding:14,background:'rgba(255,255,255,.03)',borderRadius:10,border:`1px solid ${k.c}30`}}>
             <div style={{fontSize:10,color:'#888'}}>{k.l}</div>
             <div style={{fontSize:24,fontWeight:700,color:k.c,margin:'4px 0'}}>{k.v}</div>
@@ -142,7 +142,7 @@ export function DashboardRHV2({s,d,props_tab}){
               :`⚠️ ${handicap.length}/${emps.length} (${pctHandicap}%) — quota 1% non atteint (${quota1pct-handicap.length} poste(s) à pourvoir)`}
             </div>
           </div>
-          <Row l="Quota légal (Arr.R. 06/03/2014)" v="1% de l'effectif" c="#888"/>
+          <Row l={tText('Quota légal:')+' (Arr.R. 06/03/2014)'} v="1% de l'effectif" c="#888"/>
           <Row l="Travailleurs TH actuels" v={handicap.length} c={pctHandicap>=1?'#22c55e':'#f97316'}/>
           <Row l="Quota à atteindre" v={quota1pct} c="#c6a34e"/>
           <Row l="Avantage fiscal employeur" v="Réduction ONSS patronal + Activa TH" c="#a78bfa"/>
@@ -182,19 +182,19 @@ td{padding:4px;border:1px solid #ddd;font-size:8.5px}
 @media print{button{display:none!important}.no-print{display:none!important}}
 </style></head><body>
 <div class="header">
-  <div style="font-size:18px;font-weight:800;color:#c6a34e;letter-spacing:3px">REGISTRE GENERAL DU PERSONNEL</div>
-  <div style="font-size:10px;color:#666;margin-top:4px">Arrete Royal du 8 aout 1980 relatif a la tenue des documents sociaux</div>
+  <div style="font-size:18px;font-weight:800;color:#c6a34e;letter-spacing:3px">{tText('REGISTRE GENERAL DU PERSONNEL')}</div>
+  <div style="font-size:10px;color:#666;margin-top:4px">{tText('Arrete Royal du 8 aout 1980 relatif a la tenue des documents sociaux')}</div>
 </div>
 <table style="width:auto;margin-bottom:15px">
-  <tr><td style="font-weight:bold;width:150px">Employeur</td><td>${co.name||'—'}</td></tr>
-  <tr><td style="font-weight:bold">N° BCE / TVA</td><td>${co.vat||'—'}</td></tr>
-  <tr><td style="font-weight:bold">N° ONSS</td><td>${co.onss||'—'}</td></tr>
-  <tr><td style="font-weight:bold">Siege social</td><td>${co.address||''} ${co.zip||''} ${co.city||''}</td></tr>
+  <tr><td style="font-weight:bold;width:150px">{tText('Employeur')}</td><td>${co.name||'—'}</td></tr>
+  <tr><td style="font-weight:bold">{tText('N° BCE / TVA')}</td><td>${co.vat||'—'}</td></tr>
+  <tr><td style="font-weight:bold">{tText('N° ONSS')}</td><td>${co.onss||'—'}</td></tr>
+  <tr><td style="font-weight:bold">{tText('Siege social')}</td><td>${co.address||''} ${co.zip||''} ${co.city||''}</td></tr>
   <tr><td style="font-weight:bold">{tText('Commission paritaire')}</td><td>CP ${co.cp||'200'}</td></tr>
-  <tr><td style="font-weight:bold">Date impression</td><td>${now.toLocaleDateString('fr-BE')} a ${now.toLocaleTimeString('fr-BE')}</td></tr>
+  <tr><td style="font-weight:bold">{tText('Date impression')}</td><td>${now.toLocaleDateString('fr-BE')} a ${now.toLocaleTimeString('fr-BE')}</td></tr>
 </table>
 <table>
-  <tr><th>N° ordre</th><th>{tText('Nom')}</th><th>Prenom</th><th>{tText('NISS')}</th><th>Sexe</th><th>Nationalite</th><th>Date naiss.</th><th>Domicile</th><th>Debut</th><th>Fin</th><th>Type contrat</th><th>Regime</th><th>Fonction</th><th>{tText('Brut mensuel')}</th></tr>`;
+  <tr><th>{tText('N° ordre')}</th><th>{tText('Nom')}</th><th>{tText('Prenom')}</th><th>{tText('NISS')}</th><th>{tText('Sexe')}</th><th>{tText('Nationalite')}</th><th>{tText('Date naiss.')}</th><th>{tText('Domicile')}</th><th>{tText('Debut')}</th><th>{tText('Fin')}</th><th>{tText('Type contrat')}</th><th>{tText('Regime')}</th><th>{tText('Fonction')}</th><th>{tText('Brut mensuel')}</th></tr>`;
     emps.forEach((e,i)=>{
       html+=`<tr>
         <td style="text-align:center;font-weight:bold">${String(i+1).padStart(3,'0')}</td>
@@ -204,7 +204,7 @@ td{padding:4px;border:1px solid #ddd;font-size:8.5px}
         <td>${e.nationality||'Belge'}</td><td>${e.birthDate||'—'}</td>
         <td style="font-size:7.5px">${e.address||'—'}</td>
         <td>${e.startDate||e.start||'—'}</td><td>${e.endDate||e.end||'—'}</td>
-        <td style="text-align:center">${e.contractType||'CDI'}</td>
+        <td style="text-align:center">${e.contractType||tText('CDI')}</td>
         <td style="text-align:center">${e.regime||100}%</td>
         <td>${e.function||e.titre||e.job||'—'}</td>
         <td style="text-align:right;font-family:monospace">${fmt(+(e.monthlySalary||e.gross||0))} EUR</td>
@@ -233,12 +233,12 @@ td{padding:4px;border:1px solid #ddd;font-size:8.5px}
     </div>
 
     <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:16}}>
-      <KPI l="Inscrits" v={emps.length} c="#c6a34e"/><KPI l="CDI" v={emps.filter(e=>!e.contractType||e.contractType==='CDI').length} c="#4ade80"/><KPI l="CDD" v={emps.filter(e=>e.contractType==='CDD').length} c="#eab308"/><KPI l="NISS complets" v={emps.filter(e=>e.niss||e.NISS).length+'/'+emps.length} c={emps.every(e=>e.niss||e.NISS)?'#4ade80':'#ef4444'}/>
+      <KPI l="Inscrits" v={emps.length} c="#c6a34e"/><KPI l="CDI" v={emps.filter(e=>!e.contractType||e.contractType===tText('CDI')).length} c="#4ade80"/><KPI l="CDD" v={emps.filter(e=>e.contractType===tText('CDD')).length} c="#eab308"/><KPI l="NISS complets" v={emps.filter(e=>e.niss||e.NISS).length+'/'+emps.length} c={emps.every(e=>e.niss||e.NISS)?'#4ade80':'#ef4444'}/>
     </div>
 
     <div style={{border:'1px solid rgba(198,163,78,.1)',borderRadius:14,overflow:'hidden'}}>
       <div style={{display:'grid',gridTemplateColumns:'40px 1fr 1fr 120px 60px 80px 80px 80px',padding:'8px 12px',background:'rgba(198,163,78,.06)',fontSize:8,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'.5px'}}>
-        <div>N°</div><div>{tText('Nom')}</div><div>Prenom</div><div>{tText('NISS')}</div><div>{tText('Contrat')}</div><div>Debut</div><div>Fonction</div><div style={{textAlign:'right'}}>{tText('Brut')}</div>
+        <div>N°</div><div>{tText('Nom')}</div><div>{tText('Prenom')}</div><div>{tText('NISS')}</div><div>{tText('Contrat')}</div><div>{tText('Debut')}</div><div>{tText('Fonction')}</div><div style={{textAlign:'right'}}>{tText('Brut')}</div>
       </div>
       <div style={{maxHeight:500,overflowY:'auto'}}>
         {emps.map((e,i)=><div key={i} style={{display:'grid',gridTemplateColumns:'40px 1fr 1fr 120px 60px 80px 80px 80px',padding:'6px 12px',borderBottom:'1px solid rgba(255,255,255,.02)',fontSize:11,alignItems:'center'}}>
@@ -246,7 +246,7 @@ td{padding:4px;border:1px solid #ddd;font-size:8.5px}
           <span style={{color:'#e8e6e0',fontWeight:600}}>{e.last||e.ln||'—'}</span>
           <span style={{color:'#e8e6e0'}}>{e.first||e.fn||'—'}</span>
           <span style={{fontFamily:'monospace',fontSize:10,color:e.niss||e.NISS?'#e8e6e0':'#ef4444'}}>{e.niss||e.NISS||'⚠️ MANQUANT'}</span>
-          <Badge text={e.contractType||'CDI'} color={(e.contractType||'CDI')==='CDI'?'#4ade80':'#eab308'}/>
+          <Badge text={e.contractType||tText('CDI')} color={(e.contractType||tText('CDI'))===tText('CDI')?'#4ade80':'#eab308'}/>
           <span style={{fontSize:10,color:'#888'}}>{e.startDate||e.start||'—'}</span>
           <span style={{fontSize:10,color:'#888'}}>{e.function||e.titre||'—'}</span>
           <span style={{textAlign:'right',fontFamily:'monospace',color:'#c6a34e'}}>{fmt(+(e.monthlySalary||e.gross||0))}</span>
@@ -267,7 +267,7 @@ export function PortailEmployeV2({s,d}){
   const clients= s?.clients||[];const [selC,setSelC]=useState(0);const [selE,setSelE]=useState(0);
   const [tab,setTab]=useState('accueil');const [demandes,setDemandes]=useState([]);
   const [newDem,setNewDem]=useState({type:'conge',dateDebut:'',dateFin:'',motif:''});
-  const mois=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const mois = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
   const cl=clients[selC]||{emps:[]};const emp=(cl.emps||[])[selE];
   if(!emp)return <div style={{padding:24,textAlign:'center',color:'#888'}}>{tText('Ajoutez des clients et employés pour accéder au portail.')}</div>;
 
@@ -298,13 +298,13 @@ export function PortailEmployeV2({s,d}){
         <Badge text="MODE PREVIEW" color="#eab308"/>
       </div>
     </div>
-    <p style={{fontSize:11,color:'#888',margin:'0 0 16px'}}>Espace personnel employé — fiches de paie, demandes, infos</p>
+    <p style={{fontSize:11,color:'#888',margin:'0 0 16px'}}>{tText('Espace personnel employé — fiches de paie, demandes, infos')}</p>
 
     {/* Welcome */}
     <div style={{padding:18,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.15)',borderRadius:14,marginBottom:16}}>
       <div style={{display:'flex',alignItems:'center',gap:14}}>
         <div style={{width:48,height:48,borderRadius:24,background:'linear-gradient(135deg,#c6a34e,#a07d3e)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,color:'#060810',fontWeight:800}}>{(emp.first||'?')[0]}{(emp.last||'?')[0]}</div>
-        <div><div style={{fontSize:16,fontWeight:700,color:'#e5e5e5'}}>Bonjour, {emp.first||name} 👋</div><div style={{fontSize:11,color:'#888'}}>{emp.function||emp.job||'Employé'} — {cl.company?.name} — {emp.contractType||'CDI'} — {anc} mois ancienneté</div></div>
+        <div><div style={{fontSize:16,fontWeight:700,color:'#e5e5e5'}}>Bonjour, {emp.first||name} 👋</div><div style={{fontSize:11,color:'#888'}}>{emp.function||emp.job||tText('Employé')} — {cl.company?.name} — {emp.contractType||tText('CDI')} — {anc} mois ancienneté</div></div>
       </div>
     </div>
 
@@ -317,13 +317,13 @@ export function PortailEmployeV2({s,d}){
 
     {tab==='accueil'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
       <C title="Informations personnelles"><Row l="Nom" v={name}/><Row l="NISS" v={emp.niss||'—'}/><Row l="Email" v={emp.email||'—'}/><Row l="Adresse" v={emp.address||'—'}/><Row l="IBAN" v={emp.iban||'—'}/></C>
-      <C title="Contrat"><Row l="Type" v={emp.contractType||'CDI'}/><Row l="Debut" v={emp.startDate||emp.start||'—'}/><Row l="Regime" v={(emp.regime||100)+'%'}/><Row l="Fonction" v={emp.function||'—'}/><Row l="Brut mensuel" v={fmt(brut)+' €'}/></C>
+      <C title="Contrat"><Row l="Type" v={emp.contractType||tText('CDI')}/><Row l="Debut" v={emp.startDate||emp.start||'—'}/><Row l="Regime" v={(emp.regime||100)+'%'}/><Row l="Fonction" v={emp.function||'—'}/><Row l="Brut mensuel" v={fmt(brut)+' €'}/></C>
     </div>}
 
     {tab==='fiches'&&<C title="Historique fiches de paie">
       <div style={{border:'1px solid rgba(198,163,78,.08)',borderRadius:10,overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'1fr 80px 80px 80px 80px 60px',padding:'8px 12px',background:'rgba(198,163,78,.06)',fontSize:9,fontWeight:600,color:'#c6a34e'}}>
-          <div>Periode</div><div style={{textAlign:'right'}}>{tText('Brut')}</div><div style={{textAlign:'right'}}>{tText('ONSS')}</div><div style={{textAlign:'right'}}>PP</div><div style={{textAlign:'right'}}>Net</div><div/>
+          <div>{tText('Periode')}</div><div style={{textAlign:'right'}}>{tText('Brut')}</div><div style={{textAlign:'right'}}>{tText('ONSS')}</div><div style={{textAlign:'right'}}>PP</div><div style={{textAlign:'right'}}>{tText('Net')}</div><div/>
         </div>
         {payHistory.map((p,i)=><div key={i} style={{display:'grid',gridTemplateColumns:'1fr 80px 80px 80px 80px 60px',padding:'6px 12px',borderBottom:'1px solid rgba(255,255,255,.02)',fontSize:11,alignItems:'center'}}>
           <span style={{color:'#e8e6e0',fontWeight:500}}>{p.month} {p.year}</span>
@@ -340,8 +340,8 @@ export function PortailEmployeV2({s,d}){
       <C title="Nouvelle demande">
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:8,marginBottom:10}}>
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Type')}</label><select value={newDem.type} onChange={e=>setNewDem(p=>({...p,type:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}><option value="conge">Conge</option><option value="maladie">{tText('Maladie')}</option><option value="formation">{tText('Formation')}</option><option value="teletravail">Teletravail</option><option value="attestation">Attestation</option><option value="autre">{tText('Autre')}</option></select></div>
-          <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Date debut</label><input type="date" value={newDem.dateDebut} onChange={e=>setNewDem(p=>({...p,dateDebut:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}/></div>
-          <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>Date fin</label><input type="date" value={newDem.dateFin} onChange={e=>setNewDem(p=>({...p,dateFin:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}/></div>
+          <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Date debut')}</label><input type="date" value={newDem.dateDebut} onChange={e=>setNewDem(p=>({...p,dateDebut:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}/></div>
+          <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Date fin')}</label><input type="date" value={newDem.dateFin} onChange={e=>setNewDem(p=>({...p,dateFin:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}/></div>
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Motif')}</label><input value={newDem.motif} onChange={e=>setNewDem(p=>({...p,motif:e.target.value}))} placeholder="Optionnel" style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}/></div>
         </div>
         <button onClick={submitDemande} style={{padding:'8px 20px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:12,cursor:'pointer'}}>📝 Soumettre</button>
@@ -394,7 +394,7 @@ export function GestionInterimairesV2({s,d}){
 
     {tab==='liste'&&<div style={{border:'1px solid rgba(198,163,78,.1)',borderRadius:14,overflow:'hidden'}}>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 100px 70px 60px 80px 80px 30px',padding:'8px 12px',background:'rgba(198,163,78,.06)',fontSize:9,fontWeight:600,color:'#c6a34e'}}>
-        <div>{tText('Nom')}</div><div>{tText('Agence')}</div><div>{tText('NISS')}</div><div>Heures</div><div>{tText('Coeff')}</div><div style={{textAlign:'right'}}>{tText('Brut')}</div><div style={{textAlign:'right'}}>{tText('Cout')}</div><div/>
+        <div>{tText('Nom')}</div><div>{tText('Agence')}</div><div>{tText('NISS')}</div><div>{tText('Heures')}</div><div>{tText('Coeff')}</div><div style={{textAlign:'right'}}>{tText('Brut')}</div><div style={{textAlign:'right'}}>{tText('Cout')}</div><div/>
       </div>
       {ints.map((it,i)=>{const ag=agences.find(a=>a.id===it.agence);return <div key={it.id} style={{display:'grid',gridTemplateColumns:'1fr 1fr 100px 70px 60px 80px 80px 30px',padding:'6px 12px',borderBottom:'1px solid rgba(255,255,255,.02)',fontSize:11,alignItems:'center'}}>
         <span style={{color:'#e8e6e0',fontWeight:500}}>{it.first} {it.last}</span>
@@ -406,7 +406,7 @@ export function GestionInterimairesV2({s,d}){
         <span style={{textAlign:'right',fontFamily:'monospace',color:'#ef4444',fontWeight:600}}>{fmt(it.cout)}</span>
         <button onClick={()=>setInts(p=>p.filter(x=>x.id!==it.id))} style={{background:'none',border:'none',color:'#ef4444',cursor:'pointer'}}>✕</button>
       </div>;})}
-      {ints.length===0&&<div style={{padding:30,textAlign:'center',color:'#888'}}>Aucun interimaire. Cliquez + pour ajouter.</div>}
+      {ints.length===0&&<div style={{padding:30,textAlign:'center',color:'#888'}}>{tText('Aucun interimaire. Cliquez + pour ajouter.')}</div>}
     </div>}
 
     {tab==='contrats'&&<C title="Contrats & DIMONA interimaires">
@@ -415,7 +415,7 @@ export function GestionInterimairesV2({s,d}){
           <div><b style={{color:'#e8e6e0',fontSize:12}}>{it.first} {it.last}</b> <span style={{color:'#888',fontSize:10}}>— {agences.find(a=>a.id===it.agence)?.n} — {it.motif}</span></div>
           <div style={{display:'flex',gap:6}}>
             <Badge text={it.debut?'Du '+it.debut:'Pas de date'} color={it.debut?'#4ade80':'#eab308'}/>
-            <Badge text={it.niss?'DIMONA pret':'NISS manquant'} color={it.niss?'#4ade80':'#ef4444'}/>
+            <Badge text={it.niss?'DIMONA pret':tText('NISS manquant')} color={it.niss?'#4ade80':'#ef4444'}/>
           </div>
         </div>
       </div>)}
@@ -423,7 +423,7 @@ export function GestionInterimairesV2({s,d}){
     </C>}
 
     {tab==='couts'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
-      <C title="Cout par agence">{[...new Set(ints.map(i=>i.agence))].map(ag=>{const agInts=ints.filter(i=>i.agence===ag);const agInfo=agences.find(a=>a.id===ag);return <Row key={ag} l={(agInfo?.n||ag)+' ('+agInts.length+')' } v={fmt(agInts.reduce((a,i)=>a+i.cout,0))+' €'} c={agInfo?.c}/>;})}{ints.length===0&&<div style={{color:'#888',fontSize:11}}>Pas de donnees</div>}</C>
+      <C title="Cout par agence">{[...new Set(ints.map(i=>i.agence))].map(ag=>{const agInts=ints.filter(i=>i.agence===ag);const agInfo=agences.find(a=>a.id===ag);return <Row key={ag} l={(agInfo?.n||ag)+' ('+agInts.length+')' } v={fmt(agInts.reduce((a,i)=>a+i.cout,0))+' €'} c={agInfo?.c}/>;})}{ints.length===0&&<div style={{color:'#888',fontSize:11}}>{tText('Pas de donnees')}</div>}</C>
       <C title="Comparaison interim vs CDI">
         <Row l="Cout interim/mois" v={fmt(totalCout)+' €'} c="#ef4444"/>
         <Row l="Equivalent CDI (ONSS)" v={fmt(totalBrut*(1+TX_ONSS_E))+' €'} c="#4ade80"/>
@@ -434,9 +434,9 @@ export function GestionInterimairesV2({s,d}){
 
     {showAdd&&<div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,.6)',zIndex:999,display:'flex',alignItems:'center',justifyContent:'center'}} onClick={()=>setShowAdd(false)}>
       <div onClick={e=>e.stopPropagation()} style={{background:'#0d1117',border:'1px solid rgba(198,163,78,.2)',borderRadius:16,padding:24,width:500}}>
-        <h3 style={{fontSize:16,fontWeight:700,color:'#c6a34e',marginBottom:14}}>Nouvel interimaire</h3>
+        <h3 style={{fontSize:16,fontWeight:700,color:'#c6a34e',marginBottom:14}}>{tText('Nouvel interimaire')}</h3>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-          {[{l:'Prenom',k:'first'},{l:tText('Nom'),k:'last'},{l:'NISS',k:'niss'},{l:tText('Brut/h (€)'),k:'brutH',t:'number'},{l:'Heures/mois',k:'heures',t:'number'},{l:tText('Coefficient'),k:'coeff',t:'number'},{l:'Date debut',k:'debut',t:'date'},{l:'Date fin',k:'fin',t:'date'},{l:tText('Motif'),k:'motif'}].map((f,i)=>
+          {[{l:tText('Prenom'),k:'first'},{l:tText('Nom'),k:'last'},{l:tText('NISS'),k:'niss'},{l:tText('Brut/h (€)'),k:'brutH',t:'number'},{l:tText('Heures/mois'),k:'heures',t:'number'},{l:tText('Coefficient'),k:'coeff',t:'number'},{l:tText('Date debut'),k:'debut',t:'date'},{l:tText('Date fin'),k:'fin',t:'date'},{l:tText('Motif'),k:'motif'}].map((f,i)=>
             <div key={i}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{f.l}</label><input type={f.t||'text'} value={ni[f.k]} onChange={e=>setNi(p=>({...p,[f.k]:f.t==='number'?+e.target.value:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit',boxSizing:'border-box'}}/></div>
           )}
           <div><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Agence')}</label><select value={ni.agence} onChange={e=>setNi(p=>({...p,agence:e.target.value}))} style={{width:'100%',padding:'8px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:6,color:'#e5e5e5',fontSize:11,fontFamily:'inherit'}}>{agences.map(a=><option key={a.id} value={a.id}>{a.n}</option>)}</select></div>

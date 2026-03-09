@@ -59,9 +59,9 @@ function SettingsPage({s,d}) {
           </label>
           <button onClick={()=>{
             let autoBackup=safeLS.get('aureus_autobackup');
-            if(!autoBackup){alert('Aucune sauvegarde automatique trouvée');return;}
+            if(!autoBackup){alert(tText('Aucune sauvegarde automatique trouvée'));return;}
             if(confirm('Restaurer la dernière sauvegarde automatique ?\n\nDate: '+new Date(safeLS.get('aureus_autobackup_date')).toLocaleString('fr-BE'))){
-              try{const b=(()=>{try{return JSON.parse(autoBackup)}catch(e){return null}})();if(b.co)d({type:'SET_COMPANY',data:b.co});if(b.emps)d({type:'SET_EMPS',data:b.emps});if(b.pays)d({type:'SET_PAYS',data:b.pays});alert('✅ Restauration auto-backup réussie');}catch(err){alert('❌ Erreur: '+err);}
+              try{const b=(()=>{try{return JSON.parse(autoBackup)}catch(e){return null}})();if(b.co)d({type:'SET_COMPANY',data:b.co});if(b.emps)d({type:'SET_EMPS',data:b.emps});if(b.pays)d({type:'SET_PAYS',data:b.pays});alert(tText('✅ Restauration auto-backup réussie'));}catch(err){alert('❌ Erreur: '+err);}
             }
           }} style={{padding:'8px 16px',borderRadius:8,border:'1px solid rgba(234,179,8,.3)',background:'rgba(234,179,8,.1)',color:'#eab308',fontSize:11,fontWeight:600,cursor:'pointer'}}>🔄 Auto-backup</button>
         </div>
@@ -107,7 +107,7 @@ function SettingsPage({s,d}) {
         <I label="Secrétariat social" value={f.secSoc} onChange={v=>setF({...f,secSoc:v})}/>
       </div></C>
     </div>
-    <div style={{marginTop:14,display:'flex',justifyContent:'flex-end'}}><B onClick={()=>{d({type:"UPD_CO",d:f});alert('Sauvegardé !')}}>Sauvegarder</B></div>
+    <div style={{marginTop:14,display:'flex',justifyContent:'flex-end'}}><B onClick={()=>{d({type:"UPD_CO",d:f});alert(tText('Sauvegardé !'))}}>Sauvegarder</B></div>
     
     {/* 2FA Security Section */}
     <C style={{marginTop:20}}>
@@ -132,7 +132,7 @@ function SettingsPage({s,d}) {
                   const secret=data.totp?.secret;
                   alert('2FA activé !\\n\\nScannez le QR code avec Google Authenticator ou Authy.\\n\\nSecret: '+secret+'\\n\\n(Le QR code sera affiché dans une prochaine version)');
                 }
-              }catch(e){alert('2FA via TOTP — Activez dans Supabase Dashboard > Authentication > MFA');}
+              }catch(e){alert(tText('2FA via TOTP — Activez dans Supabase Dashboard > Authentication > MFA'));}
             }}>🔐 Activer 2FA (TOTP)</B>
           </div>
         </div>
@@ -161,7 +161,7 @@ function SettingsPage({s,d}) {
                 <div style={{fontSize:11.5,color:'#e8e6e0'}}>{tText('Session timeout')}</div>
                 <div style={{fontSize:9.5,color:'#5e5c56'}}>{tText('Déconnexion après inactivité')}</div>
               </div>
-              <span style={{fontSize:10,color:'#fb923c',fontWeight:600}}>1 heure</span>
+              <span style={{fontSize:10,color:'#fb923c',fontWeight:600}}>{tText('1 heure')}</span>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>📱</span>
@@ -367,8 +367,8 @@ const DRS_DOCS={
     {code:'ATT-276',l:"Attestation 276 frontaliers",f:['pays',"annee"]},
   ],
 };
-const COMPTA=[{id:"bob",n:'BOB Software',fmt:'CSV/XML'},{id:"winbooks",n:'Winbooks',fmt:'TXT/CSV'},{id:"kluwer",n:'Kluwer Expert',fmt:'CSV'},{id:"popsy",n:'Popsy',fmt:'TXT'},{id:"soda",n:'Soda',fmt:'CSV'},{id:"exact",n:'Exact Online',fmt:'CSV/XML'},{id:"octopus",n:'Octopus',fmt:'CSV'},{id:"clearfact",n:'ClearFact',fmt:'CSV/UBL'},{id:"yuki",n:'Yuki',fmt:'XML'},{id:"horus",n:'Horus',fmt:'CSV'},{id:"other",n:'Autre (txt/xls)',fmt:'TXT/XLS'}];
-const CR_PROV=[{id:"pluxee",n:'Pluxee (ex-Sodexo)',ic:'🟠'},{id:"edenred",n:'Edenred',ic:'🔴'},{id:"monizze",n:'Monizze',ic:'🟢'},{id:"got",n:'G.O.T. CONNECTION',ic:'🔵'}];
+const COMPTA=[{id:"bob",n:tText('BOB Software'),fmt:'CSV/XML'},{id:"winbooks",n:tText('Winbooks'),fmt:'TXT/CSV'},{id:"kluwer",n:'Kluwer Expert',fmt:'CSV'},{id:"popsy",n:'Popsy',fmt:'TXT'},{id:"soda",n:'Soda',fmt:'CSV'},{id:"exact",n:tText('Exact Online'),fmt:'CSV/XML'},{id:"octopus",n:tText('Octopus'),fmt:'CSV'},{id:"clearfact",n:tText('ClearFact'),fmt:'CSV/UBL'},{id:"yuki",n:tText('Yuki'),fmt:'XML'},{id:"horus",n:tText('Horus'),fmt:'CSV'},{id:"other",n:'Autre (txt/xls)',fmt:'TXT/XLS'}];
+const CR_PROV=[{id:"pluxee",n:'Pluxee (ex-Sodexo)',ic:'🟠'},{id:"edenred",n:tText('Edenred'),ic:'🔴'},{id:"monizze",n:tText('Monizze'),ic:'🟢'},{id:"got",n:'G.O.T. CONNECTION',ic:'🔵'}];
 
 // ═══════════════════════════════════════════════════════════════
 //  SOUS-NAVIGATION — Breadcrumb + bouton retour + onglets

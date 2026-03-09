@@ -20,7 +20,7 @@ function Employees({s,d}) {
   const [search,setSearch]=useState('');
   const [filter,setFilter]=useState('all'); // all, active, sorti, student, ouvrier
   const [viewMode,setViewMode]=useState('list'); // list, grid
-  const empty={first:'',last:'',niss:'',birth:'',addr:'',city:'',zip:'',startD:'',endD:'',fn:"",dept:'',contract:'CDI',regime:'full',whWeek:38,monthlySalary:0,civil:"single",depChildren:0,handiChildren:0,iban:'',mvT:10,mvW:CR_TRAV,mvE:8.91,expense:0,cp:'200',dmfaCode:'495',dimType:'OTH',commDist:0,commType:'none',commMonth:0,status:'active',sexe:'M',statut:'employe',niveauEtude:'sec',allocTravailType:'none',allocTravail:0,carFuel:"none",carCO2:0,carCatVal:0,carBrand:"",carModel:"",atnGSM:false,atnPC:false,atnInternet:false,atnLogement:false,atnLogementRC:0,atnChauffage:false,atnElec:false,depAscendant:0,depAscendantHandi:0,conjointHandicap:false,depAutres:0,anciennete:0,nrEngagement:0,engagementTrimestre:1,
+  const empty={first:'',last:'',niss:'',birth:'',addr:'',city:'',zip:'',startD:'',endD:'',fn:"",dept:'',contract:tText('CDI'),regime:'full',whWeek:38,monthlySalary:0,civil:"single",depChildren:0,handiChildren:0,iban:'',mvT:10,mvW:CR_TRAV,mvE:8.91,expense:0,cp:'200',dmfaCode:'495',dimType:'OTH',commDist:0,commType:'none',commMonth:0,status:'active',sexe:'M',statut:'employe',niveauEtude:'sec',allocTravailType:'none',allocTravail:0,carFuel:"none",carCO2:0,carCatVal:0,carBrand:"",carModel:"",atnGSM:false,atnPC:false,atnInternet:false,atnLogement:false,atnLogementRC:0,atnChauffage:false,atnElec:false,depAscendant:0,depAscendantHandi:0,conjointHandicap:false,depAutres:0,anciennete:0,nrEngagement:0,engagementTrimestre:1,
     veloSociete:false,veloType:'none',veloValeur:0,veloLeasingMois:0,motoSociete:false,motoCO2:0,motoCatVal:0,motoBrand:'',carteCarburant:false,carteCarburantMois:0,borneRecharge:false,borneRechargeCoût:0,
     frontalier:false,frontalierPays:'',frontalierConvention:'',frontalierA1:false,frontalierExoPP:false,
     pensionné:false,pensionType:'none',pensionAge:0,pensionCarriere:0,pensionCumulIllimite:false,pensionMontant:0,
@@ -111,18 +111,18 @@ function Employees({s,d}) {
       for(const r of rows){
         const emp={
           ...empty,
-          first:r[tText('Prénom')]||r['Prenom']||r['prenom']||r['first']||r['First']||'',
+          first:r[tText('Prénom')]||r[tText('Prenom')]||r['prenom']||r['first']||r['First']||'',
           last:r[tText('Nom')]||r['nom']||r['last']||r['Last']||'',
-          niss:String(r['NISS']||r['niss']||r['Registre national']||''),
-          fn:r['Fonction']||r['fonction']||r['function']||'',
+          niss:String(r[tText('NISS')]||r['niss']||r['Registre national']||''),
+          fn:r[tText('Fonction')]||r['fonction']||r['function']||'',
           dept:r[tText('Département')]||r['Departement']||r['dept']||'',
-          contract:r[tText('Contrat')]||r['contrat']||r[tText('Type')]||'CDI',
+          contract:r[tText('Contrat')]||r[tText('contrat')]||r[tText('Type')]||tText('CDI'),
           cp:String(r['CP']||r['cp']||r[tText('Commission paritaire')]||'200'),
-          monthlySalary:parseFloat(r['Brut']||r['brut']||r['Salaire']||r['salaire']||0),
-          startD:r['Entrée']||r['Entree']||r['Date entrée']||r['startD']||'',
-          iban:r['IBAN']||r['iban']||'',
+          monthlySalary:parseFloat(r[tText('Brut')]||r['brut']||r['Salaire']||r['salaire']||0),
+          startD:r['Entrée']||r[tText('Entree')]||r['Date entrée']||r['startD']||'',
+          iban:r[tText('IBAN')]||r['iban']||'',
           statut:r[tText('Statut')]||r['statut']||'employe',
-          sexe:r['Sexe']||r['sexe']||'M',
+          sexe:r[tText('Sexe')]||r['sexe']||'M',
           status:'active',
         };
         if(emp.first||emp.last){
@@ -214,7 +214,7 @@ function Employees({s,d}) {
       id:'E-Activa-Nourdin',
       first:'Nourdin',last:'MOUSSATI',niss:'83.09.30.133.94',birth:'1983-09-30',
       fn:'Assistant administratif',function:'Assistant administratif',dept:tText('Administration'),
-      contract:'CDD',regime:'full',whWeek:38,monthlySalary:2800,
+      contract:tText('CDD'),regime:'full',whWeek:38,monthlySalary:2800,
       cp:'200',dmfaCode:'495',dimType:'OTH',
       startD:startDate,startDate:startDate,endD:endDate,endDate:endDate,
       addr:'Avenue Princesse Elisabeth 5 Bte 1',zip:'1030',city:'Schaerbeek',
@@ -275,11 +275,11 @@ function Employees({s,d}) {
       </div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12}}>
         <div style={{padding:16,borderRadius:10,background:'rgba(74,222,128,.06)',border:'1px solid rgba(74,222,128,.15)',textAlign:'center'}}>
-          <div style={{fontSize:10,color:'#9e9b93',marginBottom:4}}>Économie / mois</div>
+          <div style={{fontSize:10,color:'#9e9b93',marginBottom:4}}>{tText('Économie / mois')}</div>
           <div style={{fontSize:22,fontWeight:700,color:'#4ade80'}}>{roiSaving.toFixed(0)} €</div>
         </div>
         <div style={{padding:16,borderRadius:10,background:'rgba(198,163,78,.06)',border:'1px solid rgba(198,163,78,.15)',textAlign:'center'}}>
-          <div style={{fontSize:10,color:'#9e9b93',marginBottom:4}}>Économie / an</div>
+          <div style={{fontSize:10,color:'#9e9b93',marginBottom:4}}>{tText('Économie / an')}</div>
           <div style={{fontSize:22,fontWeight:700,color:'#c6a34e'}}>{roiSavingYear.toFixed(0)} €</div>
         </div>
         <div style={{padding:16,borderRadius:10,background:'rgba(96,165,250,.06)',border:'1px solid rgba(96,165,250,.15)',textAlign:'center'}}>
@@ -304,7 +304,7 @@ function Employees({s,d}) {
         </div>
         <I label="Naissance" type="date" value={form.birth} onChange={v=>setF({...form,birth:v})}/>
         <I label="Sexe" value={form.sexe} onChange={v=>setF({...form,sexe:v})} options={[{v:"M",l:"Homme"},{v:"F",l:"Femme"},{v:"X",l:"Non-binaire"}]}/>
-        <I label="Statut" value={form.statut} onChange={v=>setF({...form,statut:v})} options={[{v:"employe",l:"Employé"},{v:"ouvrier",l:"Ouvrier"},{v:"etudiant",l:"Étudiant"},{v:"apprenti",l:"Apprenti"},{v:"dirigeant",l:"Dirigeant d\'entreprise"}]}/>
+        <I label="Statut" value={form.statut} onChange={v=>setF({...form,statut:v})} options={[{v:"employe",l:tText('Employé')},{v:"ouvrier",l:tText('Ouvrier')},{v:"etudiant",l:"Étudiant"},{v:"apprenti",l:"Apprenti"},{v:"dirigeant",l:"Dirigeant d\'entreprise"}]}/>
         <I label="Adresse" value={form.addr} onChange={v=>setF({...form,addr:v})} span={2}/>
         <I label="CP" value={form.zip} onChange={v=>setF({...form,zip:v})}/>
         <I label="Ville" value={form.city} onChange={v=>setF({...form,city:v})}/>
@@ -320,8 +320,8 @@ function Employees({s,d}) {
         <I label="Département" value={form.dept} onChange={v=>setF({...form,dept:v})}/>
         <I label="Entrée" type="date" value={form.startD} onChange={v=>setF({...form,startD:v})}/>
         <I label="Contrat" value={form.contract} onChange={v=>setF({...form,contract:v})} options={[
-          {v:"CDI",l:"CDI"},{v:"CDD",l:"CDD"},{v:"trav_det",l:"Travail nettement défini"},{v:"remplacement",l:"Remplacement"},
-          {v:"tpartiel",l:"Temps partiel"},{v:"interim",l:tText('Intérimaire')},{v:"student",l:"Étudiant (650h)"},
+          {v:"CDI",l:tText('CDI')},{v:"CDD",l:tText('CDD')},{v:"trav_det",l:"Travail nettement défini"},{v:"remplacement",l:"Remplacement"},
+          {v:"tpartiel",l:tText('Temps partiel')},{v:"interim",l:tText('Intérimaire')},{v:"student",l:"Étudiant (650h)"},
           {v:"flexi",l:"Flexi-job"},{v:"saisonnier",l:"Saisonnier"},{v:"occas_horeca",l:"Extra Horeca"},
           {v:"titre_service",l:"Titres-services"},{v:"art60",l:"Art. 60§7 (CPAS)"},{v:"CIP",l:"Convention immersion"},
           {v:"alternance",l:"Alternance"},{v:"CPE",l:"Premier emploi"},{v:"ETA",l:"Travail adapté"},
@@ -351,7 +351,7 @@ function Employees({s,d}) {
         <div style={{display:'flex',gap:6,marginBottom:8,alignItems:'center'}}>
           <span style={{fontSize:11,color:'#9e9b93',fontWeight:600,width:70}}>{tText('Fraction:')}</span>
           <span style={{fontSize:13,fontWeight:700,color:(form.whWeek||38)>=38?'#4ade80':'#fb923c'}}>{Math.round((form.whWeek||38)/38*100)}%</span>
-          <span style={{fontSize:10.5,color:'#5e5c56',marginLeft:6}}>({form.whWeek||38}h / 38h réf.) — {(form.whWeek||38)>=38?'Temps plein':'Temps partiel'}</span>
+          <span style={{fontSize:10.5,color:'#5e5c56',marginLeft:6}}>({form.whWeek||38}h / 38h réf.) — {(form.whWeek||38)>=38?tText('Temps plein'):tText('Temps partiel')}</span>
           <span style={{fontSize:10.5,color:'#5e5c56',marginLeft:'auto'}}>{((form.whWeek||38)/5).toFixed(2)}h/jour · Pause: 30min (si {'>'} 6h)</span>
         </div>
         <table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
@@ -368,7 +368,7 @@ function Employees({s,d}) {
               </td>
             </tr>
             <tr>
-              <td style={{padding:'4px 6px',fontSize:10,color:'#9e9b93'}}>Fin</td>
+              <td style={{padding:'4px 6px',fontSize:10,color:'#9e9b93'}}>{tText('Fin')}</td>
               {['lu',"ma","me","je","ve","sa"].map(d=><td key={d}><input type="time" defaultValue={d==='sa'?'':'17:36'} style={{width:'100%',background:"rgba(198,163,78,.05)",border:'1px solid rgba(198,163,78,.1)',borderRadius:4,padding:'3px 4px',fontSize:10,color:'#e8e6e0',textAlign:'center'}} onChange={e=>setF({...form,[`h_${d}_a`]:e.target.value})}/></td>)}
             </tr>
           </tbody>
@@ -406,13 +406,13 @@ function Employees({s,d}) {
           {v:"Audi",l:"Audi"},{v:"Bentley",l:"Bentley"},{v:"BMW",l:"BMW"},{v:"BYD",l:"BYD"},{v:"Cadillac",l:"Cadillac"},
           {v:"Chevrolet",l:"Chevrolet"},{v:"Chrysler",l:"Chrysler"},{v:"Citroën",l:"Citroën"},{v:"Cupra",l:"Cupra"},{v:"Dacia",l:"Dacia"},
           {v:"Dodge",l:"Dodge"},{v:"DS",l:"DS Automobiles"},{v:"Ferrari",l:"Ferrari"},{v:"Fiat",l:"Fiat"},{v:"Ford",l:"Ford"},
-          {v:"Genesis",l:"Genesis"},{v:"Honda",l:"Honda"},{v:"Hyundai",l:"Hyundai"},{v:"Infiniti",l:"Infiniti"},{v:"Isuzu",l:"Isuzu"},
+          {v:"Genesis",l:"Genesis"},{v:"Honda",l:tText('Honda')},{v:"Hyundai",l:"Hyundai"},{v:"Infiniti",l:"Infiniti"},{v:"Isuzu",l:"Isuzu"},
           {v:"Jaguar",l:"Jaguar"},{v:"Jeep",l:"Jeep"},{v:"Kia",l:"Kia"},{v:"Lamborghini",l:"Lamborghini"},{v:"Land Rover",l:"Land Rover"},
           {v:"Lexus",l:"Lexus"},{v:"Lotus",l:"Lotus"},{v:"Lynk & Co",l:"Lynk & Co"},{v:"Maserati",l:"Maserati"},{v:"Mazda",l:"Mazda"},
           {v:"McLaren",l:"McLaren"},{v:"Mercedes",l:"Mercedes-Benz"},{v:"MG",l:"MG"},{v:"Mini",l:"Mini"},{v:"Mitsubishi",l:"Mitsubishi"},
           {v:"NIO",l:"NIO"},{v:"Nissan",l:"Nissan"},{v:"Opel",l:"Opel"},{v:"Peugeot",l:"Peugeot"},{v:"Polestar",l:"Polestar"},
           {v:"Porsche",l:"Porsche"},{v:"Renault",l:"Renault"},{v:"Rolls-Royce",l:"Rolls-Royce"},{v:"Seat",l:"Seat"},{v:"Škoda",l:"Škoda"},
-          {v:"Smart",l:"Smart"},{v:"SsangYong",l:"SsangYong"},{v:"Subaru",l:"Subaru"},{v:"Suzuki",l:"Suzuki"},{v:"Tesla",l:"Tesla"},
+          {v:"Smart",l:"Smart"},{v:"SsangYong",l:"SsangYong"},{v:"Subaru",l:"Subaru"},{v:"Suzuki",l:tText('Suzuki')},{v:"Tesla",l:"Tesla"},
           {v:"Toyota",l:"Toyota"},{v:"Volkswagen",l:"Volkswagen"},{v:"Volvo",l:"Volvo"},{v:"XPeng",l:"XPeng"},{v:"Autre",l:tText('Autre')}
         ]}/>
         <I label="Modèle" value={form.carModel} onChange={v=>setF({...form,carModel:v})} options={[
@@ -472,7 +472,7 @@ function Employees({s,d}) {
         {form.veloSociete&&<I label="Leasing mensuel (€)" type="number" value={form.veloLeasingMois} onChange={v=>setF({...form,veloLeasingMois:v})}/>}
       </div>
       {form.veloSociete&&<div style={{marginTop:8,padding:10,background:"rgba(74,222,128,.04)",borderRadius:8,fontSize:10.5,color:'#4ade80',lineHeight:1.6}}>
-        🚲 <b>Vélo de société</b> — ATN = 0€ (Art. 38§1er 14°a CIR — exonéré ONSS et IPP depuis 01/01/2024). Leasing vélo déductible 100% pour l'employeur. Cumulable avec l'indemnité vélo 0,27€/km. Le speed pedelec est assimilé à un vélo.
+        🚲 <b>{tText('Vélo de société')}</b> — ATN = 0€ (Art. 38§1er 14°a CIR — exonéré ONSS et IPP depuis 01/01/2024). Leasing vélo déductible 100% pour l'employeur. Cumulable avec l'indemnité vélo 0,27€/km. Le speed pedelec est assimilé à un vélo.
       </div>}
       <ST>{tText('Moto de société (ATN)')}</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
@@ -485,7 +485,7 @@ function Employees({s,d}) {
         {form.motoSociete&&<I label="Carburant moto" value={form.motoFuel||'essence'} onChange={v=>setF({...form,motoFuel:v})} options={[{v:'essence',l:tText('Essence')},{v:'electrique',l:tText('Électrique')},{v:'hybride',l:tText('Hybride')}]}/>}
         {form.motoSociete&&<I label="CO2 g/km moto" type="number" value={form.motoCO2} onChange={v=>setF({...form,motoCO2:v})}/>}
         {form.motoSociete&&<I label="Valeur catalogue moto (€)" type="number" value={form.motoCatVal} onChange={v=>setF({...form,motoCatVal:v})}/>}
-        {form.motoSociete&&<I label="Marque moto" value={form.motoBrand||''} onChange={v=>setF({...form,motoBrand:v})} options={[{v:'',l:'— Sélectionner —'},{v:'BMW Motorrad',l:'BMW Motorrad'},{v:'Ducati',l:'Ducati'},{v:'Harley-Davidson',l:'Harley-Davidson'},{v:'Honda',l:'Honda'},{v:'Kawasaki',l:'Kawasaki'},{v:'KTM',l:'KTM'},{v:'Piaggio',l:'Piaggio'},{v:'Suzuki',l:'Suzuki'},{v:'Triumph',l:'Triumph'},{v:'Yamaha',l:'Yamaha'},{v:tText('Autre'),l:tText('Autre')}]}/>}
+        {form.motoSociete&&<I label="Marque moto" value={form.motoBrand||''} onChange={v=>setF({...form,motoBrand:v})} options={[{v:'',l:'— Sélectionner —'},{v:tText('BMW Motorrad'),l:tText('BMW Motorrad')},{v:tText('Ducati'),l:tText('Ducati')},{v:tText('Harley-Davidson'),l:tText('Harley-Davidson')},{v:tText('Honda'),l:tText('Honda')},{v:tText('Kawasaki'),l:tText('Kawasaki')},{v:tText('KTM'),l:tText('KTM')},{v:tText('Piaggio'),l:tText('Piaggio')},{v:tText('Suzuki'),l:tText('Suzuki')},{v:tText('Triumph'),l:tText('Triumph')},{v:tText('Yamaha'),l:tText('Yamaha')},{v:tText('Autre'),l:tText('Autre')}]}/>}
         {form.motoSociete&&<I label="Modèle moto" value={form.motoModel||''} onChange={v=>setF({...form,motoModel:v})}/>}
       </div>
       {form.motoSociete&&<div style={{marginTop:8,padding:10,background:"rgba(251,146,60,.04)",borderRadius:8,fontSize:10.5,color:'#fb923c',lineHeight:1.6}}>
@@ -573,7 +573,7 @@ function Employees({s,d}) {
         • PP: barème normal. La pension est imposée séparément par le SFP.<br/>
         • DmfA: déclaration normale. SIGEDIS/SFP vérifie le cumul automatiquement.
       </div>}
-      <ST>Situation familiale</ST>
+      <ST>{tText('Situation familiale')}</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
         <I label="Situation" value={form.civil} onChange={v=>setF({...form,civil:v})} options={[{v:"single",l:tText('Isolé')},{v:"married_2",l:"Marié (2 revenus)"},{v:"married_1",l:"Marié (1 revenu)"},{v:"cohabit",l:"Cohabitant légal"}]}/>
         <I label="Enfants à charge" type="number" value={form.depChildren} onChange={v=>setF({...form,depChildren:v})}/>
@@ -614,7 +614,7 @@ function Employees({s,d}) {
             }}>{r.status==='sorti'?'SORTI':r.contract==='student'?'ÉTUDIANT':r.statut==='ouvrier'?'OUVRIER':'EMPLOYÉ'}</span>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,fontSize:11}}>
-            <div><span style={{color:'#5e5c56'}}>CP:</span> <span style={{color:'#d4d0c8'}}>{r.cp}</span></div>
+            <div><span style={{color:'#5e5c56'}}>{tText('CP:')}</span> <span style={{color:'#d4d0c8'}}>{r.cp}</span></div>
             <div><span style={{color:'#5e5c56'}}>{tText('Contrat:')}</span> <span style={{color:'#d4d0c8'}}>{r.contract}</span></div>
             <div><span style={{color:'#5e5c56'}}>{tText('Brut:')}</span> <span style={{color:'#c6a34e',fontWeight:600}}>{fmt(r.monthlySalary)}</span></div>
             <div><span style={{color:'#5e5c56'}}>{tText('Net:')}</span> <span style={{color:'#4ade80',fontWeight:600}}>{fmt(p.net)}</span></div>
@@ -629,15 +629,15 @@ function Employees({s,d}) {
     {/* LIST VIEW */}
     {viewMode==='list'&&<C style={{padding:0,overflow:'hidden'}}>
       <Tbl cols={[
-        {k:'n',l:"Employé",r:r=><div style={{display:'flex',alignItems:'center',gap:10}}>
+        {k:'n',l:tText('Employé'),r:r=><div style={{display:'flex',alignItems:'center',gap:10}}>
           <div style={{width:30,height:30,borderRadius:7,background:"rgba(198,163,78,.06)",display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,color:'#c6a34e'}}>{(r.first||'')[0]}{(r.last||'')[0]}</div>
           <div><div style={{fontWeight:500}}>{r.first} {r.last} <span style={{fontSize:8.5,padding:'1px 5px',borderRadius:3,fontWeight:600,background:r.status==='sorti'?'rgba(248,113,113,.12)':r.contract==='student'?'rgba(251,146,60,.12)':r.statut==='ouvrier'?'rgba(251,146,60,.1)':'rgba(96,165,250,.08)',color:r.status==='sorti'?'#f87171':r.contract==='student'?'#fb923c':r.statut==='ouvrier'?'#fb923c':'#60a5fa',marginLeft:4}}>{r.status==='sorti'?'SORTI':r.contract==='student'?'ÉTU':r.statut==='ouvrier'?'OUV':'EMPL'}</span></div><div style={{fontSize:10.5,color:'#5e5c56'}}>{r.niss} · {r.sexe==='F'?'♀':'♂'}</div></div>
         </div>},
-        {k:'f',l:"Fonction",r:r=><div>{r.fn}<div style={{fontSize:10.5,color:'#5e5c56'}}>{r.dept}</div></div>},
+        {k:'f',l:tText('Fonction'),r:r=><div>{r.fn}<div style={{fontSize:10.5,color:'#5e5c56'}}>{r.dept}</div></div>},
         {k:'c',l:tText('Contrat'),r:r=><span style={{fontSize:12}}>{r.contract} · {r.whWeek}h</span>},
         {k:'cp',l:"CP",r:r=>r.cp},
-        {k:'g',l:"Brut",a:'right',r:r=><span style={{fontWeight:600}}>{fmt(r.monthlySalary)}</span>},
-        {k:'ne',l:"Net",a:'right',r:r=><span style={{fontWeight:600,color:'#4ade80'}}>{fmt(calc(r,DPER,s.co).net)}</span>},
+        {k:'g',l:tText('Brut'),a:'right',r:r=><span style={{fontWeight:600}}>{fmt(r.monthlySalary)}</span>},
+        {k:'ne',l:tText('Net'),a:'right',r:r=><span style={{fontWeight:600,color:'#4ade80'}}>{fmt(calc(r,DPER,s.co).net)}</span>},
         {k:'co',l:"Coût",a:'right',r:r=><span style={{color:'#a78bfa'}}>{fmt(calc(r,DPER,s.co).costTotal)}</span>},
         {k:'a',l:"",a:'right',r:r=><div style={{display:'flex',gap:5,justifyContent:'flex-end'}}>
           <B v="ghost" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();setF({...r});setEd(true);}}>✎</B>

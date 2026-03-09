@@ -15,22 +15,22 @@ function Score({val,max,color}){const pct=Math.round((val/max)*100);return <div 
 function AuditSecuriteTab({s}) {
   const checks = [
     { cat:'Authentification', items:[
-      { id:'auth1', label:'Supabase Auth activé', status:'ok', detail:'Email/password via Supabase GoTrue' },
-      { id:'auth2', label:'Session JWT vérifiée côté serveur', status:'warning', detail:'À implémenter dans middleware.js' },
+      { id:'auth1', label:tText('Supabase Auth activé'), status:'ok', detail:'Email/password via Supabase GoTrue' },
+      { id:'auth2', label:tText('Session JWT vérifiée côté serveur'), status:'warning', detail:'À implémenter dans middleware.js' },
       { id:'auth3', label:'2FA / MFA', status:'error', detail:'Non configuré — critique avant premier client' },
-      { id:'auth4', label:'Timeout de session (30min)', status:'warning', detail:'useEffect inactivité à ajouter' },
+      { id:'auth4', label:tText('Timeout de session (30min)'), status:'warning', detail:'useEffect inactivité à ajouter' },
     ]},
     { cat:'Données sensibles', items:[
-      { id:'data1', label:'NISS chiffré en base', status:'error', detail:'AES-256 non implémenté — obligation RGPD Art.32' },
-      { id:'data2', label:tText('IBAN masqué dans les vues'), status:'warning', detail:'Afficher BE76 **** **** 3456 uniquement' },
-      { id:'data3', label:'RLS Supabase (multi-tenant)', status:'error', detail:'Row Level Security non configuré — isolation des données clients' },
-      { id:'data4', label:'Logs d\'accès aux données', status:'warning', detail:'Table audit_log à créer' },
+      { id:'data1', label:tText('NISS chiffré en base'), status:'error', detail:tText('AES-256 non implémenté — obligation RGPD Art.32') },
+      { id:'data2', label:tText('IBAN masqué dans les vues'), status:'warning', detail:tText('Afficher BE76 **** **** 3456 uniquement') },
+      { id:'data3', label:tText('RLS Supabase (multi-tenant)'), status:'error', detail:'Row Level Security non configuré — isolation des données clients' },
+      { id:'data4', label:tText('Logs d\'accès aux données'), status:'warning', detail:'Table audit_log à créer' },
     ]},
-    { cat:'API & Réseau', items:[
+    { cat:tText('API & Réseau'), items:[
       { id:'api1', label:tText('HTTPS forcé (Vercel)'), status:'ok', detail:'TLS 1.3 via Vercel Edge' },
       { id:'api2', label:tText('CORS configuré'), status:'ok', detail:'Next.js headers config en place' },
-      { id:'api3', label:'Rate limiting API', status:'error', detail:'Aucun rate limit sur /api/* — risque DDoS' },
-      { id:'api4', label:'Validation input server-side', status:'warning', detail:'Zod schemas à ajouter sur les routes API' },
+      { id:'api3', label:tText('Rate limiting API'), status:'error', detail:tText('Aucun rate limit sur /api/* — risque DDoS') },
+      { id:'api4', label:tText('Validation input server-side'), status:'warning', detail:'Zod schemas à ajouter sur les routes API' },
     ]},
     { cat:'Code', items:[
       { id:'code1', label:'eval() supprimé', status:'error', detail:'4 occurrences détectées — XSS critique' },
@@ -51,7 +51,7 @@ function AuditSecuriteTab({s}) {
 
   return <div>
     <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:20}}>
-      {[{l:'Score sécurité',v:score+'%',c:score>=70?GREEN:score>=40?ORANGE:RED},
+      {[{l:tText('Score sécurité'),v:score+'%',c:score>=70?GREEN:score>=40?ORANGE:RED},
         {l:tText('Contrôles OK'),v:ok,c:GREEN},{l:tText('Avertissements'),v:warn,c:ORANGE},{l:tText('Critiques'),v:err,c:RED}
       ].map((k,i)=><div key={i} style={{padding:'14px 16px',background:'rgba(198,163,78,.03)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
         <div style={{fontSize:9,color:'#5e5c56',textTransform:'uppercase',marginBottom:6}}>{k.l}</div>
@@ -86,12 +86,12 @@ function AuditTrailTab({s}) {
     {type:'payroll',icon:'💰',user:'info@aureus-ia.com',action:'Fiche de paie générée — Moussati N. Mars 2026',ip:'91.183.xx.xx',ts:new Date(now-900000)},
     {type:'dimona',icon:'📤',user:'info@aureus-ia.com',action:'Dimona IN simulée — ref SIM-1741360000',ip:'91.183.xx.xx',ts:new Date(now-1800000)},
     {type:'auth',icon:'🔐',user:'salem@aureus-ia.com',action:'Connexion réussie',ip:'92.104.xx.xx',ts:new Date(now-3600000)},
-    {type:'admin',icon:'⚙️',user:'info@aureus-ia.com',action:'Paramètres société mis à jour',ip:'91.183.xx.xx',ts:new Date(now-7200000)},
+    {type:'admin',icon:'⚙️',user:'info@aureus-ia.com',action:tText('Paramètres société mis à jour'),ip:'91.183.xx.xx',ts:new Date(now-7200000)},
     {type:'export',icon:'📥',user:'info@aureus-ia.com',action:'Export CSV travailleurs (3 enregistrements)',ip:'91.183.xx.xx',ts:new Date(now-86400000)},
     {type:'auth',icon:'❌',user:'unknown@test.com',action:'Tentative de connexion échouée',ip:'185.220.xx.xx',ts:new Date(now-172800000)},
   ];
 
-  const types = [{v:'all',l:tText('Tous')},{v:'auth',l:tText('Auth')},{v:'data',l:tText('Données')},{v:'payroll',l:'Paie'},{v:'dimona',l:'Dimona'},{v:'export',l:tText('Exports')},{v:'admin',l:tText('Admin')}];
+  const types = [{v:'all',l:tText('Tous')},{v:'auth',l:tText('Auth')},{v:'data',l:tText('Données')},{v:'payroll',l:tText('Paie')},{v:'dimona',l:tText('Dimona')},{v:'export',l:tText('Exports')},{v:'admin',l:tText('Admin')}];
   const filtered = filter==='all' ? events : events.filter(e=>e.type===filter);
   const typeColor = t => ({auth:BLUE,data:GOLD,payroll:GREEN,dimona:ORANGE,export:'#a855f7',admin:'#6366f1'}[t]||'#888');
 
@@ -130,11 +130,11 @@ function AuditFiscalTab({s}) {
     {ref:'ART.315 CIR92',label:tText('Conservation documents fiscaux'),detail:'7 ans minimum — fiches de paie, fiches fiscales 281.10',status:'ok'},
     {ref:'ART.315bis CIR92',label:tText('Documents électroniques acceptés'),detail:'PDF signés numériquement valables si intégrité garantie',status:'ok'},
     {ref:'ART.57 CIR92',label:tText('Dépenses professionnelles documentées'),detail:'Frais propres forfaitaires — justificatifs requis si dépassement',status:'warning'},
-    {ref:'ART.274 CIR92',label:'Précompte professionnel (274.10)',detail:'Versement mensuel SPF Finances avant le 15 du mois suivant',status:'ok'},
+    {ref:'ART.274 CIR92',label:tText('Précompte professionnel (274.10)'),detail:'Versement mensuel SPF Finances avant le 15 du mois suivant',status:'ok'},
     {ref:'LOIS 27/06/1969',label:tText('Déclaration ONSS trimestrielle (DmfA)'),detail:'T1/2026 — deadline 30/04/2026',status:'warning'},
-    {ref:'AR 28/11/1969',label:'Dimona — déclaration immédiate',detail:'Avant la mise au travail — pénalité €1,800 par travailleur',status:'ok'},
-    {ref:'CCT 90',label:'Plan de bonus — objectifs chiffrés',detail:'Dépôt au SPF ETCS avant le début de la période',status:'warning'},
-    {ref:'RGPD Art.30',label:'Registre des activités de traitement',detail:'Tenu et disponible pour inspection APD',status:'ok'},
+    {ref:'AR 28/11/1969',label:tText('Dimona — déclaration immédiate'),detail:tText('Avant la mise au travail — pénalité €1,800 par travailleur'),status:'ok'},
+    {ref:'CCT 90',label:tText('Plan de bonus — objectifs chiffrés'),detail:'Dépôt au SPF ETCS avant le début de la période',status:'warning'},
+    {ref:'RGPD Art.30',label:tText('Registre des activités de traitement'),detail:'Tenu et disponible pour inspection APD',status:'ok'},
     {ref:'RGPD Art.28',label:tText('DPA avec sous-traitants (Supabase, Vercel)'),detail:'Contrats DPA signés — conservation obligatoire',status:'ok'},
     {ref:'CODE PÉNAL SOCIAL',label:tText('Infractions sociales — conservation 5 ans'),detail:'Dimona, DmfA, contrats, règlement de travail',status:'ok'},
   ];
@@ -166,34 +166,34 @@ function TestSuiteTab({s}) {
     { id:'t1', suite:'Calcul paie', label:'calc() — brut 3000€ isolé 0 enfant', fn: () => {
       const { calc } = require('@/app/lib/helpers');
       const r = calc({monthlySalary:3000});
-      return r.net > 0 && r.onssNet > 0 ? {ok:true,val:`Net: ${r.net}€ / ONSS: ${r.onssNet}€`} : {ok:false,val:'Résultat invalide'};
+      return r.net > 0 && r.onssNet > 0 ? {ok:true,val:`Net: ${r.net}€ / ONSS: ${r.onssNet}€`} : {ok:false,val:tText('Résultat invalide')};
     }},
-    { id:'t2', suite:'Calcul paie', label:'RMMMG 2026 = 1,994.21€', fn: () => {
+    { id:'t2', suite:'Calcul paie', label:tText('RMMMG 2026 = 1,994.21€'), fn: () => {
       const RMMMG = 1994.21;
       return {ok:true,val:`RMMMG: ${RMMMG}€`};
     }},
-    { id:'t3', suite:'NISS', label:'validateNISS — NISS valide', fn: () => {
+    { id:'t3', suite:tText('NISS'), label:'validateNISS — NISS valide', fn: () => {
       return {ok:true,val:'Validation structurelle OK (mod97)'};
     }},
-    { id:'t4', suite:'NISS', label:'validateNISS — NISS invalide rejeté', fn: () => {
+    { id:'t4', suite:tText('NISS'), label:'validateNISS — NISS invalide rejeté', fn: () => {
       return {ok:true,val:'Clé de contrôle vérifiée'};
     }},
-    { id:'t5', suite:'Dimona', label:'genDimonaXML — XML valide produit', fn: () => {
+    { id:'t5', suite:tText('Dimona'), label:'genDimonaXML — XML valide produit', fn: () => {
       return {ok:true,val:'Structure XML Dimona 2.1 conforme'};
     }},
-    { id:'t6', suite:'Dimona', label:'submitToONSS — simulation retourne ref', fn: () => {
+    { id:'t6', suite:tText('Dimona'), label:'submitToONSS — simulation retourne ref', fn: () => {
       return {ok:true,val:`Ref: SIM-${Date.now()}`};
     }},
-    { id:'t7', suite:'UI', label:'Composant I (Input) — rendu correct', fn: () => {
+    { id:'t7', suite:'UI', label:tText('Composant I (Input) — rendu correct'), fn: () => {
       return {ok:true,val:'Input avec label, value, onChange OK'};
     }},
     { id:'t8', suite:'UI', label:tText('Helpers — 50+ exports disponibles'), fn: () => {
       return {ok:true,val:'C,B,I,ST,PH,Tbl,fmt,calc,quickPP... OK'};
     }},
-    { id:'t9', suite:'Legal', label:'TX_ONSS_W 2026 = 13.07%', fn: () => {
+    { id:'t9', suite:'Legal', label:tText('TX_ONSS_W 2026 = 13.07%'), fn: () => {
       return {ok:true,val:'0.1307 confirmé'};
     }},
-    { id:'t10', suite:'Legal', label:'PP barème 2026 — tranche 1 correcte', fn: () => {
+    { id:'t10', suite:'Legal', label:tText('PP barème 2026 — tranche 1 correcte'), fn: () => {
       return {ok:true,val:'Exonération < 1110€ imposable OK'};
     }},
     { id:'t11', suite:'Sécurité', label:tText('Aucune clé API exposée côté client'), fn: () => {
@@ -225,7 +225,7 @@ function TestSuiteTab({s}) {
       <button onClick={runTests} disabled={running}
         style={{padding:'8px 20px',borderRadius:8,border:`1px solid ${GOLD}`,background:'rgba(198,163,78,.08)',
           color:GOLD,fontSize:12,cursor:running?'wait':'pointer',fontFamily:'inherit',fontWeight:600}}>
-        {running ? '⏳ Exécution...' : '▶ Lancer tous les tests'}
+        {running ? tText('⏳ Exécution...') : tText('▶ Lancer tous les tests')}
       </button>
       {results && <div style={{fontSize:12,color:ok===total?GREEN:ORANGE,fontWeight:700}}>{ok}/{total} tests réussis</div>}
     </div>
@@ -261,8 +261,8 @@ export default function AuditSecuriteCode({s, d, tab: props_tab}) {
 
   const tabs = [
     {id:'securite', label:'🛡 Sécurité Code', subtitle:tText('Audit OWASP')},
-    {id:'trail', label:'🔍 Audit Trail', subtitle:'Historique accès'},
-    {id:'fiscal', label:'📋 Piste Audit SPF', subtitle:'Obligations légales'},
+    {id:'trail', label:'🔍 Audit Trail', subtitle:tText('Historique accès')},
+    {id:'fiscal', label:'📋 Piste Audit SPF', subtitle:tText('Obligations légales')},
     {id:'tests', label:'🧪 Test Suite', subtitle:'Tests unitaires'},
   ];
 

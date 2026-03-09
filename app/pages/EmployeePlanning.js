@@ -15,23 +15,23 @@ const BORDER = '#1e2633'
 const TEXT = '#e0e0e0'
 const MUTED = '#8b95a5'
 
-const MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
+const MONTHS = [tText('Janvier'), tText('Février'), tText('Mars'), tText('Avril'), tText('Mai'), tText('Juin'), tText('Juillet'), tText('Août'), tText('Septembre'), tText('Octobre'), tText('Novembre'), tText('Décembre')]
 const DAYS_SHORT = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']
 
 // ── Types d'absence belges ──
 const ABSENCE_TYPES = {
   CONGE: { label:tText('Congé annuel'), short: 'CA', color: '#3b82f6', legal: '20 jours/an (régime 5j)' },
   MALADIE: { label:tText('Maladie'), short: 'M', color: '#ef4444', legal: 'Salaire garanti: 30j employé / 7j ouvrier' },
-  CTM: { label:tText('Congé thématique'), short: 'CT', color: '#8b5cf6', legal: 'Crédit-temps, congé parental, etc.' },
-  FORMATION: { label:tText('Formation'), short: 'F', color: '#06b6d4', legal: 'Congé-éducation payé: max 125h/an' },
-  PETIT_CHOMAGE: { label: 'Petit chômage', short: 'PC', color: '#f59e0b', legal: 'Événements familiaux (mariage, décès, etc.)' },
-  CHOMAGE_TEMP: { label:tText('Chômage temporaire'), short: 'TE', color: '#ef4444', legal: 'Force majeure, économique, etc.' },
-  MATERNITE: { label: 'Maternité', short: 'MA', color: '#ec4899', legal: '15 semaines (105 jours)' },
-  PATERNITE: { label: 'Paternité', short: 'PA', color: '#3b82f6', legal: '20 jours (2025+)' },
-  SANS_SOLDE: { label: 'Sans solde', short: 'SS', color: '#6b7280', legal: 'Convention avec employeur' },
-  TELETRAVAIL: { label: 'Télétravail', short: 'TT', color: '#22c55e', legal: 'Selon convention d\'entreprise' },
+  CTM: { label:tText('Congé thématique'), short: 'CT', color: '#8b5cf6', legal: tText('Crédit-temps, congé parental, etc.') },
+  FORMATION: { label:tText('Formation'), short: 'F', color: '#06b6d4', legal: tText('Congé-éducation payé: max 125h/an') },
+  PETIT_CHOMAGE: { label:tText('Petit chômage'), short: 'PC', color: '#f59e0b', legal: 'Événements familiaux (mariage, décès, etc.)' },
+  CHOMAGE_TEMP: { label:tText('Chômage temporaire'), short: 'TE', color: '#ef4444', legal: tText('Force majeure, économique, etc.') },
+  MATERNITE: { label:tText('Maternité'), short: 'MA', color: '#ec4899', legal: '15 semaines (105 jours)' },
+  PATERNITE: { label:tText('Paternité'), short: 'PA', color: '#3b82f6', legal: '20 jours (2025+)' },
+  SANS_SOLDE: { label:tText('Sans solde'), short: 'SS', color: '#6b7280', legal: tText('Convention avec employeur') },
+  TELETRAVAIL: { label:tText('Télétravail'), short: 'TT', color: '#22c55e', legal: 'Selon convention d\'entreprise' },
   FERIE: { label:tText('Jour férié'), short: 'JF', color: '#c6a34e', legal: '10 jours fériés légaux/an' },
-  DEMI_JOUR: { label:tText('Demi-jour'), short: '½', color: '#f59e0b', legal: 'Demi-journée de congé' },
+  DEMI_JOUR: { label:tText('Demi-jour'), short: '½', color: '#f59e0b', legal: tText('Demi-journée de congé') },
 }
 
 // ── Jours fériés belges 2026 ──
@@ -42,12 +42,12 @@ function getJoursFeries(year) {
   const lunPent = new Date(paq); lunPent.setDate(paq.getDate() + 50)
 
   return [
-    { date: new Date(year, 0, 1), label: 'Jour de l\'An' },
+    { date: new Date(year, 0, 1), label: tText('Jour de l\'An') },
     { date: paq, label:tText('Pâques') },
-    { date: lunPaq, label: 'Lundi de Pâques' },
+    { date: lunPaq, label:tText('Lundi de Pâques') },
     { date: new Date(year, 4, 1), label:tText('Fête du Travail') },
     { date: ascension, label:tText('Ascension') },
-    { date: lunPent, label: 'Lundi de Pentecôte' },
+    { date: lunPent, label:tText('Lundi de Pentecôte') },
     { date: new Date(year, 6, 21), label:tText('Fête nationale') },
     { date: new Date(year, 7, 15), label:tText('Assomption') },
     { date: new Date(year, 10, 1), label:tText('Toussaint') },
@@ -271,7 +271,7 @@ function EmployeePlanning({ state, dispatch, defaultTab, initialView }) {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
-          <h2 style={{ color: GOLD, margin: '0 0 4px 0', fontSize: 20 }}>Planning & Calendrier</h2>
+          <h2 style={{ color: GOLD, margin: '0 0 4px 0', fontSize: 20 }}>{tText('Planning & Calendrier')}</h2>
           <p style={{ color: MUTED, margin: 0, fontSize: 13 }}>
             {activeEmployees.length} travailleurs actifs — {monthStats.workDays} jours ouvrables en {MONTHS[month]}
           </p>
@@ -340,7 +340,7 @@ function EmployeePlanning({ state, dispatch, defaultTab, initialView }) {
           display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16, padding: 10,
           background: `${GOLD}11`, borderRadius: 6, border: `1px solid ${GOLD}33`,
         }}>
-          <span style={{ fontSize: 11, color: GOLD, fontWeight: 600 }}>Jours fériés :</span>
+          <span style={{ fontSize: 11, color: GOLD, fontWeight: 600 }}>{tText('Jours fériés :')}</span>
           {joursFeries
             .filter(jf => jf.date.getMonth() === month && jf.date.getFullYear() === year)
             .map((jf, i) => (
@@ -416,7 +416,7 @@ function EmployeePlanning({ state, dispatch, defaultTab, initialView }) {
       }}>
         <div style={{ padding: 12, background: DARK, borderRadius: 8, border: `1px solid ${BORDER}`, textAlign: 'center' }}>
           <div style={{ fontSize: 20, fontWeight: 700, color: GOLD }}>{monthStats.workDays}</div>
-          <div style={{ fontSize: 11, color: MUTED }}>Jours ouvrables</div>
+          <div style={{ fontSize: 11, color: MUTED }}>{tText('Jours ouvrables')}</div>
         </div>
         <div style={{ padding: 12, background: DARK, borderRadius: 8, border: `1px solid ${BORDER}`, textAlign: 'center' }}>
           <div style={{ fontSize: 20, fontWeight: 700, color: '#ef4444' }}>{monthStats.totalAbsences}</div>
@@ -501,7 +501,7 @@ function EmployeePlanning({ state, dispatch, defaultTab, initialView }) {
               </div>
 
               <div>
-                <label style={{ fontSize: 12, color: MUTED, marginBottom: 4, display: 'block' }}>Motif (optionnel)</label>
+                <label style={{ fontSize: 12, color: MUTED, marginBottom: 4, display: 'block' }}>{tText('Motif (optionnel)')}</label>
                 <input
                   value={newAbsence.reason}
                   onChange={e => setNewAbsence(prev => ({ ...prev, reason: e.target.value }))}

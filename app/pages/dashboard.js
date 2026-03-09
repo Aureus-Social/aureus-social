@@ -51,7 +51,7 @@ function Dashboard({s,d}) {
     const daysToDmfa=Math.ceil((qEnd-now)/(1000*60*60*24));
     dl.push({l:`DmfA T${q}/${curYear}`,d:`${qEnd.getDate()}/${String(q*3).padStart(2,"0")}/${curYear}`,days:daysToDmfa,t:'trimestriel',urgent:daysToDmfa<=14,icon:'◆'});
     if(curMonth<=1){const belco=new Date(curYear,2,1);const dB=Math.ceil((belco-now)/(1000*60*60*24));dl.push({l:"Belcotax 281.xx",d:`01/03/${curYear}`,days:dB,t:'annuel',urgent:dB<=30,icon:'▣'});}
-    if(curMonth<=1){const bilan=new Date(curYear,1,28);const dBi=Math.ceil((bilan-now)/(1000*60*60*24));dl.push({l:"Bilan Social BNB",d:`28/02/${curYear}`,days:dBi,t:'annuel',urgent:dBi<=30,icon:'◈'});}
+    if(curMonth<=1){const bilan=new Date(curYear,1,28);const dBi=Math.ceil((bilan-now)/(1000*60*60*24));dl.push({l:tText('Bilan Social BNB'),d:`28/02/${curYear}`,days:dBi,t:'annuel',urgent:dBi<=30,icon:'◈'});}
     dl.push({l:"Dimona IN — Avant embauche",d:"Permanent",days:null,t:'event',urgent:false,icon:'⬆'});
     dl.push({l:"Provisions ONSS mensuelles",d:`5 du mois`,days:daysToPP,t:'mensuel',urgent:daysToPP<=5,icon:'◆'});
     return dl.sort((a,b)=>(a.days??999)-(b.days??999));
@@ -89,7 +89,7 @@ function Dashboard({s,d}) {
     const nextIndex=new Date(today.getFullYear(),0,1);
     if(today.getMonth()>=10)nextIndex.setFullYear(today.getFullYear()+1);
     const daysToIndex=Math.ceil((nextIndex-today)/(1000*60*60*24));
-    if(daysToIndex<=60&&daysToIndex>0)alerts.push({type:'info',icon:'📈',msg:`Indexation salariale prévue dans ~${daysToIndex} jours (janvier ${nextIndex.getFullYear()})`,cat:'Légal'});
+    if(daysToIndex<=60&&daysToIndex>0)alerts.push({type:'info',icon:'📈',msg:`Indexation salariale prévue dans ~${daysToIndex} jours (janvier ${nextIndex.getFullYear()})`,cat:tText('Légal')});
     // DmfA trimestrielle
     const q=Math.floor(today.getMonth()/3)+1;
     const qEnd=new Date(today.getFullYear(),q*3,0);
@@ -170,7 +170,7 @@ function Dashboard({s,d}) {
           } catch(e){alert('❌ Erreur monitoring: '+e.message);}
           finally{if(btn){btn.textContent='📡 Monitor';btn.disabled=false;}}
         }} id="monitor-btn" style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(96,165,250,.12)',color:'#60a5fa',fontSize:11,cursor:'pointer',fontWeight:600}}>📡 Monitor</button>
-        <button onClick={()=>d({type:'NAV',page:'automatisation'})} style={{padding:'7px 14px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:500}}>Voir tout →</button>
+        <button onClick={()=>d({type:'NAV',page:'automatisation'})} style={{padding:'7px 14px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:500}}>{tText('Voir tout →')}</button>
       </div>
     </div>
 {(()=>{const al=getAlertes(s.emps||[],s.co);return al.length>0?<div style={{marginBottom:16,borderRadius:10,border:"1px solid rgba(198,163,78,.15)",padding:12,background:"rgba(198,163,78,.03)"}}><div style={{fontSize:12,fontWeight:700,color:"#c6a34e",marginBottom:8}}>Alertes ({al.length})</div>{al.slice(0,8).map((a,i)=><div key={i} style={{padding:"6px 8px",marginBottom:4,borderRadius:6,fontSize:11,background:a.level==="danger"?"rgba(248,113,113,.08)":a.level==="warning"?"rgba(251,146,60,.08)":"rgba(96,165,250,.08)",color:a.level==="danger"?"#f87171":a.level==="warning"?"#fb923c":"#60a5fa"}}>{a.icon} {a.msg}</div>)}{al.length>8?<div style={{fontSize:10,color:"#9e9b93",marginTop:4}}>+{al.length-8} autres alertes</div>:null}</div>:null})()}
@@ -179,7 +179,7 @@ function Dashboard({s,d}) {
     <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:14,marginBottom:22}}>
       {[
         {label:tText('Employés actifs'),value:ae.length,sub:`${sortie.length} sorti${sortie.length>1?'s':''} · ${etudiants.length} étudiant${etudiants.length>1?'s':''}`,color:'#c6a34e',icon:'◉'},
-        {label:"Masse salariale brute",value:fmt(tm),sub:`Moy: ${fmt(avgGross)}/emp`,color:'#4ade80',icon:'◈'},
+        {label:tText('Masse salariale brute'),value:fmt(tm),sub:`Moy: ${fmt(avgGross)}/emp`,color:'#4ade80',icon:'◈'},
         {label:"Net total",value:fmt(tn),sub:`${ae.length?Math.round(tn/tm*100):0}% du brut`,color:'#60a5fa',icon:'▤'},
         {label:"Coût employeur total",value:fmt(tc),sub:`Ratio: ${ae.length?((tc/tm)*100).toFixed(0):0}% du brut`,color:'#a78bfa',icon:'◆'},
         {label:tText('Déclarations'),value:`${(s.pays||[]).length}`,sub:`${(s.dims||[]).length} Dimona · ${(s.dmfas||[]).length} DmfA`,color:'#fb923c',icon:'◇'},
@@ -198,9 +198,9 @@ function Dashboard({s,d}) {
       {/* 12-MONTH CHART */}
       <C style={{padding:'22px 24px'}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:18}}>
-          <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Évolution coût salarial — 12 mois</div>
+          <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>{tText('Évolution coût salarial — 12 mois')}</div>
           <div style={{display:'flex',gap:14}}>
-            {[{l:tText('Coût total'),c:'#a78bfa'},{l:"Masse brute",c:'#c6a34e'},{l:"Net",c:'#4ade80'}].map(x=>
+            {[{l:tText('Coût total'),c:'#a78bfa'},{l:"Masse brute",c:'#c6a34e'},{l:tText('Net'),c:'#4ade80'}].map(x=>
               <div key={x.l} style={{display:'flex',alignItems:'center',gap:5,fontSize:10,color:'#5e5c56'}}>
                 <span style={{width:8,height:3,borderRadius:2,background:x.c,display:'inline-block'}}/>{x.l}
               </div>
@@ -322,14 +322,14 @@ function Dashboard({s,d}) {
       <C style={{padding:'20px 18px',maxHeight:340,overflowY:'auto'}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
           <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Équipe ({ae.length})</div>
-          <button onClick={()=>d({type:"NAV",page:'employees'})} style={{fontSize:10,color:'#c6a34e',background:"none",border:'none',cursor:'pointer',fontFamily:'inherit',fontWeight:500}}>Voir tout →</button>
+          <button onClick={()=>d({type:"NAV",page:'employees'})} style={{fontSize:10,color:'#c6a34e',background:"none",border:'none',cursor:'pointer',fontFamily:'inherit',fontWeight:500}}>{tText('Voir tout →')}</button>
         </div>
         {calcs.slice(0,8).map(({e,c},i)=>(
           <div key={e.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'9px 0',borderBottom:'1px solid rgba(255,255,255,.03)',animation:`fadeIn .3s ease ${i*0.04}s both`}}>
             <div style={{display:'flex',alignItems:'center',gap:10}}>
               <div style={{width:32,height:32,borderRadius:8,background:`linear-gradient(135deg,${['#c6a34e',"#60a5fa","#a78bfa","#4ade80","#fb923c","#06b6d4"][i%6]}22,${['#c6a34e',"#60a5fa","#a78bfa","#4ade80","#fb923c","#06b6d4"][i%6]}08)`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:['#c6a34e',"#60a5fa","#a78bfa","#4ade80","#fb923c","#06b6d4"][i%6]}}>{(e.first||'')[0]}{(e.last||'')[0]}</div>
               <div>
-                <div style={{fontSize:12.5,fontWeight:500,color:'#e8e6e0'}}>{e.first||e.fn||'Employé'} {e.last||''}
+                <div style={{fontSize:12.5,fontWeight:500,color:'#e8e6e0'}}>{e.first||e.fn||tText('Employé')} {e.last||''}
                   <span style={{fontSize:8.5,padding:'1px 5px',borderRadius:3,marginLeft:6,fontWeight:600,
                     background:e.status==='sorti'?'rgba(248,113,113,.12)':e.contract==='student'?'rgba(251,146,60,.12)':e.statut==='ouvrier'?'rgba(251,146,60,.1)':'rgba(96,165,250,.08)',
                     color:e.status==='sorti'?'#f87171':e.contract==='student'?'#fb923c':e.statut==='ouvrier'?'#fb923c':'#60a5fa',

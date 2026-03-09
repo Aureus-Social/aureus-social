@@ -57,7 +57,7 @@ export const PRIMES_SECTORIELLES={
     details:{base_legale:'CCT CP 119 — Ouvertures tardives',conditions:['Heures prestées après 20h00','Nocturnes commerce autorisées','Majoré à +100% après 22h dans certaines CCT entreprise'],calcul:'Salaire horaire × 50%. Ex: 13.20 EUR/h → +6.60 EUR/h après 20h.'}},
   {nom:'Prime fin d\'année',montant:'1 mois brut (après 6 mois)',condition:'Au 31/12',cat:'annuelle',
     details:{base_legale:'CCT CP 119',conditions:['Ancienneté min 6 mois au 31/12','Prorata entrée/sortie','Non due si faute grave'],calcul:'Salaire brut mensuel × (mois prestés / 12)',paiement:'Décembre',fiscal:'Taxé ONSS 13.07% + PP barème annualisé'}},
-  {nom:'Eco-chèques',montant:'250 EUR/an',condition:'Temps plein',cat:'avantage',
+  {nom:'Eco-chèques',montant:'250 EUR/an',condition:tText('Temps plein'),cat:'avantage',
     details:{base_legale:'CCT 98 CNT + CCT CP 119',conditions:['250 EUR temps plein, prorata temps partiel','Validité 24 mois','Produits écologiques (liste SPF)'],exoneration:'Exonéré ONSS + IPP',paiement:'Juin-juillet'}},
   {nom:tText('Prime syndicale'),montant:'~135 EUR/an',condition:'Membre syndicat',cat:'syndicale',
     details:{base_legale:'CCT CP 119',conditions:['Affilié syndicat reconnu','Formulaire annuel'],paiement:'Via syndicat mars-avril',fiscal:'Non imposable'}},
@@ -105,7 +105,7 @@ export const PRIMES_SECTORIELLES={
     details:{base_legale:'CCT CP 124 + AR Amiante 16/03/2006',conditions:['Manipulation amiante (désamiantage): formation spécifique + agrément','Contact plomb, poussières toxiques','Travail en milieu contaminé','Protection respiratoire obligatoire'],calcul:'Salaire horaire × 10%. Cumulable avec prime hauteur.',special:'Désamiantage: agrément obligatoire de l\'entreprise + suivi médical renforcé du travailleur.'}},
   {nom:'Prime fin d\'année',montant:'1 mois brut',condition:'Via fonds sectoriel',cat:'annuelle',
     details:{base_legale:'CCT CP 124',conditions:['Ancienneté dans le secteur','Prorata prestations','Via fonds sectoriel Constructiv'],paiement:'Décembre via Constructiv ou employeur',fiscal:'ONSS + PP'}},
-  {nom:'Eco-chèques',montant:'250 EUR/an',condition:'Temps plein',cat:'avantage',
+  {nom:'Eco-chèques',montant:'250 EUR/an',condition:tText('Temps plein'),cat:'avantage',
     details:{base_legale:'CCT 98 CNT + CCT CP 124',conditions:['250 EUR temps plein, prorata temps partiel','Validité 24 mois'],exoneration:'Exonéré ONSS + IPP',paiement:'Juin-juillet'}},
   {nom:tText('Prime syndicale'),montant:'~145 EUR/an',condition:'Membre syndicat',cat:'syndicale',
     details:{base_legale:'CCT CP 124 — Constructiv',conditions:['Affilié syndicat reconnu','Construction: prime parmi les plus élevées'],paiement:'Mars-avril via syndicat',fiscal:'Non imposable'}},
@@ -117,7 +117,7 @@ export const PRIMES_SECTORIELLES={
     details:{base_legale:'CCT CP 322.01 — Titres-services',conditions:['Ancienneté min 6 mois dans le secteur','Prorata si temps partiel ou entrée en cours d\'année','Non due si licenciement faute grave'],calcul:'4.33 semaines de salaire brut. Ex: 13.50 EUR/h × 38h/sem × 4.33 = ~2,219 EUR brut.',paiement:'Décembre, via employeur ou fonds sectoriel',fiscal:'ONSS 13.07% + PP'}},
   {nom:'Prime annuelle (juin)',montant:'~1 semaine salaire',condition:'En juin',cat:'annuelle',
     details:{base_legale:'CCT CP 322.01',conditions:['Ancienneté min 6 mois','En service au 30 juin'],calcul:'~1 semaine de salaire brut. Ex: 13.50 EUR/h × 38h = ~513 EUR brut.',paiement:'Juin'}},
-  {nom:'Eco-chèques',montant:'250 EUR/an',condition:'Temps plein',cat:'avantage',
+  {nom:'Eco-chèques',montant:'250 EUR/an',condition:tText('Temps plein'),cat:'avantage',
     details:{base_legale:'CCT 98 CNT + CCT CP 322.01',conditions:['250 EUR temps plein, prorata temps partiel','Validité 24 mois','Produits écologiques uniquement'],exoneration:'Exonéré ONSS + IPP'}},
   {nom:'Indemnité déplacement',montant:'Remboursement entre clients',condition:'Pas domicile-1er client',cat:'conditions',
     details:{base_legale:'CCT CP 322.01 — Déplacements titres-services',conditions:['Remboursement des déplacements ENTRE clients','Le trajet domicile → 1er client n\'est PAS remboursé','Le trajet dernier client → domicile n\'est PAS remboursé','Transport en commun: remboursement abonnement (80-100% selon CCT)'],calcul:'Véhicule privé: 0.15 EUR/km entre clients. Transport en commun: abonnement remboursé.',fiscal:'Exonéré ONSS comme frais de déplacement professionnel'}},
@@ -155,7 +155,7 @@ export const PRIMES_SECTORIELLES={
     details:{base_legale:'CCT CP 111 — Conditions de travail pénibles',conditions:['Bruit > 80 dB: +5%','Chaleur > 30°C: +10%','Poussières/fumées toxiques: +10-15%','Évaluation par conseiller en prévention'],calcul:'Variable selon le risque. Cumulable entre risques (max +15%).'}},
   {nom:'Prime fin d\'année',montant:'1 mois brut',condition:'Au 31/12',cat:'annuelle',
     details:{base_legale:'CCT CP 111',conditions:['Ancienneté min 6 mois','Prorata prestations'],paiement:'Décembre',fiscal:'ONSS + PP'}},
-  {nom:'Eco-chèques',montant:'250 EUR/an',condition:'Temps plein',cat:'avantage',
+  {nom:'Eco-chèques',montant:'250 EUR/an',condition:tText('Temps plein'),cat:'avantage',
     details:{base_legale:'CCT 98 CNT + CCT CP 111',conditions:['250 EUR temps plein, prorata','Validité 24 mois'],exoneration:'Exonéré ONSS + IPP'}},
   {nom:tText('Prime syndicale'),montant:'~135 EUR/an',condition:'Membre syndicat',cat:'syndicale',
     details:{base_legale:'CCT CP 111 — Fonds social métallurgie',conditions:['Affilié syndicat reconnu'],paiement:'Mars-avril',fiscal:'Non imposable'}},
@@ -292,32 +292,32 @@ contratAlternance:{
 // ════════════════════════════════════════════════════════════
 export const OBLIGATIONS_SECTORIELLES={
 '118':{
-  vetements:{obligatoire:true,fourniture:'Employeur',entretien:'Employeur',items:['Veste/pantalon de travail','Charlotte/calot','Chaussures de sécurité','Tablier']},
+  vetements:{obligatoire:true,fourniture:tText('Employeur'),entretien:tText('Employeur'),items:['Veste/pantalon de travail','Charlotte/calot','Chaussures de sécurité','Tablier']},
   hygiene:{haccp:true,certificat_medical:true,formations:['Formation HACCP initiale','Recyclage annuel','Hygiène des mains','Allergènes']},
   securite:['Extincteurs','Plan d\'évacuation','Premiers secours','Protection machines'],
 },
 '119':{
-  vetements:{obligatoire:true,fourniture:'Employeur',entretien:'Employeur ou indemnité',items:['Veste/tablier','Charlotte (rayon boucherie/boulangerie)','Chaussures adaptées']},
+  vetements:{obligatoire:true,fourniture:tText('Employeur'),entretien:'Employeur ou indemnité',items:['Veste/tablier','Charlotte (rayon boucherie/boulangerie)','Chaussures adaptées']},
   hygiene:{haccp:true,certificat_medical:true,formations:['HACCP','Traçabilité','Conservation']},
   securite:['Ergonomie caisse','Manutention charges'],
 },
 '302':{
-  vetements:{obligatoire:true,fourniture:'Employeur',entretien:'Employeur',items:['Tenue de cuisine complète','Chaussures de sécurité cuisine','Uniforme de service']},
+  vetements:{obligatoire:true,fourniture:tText('Employeur'),entretien:tText('Employeur'),items:['Tenue de cuisine complète','Chaussures de sécurité cuisine','Uniforme de service']},
   hygiene:{haccp:true,certificat_medical:true,formations:['HACCP cuisine/salle','Allergènes obligatoire','Conservation/chaîne du froid','Nettoyage/désinfection']},
   securite:['Plan de prévention','Premiers secours','Extincteurs','Ventilation cuisine'],
 },
 '124':{
-  vetements:{obligatoire:true,fourniture:'Employeur',entretien:'Employeur',items:['Casque de chantier','Chaussures de sécurité S3','Vêtements haute visibilité','Gants','Lunettes','Harnais anti-chute (hauteur)','Protection auditive']},
+  vetements:{obligatoire:true,fourniture:tText('Employeur'),entretien:tText('Employeur'),items:['Casque de chantier','Chaussures de sécurité S3','Vêtements haute visibilité','Gants','Lunettes','Harnais anti-chute (hauteur)','Protection auditive']},
   hygiene:{haccp:false,certificat_medical:false,formations:['VCA (sécurité chantier)','Travail en hauteur','Amiante (si applicable)','Premiers secours chantier']},
   securite:['Carte C3.2A obligatoire','Checkin@work','Plan de sécurité/santé','Coordinateur sécurité','Registre de chantier','Analyse des risques'],
 },
 '330':{
-  vetements:{obligatoire:true,fourniture:'Employeur',entretien:'Employeur',items:['Tunique/uniforme soignant','Chaussures médicales','Gants','Masques','Surblouse']},
+  vetements:{obligatoire:true,fourniture:tText('Employeur'),entretien:tText('Employeur'),items:['Tunique/uniforme soignant','Chaussures médicales','Gants','Masques','Surblouse']},
   hygiene:{haccp:false,certificat_medical:true,formations:['Hygiène hospitalière','Prévention infections','Déchets médicaux','Radioprotection (si applicable)']},
   securite:['Plan d\'urgence interne','Défibrillateur','Prévention violence/agression','Ergonomie soins (manutention patients)'],
 },
 '121':{
-  vetements:{obligatoire:true,fourniture:'Employeur',entretien:'Employeur ou indemnité',items:['Vêtements de travail','Chaussures de sécurité','Gants','Protection yeux (produits chimiques)']},
+  vetements:{obligatoire:true,fourniture:tText('Employeur'),entretien:'Employeur ou indemnité',items:['Vêtements de travail','Chaussures de sécurité','Gants','Protection yeux (produits chimiques)']},
   hygiene:{haccp:false,certificat_medical:false,formations:['Manipulation produits chimiques','Fiches de sécurité (FDS)','Ergonomie']},
   securite:['Formation hauteur (laveurs de vitres)','EPI obligatoires','Analyse des risques par chantier'],
 },
@@ -395,10 +395,10 @@ export const INDEXATION_CP={
 // ════════════════════════════════════════════════════════════
 export const JOURS_FERIES_2026=[
   {date:'01/01/2026',nom:'Jour de l\'An',jour:'Jeudi'},
-  {date:'05/04/2026',nom:'Lundi de Pâques',jour:'Lundi'},
+  {date:'05/04/2026',nom:tText('Lundi de Pâques'),jour:'Lundi'},
   {date:'01/05/2026',nom:tText('Fête du Travail'),jour:'Vendredi'},
   {date:'14/05/2026',nom:tText('Ascension'),jour:'Jeudi'},
-  {date:'25/05/2026',nom:'Lundi de Pentecôte',jour:'Lundi'},
+  {date:'25/05/2026',nom:tText('Lundi de Pentecôte'),jour:'Lundi'},
   {date:'21/07/2026',nom:tText('Fête nationale'),jour:'Mardi'},
   {date:'15/08/2026',nom:tText('Assomption'),jour:'Samedi'},
   {date:'01/11/2026',nom:tText('Toussaint'),jour:'Dimanche'},
@@ -486,7 +486,7 @@ export function TransversalCPView({cp,initialTab,barData}){
             <div style={{fontSize:12,fontWeight:600,color:'#c6a34e'}}>{p.montant}</div>
           </div>)}
           {barData.particularites&&<div style={{marginTop:12}}>{barData.particularites.map((p,i)=><div key={i} style={{fontSize:10,color:'#888',padding:'3px 0'}}>• {p}</div>)}</div>}
-        </C>:<div style={{padding:20,textAlign:'center',color:'#888'}}>Pas de primes spécifiques détaillées pour cette CP. Consultez la CCT sectorielle.</div>}
+        </C>:<div style={{padding:20,textAlign:'center',color:'#888'}}>{tText('Pas de primes spécifiques détaillées pour cette CP. Consultez la CCT sectorielle.')}</div>}
       </div>}
     </div>}
 
@@ -549,7 +549,7 @@ export function TransversalCPView({cp,initialTab,barData}){
         <Row l="Cotisation" v={fonds.cotisation}/>
         <div style={{marginTop:8,fontSize:11,fontWeight:600,color:'#c6a34e'}}>{tText('Services:')}</div>
         {fonds.services.map((s,i)=><div key={i} style={{fontSize:10,color:'#888',padding:'3px 0'}}>• {s}</div>)}
-      </C>:<div style={{padding:20,textAlign:'center',color:'#888'}}>Pas de fonds sectoriel spécifique identifié.</div>}
+      </C>:<div style={{padding:20,textAlign:'center',color:'#888'}}>{tText('Pas de fonds sectoriel spécifique identifié.')}</div>}
       {cp==='124'&&<div>
         <C title="⭐ Timbres de fidélité (Construction)" color="#c6a34e">
           <Row l="Calcul" v={TIMBRES.fidelite.calcul}/>
@@ -578,7 +578,7 @@ export function TransversalCPView({cp,initialTab,barData}){
         <Row l="Dernière indexation" v={idx.dernier} c="#22c55e"/>
         <Row l="Pourcentage dernière" v={'+'+idx.pctDernier+'%'} c="#c6a34e"/>
         <div style={{marginTop:8,fontSize:10,color:'#888'}}>{idx.note}</div>
-      </C>:<div style={{padding:20,textAlign:'center',color:'#888'}}>Indexation standard: index santé lissé, application au dépassement du pivot.</div>}
+      </C>:<div style={{padding:20,textAlign:'center',color:'#888'}}>{tText('Indexation standard: index santé lissé, application au dépassement du pivot.')}</div>}
       <C title="Comment fonctionne l'indexation belge?" sub="Résumé simplifié">
         <div style={{fontSize:10,color:'#888',lineHeight:1.8}}>{[
           '1. L\'indice des prix à la consommation est calculé mensuellement par Statbel',

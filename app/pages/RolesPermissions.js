@@ -7,11 +7,11 @@ const ROLE_LABELS = { admin:tText('Administrateur'), comptable:'Comptable', rh:t
 const ROLE_COLORS = { admin:'#c6a34e', comptable:'#60a5fa', rh:'#22c55e', commercial:'#a78bfa', readonly:'#5e5c56' };
 const PERM_LABELS = {
   voir_fiches_paie:'Voir fiches de paie', calculer_paie:'Calculer la paie',
-  exporter_comptabilite:'Exporter comptabilité', soumettre_dimona:'Soumettre Dimona',
+  exporter_comptabilite:tText('Exporter comptabilité'), soumettre_dimona:'Soumettre Dimona',
   modifier_travailleurs:'Modifier travailleurs', voir_travailleurs:'Voir travailleurs',
-  gerer_contrats:'Gérer contrats', voir_clients_entreprises:'Voir clients/entreprises',
-  gerer_facturation:'Gérer facturation', acces_audit_trail:tText('Accès audit trail'),
-  gerer_utilisateurs:'Gérer utilisateurs', configuration_app:'Configuration app',
+  gerer_contrats:tText('Gérer contrats'), voir_clients_entreprises:'Voir clients/entreprises',
+  gerer_facturation:tText('Gérer facturation'), acces_audit_trail:tText('Accès audit trail'),
+  gerer_utilisateurs:tText('Gérer utilisateurs'), configuration_app:'Configuration app',
   exporter_donnees:'Exporter ses données', voir_dashboard_kpis:'Voir dashboard KPIs',
 };
 
@@ -34,7 +34,7 @@ export default function RolesPermissions({ s }) {
       <div style={{display:'flex',gap:4,marginBottom:16,flexWrap:'wrap'}}>
         {['matrice','detail','kpis'].map(t => (
           <button key={t} onClick={()=>setTab(t)} style={{padding:'7px 14px',borderRadius:8,border:'none',cursor:'pointer',fontSize:11,fontWeight:tab===t?700:400,fontFamily:'inherit',background:tab===t?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t?'#c6a34e':'#9e9b93'}}>
-            {t==='matrice'?'📊 Matrice complète':t==='detail'?'👤 Détail par rôle':'📈 Périmètre KPIs'}
+            {t==='matrice'?tText('📊 Matrice complète'):t==='detail'?tText('👤 Détail par rôle'):tText('📈 Périmètre KPIs')}
           </button>
         ))}
       </div>
@@ -111,10 +111,10 @@ export default function RolesPermissions({ s }) {
             <div key={r} style={{padding:'12px',marginBottom:8,background:'rgba(255,255,255,.02)',borderRadius:8,border:'1px solid rgba(255,255,255,.04)'}}>
               <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
                 <span style={{fontSize:11,fontWeight:700,color:ROLE_COLORS[r]}}>{ROLE_LABELS[r]}</span>
-                <span style={{fontSize:9,padding:'2px 8px',borderRadius:10,background:`${ROLE_COLORS[r]}15`,color:ROLE_COLORS[r]}}>{KPI_SCOPE[r][0]==='all'?'Accès total':KPI_SCOPE[r].length+' KPIs'}</span>
+                <span style={{fontSize:9,padding:'2px 8px',borderRadius:10,background:`${ROLE_COLORS[r]}15`,color:ROLE_COLORS[r]}}>{KPI_SCOPE[r][0]==='all'?tText('Accès total'):KPI_SCOPE[r].length+' KPIs'}</span>
               </div>
               <div style={{fontSize:10,color:'#9e9b93'}}>
-                {KPI_SCOPE[r][0]==='all' ? 'Tous les KPIs — vue globale plateforme' : KPI_SCOPE[r].join(' · ')}
+                {KPI_SCOPE[r][0]==='all' ? tText('Tous les KPIs — vue globale plateforme') : KPI_SCOPE[r].join(' · ')}
               </div>
             </div>
           ))}

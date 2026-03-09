@@ -67,7 +67,7 @@ const AUREUS = {
 
 // ══ RÉDUCTIONS PREMIER(S) EMPLOYÉ(S) 2026 ══
 const REDUCTIONS_PREMIERS_EMPLOYES = [
-  { rang: 1, label: '1er employé', exo: 'TOTALE', montant: null, duree: 'Illimitée', detail: 'Exonération totale des cotisations patronales de base. Art. 334 Loi 22/12/2003. Aucune limite dans le temps. Montant moyen économisé : ~8.000–12.000 EUR/an selon salaire.' },
+  { rang: 1, label:tText('1er employé'), exo: 'TOTALE', montant: null, duree: tText('Illimitée'), detail: 'Exonération totale des cotisations patronales de base. Art. 334 Loi 22/12/2003. Aucune limite dans le temps. Montant moyen économisé : ~8.000–12.000 EUR/an selon salaire.' },
   { rang: 2, label: '2e employé', exo: 'PARTIELLE', montant: 3100, duree: '13 trimestres', detail: 'Réduction forfaitaire 3.100 EUR/trimestre pendant 13 trimestres (3,25 ans). Art. 2 §2 Loi 27/06/1969. Économie totale : ~40.300 EUR.' },
   { rang: 3, label: '3e employé', exo: 'PARTIELLE', montant: 1000, duree: '13 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 13 trimestres. Économie totale : ~13.000 EUR.' },
   { rang: 4, label: '4e employé', exo: 'PARTIELLE', montant: 1000, duree: '8 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 8 trimestres (2 ans). Économie totale : ~8.000 EUR.' },
@@ -81,7 +81,7 @@ const PRIMES_EMPLOI = [
     id: 'activa_bxl',
     label:tText('Activa.brussels'),
     montant: '350 EUR/mois',
-    duree: '24 mois',
+    duree: tText('24 mois'),
     region: 'Bruxelles',
     organisme: 'Actiris',
     conditions: 'Demandeur d\'emploi bruxellois inoccupé ≥ 6 mois. 18–64 ans.',
@@ -103,7 +103,7 @@ const PRIMES_EMPLOI = [
   },
   {
     id: 'art60',
-    label: 'Art. 60 §7 — CPAS (Premier emploi CPAS)',
+    label:tText('Art. 60 §7 — CPAS (Premier emploi CPAS)'),
     montant: '100% salaire + cotisations',
     duree: 'Variable (6–24 mois)',
     region: 'National',
@@ -111,13 +111,13 @@ const PRIMES_EMPLOI = [
     conditions: 'Bénéficiaire du revenu d\'intégration sociale (RIS). Contrat via CPAS qui le met à disposition d\'un tiers employeur.',
     demarches: 'Contact CPAS de la commune + convention de mise à disposition.',
     base_legale: 'Art. 60 §7 Loi CPAS 08/07/1976',
-    calcul: 'CPAS prend en charge 100% du coût salarial pendant la durée convenue.',
+    calcul: tText('CPAS prend en charge 100% du coût salarial pendant la durée convenue.'),
   },
   {
     id: 'activa_jeune',
     label:tText('Activa Jeunes < 30 ans'),
     montant: '350 EUR/mois',
-    duree: '12–24 mois',
+    duree: tText('12–24 mois'),
     region: 'Bruxelles / Flandre / Wallonie',
     organisme: 'Actiris / VDAB / FOREM',
     conditions: 'Moins de 30 ans. Chercheur d\'emploi. Diplôme max CESS.',
@@ -129,7 +129,7 @@ const PRIMES_EMPLOI = [
     id: 'impulsion_55',
     label:tText('Impulsion 55+'),
     montant: '500 EUR/mois',
-    duree: '36 mois',
+    duree: tText('36 mois'),
     region: 'Bruxelles',
     organisme: 'Actiris',
     conditions: 'Chercheur d\'emploi ≥ 55 ans. Inoccupé ≥ 6 mois.',
@@ -139,9 +139,9 @@ const PRIMES_EMPLOI = [
   },
   {
     id: 'sine',
-    label: 'SINE — Économie Sociale',
+    label:tText('SINE — Économie Sociale'),
     montant: '500 EUR/mois',
-    duree: '24 mois',
+    duree: tText('24 mois'),
     region: 'National',
     organisme: 'ONEM',
     conditions: 'Très difficile d\'insertion. RSI ou équivalent. Engagement en économie sociale agréée.',
@@ -151,7 +151,7 @@ const PRIMES_EMPLOI = [
   },
   {
     id: 'monbee',
-    label: 'MonBEE (Économie d\'énergie employeur)',
+    label: tText('MonBEE (Économie d\'énergie employeur)'),
     montant: 'Variable selon investissements',
     duree: tText('Annuel'),
     region: 'Bruxelles',
@@ -159,14 +159,14 @@ const PRIMES_EMPLOI = [
     conditions: 'Employeur bruxellois réalisant des investissements verts.',
     demarches: 'Dossier MonBEE avant le 01/06/2026 (deadline active).',
     base_legale: 'Ord. Bruxelloise sur les primes énergie',
-    calcul: 'Variable selon investissements énergétiques',
+    calcul: tText('Variable selon investissements énergétiques'),
   },
 ];
 
 // ══ TAUX DOMICILIATION 2026 ══
 const DOMICILIATION_TAUX = {
   tauxRistourne: 0.05,
-  label: 'Ristourne domiciliation 5%',
+  label:tText('Ristourne domiciliation 5%'),
   description: 'En contrepartie de la domiciliation de tous les paiements sociaux (cotisations ONSS, versements PP, virements salaires) sur le compte bancaire d\'Aureus IA SPRL référencé, le client bénéficie d\'une ristourne de 5% sur les honoraires mensuels Aureus Social Pro.',
   conditionsAppliquer: [
     'Domiciliation des virements SEPA salaires depuis Aureus',
@@ -174,7 +174,7 @@ const DOMICILIATION_TAUX = {
     'Versements précompte professionnel via Aureus',
     'Minimum 3 mois consécutifs de domiciliation active',
   ],
-  calcul: 'Honoraires bruts × 0,95 = honoraires avec ristourne',
+  calcul: tText('Honoraires bruts × 0,95 = honoraires avec ristourne'),
 };
 
 // ══════════════════════════════════════════════════════════════
@@ -354,8 +354,8 @@ ${clientForm.nom || ''}`;
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 16 }}>
               {[
                 { l:tText('Matricule provisoire'), v: AUREUS.matriculeONSS, c: '#f97316' },
-                { l: 'Réf. Mahis', v: AUREUS.mahisRef, c: '#22c55e' },
-                { l: 'CSAM GAP réf. 1', v: AUREUS.csamRef1, c: '#60a5fa' },
+                { l:tText('Réf. Mahis'), v: AUREUS.mahisRef, c: '#22c55e' },
+                { l:tText('CSAM GAP réf. 1'), v: AUREUS.csamRef1, c: '#60a5fa' },
               ].map((k, i) => (
                 <div key={i} onClick={() => copy(k.v, k.l)} style={{ padding: '12px 14px',
                   background: 'rgba(255,255,255,0.03)', borderRadius: 10, border: `1px solid ${k.c}30`,
@@ -432,8 +432,8 @@ ${clientForm.nom || ''}`;
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 16 }}>
               {[
                 { l:tText('Fiche 281.10'), v: 'Salariés', desc: 'Tous les travailleurs sous contrat de travail', icon: '👔', deadline: '1er mars' },
-                { l: 'Fiche 281.20', v: 'Dirigeants', desc: 'Administrateurs, gérants rémunérés', icon: '👔', deadline: '1er mars' },
-                { l: 'Fiche 281.30', v: 'Honoraires', desc: 'Indépendants, free-lances', icon: '🧾', deadline: '1er mars' },
+                { l:tText('Fiche 281.20'), v: 'Dirigeants', desc: 'Administrateurs, gérants rémunérés', icon: '👔', deadline: '1er mars' },
+                { l:tText('Fiche 281.30'), v: 'Honoraires', desc: 'Indépendants, free-lances', icon: '🧾', deadline: '1er mars' },
               ].map((f, i) => (
                 <div key={i} style={{ padding: 14, background: 'rgba(255,255,255,0.03)', borderRadius: 10,
                   border: '1px solid rgba(198,163,78,0.1)' }}>
@@ -545,7 +545,7 @@ ${clientForm.nom || ''}`;
                 <div style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                     <thead>
-                      <tr>{['Travailleur','NISS',tText('Brut annuel'),'ONSS trav.','Imposable','PP'].map(h => (
+                      <tr>{[tText('Travailleur'),tText('NISS'),tText('Brut annuel'),tText('ONSS trav.'),'Imposable','PP'].map(h => (
                         <th key={h} style={{ padding: '8px', textAlign: 'left', color: '#c6a34e', borderBottom: '2px solid rgba(198,163,78,.2)', fontSize: 10 }}>{h}</th>
                       ))}</tr>
                     </thead>
@@ -571,7 +571,7 @@ ${clientForm.nom || ''}`;
                   </table>
                 </div>
               ) : (
-                <div style={{ color: '#5e5c56', fontSize: 11, padding: 12 }}>Aucun travailleur — les fiches apparaîtront ici</div>
+                <div style={{ color: '#5e5c56', fontSize: 11, padding: 12 }}>{tText('Aucun travailleur — les fiches apparaîtront ici')}</div>
               )}
             </div>
           </C>
@@ -624,9 +624,9 @@ ${clientForm.nom || ''}`;
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 }}>
               {[
-                { l: 'Ristourne/mois', v: f2(ristourne) + ' EUR', c: '#22c55e' },
-                { l: 'Net avec ristourne', v: f2(netAvecRistourne) + ' EUR/m', c: '#c6a34e' },
-                { l: 'Économie totale', v: f2(economieAnnuelle) + ' EUR', c: '#a78bfa' },
+                { l:tText('Ristourne/mois'), v: f2(ristourne) + ' EUR', c: '#22c55e' },
+                { l:tText('Net avec ristourne'), v: f2(netAvecRistourne) + ' EUR/m', c: '#c6a34e' },
+                { l:tText('Économie totale'), v: f2(economieAnnuelle) + ' EUR', c: '#a78bfa' },
               ].map((k, i) => (
                 <div key={i} style={{ padding: '14px', background: 'rgba(255,255,255,0.03)',
                   borderRadius: 10, border: `1px solid ${k.c}30`, textAlign: 'center' }}>
@@ -670,7 +670,7 @@ est interrompue pendant plus de 2 mois consécutifs.`}
             <ST>🏅 Réductions Cotisations — 1er au 6e Employé (2026)</ST>
             <p style={{ fontSize: 11, color: '#9e9b93', lineHeight: 1.6, margin: '0 0 12px' }}>
               En Belgique, les premières embauches bénéficient de réductions massives sur les cotisations 
-              patronales ONSS. Le 1er employé est exonéré <strong style={{ color: '#22c55e' }}>TOTALEMENT</strong> à vie. 
+              patronales ONSS. Le 1er employé est exonéré <strong style={{ color: '#22c55e' }}>{tText('TOTALEMENT')}</strong> à vie. 
               Les suivants bénéficient de réductions forfaitaires dégressives.
             </p>
           </C>
@@ -699,7 +699,7 @@ est interrompue pendant plus de 2 mois consécutifs.`}
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                 <thead>
                   <tr>
-                    {['Employé', 'Réduction', tText('Durée'), 'Économie totale', tText('Base légale')].map(h => (
+                    {[tText('Employé'), tText('Réduction'), tText('Durée'), tText('Économie totale'), tText('Base légale')].map(h => (
                       <th key={h} style={{ padding: '8px', textAlign: 'left', color: '#c6a34e',
                         borderBottom: '2px solid rgba(198,163,78,0.2)', fontSize: 10 }}>{h}</th>
                     ))}
@@ -859,9 +859,9 @@ est interrompue pendant plus de 2 mois consécutifs.`}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 14 }}>
               {[
-                { l: 'Montant mensuel', v: `${RMMMG_M} EUR`, sub: '≥ 18 ans — taux plein', c: '#22c55e' },
-                { l: 'Montant horaire (38h/sem)', v: `${RMMMG_H} EUR/h`, sub:tText('Base 38h hebdomadaires'), c: '#c6a34e' },
-                { l: 'Montant annuel brut', v: `${RMMMG_AN} EUR`, sub: '× 12 mensualités', c: '#a78bfa' },
+                { l:tText('Montant mensuel'), v: `${RMMMG_M} EUR`, sub: '≥ 18 ans — taux plein', c: '#22c55e' },
+                { l:tText('Montant horaire (38h/sem)'), v: `${RMMMG_H} EUR/h`, sub:tText('Base 38h hebdomadaires'), c: '#c6a34e' },
+                { l:tText('Montant annuel brut'), v: `${RMMMG_AN} EUR`, sub: '× 12 mensualités', c: '#a78bfa' },
               ].map((k, i) => (
                 <div key={i} style={{ padding: '14px', background: 'rgba(255,255,255,0.04)',
                   borderRadius: 10, border: `1px solid ${k.c}30`, textAlign: 'center' }}>
@@ -910,17 +910,17 @@ est interrompue pendant plus de 2 mois consécutifs.`}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 10 }}>
             {[
               { cat: '🏛 ONSS & Sécurité Sociale', color: '#c6a34e', links: [
-                { l: 'ONSS — Portail employeur', url: 'https://www.socialsecurity.be', desc: 'DmfA, déclarations, cotisations' },
-                { l: 'ONSS — Mahis (mandats)', url: 'https://www.socialsecurity.be/site_fr/employer/applics/mahis/index.htm', desc: 'Gestion mandats prestataires' },
-                { l: 'CSAM GAP — Accès applications', url: 'https://csam.belgique.be', desc: 'Configurer accès eID / mandats' },
-                { l: 'WIDE — Immatriculation ONSS', url: 'https://www.socialsecurity.be/site_fr/employer/applics/wide/index.htm', desc: 'Demande matricule employeur' },
-                { l: 'Dimona — Déclarations immédiates', url: 'https://www.socialsecurity.be/site_fr/employer/applics/dimona/index.htm', desc: 'IN/OUT/INTERM travailleurs' },
+                { l:tText('ONSS — Portail employeur'), url: 'https://www.socialsecurity.be', desc: 'DmfA, déclarations, cotisations' },
+                { l:tText('ONSS — Mahis (mandats)'), url: 'https://www.socialsecurity.be/site_fr/employer/applics/mahis/index.htm', desc: 'Gestion mandats prestataires' },
+                { l:tText('CSAM GAP — Accès applications'), url: 'https://csam.belgique.be', desc: 'Configurer accès eID / mandats' },
+                { l:tText('WIDE — Immatriculation ONSS'), url: 'https://www.socialsecurity.be/site_fr/employer/applics/wide/index.htm', desc: 'Demande matricule employeur' },
+                { l:tText('Dimona — Déclarations immédiates'), url: 'https://www.socialsecurity.be/site_fr/employer/applics/dimona/index.htm', desc: 'IN/OUT/INTERM travailleurs' },
               ]},
               { cat: '💰 SPF Finances & Fiscal', color: '#60a5fa', links: [
-                { l: 'MyMinfin — Espace professionnel', url: 'https://eservices.minfin.fgov.be', desc: 'TVA, PP, Belcotax, taxe' },
+                { l:tText('MyMinfin — Espace professionnel'), url: 'https://eservices.minfin.fgov.be', desc: 'TVA, PP, Belcotax, taxe' },
                 { l:tText('Belcotax-on-web'), url: 'https://eservices.minfin.fgov.be/belcotax-on-web', desc: 'Fiches 281.10/20/30 mandataire' },
-                { l: 'SPF Finances — Barèmes PP 2026', url: 'https://finances.belgium.be/fr/entreprises/personnel_et_remuneration/precompte_professionnel/baremes', desc: 'Tables officielles précompte' },
-                { l: 'CNT — CCT & RMMMG', url: 'https://www.cnt-nar.be', desc: 'CCT 43/15 — Salaire minimum 2.070,48 EUR' },
+                { l:tText('SPF Finances — Barèmes PP 2026'), url: 'https://finances.belgium.be/fr/entreprises/personnel_et_remuneration/precompte_professionnel/baremes', desc: 'Tables officielles précompte' },
+                { l:tText('CNT — CCT & RMMMG'), url: 'https://www.cnt-nar.be', desc: 'CCT 43/15 — Salaire minimum 2.070,48 EUR' },
               ]},
               { cat: '💼 Primes Emploi Bruxelles', color: '#22c55e', links: [
                 { l:tText('Actiris — Activa.brussels'), url: 'https://www.actiris.brussels/fr/employeurs/activa-brussels/', desc: 'Attestation, suivi N° 829605' },
@@ -929,22 +929,22 @@ est interrompue pendant plus de 2 mois consécutifs.`}
                 { l: '⚠ MonBEE — deadline 01/06/2026', url: 'https://environnement.brussels/monbee', desc: 'Primes énergie bruxelloises' },
               ]},
               { cat: '📋 Réglementations & Barèmes', color: '#a78bfa', links: [
-                { l: 'CCT 43/15 — RMMMG officiel', url: 'https://www.cnt-nar.be/CCT-ORIG/cct-043-15.pdf', desc: '2.070,48 EUR — texte CCT complet' },
-                { l: 'ONSS — Cotisations 2026', url: 'https://www.socialsecurity.be/site_fr/employer/general/contributions/index.htm', desc: 'Taux patronaux, réductions' },
+                { l:tText('CCT 43/15 — RMMMG officiel'), url: 'https://www.cnt-nar.be/CCT-ORIG/cct-043-15.pdf', desc: '2.070,48 EUR — texte CCT complet' },
+                { l:tText('ONSS — Cotisations 2026'), url: 'https://www.socialsecurity.be/site_fr/employer/general/contributions/index.htm', desc: 'Taux patronaux, réductions' },
                 { l:tText('Fedris — Accidents du travail'), url: 'https://www.fedris.be', desc: 'Taux cotisation AT par secteur' },
-                { l: 'SPF ETCS — Barèmes salaires CP', url: 'https://emploi.belgique.be/fr/themes/remunerations/baremes-de-salaires', desc: '228 CP — barèmes officiels' },
+                { l:tText('SPF ETCS — Barèmes salaires CP'), url: 'https://emploi.belgique.be/fr/themes/remunerations/baremes-de-salaires', desc: '228 CP — barèmes officiels' },
               ]},
               { cat: '🔌 Outils Administratifs', color: '#f97316', links: [
-                { l: 'BCE.be — Banque-Carrefour', url: 'https://economie.fgov.be/fr/themes/entreprises/banque-carrefour-des/rechercher-dans-la-banque', desc: 'Vérifier BCE, statuts, mandats' },
-                { l: 'Peppol — Facturation électronique', url: 'https://peppol.eu', desc: 'ID Aureus : 0208:1028230781' },
-                { l: 'Isabel 6 — Virements SEPA', url: 'https://www.isabel.eu', desc: 'Paiements SEPA pain.001' },
+                { l:tText('BCE.be — Banque-Carrefour'), url: 'https://economie.fgov.be/fr/themes/entreprises/banque-carrefour-des/rechercher-dans-la-banque', desc: 'Vérifier BCE, statuts, mandats' },
+                { l:tText('Peppol — Facturation électronique'), url: 'https://peppol.eu', desc: 'ID Aureus : 0208:1028230781' },
+                { l:tText('Isabel 6 — Virements SEPA'), url: 'https://www.isabel.eu', desc: 'Paiements SEPA pain.001' },
                 { l:tText('APD — Protection données'), url: 'https://www.autoriteprotectiondonnees.be', desc: 'RGPD — plainte, DPA' },
               ]},
               { cat: '📊 Références Salariales', color: '#ec4899', links: [
-                { l: 'RMMMG — CCT 43 coordonnée', url: 'https://www.cnt-nar.be/CCT-COORD/cct-043.pdf', desc: 'Évolutions historiques RMMMG' },
-                { l: 'Statbel — Statistiques salariales', url: 'https://statbel.fgov.be/fr/themes/emploi-formation/salaires', desc: 'Données officielles salaires BE' },
-                { l: 'SPF ETCS — Législation emploi', url: 'https://emploi.belgique.be/fr', desc: 'Contrats types, loi 03/07/1978' },
-                { l: 'Moniteur Belge', url: 'https://www.ejustice.just.fgov.be/cgi/welcome.pl', desc: 'Législation officielle belge' },
+                { l:tText('RMMMG — CCT 43 coordonnée'), url: 'https://www.cnt-nar.be/CCT-COORD/cct-043.pdf', desc: 'Évolutions historiques RMMMG' },
+                { l:tText('Statbel — Statistiques salariales'), url: 'https://statbel.fgov.be/fr/themes/emploi-formation/salaires', desc: 'Données officielles salaires BE' },
+                { l:tText('SPF ETCS — Législation emploi'), url: 'https://emploi.belgique.be/fr', desc: 'Contrats types, loi 03/07/1978' },
+                { l:tText('Moniteur Belge'), url: 'https://www.ejustice.just.fgov.be/cgi/welcome.pl', desc: 'Législation officielle belge' },
               ]},
             ].map((section, si) => (
               <C key={si} style={{ marginBottom: 0 }}>
