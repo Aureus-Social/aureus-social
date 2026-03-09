@@ -674,10 +674,11 @@ function PageHome({t,go}) {
   </>);
 }
 
-function PageInd({t,go}) {
+function PageInd({t,go,goBack}) {
   const d=t.ind;const[openFaq,setOpenFaq]=useState(null);useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
+      <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>Retour</div>
       <div className="vt-ey">{d.ey}</div>
       <h1 style={{marginBottom:18,whiteSpace:'pre-line'}}>{d.h.split('\n').map((l,i)=>(<span key={i}>{i>0&&<br/>}{i===2?<em>{l}</em>:l}</span>))}</h1>
       <p style={{fontSize:18,color:STONE,marginBottom:28,fontWeight:300}}>{d.sub}</p>
@@ -701,10 +702,11 @@ function PageInd({t,go}) {
   </>);
 }
 
-function PageEmp({t,go}) {
+function PageEmp({t,go,goBack}) {
   const d=t.emp;useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
+      <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>Retour</div>
       <div className="vt-ey">{d.ey}</div>
       <h1 style={{marginBottom:18,whiteSpace:'pre-line'}}>{d.h.split('\n').map((l,i)=>(<span key={i}>{i>0&&<br/>}{i===2?<em>{l}</em>:l}</span>))}</h1>
       <p style={{fontSize:18,color:STONE,marginBottom:28,fontWeight:300}}>{d.sub}</p>
@@ -722,10 +724,11 @@ function PageEmp({t,go}) {
   </>);
 }
 
-function PageEmps({t,go}) {
+function PageEmps({t,go,goBack}) {
   const d=t.emps;useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
+      <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>Retour</div>
       <div className="vt-ey">{d.ey}</div>
       <h1 style={{marginBottom:18,whiteSpace:'pre-line'}}>{d.h.split('\n').map((l,i)=>(<span key={i}>{i>0&&<br/>}{i===2?<em>{l}</em>:l}</span>))}</h1>
       <p style={{fontSize:18,color:STONE,marginBottom:28,fontWeight:300}}>{d.sub}</p>
@@ -739,10 +742,11 @@ function PageEmps({t,go}) {
   </>);
 }
 
-function PageExp({t,go}) {
+function PageExp({t,go,goBack}) {
   const d=t.exp;useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
+      <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>Retour</div>
       <div className="vt-ey">{d.ey}</div>
       <h1 style={{marginBottom:18,whiteSpace:'pre-line'}}>{d.h.split('\n').map((l,i)=>(<span key={i}>{i>0&&<br/>}{i===2?<em>{l}</em>:l}</span>))}</h1>
       <p style={{fontSize:18,color:STONE,marginBottom:28,fontWeight:300}}>{d.sub}</p>
@@ -762,10 +766,11 @@ function PageExp({t,go}) {
   </>);
 }
 
-function PageForm({t,go}) {
+function PageForm({t,go,goBack}) {
   const d=t.form;useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
+      <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>Retour</div>
       <div className="vt-ey">{d.ey}</div>
       <h1 style={{marginBottom:18,whiteSpace:'pre-line'}}>{d.h.split('\n').map((l,i)=>(<span key={i}>{i>0&&<br/>}{i===2?<em>{l}</em>:l}</span>))}</h1>
       <p style={{fontSize:18,color:STONE,marginBottom:28,fontWeight:300}}>{d.sub}</p>
@@ -784,7 +789,7 @@ function PageForm({t,go}) {
   </>);
 }
 
-function PageCon({t,go,lang}) {
+function PageCon({t,go,goBack,lang}) {
   const d=t.con;
   const[sent,setSent]=useState(false);
   const[loading,setLoading]=useState(false);
@@ -809,7 +814,8 @@ function PageCon({t,go,lang}) {
     <section className="vt-sec"><div className="vt-wrap">
       <div style={{display:'grid',gridTemplateColumns:'1fr 1.3fr',gap:72,alignItems:'start'}}>
         <div className="fade-in">
-          <div className="vt-ey">{d.ey}</div>
+          <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>Retour</div>
+      <div className="vt-ey">{d.ey}</div>
           <h2 style={{whiteSpace:'pre-line'}}>{d.h}</h2>
           <p style={{margin:'16px 0 28px',fontSize:17}}>{d.sub}</p>
           {d.ch.map(([ico,l,v])=>(<div key={l} className="ch"><div style={{width:40,height:40,borderRadius:9,background:WHITE,border:`1px solid ${BORDER}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>{ico}</div><div><div style={{fontSize:13,fontWeight:600,color:INK,marginBottom:2}}>{l}</div><div style={{fontSize:14,color:STONE}}>{v}</div></div></div>))}
@@ -843,17 +849,17 @@ function PageCon({t,go,lang}) {
   </>);
 }
 
-function PageArticle({t,go,slug}) {
+function PageArticle({t,go,goBack,slug}) {
   const art=t.articles&&t.articles[slug];
   useEffect(()=>{ window.scrollTo({top:0}); },[slug]);
   useFadeIn();
-  if(!art) return(<div style={{padding:'120px 0',textAlign:'center'}}><p>Article introuvable.</p><button className="btn-p" style={{margin:'20px auto',display:'inline-flex'}} onClick={()=>go('home')}>Retour</button></div>);
+  if(!art) return(<div style={{padding:'120px 0',textAlign:'center'}}><p>Article introuvable.</p><button className="btn-p" style={{margin:'20px auto',display:'inline-flex'}} onClick={goBack}>← Retour</button></div>);
   return(<>
     <section style={{background:CREAM,padding:'60px 0 48px',borderBottom:`1px solid ${BORDER}`}}>
       <div className="vt-wrap">
-        <div style={{display:'flex',alignItems:'center',gap:8,fontSize:13,color:MIST,marginBottom:24,cursor:'pointer'}} onClick={()=>go('home')}>
+        <div style={{display:'flex',alignItems:'center',gap:8,fontSize:13,color:MIST,marginBottom:24,cursor:'pointer'}} onClick={goBack}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          Retour aux ressources
+          Retour
         </div>
         <div style={{display:'flex',gap:10,marginBottom:16}}>
           <span className="vt-tag vt-tag-au">{art.tag}</span>
@@ -908,6 +914,7 @@ const PAGES={home:PageHome,independant:PageInd,employeur:PageEmp,employeurs:Page
 
 export default function VitrinePage() {
   const[page,setPage]=useState('home');
+  const[history,setHistory]=useState(['home']);
   const[lang,setLang]=useState('fr');
   const[openMega,setOpenMega]=useState(null);
   const[scrolled,setScrolled]=useState(false);
@@ -917,8 +924,19 @@ export default function VitrinePage() {
 
   const go=(p)=>{
     if(p==='app'){window.location.href='/login';return;}
+    setHistory(h=>[...h,p]);
     setPage(p);setOpenMega(null);
     window.scrollTo({top:0,behavior:'smooth'});
+  };
+  const goBack=()=>{
+    setHistory(h=>{
+      if(h.length<=1) return h;
+      const prev=h[h.length-2];
+      setPage(prev);
+      setOpenMega(null);
+      window.scrollTo({top:0,behavior:'smooth'});
+      return h.slice(0,-1);
+    });
   };
   const articleSlug=page.startsWith('article:')?page.slice(8):null;
 
@@ -1000,8 +1018,8 @@ export default function VitrinePage() {
 
       <div style={{paddingTop:36+64}}>
         {articleSlug
-          ? <PageArticle t={t} go={go} slug={articleSlug}/>
-          : <PageComp t={t} go={go} lang={lang}/>
+          ? <PageArticle t={t} go={go} goBack={goBack} slug={articleSlug}/>
+          : <PageComp t={t} go={go} goBack={goBack} lang={lang}/>
         }
       </div>
 
