@@ -41,6 +41,7 @@ fr:{
   ]},
   nw:{ey:'Newsletter',h:'Ne manquez aucune actualité sociale.',sub:'Changements législatifs, barèmes mis à jour, conseils pratiques.',ph:'votre@email.be',btn:"S'inscrire",note:'Politique de confidentialité Aureus IA SPRL.',ok:'✓ Inscription confirmée — bienvenue !',feats:[['⚖️','Veille législative quotidienne','Alertes dès qu\'une loi impacte vos obligations'],['🧮','Barèmes 2026 mis à jour','Nouvelles grilles CP avant entrée en vigueur'],['💡',"Conseils d'experts","Fiches pratiques de nos juristes"]]},
   cta:{h:'Prêt à moderniser votre gestion sociale ?',sub:'Premier mois offert · Accès immédiat · Migration assistée',btn:'Accéder maintenant →'},
+  back:'← Retour',artBack:'Retour',artToc:'Dans cet article',artRead:' de lecture',autoManaged:'Tous ces sujets sont gérés automatiquement dans Aureus Social Pro.',
   ft:{col1:'Solutions',col2:'Produit',col3:'Légal',copy:'© 2026 Aureus IA SPRL · Tous droits réservés',links:['Disclaimer','Privacy','Cookie policy','CGU'],desc:'Secrétariat social numérique belge. 132 modules, 166 CP.',
     c1:[['Indépendants','independant'],['Devenir employeur','employeur'],['Employeurs','employeurs'],['Experts-comptables','experts'],['Formations','formations']],
     c2:[['Demander une démo','contact'],['Documentation',null],['Statut',null]],
@@ -159,6 +160,7 @@ Object.assign(T.nl,{
   nav:{demo:'Demo aanvragen',login:'Inloggen'},
   discover:'Ontdekken',readmore:'Lezen',
   cookie:{text:'Deze website gebruikt cookies om uw ervaring te verbeteren.',accept:'Accepteren',refuse:'Weigeren',settings:'Instellingen'},
+  back:'← Terug',artBack:'Terug',artToc:'In dit artikel',artRead:' leestijd',autoManaged:'Al deze onderwerpen worden automatisch beheerd in Aureus Social Pro.',
 });
 T.nl.mega[1].label='Zelfstandigen'; T.nl.mega[2].label='Werkgever worden'; T.nl.mega[3].label='Werkgevers'; T.nl.mega[4].label='Opleidingen'; T.nl.mega[5].label='Accountants';
 T.nl.hero={badge:'Digitaal sociaal secretariaat — v18 in productie',h1:'Uw Belgische sociale\npartner.\nEindelijk digitaal.',sub:'Van Dimona tot kwartaalaangiften — alles wat u nodig heeft, op één plek.',cta1:'Naar de applicatie',cta2:'Demo bekijken',stats:[['166','Paritaire comités'],['< 8s','Dimona ingediend'],['12K+','Loonfiches'],['420+','Bedrijven']]};
@@ -181,6 +183,7 @@ Object.assign(T.en,{
   nav:{demo:'Book a demo',login:'Log in'},
   discover:'Discover',readmore:'Read',
   cookie:{text:'This site uses cookies to improve your experience.',accept:'Accept',refuse:'Decline',settings:'Settings'},
+  back:'← Back',artBack:'Back',artToc:'In this article',artRead:' read',autoManaged:'All these topics are automatically managed in Aureus Social Pro.',
 });
 T.en.mega[1].label='Freelancers'; T.en.mega[2].label='Become an employer'; T.en.mega[3].label='Employers'; T.en.mega[4].label='Training'; T.en.mega[5].label='Accountants';
 T.en.hero={badge:'Belgian digital payroll platform — v18 in production',h1:'Your Belgian social\npartner.\nFinally digital.',sub:'From Dimona to quarterly declarations — everything you need, in one place.',cta1:'Go to application',cta2:'Watch demo',stats:[['166','Joint committees'],['< 8s','Dimona submitted'],['12K+','Payslips'],['420+','Companies']]};
@@ -203,6 +206,7 @@ Object.assign(T.de,{
   nav:{demo:'Demo anfordern',login:'Anmelden'},
   discover:'Entdecken',readmore:'Lesen',
   cookie:{text:'Diese Website verwendet Cookies zur Verbesserung Ihrer Erfahrung.',accept:'Akzeptieren',refuse:'Ablehnen',settings:'Einstellungen'},
+  back:'← Zurück',artBack:'Zurück',artToc:'In diesem Artikel',artRead:' Lesezeit',autoManaged:'Alle diese Themen werden automatisch in Aureus Social Pro verwaltet.',
 });
 T.de.mega[1].label='Selbständige'; T.de.mega[2].label='Arbeitgeber werden'; T.de.mega[3].label='Arbeitgeber'; T.de.mega[4].label='Schulungen'; T.de.mega[5].label='Buchhalter';
 T.de.hero={badge:'Digitales belgisches Sozialsekretariat — v18 in Produktion',h1:'Ihr belgischer\nSozialpartner.\nEndlich digital.',sub:'Von Dimona bis Quartalsmeldungen — alles, was Sie brauchen, an einem Ort.',cta1:'Zur Anwendung',cta2:'Demo ansehen',stats:[['166','Paritätische Kommissionen'],['< 8s','Dimona eingereicht'],['12K+','Gehaltszettel'],['420+','Unternehmen']]};
@@ -538,7 +542,7 @@ function Testimonials({t}) {
   );
 }
 
-function RoiCalculator({t,go}) {
+function RoiCalculator({t,go,lang}) {
   const[emp,setEmp]=useState(5);
   const[provIdx,setProvIdx]=useState(0);
   const roi=t.roi;
@@ -582,7 +586,7 @@ function RoiCalculator({t,go}) {
               </div>
             </div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,padding:'20px',background:CREAM,borderRadius:10,border:`1px solid ${BORDER}`}}>
-              {[[roi.providers[provIdx],`${currentCost}€/mois`,'#EF4444'],['Aureus Social Pro',`${aureusCost}€/mois`,'#22C55E']].map(([l,v,c])=>(
+              {[[roi.providers[provIdx],`${currentCost}€/${lang==='nl'?'mnd':lang==='de'?'Mo':lang==='en'?'mo':'mois'}`,'#EF4444'],['Aureus Social Pro',`${aureusCost}€/${lang==='nl'?'mnd':lang==='de'?'Mo':lang==='en'?'mo':'mois'}`,'#22C55E']].map(([l,v,c])=>(
                 <div key={l}><div style={{fontSize:12,color:MIST,marginBottom:4}}>{l}</div><div style={{fontSize:18,fontWeight:700,color:c,fontFamily:"'Fraunces',serif"}}>{v}</div></div>
               ))}
             </div>
@@ -594,7 +598,7 @@ function RoiCalculator({t,go}) {
               <div style={{fontSize:14,color:'rgba(255,255,255,.5)',marginBottom:24}}>{monthly>0?`${monthly.toLocaleString('fr-BE')} € ${roi.result.per}`:''}</div>
               {annual>0&&<div style={{background:'rgba(255,255,255,.07)',borderRadius:8,padding:'16px',marginBottom:20}}>
                 <div style={{fontSize:12,color:'rgba(255,255,255,.4)',marginBottom:4}}>{roi.result.months}</div>
-                <div style={{fontSize:24,fontWeight:700,color:G2,fontFamily:"'Fraunces',serif"}}>{months} {t.lang==='nl'?'maanden':t.lang==='de'?'Monate':t.lang==='en'?'months':'mois'}</div>
+                <div style={{fontSize:24,fontWeight:700,color:G2,fontFamily:"'Fraunces',serif"}}>{months} {lang==='nl'?'maanden':lang==='de'?'Monate':lang==='en'?'months':'mois'}</div>
               </div>}
               <button className="btn-gold" style={{width:'100%',justifyContent:'center'}} onClick={()=>go('contact')}>{roi.result.cta} <Arr/></button>
             </div>
@@ -702,7 +706,7 @@ function DkCard({label,title,sub,stats}) {
 }
 
 // ═══════ PAGES ═══════
-function PageHome({t,go}) {
+function PageHome({t,go,lang}) {
   const[filter,setFilter]=useState('tout');
   useFadeIn();
   const art=t.art;const sol=t.sol;const hero=t.hero;const mockup=t.mockup;
@@ -769,7 +773,7 @@ function PageHome({t,go}) {
     <Testimonials t={t}/>
 
     {/* ROI CALCULATOR */}
-    <RoiCalculator t={t} go={go}/>
+    <RoiCalculator t={t} go={go} lang={lang}/>
 
     {/* ARTICLES */}
     <section className="vt-sec">
@@ -782,7 +786,7 @@ function PageHome({t,go}) {
           {art.filters.map(([k,l])=>(<button key={k} className={`ttab${filter===k?' active':''}`} onClick={()=>setFilter(k)}>{l}</button>))}
         </div>
         <div className="tc-grid">
-          {vis.map(a=>(<div key={a.title} className="tc" onClick={()=>a.slug&&go('article:'+a.slug)} style={{cursor:a.slug?'pointer':'default'}}><div className="tc-img">{a.ico}</div><div className="tc-body"><span className="tc-tag">{tagLabel(a.tag,t.lang||'fr')}</span><h4>{a.title}</h4><p>{a.desc}</p><div className="tc-cta">{t.readmore} <Arr/></div></div></div>))}
+          {vis.map(a=>(<div key={a.title} className="tc" onClick={()=>a.slug&&go('article:'+a.slug)} style={{cursor:a.slug?'pointer':'default'}}><div className="tc-img">{a.ico}</div><div className="tc-body"><span className="tc-tag">{tagLabel(a.tag,lang)}</span><h4>{a.title}</h4><p>{a.desc}</p><div className="tc-cta">{t.readmore} <Arr/></div></div></div>))}
         </div>
       </div>
     </section>
@@ -797,7 +801,7 @@ function PageInd({t,go,goBack}) {
   const d=t.ind;const[openFaq,setOpenFaq]=useState(null);useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
-      <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>Retour</div>
+      <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>{t.back||'← Retour'}</div>
       <div className="vt-ey">{d.ey}</div>
       <h1 style={{marginBottom:18,whiteSpace:'pre-line'}}>{d.h.split('\n').map((l,i)=>(<span key={i}>{i>0&&<br/>}{i===2?<em>{l}</em>:l}</span>))}</h1>
       <p style={{fontSize:18,color:STONE,marginBottom:28,fontWeight:300}}>{d.sub}</p>
@@ -825,7 +829,7 @@ function PageEmp({t,go,goBack}) {
   const d=t.emp;useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
-      <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>Retour</div>
+      <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>{t.back||'← Retour'}</div>
       <div className="vt-ey">{d.ey}</div>
       <h1 style={{marginBottom:18,whiteSpace:'pre-line'}}>{d.h.split('\n').map((l,i)=>(<span key={i}>{i>0&&<br/>}{i===2?<em>{l}</em>:l}</span>))}</h1>
       <p style={{fontSize:18,color:STONE,marginBottom:28,fontWeight:300}}>{d.sub}</p>
@@ -847,7 +851,7 @@ function PageEmps({t,go,goBack}) {
   const d=t.emps;useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
-      <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>Retour</div>
+      <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>{t.back||'← Retour'}</div>
       <div className="vt-ey">{d.ey}</div>
       <h1 style={{marginBottom:18,whiteSpace:'pre-line'}}>{d.h.split('\n').map((l,i)=>(<span key={i}>{i>0&&<br/>}{i===2?<em>{l}</em>:l}</span>))}</h1>
       <p style={{fontSize:18,color:STONE,marginBottom:28,fontWeight:300}}>{d.sub}</p>
@@ -865,7 +869,7 @@ function PageExp({t,go,goBack}) {
   const d=t.exp;useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
-      <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>Retour</div>
+      <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>{t.back||'← Retour'}</div>
       <div className="vt-ey">{d.ey}</div>
       <h1 style={{marginBottom:18,whiteSpace:'pre-line'}}>{d.h.split('\n').map((l,i)=>(<span key={i}>{i>0&&<br/>}{i===2?<em>{l}</em>:l}</span>))}</h1>
       <p style={{fontSize:18,color:STONE,marginBottom:28,fontWeight:300}}>{d.sub}</p>
@@ -889,7 +893,7 @@ function PageForm({t,go,goBack}) {
   const d=t.form;useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
-      <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>Retour</div>
+      <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>{t.back||'← Retour'}</div>
       <div className="vt-ey">{d.ey}</div>
       <h1 style={{marginBottom:18,whiteSpace:'pre-line'}}>{d.h.split('\n').map((l,i)=>(<span key={i}>{i>0&&<br/>}{i===2?<em>{l}</em>:l}</span>))}</h1>
       <p style={{fontSize:18,color:STONE,marginBottom:28,fontWeight:300}}>{d.sub}</p>
@@ -901,7 +905,7 @@ function PageForm({t,go,goBack}) {
     </div></section>
     <section className="vt-sec"><div className="vt-wrap">
       <div style={{marginBottom:48}} className="fade-in"><div className="vt-ey">{d.arts.ey}</div><h2>{d.arts.h}</h2></div>
-      <div className="tc-grid">{d.arts.items.map(a=>(<div key={a.t} className="tc" onClick={()=>a.slug&&go('article:'+a.slug)} style={{cursor:a.slug?'pointer':'default'}}><div className="tc-img">{a.ico}</div><div className="tc-body"><span className="tc-tag">{tagLabel(a.tag,t.lang||'fr')}</span><h4>{a.t}</h4><p>{a.d}</p><div className="tc-cta">{t.readmore} <Arr/></div></div></div>))}</div>
+      <div className="tc-grid">{d.arts.items.map(a=>(<div key={a.t} className="tc" onClick={()=>a.slug&&go('article:'+a.slug)} style={{cursor:a.slug?'pointer':'default'}}><div className="tc-img">{a.ico}</div><div className="tc-body"><span className="tc-tag">{tagLabel(a.tag,lang)}</span><h4>{a.t}</h4><p>{a.d}</p><div className="tc-cta">{t.readmore} <Arr/></div></div></div>))}</div>
     </div></section>
     <Newsletter t={t} go={go}/>
     <CtaBand h={d.cta.h} sub={d.cta.sub} btn={d.cta.btn} go={go}/><Footer t={t} go={go}/>
@@ -933,7 +937,7 @@ function PageCon({t,go,goBack,lang}) {
     <section className="vt-sec"><div className="vt-wrap">
       <div style={{display:'grid',gridTemplateColumns:'1fr 1.3fr',gap:72,alignItems:'start'}}>
         <div className="fade-in">
-          <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>Retour</div>
+          <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>{t.back||'← Retour'}</div>
       <div className="vt-ey">{d.ey}</div>
           <h2 style={{whiteSpace:'pre-line'}}>{d.h}</h2>
           <p style={{margin:'16px 0 28px',fontSize:17}}>{d.sub}</p>
@@ -972,17 +976,17 @@ function PageArticle({t,go,goBack,slug}) {
   const art=t.articles&&t.articles[slug];
   useEffect(()=>{ window.scrollTo({top:0}); },[slug]);
   useFadeIn();
-  if(!art) return(<div style={{padding:'120px 0',textAlign:'center'}}><p>Article introuvable.</p><button className="btn-p" style={{margin:'20px auto',display:'inline-flex'}} onClick={goBack}>← Retour</button></div>);
+  if(!art) return(<div style={{padding:'120px 0',textAlign:'center'}}><p>{t.artBack||'Article introuvable'}</p><button className="btn-p" style={{margin:'20px auto',display:'inline-flex'}} onClick={goBack}>{t.back||'← Retour'}</button></div>);
   return(<>
     <section style={{background:CREAM,padding:'60px 0 48px',borderBottom:`1px solid ${BORDER}`}}>
       <div className="vt-wrap">
         <div style={{display:'flex',alignItems:'center',gap:8,fontSize:13,color:MIST,marginBottom:24,cursor:'pointer'}} onClick={goBack}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          Retour
+          {t.artBack||'Retour'}
         </div>
         <div style={{display:'flex',gap:10,marginBottom:16}}>
           <span className="vt-tag vt-tag-au">{art.tag}</span>
-          <span style={{fontSize:13,color:MIST}}>{art.date} · {art.readTime} de lecture</span>
+          <span style={{fontSize:13,color:MIST}}>{art.date} · {art.readTime}{t.artRead||' de lecture'}</span>
         </div>
         <h1 style={{maxWidth:760,marginBottom:20}}>{art.title}</h1>
         <p style={{fontSize:18,color:STONE,maxWidth:680,lineHeight:1.75,fontWeight:300}}>{art.intro}</p>
@@ -1008,7 +1012,7 @@ function PageArticle({t,go,goBack,slug}) {
           </div>
           <div style={{position:'sticky',top:120}}>
             <div style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:10,padding:24,marginBottom:16}}>
-              <div style={{fontSize:12,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:MIST,marginBottom:14}}>Dans cet article</div>
+              <div style={{fontSize:12,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:MIST,marginBottom:14}}>{t.artToc||'Dans cet article'}</div>
               {art.sections.map((sec,i)=>(
                 <div key={i} style={{display:'flex',gap:10,padding:'8px 0',borderBottom:i<art.sections.length-1?`1px solid ${BORDER}`:'none'}}>
                   <span style={{color:G,fontWeight:700,fontSize:13,flexShrink:0}}>{String(i+1).padStart(2,'0')}</span>
@@ -1018,8 +1022,8 @@ function PageArticle({t,go,goBack,slug}) {
             </div>
             <div style={{background:INK,borderRadius:10,padding:24,color:WHITE}}>
               <div style={{fontSize:12,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:G2,marginBottom:12}}>Aureus Social Pro</div>
-              <p style={{fontSize:13,color:'rgba(255,255,255,.6)',marginBottom:16,lineHeight:1.6}}>Tous ces sujets sont gérés automatiquement dans Aureus Social Pro.</p>
-              <button className="btn-gold" style={{width:'100%',justifyContent:'center',fontSize:13}} onClick={()=>go('contact')}>Demander une démo <Arr/></button>
+              <p style={{fontSize:13,color:'rgba(255,255,255,.6)',marginBottom:16,lineHeight:1.6}}>{t.autoManaged||'Tous ces sujets sont gérés automatiquement dans Aureus Social Pro.'}</p>
+              <button className="btn-gold" style={{width:'100%',justifyContent:'center',fontSize:13}} onClick={()=>go('contact')}>{t.nav.demo} <Arr/></button>
             </div>
           </div>
         </div>
@@ -1040,7 +1044,6 @@ export default function VitrinePage() {
   const[showSticky,setShowSticky]=useState(false);
   const navRef=useRef(null);
   const t=T[lang]||T.fr;
-  if(t&&!t.lang)t.lang=lang;
 
   const go=(p)=>{
     if(p==='app'){window.location.href='/login';return;}
