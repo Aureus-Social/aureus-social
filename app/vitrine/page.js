@@ -795,7 +795,7 @@ export default function VitrinePage() {
   const navRef = useRef(null);
 
   const go = (p) => {
-    if (p === 'app') { window.location.href = '/'; return; }
+    if (p === 'app') { window.location.href = '/login'; return; }
     setPage(p);
     setOpenMega(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
