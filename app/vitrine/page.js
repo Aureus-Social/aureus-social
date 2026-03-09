@@ -1,31 +1,895 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-const CSS_CONTENT = "/* \u2550\u2550\u2550 TOKENS \u2550\u2550\u2550 */\n:root{\n  --ink:#0E0D0A;--ink2:#252320;--stone:#56524A;--mist:#9A968E;\n  --border:#E8E4DC;--cream:#F9F6F0;--cream2:#F1EDE6;--white:#fff;\n  --gold:#B8913A;--gold2:#D4A84C;--gold-pale:#FBF3E2;\n  --green:#1A5C42;--green-bg:#EAF4EE;\n  --blue:#18396A;--blue-bg:#EDF1F9;\n  --red:#B03228;\n  --nav-h:64px;--mega-h:400px;\n  --r:5px;--r2:10px;--r3:16px;\n  --sh:0 2px 16px rgba(14,13,10,.07);\n  --sh2:0 8px 40px rgba(14,13,10,.12);\n  --sh3:0 24px 72px rgba(14,13,10,.18);\n  --max:1200px;\n}\n*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}\nhtml{scroll-behavior:smooth}\nbody{font-family:'Cabinet Grotesk',sans-serif;background:var(--white);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden}\na{color:inherit;text-decoration:none}\nh1,h2,h3,h4{font-family:'Fraunces',serif;font-weight:400;line-height:1.08;letter-spacing:-.02em}\nh1{font-size:clamp(36px,5.5vw,72px)}\nh2{font-size:clamp(28px,3.8vw,50px)}\nh3{font-size:clamp(20px,2.4vw,28px)}\nh4{font-family:'Cabinet Grotesk',sans-serif;font-size:16px;font-weight:700}\np{font-size:16px;line-height:1.75;color:var(--stone);font-weight:300}\nem{font-style:italic;color:var(--gold)}\nstrong{font-weight:600}\n.wrap{max-width:var(--max);margin:0 auto;padding:0 36px}\nsection{padding:88px 0}\n@media(max-width:768px){section{padding:56px 0}.wrap{padding:0 20px}}\n\n/* \u2550\u2550\u2550 NAV \u2550\u2550\u2550 */\n#nav{\n  position:fixed;top:0;left:0;right:0;z-index:300;\n  height:var(--nav-h);background:var(--white);\n  border-bottom:1px solid var(--border);\n  transition:box-shadow .3s;\n}\n#nav.scrolled{box-shadow:var(--sh)}\n.nav-top{\n  max-width:var(--max);margin:0 auto;padding:0 36px;\n  height:var(--nav-h);display:flex;align-items:center;\n  justify-content:space-between;gap:16px;\n}\n.nav-logo{display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0}\n.nav-logo-ic{width:32px;height:32px;border-radius:7px;background:var(--ink);display:flex;align-items:center;justify-content:center}\n.nav-logo-name{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:.04em;display:block;line-height:1}\n.nav-logo-sub{font-size:8px;color:var(--mist);letter-spacing:.18em;text-transform:uppercase;display:block}\n\n/* Mega menu */\n.nav-menu{display:flex;align-items:stretch;gap:0;height:var(--nav-h)}\n.nav-item{position:relative;display:flex;align-items:center}\n.nav-item > a{\n  padding:0 16px;height:100%;display:flex;align-items:center;\n  font-size:14px;font-weight:500;color:var(--stone);\n  cursor:pointer;transition:color .18s;white-space:nowrap;\n  border-bottom:2px solid transparent;\n}\n.nav-item > a:hover,.nav-item.open > a{color:var(--ink);border-bottom-color:var(--gold)}\n.nav-item > a .arrow{font-size:10px;margin-left:5px;transition:transform .2s;display:inline-block}\n.nav-item.open > a .arrow{transform:rotate(180deg)}\n\n/* Mega dropdown */\n.mega{\n  position:absolute;top:calc(var(--nav-h) - 1px);left:50%;\n  transform:translateX(-50%) translateY(-8px);\n  background:var(--white);border:1px solid var(--border);\n  border-radius:var(--r2);box-shadow:var(--sh3);\n  min-width:560px;padding:28px;\n  opacity:0;pointer-events:none;\n  transition:opacity .22s,transform .22s;\n  display:grid;grid-template-columns:1fr 1fr;gap:6px;\n}\n.nav-item.open .mega{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}\n.mega-item{\n  display:flex;align-items:flex-start;gap:14px;\n  padding:14px 16px;border-radius:var(--r);cursor:pointer;\n  transition:background .18s;\n}\n.mega-item:hover{background:var(--cream)}\n.mega-ico{width:36px;height:36px;border-radius:8px;background:var(--cream2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}\n.mega-t{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px}\n.mega-d{font-size:12px;color:var(--mist);line-height:1.5}\n\n.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}\n.btn-nav-ghost{padding:8px 16px;border-radius:var(--r);font-size:13px;font-weight:500;color:var(--stone);border:1.5px solid var(--border);background:transparent;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;transition:all .2s}\n.btn-nav-ghost:hover{border-color:var(--ink);color:var(--ink)}\n.btn-nav-dark{padding:9px 18px;border-radius:var(--r);font-size:13px;font-weight:600;color:var(--white);background:var(--ink);border:none;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;transition:all .22s;display:flex;align-items:center;gap:6px;white-space:nowrap}\n.btn-nav-dark:hover{background:var(--ink2);transform:translateY(-1px)}\n@media(max-width:900px){.nav-menu{display:none}}\n@media(max-width:560px){.btn-nav-ghost{display:none}}\n\n/* \u2550\u2550\u2550 TOPBAR \u2550\u2550\u2550 */\n.topbar{\n  background:var(--ink);height:36px;display:flex;align-items:center;\n  padding-top:calc(var(--nav-h) + 36px);margin-top:calc(-1*(var(--nav-h) + 36px));\n  position:relative;z-index:200;\n}\n.topbar-inner{\n  max-width:var(--max);margin:0 auto;padding:0 36px;\n  display:flex;align-items:center;justify-content:flex-end;gap:20px;\n  height:36px;\n}\n.topbar a{font-size:12px;color:rgba(255,255,255,.55);transition:color .18s;cursor:pointer}\n.topbar a:hover{color:var(--white)}\n.topbar-sep{width:1px;height:14px;background:rgba(255,255,255,.15)}\n\n/* \u2550\u2550\u2550 PAGE SYSTEM \u2550\u2550\u2550 */\n.page{display:none;padding-top:var(--nav-h);min-height:100vh}\n.page.active{display:block}\n\n/* \u2550\u2550\u2550 COMPONENTS \u2550\u2550\u2550 */\n.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}\n.eyebrow::before{content:'';width:18px;height:2px;background:var(--gold);border-radius:1px}\n.tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;border:1px solid var(--border);color:var(--mist);background:var(--cream);font-family:'Fira Code',monospace}\n.tag-g{background:var(--green-bg);border-color:#9EC4B0;color:var(--green)}\n.tag-au{background:var(--gold-pale);border-color:#D4B870;color:#6A4E10}\n.tag-b{background:var(--blue-bg);border-color:#9EB0D0;color:var(--blue)}\n.tag-r{background:#FBF0EE;border-color:#D4A09A;color:var(--red)}\n\n.btn-p{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:var(--r);background:var(--ink);color:var(--white);font-size:14px;font-weight:600;border:none;cursor:pointer;transition:all .22s;font-family:'Cabinet Grotesk',sans-serif;box-shadow:0 4px 20px rgba(14,13,10,.18)}\n.btn-p:hover{background:var(--ink2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(14,13,10,.24)}\n.btn-s{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:var(--r);background:transparent;color:var(--ink);font-size:14px;font-weight:500;border:1.5px solid var(--border);cursor:pointer;transition:all .22s;font-family:'Cabinet Grotesk',sans-serif}\n.btn-s:hover{border-color:var(--ink);background:var(--cream)}\n.btn-gold{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:var(--r);background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .22s;font-family:'Cabinet Grotesk',sans-serif;box-shadow:0 4px 24px rgba(184,145,58,.4)}\n.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(184,145,58,.5)}\n.btn-outline-white{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:var(--r);background:transparent;color:var(--white);font-size:14px;font-weight:500;border:1.5px solid rgba(255,255,255,.3);cursor:pointer;transition:all .22s;font-family:'Cabinet Grotesk',sans-serif}\n.btn-outline-white:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.6)}\n\n.reveal{opacity:0;transform:translateY(24px);transition:opacity .65s,transform .65s}\n.reveal.in{opacity:1;transform:none}\n.d1{transition-delay:.07s}.d2{transition-delay:.14s}.d3{transition-delay:.21s}.d4{transition-delay:.28s}.d5{transition-delay:.35s}.d6{transition-delay:.42s}\n\n/* \u2550\u2550\u2550 HOME HERO \u2550\u2550\u2550 */\n.hero{background:var(--ink);padding:80px 0 0;position:relative;overflow:hidden;min-height:560px;display:flex;flex-direction:column}\n.hero-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 80% 60% at 70% 50%,rgba(184,145,58,.12) 0%,transparent 65%),radial-gradient(ellipse 50% 80% at 10% 80%,rgba(26,92,66,.1) 0%,transparent 60%)}\n.hero-dots{position:absolute;inset:0;pointer-events:none;opacity:.15;background-image:radial-gradient(rgba(255,255,255,.6) 1px,transparent 1px);background-size:28px 28px}\n.hero-inner{position:relative;z-index:1;flex:1;display:flex;align-items:center;padding-bottom:0}\n.hero-content{max-width:640px}\n.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:99px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);font-size:12px;color:rgba(255,255,255,.7);margin-bottom:24px}\n.ldot{width:7px;height:7px;border-radius:50%;background:#22C55E;animation:pulse 2s infinite}\n@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}}\n.hero h1{color:var(--white);margin-bottom:20px}\n.hero-sub{font-size:18px;color:rgba(255,255,255,.6);margin-bottom:36px;line-height:1.7;font-weight:300;max-width:520px}\n.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:60px}\n\n/* Hero bottom stats strip */\n.hero-strip{\n  position:relative;z-index:1;\n  border-top:1px solid rgba(255,255,255,.08);\n  display:grid;grid-template-columns:repeat(4,1fr);\n  background:rgba(0,0,0,.2);\n}\n.hs-item{padding:24px 28px;border-right:1px solid rgba(255,255,255,.07)}\n.hs-item:last-child{border-right:none}\n.hs-val{font-family:'Fraunces',serif;font-size:clamp(24px,3vw,40px);color:var(--white);line-height:1;margin-bottom:6px}\n.hs-val span{color:var(--gold2)}\n.hs-lbl{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.06em;text-transform:uppercase;font-weight:500}\n@media(max-width:640px){.hero-strip{grid-template-columns:repeat(2,1fr)}.hs-item:nth-child(2){border-right:none}.hs-item:nth-child(3){border-right:1px solid rgba(255,255,255,.07)}}\n\n/* \u2550\u2550\u2550 HOME SOLUTIONS \u2550\u2550\u2550 */\n.solutions{background:var(--cream)}\n.sol-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}\n@media(max-width:900px){.sol-grid{grid-template-columns:1fr 1fr}}\n@media(max-width:560px){.sol-grid{grid-template-columns:1fr}}\n.sol-card{\n  background:var(--white);border:1px solid var(--border);border-radius:var(--r3);\n  padding:32px 28px;cursor:pointer;transition:all .28s;position:relative;overflow:hidden;\n  display:flex;flex-direction:column;gap:16px;\n}\n.sol-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),transparent);transform:scaleX(0);transform-origin:left;transition:transform .32s}\n.sol-card:hover{box-shadow:var(--sh2);transform:translateY(-4px)}\n.sol-card:hover::after{transform:scaleX(1)}\n.sol-card.featured{background:var(--ink);border-color:var(--ink)}\n.sol-card.featured h4,.sol-card.featured .sol-desc{color:rgba(255,255,255,.85)}\n.sol-card.featured p{color:rgba(255,255,255,.5)}\n.sol-ico{width:48px;height:48px;border-radius:10px;background:var(--cream2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px}\n.sol-card.featured .sol-ico{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15)}\n.sol-card h4{font-size:17px;font-weight:700;color:var(--ink);line-height:1.3}\n.sol-desc{font-size:14px;color:var(--stone);line-height:1.7;flex:1}\n.sol-link{font-size:13px;font-weight:600;color:var(--gold);display:flex;align-items:center;gap:5px;transition:gap .18s}\n.sol-card:hover .sol-link{gap:9px}\n.sol-card.featured .sol-link{color:var(--gold2)}\n\n/* \u2550\u2550\u2550 HOME THEMES \u2550\u2550\u2550 */\n.themes-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:40px}\n.ttab{padding:9px 20px;border-radius:99px;font-size:14px;font-weight:500;color:var(--stone);border:1.5px solid var(--border);background:transparent;cursor:pointer;transition:all .2s;font-family:'Cabinet Grotesk',sans-serif}\n.ttab.active,.ttab:hover{background:var(--ink);color:var(--white);border-color:var(--ink)}\n.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}\n@media(max-width:900px){.theme-grid{grid-template-columns:1fr 1fr}}\n@media(max-width:560px){.theme-grid{grid-template-columns:1fr}}\n.theme-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;cursor:pointer;transition:all .25s}\n.theme-card:hover{box-shadow:var(--sh2);transform:translateY(-3px)}\n.theme-card-img{height:160px;background:var(--cream2);display:flex;align-items:center;justify-content:center;font-size:48px;border-bottom:1px solid var(--border)}\n.theme-card-body{padding:20px}\n.theme-card-tag{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;display:block}\n.theme-card h4{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:8px;line-height:1.4}\n.theme-card p{font-size:13px;color:var(--stone);line-height:1.65}\n.theme-card-cta{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--gold);margin-top:14px;cursor:pointer}\n\n/* \u2550\u2550\u2550 NEWSLETTER \u2550\u2550\u2550 */\n.newsletter{background:var(--ink);padding:72px 0}\n.nl-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}\n@media(max-width:800px){.nl-grid{grid-template-columns:1fr;gap:40px}}\n.nl-form{display:flex;gap:10px;flex-wrap:wrap}\n.nl-input{flex:1;min-width:220px;padding:13px 18px;border-radius:var(--r);border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:var(--white);font-family:'Cabinet Grotesk',sans-serif;font-size:15px;outline:none;transition:border-color .2s}\n.nl-input::placeholder{color:rgba(255,255,255,.35)}\n.nl-input:focus{border-color:var(--gold)}\n.nl-note{font-size:12px;color:rgba(255,255,255,.3);margin-top:10px;line-height:1.6}\n.nl-features{display:flex;flex-direction:column;gap:14px;margin-top:28px}\n.nl-feat{display:flex;align-items:flex-start;gap:12px}\n.nl-feat-ico{width:32px;height:32px;border-radius:7px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}\n.nl-feat-t{font-size:14px;font-weight:600;color:var(--white);margin-bottom:2px}\n.nl-feat-d{font-size:13px;color:rgba(255,255,255,.45)}\n\n/* \u2550\u2550\u2550 INNER PAGE HERO \u2550\u2550\u2550 */\n.page-hero{background:var(--cream);padding:60px 0 64px;border-bottom:1px solid var(--border)}\n.page-hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}\n@media(max-width:800px){.page-hero-grid{grid-template-columns:1fr;gap:36px}}\n.breadcrumb{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mist);margin-bottom:20px}\n.breadcrumb span{color:var(--gold)}\n.page-hero h1{margin-bottom:18px}\n.page-hero-sub{font-size:18px;color:var(--stone);margin-bottom:28px;font-weight:300}\n.page-hero-actions{display:flex;gap:12px;flex-wrap:wrap}\n\n/* Visual card dark */\n.dark-card{background:var(--ink);border-radius:var(--r3);padding:32px;color:var(--white);position:relative;overflow:hidden}\n.dark-card::before{content:'';position:absolute;top:-30px;right:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(184,145,58,.2) 0%,transparent 70%)}\n.dark-card-lbl{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}\n.dark-card h3{color:var(--white);font-size:20px;margin-bottom:8px}\n.dark-card-sub{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:24px}\n.dark-card-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px}\n.dcs-val{font-family:'Fraunces',serif;font-size:26px;color:var(--gold);margin-bottom:2px}\n.dcs-lbl{font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.04em}\n\n/* \u2550\u2550\u2550 STEPS \u2550\u2550\u2550 */\n.steps{display:flex;flex-direction:column;gap:0}\n.step{display:grid;grid-template-columns:56px 1fr;gap:24px;padding:32px 0;border-bottom:1px solid var(--border);position:relative}\n.step:last-child{border-bottom:none}\n.step-num{width:48px;height:48px;border-radius:50%;background:var(--ink);color:var(--white);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:20px;flex-shrink:0;margin-top:2px}\n.step-body h4{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:8px}\n.step-body p{font-size:15px;color:var(--stone);line-height:1.7}\n.step-body .step-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}\n.step-body .step-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--gold);margin-top:12px;cursor:pointer;transition:gap .18s}\n.step-body .step-link:hover{gap:10px}\n\n/* \u2550\u2550\u2550 INFO CARDS \u2550\u2550\u2550 */\n.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}\n@media(max-width:900px){.info-grid{grid-template-columns:1fr 1fr}}\n@media(max-width:560px){.info-grid{grid-template-columns:1fr}}\n.info-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:28px 24px;transition:all .25s}\n.info-card:hover{box-shadow:var(--sh2);transform:translateY(-3px)}\n.info-card-ico{font-size:28px;margin-bottom:14px}\n.info-card h4{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px}\n.info-card p{font-size:14px;color:var(--stone);line-height:1.7}\n\n/* \u2550\u2550\u2550 FAQ \u2550\u2550\u2550 */\n.faq-item{border-bottom:1px solid var(--border)}\n.faq-q{width:100%;padding:20px 0;display:flex;justify-content:space-between;align-items:center;background:none;border:none;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;font-size:16px;font-weight:600;color:var(--ink);text-align:left;gap:16px;transition:color .2s}\n.faq-q:hover{color:var(--gold)}\n.faq-arr{font-size:20px;color:var(--mist);transition:transform .3s,color .2s;flex-shrink:0}\n.faq-item.open .faq-arr{transform:rotate(45deg);color:var(--gold)}\n.faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease}\n.faq-ai{padding:0 0 20px;font-size:15px;color:var(--stone);line-height:1.75}\n\n/* \u2550\u2550\u2550 CTA BAND \u2550\u2550\u2550 */\n.ctaband{background:var(--ink);padding:72px 0;text-align:center;position:relative;overflow:hidden}\n.ctaband::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 120% at 50% 100%,rgba(184,145,58,.1) 0%,transparent 70%)}\n.ctaband-inner{position:relative;z-index:1}\n.ctaband h2{color:var(--white);margin-bottom:14px}\n.ctaband p{color:rgba(255,255,255,.5);max-width:440px;margin:0 auto 32px;font-size:17px}\n\n/* \u2550\u2550\u2550 CONTACT \u2550\u2550\u2550 */\n.contact-layout{display:grid;grid-template-columns:1fr 1.3fr;gap:72px;align-items:start}\n@media(max-width:800px){.contact-layout{grid-template-columns:1fr;gap:48px}}\n.contact-channels{display:flex;flex-direction:column;gap:12px;margin-top:28px}\n.cc{display:flex;align-items:flex-start;gap:14px;padding:18px;border-radius:var(--r2);border:1px solid var(--border);background:var(--cream);transition:all .22s;cursor:pointer}\n.cc:hover{border-color:var(--gold);background:var(--gold-pale)}\n.cc-ico{width:40px;height:40px;border-radius:9px;background:var(--white);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}\n.cc-l{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px}\n.cc-v{font-size:14px;color:var(--stone)}\n.contact-form-wrap{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:36px 32px;box-shadow:var(--sh2)}\n.cf-title{font-family:'Fraunces',serif;font-size:24px;color:var(--ink);margin-bottom:6px;font-weight:400}\n.cf-sub{font-size:14px;color:var(--mist);margin-bottom:28px}\n.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}\n@media(max-width:560px){.fgrid{grid-template-columns:1fr}}\n.fg{display:flex;flex-direction:column;gap:6px}.fg.full{grid-column:1/-1}\n.flbl{font-size:13px;font-weight:600;color:var(--ink)}.flbl span{color:var(--gold)}\n.finp,.fsel,.ftxt{padding:11px 14px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--cream);font-family:'Cabinet Grotesk',sans-serif;font-size:14px;color:var(--ink);transition:all .2s;outline:none;width:100%}\n.finp:focus,.fsel:focus,.ftxt:focus{border-color:var(--gold);background:var(--white);box-shadow:0 0 0 3px rgba(184,145,58,.1)}\n.ftxt{resize:vertical;min-height:100px}.fsel{appearance:none;cursor:pointer}\n.fsub{width:100%;margin-top:6px;padding:14px;border-radius:var(--r);border:none;background:var(--ink);color:var(--white);font-family:'Cabinet Grotesk',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .22s;display:flex;align-items:center;justify-content:center;gap:8px}\n.fsub:hover{background:var(--ink2);transform:translateY(-2px);box-shadow:var(--sh2)}\n.fnote{font-size:11px;color:var(--mist);text-align:center;margin-top:10px;line-height:1.6}\n\n/* \u2550\u2550\u2550 EXPERTS \u2550\u2550\u2550 */\n.expert-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}\n@media(max-width:700px){.expert-grid{grid-template-columns:1fr}}\n.expert-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:28px 24px;display:flex;gap:18px;align-items:flex-start;transition:all .25s}\n.expert-card:hover{box-shadow:var(--sh2);transform:translateY(-3px)}\n.expert-num{font-family:'Fraunces',serif;font-size:36px;color:var(--cream2);line-height:1;flex-shrink:0;width:44px}\n.expert-t{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px}\n.expert-d{font-size:14px;color:var(--stone);line-height:1.7}\n\n/* \u2550\u2550\u2550 FOOTER \u2550\u2550\u2550 */\n.site-footer{background:var(--ink);padding:60px 0 0}\n.footer-grid{display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px}\n@media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;gap:28px}}\n@media(max-width:560px){.footer-grid{grid-template-columns:1fr}}\n.footer-brand .flogo{display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:14px}\n.footer-brand .flogo-n{font-size:15px;font-weight:700;color:var(--white);letter-spacing:.04em}\n.footer-brand .flogo-s{font-size:8px;color:rgba(255,255,255,.3);letter-spacing:.2em;text-transform:uppercase}\n.footer-brand-desc{font-size:14px;color:rgba(255,255,255,.4);line-height:1.7;margin-bottom:14px;max-width:260px}\n.footer-bce{font-family:'Fira Code',monospace;font-size:11px;color:rgba(255,255,255,.2)}\n.footer-col-title{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:12px}\n.footer-col-links{display:flex;flex-direction:column;gap:9px}\n.footer-col-links a{font-size:14px;color:rgba(255,255,255,.45);cursor:pointer;transition:color .18s}\n.footer-col-links a:hover{color:var(--white)}\n.footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding:20px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}\n.footer-copy{font-size:12px;color:rgba(255,255,255,.25)}\n.footer-legal{display:flex;gap:16px}\n.footer-legal a{font-size:12px;color:rgba(255,255,255,.25);cursor:pointer;transition:color .18s}\n.footer-legal a:hover{color:rgba(255,255,255,.6)}\n\n/* \u2550\u2550\u2550 TOAST \u2550\u2550\u2550 */\n#toast{position:fixed;bottom:28px;right:28px;z-index:999;background:var(--ink);color:var(--white);padding:14px 20px;border-radius:var(--r2);border-left:4px solid #22C55E;font-size:14px;font-weight:500;box-shadow:var(--sh3);opacity:0;transform:translateY(20px);transition:all .4s;pointer-events:none}\n#toast.show{opacity:1;transform:none}";
-const BODY_HTML = "<!-- TOPBAR -->\n<div style=\"height:36px;background:var(--ink);display:flex;align-items:center;position:fixed;top:0;left:0;right:0;z-index:400\">\n  <div style=\"max-width:1200px;margin:0 auto;padding:0 36px;display:flex;align-items:center;justify-content:space-between;width:100%\">\n    <span style=\"font-size:12px;color:rgba(255,255,255,.5)\">\ud83c\udde7\ud83c\uddea Belgique &nbsp;\u00b7&nbsp; <strong style=\"color:rgba(255,255,255,.8)\">BCE BE 1028.230.781</strong></span>\n    <div style=\"display:flex;gap:20px;align-items:center\">\n      <a onclick=\"go('contact')\" style=\"font-size:12px;color:rgba(255,255,255,.55);cursor:pointer;transition:color .18s\" onmouseover=\"this.style.color='white'\" onmouseout=\"this.style.color='rgba(255,255,255,.55)'\">Contact</a>\n      <div style=\"width:1px;height:14px;background:rgba(255,255,255,.15)\"></div>\n      <a onclick=\"window.location.href='/'\" style=\"font-size:12px;color:rgba(255,255,255,.55);cursor:pointer;transition:color .18s\" onmouseover=\"this.style.color='white'\" onmouseout=\"this.style.color='rgba(255,255,255,.55)'\">Espace client</a>\n    </div>\n  </div>\n</div>\n\n<!-- NAV -->\n<nav id=\"nav\" style=\"top:36px\">\n  <div class=\"nav-top\">\n    <div class=\"nav-logo\" onclick=\"go('home')\">\n      <div class=\"nav-logo-ic\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 18 18\" fill=\"none\"><path d=\"M9 2L15.5 14H2.5Z\" fill=\"#B8913A\"/></svg></div>\n      <div><span class=\"nav-logo-name\">AUREUS</span><span class=\"nav-logo-sub\">Social Pro</span></div>\n    </div>\n\n    <div class=\"nav-menu\">\n      <!-- Ind\u00e9pendants -->\n      <div class=\"nav-item\" id=\"ni-1\">\n        <a onclick=\"toggleMega(1)\">Ind\u00e9pendants <span class=\"arrow\">\u25be</span></a>\n        <div class=\"mega\">\n          <div class=\"mega-item\" onclick=\"go('independant');closeMega()\"><div class=\"mega-ico\">\ud83d\ude80</div><div><div class=\"mega-t\">Se lancer comme ind\u00e9pendant</div><div class=\"mega-d\">Statut, obligations, d\u00e9marches ONSS</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('independant');closeMega()\"><div class=\"mega-ico\">\ud83e\uddee</div><div><div class=\"mega-t\">Cotisations sociales</div><div class=\"mega-d\">Calcul et paiement des cotisations ONSS</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('independant');closeMega()\"><div class=\"mega-ico\">\ud83d\udccb</div><div><div class=\"mega-t\">Obligations d\u00e9claratives</div><div class=\"mega-d\">Dimona, DmfA, TVA, IPP</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('independant');closeMega()\"><div class=\"mega-ico\">\ud83d\udee1\ufe0f</div><div><div class=\"mega-t\">Protection sociale</div><div class=\"mega-d\">Maladie, invalidit\u00e9, pension</div></div></div>\n        </div>\n      </div>\n      <!-- Devenir employeur -->\n      <div class=\"nav-item\" id=\"ni-2\">\n        <a onclick=\"toggleMega(2)\">Devenir employeur <span class=\"arrow\">\u25be</span></a>\n        <div class=\"mega\">\n          <div class=\"mega-item\" onclick=\"go('employeur');closeMega()\"><div class=\"mega-ico\">\ud83d\udc64</div><div><div class=\"mega-t\">Premier employ\u00e9</div><div class=\"mega-d\">Immatriculation ONSS, num\u00e9ro d'entreprise</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('employeur');closeMega()\"><div class=\"mega-ico\">\ud83d\udcc4</div><div><div class=\"mega-t\">Contrat de travail</div><div class=\"mega-d\">CDD, CDI, temps partiel \u2014 mod\u00e8les conformes</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('employeur');closeMega()\"><div class=\"mega-ico\">\u26a1</div><div><div class=\"mega-t\">Dimona automatique</div><div class=\"mega-d\">D\u00e9claration IN/OUT en 8 secondes</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('employeur');closeMega()\"><div class=\"mega-ico\">\ud83d\udcb6</div><div><div class=\"mega-t\">Premiers salaires</div><div class=\"mega-d\">Calcul paie, fiches, SEPA pain.001</div></div></div>\n        </div>\n      </div>\n      <!-- Employeurs -->\n      <div class=\"nav-item\" id=\"ni-3\">\n        <a onclick=\"toggleMega(3)\">Employeurs <span class=\"arrow\">\u25be</span></a>\n        <div class=\"mega\">\n          <div class=\"mega-item\" onclick=\"go('employeurs');closeMega()\"><div class=\"mega-ico\">\ud83c\udfe2</div><div><div class=\"mega-t\">Gestion de la paie</div><div class=\"mega-d\">166 CP, bar\u00e8mes, primes, ONSS</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('employeurs');closeMega()\"><div class=\"mega-ico\">\ud83d\udcca</div><div><div class=\"mega-t\">D\u00e9clarations trimestrielles</div><div class=\"mega-d\">DmfA XML, Belcotax 281.10/20/30</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('employeurs');closeMega()\"><div class=\"mega-ico\">\ud83d\udcc1</div><div><div class=\"mega-t\">Export comptable</div><div class=\"mega-d\">WinBooks, BOB, Octopus, Exact Online</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('employeurs');closeMega()\"><div class=\"mega-ico\">\ud83d\udd10</div><div><div class=\"mega-t\">S\u00e9curit\u00e9 &amp; RGPD</div><div class=\"mega-d\">AES-256-GCM, audit trail, RLS</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('employeurs');closeMega()\"><div class=\"mega-ico\">\ud83d\udc65</div><div><div class=\"mega-t\">Portail employ\u00e9</div><div class=\"mega-d\">Fiches de paie, documents, cong\u00e9s</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('employeurs');closeMega()\"><div class=\"mega-ico\">\u270d\ufe0f</div><div><div class=\"mega-t\">Signature \u00e9lectronique</div><div class=\"mega-d\">Yousign / DocuSign \u2014 valeur l\u00e9gale</div></div></div>\n        </div>\n      </div>\n      <!-- Formations -->\n      <div class=\"nav-item\" id=\"ni-5\">\n        <a onclick=\"toggleMega(5)\">Formations <span class=\"arrow\">\u25be</span></a>\n        <div class=\"mega\" style=\"min-width:480px\">\n          <div class=\"mega-item\" onclick=\"go('formations');closeMega()\"><div class=\"mega-ico\">\ud83d\udcda</div><div><div class=\"mega-t\">Droit social belge</div><div class=\"mega-d\">ONSS, paie, Dimona \u2014 ma\u00eetrisez les bases</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('formations');closeMega()\"><div class=\"mega-ico\">\ud83e\uddee</div><div><div class=\"mega-t\">Calcul de paie avanc\u00e9</div><div class=\"mega-d\">CP, bar\u00e8mes, PP Annexe III, bonus emploi</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('formations');closeMega()\"><div class=\"mega-ico\">\ud83c\udfdb</div><div><div class=\"mega-t\">DmfA &amp; Belcotax</div><div class=\"mega-d\">D\u00e9clarations trimestrielles pas \u00e0 pas</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('formations');closeMega()\"><div class=\"mega-ico\">\ud83d\ude80</div><div><div class=\"mega-t\">Onboarding Aureus Pro</div><div class=\"mega-d\">Prise en main compl\u00e8te de la plateforme</div></div></div>\n        </div>\n      </div>\n      <!-- Experts-comptables -->\n      <div class=\"nav-item\" id=\"ni-4\">\n        <a onclick=\"toggleMega(4)\">Experts-comptables <span class=\"arrow\">\u25be</span></a>\n        <div class=\"mega\">\n          <div class=\"mega-item\" onclick=\"go('experts');closeMega()\"><div class=\"mega-ico\">\ud83c\udfdb</div><div><div class=\"mega-t\">Portail multi-clients</div><div class=\"mega-d\">G\u00e9rez tous vos dossiers en un endroit</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('experts');closeMega()\"><div class=\"mega-ico\">\ud83d\udd17</div><div><div class=\"mega-t\">API REST + Webhooks</div><div class=\"mega-d\">Int\u00e9gration avec vos outils existants</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('experts');closeMega()\"><div class=\"mega-ico\">\ud83d\udce4</div><div><div class=\"mega-t\">Mandats ONSS &amp; Belcotax</div><div class=\"mega-d\">G\u00e9n\u00e9ration automatique Mahis/CSAM</div></div></div>\n          <div class=\"mega-item\" onclick=\"go('experts');closeMega()\"><div class=\"mega-ico\">\ud83d\udd04</div><div><div class=\"mega-t\">Migration assist\u00e9e</div><div class=\"mega-d\">Importation depuis SD Worx, Partena\u2026</div></div></div>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"nav-right\">\n      <button class=\"btn-nav-ghost\" onclick=\"window.location.href='/'\">Connexion</button>\n      <button class=\"btn-nav-dark\" onclick=\"go('contact')\">Demander une d\u00e9mo <svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></button>\n    </div>\n  </div>\n</nav>\n\n<div id=\"toast\"></div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n     PAGE HOME\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"page active\" id=\"page-home\" style=\"padding-top:calc(var(--nav-h) + 36px)\">\n\n  <section class=\"hero\" style=\"padding-top:72px\">\n    <div class=\"hero-glow\"></div><div class=\"hero-dots\"></div>\n    <div class=\"wrap hero-inner\">\n      <div class=\"hero-content\">\n        <div class=\"hero-badge\"><span class=\"ldot\"></span>Secr\u00e9tariat social num\u00e9rique \u2014 v18 en production</div>\n        <h1>Votre partenaire<br/>social belge.<br/><em>Enfin num\u00e9rique.</em></h1>\n        <p class=\"hero-sub\">De la Dimona aux d\u00e9clarations trimestrielles, de la fiche de paie \u00e0 la signature \u00e9lectronique \u2014 tout ce dont vous avez besoin, en un seul endroit.</p>\n        <div class=\"hero-actions\">\n          <button class=\"btn-gold\" onclick=\"window.location.href='/'\">Acc\u00e9der \u00e0 l'application <svg width=\"14\" height=\"14\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></button>\n          <button class=\"btn-outline-white\" onclick=\"go('contact')\">Demander une d\u00e9mo</button>\n        </div>\n      </div>\n    </div>\n    <div class=\"hero-strip\">\n      <div class=\"hs-item\"><div class=\"hs-val\"><span>166</span></div><div class=\"hs-lbl\">Commissions paritaires</div></div>\n      <div class=\"hs-item\"><div class=\"hs-val\"><span>&lt;8</span>s</div><div class=\"hs-lbl\">Dimona temps r\u00e9el</div></div>\n      <div class=\"hs-item\"><div class=\"hs-val\"><span>132</span></div><div class=\"hs-lbl\">Modules d\u00e9ploy\u00e9s</div></div>\n      <div class=\"hs-item\"><div class=\"hs-val\"><span>99.97</span>%</div><div class=\"hs-lbl\">Uptime production</div></div>\n    </div>\n  </section>\n\n  <!-- Solutions -->\n  <section class=\"solutions\">\n    <div class=\"wrap\">\n      <div style=\"margin-bottom:48px\">\n        <span class=\"eyebrow\">Nos solutions</span>\n        <h2 class=\"reveal\">Pour chaque profil,<br/><em>la bonne solution.</em></h2>\n        <p class=\"reveal d1\" style=\"max-width:520px;margin-top:12px\">Ind\u00e9pendant, employeur ou expert-comptable \u2014 Aureus Social Pro s'adapte \u00e0 votre r\u00e9alit\u00e9.</p>\n      </div>\n      <div class=\"sol-grid\">\n        <div class=\"sol-card reveal d1\" onclick=\"go('independant')\">\n          <div class=\"sol-ico\">\ud83d\ude80</div>\n          <h4>Se lancer comme ind\u00e9pendant</h4>\n          <p class=\"sol-desc\">Statut, affiliation ONSS, obligations d\u00e9claratives, cotisations \u2014 tout ce qu'il faut savoir pour d\u00e9marrer sereinement.</p>\n          <div class=\"sol-link\">D\u00e9couvrir <svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div>\n        </div>\n        <div class=\"sol-card reveal d2 featured\" onclick=\"go('employeur')\">\n          <div class=\"sol-ico\">\ud83d\udc64</div>\n          <h4>Devenir employeur</h4>\n          <p class=\"sol-desc\">Engagez votre premier collaborateur en toute conformit\u00e9. Immatriculation ONSS, contrat, Dimona, premiers salaires.</p>\n          <div class=\"sol-link\">D\u00e9couvrir <svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div>\n        </div>\n        <div class=\"sol-card reveal d3\" onclick=\"go('employeurs')\">\n          <div class=\"sol-ico\">\ud83c\udfe2</div>\n          <h4>Employeurs</h4>\n          <p class=\"sol-desc\">Automatisez la paie, les d\u00e9clarations trimestrielles et les exports comptables pour vos \u00e9quipes existantes.</p>\n          <div class=\"sol-link\">D\u00e9couvrir <svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div>\n        </div>\n        <div class=\"sol-card reveal d4\" onclick=\"go('experts')\">\n          <div class=\"sol-ico\">\ud83c\udfdb</div>\n          <h4>Experts-comptables</h4>\n          <p class=\"sol-desc\">Portail multi-clients, mandats Mahis/CSAM, API REST \u2014 g\u00e9rez tous vos dossiers depuis un seul tableau de bord.</p>\n          <div class=\"sol-link\">D\u00e9couvrir <svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div>\n        </div>\n        <div class=\"sol-card reveal d5\" onclick=\"go('employeurs')\">\n          <div class=\"sol-ico\">\ud83d\udcca</div>\n          <h4>D\u00e9clarations &amp; Belcotax</h4>\n          <p class=\"sol-desc\">DmfA trimestrielle, fiches 281.10/20/30, t\u00e9l\u00e9versement MyMinfin \u2014 conformes SPF Finances.</p>\n          <div class=\"sol-link\">D\u00e9couvrir <svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div>\n        </div>\n        <div class=\"sol-card reveal d6\" onclick=\"go('contact')\">\n          <div class=\"sol-ico\">\ud83d\udcac</div>\n          <h4>Conseil &amp; accompagnement</h4>\n          <p class=\"sol-desc\">Questions sur le droit social belge ? Nos experts vous r\u00e9pondent sous 4h ouvrables. Pas de chatbot.</p>\n          <div class=\"sol-link\">Nous contacter <svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div>\n        </div>\n      </div>\n    </div>\n  </section>\n\n  <!-- Themes -->\n  <section>\n    <div class=\"wrap\">\n      <div style=\"margin-bottom:32px\">\n        <span class=\"eyebrow\">Toujours pr\u00eat pour l'avenir</span>\n        <h2 class=\"reveal\">Ressources &amp; <em>actualit\u00e9s</em></h2>\n      </div>\n      <div class=\"themes-tabs\" id=\"theme-tabs\">\n        <button class=\"ttab active\" onclick=\"filterTheme('tout',this)\">Tout</button>\n        <button class=\"ttab\" onclick=\"filterTheme('paie',this)\">Paie</button>\n        <button class=\"ttab\" onclick=\"filterTheme('rh',this)\">RH</button>\n        <button class=\"ttab\" onclick=\"filterTheme('legal',this)\">L\u00e9gislation</button>\n        <button class=\"ttab\" onclick=\"filterTheme('onss',this)\">ONSS</button>\n      </div>\n      <div class=\"theme-grid\" id=\"theme-grid\">\n        <div class=\"theme-card\" data-cat=\"paie\"><div class=\"theme-card-img\">\ud83e\uddee</div><div class=\"theme-card-body\"><span class=\"theme-card-tag\">Paie</span><h4>Bar\u00e8mes sectoriels 2026 : ce qui change</h4><p>Mise \u00e0 jour des 166 CP int\u00e9gr\u00e9e dans Aureus Social Pro avant le 1er janvier. Retrouvez les nouvelles grilles.</p><div class=\"theme-card-cta\">Lire la mise \u00e0 jour <svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div></div>\n        <div class=\"theme-card\" data-cat=\"legal\"><div class=\"theme-card-img\">\u2696\ufe0f</div><div class=\"theme-card-body\"><span class=\"theme-card-tag\">L\u00e9gislation</span><h4>Bonus emploi 2026 : nouveaux plafonds</h4><p>Le plafond salarial pour le bonus emploi a \u00e9t\u00e9 r\u00e9vis\u00e9. Impact sur vos calculs et comment Aureus l'int\u00e8gre.</p><div class=\"theme-card-cta\">Lire l'analyse <svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div></div>\n        <div class=\"theme-card\" data-cat=\"onss\"><div class=\"theme-card-img\">\ud83c\udfdb</div><div class=\"theme-card-body\"><span class=\"theme-card-tag\">ONSS</span><h4>DmfA Q1 2026 : d\u00e9lai et nouveaut\u00e9s</h4><p>Date limite de la DmfA Q1, nouveaux codes travailleurs ONSS et changements dans la r\u00e9duction structurelle.</p><div class=\"theme-card-cta\">Consulter le guide <svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div></div>\n        <div class=\"theme-card\" data-cat=\"rh\"><div class=\"theme-card-img\">\ud83d\udc65</div><div class=\"theme-card-body\"><span class=\"theme-card-tag\">RH</span><h4>Portail employ\u00e9 : fiches, documents, cong\u00e9s</h4><p>Vos collaborateurs acc\u00e8dent eux-m\u00eames \u00e0 leurs fiches de paie et documents RH \u2014 sans solliciter le service paie.</p><div class=\"theme-card-cta\">Voir la d\u00e9mo <svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div></div>\n        <div class=\"theme-card\" data-cat=\"paie\"><div class=\"theme-card-img\">\ud83c\udfe6</div><div class=\"theme-card-body\"><span class=\"theme-card-tag\">Paie</span><h4>SEPA pain.001 : automatisez vos virements</h4><p>G\u00e9n\u00e9rez vos fichiers de virement batch ISO 20022 directement depuis votre tableau de bord paie.</p><div class=\"theme-card-cta\">En savoir plus <svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div></div>\n        <div class=\"theme-card\" data-cat=\"legal\"><div class=\"theme-card-img\">\ud83d\udd10</div><div class=\"theme-card-body\"><span class=\"theme-card-tag\">L\u00e9gislation</span><h4>RGPD Art. 32 &amp; paie belge : vos obligations</h4><p>Chiffrement des donn\u00e9es sensibles, registre Art. 30, convention DPA \u2014 comment Aureus vous met en conformit\u00e9.</p><div class=\"theme-card-cta\">Lire le guide RGPD <svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div></div>\n      </div>\n    </div>\n  </section>\n\n  <!-- Newsletter -->\n  <section class=\"newsletter\">\n    <div class=\"wrap\"><div class=\"nl-grid\">\n      <div>\n        <span class=\"eyebrow\" style=\"color:var(--gold2)\">Newsletter</span>\n        <h2 style=\"color:var(--white);margin-bottom:16px\">Ne manquez aucune<br/><em style=\"color:var(--gold2)\">actualit\u00e9 sociale.</em></h2>\n        <p style=\"color:rgba(255,255,255,.5);margin-bottom:28px\">Changements l\u00e9gislatifs belges, bar\u00e8mes mis \u00e0 jour, conseils pratiques \u2014 directement dans votre bo\u00eete mail.</p>\n        <div class=\"nl-form\">\n          <input class=\"nl-input\" type=\"email\" placeholder=\"votre@email.be\"/>\n          <button class=\"btn-gold\" onclick=\"nlSubmit()\">S'inscrire</button>\n        </div>\n        <p class=\"nl-note\">En transmettant mes donn\u00e9es, j'accepte la politique de confidentialit\u00e9 d'Aureus IA SPRL. D\u00e9sinscription possible \u00e0 tout moment.</p>\n      </div>\n      <div class=\"nl-features\">\n        <div class=\"nl-feat\"><div class=\"nl-feat-ico\">\u2696\ufe0f</div><div><div class=\"nl-feat-t\">Veille l\u00e9gislative quotidienne</div><div class=\"nl-feat-d\">Alertes d\u00e8s qu'une loi belge impacte vos obligations sociales</div></div></div>\n        <div class=\"nl-feat\"><div class=\"nl-feat-ico\">\ud83e\uddee</div><div><div class=\"nl-feat-t\">Bar\u00e8mes 2026 mis \u00e0 jour</div><div class=\"nl-feat-d\">Nouvelles grilles CP int\u00e9gr\u00e9es avant leur entr\u00e9e en vigueur</div></div></div>\n        <div class=\"nl-feat\"><div class=\"nl-feat-ico\">\ud83d\udca1</div><div><div class=\"nl-feat-t\">Conseils d'experts</div><div class=\"nl-feat-d\">Fiches pratiques sur la paie belge r\u00e9dig\u00e9es par nos juristes</div></div></div>\n      </div>\n    </div></div>\n  </section>\n\n  <div class=\"ctaband\"><div class=\"wrap\"><div class=\"ctaband-inner\">\n    <h2>Pr\u00eat \u00e0 moderniser votre <em>gestion sociale</em>&nbsp;?</h2>\n    <p>Premier mois offert \u00b7 Acc\u00e8s imm\u00e9diat \u00b7 Migration assist\u00e9e</p>\n    <button class=\"btn-gold\" onclick=\"window.location.href='/'\">Acc\u00e9der maintenant \u2192</button>\n  </div></div></div>\n\n  <footer class=\"site-footer\" id=\"f-home\"></footer>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n     PAGE IND\u00c9PENDANTS\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"page\" id=\"page-independant\" style=\"padding-top:calc(var(--nav-h) + 36px)\">\n  <section class=\"page-hero\">\n    <div class=\"wrap\"><div class=\"page-hero-grid\">\n      <div>\n        <div class=\"breadcrumb\">Accueil <span>\u203a</span> Ind\u00e9pendants</div>\n        <span class=\"eyebrow\">Ind\u00e9pendants</span>\n        <h1>Se lancer comme<br/><em>ind\u00e9pendant</em><br/>en Belgique.</h1>\n        <p class=\"page-hero-sub\">Statut, affiliation ONSS, cotisations, obligations d\u00e9claratives \u2014 le guide complet \u00e9tape par \u00e9tape par des experts en droit social belge.</p>\n        <div class=\"page-hero-actions\">\n          <button class=\"btn-p\" onclick=\"go('contact')\">Parler \u00e0 un expert</button>\n          <button class=\"btn-s\" onclick=\"go('contact')\">Demander une d\u00e9mo</button>\n        </div>\n      </div>\n      <div class=\"dark-card reveal d2\">\n        <div class=\"dark-card-lbl\">Aureus Social Pro</div>\n        <h3>Votre back-office social</h3>\n        <p class=\"dark-card-sub\" style=\"font-size:13px;color:rgba(255,255,255,.4);margin-bottom:22px\">Automatisez vos obligations sociales d\u00e8s le premier jour d'activit\u00e9.</p>\n        <div class=\"dark-card-stats\">\n          <div><div class=\"dcs-val\">166</div><div class=\"dcs-lbl\">CP g\u00e9r\u00e9es</div></div>\n          <div><div class=\"dcs-val\">&lt;8s</div><div class=\"dcs-lbl\">Dimona</div></div>\n          <div><div class=\"dcs-val\">100%</div><div class=\"dcs-lbl\">Belge &amp; conforme</div></div>\n          <div><div class=\"dcs-val\">24/7</div><div class=\"dcs-lbl\">Acc\u00e8s plateforme</div></div>\n        </div>\n      </div>\n    </div></div>\n  </section>\n\n  <section>\n    <div class=\"wrap\">\n      <div style=\"margin-bottom:48px\"><span class=\"eyebrow\">Guide pas \u00e0 pas</span><h2 class=\"reveal\">Se lancer en <em>6 \u00e9tapes</em></h2></div>\n      <div style=\"display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start\">\n        <div class=\"steps\">\n          <div class=\"step reveal d1\">\n            <div class=\"step-num\">1</div>\n            <div class=\"step-body\">\n              <h4>Choisir votre statut</h4>\n              <p>Ind\u00e9pendant \u00e0 titre principal ou compl\u00e9mentaire, soci\u00e9t\u00e9 (SRL, SA\u2026) ou unipersonnel \u2014 chaque statut a des implications sociales et fiscales diff\u00e9rentes.</p>\n              <div class=\"step-tags\"><span class=\"tag tag-au\">SRL \u00b7 SA \u00b7 Unipersonnel</span></div>\n            </div>\n          </div>\n          <div class=\"step reveal d2\">\n            <div class=\"step-num\">2</div>\n            <div class=\"step-body\">\n              <h4>Num\u00e9ro d'entreprise (BCE)</h4>\n              <p>Inscription au registre des personnes morales aupr\u00e8s du greffe du tribunal de l'entreprise ou via un guichet d'entreprises agr\u00e9\u00e9.</p>\n              <div class=\"step-tags\"><span class=\"tag tag-b\">BCE \u00b7 Banque-Carrefour</span></div>\n            </div>\n          </div>\n          <div class=\"step reveal d3\">\n            <div class=\"step-num\">3</div>\n            <div class=\"step-body\">\n              <h4>Affiliation \u00e0 une caisse d'assurances sociales</h4>\n              <p>Obligation l\u00e9gale dans les 90 jours du d\u00e9but d'activit\u00e9. Vous \u00eates affili\u00e9 via votre caisse (ONSS-Ind\u00e9pendants, Securitas, UCM\u2026). Aureus vous guide dans les d\u00e9marches.</p>\n              <div class=\"step-tags\"><span class=\"tag tag-g\">ONSS \u00b7 90 jours</span></div>\n            </div>\n          </div>\n          <div class=\"step reveal d4\">\n            <div class=\"step-num\">4</div>\n            <div class=\"step-body\">\n              <h4>Cotisations sociales trimestrielles</h4>\n              <p>Calcul\u00e9es sur votre revenu net imposable. Taux : 20,5% jusqu'\u00e0 72 810,09 \u20ac et 14,16% au-del\u00e0 pour 2026. Minimum : 870,78 \u20ac/trimestre (activit\u00e9 principale).</p>\n              <div class=\"step-tags\"><span class=\"tag tag-au\">20,5% \u00b7 Trimestriel</span></div>\n            </div>\n          </div>\n          <div class=\"step reveal d5\">\n            <div class=\"step-num\">5</div>\n            <div class=\"step-body\">\n              <h4>Obligations TVA &amp; IPP</h4>\n              <p>D\u00e9claration TVA (mensuelle ou trimestrielle selon seuil), d\u00e9claration IPP annuelle. Aureus g\u00e9n\u00e8re les donn\u00e9es n\u00e9cessaires pour votre comptable.</p>\n              <div class=\"step-tags\"><span class=\"tag\">TVA \u00b7 IPP \u00b7 SPF Finances</span></div>\n            </div>\n          </div>\n          <div class=\"step reveal d6\">\n            <div class=\"step-num\">6</div>\n            <div class=\"step-body\">\n              <h4>Protection sociale</h4>\n              <p>Couverture maladie-invalidit\u00e9 (INAMI), droit \u00e0 la pension, allocations familiales. Optionnel : assurance revenu garanti, pension compl\u00e9mentaire (PLCI).</p>\n              <div class=\"step-tags\"><span class=\"tag tag-g\">INAMI \u00b7 Pension \u00b7 PLCI</span></div>\n              <div class=\"step-link\" onclick=\"go('contact')\">Simuler ma protection \u2192 </div>\n            </div>\n          </div>\n        </div>\n        <div>\n          <div style=\"background:var(--cream);border:1px solid var(--border);border-radius:var(--r2);padding:28px;margin-bottom:20px\">\n            <h4 style=\"margin-bottom:16px;font-size:16px\">\u2705 Ce qu'Aureus automatise pour vous</h4>\n            <div style=\"display:flex;flex-direction:column;gap:10px\">\n              <div style=\"display:flex;gap:10px;font-size:14px;color:var(--stone)\"><span style=\"color:#22C55E;flex-shrink:0\">\u2713</span>Dimona IN/OUT en moins de 8 secondes</div>\n              <div style=\"display:flex;gap:10px;font-size:14px;color:var(--stone)\"><span style=\"color:#22C55E;flex-shrink:0\">\u2713</span>Calcul des cotisations ONSS 13,07%</div>\n              <div style=\"display:flex;gap:10px;font-size:14px;color:var(--stone)\"><span style=\"color:#22C55E;flex-shrink:0\">\u2713</span>Fiches de paie PDF conformes</div>\n              <div style=\"display:flex;gap:10px;font-size:14px;color:var(--stone)\"><span style=\"color:#22C55E;flex-shrink:0\">\u2713</span>DmfA XML trimestrielle ONSS</div>\n              <div style=\"display:flex;gap:10px;font-size:14px;color:var(--stone)\"><span style=\"color:#22C55E;flex-shrink:0\">\u2713</span>Belcotax 281.10 SPF Finances</div>\n              <div style=\"display:flex;gap:10px;font-size:14px;color:var(--stone)\"><span style=\"color:#22C55E;flex-shrink:0\">\u2713</span>SEPA pain.001 virements batch</div>\n              <div style=\"display:flex;gap:10px;font-size:14px;color:var(--stone)\"><span style=\"color:#22C55E;flex-shrink:0\">\u2713</span>Signature \u00e9lectronique (Yousign)</div>\n            </div>\n          </div>\n          <div style=\"background:var(--gold-pale);border:1px solid #D4B870;border-radius:var(--r2);padding:24px\">\n            <div style=\"font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7A5010;margin-bottom:12px\">Bon \u00e0 savoir</div>\n            <p style=\"font-size:14px;color:#5A3A0A;line-height:1.7\">En 2026, le premier employ\u00e9 b\u00e9n\u00e9ficie d'une <strong>exon\u00e9ration totale des cotisations patronales ONSS</strong> pendant 5 ans (r\u00e9duction Win-Win). Aureus la calcule et l'applique automatiquement.</p>\n          </div>\n        </div>\n      </div>\n    </div>\n  </section>\n\n  <section style=\"background:var(--cream)\">\n    <div class=\"wrap\">\n      <div style=\"text-align:center;margin-bottom:48px\"><span class=\"eyebrow\">Questions fr\u00e9quentes</span><h2 class=\"reveal\">Tout ce que vous voulez <em>savoir</em></h2></div>\n      <div style=\"max-width:720px;margin:0 auto\">\n        <div class=\"faq-item\"><button class=\"faq-q\" onclick=\"faq(this)\">Quel est le d\u00e9lai pour s'affilier \u00e0 une caisse sociale ?<span class=\"faq-arr\">+</span></button><div class=\"faq-a\"><div class=\"faq-ai\">Vous avez 90 jours \u00e0 compter du d\u00e9but de votre activit\u00e9. En cas de d\u00e9passement, vous risquez une affiliation d'office et des majorations de cotisations.</div></div></div>\n        <div class=\"faq-item\"><button class=\"faq-q\" onclick=\"faq(this)\">Combien co\u00fbtent les cotisations sociales en 2026 ?<span class=\"faq-arr\">+</span></button><div class=\"faq-a\"><div class=\"faq-ai\">20,5% sur la tranche de revenu net jusqu'\u00e0 72 810,09 \u20ac et 14,16% au-del\u00e0. Le minimum absolu est de 870,78 \u20ac/trimestre pour un ind\u00e9pendant \u00e0 titre principal.</div></div></div>\n        <div class=\"faq-item\"><button class=\"faq-q\" onclick=\"faq(this)\">Puis-je travailler comme ind\u00e9pendant compl\u00e9mentaire tout en \u00e9tant salari\u00e9 ?<span class=\"faq-arr\">+</span></button><div class=\"faq-a\"><div class=\"faq-ai\">Oui, sous r\u00e9serve de l'accord de votre employeur principal (clause d'exclusivit\u00e9). Vos cotisations seront r\u00e9duites gr\u00e2ce au r\u00e9gime compl\u00e9mentaire.</div></div></div>\n        <div class=\"faq-item\"><button class=\"faq-q\" onclick=\"faq(this)\">Aureus g\u00e8re-t-il aussi les ind\u00e9pendants en soci\u00e9t\u00e9 ?<span class=\"faq-arr\">+</span></button><div class=\"faq-a\"><div class=\"faq-ai\">Oui. Aureus Social Pro g\u00e8re aussi bien les personnes physiques que les mandataires de soci\u00e9t\u00e9 (g\u00e9rants SRL, administrateurs SA) avec les sp\u00e9cificit\u00e9s ONSS applicables.</div></div></div>\n      </div>\n    </div>\n  </section>\n\n  <div class=\"ctaband\"><div class=\"wrap\"><div class=\"ctaband-inner\"><h2>Pr\u00eat \u00e0 vous lancer<br/><em>en toute s\u00e9r\u00e9nit\u00e9</em>&nbsp;?</h2><p>Nos experts vous accompagnent de A \u00e0 Z.</p><button class=\"btn-gold\" onclick=\"go('contact')\">Parler \u00e0 un expert \u2192</button></div></div></div>\n  <footer class=\"site-footer\" id=\"f-independant\"></footer>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n     PAGE DEVENIR EMPLOYEUR\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"page\" id=\"page-employeur\" style=\"padding-top:calc(var(--nav-h) + 36px)\">\n  <section class=\"page-hero\">\n    <div class=\"wrap\"><div class=\"page-hero-grid\">\n      <div>\n        <div class=\"breadcrumb\">Accueil <span>\u203a</span> Devenir employeur</div>\n        <span class=\"eyebrow\">Premier employ\u00e9</span>\n        <h1>Engagez votre<br/>premier collaborateur<br/><em>en confiance.</em></h1>\n        <p class=\"page-hero-sub\">Immatriculation ONSS, contrat de travail, Dimona, premiers salaires \u2014 Aureus vous guide \u00e0 chaque \u00e9tape et automatise toutes vos obligations.</p>\n        <div class=\"page-hero-actions\">\n          <button class=\"btn-p\" onclick=\"go('contact')\">Demander une d\u00e9mo</button>\n          <button class=\"btn-s\" onclick=\"go('employeurs')\">D\u00e9j\u00e0 employeur \u2192</button>\n        </div>\n      </div>\n      <div class=\"dark-card reveal d2\">\n        <div class=\"dark-card-lbl\">Premier employ\u00e9 en Belgique</div>\n        <h3>Ce qu'Aureus fait pour vous</h3>\n        <p class=\"dark-card-sub\">Automatisation compl\u00e8te du cycle social.</p>\n        <div class=\"dark-card-stats\">\n          <div><div class=\"dcs-val\">0\u20ac</div><div class=\"dcs-lbl\">Cotisations patronales an 1</div></div>\n          <div><div class=\"dcs-val\">8s</div><div class=\"dcs-lbl\">Dimona soumise</div></div>\n          <div><div class=\"dcs-val\">100%</div><div class=\"dcs-lbl\">Conformit\u00e9 ONSS</div></div>\n          <div><div class=\"dcs-val\">CP 200</div><div class=\"dcs-lbl\">+ 165 autres CP</div></div>\n        </div>\n      </div>\n    </div></div>\n  </section>\n\n  <section>\n    <div class=\"wrap\">\n      <div style=\"margin-bottom:48px\"><span class=\"eyebrow\">\u00c9tapes cl\u00e9s</span><h2 class=\"reveal\">De 0 \u00e0 votre premier <em>employ\u00e9</em></h2></div>\n      <div class=\"steps\" style=\"max-width:680px\">\n        <div class=\"step reveal d1\"><div class=\"step-num\">1</div><div class=\"step-body\"><h4>Immatriculation ONSS employeur</h4><p>Vous devez obtenir un num\u00e9ro d'employeur ONSS avant d'engager. Aureus vous guide dans la soumission via le portail WIDE et assure le suivi du matricule provisoire.</p><div class=\"step-tags\"><span class=\"tag tag-b\">ONSS \u00b7 WIDE \u00b7 Matricule</span></div></div></div>\n        <div class=\"step reveal d2\"><div class=\"step-num\">2</div><div class=\"step-body\"><h4>R\u00e9daction du contrat de travail</h4><p>CDI, CDD, temps plein ou partiel \u2014 Aureus g\u00e9n\u00e8re des mod\u00e8les conformes \u00e0 la commission paritaire applicable, avec clause de p\u00e9riode d'essai selon la l\u00e9gislation 2026.</p><div class=\"step-tags\"><span class=\"tag tag-au\">CDI \u00b7 CDD \u00b7 CP 200</span></div></div></div>\n        <div class=\"step reveal d3\"><div class=\"step-num\">3</div><div class=\"step-body\"><h4>D\u00e9claration Dimona IN</h4><p>Obligatoire avant le d\u00e9but du travail. Aureus soumet la Dimona IN en moins de 8 secondes d\u00e8s l'ajout du travailleur, avec confirmation ONSS en temps r\u00e9el.</p><div class=\"step-tags\"><span class=\"tag tag-g\">Dimona IN \u00b7 &lt;8s \u00b7 ONSS</span></div></div></div>\n        <div class=\"step reveal d4\"><div class=\"step-num\">4</div><div class=\"step-body\"><h4>Calcul du premier salaire</h4><p>Brut \u2192 Net complet : ONSS 13,07% travailleur, pr\u00e9compte professionnel Annexe III, bonus emploi, r\u00e9duction bas salaire. Fiche de paie PDF conforme g\u00e9n\u00e9r\u00e9e automatiquement.</p><div class=\"step-tags\"><span class=\"tag tag-au\">ONSS \u00b7 PP \u00b7 Bonus emploi</span></div></div></div>\n        <div class=\"step reveal d5\"><div class=\"step-num\">5</div><div class=\"step-body\"><h4>Virement SEPA &amp; paiement</h4><p>Aureus g\u00e9n\u00e8re le fichier SEPA pain.001 pr\u00eat \u00e0 importer dans votre banque. Validation IBAN/BIC int\u00e9gr\u00e9e.</p><div class=\"step-tags\"><span class=\"tag tag-b\">SEPA pain.001 \u00b7 ISO 20022</span></div></div></div>\n        <div class=\"step reveal d6\"><div class=\"step-num\">6</div><div class=\"step-body\"><h4>D\u00e9clarations trimestrielles ONSS</h4><p>DmfA XML Q1\u2013Q4 g\u00e9n\u00e9r\u00e9e automatiquement avec toutes les r\u00e9ductions applicables. Envoi direct ONSS depuis la plateforme.</p><div class=\"step-tags\"><span class=\"tag\">DmfA \u00b7 Q1\u2013Q4 \u00b7 R\u00e9duction struct.</span></div><div class=\"step-link\" onclick=\"go('contact')\">Voir comment \u00e7a marche \u2192</div></div></div>\n      </div>\n    </div>\n  </section>\n\n  <section style=\"background:var(--cream)\">\n    <div class=\"wrap\">\n      <div style=\"text-align:center;margin-bottom:48px\"><span class=\"eyebrow\">Avantages 2026</span><h2 class=\"reveal\">Exon\u00e9rations &amp; <em>primes \u00e0 l'embauche</em></h2></div>\n      <div class=\"info-grid\">\n        <div class=\"info-card reveal d1\"><div class=\"info-card-ico\">\ud83c\udf81</div><h4>Exemption 1er employ\u00e9</h4><p>Exon\u00e9ration totale des cotisations patronales ONSS pour le premier employ\u00e9 pendant 5 ans. Calcul\u00e9e automatiquement par Aureus.</p></div>\n        <div class=\"info-card reveal d2\"><div class=\"info-card-ico\">\ud83d\udcbc</div><h4>Activa.brussels</h4><p>Prime mensuelle jusqu'\u00e0 350 \u20ac pour l'engagement d'un demandeur d'emploi bruxellois. Aureus int\u00e8gre l'attestation dans le calcul.</p></div>\n        <div class=\"info-card reveal d3\"><div class=\"info-card-ico\">\ud83d\udcc9</div><h4>R\u00e9duction bas salaire</h4><p>R\u00e9duction ONSS patronale automatique pour les salaires inf\u00e9rieurs \u00e0 3 100 \u20ac/mois. Appliqu\u00e9e dans chaque DmfA.</p></div>\n        <div class=\"info-card reveal d4\"><div class=\"info-card-ico\">\ud83c\udf93</div><h4>SINE &amp; plan Activa</h4><p>R\u00e9ductions pour l'engagement de personnes \u00e9loign\u00e9es du march\u00e9 de l'emploi. Conditions et calcul int\u00e9gr\u00e9s dans la paie.</p></div>\n        <div class=\"info-card reveal d5\"><div class=\"info-card-ico\">\ud83d\udc76</div><h4>Cong\u00e9 parental</h4><p>Gestion des suspensions de contrat, remplacement temporaire, d\u00e9clarations ONSS sp\u00e9cifiques \u2014 tout est automatis\u00e9.</p></div>\n        <div class=\"info-card reveal d6\"><div class=\"info-card-ico\">\ud83d\udccb</div><h4>MonBEE recrutement</h4><p>Prime \u00e0 l'embauche via MonBEE. Aureus vous rappelle les d\u00e9lais et g\u00e9n\u00e8re les documents n\u00e9cessaires.</p></div>\n      </div>\n    </div>\n  </section>\n\n  <div class=\"ctaband\"><div class=\"wrap\"><div class=\"ctaband-inner\"><h2>Engagez votre premier collaborateur<br/><em>d\u00e8s demain.</em></h2><p>D\u00e9mo gratuite \u00b7 Accompagnement complet \u00b7 Premier mois offert</p><button class=\"btn-gold\" onclick=\"go('contact')\">D\u00e9marrer \u2192</button></div></div></div>\n  <footer class=\"site-footer\" id=\"f-employeur\"></footer>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n     PAGE EMPLOYEURS\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"page\" id=\"page-employeurs\" style=\"padding-top:calc(var(--nav-h) + 36px)\">\n  <section class=\"page-hero\">\n    <div class=\"wrap\"><div class=\"page-hero-grid\">\n      <div>\n        <div class=\"breadcrumb\">Accueil <span>\u203a</span> Employeurs</div>\n        <span class=\"eyebrow\">Employeurs</span>\n        <h1>Votre paie,<br/>vos d\u00e9clarations,<br/><em>automatis\u00e9es.</em></h1>\n        <p class=\"page-hero-sub\">166 commissions paritaires, DmfA XML, Belcotax, export WinBooks/BOB \u2014 132 modules pour couvrir l'int\u00e9gralit\u00e9 du cycle social belge.</p>\n        <div class=\"page-hero-actions\">\n          <button class=\"btn-p\" onclick=\"window.location.href='/'\">Acc\u00e9der \u00e0 la plateforme</button>\n          <button class=\"btn-s\" onclick=\"go('contact')\">Demander une d\u00e9mo</button>\n        </div>\n      </div>\n      <div class=\"dark-card reveal d2\">\n        <div class=\"dark-card-lbl\">Plateforme en production</div>\n        <h3>Chiffres r\u00e9els \u2014 Mars 2026</h3>\n        <p class=\"dark-card-sub\">132 modules \u00b7 44 246 lignes de code</p>\n        <div class=\"dark-card-stats\">\n          <div><div class=\"dcs-val\">1 274</div><div class=\"dcs-lbl\">Fiches calcul\u00e9es</div></div>\n          <div><div class=\"dcs-val\">392</div><div class=\"dcs-lbl\">D\u00e9clarations ONSS</div></div>\n          <div><div class=\"dcs-val\">42</div><div class=\"dcs-lbl\">Entreprises g\u00e9r\u00e9es</div></div>\n          <div><div class=\"dcs-val\">99.97%</div><div class=\"dcs-lbl\">Uptime</div></div>\n        </div>\n      </div>\n    </div></div>\n  </section>\n\n  <section>\n    <div class=\"wrap\">\n      <div style=\"margin-bottom:48px\"><span class=\"eyebrow\">Fonctionnalit\u00e9s</span><h2 class=\"reveal\">132 modules pour le <em>cycle social complet</em></h2></div>\n      <div class=\"info-grid\">\n        <div class=\"info-card reveal d1\"><div class=\"info-card-ico\">\u26a1</div><h4>Dimona \u00e9lectronique</h4><p>IN/OUT/UPDATE en moins de 8 secondes. Connexion directe ONSS via Mahis/CSAM. Validation NISS temps r\u00e9el.</p></div>\n        <div class=\"info-card reveal d2\"><div class=\"info-card-ico\">\ud83e\uddee</div><h4>Calcul de paie belge</h4><p>166 CP, bar\u00e8mes sectoriels 2026, ONSS 13,07%, pr\u00e9compte professionnel Annexe III, bonus emploi, r\u00e9ductions.</p></div>\n        <div class=\"info-card reveal d3\"><div class=\"info-card-ico\">\ud83d\udccb</div><h4>DmfA XML trimestrielle</h4><p>Q1\u2013Q4 conformes ONSS. R\u00e9duction structurelle, bas salaire, bonus emploi. Envoi direct depuis la plateforme.</p></div>\n        <div class=\"info-card reveal d4\"><div class=\"info-card-ico\">\ud83d\udcca</div><h4>Belcotax XML</h4><p>Fiches 281.10, 281.20, 281.30 conformes SPF Finances. T\u00e9l\u00e9versement direct MyMinfin. Corrections et annulations.</p></div>\n        <div class=\"info-card reveal d5\"><div class=\"info-card-ico\">\ud83c\udfe6</div><h4>SEPA pain.001</h4><p>Fichiers virement batch ISO 20022. Validation IBAN/BIC. Multi-devises. Compatible toutes banques belges.</p></div>\n        <div class=\"info-card reveal d6\"><div class=\"info-card-ico\">\ud83d\udcc1</div><h4>Export comptable \u00d7 6</h4><p>WinBooks ACT, BOB50, Exact Online XML, Octopus, Horus/Popsy, CSV g\u00e9n\u00e9rique. PCMN belge int\u00e9gr\u00e9.</p></div>\n        <div class=\"info-card reveal d1\"><div class=\"info-card-ico\">\u270d\ufe0f</div><h4>Signature \u00e9lectronique</h4><p>Yousign ou DocuSign. Contrats, avenants, documents RH. Valeur probante l\u00e9gale. Archivage GED automatique.</p></div>\n        <div class=\"info-card reveal d2\"><div class=\"info-card-ico\">\ud83d\udc65</div><h4>Portail employ\u00e9</h4><p>Fiches de paie, documents RH, demandes de cong\u00e9 \u2014 accessibles par chaque collaborateur sans solliciter le service paie.</p></div>\n        <div class=\"info-card reveal d3\"><div class=\"info-card-ico\">\ud83d\udd10</div><h4>S\u00e9curit\u00e9 RGPD Art. 32</h4><p>AES-256-GCM NISS/IBAN, audit trail complet, RLS Supabase, OWASP ZAP CI/CD, backup nocturne chiffr\u00e9 B2.</p></div>\n      </div>\n    </div>\n  </section>\n\n  <div class=\"ctaband\"><div class=\"wrap\"><div class=\"ctaband-inner\"><h2>Voyez la plateforme<br/><em>en action.</em></h2><p>D\u00e9mo sur vos propres donn\u00e9es \u2014 30 minutes chrono.</p><button class=\"btn-gold\" onclick=\"go('contact')\">R\u00e9server une d\u00e9mo \u2192</button></div></div></div>\n  <footer class=\"site-footer\" id=\"f-employeurs\"></footer>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n     PAGE EXPERTS-COMPTABLES\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"page\" id=\"page-experts\" style=\"padding-top:calc(var(--nav-h) + 36px)\">\n  <section class=\"page-hero\">\n    <div class=\"wrap\"><div class=\"page-hero-grid\">\n      <div>\n        <div class=\"breadcrumb\">Accueil <span>\u203a</span> Experts-comptables</div>\n        <span class=\"eyebrow\">Experts-comptables</span>\n        <h1>Un portail,<br/>tous vos <em>dossiers</em><br/>sociaux.</h1>\n        <p class=\"page-hero-sub\">Mandats Mahis/CSAM, portail multi-clients, API REST, migration depuis SD Worx ou Partena \u2014 Aureus est con\u00e7u pour les professionnels du chiffre.</p>\n        <div class=\"page-hero-actions\">\n          <button class=\"btn-p\" onclick=\"go('contact')\">Demander une d\u00e9mo fiduciaire</button>\n          <button class=\"btn-s\" onclick=\"go('contact')\">Migration assist\u00e9e</button>\n        </div>\n      </div>\n      <div class=\"dark-card reveal d2\">\n        <div class=\"dark-card-lbl\">Plan Fiduciaire</div>\n        <h3>Multi-dossiers illimit\u00e9s</h3>\n        <p class=\"dark-card-sub\">Portail \u00b7 API \u00b7 SLA \u00b7 Migration</p>\n        <div class=\"dark-card-stats\">\n          <div><div class=\"dcs-val\">\u221e</div><div class=\"dcs-lbl\">Dossiers clients</div></div>\n          <div><div class=\"dcs-val\">99.9%</div><div class=\"dcs-lbl\">SLA garanti</div></div>\n          <div><div class=\"dcs-val\">REST</div><div class=\"dcs-lbl\">API + Webhooks</div></div>\n          <div><div class=\"dcs-val\">Auto</div><div class=\"dcs-lbl\">Migration CSV</div></div>\n        </div>\n      </div>\n    </div></div>\n  </section>\n\n  <section>\n    <div class=\"wrap\">\n      <div style=\"margin-bottom:48px\"><span class=\"eyebrow\">Ce que nous offrons</span><h2 class=\"reveal\">Con\u00e7u pour les <em>professionnels du chiffre</em></h2></div>\n      <div class=\"expert-grid\">\n        <div class=\"expert-card reveal d1\"><div class=\"expert-num\">01</div><div><div class=\"expert-t\">Portail multi-clients centralis\u00e9</div><div class=\"expert-d\">G\u00e9rez tous vos dossiers employeurs depuis un seul tableau de bord. Droits d'acc\u00e8s granulaires par collaborateur. Vue consolid\u00e9e de toutes les \u00e9ch\u00e9ances.</div></div></div>\n        <div class=\"expert-card reveal d2\"><div class=\"expert-num\">02</div><div><div class=\"expert-t\">Mandats ONSS &amp; Belcotax automatiques</div><div class=\"expert-d\">G\u00e9n\u00e9ration des conventions de mandat Mahis/CSAM conformes. D\u00e9signation des acc\u00e8s salari\u00e9s Salem ou collaborateurs. Suivi des mandates actifs.</div></div></div>\n        <div class=\"expert-card reveal d3\"><div class=\"expert-num\">03</div><div><div class=\"expert-t\">API REST + Webhooks HMAC</div><div class=\"expert-d\">Int\u00e9grez Aureus dans votre ERP ou votre workflow. Webhooks s\u00e9curis\u00e9s pour les \u00e9v\u00e9nements paie, DmfA, Dimona. Documentation OpenAPI compl\u00e8te.</div></div></div>\n        <div class=\"expert-card reveal d4\"><div class=\"expert-num\">04</div><div><div class=\"expert-t\">Migration depuis vos prestataires actuels</div><div class=\"expert-d\">Parseur CSV multi-format pour importer depuis SD Worx, Partena, Securex, Sodexo. Migration assist\u00e9e compl\u00e8te incluse dans le plan Fiduciaire.</div></div></div>\n        <div class=\"expert-card reveal d5\"><div class=\"expert-num\">05</div><div><div class=\"expert-t\">6 formats d'export comptable</div><div class=\"expert-d\">WinBooks ACT, BOB50, Exact Online XML, Octopus, Horus/Popsy, CSV. PCMN belge int\u00e9gr\u00e9. Mappage persistant par client.</div></div></div>\n        <div class=\"expert-card reveal d6\"><div class=\"expert-num\">06</div><div><div class=\"expert-t\">SLA 99.9% + Account Manager</div><div class=\"expert-d\">R\u00e9ponse garantie en moins de 2h ouvrables. Canal Slack ou Teams d\u00e9di\u00e9. Account manager attitr\u00e9 pour chaque cabinet fiduciaire.</div></div></div>\n      </div>\n    </div>\n  </section>\n\n  <section style=\"background:var(--cream)\">\n    <div class=\"wrap\">\n      <div style=\"text-align:center;margin-bottom:48px\"><span class=\"eyebrow\">Migration</span><h2 class=\"reveal\">Quitter SD Worx ou Partena<br/><em>sans risque.</em></h2></div>\n      <div style=\"display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:900px;margin:0 auto\">\n        <div style=\"text-align:center;padding:24px 16px;background:var(--white);border:1px solid var(--border);border-radius:var(--r2)\"><div style=\"font-size:28px;margin-bottom:12px\">\ud83d\udce5</div><div style=\"font-weight:700;font-size:14px;color:var(--ink);margin-bottom:6px\">Export donn\u00e9es</div><div style=\"font-size:13px;color:var(--stone)\">Extraction CSV depuis votre prestataire actuel</div></div>\n        <div style=\"text-align:center;padding:24px 16px;background:var(--white);border:1px solid var(--border);border-radius:var(--r2)\"><div style=\"font-size:28px;margin-bottom:12px\">\ud83d\udd04</div><div style=\"font-weight:700;font-size:14px;color:var(--ink);margin-bottom:6px\">Import automatique</div><div style=\"font-size:13px;color:var(--stone)\">Parseur multi-format Aureus \u2014 aucune ressaisie</div></div>\n        <div style=\"text-align:center;padding:24px 16px;background:var(--white);border:1px solid var(--border);border-radius:var(--r2)\"><div style=\"font-size:28px;margin-bottom:12px\">\u2705</div><div style=\"font-weight:700;font-size:14px;color:var(--ink);margin-bottom:6px\">Validation crois\u00e9e</div><div style=\"font-size:13px;color:var(--stone)\">Comparaison des calculs avant go-live</div></div>\n        <div style=\"text-align:center;padding:24px 16px;background:var(--white);border:1px solid var(--border);border-radius:var(--r2)\"><div style=\"font-size:28px;margin-bottom:12px\">\ud83d\ude80</div><div style=\"font-weight:700;font-size:14px;color:var(--ink);margin-bottom:6px\">Go-live en 7 jours</div><div style=\"font-size:13px;color:var(--stone)\">Dossiers op\u00e9rationnels d\u00e8s le premier cycle</div></div>\n      </div>\n    </div>\n  </section>\n\n  <div class=\"ctaband\"><div class=\"wrap\"><div class=\"ctaband-inner\"><h2>Rejoignez les fiduciaires<br/>qui ont choisi <em>l'ind\u00e9pendance.</em></h2><p>Migration assist\u00e9e \u00b7 SLA 99.9% \u00b7 Premier mois offert</p><button class=\"btn-gold\" onclick=\"go('contact')\">Demo fiduciaire \u2192</button></div></div></div>\n  <footer class=\"site-footer\" id=\"f-experts\"></footer>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n     PAGE CONTACT\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"page\" id=\"page-contact\" style=\"padding-top:calc(var(--nav-h) + 36px)\">\n  <section>\n    <div class=\"wrap\"><div class=\"contact-layout\">\n      <div>\n        <span class=\"eyebrow\">Contact</span>\n        <h2>Comment pouvons-nous<br/>vous <em>aider</em>&nbsp;?</h2>\n        <p style=\"margin:16px 0 28px;font-size:17px\">Notre \u00e9quipe r\u00e9pond sous 4h ouvrables. Pas de chatbot \u2014 de vrais experts en droit social belge.</p>\n        <div class=\"contact-channels\">\n          <div class=\"cc\" onclick=\"window.open('mailto:info@aureus-ia.com')\"><div class=\"cc-ico\">\u2709\ufe0f</div><div><div class=\"cc-l\">E-mail</div><div class=\"cc-v\">info@aureus-ia.com</div></div></div>\n          <div class=\"cc\" onclick=\"window.location.href='/'\"><div class=\"cc-ico\">\ud83d\udcbb</div><div><div class=\"cc-l\">Espace client</div><div class=\"cc-v\">app.aureussocial.be</div></div></div>\n          <div class=\"cc\"><div class=\"cc-ico\">\ud83d\udccd</div><div><div class=\"cc-l\">Adresse</div><div class=\"cc-v\">Place Marcel Broodthaers 8, 1060 Saint-Gilles, Bruxelles</div></div></div>\n        </div>\n        <div style=\"display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:28px\">\n          <div style=\"background:var(--cream);border:1px solid var(--border);border-radius:var(--r);padding:14px\"><div style=\"font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mist);margin-bottom:6px\">BCE</div><div style=\"font-family:'Fira Code',monospace;font-size:12px;color:var(--ink)\">BE 1028.230.781</div></div>\n          <div style=\"background:var(--cream);border:1px solid var(--border);border-radius:var(--r);padding:14px\"><div style=\"font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mist);margin-bottom:6px\">Mahis</div><div style=\"font-family:'Fira Code',monospace;font-size:12px;color:var(--ink)\">DGIII/MAHI011</div></div>\n          <div style=\"background:var(--cream);border:1px solid var(--border);border-radius:var(--r);padding:14px\"><div style=\"font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mist);margin-bottom:6px\">Peppol</div><div style=\"font-family:'Fira Code',monospace;font-size:12px;color:var(--ink)\">0208:1028230781</div></div>\n          <div style=\"background:var(--cream);border:1px solid var(--border);border-radius:var(--r);padding:14px\"><div style=\"font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mist);margin-bottom:6px\">R\u00e9ponse</div><div style=\"font-family:'Fira Code',monospace;font-size:12px;color:var(--ink)\">&lt; 4h ouvrables</div></div>\n        </div>\n      </div>\n      <div class=\"contact-form-wrap\">\n        <div class=\"cf-title\">Demande de d\u00e9mo</div>\n        <div class=\"cf-sub\">Remplissez le formulaire \u2014 r\u00e9ponse garantie sous 4h ouvrables.</div>\n        <div class=\"fgrid\">\n          <div class=\"fg\"><label class=\"flbl\">Pr\u00e9nom <span>*</span></label><input class=\"finp\" type=\"text\" placeholder=\"Jean\"/></div>\n          <div class=\"fg\"><label class=\"flbl\">Nom <span>*</span></label><input class=\"finp\" type=\"text\" placeholder=\"Dupont\"/></div>\n          <div class=\"fg full\"><label class=\"flbl\">E-mail professionnel <span>*</span></label><input class=\"finp\" type=\"email\" placeholder=\"jean.dupont@fiduciaire.be\"/></div>\n          <div class=\"fg full\"><label class=\"flbl\">Soci\u00e9t\u00e9</label><input class=\"finp\" type=\"text\" placeholder=\"Cabinet Dupont & Associ\u00e9s\"/></div>\n          <div class=\"fg full\"><label class=\"flbl\">Vous \u00eates <span>*</span></label>\n            <select class=\"fsel\">\n              <option value=\"\">S\u00e9lectionnez...</option>\n              <option>Ind\u00e9pendant / Starter</option>\n              <option>Fiduciaire / Expert-comptable</option>\n              <option>Employeur direct</option>\n              <option>Secr\u00e9tariat social</option>\n              <option>Courtier / Partenaire</option>\n              <option>Autre</option>\n            </select>\n          </div>\n          <div class=\"fg full\"><label class=\"flbl\">Sujet</label>\n            <select class=\"fsel\">\n              <option value=\"\">S\u00e9lectionnez...</option>\n              <option>Demande de d\u00e9mo</option>\n              <option>Question technique</option>\n              <option>Migration depuis un autre prestataire</option>\n              <option>Partenariat / API</option>\n              <option>Autre</option>\n            </select>\n          </div>\n          <div class=\"fg full\"><label class=\"flbl\">Message</label><textarea class=\"ftxt\" placeholder=\"D\u00e9crivez votre situation, vos besoins ou vos questions...\"></textarea></div>\n        </div>\n        <button class=\"fsub\" onclick=\"submitForm()\">Envoyer la demande <svg width=\"14\" height=\"14\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></button>\n        <p class=\"fnote\">En soumettant ce formulaire, vous acceptez que nous traitions vos donn\u00e9es conform\u00e9ment \u00e0 notre politique RGPD. Aucun spam.</p>\n      </div>\n    </div></div>\n  </section>\n  <footer class=\"site-footer\" id=\"f-contact\"></footer>\n</div>\n\n<!-- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n     PAGE FORMATIONS\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -->\n<div class=\"page\" id=\"page-formations\" style=\"padding-top:calc(var(--nav-h) + 36px)\">\n  <section class=\"page-hero\">\n    <div class=\"wrap\"><div class=\"page-hero-grid\">\n      <div>\n        <div class=\"breadcrumb\">Accueil <span>\u203a</span> Formations</div>\n        <span class=\"eyebrow\">Formations</span>\n        <h1>Ma\u00eetrisez le droit<br/>social belge.<br/><em>\u00c0 votre rythme.</em></h1>\n        <p class=\"page-hero-sub\">Webinaires, guides pratiques et tutoriels vid\u00e9o sur la paie belge, ONSS, Dimona et Belcotax \u2014 r\u00e9dig\u00e9s par nos experts juridiques.</p>\n        <div class=\"page-hero-actions\">\n          <button class=\"btn-p\" onclick=\"go('contact')\">Voir le programme</button>\n          <button class=\"btn-s\" onclick=\"go('contact')\">Nous contacter</button>\n        </div>\n      </div>\n      <div class=\"dark-card reveal d2\">\n        <div class=\"dark-card-lbl\">Formations Aureus</div>\n        <h3>Apprenez des experts</h3>\n        <p class=\"dark-card-sub\">Contenu bas\u00e9 sur les vrais cas pratiques de la plateforme.</p>\n        <div class=\"dark-card-stats\">\n          <div><div class=\"dcs-val\">6</div><div class=\"dcs-lbl\">Modules de formation</div></div>\n          <div><div class=\"dcs-val\">100%</div><div class=\"dcs-lbl\">Droit belge 2026</div></div>\n          <div><div class=\"dcs-val\">CPD</div><div class=\"dcs-lbl\">Heures valid\u00e9es IEC</div></div>\n          <div><div class=\"dcs-val\">FR/NL</div><div class=\"dcs-lbl\">Langues disponibles</div></div>\n        </div>\n      </div>\n    </div></div>\n  </section>\n\n  <!-- Th\u00e9matiques -->\n  <section style=\"background:var(--cream)\">\n    <div class=\"wrap\">\n      <div style=\"margin-bottom:48px\"><span class=\"eyebrow\">Th\u00e9matiques</span><h2 class=\"reveal\">Nos <em>4 domaines</em> de formation</h2></div>\n      <div class=\"sol-grid\">\n        <div class=\"sol-card reveal d1\">\n          <div class=\"sol-ico\">\u2696\ufe0f</div>\n          <h4>Droit social belge</h4>\n          <p class=\"sol-desc\">Loi du 27/06/1969, cotisations ONSS, obligations de l'employeur, commissions paritaires \u2014 les fondamentaux expliqu\u00e9s clairement.</p>\n          <div class=\"sol-link\">Voir le module <svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div>\n        </div>\n        <div class=\"sol-card reveal d2 featured\">\n          <div class=\"sol-ico\">\ud83e\uddee</div>\n          <h4>Calcul de paie avanc\u00e9</h4>\n          <p class=\"sol-desc\">Brut \u2192 Net complet : ONSS 13,07%, pr\u00e9compte professionnel Annexe III, bonus emploi, r\u00e9ductions structurelles. Exercices pratiques inclus.</p>\n          <div class=\"sol-link\">Voir le module <svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div>\n        </div>\n        <div class=\"sol-card reveal d3\">\n          <div class=\"sol-ico\">\ud83d\udccb</div>\n          <h4>DmfA &amp; Belcotax</h4>\n          <p class=\"sol-desc\">D\u00e9clarations trimestrielles ONSS, fiches 281.10/20/30 SPF Finances, d\u00e9lais, corrections \u2014 le guide complet \u00e9tape par \u00e9tape.</p>\n          <div class=\"sol-link\">Voir le module <svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div>\n        </div>\n        <div class=\"sol-card reveal d4\">\n          <div class=\"sol-ico\">\ud83d\ude80</div>\n          <h4>Onboarding Aureus Pro</h4>\n          <p class=\"sol-desc\">Prise en main compl\u00e8te de la plateforme : configuration, import des travailleurs, premi\u00e8re fiche de paie, premi\u00e8re Dimona \u2014 en 2 heures.</p>\n          <div class=\"sol-link\">Voir le module <svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div>\n        </div>\n        <div class=\"sol-card reveal d5\">\n          <div class=\"sol-ico\">\ud83c\udfdb</div>\n          <h4>RGPD &amp; s\u00e9curit\u00e9 des donn\u00e9es RH</h4>\n          <p class=\"sol-desc\">Obligations RGPD Art. 28 et 32, registre Art. 30, DPA, chiffrement NISS/IBAN \u2014 conformit\u00e9 compl\u00e8te pour les gestionnaires de paie.</p>\n          <div class=\"sol-link\">Voir le module <svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div>\n        </div>\n        <div class=\"sol-card reveal d6\">\n          <div class=\"sol-ico\">\ud83d\udcca</div>\n          <h4>Veille l\u00e9gislative continue</h4>\n          <p class=\"sol-desc\">Alertes automatiques d\u00e8s qu'une loi belge impacte vos obligations sociales. Bar\u00e8mes 2026 mis \u00e0 jour avant leur entr\u00e9e en vigueur.</p>\n          <div class=\"sol-link\">S'inscrire aux alertes <svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div>\n        </div>\n      </div>\n    </div>\n  </section>\n\n  <!-- Inspiration / Blog -->\n  <section>\n    <div class=\"wrap\">\n      <div style=\"margin-bottom:48px\">\n        <span class=\"eyebrow\">Inspiration</span>\n        <h2 class=\"reveal\">Toujours pr\u00eat(e) pour <em>l'avenir</em></h2>\n        <p class=\"reveal d1\" style=\"max-width:560px;margin-top:12px\">Les articles les plus pertinents sur la paie belge, le droit social et la gestion RH \u2014 r\u00e9dig\u00e9s par nos experts.</p>\n      </div>\n      <div style=\"display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:20px\">\n        <!-- Article vedette -->\n        <div class=\"theme-card\" style=\"grid-row:span 2;display:flex;flex-direction:column\">\n          <div class=\"theme-card-img\" style=\"height:220px;font-size:64px\">\ud83e\uddee</div>\n          <div class=\"theme-card-body\" style=\"flex:1;display:flex;flex-direction:column\">\n            <span class=\"theme-card-tag\">Paie \u00b7 L\u00e9gislation</span>\n            <h4 style=\"font-size:18px\">Bar\u00e8mes sectoriels 2026 : tout ce qui change dans vos 166 CP</h4>\n            <p style=\"flex:1\">Revue compl\u00e8te des nouvelles grilles salariales par commission paritaire. CP 200, CP 226, CP 319\u2026 Aureus int\u00e8gre chaque bar\u00e8me avant son entr\u00e9e en vigueur.</p>\n            <div class=\"theme-card-cta\" style=\"margin-top:auto\">Lire l'analyse compl\u00e8te <svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div>\n          </div>\n        </div>\n        <div class=\"theme-card\"><div class=\"theme-card-img\" style=\"height:120px;font-size:36px\">\u2696\ufe0f</div><div class=\"theme-card-body\"><span class=\"theme-card-tag\">Droit social</span><h4>Premier employ\u00e9 : les 5 erreurs \u00e0 \u00e9viter</h4><p>Immatriculation tardive, Dimona oubli\u00e9e, CP incorrecte \u2014 les pi\u00e8ges les plus fr\u00e9quents et comment les \u00e9viter avec Aureus.</p><div class=\"theme-card-cta\">Lire le guide <svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div></div>\n        <div class=\"theme-card\"><div class=\"theme-card-img\" style=\"height:120px;font-size:36px\">\ud83d\udcbc</div><div class=\"theme-card-body\"><span class=\"theme-card-tag\">Entrepreneuriat</span><h4>Ind\u00e9pendant ou soci\u00e9t\u00e9 : quel statut choisir en 2026 ?</h4><p>Cotisations, fiscalit\u00e9, protection sociale \u2014 comparaison compl\u00e8te pour vous aider \u00e0 faire le bon choix d\u00e8s le d\u00e9part.</p><div class=\"theme-card-cta\">Comparer les statuts <svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div></div>\n      </div>\n      <div class=\"theme-grid\">\n        <div class=\"theme-card\"><div class=\"theme-card-img\">\ud83c\udfe5</div><div class=\"theme-card-body\"><span class=\"theme-card-tag\">Sant\u00e9</span><h4>Absent\u00e9isme : obligations l\u00e9gales de l'employeur belge</h4><p>Salaire garanti, certificat m\u00e9dical, contr\u00f4le m\u00e9dical \u2014 vos droits et obligations d\u00e9taill\u00e9s.</p><div class=\"theme-card-cta\">Lire l'article <svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div></div>\n        <div class=\"theme-card\"><div class=\"theme-card-img\">\ud83c\udfaf</div><div class=\"theme-card-body\"><span class=\"theme-card-tag\">Motivation</span><h4>R\u00e9mun\u00e9ration alternative : warrants, ch\u00e8ques-repas, voiture de soci\u00e9t\u00e9</h4><p>Optimisez votre politique salariale avec les avantages extral\u00e9gaux belges. Calcul co\u00fbt-b\u00e9n\u00e9fice inclus.</p><div class=\"theme-card-cta\">Voir les options <svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div></div>\n        <div class=\"theme-card\"><div class=\"theme-card-img\">\ud83d\udd10</div><div class=\"theme-card-body\"><span class=\"theme-card-tag\">RGPD</span><h4>RGPD &amp; donn\u00e9es RH : ce que tout employeur doit savoir</h4><p>Traitement des donn\u00e9es NISS, IBAN, dossiers m\u00e9dicaux \u2014 obligations RGPD Art. 28 et 32 expliqu\u00e9es simplement.</p><div class=\"theme-card-cta\">Lire le guide RGPD <svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M9 4l4 4-4 4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></div></div></div>\n      </div>\n    </div>\n  </section>\n\n  <!-- CTA newsletter -->\n  <section class=\"newsletter\">\n    <div class=\"wrap\"><div class=\"nl-grid\">\n      <div>\n        <span class=\"eyebrow\" style=\"color:var(--gold2)\">Newsletter</span>\n        <h2 style=\"color:var(--white);margin-bottom:16px\">Ne manquez aucune<br/><em style=\"color:var(--gold2)\">actualit\u00e9 sociale.</em></h2>\n        <p style=\"color:rgba(255,255,255,.5);margin-bottom:28px\">Changements l\u00e9gislatifs, bar\u00e8mes mis \u00e0 jour, nouveaux modules Aureus \u2014 directement dans votre bo\u00eete mail.</p>\n        <div class=\"nl-form\">\n          <input class=\"nl-input\" type=\"email\" placeholder=\"votre@email.be\"/>\n          <button class=\"btn-gold\" onclick=\"nlSubmit()\">S'inscrire</button>\n        </div>\n        <p class=\"nl-note\">En transmettant mes donn\u00e9es, j'accepte la politique de confidentialit\u00e9 d'Aureus IA SPRL. D\u00e9sinscription possible \u00e0 tout moment.</p>\n      </div>\n      <div class=\"nl-features\">\n        <div class=\"nl-feat\"><div class=\"nl-feat-ico\">\u2696\ufe0f</div><div><div class=\"nl-feat-t\">Veille l\u00e9gislative quotidienne</div><div class=\"nl-feat-d\">Alertes d\u00e8s qu'une loi belge impacte vos obligations</div></div></div>\n        <div class=\"nl-feat\"><div class=\"nl-feat-ico\">\ud83e\uddee</div><div><div class=\"nl-feat-t\">Bar\u00e8mes 2026 mis \u00e0 jour</div><div class=\"nl-feat-d\">Nouvelles grilles CP avant leur entr\u00e9e en vigueur</div></div></div>\n        <div class=\"nl-feat\"><div class=\"nl-feat-ico\">\ud83d\udca1</div><div><div class=\"nl-feat-t\">Conseils d'experts</div><div class=\"nl-feat-d\">Fiches pratiques r\u00e9dig\u00e9es par nos juristes en droit social</div></div></div>\n      </div>\n    </div></div>\n  </section>\n\n  <div class=\"ctaband\"><div class=\"wrap\"><div class=\"ctaband-inner\"><h2>Vous cr\u00e9ez une activit\u00e9 ou vous souhaitez<br/><em>d\u00e9velopper votre entreprise&nbsp;?</em></h2><p>Quelle que soit votre question, Aureus vous donne des r\u00e9ponses claires.</p><button class=\"btn-gold\" onclick=\"go('contact')\">Contactez-nous \u2192</button></div></div></div>\n  <footer class=\"site-footer\" id=\"f-formations\"></footer>\n</div>";
-const JS_CODE = "// \u2550\u2550\u2550\u2550\u2550\u2550 FOOTER \u2550\u2550\u2550\u2550\u2550\u2550\nfunction buildFooter(){\n  const html = `<div class=\"wrap\">\n    <div class=\"footer-grid\">\n      <div class=\"footer-brand\">\n        <div class=\"flogo\" onclick=\"go('home')\">\n          <div style=\"width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 18 18\" fill=\"none\"><path d=\"M9 2L15.5 14H2.5Z\" fill=\"#B8913A\"/></svg></div>\n          <div><span class=\"flogo-n\">AUREUS</span><span class=\"flogo-s\">Social Pro</span></div>\n        </div>\n        <p class=\"footer-brand-desc\">Secr\u00e9tariat social num\u00e9rique belge. 132 modules, 166 CP, s\u00e9curit\u00e9 bancaire.</p>\n        <div class=\"footer-bce\">BCE BE 1028.230.781 \u00b7 Place Marcel Broodthaers 8, 1060 Saint-Gilles</div>\n      </div>\n      <div><div class=\"footer-col-title\">Solutions</div><div class=\"footer-col-links\"><a onclick=\"go('independant')\">Ind\u00e9pendants</a><a onclick=\"go('employeur')\">Devenir employeur</a><a onclick=\"go('employeurs')\">Employeurs</a><a onclick=\"go('experts')\">Experts-comptables</a><a onclick=\"go('formations')\">Formations</a></div></div>\n      <div><div class=\"footer-col-title\">Produit</div><div class=\"footer-col-links\"><a onclick=\"window.location.href='/'\">Application</a><a onclick=\"go('contact')\">Demander une d\u00e9mo</a><a>Documentation</a><a>Statut plateforme</a></div></div>\n      <div><div class=\"footer-col-title\">L\u00e9gal</div><div class=\"footer-col-links\"><a>Confidentialit\u00e9</a><a>CGU</a><a>RGPD</a><a>Disclaimer</a></div></div>\n    </div>\n    <div class=\"footer-bottom\">\n      <span class=\"footer-copy\">\u00a9 2026 Aureus IA SPRL \u00b7 Tous droits r\u00e9serv\u00e9s</span>\n      <div class=\"footer-legal\"><a>Disclaimer</a><a>Privacy</a><a>Cookie policy</a><a>CGU</a></div>\n    </div>\n  </div>`;\n  ['home','independant','employeur','employeurs','experts','formations','contact'].forEach(id=>{\n    const el = document.getElementById('f-'+id);\n    if(el) el.innerHTML = html;\n  });\n}\nbuildFooter();\n\n// \u2550\u2550\u2550\u2550\u2550\u2550 NAV \u2550\u2550\u2550\u2550\u2550\u2550\nwindow.addEventListener('scroll',()=>{\n  document.getElementById('nav').classList.toggle('scrolled', window.scrollY>10);\n},{passive:true});\n\nfunction toggleMega(n){\n  const item = document.getElementById('ni-'+n);\n  const isOpen = item.classList.contains('open');\n  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('open'));\n  if(!isOpen) item.classList.add('open');\n}\ndocument.addEventListener('click',e=>{\n  if(!e.target.closest('.nav-item')) document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('open'));\n});\nfunction closeMega(){ document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('open')); }\n\n// \u2550\u2550\u2550\u2550\u2550\u2550 PAGES \u2550\u2550\u2550\u2550\u2550\u2550\nfunction go(p){\n  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));\n  document.getElementById('page-'+p).classList.add('active');\n  window.scrollTo({top:0,behavior:'smooth'});\n  setTimeout(observeReveals, 50);\n}\n\n// \u2550\u2550\u2550\u2550\u2550\u2550 THEMES \u2550\u2550\u2550\u2550\u2550\u2550\nfunction filterTheme(cat, btn){\n  document.querySelectorAll('.ttab').forEach(b=>b.classList.remove('active'));\n  btn.classList.add('active');\n  document.querySelectorAll('.theme-card').forEach(c=>{\n    c.style.display = (cat==='tout' || c.dataset.cat===cat) ? '' : 'none';\n  });\n}\n\n// \u2550\u2550\u2550\u2550\u2550\u2550 FAQ \u2550\u2550\u2550\u2550\u2550\u2550\nfunction faq(btn){\n  const item = btn.parentElement;\n  const isOpen = item.classList.contains('open');\n  document.querySelectorAll('.faq-item.open').forEach(i=>{\n    i.classList.remove('open');\n    i.querySelector('.faq-a').style.maxHeight='0';\n  });\n  if(!isOpen){\n    item.classList.add('open');\n    item.querySelector('.faq-a').style.maxHeight = item.querySelector('.faq-ai').scrollHeight+'px';\n  }\n}\n\n// \u2550\u2550\u2550\u2550\u2550\u2550 FORM \u2550\u2550\u2550\u2550\u2550\u2550\nfunction submitForm(){\n  const t = document.getElementById('toast');\n  t.textContent = '\u2713 Message envoy\u00e9 \u2014 nous vous r\u00e9pondrons sous 4h ouvrables.';\n  t.classList.add('show');\n  setTimeout(()=>t.classList.remove('show'), 4500);\n}\n\nfunction nlSubmit(){\n  const t = document.getElementById('toast');\n  t.textContent = '\u2713 Inscription confirm\u00e9e \u2014 bienvenue dans notre newsletter !';\n  t.classList.add('show');\n  setTimeout(()=>t.classList.remove('show'), 4000);\n}\n\n// \u2550\u2550\u2550\u2550\u2550\u2550 REVEAL \u2550\u2550\u2550\u2550\u2550\u2550\nfunction observeReveals(){\n  const io = new IntersectionObserver(entries=>{\n    entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });\n  },{threshold:.1});\n  document.querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));\n}\nobserveReveals();";
+const G = '#B8913A', G2 = '#D4A84C', INK = '#0E0D0A', CREAM = '#F9F6F0', BORDER = '#E8E4DC', STONE = '#56524A', MIST = '#9A968E', WHITE = '#fff';
 
-export default function VitrinePage() {
-  const executed = useRef(false);
+const css = `
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Cabinet+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden}
+.vt-body{font-family:'Cabinet Grotesk',sans-serif;background:#fff;color:#0E0D0A;-webkit-font-smoothing:antialiased}
+.vt-body h1,.vt-body h2,.vt-body h3{font-family:'Fraunces',serif;font-weight:400;line-height:1.08;letter-spacing:-.02em}
+.vt-body h1{font-size:clamp(36px,5.5vw,72px)}
+.vt-body h2{font-size:clamp(28px,3.8vw,50px)}
+.vt-body h3{font-size:clamp(20px,2.4vw,28px)}
+.vt-body p{font-size:16px;line-height:1.75;color:#56524A;font-weight:300}
+.vt-body em{font-style:italic;color:#B8913A}
+.vt-wrap{max-width:1200px;margin:0 auto;padding:0 36px}
+.vt-section{padding:88px 0}
+@media(max-width:768px){.vt-section{padding:56px 0}.vt-wrap{padding:0 20px}}
+.vt-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:#B8913A;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
+.vt-eyebrow::before{content:'';width:18px;height:2px;background:#B8913A;border-radius:1px}
+.vt-tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;border:1px solid #E8E4DC;color:#9A968E;background:#F9F6F0;font-family:'Fira Code',monospace}
+.vt-tag-g{background:#EAF4EE;border-color:#9EC4B0;color:#1A5C42}
+.vt-tag-au{background:#FBF3E2;border-color:#D4B870;color:#6A4E10}
+.vt-tag-b{background:#EDF1F9;border-color:#9EB0D0;color:#18396A}
+.btn-p{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:5px;background:#0E0D0A;color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;transition:all .22s;font-family:'Cabinet Grotesk',sans-serif;box-shadow:0 4px 20px rgba(14,13,10,.18)}
+.btn-p:hover{background:#252320;transform:translateY(-2px)}
+.btn-s{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:5px;background:transparent;color:#0E0D0A;font-size:14px;font-weight:500;border:1.5px solid #E8E4DC;cursor:pointer;transition:all .22s;font-family:'Cabinet Grotesk',sans-serif}
+.btn-s:hover{border-color:#0E0D0A;background:#F9F6F0}
+.btn-gold{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:5px;background:linear-gradient(135deg,#B8913A,#D4A84C);color:#0E0D0A;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .22s;font-family:'Cabinet Grotesk',sans-serif;box-shadow:0 4px 24px rgba(184,145,58,.4)}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(184,145,58,.5)}
+.btn-ow{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:5px;background:transparent;color:#fff;font-size:14px;font-weight:500;border:1.5px solid rgba(255,255,255,.3);cursor:pointer;transition:all .22s;font-family:'Cabinet Grotesk',sans-serif}
+.btn-ow:hover{background:rgba(255,255,255,.1)}
+.ldot{width:7px;height:7px;border-radius:50%;background:#22C55E;animation:ldpulse 2s infinite;display:inline-block}
+@keyframes ldpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}}
+.hero-dots{position:absolute;inset:0;pointer-events:none;opacity:.15;background-image:radial-gradient(rgba(255,255,255,.6) 1px,transparent 1px);background-size:28px 28px}
+.hero-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 80% 60% at 70% 50%,rgba(184,145,58,.12) 0%,transparent 65%),radial-gradient(ellipse 50% 80% at 10% 80%,rgba(26,92,66,.1) 0%,transparent 60%)}
+.sol-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.sol-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.sol-grid{grid-template-columns:1fr}}
+.sol-card{background:#fff;border:1px solid #E8E4DC;border-radius:16px;padding:32px 28px;cursor:pointer;transition:all .28s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:16px}
+.sol-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#B8913A,transparent);transform:scaleX(0);transform-origin:left;transition:transform .32s}
+.sol-card:hover{box-shadow:0 8px 40px rgba(14,13,10,.12);transform:translateY(-4px)}
+.sol-card:hover::after{transform:scaleX(1)}
+.sol-card.featured{background:#0E0D0A;border-color:#0E0D0A}
+.sol-card.featured h4,.sol-card.featured .sol-desc{color:rgba(255,255,255,.85)}
+.sol-card.featured p{color:rgba(255,255,255,.5)}
+.sol-ico{width:48px;height:48px;border-radius:10px;background:#F1EDE6;border:1px solid #E8E4DC;display:flex;align-items:center;justify-content:center;font-size:22px}
+.sol-card.featured .sol-ico{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15)}
+.sol-card h4{font-size:17px;font-weight:700;color:#0E0D0A;line-height:1.3;font-family:'Cabinet Grotesk',sans-serif}
+.sol-desc{font-size:14px;color:#56524A;line-height:1.7;flex:1}
+.sol-link{font-size:13px;font-weight:600;color:#B8913A;display:flex;align-items:center;gap:5px}
+.sol-card.featured .sol-link{color:#D4A84C}
+.hero-strip{display:grid;grid-template-columns:repeat(4,1fr);background:rgba(0,0,0,.2);border-top:1px solid rgba(255,255,255,.08)}
+.hs-item{padding:24px 28px;border-right:1px solid rgba(255,255,255,.07)}
+.hs-item:last-child{border-right:none}
+.hs-val{font-family:'Fraunces',serif;font-size:clamp(24px,3vw,40px);color:#fff;line-height:1;margin-bottom:6px}
+.hs-val span{color:#D4A84C}
+.hs-lbl{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+@media(max-width:640px){.hero-strip{grid-template-columns:repeat(2,1fr)}.hs-item:nth-child(2){border-right:none}.hs-item:nth-child(3){border-right:1px solid rgba(255,255,255,.07)}}
+.theme-card{background:#fff;border:1px solid #E8E4DC;border-radius:10px;overflow:hidden;cursor:pointer;transition:all .25s}
+.theme-card:hover{box-shadow:0 8px 40px rgba(14,13,10,.12);transform:translateY(-3px)}
+.theme-img{height:160px;background:#F1EDE6;display:flex;align-items:center;justify-content:center;font-size:48px;border-bottom:1px solid #E8E4DC}
+.theme-body{padding:20px}
+.theme-tag{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#B8913A;margin-bottom:8px;display:block}
+.theme-card h4{font-size:15px;font-weight:600;color:#0E0D0A;margin-bottom:8px;line-height:1.4;font-family:'Cabinet Grotesk',sans-serif}
+.theme-card p{font-size:13px;color:#56524A;line-height:1.65}
+.theme-cta{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#B8913A;margin-top:14px}
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.theme-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.theme-grid{grid-template-columns:1fr}}
+.ttab{padding:9px 20px;border-radius:99px;font-size:14px;font-weight:500;color:#56524A;border:1.5px solid #E8E4DC;background:transparent;cursor:pointer;transition:all .2s;font-family:'Cabinet Grotesk',sans-serif}
+.ttab.active,.ttab:hover{background:#0E0D0A;color:#fff;border-color:#0E0D0A}
+.nl-input{flex:1;min-width:220px;padding:13px 18px;border-radius:5px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.07);color:#fff;font-family:'Cabinet Grotesk',sans-serif;font-size:15px;outline:none;transition:border-color .2s}
+.nl-input::placeholder{color:rgba(255,255,255,.35)}
+.nl-input:focus{border-color:#B8913A}
+.step{display:grid;grid-template-columns:56px 1fr;gap:24px;padding:32px 0;border-bottom:1px solid #E8E4DC}
+.step:last-child{border-bottom:none}
+.step-num{width:48px;height:48px;border-radius:50%;background:#0E0D0A;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:20px;flex-shrink:0;margin-top:2px}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.info-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.info-grid{grid-template-columns:1fr}}
+.info-card{background:#fff;border:1px solid #E8E4DC;border-radius:10px;padding:28px 24px;transition:all .25s}
+.info-card:hover{box-shadow:0 8px 40px rgba(14,13,10,.12);transform:translateY(-3px)}
+.faq-item{border-bottom:1px solid #E8E4DC}
+.faq-q{width:100%;padding:20px 0;display:flex;justify-content:space-between;align-items:center;background:none;border:none;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;font-size:16px;font-weight:600;color:#0E0D0A;text-align:left;gap:16px;transition:color .2s}
+.faq-q:hover{color:#B8913A}
+.faq-arr{font-size:20px;color:#9A968E;transition:transform .3s,color .2s;flex-shrink:0}
+.faq-open .faq-arr{transform:rotate(45deg);color:#B8913A}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.dark-card{background:#0E0D0A;border-radius:16px;padding:32px;color:#fff;position:relative;overflow:hidden}
+.dark-card::before{content:'';position:absolute;top:-30px;right:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(184,145,58,.2) 0%,transparent 70%)}
+.expert-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+@media(max-width:700px){.expert-grid{grid-template-columns:1fr}}
+.expert-card{background:#fff;border:1px solid #E8E4DC;border-radius:10px;padding:28px 24px;display:flex;gap:18px;align-items:flex-start;transition:all .25s}
+.expert-card:hover{box-shadow:0 8px 40px rgba(14,13,10,.12);transform:translateY(-3px)}
+.contact-ch{display:flex;align-items:flex-start;gap:14px;padding:18px;border-radius:10px;border:1px solid #E8E4DC;background:#F9F6F0;transition:all .22s;cursor:pointer;margin-bottom:12px}
+.contact-ch:hover{border-color:#B8913A;background:#FBF3E2}
+.finp,.fsel,.ftxt{padding:11px 14px;border-radius:5px;border:1.5px solid #E8E4DC;background:#F9F6F0;font-family:'Cabinet Grotesk',sans-serif;font-size:14px;color:#0E0D0A;transition:all .2s;outline:none;width:100%}
+.finp:focus,.fsel:focus,.ftxt:focus{border-color:#B8913A;background:#fff;box-shadow:0 0 0 3px rgba(184,145,58,.1)}
+.ftxt{resize:vertical;min-height:100px}.fsel{appearance:none;cursor:pointer}
+.page-hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+@media(max-width:800px){.page-hero-grid{grid-template-columns:1fr;gap:36px}}
+.footer-grid{display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px}
+@media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;gap:28px}}
+@media(max-width:560px){.footer-grid{grid-template-columns:1fr}}
+`;
 
-  useEffect(() => {
-    if (executed.current) return;
-    executed.current = true;
-    try {
-      // eslint-disable-next-line no-new-func
-      new Function(JS_CODE)();
-    } catch(e) {
-      console.warn('Vitrine script:', e);
-    }
-  }, []);
+// ─── ARROW SVG ───────────────────────────────
+const Arr = () => (
+  <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// ─── FOOTER ──────────────────────────────────
+function Footer({ go }) {
+  return (
+    <footer style={{ background: INK, padding: '60px 0 0' }}>
+      <div className="vt-wrap">
+        <div className="footer-grid">
+          <div>
+            <div style={{ display:'flex', alignItems:'center', gap:10, cursor:'pointer', marginBottom:14 }} onClick={() => go('home')}>
+              <div style={{ width:34, height:34, borderRadius:8, background:'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 2L15.5 14H2.5Z" fill="#B8913A"/></svg>
+              </div>
+              <div>
+                <div style={{ fontSize:14, fontWeight:700, color:'#fff', letterSpacing:'.04em' }}>AUREUS</div>
+                <div style={{ fontSize:8, color:'rgba(255,255,255,.3)', letterSpacing:'.2em', textTransform:'uppercase' }}>Social Pro</div>
+              </div>
+            </div>
+            <p style={{ fontSize:14, color:'rgba(255,255,255,.4)', lineHeight:1.7, marginBottom:14, maxWidth:260 }}>Secrétariat social numérique belge. 132 modules, 166 CP, sécurité bancaire.</p>
+            <div style={{ fontFamily:"'Fira Code',monospace", fontSize:11, color:'rgba(255,255,255,.2)' }}>BCE BE 1028.230.781 · Saint-Gilles, Bruxelles</div>
+          </div>
+          {[
+            { title:'Solutions', links:[['Indépendants','independant'],['Devenir employeur','employeur'],['Employeurs','employeurs'],['Experts-comptables','experts'],['Formations','formations']] },
+            { title:'Produit', links:[['Application','app'],['Demander une démo','contact'],['Documentation',null],['Statut',null]] },
+            { title:'Légal', links:[['Confidentialité',null],['CGU',null],['RGPD',null],['Disclaimer',null]] },
+          ].map(col => (
+            <div key={col.title}>
+              <div style={{ fontSize:11, fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', color:'rgba(255,255,255,.3)', marginBottom:12 }}>{col.title}</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:9 }}>
+                {col.links.map(([label, page]) => (
+                  <a key={label} onClick={() => page && go(page)} style={{ fontSize:14, color:'rgba(255,255,255,.45)', cursor:'pointer', transition:'color .18s' }}
+                    onMouseOver={e => e.target.style.color='#fff'} onMouseOut={e => e.target.style.color='rgba(255,255,255,.45)'}>{label}</a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ borderTop:'1px solid rgba(255,255,255,.07)', padding:'20px 0', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
+          <span style={{ fontSize:12, color:'rgba(255,255,255,.25)' }}>© 2026 Aureus IA SPRL · Tous droits réservés</span>
+          <div style={{ display:'flex', gap:16 }}>
+            {['Disclaimer','Privacy','Cookie policy','CGU'].map(l => (
+              <a key={l} style={{ fontSize:12, color:'rgba(255,255,255,.25)', cursor:'pointer' }}>{l}</a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// ─── DARK CARD ───────────────────────────────
+function DarkCard({ label, title, sub, stats }) {
+  return (
+    <div className="dark-card">
+      <div style={{ fontSize:11, fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', color:G, marginBottom:16 }}>{label}</div>
+      <h3 style={{ color:'#fff', fontSize:20, marginBottom:8 }}>{title}</h3>
+      <p style={{ fontSize:13, color:'rgba(255,255,255,.4)', marginBottom:24 }}>{sub}</p>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+        {stats.map(([val, lbl]) => (
+          <div key={lbl}>
+            <div style={{ fontFamily:"'Fraunces',serif", fontSize:26, color:G, marginBottom:2 }}>{val}</div>
+            <div style={{ fontSize:11, color:'rgba(255,255,255,.35)', letterSpacing:'.04em' }}>{lbl}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── CTA BAND ────────────────────────────────
+function CtaBand({ title, sub, btnLabel, go, target }) {
+  return (
+    <div style={{ background:INK, padding:'72px 0', textAlign:'center', position:'relative', overflow:'hidden' }}>
+      <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse 70% 120% at 50% 100%,rgba(184,145,58,.1) 0%,transparent 70%)' }}/>
+      <div style={{ position:'relative', zIndex:1 }} className="vt-wrap">
+        <h2 style={{ color:'#fff', marginBottom:14 }} dangerouslySetInnerHTML={{ __html: title }}/>
+        <p style={{ color:'rgba(255,255,255,.5)', maxWidth:440, margin:'0 auto 32px', fontSize:17 }}>{sub}</p>
+        <button className="btn-gold" onClick={() => go(target || 'contact')}>{btnLabel}</button>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════
+// PAGES
+// ═══════════════════════════════════════════════════════
+
+function PageHome({ go }) {
+  const articles = [
+    { cat:'paie', ico:'🧮', tag:'Paie', title:'Barèmes sectoriels 2026 : ce qui change', desc:'Mise à jour des 166 CP intégrée dans Aureus Social Pro avant le 1er janvier. Retrouvez les nouvelles grilles.' },
+    { cat:'legal', ico:'⚖️', tag:'Législation', title:'Bonus emploi 2026 : nouveaux plafonds', desc:'Le plafond salarial a été révisé. Impact sur vos calculs et comment Aureus l\'intègre automatiquement.' },
+    { cat:'onss', ico:'🏛', tag:'ONSS', title:'DmfA Q1 2026 : délai et nouveautés', desc:'Date limite, nouveaux codes travailleurs et changements dans la réduction structurelle.' },
+    { cat:'rh', ico:'👥', tag:'RH', title:'Portail employé : fiches, documents, congés', desc:'Vos collaborateurs accèdent à leurs fiches sans solliciter le service paie.' },
+    { cat:'paie', ico:'🏦', tag:'Paie', title:'SEPA pain.001 : automatisez vos virements', desc:'Générez vos fichiers de virement batch ISO 20022 directement depuis votre tableau de bord.' },
+    { cat:'legal', ico:'🔐', tag:'RGPD', title:'RGPD Art. 32 &amp; paie belge', desc:'Chiffrement NISS, registre Art. 30, convention DPA — comment Aureus vous met en conformité.' },
+  ];
+  const [filter, setFilter] = useState('tout');
+  const visible = articles.filter(a => filter === 'tout' || a.cat === filter);
+
+  const solutions = [
+    { ico:'🚀', title:"Se lancer comme indépendant", desc:"Statut, affiliation ONSS, obligations déclaratives — tout ce qu'il faut savoir pour démarrer sereinement.", page:'independant', featured:false },
+    { ico:'👤', title:"Devenir employeur", desc:"Engagez votre premier collaborateur en toute conformité. Immatriculation, contrat, Dimona, premiers salaires.", page:'employeur', featured:true },
+    { ico:'🏢', title:"Employeurs", desc:"Automatisez la paie, les déclarations trimestrielles et les exports comptables pour vos équipes.", page:'employeurs', featured:false },
+    { ico:'🏛', title:"Experts-comptables", desc:"Portail multi-clients, mandats Mahis/CSAM, API REST — gérez tous vos dossiers depuis un tableau de bord.", page:'experts', featured:false },
+    { ico:'📊', title:"Déclarations & Belcotax", desc:"DmfA trimestrielle, fiches 281.10/20/30, téléversement MyMinfin — conformes SPF Finances.", page:'employeurs', featured:false },
+    { ico:'📚', title:"Formations", desc:"Webinaires, guides pratiques et tutoriels sur le droit social belge, ONSS et Dimona.", page:'formations', featured:false },
+  ];
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: CSS_CONTENT }} />
-      <div
-        id="vitrine-root"
-        dangerouslySetInnerHTML={{ __html: BODY_HTML }}
-      />
+      {/* HERO */}
+      <section style={{ background:INK, padding:'80px 0 0', position:'relative', overflow:'hidden', minHeight:560, display:'flex', flexDirection:'column' }}>
+        <div className="hero-glow"/><div className="hero-dots"/>
+        <div className="vt-wrap" style={{ position:'relative', zIndex:1, flex:1, display:'flex', alignItems:'center', paddingBottom:0 }}>
+          <div style={{ maxWidth:640 }}>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 14px', borderRadius:99, border:'1px solid rgba(255,255,255,.15)', background:'rgba(255,255,255,.06)', fontSize:12, color:'rgba(255,255,255,.7)', marginBottom:24 }}>
+              <span className="ldot"/>&nbsp;Secrétariat social numérique — v18 en production
+            </div>
+            <h1 style={{ color:'#fff', marginBottom:20 }}>Votre partenaire<br/>social belge.<br/><em>Enfin numérique.</em></h1>
+            <p style={{ fontSize:18, color:'rgba(255,255,255,.6)', marginBottom:36, lineHeight:1.7, fontWeight:300, maxWidth:520 }}>
+              De la Dimona aux déclarations trimestrielles, de la fiche de paie à la signature électronique — tout ce dont vous avez besoin, en un seul endroit.
+            </p>
+            <div style={{ display:'flex', gap:12, flexWrap:'wrap', marginBottom:60 }}>
+              <button className="btn-gold" onClick={() => go('app')}>Accéder à l'application <Arr/></button>
+              <button className="btn-ow" onClick={() => go('contact')}>Demander une démo</button>
+            </div>
+          </div>
+        </div>
+        <div className="hero-strip">
+          {[['166','Commissions paritaires'],['<8','Dimona (secondes)'],['132','Modules déployés'],['99.97%','Uptime production']].map(([v,l]) => (
+            <div key={l} className="hs-item">
+              <div className="hs-val"><span dangerouslySetInnerHTML={{ __html: v }}/></div>
+              <div className="hs-lbl">{l}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* SOLUTIONS */}
+      <section className="vt-section" style={{ background:CREAM }}>
+        <div className="vt-wrap">
+          <div style={{ marginBottom:48 }}>
+            <div className="vt-eyebrow">Nos solutions</div>
+            <h2>Pour chaque profil,<br/><em>la bonne solution.</em></h2>
+            <p style={{ maxWidth:520, marginTop:12 }}>Indépendant, employeur ou expert-comptable — Aureus Social Pro s'adapte à votre réalité.</p>
+          </div>
+          <div className="sol-grid">
+            {solutions.map(s => (
+              <div key={s.title} className={`sol-card${s.featured ? ' featured' : ''}`} onClick={() => go(s.page)}>
+                <div className="sol-ico">{s.ico}</div>
+                <h4>{s.title}</h4>
+                <p className="sol-desc">{s.desc}</p>
+                <div className="sol-link">Découvrir <Arr/></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* THEMES */}
+      <section className="vt-section">
+        <div className="vt-wrap">
+          <div style={{ marginBottom:32 }}>
+            <div className="vt-eyebrow">Toujours prêt pour l'avenir</div>
+            <h2>Ressources &amp; <em>actualités</em></h2>
+          </div>
+          <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:40 }}>
+            {[['tout','Tout'],['paie','Paie'],['rh','RH'],['legal','Législation'],['onss','ONSS']].map(([k,l]) => (
+              <button key={k} className={`ttab${filter===k?' active':''}`} onClick={() => setFilter(k)}>{l}</button>
+            ))}
+          </div>
+          <div className="theme-grid">
+            {visible.map(a => (
+              <div key={a.title} className="theme-card">
+                <div className="theme-img">{a.ico}</div>
+                <div className="theme-body">
+                  <span className="theme-tag">{a.tag}</span>
+                  <h4>{a.title}</h4>
+                  <p>{a.desc}</p>
+                  <div className="theme-cta">Lire <Arr/></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* NEWSLETTER */}
+      <Newsletter go={go}/>
+
+      <CtaBand title="Prêt à moderniser votre <em>gestion sociale</em>&nbsp;?" sub="Premier mois offert · Accès immédiat · Migration assistée" btnLabel="Accéder maintenant →" go={go} target="app"/>
+      <Footer go={go}/>
     </>
+  );
+}
+
+function Newsletter({ go }) {
+  const [email, setEmail] = useState('');
+  const [sent, setSent] = useState(false);
+  return (
+    <section style={{ background:INK, padding:'72px 0' }}>
+      <div className="vt-wrap">
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:80, alignItems:'center' }}>
+          <div>
+            <div className="vt-eyebrow" style={{ color:G2 }}>Newsletter</div>
+            <h2 style={{ color:'#fff', marginBottom:16 }}>Ne manquez aucune<br/><em style={{ color:G2 }}>actualité sociale.</em></h2>
+            <p style={{ color:'rgba(255,255,255,.5)', marginBottom:28 }}>Changements législatifs belges, barèmes mis à jour, conseils pratiques.</p>
+            {sent ? (
+              <div style={{ padding:'14px 20px', borderRadius:10, background:'rgba(34,197,94,.15)', border:'1px solid rgba(34,197,94,.3)', color:'#86efac', fontSize:15 }}>✓ Inscription confirmée — bienvenue !</div>
+            ) : (
+              <>
+                <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
+                  <input className="nl-input" type="email" placeholder="votre@email.be" value={email} onChange={e => setEmail(e.target.value)}/>
+                  <button className="btn-gold" onClick={() => { if(email) setSent(true); }}>S'inscrire</button>
+                </div>
+                <p style={{ fontSize:12, color:'rgba(255,255,255,.3)', marginTop:10, lineHeight:1.6 }}>Politique de confidentialité Aureus IA SPRL. Désinscription à tout moment.</p>
+              </>
+            )}
+          </div>
+          <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+            {[['⚖️','Veille législative quotidienne','Alertes dès qu\'une loi belge impacte vos obligations'],['🧮','Barèmes 2026 mis à jour','Nouvelles grilles CP avant leur entrée en vigueur'],['💡','Conseils d\'experts','Fiches pratiques rédigées par nos juristes en droit social']].map(([ico,t,d]) => (
+              <div key={t} style={{ display:'flex', alignItems:'flex-start', gap:12 }}>
+                <div style={{ width:32, height:32, borderRadius:7, background:'rgba(255,255,255,.07)', border:'1px solid rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, flexShrink:0 }}>{ico}</div>
+                <div>
+                  <div style={{ fontSize:14, fontWeight:600, color:'#fff', marginBottom:2 }}>{t}</div>
+                  <div style={{ fontSize:13, color:'rgba(255,255,255,.45)' }}>{d}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PageIndependant({ go }) {
+  const steps = [
+    { n:1, title:'Choisir votre statut', body:"Indépendant à titre principal ou complémentaire, société (SRL, SA…) ou unipersonnel. Chaque statut a des implications sociales et fiscales différentes.", tags:['SRL · SA · Unipersonnel'], tagClass:'vt-tag-au' },
+    { n:2, title:'Numéro d\'entreprise (BCE)', body:"Inscription au registre des personnes morales auprès du greffe du tribunal de l'entreprise ou via un guichet d'entreprises agréé.", tags:['BCE · Banque-Carrefour'], tagClass:'vt-tag-b' },
+    { n:3, title:'Affiliation à une caisse sociale', body:"Obligation légale dans les 90 jours du début d'activité. Aureus vous guide dans les démarches.", tags:['ONSS · 90 jours'], tagClass:'vt-tag-g' },
+    { n:4, title:'Cotisations sociales trimestrielles', body:"Taux : 20,5% jusqu'à 72 810 € et 14,16% au-delà pour 2026. Minimum : 870,78 €/trimestre (activité principale).", tags:['20,5% · Trimestriel'], tagClass:'vt-tag-au' },
+    { n:5, title:'Obligations TVA & IPP', body:"Déclaration TVA (mensuelle ou trimestrielle), déclaration IPP annuelle. Aureus génère les données pour votre comptable.", tags:['TVA · IPP · SPF Finances'], tagClass:'' },
+    { n:6, title:'Protection sociale', body:"Couverture maladie-invalidité (INAMI), droit à la pension, allocations familiales. Optionnel : PLCI, assurance revenu garanti.", tags:['INAMI · Pension · PLCI'], tagClass:'vt-tag-g' },
+  ];
+  const [openFaq, setOpenFaq] = useState(null);
+  const faqs = [
+    ['Quel est le délai pour s\'affilier à une caisse sociale ?','Vous avez 90 jours à compter du début de votre activité. En cas de dépassement, vous risquez une affiliation d\'office et des majorations.'],
+    ['Combien coûtent les cotisations sociales en 2026 ?','20,5% sur la tranche jusqu\'à 72 810,09 € et 14,16% au-delà. Minimum absolu : 870,78 €/trimestre pour une activité principale.'],
+    ['Puis-je travailler comme indépendant complémentaire tout en étant salarié ?','Oui, sous réserve de l\'accord de votre employeur (clause d\'exclusivité). Vos cotisations seront réduites grâce au régime complémentaire.'],
+    ['Aureus gère-t-il aussi les indépendants en société ?','Oui. Aureus Social Pro gère aussi bien les personnes physiques que les mandataires de société (gérants SRL, administrateurs SA).'],
+  ];
+  return (
+    <>
+      <section style={{ background:CREAM, padding:'60px 0 64px', borderBottom:`1px solid ${BORDER}` }}>
+        <div className="vt-wrap"><div className="page-hero-grid">
+          <div>
+            <div style={{ display:'flex', alignItems:'center', gap:8, fontSize:12, color:MIST, marginBottom:20 }}>Accueil <span style={{ color:G }}>›</span> Indépendants</div>
+            <div className="vt-eyebrow">Indépendants</div>
+            <h1 style={{ marginBottom:18 }}>Se lancer comme<br/><em>indépendant</em><br/>en Belgique.</h1>
+            <p style={{ fontSize:18, color:STONE, marginBottom:28, fontWeight:300 }}>Statut, affiliation ONSS, cotisations, obligations — le guide complet étape par étape.</p>
+            <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+              <button className="btn-p" onClick={() => go('contact')}>Parler à un expert</button>
+              <button className="btn-s" onClick={() => go('contact')}>Demander une démo</button>
+            </div>
+          </div>
+          <DarkCard label="Aureus Social Pro" title="Votre back-office social" sub="Automatisez vos obligations sociales dès le premier jour." stats={[['166','CP gérées'],['<8s','Dimona'],['100%','Belge & conforme'],['24/7','Accès plateforme']]}/>
+        </div></div>
+      </section>
+      <section className="vt-section">
+        <div className="vt-wrap">
+          <div style={{ marginBottom:48 }}><div className="vt-eyebrow">Guide pas à pas</div><h2>Se lancer en <em>6 étapes</em></h2></div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:64, alignItems:'start' }}>
+            <div>
+              {steps.map(s => (
+                <div key={s.n} className="step">
+                  <div className="step-num">{s.n}</div>
+                  <div>
+                    <h4 style={{ fontFamily:"'Cabinet Grotesk',sans-serif", fontSize:17, fontWeight:700, color:INK, marginBottom:8 }}>{s.title}</h4>
+                    <p style={{ fontSize:15 }}>{s.body}</p>
+                    <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginTop:12 }}>
+                      {s.tags.map(t => <span key={t} className={`vt-tag ${s.tagClass}`}>{t}</span>)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div>
+              <div style={{ background:CREAM, border:`1px solid ${BORDER}`, borderRadius:10, padding:28, marginBottom:20 }}>
+                <h4 style={{ fontFamily:"'Cabinet Grotesk',sans-serif", fontSize:16, marginBottom:16 }}>✅ Ce qu'Aureus automatise</h4>
+                {['Dimona IN/OUT en moins de 8 secondes','Calcul cotisations ONSS 13,07%','Fiches de paie PDF conformes','DmfA XML trimestrielle ONSS','Belcotax 281.10 SPF Finances','SEPA pain.001 virements batch','Signature électronique (Yousign)'].map(item => (
+                  <div key={item} style={{ display:'flex', gap:10, fontSize:14, color:STONE, marginBottom:10 }}>
+                    <span style={{ color:'#22C55E', flexShrink:0 }}>✓</span>{item}
+                  </div>
+                ))}
+              </div>
+              <div style={{ background:'#FBF3E2', border:'1px solid #D4B870', borderRadius:10, padding:24 }}>
+                <div style={{ fontSize:12, fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', color:'#7A5010', marginBottom:12 }}>Bon à savoir</div>
+                <p style={{ fontSize:14, color:'#5A3A0A', lineHeight:1.7 }}>En 2026, le <strong>premier employé bénéficie d'une exonération totale des cotisations patronales ONSS pendant 5 ans</strong>. Aureus la calcule et l'applique automatiquement.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="vt-section" style={{ background:CREAM }}>
+        <div className="vt-wrap">
+          <div style={{ textAlign:'center', marginBottom:48 }}><div className="vt-eyebrow">Questions fréquentes</div><h2>Tout ce que vous voulez <em>savoir</em></h2></div>
+          <div style={{ maxWidth:720, margin:'0 auto' }}>
+            {faqs.map(([q,a], i) => (
+              <div key={i} className={`faq-item${openFaq===i ? ' faq-open' : ''}`}>
+                <button className="faq-q" onClick={() => setOpenFaq(openFaq===i ? null : i)}>{q}<span className="faq-arr">+</span></button>
+                <div className="faq-a" style={{ maxHeight: openFaq===i ? 200 : 0 }}>
+                  <div style={{ padding:'0 0 20px', fontSize:15, color:STONE, lineHeight:1.75 }}>{a}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <CtaBand title="Prêt à vous lancer <em>en toute sérénité</em>&nbsp;?" sub="Nos experts vous accompagnent de A à Z." btnLabel="Parler à un expert →" go={go}/>
+      <Footer go={go}/>
+    </>
+  );
+}
+
+function PageEmployeur({ go }) {
+  const steps = [
+    { n:1, title:'Immatriculation ONSS employeur', body:"Obtenez un numéro d'employeur ONSS avant d'engager. Aureus guide la soumission via WIDE et assure le suivi du matricule provisoire.", tags:['ONSS · WIDE · Matricule'], tagClass:'vt-tag-b' },
+    { n:2, title:'Rédaction du contrat de travail', body:"CDI, CDD, temps plein ou partiel — Aureus génère des modèles conformes à la commission paritaire applicable.", tags:['CDI · CDD · CP 200'], tagClass:'vt-tag-au' },
+    { n:3, title:'Déclaration Dimona IN', body:"Obligatoire avant le début du travail. Aureus soumet la Dimona IN en moins de 8 secondes avec confirmation ONSS temps réel.", tags:['Dimona IN · <8s · ONSS'], tagClass:'vt-tag-g' },
+    { n:4, title:'Calcul du premier salaire', body:"Brut → Net complet : ONSS 13,07%, précompte professionnel Annexe III, bonus emploi, réduction bas salaire. Fiche PDF automatique.", tags:['ONSS · PP · Bonus emploi'], tagClass:'vt-tag-au' },
+    { n:5, title:'Virement SEPA & paiement', body:"Aureus génère le fichier SEPA pain.001 prêt à importer dans votre banque. Validation IBAN/BIC intégrée.", tags:['SEPA pain.001 · ISO 20022'], tagClass:'vt-tag-b' },
+    { n:6, title:'Déclarations trimestrielles ONSS', body:"DmfA XML Q1–Q4 générée automatiquement avec toutes les réductions applicables. Envoi direct ONSS.", tags:['DmfA · Q1–Q4 · Réduction struct.'], tagClass:'' },
+  ];
+  const avantages = [
+    ['🎁','Exemption 1er employé','Exonération totale des cotisations patronales ONSS pendant 5 ans. Calculée automatiquement par Aureus.'],
+    ['💼','Activa.brussels','Prime mensuelle jusqu\'à 350 € pour l\'engagement d\'un demandeur d\'emploi bruxellois.'],
+    ['📉','Réduction bas salaire','Réduction ONSS patronale automatique pour les salaires inférieurs à 3 100 €/mois.'],
+    ['🎓','SINE & plan Activa','Réductions pour l\'engagement de personnes éloignées du marché de l\'emploi.'],
+    ['👶','Congé parental','Gestion des suspensions de contrat, remplacement temporaire, déclarations ONSS spécifiques.'],
+    ['📋','MonBEE recrutement','Prime à l\'embauche via MonBEE. Aureus rappelle les délais et génère les documents nécessaires.'],
+  ];
+  return (
+    <>
+      <section style={{ background:CREAM, padding:'60px 0 64px', borderBottom:`1px solid ${BORDER}` }}>
+        <div className="vt-wrap"><div className="page-hero-grid">
+          <div>
+            <div style={{ display:'flex', alignItems:'center', gap:8, fontSize:12, color:MIST, marginBottom:20 }}>Accueil <span style={{ color:G }}>›</span> Devenir employeur</div>
+            <div className="vt-eyebrow">Premier employé</div>
+            <h1 style={{ marginBottom:18 }}>Engagez votre<br/>premier collaborateur<br/><em>en confiance.</em></h1>
+            <p style={{ fontSize:18, color:STONE, marginBottom:28, fontWeight:300 }}>Immatriculation ONSS, contrat, Dimona, premiers salaires — Aureus guide chaque étape.</p>
+            <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+              <button className="btn-p" onClick={() => go('contact')}>Demander une démo</button>
+              <button className="btn-s" onClick={() => go('employeurs')}>Déjà employeur →</button>
+            </div>
+          </div>
+          <DarkCard label="Premier employé en Belgique" title="Ce qu'Aureus fait pour vous" sub="Automatisation complète du cycle social." stats={[['0€','Cotisations patronales an 1'],['8s','Dimona soumise'],['100%','Conformité ONSS'],['166 CP','Toutes commissions']]}/>
+        </div></div>
+      </section>
+      <section className="vt-section">
+        <div className="vt-wrap">
+          <div style={{ marginBottom:48 }}><div className="vt-eyebrow">Étapes clés</div><h2>De 0 à votre premier <em>employé</em></h2></div>
+          <div style={{ maxWidth:680 }}>
+            {steps.map(s => (
+              <div key={s.n} className="step">
+                <div className="step-num">{s.n}</div>
+                <div>
+                  <h4 style={{ fontFamily:"'Cabinet Grotesk',sans-serif", fontSize:17, fontWeight:700, color:INK, marginBottom:8 }}>{s.title}</h4>
+                  <p style={{ fontSize:15 }}>{s.body}</p>
+                  <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginTop:12 }}>
+                    {s.tags.map(t => <span key={t} className={`vt-tag ${s.tagClass}`}>{t}</span>)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section className="vt-section" style={{ background:CREAM }}>
+        <div className="vt-wrap">
+          <div style={{ textAlign:'center', marginBottom:48 }}><div className="vt-eyebrow">Avantages 2026</div><h2>Exonérations &amp; <em>primes à l'embauche</em></h2></div>
+          <div className="info-grid">
+            {avantages.map(([ico,t,d]) => (
+              <div key={t} className="info-card">
+                <div style={{ fontSize:28, marginBottom:14 }}>{ico}</div>
+                <h4 style={{ fontFamily:"'Cabinet Grotesk',sans-serif", fontSize:16, fontWeight:700, color:INK, marginBottom:8 }}>{t}</h4>
+                <p style={{ fontSize:14 }}>{d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <CtaBand title="Engagez votre premier collaborateur <em>dès demain.</em>" sub="Démo gratuite · Accompagnement complet · Premier mois offert" btnLabel="Démarrer →" go={go}/>
+      <Footer go={go}/>
+    </>
+  );
+}
+
+function PageEmployeurs({ go }) {
+  const modules = [
+    ['⚡','Dimona électronique','IN/OUT/UPDATE en moins de 8 secondes. Connexion directe ONSS via Mahis/CSAM. Validation NISS temps réel.'],
+    ['🧮','Calcul de paie belge','166 CP, barèmes sectoriels 2026, ONSS 13,07%, précompte professionnel Annexe III, bonus emploi, réductions.'],
+    ['📋','DmfA XML trimestrielle','Q1–Q4 conformes ONSS. Réduction structurelle, bas salaire, bonus emploi. Envoi direct depuis la plateforme.'],
+    ['📊','Belcotax XML','Fiches 281.10, 281.20, 281.30 conformes SPF Finances. Téléversement direct MyMinfin. Corrections et annulations.'],
+    ['🏦','SEPA pain.001','Fichiers virement batch ISO 20022. Validation IBAN/BIC. Multi-devises. Compatible toutes banques belges.'],
+    ['📁','Export comptable × 6','WinBooks ACT, BOB50, Exact Online XML, Octopus, Horus/Popsy, CSV générique. PCMN belge intégré.'],
+    ['✍️','Signature électronique','Yousign ou DocuSign. Contrats, avenants, documents RH. Valeur probante légale. Archivage GED automatique.'],
+    ['👥','Portail employé','Fiches de paie, documents RH, demandes de congé — accessibles directement par chaque collaborateur.'],
+    ['🔐','Sécurité RGPD Art. 32','AES-256-GCM NISS/IBAN, audit trail complet, RLS Supabase, OWASP ZAP CI/CD, backup nocturne chiffré B2.'],
+  ];
+  return (
+    <>
+      <section style={{ background:CREAM, padding:'60px 0 64px', borderBottom:`1px solid ${BORDER}` }}>
+        <div className="vt-wrap"><div className="page-hero-grid">
+          <div>
+            <div style={{ display:'flex', alignItems:'center', gap:8, fontSize:12, color:MIST, marginBottom:20 }}>Accueil <span style={{ color:G }}>›</span> Employeurs</div>
+            <div className="vt-eyebrow">Employeurs</div>
+            <h1 style={{ marginBottom:18 }}>Votre paie,<br/>vos déclarations,<br/><em>automatisées.</em></h1>
+            <p style={{ fontSize:18, color:STONE, marginBottom:28, fontWeight:300 }}>166 commissions paritaires, DmfA XML, Belcotax, export WinBooks/BOB — 132 modules pour le cycle social belge complet.</p>
+            <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+              <button className="btn-p" onClick={() => go('app')}>Accéder à la plateforme</button>
+              <button className="btn-s" onClick={() => go('contact')}>Demander une démo</button>
+            </div>
+          </div>
+          <DarkCard label="Plateforme en production" title="Chiffres réels — Mars 2026" sub="132 modules · 44 246 lignes de code" stats={[['1 274','Fiches calculées'],['392','Déclarations ONSS'],['42','Entreprises gérées'],['99.97%','Uptime']]}/>
+        </div></div>
+      </section>
+      <section className="vt-section">
+        <div className="vt-wrap">
+          <div style={{ marginBottom:48 }}><div className="vt-eyebrow">Fonctionnalités</div><h2>132 modules pour le <em>cycle social complet</em></h2></div>
+          <div className="info-grid">
+            {modules.map(([ico,t,d]) => (
+              <div key={t} className="info-card">
+                <div style={{ fontSize:28, marginBottom:14 }}>{ico}</div>
+                <h4 style={{ fontFamily:"'Cabinet Grotesk',sans-serif", fontSize:16, fontWeight:700, color:INK, marginBottom:8 }}>{t}</h4>
+                <p style={{ fontSize:14 }}>{d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <CtaBand title="Voyez la plateforme <em>en action.</em>" sub="Démo sur vos propres données — 30 minutes chrono." btnLabel="Réserver une démo →" go={go}/>
+      <Footer go={go}/>
+    </>
+  );
+}
+
+function PageExperts({ go }) {
+  const items = [
+    ['01','Portail multi-clients centralisé','Gérez tous vos dossiers employeurs depuis un seul tableau de bord. Droits d\'accès granulaires par collaborateur.'],
+    ['02','Mandats ONSS & Belcotax automatiques','Génération des conventions de mandat Mahis/CSAM conformes. Suivi des mandats actifs par client.'],
+    ['03','API REST + Webhooks HMAC','Intégrez Aureus dans votre ERP ou workflow. Webhooks sécurisés pour les événements paie, DmfA, Dimona.'],
+    ['04','Migration depuis vos prestataires','Parseur CSV multi-format pour importer depuis SD Worx, Partena, Securex, Sodexo. Migration assistée incluse.'],
+    ['05','6 formats d\'export comptable','WinBooks ACT, BOB50, Exact Online XML, Octopus, Horus/Popsy, CSV. PCMN belge intégré.'],
+    ['06','SLA 99.9% + Account Manager','Réponse garantie en moins de 2h ouvrables. Canal Slack ou Teams dédié. Account manager attitré.'],
+  ];
+  return (
+    <>
+      <section style={{ background:CREAM, padding:'60px 0 64px', borderBottom:`1px solid ${BORDER}` }}>
+        <div className="vt-wrap"><div className="page-hero-grid">
+          <div>
+            <div style={{ display:'flex', alignItems:'center', gap:8, fontSize:12, color:MIST, marginBottom:20 }}>Accueil <span style={{ color:G }}>›</span> Experts-comptables</div>
+            <div className="vt-eyebrow">Experts-comptables</div>
+            <h1 style={{ marginBottom:18 }}>Un portail,<br/>tous vos <em>dossiers</em><br/>sociaux.</h1>
+            <p style={{ fontSize:18, color:STONE, marginBottom:28, fontWeight:300 }}>Mandats Mahis/CSAM, portail multi-clients, API REST, migration depuis SD Worx ou Partena.</p>
+            <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+              <button className="btn-p" onClick={() => go('contact')}>Demander une démo fiduciaire</button>
+              <button className="btn-s" onClick={() => go('contact')}>Migration assistée</button>
+            </div>
+          </div>
+          <DarkCard label="Plan Fiduciaire" title="Multi-dossiers illimités" sub="Portail · API · SLA · Migration" stats={[['∞','Dossiers clients'],['99.9%','SLA garanti'],['REST','API + Webhooks'],['Auto','Migration CSV']]}/>
+        </div></div>
+      </section>
+      <section className="vt-section">
+        <div className="vt-wrap">
+          <div style={{ marginBottom:48 }}><div className="vt-eyebrow">Ce que nous offrons</div><h2>Conçu pour les <em>professionnels du chiffre</em></h2></div>
+          <div className="expert-grid">
+            {items.map(([n,t,d]) => (
+              <div key={n} className="expert-card">
+                <div style={{ fontFamily:"'Fraunces',serif", fontSize:36, color:CREAM, lineHeight:1, flexShrink:0, width:44 }}>{n}</div>
+                <div>
+                  <div style={{ fontSize:16, fontWeight:700, color:INK, marginBottom:6, fontFamily:"'Cabinet Grotesk',sans-serif" }}>{t}</div>
+                  <div style={{ fontSize:14, color:STONE, lineHeight:1.7 }}>{d}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section className="vt-section" style={{ background:CREAM }}>
+        <div className="vt-wrap">
+          <div style={{ textAlign:'center', marginBottom:48 }}><div className="vt-eyebrow">Migration</div><h2>Quitter SD Worx ou Partena <em>sans risque.</em></h2></div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16, maxWidth:900, margin:'0 auto' }}>
+            {[['📥','Export données','Extraction CSV depuis votre prestataire actuel'],['🔄','Import automatique','Parseur multi-format Aureus — aucune ressaisie'],['✅','Validation croisée','Comparaison des calculs avant go-live'],['🚀','Go-live en 7 jours','Dossiers opérationnels dès le premier cycle']].map(([ico,t,d]) => (
+              <div key={t} style={{ textAlign:'center', padding:'24px 16px', background:WHITE, border:`1px solid ${BORDER}`, borderRadius:10 }}>
+                <div style={{ fontSize:28, marginBottom:12 }}>{ico}</div>
+                <div style={{ fontWeight:700, fontSize:14, color:INK, marginBottom:6 }}>{t}</div>
+                <div style={{ fontSize:13, color:STONE }}>{d}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <CtaBand title="Rejoignez les fiduciaires qui ont choisi <em>l'indépendance.</em>" sub="Migration assistée · SLA 99.9% · Premier mois offert" btnLabel="Demo fiduciaire →" go={go}/>
+      <Footer go={go}/>
+    </>
+  );
+}
+
+function PageFormations({ go }) {
+  const modules = [
+    { ico:'⚖️', title:'Droit social belge', desc:'Loi du 27/06/1969, cotisations ONSS, obligations de l\'employeur, commissions paritaires — les fondamentaux expliqués clairement.', featured:false },
+    { ico:'🧮', title:'Calcul de paie avancé', desc:'Brut → Net complet : ONSS 13,07%, précompte professionnel Annexe III, bonus emploi, réductions structurelles. Exercices pratiques inclus.', featured:true },
+    { ico:'📋', title:'DmfA & Belcotax', desc:'Déclarations trimestrielles ONSS, fiches 281.10/20/30, délais, corrections — le guide complet étape par étape.', featured:false },
+    { ico:'🚀', title:'Onboarding Aureus Pro', desc:'Prise en main complète : configuration, import des travailleurs, première fiche de paie, première Dimona — en 2 heures.', featured:false },
+    { ico:'🏛', title:'RGPD & sécurité RH', desc:'Obligations RGPD Art. 28 et 32, registre Art. 30, DPA, chiffrement NISS/IBAN — conformité complète pour les gestionnaires de paie.', featured:false },
+    { ico:'📊', title:'Veille législative continue', desc:'Alertes automatiques dès qu\'une loi belge impacte vos obligations. Barèmes 2026 mis à jour avant leur entrée en vigueur.', featured:false },
+  ];
+  const articles = [
+    { ico:'⚖️', tag:'Droit social', title:"Premier employé : les 5 erreurs à éviter", desc:"Immatriculation tardive, Dimona oubliée, CP incorrecte — les pièges les plus fréquents et comment les éviter." },
+    { ico:'💼', tag:'Entrepreneuriat', title:"Indépendant ou société : quel statut choisir en 2026 ?", desc:"Cotisations, fiscalité, protection sociale — comparaison complète pour faire le bon choix." },
+    { ico:'🏥', tag:'Santé', title:"Absentéisme : obligations légales de l'employeur belge", desc:"Salaire garanti, certificat médical, contrôle médical — vos droits et obligations détaillés." },
+    { ico:'🎯', tag:'Motivation', title:"Rémunération alternative : warrants, chèques-repas, voiture", desc:"Optimisez votre politique salariale avec les avantages extralégaux belges." },
+    { ico:'🔐', tag:'RGPD', title:"RGPD & données RH : ce que tout employeur doit savoir", desc:"Traitement NISS, IBAN, dossiers médicaux — obligations RGPD Art. 28 et 32 expliquées simplement." },
+    { ico:'🧮', tag:'Paie', title:"Barèmes 2026 : les changements clés par CP", desc:"CP 200, 226, 319 — revue des nouvelles grilles salariales intégrées dans Aureus avant le 1er janvier." },
+  ];
+  return (
+    <>
+      <section style={{ background:CREAM, padding:'60px 0 64px', borderBottom:`1px solid ${BORDER}` }}>
+        <div className="vt-wrap"><div className="page-hero-grid">
+          <div>
+            <div style={{ display:'flex', alignItems:'center', gap:8, fontSize:12, color:MIST, marginBottom:20 }}>Accueil <span style={{ color:G }}>›</span> Formations</div>
+            <div className="vt-eyebrow">Formations</div>
+            <h1 style={{ marginBottom:18 }}>Maîtrisez le droit<br/>social belge.<br/><em>À votre rythme.</em></h1>
+            <p style={{ fontSize:18, color:STONE, marginBottom:28, fontWeight:300 }}>Webinaires, guides pratiques et tutoriels sur la paie belge, ONSS, Dimona et Belcotax — par nos experts juridiques.</p>
+            <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+              <button className="btn-p" onClick={() => go('contact')}>Voir le programme</button>
+              <button className="btn-s" onClick={() => go('contact')}>Nous contacter</button>
+            </div>
+          </div>
+          <DarkCard label="Formations Aureus" title="Apprenez des experts" sub="Contenu basé sur les vrais cas pratiques de la plateforme." stats={[['6','Modules de formation'],['100%','Droit belge 2026'],['CPD','Heures validées IEC'],['FR/NL','Langues']]}/>
+        </div></div>
+      </section>
+      <section className="vt-section" style={{ background:CREAM }}>
+        <div className="vt-wrap">
+          <div style={{ marginBottom:48 }}><div className="vt-eyebrow">Thématiques</div><h2>Nos <em>6 modules</em> de formation</h2></div>
+          <div className="sol-grid">
+            {modules.map(m => (
+              <div key={m.title} className={`sol-card${m.featured ? ' featured' : ''}`} onClick={() => go('contact')}>
+                <div className="sol-ico">{m.ico}</div>
+                <h4>{m.title}</h4>
+                <p className="sol-desc">{m.desc}</p>
+                <div className="sol-link">Voir le module <Arr/></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section className="vt-section">
+        <div className="vt-wrap">
+          <div style={{ marginBottom:48 }}><div className="vt-eyebrow">Inspiration</div><h2>Toujours prêt(e) pour <em>l'avenir</em></h2></div>
+          <div className="theme-grid">
+            {articles.map(a => (
+              <div key={a.title} className="theme-card">
+                <div className="theme-img">{a.ico}</div>
+                <div className="theme-body">
+                  <span className="theme-tag">{a.tag}</span>
+                  <h4>{a.title}</h4>
+                  <p>{a.desc}</p>
+                  <div className="theme-cta">Lire <Arr/></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <Newsletter go={go}/>
+      <CtaBand title="Vous créez une activité ou vous souhaitez <em>développer votre entreprise&nbsp;?</em>" sub="Quelle que soit votre question, Aureus vous donne des réponses claires." btnLabel="Contactez-nous →" go={go}/>
+      <Footer go={go}/>
+    </>
+  );
+}
+
+function PageContact({ go }) {
+  const [sent, setSent] = useState(false);
+  return (
+    <>
+      <section className="vt-section">
+        <div className="vt-wrap">
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1.3fr', gap:72, alignItems:'start' }}>
+            <div>
+              <div className="vt-eyebrow">Contact</div>
+              <h2>Comment pouvons-nous<br/>vous <em>aider</em>&nbsp;?</h2>
+              <p style={{ margin:'16px 0 28px', fontSize:17 }}>Notre équipe répond sous 4h ouvrables. Pas de chatbot — de vrais experts en droit social belge.</p>
+              {[['✉️','E-mail','info@aureus-ia.com'],['💻','Application','app.aureussocial.be'],['📍','Adresse','Place Marcel Broodthaers 8, 1060 Saint-Gilles, Bruxelles']].map(([ico,l,v]) => (
+                <div key={l} className="contact-ch">
+                  <div style={{ width:40, height:40, borderRadius:9, background:WHITE, border:`1px solid ${BORDER}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:17, flexShrink:0 }}>{ico}</div>
+                  <div>
+                    <div style={{ fontSize:13, fontWeight:600, color:INK, marginBottom:2 }}>{l}</div>
+                    <div style={{ fontSize:14, color:STONE }}>{v}</div>
+                  </div>
+                </div>
+              ))}
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginTop:8 }}>
+                {[['BCE','BE 1028.230.781'],['Mahis','DGIII/MAHI011'],['Peppol','0208:1028230781'],['Réponse','< 4h ouvrables']].map(([l,v]) => (
+                  <div key={l} style={{ background:CREAM, border:`1px solid ${BORDER}`, borderRadius:5, padding:14 }}>
+                    <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:MIST, marginBottom:6 }}>{l}</div>
+                    <div style={{ fontFamily:"'Fira Code',monospace", fontSize:12, color:INK }}>{v}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{ background:WHITE, border:`1px solid ${BORDER}`, borderRadius:10, padding:'36px 32px', boxShadow:'0 8px 40px rgba(14,13,10,.12)' }}>
+              <div style={{ fontFamily:"'Fraunces',serif", fontSize:24, color:INK, marginBottom:6, fontWeight:400 }}>Demande de démo</div>
+              <div style={{ fontSize:14, color:MIST, marginBottom:28 }}>Réponse garantie sous 4h ouvrables.</div>
+              {sent ? (
+                <div style={{ padding:'20px', borderRadius:10, background:'rgba(34,197,94,.1)', border:'1px solid rgba(34,197,94,.3)', color:'#166534', fontSize:16, textAlign:'center' }}>
+                  ✓ Message envoyé — nous vous répondrons sous 4h ouvrables.
+                </div>
+              ) : (
+                <>
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+                    {[['Prénom *','text','Jean'],['Nom *','text','Dupont']].map(([l,t,ph]) => (
+                      <div key={l} style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                        <label style={{ fontSize:13, fontWeight:600, color:INK }}>{l}</label>
+                        <input className="finp" type={t} placeholder={ph}/>
+                      </div>
+                    ))}
+                    <div style={{ gridColumn:'1/-1', display:'flex', flexDirection:'column', gap:6 }}>
+                      <label style={{ fontSize:13, fontWeight:600, color:INK }}>E-mail professionnel *</label>
+                      <input className="finp" type="email" placeholder="jean.dupont@fiduciaire.be"/>
+                    </div>
+                    <div style={{ gridColumn:'1/-1', display:'flex', flexDirection:'column', gap:6 }}>
+                      <label style={{ fontSize:13, fontWeight:600, color:INK }}>Société</label>
+                      <input className="finp" type="text" placeholder="Cabinet Dupont & Associés"/>
+                    </div>
+                    <div style={{ gridColumn:'1/-1', display:'flex', flexDirection:'column', gap:6 }}>
+                      <label style={{ fontSize:13, fontWeight:600, color:INK }}>Vous êtes *</label>
+                      <select className="fsel">
+                        <option value="">Sélectionnez...</option>
+                        {['Indépendant / Starter','Fiduciaire / Expert-comptable','Employeur direct','Secrétariat social','Courtier / Partenaire','Autre'].map(o => <option key={o}>{o}</option>)}
+                      </select>
+                    </div>
+                    <div style={{ gridColumn:'1/-1', display:'flex', flexDirection:'column', gap:6 }}>
+                      <label style={{ fontSize:13, fontWeight:600, color:INK }}>Message</label>
+                      <textarea className="ftxt" placeholder="Décrivez votre situation, vos besoins ou vos questions..."/>
+                    </div>
+                  </div>
+                  <button onClick={() => setSent(true)} style={{ width:'100%', marginTop:6, padding:14, borderRadius:5, border:'none', background:INK, color:WHITE, fontFamily:"'Cabinet Grotesk',sans-serif", fontSize:15, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:8, transition:'all .22s' }}
+                    onMouseOver={e => e.currentTarget.style.background='#252320'} onMouseOut={e => e.currentTarget.style.background=INK}>
+                    Envoyer la demande <Arr/>
+                  </button>
+                  <p style={{ fontSize:11, color:MIST, textAlign:'center', marginTop:10, lineHeight:1.6 }}>En soumettant ce formulaire, vous acceptez notre politique RGPD. Aucun spam.</p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+      <Footer go={go}/>
+    </>
+  );
+}
+
+// ═══════════════════════════════════════════════════════
+// NAV + MAIN
+// ═══════════════════════════════════════════════════════
+const PAGES = { home:PageHome, independant:PageIndependant, employeur:PageEmployeur, employeurs:PageEmployeurs, experts:PageExperts, formations:PageFormations, contact:PageContact };
+
+const MEGA = {
+  1:{ label:'Indépendants', items:[['🚀',"Se lancer comme indépendant","Statut, obligations, démarches ONSS",'independant'],['🧮','Cotisations sociales','Calcul et paiement des cotisations ONSS','independant'],['📋','Obligations déclaratives','Dimona, DmfA, TVA, IPP','independant'],['🛡️','Protection sociale','Maladie, invalidité, pension','independant']] },
+  2:{ label:'Devenir employeur', items:[['👤','Premier employé','Immatriculation ONSS, numéro d\'entreprise','employeur'],['📄','Contrat de travail','CDI, CDD, temps partiel — modèles conformes','employeur'],['⚡','Dimona automatique','Déclaration IN/OUT en 8 secondes','employeur'],['💶','Premiers salaires','Calcul paie, fiches, SEPA pain.001','employeur']] },
+  3:{ label:'Employeurs', items:[['🏢','Gestion de la paie','166 CP, barèmes, primes, ONSS','employeurs'],['📊','Déclarations trimestrielles','DmfA XML, Belcotax 281.10/20/30','employeurs'],['📁','Export comptable','WinBooks, BOB, Octopus, Exact Online','employeurs'],['🔐','Sécurité & RGPD','AES-256-GCM, audit trail, RLS','employeurs'],['👥','Portail employé','Fiches de paie, documents, congés','employeurs'],['✍️','Signature électronique','Yousign / DocuSign — valeur légale','employeurs']] },
+  4:{ label:'Formations', items:[['📚','Droit social belge','ONSS, paie, Dimona — maîtrisez les bases','formations'],['🧮','Calcul de paie avancé','CP, barèmes, PP Annexe III, bonus emploi','formations'],['🏛','DmfA & Belcotax','Déclarations trimestrielles pas à pas','formations'],['🚀','Onboarding Aureus Pro','Prise en main complète de la plateforme','formations']] },
+  5:{ label:'Experts-comptables', items:[['🏛','Portail multi-clients','Gérez tous vos dossiers en un endroit','experts'],['🔗','API REST + Webhooks','Intégration avec vos outils existants','experts'],['📤','Mandats ONSS & Belcotax','Génération automatique Mahis/CSAM','experts'],['🔄','Migration assistée','Importation depuis SD Worx, Partena…','experts']] },
+};
+
+export default function VitrinePage() {
+  const [page, setPage] = useState('home');
+  const [openMega, setOpenMega] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
+  const navRef = useRef(null);
+
+  const go = (p) => {
+    if (p === 'app') { window.location.href = '/'; return; }
+    setPage(p);
+    setOpenMega(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (navRef.current && !navRef.current.contains(e.target)) setOpenMega(null);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const PageComp = PAGES[page] || PageHome;
+
+  return (
+    <div className="vt-body">
+      <style dangerouslySetInnerHTML={{ __html: css }}/>
+
+      {/* TOPBAR */}
+      <div style={{ background:INK, height:36, display:'flex', alignItems:'center', position:'fixed', top:0, left:0, right:0, zIndex:400 }}>
+        <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 36px', display:'flex', alignItems:'center', justifyContent:'space-between', width:'100%' }}>
+          <span style={{ fontSize:12, color:'rgba(255,255,255,.5)' }}>🇧🇪 Belgique &nbsp;·&nbsp; <strong style={{ color:'rgba(255,255,255,.8)' }}>BCE BE 1028.230.781</strong></span>
+          <div style={{ display:'flex', gap:20, alignItems:'center' }}>
+            <a onClick={() => go('contact')} style={{ fontSize:12, color:'rgba(255,255,255,.55)', cursor:'pointer' }}>Contact</a>
+            <div style={{ width:1, height:14, background:'rgba(255,255,255,.15)' }}/>
+            <a onClick={() => go('app')} style={{ fontSize:12, color:'rgba(255,255,255,.55)', cursor:'pointer' }}>Espace client</a>
+          </div>
+        </div>
+      </div>
+
+      {/* NAV */}
+      <nav ref={navRef} style={{ position:'fixed', top:36, left:0, right:0, zIndex:300, height:64, background:WHITE, borderBottom:`1px solid ${BORDER}`, boxShadow: scrolled ? '0 2px 16px rgba(14,13,10,.07)' : 'none', transition:'box-shadow .3s' }}>
+        <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 36px', height:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', gap:16 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, cursor:'pointer', flexShrink:0 }} onClick={() => go('home')}>
+            <div style={{ width:32, height:32, borderRadius:7, background:INK, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <svg width="14" height="14" viewBox="0 0 18 18" fill="none"><path d="M9 2L15.5 14H2.5Z" fill="#B8913A"/></svg>
+            </div>
+            <div>
+              <div style={{ fontSize:14, fontWeight:700, color:INK, letterSpacing:'.04em', lineHeight:1 }}>AUREUS</div>
+              <div style={{ fontSize:8, color:MIST, letterSpacing:'.18em', textTransform:'uppercase' }}>Social Pro</div>
+            </div>
+          </div>
+
+          {/* MEGA LINKS */}
+          <div style={{ display:'flex', alignItems:'stretch', height:64 }}>
+            {Object.entries(MEGA).map(([k, m]) => (
+              <div key={k} style={{ position:'relative', display:'flex', alignItems:'center' }}>
+                <a
+                  onClick={() => setOpenMega(openMega == k ? null : k)}
+                  style={{ padding:'0 14px', height:'100%', display:'flex', alignItems:'center', fontSize:14, fontWeight:500, color: openMega==k ? INK : STONE, cursor:'pointer', borderBottom: openMega==k ? `2px solid ${G}` : '2px solid transparent', transition:'all .18s', whiteSpace:'nowrap', userSelect:'none' }}>
+                  {m.label} <span style={{ fontSize:10, marginLeft:4, display:'inline-block', transform: openMega==k ? 'rotate(180deg)' : 'none', transition:'transform .2s' }}>▾</span>
+                </a>
+                {openMega == k && (
+                  <div style={{ position:'absolute', top:64, left:'50%', transform:'translateX(-50%)', background:WHITE, border:`1px solid ${BORDER}`, borderRadius:10, boxShadow:'0 24px 72px rgba(14,13,10,.18)', minWidth:480, padding:20, display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, zIndex:500 }}>
+                    {m.items.map(([ico,t,d,pg]) => (
+                      <div key={t} onClick={() => go(pg)} style={{ display:'flex', alignItems:'flex-start', gap:14, padding:'12px 14px', borderRadius:6, cursor:'pointer', transition:'background .18s' }}
+                        onMouseOver={e => e.currentTarget.style.background=CREAM} onMouseOut={e => e.currentTarget.style.background='transparent'}>
+                        <div style={{ width:34, height:34, borderRadius:8, background:CREAM, border:`1px solid ${BORDER}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, flexShrink:0 }}>{ico}</div>
+                        <div>
+                          <div style={{ fontSize:14, fontWeight:600, color:INK, marginBottom:3 }}>{t}</div>
+                          <div style={{ fontSize:12, color:MIST, lineHeight:1.5 }}>{d}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
+            <button onClick={() => go('app')} style={{ padding:'8px 16px', borderRadius:5, fontSize:13, fontWeight:500, color:STONE, border:`1.5px solid ${BORDER}`, background:'transparent', cursor:'pointer', fontFamily:"'Cabinet Grotesk',sans-serif", transition:'all .2s' }}
+              onMouseOver={e => { e.currentTarget.style.borderColor=INK; e.currentTarget.style.color=INK; }} onMouseOut={e => { e.currentTarget.style.borderColor=BORDER; e.currentTarget.style.color=STONE; }}>
+              Connexion
+            </button>
+            <button onClick={() => go('contact')} style={{ padding:'9px 18px', borderRadius:5, fontSize:13, fontWeight:600, color:WHITE, background:INK, border:'none', cursor:'pointer', fontFamily:"'Cabinet Grotesk',sans-serif", transition:'all .22s', display:'flex', alignItems:'center', gap:6, whiteSpace:'nowrap' }}
+              onMouseOver={e => e.currentTarget.style.background='#252320'} onMouseOut={e => e.currentTarget.style.background=INK}>
+              Demander une démo <Arr/>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* CONTENT */}
+      <div style={{ paddingTop: 36 + 64 }}>
+        <PageComp go={go}/>
+      </div>
+    </div>
   );
 }
