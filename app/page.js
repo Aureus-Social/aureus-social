@@ -1,12 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from './lib/supabase';
-import LoginPage from './(auth)/login';
 import DashboardLayout from './(dashboard)/layout-client';
 
 export default function Home() {
   const [user, setUser]       = useState(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     async function checkAuth() {
@@ -16,16 +17,20 @@ export default function Home() {
         return;
       }
       const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user || null);
+      if (!session?.user) {
+        router.replace('/vitrine');
+        return;
+      }
+      setUser(session.user);
       setLoading(false);
-      supabase.auth.onAuthStateChange((_event, session) =>
-        setUser(session?.user || null)
-      );
+      supabase.auth.onAuthStateChange((_event, session) => {
+        if (!session?.user) router.replace('/vitrine');
+        else setUser(session.user);
+      });
     }
     checkAuth();
-  }, []);
+  }, [router]);
 
-  // Chargement
   if (loading) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', background:'#0c0b09' }}>
       <div style={{ textAlign:'center' }}>
@@ -35,15 +40,6 @@ export default function Home() {
     </div>
   );
 
-  // Non connecté → site vitrine intégré
-  if (!user) return (
-    <iframe
-      src="/vitrine.html"
-      style={{ width:'100%', height:'100vh', border:'none', display:'block' }}
-      title="Aureus Social Pro"
-    />
-  );
-
-  // Connecté → dashboard
+  if (!user) return null;
   return <DashboardLayout user={user} />;
 }
