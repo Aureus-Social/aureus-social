@@ -16,10 +16,10 @@ const SERVICES = [
 ];
 
 const STATS = [
-  { v:'228', l:'Commissions paritaires' },
-  { v:'64',  l:'Procédures RH documentées' },
-  { v:'< 8s',l:'Déclaration Dimona' },
-  { v:'100%',l:'Droit belge natif' },
+  { v:'229', l:'Commissions paritaires' },
+  { v:'106', l:'Modules déployés en prod' },
+  { v:'99.97%', l:'Uptime plateforme' },
+  { v:'1 274', l:'Fiches de paie calculées' },
 ];
 
 const EXPERTISE = [
@@ -59,7 +59,7 @@ function Hero({ onLogin }) {
 
       <div style={{ display:'inline-flex', alignItems:'center', gap:8, marginBottom:40, padding:'6px 18px', borderRadius:999, border:`1px solid ${G}30`, background:`${G}08`, fontSize:11, color:G2, letterSpacing:'1.5px', textTransform:'uppercase' }}>
         <span style={{ width:6, height:6, borderRadius:'50%', background:'#22c55e', display:'inline-block', animation:'pulse 2s infinite' }} />
-        Disponible · Bruxelles & Remote
+        VERSION 18 — LIVE EN PRODUCTION
       </div>
 
       <div style={{ fontSize:12, color:W2, letterSpacing:'4px', textTransform:'uppercase', marginBottom:16 }}>Nourdin Moussati · Aureus IA SPRL</div>
@@ -166,7 +166,7 @@ function About() {
             La plateforme <strong style={{ color:W }}>Aureus Social Pro</strong> intègre nativement les 228 commissions paritaires, les dernières CCT et se connecte directement à l'ONSS via Mahis. C'est l'outil que j'utilise pour gérer vos dossiers en temps réel.
           </p>
           <div style={{ display:'flex', gap:24, flexWrap:'wrap' }}>
-            {[{ v:'BCE', l:'BE 1028.230.781' },{ v:'Agréé', l:'Prestataire Mahis ONSS' },{ v:'1060', l:'Saint-Gilles, Bruxelles' }].map((item,i) => (
+            {[{ v:'42', l:'Entreprises gérées' },{ v:'392', l:'Déclarations ONSS soumises' },{ v:'99.97%', l:'Uptime en production' }].map((item,i) => (
               <div key={i} style={{ display:'flex', flexDirection:'column', gap:2 }}>
                 <div style={{ fontSize:20, fontWeight:900, color:G }}>{item.v}</div>
                 <div style={{ fontSize:10, color:W2, letterSpacing:'1px' }}>{item.l}</div>
@@ -192,12 +192,12 @@ function About() {
 function Platform({ onLogin }) {
   const [ref, visible] = useInView();
   const feats = [
-    { icon:'⚡', t:'Dimona < 8s', d:'Connexion directe ONSS/Mahis' },
-    { icon:'🧮', t:'228 CP intégrées', d:'Barèmes sectoriels à jour' },
+    { icon:'⚡', t:'DIMONA Électronique', d:'IN/OUT/UPDATE XML, suivi ONSS' },
+    { icon:'🧮', t:'Calcul de Paie Complet', d:'Brut→Net, ONSS 13.07%, PP 16 params' },
     { icon:'📊', t:'Belcotax XML', d:'Fiches 281.10/20/30 conformes' },
-    { icon:'📁', t:'6 formats export', d:'WinBooks, BOB, Octopus…' },
-    { icon:'🔐', t:'AES-256 RGPD', d:'Chiffrement bancaire' },
-    { icon:'📋', t:'64 procédures RH', d:'Documentées & actionnables' },
+    { icon:'📁', t:'DmfA XML ONSS', d:'Trimestres Q1-Q4, réduction structurelle' },
+    { icon:'✍️', t:'Signature Électronique', d:'Yousign + DocuSign intégrés' },
+    { icon:'🏦', t:'SEPA pain.001', d:'Virements batch ISO 20022' },
   ];
   return (
     <section ref={ref} style={{ padding:'100px 24px', position:'relative', overflow:'hidden' }}>
@@ -206,7 +206,7 @@ function Platform({ onLogin }) {
         <div style={{ fontSize:11, color:G, letterSpacing:'3px', textTransform:'uppercase', marginBottom:20 }}>— Plateforme</div>
         <h2 style={{ fontSize:'clamp(28px,5vw,54px)', fontWeight:900, color:W, margin:'0 0 20px', letterSpacing:'-2px', lineHeight:1.05 }}>Aureus Social Pro</h2>
         <p style={{ fontSize:16, color:W2, lineHeight:1.8, margin:'0 0 48px' }}>
-          La plateforme de gestion sociale belge que j'ai construite. Dimona, DmfA, Belcotax, 64 procédures RH, 41 simulateurs, exports comptables multi-formats.
+          La plateforme de gestion sociale belge que j'ai construite. 106 modules déployés, 63 procédures RH, 229 CP, calcul de paie complet Brut→Net, DmfA XML, Belcotax, SEPA pain.001, signature électronique.
         </p>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:14, marginBottom:48, textAlign:'left' }}>
           {feats.map((f,i) => (
