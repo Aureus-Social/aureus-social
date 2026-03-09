@@ -20,10 +20,10 @@ const DELAI_MED_JOURS = 8;       // 8 jours calendrier pour mise en demeure
 const RELANCE_STORAGE_KEY = 'aureus_relances';
 
 const STATUT_COLORS = {
-  attente: { bg:'rgba(107,114,128,0.08)', border:'rgba(107,114,128,0.15)', text:'#6b7280', label:'En attente', icon:'⚫' },
+  attente: { bg:'rgba(107,114,128,0.08)', border:'rgba(107,114,128,0.15)', text:'#6b7280', label:tText('En attente'), icon:'⚫' },
   relance1: { bg:'rgba(234,179,8,0.08)', border:'rgba(234,179,8,0.15)', text:'#eab308', label:'Rappel envoyé', icon:'🟡' },
   relance2: { bg:'rgba(249,115,22,0.08)', border:'rgba(249,115,22,0.15)', text:'#f97316', label:'2e rappel', icon:'🟠' },
-  miseEnDemeure: { bg:'rgba(239,68,68,0.08)', border:'rgba(239,68,68,0.15)', text:'#ef4444', label:'Mise en demeure', icon:'🔴' },
+  miseEnDemeure: { bg:'rgba(239,68,68,0.08)', border:'rgba(239,68,68,0.15)', text:'#ef4444', label:tText('Mise en demeure'), icon:'🔴' },
   paye: { bg:'rgba(34,197,94,0.08)', border:'rgba(34,197,94,0.15)', text:'#22c55e', label:'Payé', icon:'✅' },
 };
 

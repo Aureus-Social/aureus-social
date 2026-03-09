@@ -451,7 +451,7 @@ function EmployeePlanning({ state, dispatch, defaultTab, initialView }) {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div>
-                <label style={{ fontSize: 12, color: MUTED, marginBottom: 4, display: 'block' }}>Type</label>
+                <label style={{ fontSize: 12, color: MUTED, marginBottom: 4, display: 'block' }}>{tText('Type')}</label>
                 <select
                   value={newAbsence.type}
                   onChange={e => setNewAbsence(prev => ({ ...prev, type: e.target.value }))}

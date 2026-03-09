@@ -70,7 +70,7 @@ function SettingsPage({s,d}) {
         <div style={{padding:8,background:'rgba(198,163,78,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#c6a34e'}}>{(s?.emps||[]).length}</div><div style={{fontSize:9,color:'#888'}}>{tText('Employés')}</div></div>
         <div style={{padding:8,background:'rgba(59,130,246,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#3b82f6'}}>{(s.pays||[]).length}</div><div style={{fontSize:9,color:'#888'}}>{tText('Fiches paie')}</div></div>
         <div style={{padding:8,background:'rgba(168,85,247,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#a855f7'}}>{(s?.clients||[]).length}</div><div style={{fontSize:9,color:'#888'}}>{tText('Clients')}</div></div>
-        <div style={{padding:8,background:'rgba(34,197,94,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#22c55e'}}>{Math.round(JSON.stringify(s).length/1024)} KB</div><div style={{fontSize:9,color:'#888'}}>Taille données</div></div>
+        <div style={{padding:8,background:'rgba(34,197,94,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#22c55e'}}>{Math.round(JSON.stringify(s).length/1024)} KB</div><div style={{fontSize:9,color:'#888'}}>{tText('Taille données')}</div></div>
       </div>
     </div>
     {/* 2FA / MFA TOTP */}
@@ -114,7 +114,7 @@ function SettingsPage({s,d}) {
       <ST>🔐 Sécurité — Authentification à deux facteurs (2FA)</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
         <div>
-          <div style={{fontSize:12,color:'#e8e6e0',marginBottom:8,fontWeight:600}}>Statut 2FA</div>
+          <div style={{fontSize:12,color:'#e8e6e0',marginBottom:8,fontWeight:600}}>{tText('Statut 2FA')}</div>
           <div style={{display:'flex',alignItems:'center',gap:10,padding:14,background:'rgba(74,222,128,.04)',borderRadius:10,border:'1px solid rgba(74,222,128,.12)'}}>
             <span style={{fontSize:24}}>🔒</span>
             <div>
@@ -137,7 +137,7 @@ function SettingsPage({s,d}) {
           </div>
         </div>
         <div>
-          <div style={{fontSize:12,color:'#e8e6e0',marginBottom:8,fontWeight:600}}>Options de sécurité</div>
+          <div style={{fontSize:12,color:'#e8e6e0',marginBottom:8,fontWeight:600}}>{tText('Options de sécurité')}</div>
           <div style={{display:'flex',flexDirection:'column',gap:8}}>
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>📧</span>
@@ -150,15 +150,15 @@ function SettingsPage({s,d}) {
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>🔑</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11.5,color:'#e8e6e0'}}>Réinitialisation mot de passe</div>
-                <div style={{fontSize:9.5,color:'#5e5c56'}}>Par email sécurisé</div>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{tText('Réinitialisation mot de passe')}</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>{tText('Par email sécurisé')}</div>
               </div>
               <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>{tText('Actif ✓')}</span>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>⏱</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11.5,color:'#e8e6e0'}}>Session timeout</div>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{tText('Session timeout')}</div>
                 <div style={{fontSize:9.5,color:'#5e5c56'}}>{tText('Déconnexion après inactivité')}</div>
               </div>
               <span style={{fontSize:10,color:'#fb923c',fontWeight:600}}>1 heure</span>
@@ -166,16 +166,16 @@ function SettingsPage({s,d}) {
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>📱</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11.5,color:'#e8e6e0'}}>TOTP (Google Authenticator / Authy)</div>
-                <div style={{fontSize:9.5,color:'#5e5c56'}}>Code à 6 chiffres toutes les 30 secondes</div>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{tText('TOTP (Google Authenticator / Authy)')}</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>{tText('Code à 6 chiffres toutes les 30 secondes')}</div>
               </div>
-              <span style={{fontSize:10,color:'#fb923c',fontWeight:600}}>À activer</span>
+              <span style={{fontSize:10,color:'#fb923c',fontWeight:600}}>{tText('À activer')}</span>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>🛡</span>
               <div style={{flex:1}}>
                 <div style={{fontSize:11.5,color:'#e8e6e0'}}>{tText('Audit trail (Boîte noire)')}</div>
-                <div style={{fontSize:9.5,color:'#5e5c56'}}>Toute action est tracée dans audit_log</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>{tText('Toute action est tracée dans audit_log')}</div>
               </div>
               <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>{tText('Actif ✓')}</span>
             </div>
@@ -186,11 +186,11 @@ function SettingsPage({s,d}) {
     <C style={{marginTop:20}}>
       <ST>{tText('Barèmes légaux')}</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:20,marginTop:10}}>
-        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>ONSS</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
+        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{tText('ONSS')}</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
           <div>Travailleur: <b style={{color:'#e8e6e0'}}>{fmtP(LEGAL.ONSS_W)}</b></div>
           <div>Employeur (marchand): <b style={{color:'#e8e6e0'}}>25,00%</b></div>
           <div>Employeur (non-march.): <b style={{color:'#e8e6e0'}}>32,40%</b></div>
-          <div>Ouvriers: brut × 108%</div>
+          <div>{tText('Ouvriers: brut × 108%')}</div>
           <div>Bonus max: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.BONUS_2026.A_MAX)}</b></div>
         </div></div>
         <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{tText('Avantages')}</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
@@ -199,7 +199,7 @@ function SettingsPage({s,d}) {
           <div>CR valeur max: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.MV.maxTotal)}</b></div>
           <div>Éco-chèques: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.ECO)}/an</b></div>
         </div></div>
-        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>Régime</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
+        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{tText('Régime')}</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
           <div>Heures/sem: <b style={{color:'#e8e6e0'}}>{LEGAL.WH}h</b></div>
           <div>Heures/jour: <b style={{color:'#e8e6e0'}}>{LEGAL.WHD}h</b></div>
           <div>Jours/mois: <b style={{color:'#e8e6e0'}}>{LEGAL.WD}</b></div>

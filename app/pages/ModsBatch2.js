@@ -1350,7 +1350,7 @@ export function CompteIndividuelMod({s,d}){
       <C>
         <I label="Année" type="number" value={yr} onChange={v=>setYr(v)}/>
         <div style={{marginTop:14,padding:12,background:"rgba(198,163,78,.06)",borderRadius:8,fontSize:12,color:'#9e9b93',lineHeight:2}}>
-          <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>Résumé</div>
+          <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>{tText('Résumé')}</div>
           <div>Travailleurs actifs: <b style={{color:'#e8e6e0'}}>{ae.length}</b></div>
           <div>Masse salariale: <b style={{color:'#4ade80'}}>{fmt(ae.reduce((a,e)=>a+e.monthlySalary*13,0))}</b></div>
         </div>
@@ -1635,7 +1635,7 @@ export function AccountingOutputMod({s,d,supabase,user}){
       </div>
       {pcmnLoading?<div style={{padding:20,textAlign:'center',color:'#666'}}>{tText('Chargement...')}</div>:
         <table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
-          <thead><tr><th style={sTh}>Type</th><th style={sTh}>Compte PCMN</th><th style={sTh}>Par défaut</th></tr></thead>
+          <thead><tr><th style={sTh}>{tText('Type')}</th><th style={sTh}>Compte PCMN</th><th style={sTh}>Par défaut</th></tr></thead>
           <tbody>{Object.keys(pcmnLabels).map(key=><tr key={key}>
             <td style={sTd}><span style={{fontWeight:600,color:'#e5e5e5'}}>{pcmnLabels[key]}</span></td>
             <td style={sTd}><input type="text" value={pcmn[key]||''} onChange={e=>{setPcmn(prev=>({...prev,[key]:e.target.value}));setPcmnSaved(false);}} style={{...sInput,width:120,textAlign:'center',fontFamily:'monospace',fontWeight:600,fontSize:13}}/></td>
@@ -2331,7 +2331,7 @@ export function TemplatesMod({s,d}){
       <SC label="Légal" value={templates.filter(t=>t.cat==='Légal').length} color="#a78bfa"/>
     </div>
     <div style={{display:'flex',gap:6,marginBottom:14,flexWrap:'wrap'}}>
-      <button onClick={()=>setCatFilter('all')} style={{padding:'5px 12px',borderRadius:16,border:catFilter==='all'?'1px solid rgba(198,163,78,.3)':'1px solid rgba(198,163,78,.06)',background:catFilter==='all'?'rgba(198,163,78,.1)':'transparent',color:catFilter==='all'?'#c6a34e':'#9e9b93',cursor:'pointer',fontSize:10.5,fontFamily:'inherit'}}>Tous</button>
+      <button onClick={()=>setCatFilter('all')} style={{padding:'5px 12px',borderRadius:16,border:catFilter==='all'?'1px solid rgba(198,163,78,.3)':'1px solid rgba(198,163,78,.06)',background:catFilter==='all'?'rgba(198,163,78,.1)':'transparent',color:catFilter==='all'?'#c6a34e':'#9e9b93',cursor:'pointer',fontSize:10.5,fontFamily:'inherit'}}>{tText('Tous')}</button>
       {cats.map(c=><button key={c} onClick={()=>setCatFilter(c)} style={{padding:'5px 12px',borderRadius:16,border:catFilter===c?'1px solid rgba(198,163,78,.3)':'1px solid rgba(198,163,78,.06)',background:catFilter===c?'rgba(198,163,78,.1)':'transparent',color:catFilter===c?'#c6a34e':'#9e9b93',cursor:'pointer',fontSize:10.5,fontFamily:'inherit'}}>{c}</button>)}
     </div>
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:12}}>
@@ -2844,7 +2844,7 @@ export function SelfServiceMod({s,d}){
         </C>}
         
         {tab==='conges'&&<C>
-          <ST>Solde congés</ST>
+          <ST>{tText('Solde congés')}</ST>
           <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:14}}>
             {[{l:"Légaux",v:20,u:20,c:'#4ade80'},{l:"Extra-légaux",v:2,u:5,c:'#60a5fa'},{l:"Récupération",v:0,u:3,c:'#a78bfa'},{l:"Ancienneté",v:1,u:1,c:'#c6a34e'}].map((k,i)=>
               <div key={i} style={{padding:'12px',background:"rgba(198,163,78,.04)",borderRadius:8,textAlign:'center'}}>

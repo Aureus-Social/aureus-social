@@ -121,7 +121,7 @@ function Dashboard({s,d}) {
     <div style={{marginBottom:20,padding:16,background:'linear-gradient(135deg,rgba(198,163,78,.06),rgba(198,163,78,.02))',border:'1px solid rgba(198,163,78,.15)',borderRadius:12,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
       <div style={{display:'flex',alignItems:'center',gap:10}}>
         <span style={{fontSize:18}}>⚡</span>
-        <div><div style={{fontSize:13,fontWeight:600,color:'#c6a34e'}}>{tText('Automatisation')}</div><div style={{fontSize:10,color:'#888'}}>Actions rapides</div></div>
+        <div><div style={{fontSize:13,fontWeight:600,color:'#c6a34e'}}>{tText('Automatisation')}</div><div style={{fontSize:10,color:'#888'}}>{tText('Actions rapides')}</div></div>
       </div>
       <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
         <button onClick={()=>{if(confirm('Générer toutes les fiches de paie ?')){(s?.emps||[]).forEach(e=>generatePayslipPDF(e,s.co));alert(s.emps.length+' fiches de paie générées')}}} style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(198,163,78,.15)',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:600}}>📄 Fiches</button>
@@ -178,11 +178,11 @@ function Dashboard({s,d}) {
     {/* KPI ROW */}
     <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:14,marginBottom:22}}>
       {[
-        {label:"Employés actifs",value:ae.length,sub:`${sortie.length} sorti${sortie.length>1?'s':''} · ${etudiants.length} étudiant${etudiants.length>1?'s':''}`,color:'#c6a34e',icon:'◉'},
+        {label:tText('Employés actifs'),value:ae.length,sub:`${sortie.length} sorti${sortie.length>1?'s':''} · ${etudiants.length} étudiant${etudiants.length>1?'s':''}`,color:'#c6a34e',icon:'◉'},
         {label:"Masse salariale brute",value:fmt(tm),sub:`Moy: ${fmt(avgGross)}/emp`,color:'#4ade80',icon:'◈'},
         {label:"Net total",value:fmt(tn),sub:`${ae.length?Math.round(tn/tm*100):0}% du brut`,color:'#60a5fa',icon:'▤'},
         {label:"Coût employeur total",value:fmt(tc),sub:`Ratio: ${ae.length?((tc/tm)*100).toFixed(0):0}% du brut`,color:'#a78bfa',icon:'◆'},
-        {label:"Déclarations",value:`${(s.pays||[]).length}`,sub:`${(s.dims||[]).length} Dimona · ${(s.dmfas||[]).length} DmfA`,color:'#fb923c',icon:'◇'},
+        {label:tText('Déclarations'),value:`${(s.pays||[]).length}`,sub:`${(s.dims||[]).length} Dimona · ${(s.dmfas||[]).length} DmfA`,color:'#fb923c',icon:'◇'},
       ].map((kpi,i)=>
         <div key={i} style={{background:"linear-gradient(145deg,#0e1220,#131829)",border:'1px solid rgba(139,115,60,.12)',borderRadius:14,padding:'20px 18px',position:'relative',overflow:'hidden',animation:`fadeIn .4s ease ${i*0.08}s both`}}>
           <div style={{position:'absolute',top:12,right:14,fontSize:22,opacity:.08,color:kpi.color}}>{kpi.icon}</div>
@@ -301,7 +301,7 @@ function Dashboard({s,d}) {
     <div style={{display:'grid',gridTemplateColumns:'260px 1fr 300px',gap:14}}>
       {/* QUICK ACTIONS */}
       <C style={{padding:'20px 18px'}}>
-        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0',marginBottom:14}}>Actions rapides</div>
+        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0',marginBottom:14}}>{tText('Actions rapides')}</div>
         {[
           {l:"+ Nouvel employé",p:'employees',i:'◉',c:'#4ade80'},
           {l:"Générer fiche de paie",p:'payslip',i:'◈',c:'#60a5fa'},
@@ -363,7 +363,7 @@ function Dashboard({s,d}) {
             <div style={{fontSize:9,color:'#5e5c56',marginTop:2}}>{pct}% de la masse salariale</div>
           </div>;
         })}
-        {Object.keys(depts).length===0&&<div style={{textAlign:'center',color:'#5e5c56',fontSize:12,padding:20}}>Aucun employé</div>}
+        {Object.keys(depts).length===0&&<div style={{textAlign:'center',color:'#5e5c56',fontSize:12,padding:20}}>{tText('Aucun employé')}</div>}
         <div style={{marginTop:16,padding:'12px 14px',background:"rgba(198,163,78,.03)",borderRadius:8,border:'1px solid rgba(198,163,78,.06)'}}>
           <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
             <span style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'1px'}}>Ratio net/brut</span>

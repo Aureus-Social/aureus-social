@@ -557,7 +557,7 @@ function NotificationCenter({ state, dispatch, defaultTab }) {
         <div style={{
           marginTop: 24, padding: 16, background: DARK, borderRadius: 8, border: `1px solid ${BORDER}`,
         }}>
-          <h3 style={{ color: GOLD, margin: '0 0 12px 0', fontSize: 14 }}>Résumé</h3>
+          <h3 style={{ color: GOLD, margin: '0 0 12px 0', fontSize: 14 }}>{tText('Résumé')}</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 }}>
             {Object.entries(NOTIF_TYPES).map(([key, val]) => {
               const count = enriched.filter(n => n.type === key).length

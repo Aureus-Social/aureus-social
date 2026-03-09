@@ -111,7 +111,7 @@ export function TimelinePaieV2({s}){
     for(let mi=0;mi<12;mi++){
       const my=moisN[mi]+' '+yr;
       dl.push({month:mi,day:5,title:'Provision ONSS',desc:'Paiement provisions mensuelles ONSS',cat:'ONSS',c:'#ef4444',recurring:true});
-      dl.push({month:mi,day:15,title:'Précompte professionnel',desc:'Declaration + paiement PP (formulaire 274)',cat:'Fiscal',c:'#a855f7',recurring:true});
+      dl.push({month:mi,day:15,title:tText('Précompte professionnel'),desc:'Declaration + paiement PP (formulaire 274)',cat:'Fiscal',c:'#a855f7',recurring:true});
       dl.push({month:mi,day:25,title:'Virements salaires SEPA',desc:'Exécution virements nets employés',cat:'Paie',c:'#22c55e',recurring:true});
       dl.push({month:mi,day:28,title:'Distribution fiches de paie',desc:'Envoi fiches par email / portail',cat:'Paie',c:'#3b82f6',recurring:true});
     }

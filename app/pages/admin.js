@@ -229,7 +229,7 @@ function AdminDashboard_Main({s,d}){
 
       <div style={{background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)",overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'2.5fr 1.5fr 1fr 1fr 1fr 1fr 1fr',padding:'10px 14px',background:"rgba(198,163,78,.06)",borderBottom:'1px solid rgba(198,163,78,.1)',fontSize:10,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:.5}}>
-          <div>{tText('Société')}</div><div>TVA / ONSS</div><div>CP</div><div>Secteur</div><div>Travailleurs</div><div>Inscription</div><div>{tText('Statut')}</div>
+          <div>{tText('Société')}</div><div>TVA / ONSS</div><div>CP</div><div>{tText('Secteur')}</div><div>Travailleurs</div><div>Inscription</div><div>{tText('Statut')}</div>
         </div>
         {clients.length===0?<div style={{padding:30,textAlign:'center',color:'#5e5c56',fontSize:12}}>Aucun dossier client.</div>:
         clients.filter(c=>{
@@ -619,9 +619,9 @@ function IntegrationsPage({s}) {
     {name:'SendGrid / Mailgun',icon:'📬',desc:'Emails automatiques',status:'pending',detail:'À configurer — relances facturation, alertes'},
   ];
   const statusInfo = {
-    connected:{label:'Connecté',color:GREEN},partial:{label:'Partiel',color:ORANGE},
+    connected:{label:tText('Connecté'),color:GREEN},partial:{label:'Partiel',color:ORANGE},
     simulation:{label:'Simulation',color:'#a855f7'},pending:{label:'À configurer',color:'#5e5c56'},
-    active:{label:'Actif',color:GREEN},ready:{label:'Prêt',color:'#3b82f6'}
+    active:{label:tText('Actif'),color:GREEN},ready:{label:'Prêt',color:'#3b82f6'}
   };
   return <div>
     <div style={{fontSize:18,fontWeight:800,color:GOLD,marginBottom:4}}>🔌 Intégrations</div>

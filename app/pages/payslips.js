@@ -398,7 +398,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
             <thead><tr style={{borderBottom:'2px solid #c6a34e'}}>
               <th style={{textAlign:'left',padding:'6px 8px',color:'#999',fontSize:9}}>Élément</th>
               <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>{tText('Montant')}</th>
-              <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>ONSS</th>
+              <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>{tText('ONSS')}</th>
               <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>PP</th>
               <th style={{textAlign:'left',padding:'6px 8px',color:'#999',fontSize:9}}>Base légale</th>
             </tr></thead>
@@ -476,7 +476,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
               <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>ONSS empl.</th>
               <th style={{textAlign:'center',padding:'6px 8px',color:'#999',fontSize:9}}>PP trav.</th>
               <th style={{textAlign:'right',padding:'6px 8px',color:'#999',fontSize:9}}>Coût empl./mois</th>
-              <th style={{textAlign:'left',padding:'6px 8px',color:'#999',fontSize:9}}>Référence</th>
+              <th style={{textAlign:'left',padding:'6px 8px',color:'#999',fontSize:9}}>{tText('Référence')}</th>
             </tr></thead>
             <tbody>
               {[

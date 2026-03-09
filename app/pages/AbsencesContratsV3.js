@@ -376,7 +376,7 @@ export function AnalyticsV3({s}){
 
     {tab==='clients'&&<C title="Analyse par client">
       <div style={{display:'grid',gridTemplateColumns:'200px repeat(4,1fr)',gap:4,padding:'6px 0',borderBottom:'2px solid rgba(198,163,78,.15)',fontSize:9,fontWeight:700,color:'#c6a34e'}}>
-        <div>Client</div><div>Effectif</div><div>Masse salariale</div><div>Coût total</div><div>Salaire moyen</div>
+        <div>Client</div><div>Effectif</div><div>{tText('Masse salariale')}</div><div>Coût total</div><div>Salaire moyen</div>
       </div>
       {clientStats.sort((a,b)=>b.masse-a.masse).map((c,i)=><div key={i} style={{display:'grid',gridTemplateColumns:'200px repeat(4,1fr)',gap:4,padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:11}}>
         <div style={{color:'#e8e6e0',fontWeight:600}}>{c.nom}</div>
@@ -426,18 +426,18 @@ export function ImportCSVV3({s}){
   const [validated,setValidated]=useState(false);
 
   const targetFields=[
-    {id:'first',label:'Prénom',required:true,validate:v=>v&&v.length>0},
-    {id:'last',label:'Nom',required:true,validate:v=>v&&v.length>0},
+    {id:'first',label:tText('Prénom'),required:true,validate:v=>v&&v.length>0},
+    {id:'last',label:tText('Nom'),required:true,validate:v=>v&&v.length>0},
     {id:'niss',label:'NISS',required:true,validate:v=>/^\d{2}\.\d{2}\.\d{2}[-]\d{3}[-\.]\d{2}$/.test(v)||/^\d{11}$/.test(v)},
-    {id:'birthDate',label:'Date de naissance',required:true,validate:v=>{const d=new Date(v);return!isNaN(d.getTime());}},
+    {id:'birthDate',label:tText('Date de naissance'),required:true,validate:v=>{const d=new Date(v);return!isNaN(d.getTime());}},
     {id:'startDate',label:'Date d\'entrée',required:true,validate:v=>{const d=new Date(v);return!isNaN(d.getTime());}},
-    {id:'gross',label:'Salaire brut',required:true,validate:v=>!isNaN(+v)&&+v>0},
+    {id:'gross',label:tText('Salaire brut'),required:true,validate:v=>!isNaN(+v)&&+v>0},
     {id:'contractType',label:'Type contrat',required:false,validate:v=>!v||['CDI','CDD','INTERIM','ETUDIANT','FLEXI'].includes((v||'').toUpperCase())},
     {id:'regime',label:'Régime (%)',required:false,validate:v=>!v||(!isNaN(+v)&&+v>0&&+v<=100)},
     {id:'function',label:'Fonction',required:false,validate:()=>true},
-    {id:'email',label:'Email',required:false,validate:v=>!v||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)},
+    {id:'email',label:tText('Email'),required:false,validate:v=>!v||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)},
     {id:'gender',label:'Genre (M/F)',required:false,validate:v=>!v||['M','F','X'].includes((v||'').toUpperCase())},
-    {id:'cp',label:'Commission paritaire',required:false,validate:()=>true},
+    {id:'cp',label:tText('Commission paritaire'),required:false,validate:()=>true},
   ];
 
   const parseCSV=(text)=>{
@@ -639,7 +639,7 @@ export function ContratsLegauxV3({s}){
           {CONTRAT_TYPES.map(ct=><div key={ct.id} style={{fontSize:9,fontWeight:700,color:'#c6a34e',textAlign:'center',padding:4}}>{ct.id.toUpperCase()}</div>)}
           {[
             {label:'ONSS employeur',key:'onss_e',vals:['25.07%','25.07%','2.71%','Via agence','28%','25.07%']},
-            {label:'ONSS travailleur',key:'onss_w',vals:['13.07%','13.07%','2.71%','Via agence','0%','13.07%']},
+            {label:tText('ONSS travailleur'),key:'onss_w',vals:['13.07%','13.07%','2.71%','Via agence','0%','13.07%']},
             {label:'PP',key:'pp',vals:['Progressif','Progressif','0% (<600h)','Via agence','0%','Progressif']},
             {label:'Durée max',key:'dur',vals:['Illimitée','3 ans','12 mois','Variable','Variable','2 ans']},
             {label:'Dimona',key:'dimona',vals:['IN/OUT','IN/OUT','STU','Via agence','FLX','IN/OUT']},

@@ -872,9 +872,9 @@ function PortalSystemPage({ s, d, tab: initialPortalTab }) {
     : [
         { id:'emp-dash', label:'Vue Employé', icon:'👤' },
         { id:'client-dash', label:'Vue Client', icon:'🏢' },
-        { id:'emp-payslips', label:'Fiches de paie', icon:'📄' },
+        { id:'emp-payslips', label:tText('Fiches de paie'), icon:'📄' },
         { id:'emp-leave', label:'Congés', icon:'🌴' },
-        { id:'emp-docs', label:'Documents', icon:'📁' },
+        { id:'emp-docs', label:tText('Documents'), icon:'📁' },
         { id:'emp-profile', label:'Profil', icon:'⚙️' },
         { id:'emp-timesheet', label:'Pointage', icon:'⏱️' },
         { id:'emp-training', label:'Formation', icon:'🎓' },
