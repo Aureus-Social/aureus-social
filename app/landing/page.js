@@ -83,7 +83,7 @@ function Hero({ onLogin }) {
           onMouseLeave={e=>e.currentTarget.style.transform='translateY(0)'}>
           Accéder à la plateforme →
         </button>
-        <a href="mailto:nourdin@aureus-ia.be" style={{ padding:'16px 40px', borderRadius:4, border:`1px solid ${G}40`, background:'transparent', color:G, fontSize:13, fontWeight:600, letterSpacing:'1px', textTransform:'uppercase', textDecoration:'none', transition:'all .3s' }}
+        <a href="mailto:info@aureus-ia.com" style={{ padding:'16px 40px', borderRadius:4, border:`1px solid ${G}40`, background:'transparent', color:G, fontSize:13, fontWeight:600, letterSpacing:'1px', textTransform:'uppercase', textDecoration:'none', transition:'all .3s' }}
           onMouseEnter={e=>{e.currentTarget.style.background=`${G}10`;e.currentTarget.style.borderColor=G;}}
           onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.borderColor=`${G}40`;}}>
           Me contacter
@@ -236,10 +236,10 @@ function Contact() {
         <h2 style={{ fontSize:'clamp(24px,4vw,40px)', fontWeight:800, color:W, margin:'0 0 14px', letterSpacing:'-1px' }}>Parlons de vos besoins.</h2>
         <p style={{ fontSize:15, color:W2, margin:'0 0 40px', lineHeight:1.75 }}>Audit gratuit de votre situation sociale. Réponse sous 24h.</p>
         <div style={{ display:'flex', flexDirection:'column', gap:12, alignItems:'center' }}>
-          <a href="mailto:nourdin@aureus-ia.be" style={{ display:'flex', alignItems:'center', gap:12, padding:'16px 32px', border:`1px solid ${G}30`, borderRadius:4, color:W, textDecoration:'none', fontSize:14, background:`${G}06`, transition:'all .3s' }}
+          <a href="mailto:info@aureus-ia.com" style={{ display:'flex', alignItems:'center', gap:12, padding:'16px 32px', border:`1px solid ${G}30`, borderRadius:4, color:W, textDecoration:'none', fontSize:14, background:`${G}06`, transition:'all .3s' }}
             onMouseEnter={e=>{e.currentTarget.style.borderColor=G;e.currentTarget.style.background=`${G}12`;}}
             onMouseLeave={e=>{e.currentTarget.style.borderColor=`${G}30`;e.currentTarget.style.background=`${G}06`;}}>
-            <span style={{ color:G }}>✉</span> nourdin@aureus-ia.be
+            <span style={{ color:G }}>✉</span> info@aureus-ia.com
           </a>
         </div>
       </div>
