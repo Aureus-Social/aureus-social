@@ -46,7 +46,7 @@ export default function RolesPermissions({ s }) {
             <table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
               <thead>
                 <tr>
-                  <th style={{padding:'8px 12px',textAlign:'left',color:'#c6a34e',borderBottom:'2px solid rgba(198,163,78,.2)',fontSize:10,fontWeight:700,minWidth:180}}>Permission</th>
+                  <th style={{padding:'8px 12px',textAlign:'left',color:'#c6a34e',borderBottom:'2px solid rgba(198,163,78,.2)',fontSize:10,fontWeight:700,minWidth:180}}>{tText('Permission')}</th>
                   {ROLES.map(r => (
                     <th key={r} style={{padding:'8px 12px',textAlign:'center',color:ROLE_COLORS[r],borderBottom:'2px solid rgba(198,163,78,.2)',fontSize:10,fontWeight:700,minWidth:100}}>
                       {ROLE_LABELS[r].split(' ')[0]}
@@ -79,7 +79,7 @@ export default function RolesPermissions({ s }) {
 
       {tab==='detail' && (
         <C>
-          <ST>Détail par rôle</ST>
+          <ST>{tText('Détail par rôle')}</ST>
           <div style={{display:'flex',gap:6,marginBottom:14,flexWrap:'wrap'}}>
             {ROLES.map(r => (
               <button key={r} onClick={()=>setSelectedRole(r)} style={{padding:'6px 14px',borderRadius:8,border:`1px solid ${selectedRole===r?ROLE_COLORS[r]:'rgba(255,255,255,.08)'}`,cursor:'pointer',fontSize:11,fontWeight:selectedRole===r?700:400,fontFamily:'inherit',background:selectedRole===r?`${ROLE_COLORS[r]}15`:'rgba(255,255,255,.02)',color:selectedRole===r?ROLE_COLORS[r]:'#9e9b93'}}>

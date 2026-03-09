@@ -750,7 +750,7 @@ est interrompue pendant plus de 2 mois consécutifs.`}
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 14 }}>
                   {[
-                    { l: 'Montant', v: prime.montant, c: '#22c55e' },
+                    { l: tText('Montant'), v: prime.montant, c: '#22c55e' },
                     { l: 'Durée', v: prime.duree, c: '#c6a34e' },
                     { l: 'Organisme', v: prime.organisme, c: '#a78bfa' },
                   ].map((k, i) => (
@@ -882,7 +882,7 @@ est interrompue pendant plus de 2 mois consécutifs.`}
           <C>
             <ST>📊 Barèmes RMMMG par Âge</ST>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
-              <thead><tr>{['Âge', 'Ancienneté', 'Montant/mois', 'Base légale', 'Notes'].map(h => (
+              <thead><tr>{['Âge', tText('Ancienneté'), 'Montant/mois', 'Base légale', 'Notes'].map(h => (
                 <th key={h} style={{ padding: '8px', textAlign: 'left', color: '#c6a34e',
                   borderBottom: '2px solid rgba(198,163,78,0.2)', fontSize: 10 }}>{h}</th>
               ))}</tr></thead>

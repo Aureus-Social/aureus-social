@@ -655,7 +655,7 @@ function FloatingLegalAgent({onAction}){
     if(!open)setUnread(u=>u+1);
   };
 
-  const labels={fr:{title:'Agent Juridique IA',placeholder:'Votre question en droit social...',disclaimer:'Info juridique indicative. Cas complexes → juriste.',clear:'Effacer'},
+  const labels={fr:{title:tText('Agent Juridique IA'),placeholder:'Votre question en droit social...',disclaimer:'Info juridique indicative. Cas complexes → juriste.',clear:'Effacer'},
     nl:{title:'Juridische AI-Agent',placeholder:'Uw vraag over sociaal recht...',disclaimer:'Indicatieve juridische info. Complexe gevallen → jurist.',clear:'Wissen'},
     en:{title:'Legal AI Agent',placeholder:'Your social law question...',disclaimer:'Indicative legal info. Complex cases → jurist.',clear:'Clear'}};
   const lb=labels[lang]||labels.fr;

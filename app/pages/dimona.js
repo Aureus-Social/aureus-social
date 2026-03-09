@@ -94,13 +94,13 @@ function DimonaPage({s,d}) {
       {errs.filter(e=>e.startsWith('⚠')).map((e,i)=><div key={i} style={{fontSize:10.5,color:'#f59e0b',marginBottom:6}}>⚠ {e.replace('⚠ ',"")}</div>)}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:12}}>
         <div style={{padding:10,background:"rgba(198,163,78,.05)",borderRadius:6,fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
-          <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>Identifiants</div>
+          <div style={{fontWeight:600,color:'#c6a34e',marginBottom:4}}>{tText('Identifiants')}</div>
           <div>Travailleur: <b style={{color:'#e8e6e0'}}>{emp.first} {emp.last}</b></div>
           <div>NISS: <b style={{color:'#e8e6e0',fontFamily:'monospace'}}>{emp.niss}</b></div>
           <div>CP: <b style={{color:'#e8e6e0'}}>{emp.cp}</b></div>
         </div>
         <div style={{padding:10,background:"rgba(96,165,250,.05)",borderRadius:6,fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
-          <div style={{fontWeight:600,color:'#60a5fa',marginBottom:4}}>Déclaration</div>
+          <div style={{fontWeight:600,color:'#60a5fa',marginBottom:4}}>{tText('Déclaration')}</div>
           <div>Action: <b style={{color:'#e8e6e0'}}>{f.action}</b></div>
           <div>Type: <b style={{color:'#e8e6e0'}}>{f.wtype} ({wtDescs[f.wtype]})</b></div>
           <div>Début: <b style={{color:'#e8e6e0'}}>{f.start}</b></div>
@@ -223,7 +223,7 @@ function DimonaPage({s,d}) {
         {k:'h',l:"Heures",r:r=>r.hours||'—'},
         {k:'r',l:"Réf",r:r=><span style={{fontFamily:'monospace',fontSize:9.5,color:'#60a5fa'}}>{r.dimNr||'—'}</span>},
         {k:'st',l:"Statut",r:r=><span style={{color:'#4ade80',fontSize:11}}>✓</span>},
-        {k:'x',l:"",a:'right',r:r=><B v="ghost" style={{padding:'3px 8px',fontSize:10}} onClick={()=>d({type:"MODAL",m:{w:800,c:<div><h3 style={{color:'#e8e6e0',margin:'0 0 10px'}}>Dimona {r.action} — {r.ename}</h3><pre style={{background:"#060810",border:'1px solid rgba(139,115,60,.15)',borderRadius:8,padding:14,fontSize:10,color:'#9e9b93',whiteSpace:'pre-wrap',maxHeight:380,overflowY:'auto'}}>{r.xml}</pre><div style={{display:'flex',gap:10,marginTop:12,justifyContent:'flex-end'}}><B v="outline" onClick={()=>d({type:"MODAL",m:null})}>{tText('Fermer')}</B><B onClick={()=>{navigator.clipboard?.writeText(r.xml);alert('Copié !')}}>Copier</B></div></div>}})}>XML</B>},
+        {k:'x',l:"",a:'right',r:r=><B v="ghost" style={{padding:'3px 8px',fontSize:10}} onClick={()=>d({type:"MODAL",m:{w:800,c:<div><h3 style={{color:'#e8e6e0',margin:'0 0 10px'}}>Dimona {r.action} — {r.ename}</h3><pre style={{background:"#060810",border:'1px solid rgba(139,115,60,.15)',borderRadius:8,padding:14,fontSize:10,color:'#9e9b93',whiteSpace:'pre-wrap',maxHeight:380,overflowY:'auto'}}>{r.xml}</pre><div style={{display:'flex',gap:10,marginTop:12,justifyContent:'flex-end'}}><B v="outline" onClick={()=>d({type:"MODAL",m:null})}>{tText('Fermer')}</B><B onClick={()=>{navigator.clipboard?.writeText(r.xml);alert('Copié !')}}>{tText('Copier')}</B></div></div>}})}>XML</B>},
       ]} data={filtered}/>
     </C>}
 

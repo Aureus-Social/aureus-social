@@ -369,7 +369,7 @@ export function NotificationCenterV2({s,d}){
 
     {/* INBOX */}
     {tab==='inbox'&&<div style={{display:'flex',flexDirection:'column',gap:4}}>
-      {filteredNotifs.length===0&&<div style={{textAlign:'center',padding:40,color:'#555',fontSize:13}}>Aucune notification</div>}
+      {filteredNotifs.length===0&&<div style={{textAlign:'center',padding:40,color:'#555',fontSize:13}}>{tText('Aucune notification')}</div>}
       {filteredNotifs.map(n=>{const isRead=readIds.has(n.id);return <div key={n.id} onClick={()=>markRead(n.id)} style={{display:'flex',gap:12,padding:'12px 16px',background:isRead?'transparent':'rgba(198,163,78,.03)',border:'1px solid '+(isRead?'rgba(255,255,255,.03)':'rgba(198,163,78,.1)'),borderRadius:10,cursor:'pointer',alignItems:'center',transition:'all .15s'}}>
         <div style={{fontSize:20,flexShrink:0}}>{n.icon}</div>
         <div style={{flex:1,minWidth:0}}>
@@ -558,7 +558,7 @@ export function JournalActiviteV2({s,d}){
     {tab==='timeline'&&<div style={{border:'1px solid rgba(198,163,78,.1)',borderRadius:14,overflow:'hidden'}}>
       {/* Header */}
       <div style={{display:'grid',gridTemplateColumns:'140px 80px 1fr 160px 100px',padding:'8px 14px',background:'rgba(198,163,78,.06)',fontSize:9,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:'.5px'}}>
-        <div>Date / Heure</div><div>Action</div><div>Cible / Detail</div><div>Utilisateur</div><div>Client</div>
+        <div>Date / Heure</div><div>{tText('Action')}</div><div>Cible / Detail</div><div>Utilisateur</div><div>{tText('Client')}</div>
       </div>
       <div style={{maxHeight:500,overflowY:'auto'}}>
         {filtered.length===0&&<div style={{padding:30,textAlign:'center',color:'#555',fontSize:12}}>Aucune entree trouvee</div>}

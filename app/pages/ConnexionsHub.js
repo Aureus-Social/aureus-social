@@ -16,14 +16,14 @@ const RMMMG_ANNUEL  = (RMMMG * 12).toFixed(2);
 
 const ALL_PORTALS = [
   // ── ONSS & SÉCURITÉ SOCIALE ──
-  { id:'onss_main',   cat:'ONSS',  label:'ONSS — Portail Employeur',         url:'https://www.socialsecurity.be',                                                                              icon:'🏛', desc:'DmfA, cotisations, déclarations trimestrielles',                prio:1, cred:'eID / itsme',       badge:null },
-  { id:'mahis',       cat:'ONSS',  label:'Mahis — Mandats Prestataires',      url:'https://www.socialsecurity.be/site_fr/employer/applics/mahis/index.htm',                                    icon:'🤝', desc:'Réf. DGIII/MAHI011/1028.230.781 · Mandats clients',            prio:1, cred:'eID',               badge:'ACTIF' },
-  { id:'dimona',      cat:'ONSS',  label:'Dimona — Déclarations IN/OUT',      url:'https://www.socialsecurity.be/site_fr/employer/applics/dimona/index.htm',                                   icon:'📡', desc:'Déclarations immédiates travailleurs (IN/OUT/INTERM)',         prio:1, cred:'eID / Mahis',     badge:null },
-  { id:'dmfa',        cat:'ONSS',  label:'DmfA — Déclaration Trimestrielle',  url:'https://www.socialsecurity.be/site_fr/employer/applics/dmfa/index.htm',                                    icon:'📋', desc:'Déclaration multifonctionnelle trimestrielle ONSS',            prio:1, cred:'eID / Mahis',     badge:null },
-  { id:'wide',        cat:'ONSS',  label:'WIDE — Immatriculation ONSS',       url:'https://www.socialsecurity.be/site_fr/employer/applics/wide/index.htm',                                    icon:'🆕', desc:'Matricule provisoire 51357716-02 · En attente définitif',       prio:1, cred:'eID',               badge:'EN COURS' },
-  { id:'csam',        cat:'ONSS',  label:'CSAM GAP — Gestion Accès',          url:'https://csam.belgique.be',                                                                                   icon:'🔑', desc:'Réf. 22A00LCY0E8HZ / 22A00LCY0ENXZ · Mandats clients',         prio:1, cred:'eID',               badge:'ACTIF' },
-  { id:'onss_stats',  cat:'ONSS',  label:'ONSS — Publications & Stats',       url:'https://www.socialsecurity.be/site_fr/employer/general/statsandpub/index.htm',                              icon:'📊', desc:'Statistiques emploi, publications officielles',                prio:3, cred:'Public',            badge:null },
-  { id:'onss_cot',    cat:'ONSS',  label:'ONSS — Guide Cotisations 2026',     url:'https://www.socialsecurity.be/site_fr/employer/general/contributions/index.htm',                           icon:'💶', desc:'Taux patronaux, réductions groupes cibles, plafonds',          prio:2, cred:'Public',            badge:null },
+  { id:'onss_main',   cat:tText('ONSS'),  label:'ONSS — Portail Employeur',         url:'https://www.socialsecurity.be',                                                                              icon:'🏛', desc:'DmfA, cotisations, déclarations trimestrielles',                prio:1, cred:'eID / itsme',       badge:null },
+  { id:'mahis',       cat:tText('ONSS'),  label:'Mahis — Mandats Prestataires',      url:'https://www.socialsecurity.be/site_fr/employer/applics/mahis/index.htm',                                    icon:'🤝', desc:'Réf. DGIII/MAHI011/1028.230.781 · Mandats clients',            prio:1, cred:'eID',               badge:'ACTIF' },
+  { id:'dimona',      cat:tText('ONSS'),  label:'Dimona — Déclarations IN/OUT',      url:'https://www.socialsecurity.be/site_fr/employer/applics/dimona/index.htm',                                   icon:'📡', desc:'Déclarations immédiates travailleurs (IN/OUT/INTERM)',         prio:1, cred:'eID / Mahis',     badge:null },
+  { id:'dmfa',        cat:tText('ONSS'),  label:'DmfA — Déclaration Trimestrielle',  url:'https://www.socialsecurity.be/site_fr/employer/applics/dmfa/index.htm',                                    icon:'📋', desc:'Déclaration multifonctionnelle trimestrielle ONSS',            prio:1, cred:'eID / Mahis',     badge:null },
+  { id:'wide',        cat:tText('ONSS'),  label:'WIDE — Immatriculation ONSS',       url:'https://www.socialsecurity.be/site_fr/employer/applics/wide/index.htm',                                    icon:'🆕', desc:'Matricule provisoire 51357716-02 · En attente définitif',       prio:1, cred:'eID',               badge:'EN COURS' },
+  { id:'csam',        cat:tText('ONSS'),  label:'CSAM GAP — Gestion Accès',          url:'https://csam.belgique.be',                                                                                   icon:'🔑', desc:'Réf. 22A00LCY0E8HZ / 22A00LCY0ENXZ · Mandats clients',         prio:1, cred:'eID',               badge:'ACTIF' },
+  { id:'onss_stats',  cat:tText('ONSS'),  label:'ONSS — Publications & Stats',       url:'https://www.socialsecurity.be/site_fr/employer/general/statsandpub/index.htm',                              icon:'📊', desc:'Statistiques emploi, publications officielles',                prio:3, cred:'Public',            badge:null },
+  { id:'onss_cot',    cat:tText('ONSS'),  label:'ONSS — Guide Cotisations 2026',     url:'https://www.socialsecurity.be/site_fr/employer/general/contributions/index.htm',                           icon:'💶', desc:'Taux patronaux, réductions groupes cibles, plafonds',          prio:2, cred:'Public',            badge:null },
 
   // ── SPF FINANCES ──
   { id:'myminfin',    cat:'FISC',  label:'MyMinfin — Espace Professionnel',   url:'https://eservices.minfin.fgov.be',                                                                           icon:'💰', desc:'TVA, précompte, Belcotax, mandats fiscaux',                   prio:1, cred:'eID / itsme',     badge:null },
@@ -353,7 +353,7 @@ export default function ConnexionsHub({ s, d, tab }) {
           );
         })}
         <div style={{marginLeft:'auto',display:'flex',gap:5}}>
-          {[['TOUS','Tous'],['1','🔴'],['2','🟠'],['3','⚪']].map(([v,l])=>(
+          {[['TOUS',tText('Tous')],['1','🔴'],['2','🟠'],['3','⚪']].map(([v,l])=>(
             <button key={v} onClick={()=>setPrio(v)} style={{padding:'5px 10px',borderRadius:20,border:'none',
               cursor:'pointer',fontSize:10,fontFamily:'inherit',
               background:prio===v?'rgba(198,163,78,0.12)':'rgba(255,255,255,0.03)',

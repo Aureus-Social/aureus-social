@@ -283,7 +283,7 @@ function Employees({s,d}) {
           <div style={{fontSize:22,fontWeight:700,color:'#c6a34e'}}>{roiSavingYear.toFixed(0)} €</div>
         </div>
         <div style={{padding:16,borderRadius:10,background:'rgba(96,165,250,.06)',border:'1px solid rgba(96,165,250,.15)',textAlign:'center'}}>
-          <div style={{fontSize:10,color:'#9e9b93',marginBottom:4}}>Réduction</div>
+          <div style={{fontSize:10,color:'#9e9b93',marginBottom:4}}>{tText('Réduction')}</div>
           <div style={{fontSize:22,fontWeight:700,color:'#60a5fa'}}>{roiPercent}%</div>
         </div>
       </div>
@@ -293,7 +293,7 @@ function Employees({s,d}) {
     </C>}
     {form&&<C style={{marginBottom:20}}>
       <h2 style={{fontSize:17,fontWeight:600,color:'#e8e6e0',margin:'0 0 16px',fontFamily:"'Cormorant Garamond',serif"}}>{ed?'Modifier':'Nouvel employé'}</h2>
-      <ST>Identité</ST>
+      <ST>{tText('Identité')}</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
         <I label="Prénom" value={form.first} onChange={v=>setF({...form,first:v})}/>
         <I label="Nom" value={form.last} onChange={v=>setF({...form,last:v})}/>
@@ -314,7 +314,7 @@ function Employees({s,d}) {
         </div>
         <I label="Niveau d'études" value={form.niveauEtude} onChange={v=>setF({...form,niveauEtude:v})} options={[{v:"prim",l:"Primaire"},{v:"sec_inf",l:"Secondaire inférieur"},{v:"sec",l:"Secondaire supérieur"},{v:"sup",l:"Supérieur non-universitaire (bachelier)"},{v:"univ",l:"Universitaire (master/doctorat)"}]}/>
       </div>
-      <ST>Contrat</ST>
+      <ST>{tText('Contrat')}</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
         <I label="Fonction" value={form.fn} onChange={v=>setF({...form,fn:v})}/>
         <I label="Département" value={form.dept} onChange={v=>setF({...form,dept:v})}/>
