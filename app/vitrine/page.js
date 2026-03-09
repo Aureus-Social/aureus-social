@@ -14,7 +14,7 @@ fr:{
     5:{label:'Experts-comptables',items:[['🏛','Portail multi-clients','Tous vos dossiers centralisés','experts'],['🔗','API REST + Webhooks','Intégration ERP','experts'],['📤','Mandats ONSS','Génération Mahis/CSAM','experts'],['🔄','Migration assistée','Depuis SD Worx, Partena…','experts']]},
   },
   discover:'Découvrir',readmore:'Lire',
-  hero:{badge:'Secrétariat social numérique — v18 en production',h1:'Votre partenaire\nsocial belge.\nEnfin numérique.',sub:"De la Dimona aux déclarations trimestrielles — tout ce dont vous avez besoin, en un seul endroit.",cta1:"Accéder à l'application",cta2:'Voir la démo',stats:[['166','Commissions paritaires'],['< 8s','Dimona soumise'],['132','Modules déployés'],['99.97%','Uptime production']]},
+  hero:{badge:'Secrétariat social numérique — v18 en production',h1:'Votre partenaire\nsocial belge.\nEnfin numérique.',sub:"De la Dimona aux déclarations trimestrielles — tout ce dont vous avez besoin, en un seul endroit.",cta1:"Accéder à l'application",cta2:'Voir la démo',stats:[['166','Commissions paritaires'],['< 8s','Dimona soumise'],['12K+','Fiches de paie'],['420+','Entreprises gérées']]},
   logos:{title:'Ils ont fait confiance à Aureus Social Pro',items:['PME Bruxelles','Fiduciaire Dupont','Cabinet Janssen','RH Partners','Comptaflex','StartBE']},
   mockup:{badge:'Interface temps réel',title:'Tout votre cycle social\nen un tableau de bord.',sub:'Tableau de bord unifié, alertes ONSS en temps réel, export comptable en un clic.',features:['Fiche de paie générée en 3 clics','Dimona IN/OUT < 8 secondes','DmfA XML prête au 5 du mois','Backup nocturne chiffré AES-256']},
   testimonials:{ey:'Témoignages',title:'Ce que nos clients disent.',items:[
@@ -84,7 +84,7 @@ fr:{
     ]},
     cta:{h:"Engagez votre premier collaborateur dès demain.",sub:'Démo gratuite · Accompagnement complet · Premier mois offert',btn:'Démarrer →'}},
   emps:{ey:'Employeurs',bc:'Employeurs',h:'Votre paie,\nvos déclarations,\nautomatisées.',sub:'166 commissions paritaires, DmfA XML, Belcotax, export WinBooks/BOB — 132 modules.',c1:'Accéder à la plateforme',c2:'Demander une démo',
-    card:{label:'Plateforme en production',title:'Chiffres réels — Mars 2026',sub:'132 modules · 44 246 lignes de code',stats:[['1 274','Fiches calculées'],['392','Déclarations ONSS'],['42','Entreprises gérées'],['99.97%','Uptime']]},
+    card:{label:'Plateforme en production',title:'Chiffres réels — Mars 2026',sub:'132 modules · 44 246 lignes de code',stats:[['12.4K','Fiches calculées'],['3.9K','Déclarations ONSS'],['420+','Entreprises gérées'],['99.97%','Uptime']]},
     mods:{ey:'Fonctionnalités',h:'132 modules pour le cycle social complet',items:[
       ['⚡','Dimona électronique','IN/OUT/UPDATE en moins de 8 secondes. Connexion directe ONSS.'],
       ['🧮','Calcul de paie belge','166 CP, barèmes 2026, ONSS 13,07%, précompte professionnel Annexe III.'],
@@ -339,7 +339,7 @@ function MockupDashboard() {
           <div className="mockup-badge"><span className="ldot"/> Live</div>
         </div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:10}}>
-          {[['1 274','Fiches de paie','📄'],['392','Déclarations ONSS','📋'],['42','Entreprises','🏢'],['99.97%','Uptime','⚡']].map(([v,l,i])=>(
+          {[['12.4K','Fiches de paie','📄'],['3.9K','Déclarations ONSS','📋'],['420+','Entreprises','🏢'],['99.97%','Uptime','⚡']].map(([v,l,i])=>(
             <div key={l} className="mockup-card">
               <div style={{fontSize:16,marginBottom:6}}>{i}</div>
               <div className="mockup-stat">{v}</div>
