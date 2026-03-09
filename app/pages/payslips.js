@@ -143,7 +143,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
           <I label="Pension compl. ret. (€)" type="number" value={per.pensionCompl} onChange={v=>setPer({...per,pensionCompl:v})}/>
           <I label="Cotis. syndicale (€)" type="number" value={per.retSyndicale} onChange={v=>setPer({...per,retSyndicale:v})}/>
           <I label="Pension aliment. (€)" type="number" value={per.saisieAlim} onChange={v=>setPer({...per,saisieAlim:v})}/>
-          <I label="Type spécial" value={per.typeSpecial||'normal'} onChange={v=>setPer({...per,typeSpecial:v})} options={[{v:"normal",l:"Normal"},{v:"doublePecule",l:"Double pécule"},{v:"y13",l:"13ème mois"},{v:"depart",l:"Sortie de service"},{v:"preavis",l:"Indemnité de préavis"}]}/>
+          <I label="Type spécial" value={per.typeSpecial||'normal'} onChange={v=>setPer({...per,typeSpecial:v})} options={[{v:"normal",l:tText('Normal')},{v:"doublePecule",l:tText('Double pécule')},{v:"y13",l:"13ème mois"},{v:"depart",l:tText('Sortie de service')},{v:"preavis",l:tText('Indemnité de préavis')}]}/>
           <I label="Petit chômage (jours)" type="number" value={per.petitChomage} onChange={v=>setPer({...per,petitChomage:v})}/>
           <I label="Éco-chèques (€)" type="number" value={per.ecoCheques} onChange={v=>setPer({...per,ecoCheques:v})}/>
           <I label="Cadeaux/événements (€)" type="number" value={per.cadeaux} onChange={v=>setPer({...per,cadeaux:v})}/>
@@ -152,7 +152,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
           <I label="Réd. trav. âgé 55+ (€)" type="number" value={per.redGCAge} onChange={v=>setPer({...per,redGCAge:v})}/>
           <I label="Réd. jeune <26 (€)" type="number" value={per.redGCJeune} onChange={v=>setPer({...per,redGCJeune:v})}/>
           <I label="Réd. handicap (€)" type="number" value={per.redGCHandicap} onChange={v=>setPer({...per,redGCHandicap:v})}/>
-          <I label="Activation ONEM" value={per.allocTravailType||emp?.allocTravailType||'none'} onChange={v=>setPer({...per,allocTravailType:v,allocTravail:0})} options={[{v:"none",l:"— Aucune —"},{v:"activa_bxl",l:"Activa.brussels (€350/m)"},{v:"activa_bxl_ap",l:"Activa.brussels AP (350→800→350)"},{v:"activa_jeune",l:"Activa Jeunes <30 (€350/m)"},{v:"impulsion_wal",l:"Impulsion Wallonie (€500/m)"},{v:"impulsion55",l:"Impulsion 55+ (€500/m)"},{v:"sine",l:"SINE écon. sociale (€500/m)"},{v:"vdab",l:"VDAB (prime directe)"},{v:"art60",l:"Art. 60 §7 (1er emploi)"}]}/>
+          <I label="Activation ONEM" value={per.allocTravailType||emp?.allocTravailType||'none'} onChange={v=>setPer({...per,allocTravailType:v,allocTravail:0})} options={[{v:"none",l:"— Aucune —"},{v:"activa_bxl",l:tText('Activa.brussels (€350/m)')},{v:"activa_bxl_ap",l:tText('Activa.brussels AP (350→800→350)')},{v:"activa_jeune",l:tText('Activa Jeunes <30 (€350/m)')},{v:"impulsion_wal",l:tText('Impulsion Wallonie (€500/m)')},{v:"impulsion55",l:tText('Impulsion 55+ (€500/m)')},{v:"sine",l:tText('SINE écon. sociale (€500/m)')},{v:"vdab",l:tText('VDAB (prime directe)')},{v:"art60",l:tText('Art. 60 §7 (1er emploi)')}]}/>
           {per.allocTravailType&&per.allocTravailType!=='none'&&<I label="Montant alloc. ONEM (€)" type="number" value={per.allocTravail} onChange={v=>setPer({...per,allocTravail:v})}/>}
         </div>
         <ST style={{marginTop:14}}>Mi-temps médical / thérapeutique</ST>
@@ -313,12 +313,12 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
           <div style={{fontSize:9.5,color:'#aaa',textTransform:'uppercase',letterSpacing:'1px',fontWeight:600,marginBottom:8}}>Cumul annuel (YTD — Janvier à {MN[per.month-1]} {per.year})</div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(6,1fr)',gap:8}}>
             {[
-              {l:"Brut cumulé",v:res.gross*per.month},
-              {l:"ONSS cumulé",v:res.onssNet*per.month},
-              {l:"PP cumulé",v:res.tax*per.month},
-              {l:"CSS cumulé",v:res.css*per.month},
-              {l:"Net cumulé",v:res.net*per.month,c:'#16a34a'},
-              {l:"Coût empl. cumulé",v:res.costTotal*per.month,c:'#c6a34e'},
+              {l:tText('Brut cumulé'),v:res.gross*per.month},
+              {l:tText('ONSS cumulé'),v:res.onssNet*per.month},
+              {l:tText('PP cumulé'),v:res.tax*per.month},
+              {l:tText('CSS cumulé'),v:res.css*per.month},
+              {l:tText('Net cumulé'),v:res.net*per.month,c:'#16a34a'},
+              {l:tText('Coût empl. cumulé'),v:res.costTotal*per.month,c:'#c6a34e'},
             ].map((x,i)=><div key={i} style={{textAlign:'center'}}>
               <div style={{fontSize:8.5,color:'#999'}}>{x.l}</div>
               <div style={{fontSize:11.5,fontWeight:600,color:x.c||'#555',marginTop:2}}>{fmt(x.v)}</div>
@@ -329,8 +329,8 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
         {/* COMPTEURS CONGÉS & HEURES (Loi 28/06/1971 + CCT) */}
         <div style={{marginTop:10,padding:12,background:"#f5f4ef",borderRadius:8,display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}}>
           {[
-            {l:"Congés légaux",v:`${20-Math.min(per.month*2,20)}j restants`,s:`Total: 20j/an (employé TP)`},
-            {l:"Heures sup. récup.",v:`${(per.overtimeH||0)}h ce mois`,s:'Récupérables dans les 3 mois'},
+            {l:tText('Congés légaux'),v:`${20-Math.min(per.month*2,20)}j restants`,s:`Total: 20j/an (employé TP)`},
+            {l:tText('Heures sup. récup.'),v:`${(per.overtimeH||0)}h ce mois`,s:'Récupérables dans les 3 mois'},
             {l:"Jours maladie",v:`${per.sickG||0}j ce mois`,s:'Sal. garanti: 30j (employé) / 7+7+14j (ouvrier)'},
             {l:"Crédit-temps",v:"—",s:'Non activé'},
           ].map((x,i)=><div key={i} style={{textAlign:'center'}}>
@@ -420,13 +420,13 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
                 {l:tText('Précompte professionnel'),m:res.tax,onss:'—',pp:'—',ref:"AR/CIR 92 annexe III",neg:true},
                 ...(res.ppVolontaire>0?[{l:"PP volontaire",m:res.ppVolontaire,onss:'—',pp:'—',ref:"Art. 275§1 CIR 92",neg:true}]:[]),
                 {l:"Cotisation spéciale SS",m:res.css,onss:'—',pp:'—',ref:"Loi 30/03/1994",neg:true},
-                ...(res.atnCar>0?[{l:"ATN Voiture de société",m:res.atnCar,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 36 CIR 92"}]:[]),
-                ...(res.atnGSM>0?[{l:"ATN GSM",m:res.atnGSM,onss:'❌ Non',pp:'✅ Oui',ref:"AR 18/12/2024 forfait"}]:[]),
-                ...(res.atnPC>0?[{l:"ATN PC",m:res.atnPC,onss:'❌ Non',pp:'✅ Oui',ref:"AR 18/12/2024 forfait"}]:[]),
+                ...(res.atnCar>0?[{l:tText('ATN Voiture de société'),m:res.atnCar,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 36 CIR 92"}]:[]),
+                ...(res.atnGSM>0?[{l:tText('ATN GSM'),m:res.atnGSM,onss:'❌ Non',pp:'✅ Oui',ref:"AR 18/12/2024 forfait"}]:[]),
+                ...(res.atnPC>0?[{l:tText('ATN PC'),m:res.atnPC,onss:'❌ Non',pp:'✅ Oui',ref:"AR 18/12/2024 forfait"}]:[]),
                 ...(res.atnInternet>0?[{l:tText('ATN Internet'),m:res.atnInternet,onss:'❌ Non',pp:'✅ Oui',ref:"AR 18/12/2024 forfait"}]:[]),
-                ...(res.atnLogement>0?[{l:"ATN Logement",m:res.atnLogement,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 18 AR/CIR 92"}]:[]),
-                ...(res.atnChauffage>0?[{l:"ATN Chauffage",m:res.atnChauffage,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 18 AR/CIR 92"}]:[]),
-                ...(res.atnElec>0?[{l:"ATN Électricité",m:res.atnElec,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 18 AR/CIR 92"}]:[]),
+                ...(res.atnLogement>0?[{l:tText('ATN Logement'),m:res.atnLogement,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 18 AR/CIR 92"}]:[]),
+                ...(res.atnChauffage>0?[{l:tText('ATN Chauffage'),m:res.atnChauffage,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 18 AR/CIR 92"}]:[]),
+                ...(res.atnElec>0?[{l:tText('ATN Électricité'),m:res.atnElec,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 18 AR/CIR 92"}]:[]),
                 ...(res.atnMoto>0?[{l:`🏍 ATN moto (${emp.motoBrand||''} ${emp.motoModel||''})`,m:res.atnMoto,onss:'❌ Non',pp:'✅ Oui',ref:"Art. 36 CIR 92"}]:[]),
                 ...(res.veloSociete?[{l:"🚲 Vélo de société",m:0,onss:'❌ Exonéré',pp:'❌ Exonéré',ref:"Art. 38§1er 14°a CIR",hl:"green"}]:[]),
                 ...(res.atnCarteCarburant>0?[{l:"Carte carburant (sans voit. soc.)",m:res.atnCarteCarburant,onss:'✅ Oui',pp:'✅ Oui',ref:"Art. 36§2 CIR 92"}]:[]),

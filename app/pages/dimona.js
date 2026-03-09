@@ -140,7 +140,7 @@ function DimonaPage({s,d}) {
     <div style={{marginBottom:14,padding:"10px 14px",background:"linear-gradient(135deg,rgba(59,130,246,.06),rgba(59,130,246,.02))",border:"1px solid rgba(59,130,246,.1)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}><div style={{fontSize:11,color:"#888"}}>⚡ Dimona automatique à chaque embauche/sortie</div><button onClick={()=>{if(confirm("Générer Dimona IN pour tous ?")){(s?.emps||[]).forEach(e=>generateDimonaXML(e,"IN",s.co));alert("✅ Dimona générées")}}} style={{padding:"6px 14px",borderRadius:8,border:"none",background:"#3b82f6",color:"#fff",fontSize:11,cursor:"pointer",fontWeight:600}}>⚡ Générer tout</button></div><div style={{display:"flex",gap:8,marginBottom:16,flexWrap:"wrap"}}>{s.emps.filter(e=>e.status==="active"||!e.status).map(e=><div key={e.id} style={{display:"flex",gap:4}}><button onClick={()=>generateDimonaXML(e,"IN",s.co)} style={{padding:"6px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:600,background:"rgba(74,222,128,.15)",color:"#4ade80"}}>IN {e.first||e.fn} {e.last||e.ln}</button><button onClick={()=>generateDimonaXML(e,"OUT",s.co)} style={{padding:"6px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:600,background:"rgba(248,113,113,.15)",color:"#f87171"}}>OUT {e.first||e.fn} {e.last||e.ln}</button></div>)}</div>
     <div style={{marginBottom:12}}><button onClick={()=>generateSEPAXML(s.emps,per,s.co)} style={{padding:"8px 16px",borderRadius:6,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,background:"rgba(96,165,250,.15)",color:"#60a5fa"}}>{tText('Generer SEPA XML (virements)')}</button></div>{/* Stats bar */}
     <div style={{display:'flex',gap:12,marginBottom:18}}>
-      {[{l:tText('Total'),v:(s.dims||[]).length,c:'#c6a34e'},{l:tText('IN'),v:statsIN,c:'#4ade80'},{l:tText('OUT'),v:statsOUT,c:'#f87171'},{l:"UPDATE",v:statsUPD,c:'#60a5fa'}].map((st,i)=>
+      {[{l:tText('Total'),v:(s.dims||[]).length,c:'#c6a34e'},{l:tText('IN'),v:statsIN,c:'#4ade80'},{l:tText('OUT'),v:statsOUT,c:'#f87171'},{l:tText('UPDATE'),v:statsUPD,c:'#60a5fa'}].map((st,i)=>
         <div key={i} style={{flex:1,padding:'12px 16px',background:"rgba(198,163,78,.04)",borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}>
           <div style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{st.l}</div>
           <div style={{fontSize:22,fontWeight:700,color:st.c,marginTop:2}}>{st.v}</div>
@@ -149,7 +149,7 @@ function DimonaPage({s,d}) {
     </div>
     {/* Tabs */}
     <div style={{display:'flex',gap:6,marginBottom:16}}>
-      {[{v:"new",l:"Nouvelle déclaration"},{v:"history",l:tText('Historique')},{v:"rules",l:"Règles & Délais"}].map(t=>
+      {[{v:"new",l:tText('Nouvelle déclaration')},{v:"history",l:tText('Historique')},{v:"rules",l:tText('Règles & Délais')}].map(t=>
         <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',
           background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>
       )}
@@ -159,12 +159,12 @@ function DimonaPage({s,d}) {
       <C><ST>{tText('Déclaration Dimona')}</ST>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9}}>
           <I label="Travailleur" value={f.eid} onChange={v=>setF({...f,eid:v})} span={2} options={(s?.emps||[]).map(e=>({v:e.id,l:`${e.first||e.fn||'Emp'} ${e.last||''} ${e.niss?'':'⚠ NISS!'}`}))}/>
-          <I label="Action" value={f.action} onChange={v=>setF({...f,action:v})} options={[{v:"IN",l:"IN — Entrée en service"},{v:"OUT",l:"OUT — Sortie de service"},{v:"UPDATE",l:"UPDATE — Modification"},{v:"CANCEL",l:"CANCEL — Annulation"}]}/>
+          <I label="Action" value={f.action} onChange={v=>setF({...f,action:v})} options={[{v:"IN",l:tText('IN — Entrée en service')},{v:"OUT",l:tText('OUT — Sortie de service')},{v:"UPDATE",l:tText('UPDATE — Modification')},{v:"CANCEL",l:tText('CANCEL — Annulation')}]}/>
           <I label="Type travailleur" value={f.wtype} onChange={v=>setF({...f,wtype:v})} options={Object.entries(wtDescs).map(([k,v])=>({v:k,l:`${k} — ${v}`}))}/>
           <I label="Date début" type="date" value={f.start} onChange={v=>setF({...f,start:v})}/>
           {needsEnd&&<I label="Date fin" type="date" value={f.end} onChange={v=>setF({...f,end:v})}/>}
           {needsHours&&<I label="Heures planifiées" type="number" value={f.planHrs} onChange={v=>setF({...f,planHrs:v})}/>}
-          {f.action===tText('OUT')&&<I label="Motif sortie" value={f.reason} onChange={v=>setF({...f,reason:v})} options={[{v:"",l:"— Sélectionner —"},{v:"DEM",l:"Démission"},{v:"LIC",l:"Licenciement"},{v:"RUP",l:"Rupture amiable"},{v:"FIN",l:"Fin contrat déterminé"},{v:"RET",l:"Retraite"},{v:"DEC",l:"Décès"},{v:"FOR",l:"Force majeure"}]}/>}
+          {f.action===tText('OUT')&&<I label="Motif sortie" value={f.reason} onChange={v=>setF({...f,reason:v})} options={[{v:"",l:"— Sélectionner —"},{v:"DEM",l:tText('Démission')},{v:"LIC",l:tText('Licenciement')},{v:"RUP",l:tText('Rupture amiable')},{v:"FIN",l:tText('Fin contrat déterminé')},{v:"RET",l:tText('Retraite')},{v:"DEC",l:tText('Décès')},{v:"FOR",l:tText('Force majeure')}]}/>}
           {f.action==='UPDATE'&&<I label="N° Dimona période" value={f.dimonaP} onChange={v=>setF({...f,dimonaP:v})}/>}
         </div>
         {/* Validation errors */}
@@ -243,7 +243,7 @@ function DimonaPage({s,d}) {
       </C>
       <C><ST>Sanctions & Amendes</ST>
         <div style={{fontSize:11,color:'#9e9b93',lineHeight:1.8}}>
-          {[{l:"Absence de Dimona IN",a:'Niveau 4: 2.500€ — 12.500€/travailleur',s:'Art. 181 CPS'},{l:"Dimona IN tardive",a:'Niveau 2: 400€ — 4.000€',s:'Art. 182 CPS'},{l:"Absence de Dimona OUT",a:'Niveau 2: 400€ — 4.000€',s:'Art. 182 CPS'},{l:"Données inexactes",a:'Niveau 2: 400€ — 4.000€',s:'Art. 182 CPS'},{l:"Récidive dans les 12 mois",a:'Amende doublée',s:'Art. 111 CPS'}].map((r,i)=>
+          {[{l:tText('Absence de Dimona IN'),a:'Niveau 4: 2.500€ — 12.500€/travailleur',s:'Art. 181 CPS'},{l:tText('Dimona IN tardive'),a:'Niveau 2: 400€ — 4.000€',s:'Art. 182 CPS'},{l:tText('Absence de Dimona OUT'),a:'Niveau 2: 400€ — 4.000€',s:'Art. 182 CPS'},{l:tText('Données inexactes'),a:'Niveau 2: 400€ — 4.000€',s:'Art. 182 CPS'},{l:tText('Récidive dans les 12 mois'),a:'Amende doublée',s:'Art. 111 CPS'}].map((r,i)=>
             <div key={i} style={{padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
               <div style={{fontWeight:600,color:'#e8e6e0'}}>{r.l}</div>
               <div style={{color:'#f87171',fontSize:10.5}}>{r.a}</div>

@@ -94,9 +94,9 @@ const categories=[
 ]},
 {id:'pp',nom:'Precompte Professionnel',icon:'💰',color:'#a855f7',params:[
   {k:'pp.tranches.0',l:tText('Tranche 1: 0-')+fmt(L.pp.tranches[0].max),v:pct(L.pp.tranches[0].taux),t:'pct'},
-  {k:'pp.tranches.1',l:'Tranche 2: '+fmt(L.pp.tranches[1].min)+'-'+fmt(L.pp.tranches[1].max),v:pct(L.pp.tranches[1].taux),t:'pct'},
-  {k:'pp.tranches.2',l:'Tranche 3: '+fmt(L.pp.tranches[2].min)+'-'+fmt(L.pp.tranches[2].max),v:pct(L.pp.tranches[2].taux),t:'pct'},
-  {k:'pp.tranches.3',l:'Tranche 4: '+fmt(L.pp.tranches[3].min)+'+',v:pct(L.pp.tranches[3].taux),t:'pct'},
+  {k:'pp.tranches.1',l:tText('Tranche 2: ')+fmt(L.pp.tranches[1].min)+'-'+fmt(L.pp.tranches[1].max),v:pct(L.pp.tranches[1].taux),t:'pct'},
+  {k:'pp.tranches.2',l:tText('Tranche 3: ')+fmt(L.pp.tranches[2].min)+'-'+fmt(L.pp.tranches[2].max),v:pct(L.pp.tranches[2].taux),t:'pct'},
+  {k:'pp.tranches.3',l:tText('Tranche 4: ')+fmt(L.pp.tranches[3].min)+'+',v:pct(L.pp.tranches[3].taux),t:'pct'},
   {k:'pp.fraisPro.salarie.pct',l:tText('Frais pro salarie'),v:pct(L.pp.fraisPro.salarie.pct)+' max '+fmt(L.pp.fraisPro.salarie.max),t:'txt'},
   {k:'pp.fraisPro.dirigeant.pct',l:tText('Frais pro dirigeant'),v:pct(L.pp.fraisPro.dirigeant.pct)+' max '+fmt(L.pp.fraisPro.dirigeant.max),t:'txt'},
   {k:'pp.quotiteExemptee.bareme1',l:tText('Quotite exemptee (bareme 1)'),v:fmt(L.pp.quotiteExemptee.bareme1)+' EUR/an',t:'num'},
@@ -203,10 +203,10 @@ return <div>
 {/* KPIs */}
 <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:18}}>
 {[
-  {l:"Parametres legaux",v:totalParams,c:"#c6a34e"},
-  {l:"Categories",v:categories.length,c:"#60a5fa"},
-  {l:"Sources surveillees",v:L.sources.length,c:"#a855f7"},
-  {l:"Version",v:L._meta.version,c:"#4ade80"},
+  {l:tText('Parametres legaux'),v:totalParams,c:"#c6a34e"},
+  {l:tText('Categories'),v:categories.length,c:"#60a5fa"},
+  {l:tText('Sources surveillees'),v:L.sources.length,c:"#a855f7"},
+  {l:tText('Version'),v:L._meta.version,c:"#4ade80"},
   {l:tText('Statut'),v:checking?"Verification...":lastCheck?"A jour":"Non verifie",c:lastCheck?"#4ade80":"#fb923c"},
 ].map((k,i)=><div key={i} style={{padding:"12px 14px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}>
   <div style={{fontSize:9,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div>
@@ -332,13 +332,13 @@ updateHistory.map((h,i)=><div key={i} style={{display:"flex",gap:10,padding:"10p
   const cout=Math.round((brut+onssE+brut*L.assurances.accidentTravail.taux+L.assurances.medecineTravail.cout)*100)/100;
   return <div>
     <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:16}}>
-    {[{l:tText('Brut'),v:fmt(brut),c:"#c6a34e"},{l:tText('Net'),v:fmt(net),c:"#4ade80"},{l:"Cout employeur",v:fmt(cout),c:"#f87171"}].map((k,i)=>
+    {[{l:tText('Brut'),v:fmt(brut),c:"#c6a34e"},{l:tText('Net'),v:fmt(net),c:"#4ade80"},{l:tText('Cout employeur'),v:fmt(cout),c:"#f87171"}].map((k,i)=>
       <div key={i} style={{padding:14,background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)",textAlign:"center"}}>
         <div style={{fontSize:9,color:"#5e5c56",textTransform:"uppercase"}}>{k.l}</div>
         <div style={{fontSize:20,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div>
       </div>)}
     </div>
-    <Tbl cols={[{k:"r",l:"Rubrique",b:1},{k:"v",l:tText('Montant'),a:"right",r:r=><span style={{color:r.c,fontWeight:600}}>{r.montant}</span>},{k:"s",l:"Source legale",r:r=><span style={{fontSize:10,color:"#5e5c56"}}>{r.source}</span>}]}
+    <Tbl cols={[{k:"r",l:tText('Rubrique'),b:1},{k:"v",l:tText('Montant'),a:"right",r:r=><span style={{color:r.c,fontWeight:600}}>{r.montant}</span>},{k:"s",l:tText('Source legale'),r:r=><span style={{fontSize:10,color:"#5e5c56"}}>{r.source}</span>}]}
     data={[
       {r:"Salaire brut",montant:fmt(brut)+" EUR",c:"#c6a34e",source:"Contrat de travail"},
       {r:"ONSS travailleur ("+pct(L.onss.travailleur)+")",montant:"- "+fmt(onssW)+" EUR",c:"#f87171",source:"Loi 27/06/1969"},

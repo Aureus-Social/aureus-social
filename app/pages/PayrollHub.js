@@ -555,7 +555,7 @@ export function SimuPensionV2({s}){
 
     <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:16}}>
       <div style={{padding:18,background:'linear-gradient(135deg,#0d1117,#131820)',border:'1px solid rgba(198,163,78,.1)',borderRadius:14}}>
-        {[{l:'Age: '+age+' ans',v:age,set:setAge,min:20,max:65},{l:'Brut: '+fmt(brut)+' €',v:brut,set:setBrut,min:1800,max:10000,step:50},{l:'Annees carriere: '+annees,v:annees,set:setAnnees,min:0,max:45}].map((sl,i)=>
+        {[{l:tText('Age: ')+age+' ans',v:age,set:setAge,min:20,max:65},{l:tText('Brut: ')+fmt(brut)+' €',v:brut,set:setBrut,min:1800,max:10000,step:50},{l:tText('Annees carriere: ')+annees,v:annees,set:setAnnees,min:0,max:45}].map((sl,i)=>
           <div key={i} style={{marginBottom:12}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{sl.l}</label><input type="range" min={sl.min} max={sl.max} step={sl.step||1} value={sl.v} onChange={e=>sl.set(+e.target.value)} style={{width:'100%',accentColor:'#c6a34e'}}/></div>
         )}
         <div style={{marginBottom:10}}><label style={{fontSize:10,color:'#888',display:'block',marginBottom:3}}>{tText('Situation familiale')}</label>

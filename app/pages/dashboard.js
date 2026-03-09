@@ -47,13 +47,13 @@ function Dashboard({s,d}) {
     const qEnd=new Date(curYear,q*3,0);
     const nextMonth5=new Date(curYear,curMonth+1,5);
     const daysToPP=Math.ceil((nextMonth5-now)/(1000*60*60*24));
-    dl.push({l:"Précompte professionnel 274",d:`5/${String(curMonth+2).padStart(2,"0")}/${curYear}`,days:daysToPP,t:'mensuel',urgent:daysToPP<=5,icon:'◇'});
+    dl.push({l:tText('Précompte professionnel 274'),d:`5/${String(curMonth+2).padStart(2,"0")}/${curYear}`,days:daysToPP,t:'mensuel',urgent:daysToPP<=5,icon:'◇'});
     const daysToDmfa=Math.ceil((qEnd-now)/(1000*60*60*24));
     dl.push({l:`DmfA T${q}/${curYear}`,d:`${qEnd.getDate()}/${String(q*3).padStart(2,"0")}/${curYear}`,days:daysToDmfa,t:'trimestriel',urgent:daysToDmfa<=14,icon:'◆'});
-    if(curMonth<=1){const belco=new Date(curYear,2,1);const dB=Math.ceil((belco-now)/(1000*60*60*24));dl.push({l:"Belcotax 281.xx",d:`01/03/${curYear}`,days:dB,t:'annuel',urgent:dB<=30,icon:'▣'});}
+    if(curMonth<=1){const belco=new Date(curYear,2,1);const dB=Math.ceil((belco-now)/(1000*60*60*24));dl.push({l:tText('Belcotax 281.xx'),d:`01/03/${curYear}`,days:dB,t:'annuel',urgent:dB<=30,icon:'▣'});}
     if(curMonth<=1){const bilan=new Date(curYear,1,28);const dBi=Math.ceil((bilan-now)/(1000*60*60*24));dl.push({l:tText('Bilan Social BNB'),d:`28/02/${curYear}`,days:dBi,t:'annuel',urgent:dBi<=30,icon:'◈'});}
-    dl.push({l:"Dimona IN — Avant embauche",d:"Permanent",days:null,t:'event',urgent:false,icon:'⬆'});
-    dl.push({l:"Provisions ONSS mensuelles",d:`5 du mois`,days:daysToPP,t:'mensuel',urgent:daysToPP<=5,icon:'◆'});
+    dl.push({l:tText('Dimona IN — Avant embauche'),d:"Permanent",days:null,t:'event',urgent:false,icon:'⬆'});
+    dl.push({l:tText('Provisions ONSS mensuelles'),d:`5 du mois`,days:daysToPP,t:'mensuel',urgent:daysToPP<=5,icon:'◆'});
     return dl.sort((a,b)=>(a.days??999)-(b.days??999));
   };
   const deadlines=getDeadlines();
@@ -180,8 +180,8 @@ function Dashboard({s,d}) {
       {[
         {label:tText('Employés actifs'),value:ae.length,sub:`${sortie.length} sorti${sortie.length>1?'s':''} · ${etudiants.length} étudiant${etudiants.length>1?'s':''}`,color:'#c6a34e',icon:'◉'},
         {label:tText('Masse salariale brute'),value:fmt(tm),sub:`Moy: ${fmt(avgGross)}/emp`,color:'#4ade80',icon:'◈'},
-        {label:"Net total",value:fmt(tn),sub:`${ae.length?Math.round(tn/tm*100):0}% du brut`,color:'#60a5fa',icon:'▤'},
-        {label:"Coût employeur total",value:fmt(tc),sub:`Ratio: ${ae.length?((tc/tm)*100).toFixed(0):0}% du brut`,color:'#a78bfa',icon:'◆'},
+        {label:tText('Net total'),value:fmt(tn),sub:`${ae.length?Math.round(tn/tm*100):0}% du brut`,color:'#60a5fa',icon:'▤'},
+        {label:tText('Coût employeur total'),value:fmt(tc),sub:`Ratio: ${ae.length?((tc/tm)*100).toFixed(0):0}% du brut`,color:'#a78bfa',icon:'◆'},
         {label:tText('Déclarations'),value:`${(s.pays||[]).length}`,sub:`${(s.dims||[]).length} Dimona · ${(s.dmfas||[]).length} DmfA`,color:'#fb923c',icon:'◇'},
       ].map((kpi,i)=>
         <div key={i} style={{background:"linear-gradient(145deg,#0e1220,#131829)",border:'1px solid rgba(139,115,60,.12)',borderRadius:14,padding:'20px 18px',position:'relative',overflow:'hidden',animation:`fadeIn .4s ease ${i*0.08}s both`}}>
@@ -200,7 +200,7 @@ function Dashboard({s,d}) {
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:18}}>
           <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>{tText('Évolution coût salarial — 12 mois')}</div>
           <div style={{display:'flex',gap:14}}>
-            {[{l:tText('Coût total'),c:'#a78bfa'},{l:"Masse brute",c:'#c6a34e'},{l:tText('Net'),c:'#4ade80'}].map(x=>
+            {[{l:tText('Coût total'),c:'#a78bfa'},{l:tText('Masse brute'),c:'#c6a34e'},{l:tText('Net'),c:'#4ade80'}].map(x=>
               <div key={x.l} style={{display:'flex',alignItems:'center',gap:5,fontSize:10,color:'#5e5c56'}}>
                 <span style={{width:8,height:3,borderRadius:2,background:x.c,display:'inline-block'}}/>{x.l}
               </div>
@@ -304,11 +304,11 @@ function Dashboard({s,d}) {
         <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0',marginBottom:14}}>{tText('Actions rapides')}</div>
         {[
           {l:"+ Nouvel employé",p:'employees',i:'◉',c:'#4ade80'},
-          {l:"Générer fiche de paie",p:'payslip',i:'◈',c:'#60a5fa'},
-          {l:"Dimona IN/OUT",p:'onss',sb:'dimona',i:'⬆',c:'#c6a34e'},
-          {l:"DmfA trimestrielle",p:'onss',sb:'dmfa',i:'◆',c:'#a78bfa'},
-          {l:"Belcotax 281.10",p:'fiscal',sb:'belcotax',i:'◇',c:'#fb923c'},
-          {l:"Virement SEPA",p:'reporting',sb:'sepa',i:'▤',c:'#06b6d4'},
+          {l:tText('Générer fiche de paie'),p:'payslip',i:'◈',c:'#60a5fa'},
+          {l:tText('Dimona IN/OUT'),p:'onss',sb:'dimona',i:'⬆',c:'#c6a34e'},
+          {l:tText('DmfA trimestrielle'),p:'onss',sb:'dmfa',i:'◆',c:'#a78bfa'},
+          {l:tText('Belcotax 281.10'),p:'fiscal',sb:'belcotax',i:'◇',c:'#fb923c'},
+          {l:tText('Virement SEPA'),p:'reporting',sb:'sepa',i:'▤',c:'#06b6d4'},
         ].map((a,i)=>
           <button key={i} onClick={()=>d({type:"NAV",page:a.p,sub:a.sb})} style={{display:'flex',alignItems:'center',gap:10,width:'100%',padding:'10px 12px',marginBottom:4,background:"rgba(198,163,78,.03)",border:'1px solid rgba(198,163,78,.06)',borderRadius:8,color:'#d4d0c8',cursor:'pointer',fontSize:12,fontWeight:500,textAlign:'left',fontFamily:'inherit',transition:'all .15s'}}
             onMouseEnter={e=>{e.currentTarget.style.background='rgba(198,163,78,.08)';e.currentTarget.style.borderColor='rgba(198,163,78,.2)';}}

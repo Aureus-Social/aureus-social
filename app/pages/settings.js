@@ -88,14 +88,14 @@ function SettingsPage({s,d}) {
         <I label="CP" value={f.cp} onChange={v=>setF({...f,cp:v})} options={Object.entries(LEGAL.CP).map(([k,v])=>({v:k,l:v}))}/>
         <I label="IBAN (compte bancaire)" value={f.bank} onChange={v=>setF({...f,bank:v})}/>
         <I label="BIC (code banque)" value={f.bic} onChange={v=>setF({...f,bic:v})} options={[
-          {v:"GEBABEBB",l:"GEBABEBB — BNP Paribas Fortis"},
-          {v:"BBRUBEBB",l:"BBRUBEBB — ING Belgique"},
-          {v:"KREDBEBB",l:"KREDBEBB — KBC / CBC"},
-          {v:"GKCCBEBB",l:"GKCCBEBB — Belfius"},
-          {v:"ARSPBE22",l:"ARSPBE22 — Argenta"},
-          {v:"NICABEBB",l:"NICABEBB — Crelan"},
-          {v:"TRIOBEBB",l:"TRIOBEBB — Triodos"},
-          {v:"AXABBE22",l:"AXABBE22 — AXA Banque"},
+          {v:"GEBABEBB",l:tText('GEBABEBB — BNP Paribas Fortis')},
+          {v:"BBRUBEBB",l:tText('BBRUBEBB — ING Belgique')},
+          {v:"KREDBEBB",l:tText('KREDBEBB — KBC / CBC')},
+          {v:"GKCCBEBB",l:tText('GKCCBEBB — Belfius')},
+          {v:"ARSPBE22",l:tText('ARSPBE22 — Argenta')},
+          {v:"NICABEBB",l:tText('NICABEBB — Crelan')},
+          {v:"TRIOBEBB",l:tText('TRIOBEBB — Triodos')},
+          {v:"AXABBE22",l:tText('AXABBE22 — AXA Banque')},
         ]}/>
       </div></C>
       <C><ST>{tText('Contact & Assurances')}</ST><div style={{display:'grid',gap:9}}>
@@ -314,18 +314,18 @@ function SettingsPage({s,d}) {
 // ═══════════════════════════════════════════════════════════════
 const DRS_DOCS={
   chomage:[
-    {code:'C4',l:"C4 — Certificat de chômage",f:['motif',"brut","regime","preavis"]},
-    {code:'C4-RCC',l:"C4 Prépension (RCC)",f:['motif',"brut","date_rcc"]},
-    {code:'C4-ENS',l:"C4 Enseignement",f:['motif',"etablissement"]},
-    {code:'C3.2-CD',l:"C3.2 Constat du droit",f:['regime',"heures"]},
-    {code:'C3.2-OUV',l:"C3.2 Employeur → Ouvriers",f:['jours',"motif"]},
-    {code:'C3.2-EMP',l:"C3.2 Anti-crise → Employés",f:['jours',"motif"]},
-    {code:'C131A',l:"C131A Employeur",f:['debut',"motif","regime"]},
-    {code:'C131B',l:"C131B",f:['debut',"regime"]},
-    {code:'C131A-E',l:"C131A Enseignement",f:['debut',"etablissement"]},
-    {code:'C131B-E',l:"C131B Enseignement",f:['debut']},
-    {code:'C78-ACT-BXL',l:"C78 Activa.brussels (Actiris)",f:['type_activa',"debut","duree","montant_red"]},
-    {code:'C78-ACT-WAL',l:"C78 Impulsion -12/-25 mois (FOREM)",f:['type_impulsion',"debut","duree","montant_red"]},
+    {code:'C4',l:tText('C4 — Certificat de chômage'),f:['motif',"brut","regime","preavis"]},
+    {code:'C4-RCC',l:tText('C4 Prépension (RCC)'),f:['motif',"brut","date_rcc"]},
+    {code:'C4-ENS',l:tText('C4 Enseignement'),f:['motif',"etablissement"]},
+    {code:'C3.2-CD',l:tText('C3.2 Constat du droit'),f:['regime',"heures"]},
+    {code:'C3.2-OUV',l:tText('C3.2 Employeur → Ouvriers'),f:['jours',"motif"]},
+    {code:'C3.2-EMP',l:tText('C3.2 Anti-crise → Employés'),f:['jours',"motif"]},
+    {code:'C131A',l:tText('C131A Employeur'),f:['debut',"motif","regime"]},
+    {code:'C131B',l:tText('C131B'),f:['debut',"regime"]},
+    {code:'C131A-E',l:tText('C131A Enseignement'),f:['debut',"etablissement"]},
+    {code:'C131B-E',l:tText('C131B Enseignement'),f:['debut']},
+    {code:'C78-ACT-BXL',l:tText('C78 Activa.brussels (Actiris)'),f:['type_activa',"debut","duree","montant_red"]},
+    {code:'C78-ACT-WAL',l:tText('C78 Impulsion -12/-25 mois (FOREM)'),f:['type_impulsion',"debut","duree","montant_red"]},
     {code:'C78-ACT-VL',l:"C78 Werkplekleren / Winwin (VDAB)",f:['type_vl',"debut","duree"]},
     {code:'C78-TRANS',l:"C78 Prime de transition (Bruxelles)",f:['debut',"duree","montant"]},
     {code:'C78-START',l:"C78 Activa Start (<26 ans)",f:['debut',"duree","age"]},

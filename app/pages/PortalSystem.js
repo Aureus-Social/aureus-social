@@ -90,38 +90,38 @@ export const PORTAL_CONFIG = {
 
 // ── Client Portal Nav ──
 export const CLIENT_NAV = [
-  {id:"_gc1",l:"MON ENTREPRISE",grp:true},
-  {id:"client_dashboard",l:"Tableau de Bord",i:'◫'},
+  {id:"_gc1",l:tText('MON ENTREPRISE'),grp:true},
+  {id:"client_dashboard",l:tText('Tableau de Bord'),i:'◫'},
   {id:"employees",l:tText('Travailleurs'),i:'👥'},
-  {id:"payslip",l:"Fiches de Paie",i:'◈'},
+  {id:"payslip",l:tText('Fiches de Paie'),i:'◈'},
   
-  {id:"_gc2",l:"DÉCLARATIONS",grp:true},
-  {id:"onss",l:"ONSS / Dimona",i:'🏛',sub:[{id:"dimona",l:"📡 Dimona"},{id:"dmfa",l:"📊 DmfA"},{id:"onss_dash",l:"📊 Dashboard ONSS"}]},
+  {id:"_gc2",l:tText('DÉCLARATIONS'),grp:true},
+  {id:"onss",l:tText('ONSS / Dimona'),i:'🏛',sub:[{id:"dimona",l:"📡 Dimona"},{id:"dmfa",l:"📊 DmfA"},{id:"onss_dash",l:"📊 Dashboard ONSS"}]},
   {id:"fiscal",l:tText('Fiscal'),i:'💰',sub:[{id:"belcotax",l:"📋 Belcotax"},{id:"précompte",l:"💶 Précompte"}]},
-  {id:"sepa",l:"SEPA & Paiements",i:'💳'},
-  {id:"echeancier",l:"Échéancier",i:'📆'},
+  {id:"sepa",l:tText('SEPA & Paiements'),i:'💳'},
+  {id:"echeancier",l:tText('Échéancier'),i:'📆'},
   
-  {id:"_gc3",l:"GESTION RH",grp:true},
+  {id:"_gc3",l:tText('GESTION RH'),grp:true},
   {id:"contratsmenu",l:tText('Contrats'),i:'📝',sub:[{id:"contrats",l:"📝 Contrats"},{id:"contratgen",l:"📝 Générer Contrat"}]},
-  {id:"rh",l:"Absences & Congés",i:'🏖',sub:[{id:"gestionabs",l:"🗓 Absences"},{id:"planifconges",l:"📅 Planning Congés"}]},
+  {id:"rh",l:tText('Absences & Congés'),i:'🏖',sub:[{id:"gestionabs",l:"🗓 Absences"},{id:"planifconges",l:"📅 Planning Congés"}]},
   {id:"formationsuivi",l:tText('Formations'),i:'🎓'},
   
-  {id:"_gc4",l:"DOCUMENTS",grp:true},
-  {id:"ged",l:"Documents (GED)",i:'📁'},
-  {id:"client_factures",l:"Mes Factures",i:'🧾'},
-  {id:"reporting",l:"Rapports",i:'📊',sub:[{id:"rapports",l:"📊 Rapports Mensuels"},{id:"bilansocial",l:"📋 Bilan Social"}]},
+  {id:"_gc4",l:tText('DOCUMENTS'),grp:true},
+  {id:"ged",l:tText('Documents (GED)'),i:'📁'},
+  {id:"client_factures",l:tText('Mes Factures'),i:'🧾'},
+  {id:"reporting",l:tText('Rapports'),i:'📊',sub:[{id:"rapports",l:"📊 Rapports Mensuels"},{id:"bilansocial",l:"📋 Bilan Social"}]},
 ];
 
 // ── Employee Portal Nav ──
 export const EMPLOYEE_NAV = [
-  {id:"_ge1",l:"MON ESPACE",grp:true},
-  {id:"emp_dashboard",l:"Mon Tableau de Bord",i:'◫'},
-  {id:"emp_payslips",l:"Mes Fiches de Paie",i:'◈'},
+  {id:"_ge1",l:tText('MON ESPACE'),grp:true},
+  {id:"emp_dashboard",l:tText('Mon Tableau de Bord'),i:'◫'},
+  {id:"emp_payslips",l:tText('Mes Fiches de Paie'),i:'◈'},
   {id:"emp_leave",l:tText('Congés & Absences'),i:'🏖'},
 
-  {id:"_ge2",l:"MES DOCUMENTS",grp:true},
-  {id:"emp_documents",l:"Mes Documents",i:'📁'},
-  {id:"emp_profile",l:"Mon Profil",i:'👤'},
+  {id:"_ge2",l:tText('MES DOCUMENTS'),grp:true},
+  {id:"emp_documents",l:tText('Mes Documents'),i:'📁'},
+  {id:"emp_profile",l:tText('Mon Profil'),i:'👤'},
 
   {id:"_ge3",l:"DIVERS",grp:true},
   {id:"emp_training",l:"Mes Formations",i:'🎓'},

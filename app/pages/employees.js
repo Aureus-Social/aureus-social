@@ -303,8 +303,8 @@ function Employees({s,d}) {
           {nissDup&&<div style={{fontSize:10,marginTop:2,color:nissDup.level==='error'?'#f87171':'#fb923c'}}>{nissDup.msg}</div>}
         </div>
         <I label="Naissance" type="date" value={form.birth} onChange={v=>setF({...form,birth:v})}/>
-        <I label="Sexe" value={form.sexe} onChange={v=>setF({...form,sexe:v})} options={[{v:"M",l:"Homme"},{v:"F",l:"Femme"},{v:"X",l:"Non-binaire"}]}/>
-        <I label="Statut" value={form.statut} onChange={v=>setF({...form,statut:v})} options={[{v:"employe",l:tText('Employé')},{v:"ouvrier",l:tText('Ouvrier')},{v:"etudiant",l:"Étudiant"},{v:"apprenti",l:"Apprenti"},{v:"dirigeant",l:"Dirigeant d\'entreprise"}]}/>
+        <I label="Sexe" value={form.sexe} onChange={v=>setF({...form,sexe:v})} options={[{v:"M",l:tText('Homme')},{v:"F",l:tText('Femme')},{v:"X",l:tText('Non-binaire')}]}/>
+        <I label="Statut" value={form.statut} onChange={v=>setF({...form,statut:v})} options={[{v:"employe",l:tText('Employé')},{v:"ouvrier",l:tText('Ouvrier')},{v:"etudiant",l:tText('Étudiant')},{v:"apprenti",l:tText('Apprenti')},{v:"dirigeant",l:tText('Dirigeant d\'entreprise')}]}/>
         <I label="Adresse" value={form.addr} onChange={v=>setF({...form,addr:v})} span={2}/>
         <I label="CP" value={form.zip} onChange={v=>setF({...form,zip:v})}/>
         <I label="Ville" value={form.city} onChange={v=>setF({...form,city:v})}/>
@@ -312,7 +312,7 @@ function Employees({s,d}) {
           <I label="IBAN" value={form.iban} onChange={onIbanChange}/>
           {ibanCheck&&<div style={{fontSize:10,marginTop:2,color:ibanCheck.valid?'#4ade80':'#f87171'}}>{ibanCheck.msg}</div>}
         </div>
-        <I label="Niveau d'études" value={form.niveauEtude} onChange={v=>setF({...form,niveauEtude:v})} options={[{v:"prim",l:"Primaire"},{v:"sec_inf",l:"Secondaire inférieur"},{v:"sec",l:"Secondaire supérieur"},{v:"sup",l:"Supérieur non-universitaire (bachelier)"},{v:"univ",l:"Universitaire (master/doctorat)"}]}/>
+        <I label="Niveau d'études" value={form.niveauEtude} onChange={v=>setF({...form,niveauEtude:v})} options={[{v:"prim",l:tText('Primaire')},{v:"sec_inf",l:tText('Secondaire inférieur')},{v:"sec",l:tText('Secondaire supérieur')},{v:"sup",l:tText('Supérieur non-universitaire (bachelier)')},{v:"univ",l:tText('Universitaire (master/doctorat)')}]}/>
       </div>
       <ST>{tText('Contrat')}</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
@@ -320,11 +320,11 @@ function Employees({s,d}) {
         <I label="Département" value={form.dept} onChange={v=>setF({...form,dept:v})}/>
         <I label="Entrée" type="date" value={form.startD} onChange={v=>setF({...form,startD:v})}/>
         <I label="Contrat" value={form.contract} onChange={v=>setF({...form,contract:v})} options={[
-          {v:"CDI",l:tText('CDI')},{v:"CDD",l:tText('CDD')},{v:"trav_det",l:"Travail nettement défini"},{v:"remplacement",l:"Remplacement"},
-          {v:"tpartiel",l:tText('Temps partiel')},{v:"interim",l:tText('Intérimaire')},{v:"student",l:"Étudiant (650h)"},
-          {v:"flexi",l:"Flexi-job"},{v:"saisonnier",l:"Saisonnier"},{v:"occas_horeca",l:"Extra Horeca"},
-          {v:"titre_service",l:"Titres-services"},{v:"art60",l:"Art. 60§7 (CPAS)"},{v:"CIP",l:"Convention immersion"},
-          {v:"alternance",l:"Alternance"},{v:"CPE",l:"Premier emploi"},{v:"ETA",l:"Travail adapté"},
+          {v:"CDI",l:tText('CDI')},{v:"CDD",l:tText('CDD')},{v:"trav_det",l:tText('Travail nettement défini')},{v:"remplacement",l:tText('Remplacement')},
+          {v:"tpartiel",l:tText('Temps partiel')},{v:"interim",l:tText('Intérimaire')},{v:"student",l:tText('Étudiant (650h)')},
+          {v:"flexi",l:tText('Flexi-job')},{v:"saisonnier",l:tText('Saisonnier')},{v:"occas_horeca",l:tText('Extra Horeca')},
+          {v:"titre_service",l:tText('Titres-services')},{v:"art60",l:tText('Art. 60§7 (CPAS)')},{v:"CIP",l:tText('Convention immersion')},
+          {v:"alternance",l:tText('Alternance')},{v:"CPE",l:"Premier emploi"},{v:"ETA",l:"Travail adapté"},
           {v:"detache",l:"Détaché"},{v:"domestique",l:"Domestique"},{v:"teletravail",l:"Télétravail struct."},
           {v:"domicile",l:"Travail à domicile"},{v:"indep_princ",l:"Indép. principal"},
           {v:"indep_compl",l:"Indép. complémentaire"},{v:"mandataire",l:"Mandataire société"},
@@ -340,7 +340,7 @@ function Employees({s,d}) {
       </div>
       <ST style={{marginTop:14}}>{tText('Activation ONEM (comme dans Fiches de Paie)')}</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:8,padding:12,background:'rgba(34,197,94,.04)',border:'1px solid rgba(34,197,94,.15)',borderRadius:8}}>
-        <I label="Activation ONEM" value={form.allocTravailType||'none'} onChange={v=>setF({...form,allocTravailType:v,allocTravail:v!=='none'?(form.allocTravail||0):0})} options={[{v:"none",l:"— Aucune —"},{v:"activa_bxl",l:"Activa.brussels (€350/m)"},{v:"activa_bxl_ap",l:"Activa.brussels AP (350→800→350)"},{v:"activa_jeune",l:"Activa Jeunes <30 (€350/m)"},{v:"impulsion_wal",l:"Impulsion Wallonie (€500/m)"},{v:"impulsion55",l:"Impulsion 55+ (€500/m)"},{v:"sine",l:"SINE écon. sociale (€500/m)"},{v:"vdab",l:"VDAB (prime directe)"},{v:"art60",l:"Art. 60 §7 (1er emploi)"}]}/>
+        <I label="Activation ONEM" value={form.allocTravailType||'none'} onChange={v=>setF({...form,allocTravailType:v,allocTravail:v!=='none'?(form.allocTravail||0):0})} options={[{v:"none",l:"— Aucune —"},{v:"activa_bxl",l:tText('Activa.brussels (€350/m)')},{v:"activa_bxl_ap",l:tText('Activa.brussels AP (350→800→350)')},{v:"activa_jeune",l:tText('Activa Jeunes <30 (€350/m)')},{v:"impulsion_wal",l:tText('Impulsion Wallonie (€500/m)')},{v:"impulsion55",l:tText('Impulsion 55+ (€500/m)')},{v:"sine",l:tText('SINE écon. sociale (€500/m)')},{v:"vdab",l:tText('VDAB (prime directe)')},{v:"art60",l:tText('Art. 60 §7 (1er emploi)')}]}/>
         {form.allocTravailType&&form.allocTravailType!=='none'&&<I label="Montant alloc. ONEM (€)" type="number" value={form.allocTravail||0} onChange={v=>setF({...form,allocTravail:parseFloat(v)||0})}/>}
       </div>
       <div style={{marginTop:6,marginBottom:12,padding:10,background:'rgba(198,163,78,.04)',borderRadius:8,fontSize:10.5,color:'#9e9b93',lineHeight:1.5}}>
@@ -575,7 +575,7 @@ function Employees({s,d}) {
       </div>}
       <ST>{tText('Situation familiale')}</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
-        <I label="Situation" value={form.civil} onChange={v=>setF({...form,civil:v})} options={[{v:"single",l:tText('Isolé')},{v:"married_2",l:"Marié (2 revenus)"},{v:"married_1",l:"Marié (1 revenu)"},{v:"cohabit",l:"Cohabitant légal"}]}/>
+        <I label="Situation" value={form.civil} onChange={v=>setF({...form,civil:v})} options={[{v:"single",l:tText('Isolé')},{v:"married_2",l:"Marié (2 revenus)"},{v:"married_1",l:"Marié (1 revenu)"},{v:"cohabit",l:tText('Cohabitant légal')}]}/>
         <I label="Enfants à charge" type="number" value={form.depChildren} onChange={v=>setF({...form,depChildren:v})}/>
         <I label="Enfants handicapés" type="number" value={form.handiChildren} onChange={v=>setF({...form,handiChildren:v})}/>
         <I label="Ascendants ≥65 ans à charge" type="number" value={form.depAscendant} onChange={v=>setF({...form,depAscendant:v})}/>
