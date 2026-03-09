@@ -637,12 +637,13 @@ function ROICalculator({onLogin}) {
 }
 
 /* ── MIGRATION 7 JOURS ───────────────────────────────────────── */
-function Migration() {
+function Migration({onLogin}) {
   const [ref,v]=useInView();
   const steps=[
     { n:1, period:'JOUR 1-2', title:'Import & Analyse', desc:'Export CSV depuis votre prestataire actuel. Notre parseur détecte automatiquement le format et importe travailleurs, contrats, historiques de paie, soldes de congés.', tags:['📥 Import CSV','📊 Analyse auto','✅ Validation NISS'] },
-    { n:2, period:'JOUR 3-5', title:'Vérification & Paramétrage', desc:'Vérification croisée de toutes les données importées : commissions paritaires, barèmes, taux ONSS sectoriels. Paramétrage des règles de votre entreprise.', tags:['⚖️ CP & barèmes','🔍 Contrôle croisé','⚙️ Config règles'] },
-    { n:3, period:'JOUR 6-7', title:'Go Live & Formation', desc:"Première paie calculée en direct, Dimona soumise, DmfA prête. Formation de vos équipes sur la plateforme. Support dédié les 30 premiers jours.", tags:['🚀 Première paie','📡 Dimona live','🎓 Formation incluse'] },
+    { n:2, period:'JOUR 3-5', title:'Vérification & Paramétrage', desc:'Vérification croisée de toutes les données importées : commissions paritaires, barèmes, taux ONSS sectoriels. Configuration des portails client et employé. Formation de votre équipe (2h).', tags:['🔍 Audit données','⚙️ Config CP','🎓 Formation 2h'] },
+    { n:3, period:'JOUR 5-6', title:'Paie Parallèle', desc:"Calcul de paie en parallèle avec votre ancien système. Comparaison fiche par fiche : brut, ONSS, précompte, net. Écart 0€ = migration validée. Ajustements si nécessaire.", tags:['🗓️ Calcul parallèle','📊 Comparaison','✅ Écart 0€'] },
+    { n:'✓', period:'JOUR 7', title:'Go Live !', desc:"Basculement définitif. Génération des premières fiches de paie officielles. Activation DIMONA, DmfA, SEPA. Vos employés reçoivent l'accès au portail. Support prioritaire pendant 30 jours.", tags:['🚀 Production','📡 DIMONA active',"🎉 C'est parti !"] },
   ];
   return (
     <section ref={ref} style={{padding:'80px 24px 100px',background:`${G}04`}}>
@@ -669,6 +670,13 @@ function Migration() {
               </div>
             </div>
           ))}
+        </div>
+        <div style={{textAlign:'center',marginTop:40}}>
+          <button onClick={onLogin} style={{padding:'16px 48px',borderRadius:8,border:'none',cursor:'pointer',background:`linear-gradient(135deg,${G3},${G},${G2})`,color:'#07060a',fontSize:14,fontWeight:800,letterSpacing:'1px',textTransform:'uppercase',fontFamily:'inherit',transition:'all .3s'}}
+            onMouseEnter={e=>e.currentTarget.style.transform='translateY(-2px)'}
+            onMouseLeave={e=>e.currentTarget.style.transform='translateY(0)'}>
+            Commencer la migration
+          </button>
         </div>
       </div>
     </section>
@@ -715,6 +723,80 @@ function FAQ() {
   );
 }
 
+
+/* ── MIGRATION COMPLÈTE (4 étapes) ──────────────────────────── */
+// On remplace la fonction Migration existante par la version complète
+// (déjà faite, on ajoute juste les étapes manquantes via patch)
+
+/* ── RESSOURCES ─────────────────────────────────────────────── */
+function Ressources() {
+  const [ref,v]=useInView();
+  const articles=[
+    { cat:'ERREURS & CONFORMITÉ', title:'Les 10 erreurs de paie les plus coûteuses en Belgique', desc:"Commission paritaire incorrecte, précompte mal calculé, DIMONA oubliée… Découvrez les erreurs qui coûtent des milliers d'euros aux fiduciaires.", time:'8 min', date:'Février 2026' },
+    { cat:'COMPARATIF', title:'Secrétariat social traditionnel vs Aureus Social Pro : comparatif 2026', desc:'Tarifs, fonctionnalités, technologie, support. Analyse objective point par point de deux approches radicalement différentes.', time:'12 min', date:'Février 2026' },
+    { cat:'GUIDE TECHNIQUE', title:'Précompte professionnel 2026 : le guide complet pour gestionnaires', desc:'Tranches progressives, quotient conjugal, réductions enfants, bonus emploi fiscal. Tout ce qui change en 2026 et comment le calculer.', time:'15 min', date:'Janvier 2026' },
+    { cat:'GUIDE MIGRATION', title:'Comment migrer de votre secrétariat social en 7 jours', desc:'Guide pas-à-pas pour quitter votre secrétariat social traditionnel sans perdre une seule donnée et sans interruption de paie.', time:'10 min', date:'Février 2026' },
+  ];
+  return (
+    <section ref={ref} style={{padding:'80px 24px 100px',background:`${G}04`}}>
+      <div style={{maxWidth:800,margin:'0 auto'}}>
+        <div style={{textAlign:'center',marginBottom:48,opacity:v?1:0,transition:'all .7s'}}>
+          <div style={{fontSize:11,color:G,letterSpacing:'3px',textTransform:'uppercase',marginBottom:14}}>— Ressources</div>
+          <h2 style={{fontSize:'clamp(28px,4vw,48px)',fontWeight:800,color:W,margin:'0 0 12px',letterSpacing:'-1px'}}>
+            Expertise <span style={{color:G,fontStyle:'italic'}}>paie belge</span>
+          </h2>
+          <p style={{fontSize:15,color:W2}}>Guides pratiques et analyses pour les gestionnaires de paie en Belgique.</p>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:16}}>
+          {articles.map((a,i)=>(
+            <div key={i} style={{padding:'28px',border:`1px solid ${G}12`,borderRadius:8,background:`${G}04`,cursor:'pointer',opacity:v?1:0,transform:v?'none':'translateY(16px)',transition:`all .5s ease ${i*.1}s`}}
+              onMouseEnter={e=>e.currentTarget.style.borderColor=`${G}30`}
+              onMouseLeave={e=>e.currentTarget.style.borderColor=`${G}12`}>
+              <div style={{fontSize:10,color:G,letterSpacing:'2px',textTransform:'uppercase',marginBottom:10}}>{a.cat}</div>
+              <h3 style={{fontSize:'clamp(16px,2vw,20px)',fontWeight:700,color:W,margin:'0 0 10px',lineHeight:1.3}}>{a.title}</h3>
+              <p style={{fontSize:13,color:W2,lineHeight:1.6,margin:'0 0 14px'}}>{a.desc}</p>
+              <div style={{display:'flex',gap:16,fontSize:11,color:W2}}>
+                <span>⏱ {a.time}</span>
+                <span>📅 {a.date}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── REJOINDRE LA RÉVOLUTION ─────────────────────────────────── */
+function Revolution({onLogin}) {
+  const [ref,v]=useInView();
+  return (
+    <section ref={ref} style={{padding:'80px 24px 100px'}}>
+      <div style={{maxWidth:700,margin:'0 auto',textAlign:'center',opacity:v?1:0,transform:v?'none':'translateY(32px)',transition:'all .8s'}}>
+        <div style={{fontSize:11,color:G,letterSpacing:'3px',textTransform:'uppercase',marginBottom:20}}>— Prêt à commencer ?</div>
+        <h2 style={{fontSize:'clamp(32px,6vw,60px)',fontWeight:900,color:W,margin:'0 0 20px',letterSpacing:'-2px',lineHeight:1.05}}>
+          Rejoignez la <span style={{color:G,fontStyle:'italic'}}>révolution</span><br/>de la paie belge
+        </h2>
+        <p style={{fontSize:16,color:W2,lineHeight:1.8,margin:'0 0 48px'}}>
+          Dites adieu aux logiciels obsolètes. Aureus Social Pro modernise votre secrétariat social pour une fraction du prix.
+        </p>
+        <div style={{display:'flex',gap:16,flexWrap:'wrap',justifyContent:'center'}}>
+          <button onClick={onLogin} style={{padding:'18px 48px',borderRadius:8,border:'none',cursor:'pointer',background:`linear-gradient(135deg,${G3},${G},${G2})`,color:'#07060a',fontSize:14,fontWeight:800,letterSpacing:'1px',textTransform:'uppercase',fontFamily:'inherit',boxShadow:`0 0 60px ${G}30`,transition:'all .3s'}}
+            onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.boxShadow=`0 8px 60px ${G}50`;}}
+            onMouseLeave={e=>{e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.boxShadow=`0 0 60px ${G}30`;}}>
+            Créer un compte gratuit
+          </button>
+          <a href="mailto:info@aureus-ia.com" style={{padding:'18px 48px',borderRadius:8,border:`1px solid ${G}40`,background:'transparent',color:G,fontSize:14,fontWeight:600,letterSpacing:'1px',textTransform:'uppercase',textDecoration:'none',fontFamily:'inherit',transition:'all .3s',display:'flex',alignItems:'center'}}
+            onMouseEnter={e=>{e.currentTarget.style.background=`${G}10`;e.currentTarget.style.borderColor=G;}}
+            onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.borderColor=`${G}40`;}}>
+            Nous contacter
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ── CTA FINAL ───────────────────────────────────────────────── */
 function CTA({onLogin}) {
   const [ref,v]=useInView();
@@ -749,18 +831,51 @@ function CTA({onLogin}) {
 /* ── FOOTER ──────────────────────────────────────────────────── */
 function Footer({onLogin}) {
   return (
-    <footer style={{padding:'32px 24px',borderTop:`1px solid ${G}12`}}>
-      <div style={{maxWidth:1100,margin:'0 auto',display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:16}}>
-        <div>
-          <div style={{fontSize:14,fontWeight:900,color:G,letterSpacing:'2px'}}>AUREUS</div>
-          <div style={{fontSize:9,color:W2,letterSpacing:'3px',marginTop:2}}>SOCIAL PRO · IA SPRL</div>
+    <footer style={{background:'#0a0908',borderTop:`1px solid ${G}12`}}>
+      <div style={{maxWidth:1100,margin:'0 auto',padding:'60px 24px 32px'}}>
+        <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr 1fr',gap:40,marginBottom:48}}>
+          <div>
+            <div style={{fontSize:18,fontWeight:900,color:G,letterSpacing:'2px',marginBottom:4}}>AUREUS</div>
+            <div style={{fontSize:9,color:W2,letterSpacing:'3px',marginBottom:16}}>SOCIAL PRO · IA SPRL</div>
+            <p style={{fontSize:13,color:W2,lineHeight:1.7,margin:'0 0 16px'}}>Secrétariat social digital belge de nouvelle génération. 106 modules, 229 CP, sécurité bancaire.</p>
+            <div style={{fontSize:12,color:W2}}>BCE BE 1028.230.781<br/>Place Marcel Broodthaers 8<br/>1060 Saint-Gilles, Bruxelles</div>
+          </div>
+          <div>
+            <div style={{fontSize:11,color:W2,letterSpacing:'2px',textTransform:'uppercase',marginBottom:16}}>Produit</div>
+            {['Fonctionnalités','Tarifs','Migration','Sécurité','API'].map(l=>(
+              <div key={l} style={{fontSize:13,color:W2,marginBottom:10,cursor:'pointer'}}
+                onMouseEnter={e=>e.currentTarget.style.color=G}
+                onMouseLeave={e=>e.currentTarget.style.color=W2}>{l}</div>
+            ))}
+          </div>
+          <div>
+            <div style={{fontSize:11,color:W2,letterSpacing:'2px',textTransform:'uppercase',marginBottom:16}}>Ressources</div>
+            {['Guides paie belge','FAQ','Documentation','Statut plateforme'].map(l=>(
+              <div key={l} style={{fontSize:13,color:W2,marginBottom:10,cursor:'pointer'}}
+                onMouseEnter={e=>e.currentTarget.style.color=G}
+                onMouseLeave={e=>e.currentTarget.style.color=W2}>{l}</div>
+            ))}
+          </div>
+          <div>
+            <div style={{fontSize:11,color:W2,letterSpacing:'2px',textTransform:'uppercase',marginBottom:16}}>Légal</div>
+            {['Contact','Trust Center','Confidentialité','CGU'].map(l=>(
+              <div key={l} style={{fontSize:13,color:W2,marginBottom:10,cursor:'pointer'}}
+                onMouseEnter={e=>e.currentTarget.style.color=G}
+                onMouseLeave={e=>e.currentTarget.style.color=W2}>{l}</div>
+            ))}
+            <a href="mailto:info@aureus-ia.com" style={{fontSize:13,color:G,display:'block',marginTop:16,textDecoration:'none'}}>info@aureus-ia.com</a>
+          </div>
         </div>
-        <div style={{fontSize:11,color:W2,textAlign:'center'}}>BCE BE 1028.230.781 · Saint-Gilles, Bruxelles</div>
-        <button onClick={onLogin} style={{padding:'10px 22px',borderRadius:3,border:`1px solid ${G}30`,background:'transparent',color:G,fontSize:11,cursor:'pointer',letterSpacing:'1px',textTransform:'uppercase',fontFamily:'inherit',transition:'all .2s'}}
-          onMouseEnter={e=>e.currentTarget.style.background=`${G}10`}
-          onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
-          Connexion →
-        </button>
+        <div style={{borderTop:`1px solid ${G}10`,paddingTop:24,display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:12}}>
+          <div style={{fontSize:12,color:W2}}>
+            <span style={{color:G,fontWeight:700}}>AUREUS</span> SOCIAL PRO © 2026 · Aureus IA SPRL · BCE BE 1028.230.781 — Bruxelles
+          </div>
+          <button onClick={onLogin} style={{padding:'10px 22px',borderRadius:3,border:`1px solid ${G}30`,background:'transparent',color:G,fontSize:11,cursor:'pointer',letterSpacing:'1px',textTransform:'uppercase',fontFamily:'inherit',transition:'all .2s'}}
+            onMouseEnter={e=>e.currentTarget.style.background=`${G}10`}
+            onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+            Se connecter →
+          </button>
+        </div>
       </div>
     </footer>
   );
@@ -820,10 +935,11 @@ export default function LandingPage() {
         <Temoignages/>
         <Tarifs onLogin={handleLogin}/>
         <ROICalculator onLogin={handleLogin}/>
-        <Migration/>
+        <Migration onLogin={handleLogin}/>
+        <Ressources/>
         <FAQ/>
         <About/>
-        <CTA onLogin={handleLogin}/>
+        <Revolution onLogin={handleLogin}/>
         <Footer onLogin={handleLogin}/>
       </div>
     </>
