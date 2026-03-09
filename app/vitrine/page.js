@@ -573,7 +573,7 @@ function PageCon({t,go,lang}){
       <p style={{fontSize:11,color:MIST,textAlign:'center',marginTop:10,lineHeight:1.6}}>{d.f.note}</p>
     </>)}
   </div></div></div></section><Footer t={t} go={go}/></>);
-});}
+}
 
 const PAGES={home:PageHome,independant:PageInd,employeur:PageEmp,employeurs:PageEmps,experts:PageExp,formations:PageForm,contact:PageCon};
 
