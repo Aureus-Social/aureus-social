@@ -186,7 +186,7 @@ T.nl={
   nw:{ey:'Nieuwsbrief',h:'Mis geen sociaal nieuws.',sub:'Wetswijzigingen, bijgewerkte barema\u2019s, praktische tips.',ph:'uw@email.be',btn:'Inschrijven',note:'Privacybeleid Aureus IA SPRL.',ok:'\u2713 Inschrijving bevestigd \u2014 welkom!',feats:[['\u2696\uFE0F','Dagelijkse wettelijke watch','Meldingen zodra een wet uw verplichtingen be\u00efnvloedt'],['\u{1F9EE}','Barema\u2019s 2026 bijgewerkt','Nieuwe CP-roosters voor inwerkingtreding'],['\u{1F4A1}','Expertadvies','Praktijkfiches van onze juristen']]},
   cta:{h:'Klaar om uw sociaal beheer te moderniseren?',sub:'Eerste maand gratis \u00b7 Directe toegang \u00b7 Migratiebegeleiding',btn:'Nu beginnen \u2192'},
   ft:{col1:'Oplossingen',col2:'Product',col3:'Juridisch',copy:'\u00a9 2026 Aureus IA SPRL \u00b7 Alle rechten voorbehouden',links:['Disclaimer','Privacy','Cookiebeleid','AVV'],desc:'Digitaal Belgisch sociaal secretariaat. 132 modules, 166 PC.',c1:[['Zelfstandigen','independant'],['Werkgever worden','employeur'],['Werkgevers','employeurs'],['Accountants','experts'],['Opleidingen','formations']],c2:[['Demo aanvragen','contact'],['Documentatie',null],['Status',null]],c3:[['Privacy',null],['Gebruiksvoorwaarden',null],['GDPR',null],['Disclaimer',null]]},
-  articles:T.fr.articles,
+  articles:T.articles,
   ind:{ey:'Zelfstandigen',bc:'Zelfstandigen',h:'Zelfstandige worden\nin Belgi\u00eb.',sub:'De complete gids stap voor stap.',c1:'Praat met een expert',c2:'Demo aanvragen',
     card:{label:'Aureus Social Pro',title:'Uw sociale back-office',sub:'Automatiseer uw verplichtingen.',stats:[['166','PC beheerd'],['<8s','Dimona'],['100%','Conform'],['24/7','Toegang']]},
     sy:{ey:'Stap voor stap',h:'Starten in 6 stappen',chk:['Dimona IN/OUT < 8s','ONSS-bijdragen 13,07%','Loonfiches PDF','DmfA XML per kwartaal','Belcotax 281.10','SEPA pain.001','Elektronische handtekening'],chkH:'Wat Aureus automatiseert',
@@ -257,7 +257,7 @@ T.en={
   nw:{ey:'Newsletter',h:'Never miss a social update.',sub:'Legal changes, updated scales, practical advice.',ph:'your@email.com',btn:'Subscribe',note:'Aureus IA SPRL privacy policy.',ok:'\u2713 Subscription confirmed \u2014 welcome!',feats:[['\u2696\uFE0F','Daily legal watch','Alerts when a law impacts your obligations'],['\u{1F9EE}','Updated 2026 scales','New JC grids before entry into force'],['\u{1F4A1}','Expert advice','Practical guides from our lawyers']]},
   cta:{h:'Ready to modernize your HR administration?',sub:'First month free \u00b7 Immediate access \u00b7 Assisted migration',btn:'Get started \u2192'},
   ft:{col1:'Solutions',col2:'Product',col3:'Legal',copy:'\u00a9 2026 Aureus IA SPRL \u00b7 All rights reserved',links:['Disclaimer','Privacy','Cookie policy','T&C'],desc:'Belgian digital payroll platform. 132 modules, 166 joint committees.',c1:[['Freelancers','independant'],['Become an employer','employeur'],['Employers','employeurs'],['Accountants','experts'],['Training','formations']],c2:[['Book a demo','contact'],['Documentation',null],['Status',null]],c3:[['Privacy',null],['Terms',null],['GDPR',null],['Disclaimer',null]]},
-  articles:T.fr.articles,
+  articles:T.articles,
   ind:{ey:'Freelancers',bc:'Freelancers',h:'Become a freelancer\nin Belgium.',sub:'The complete step-by-step guide.',c1:'Talk to an expert',c2:'Book a demo',
     card:{label:'Aureus Social Pro',title:'Your social back-office',sub:'Automate your obligations.',stats:[['166','JC managed'],['<8s','Dimona'],['100%','Compliant'],['24/7','Access']]},
     sy:{ey:'Step-by-step guide',h:'Start in 6 steps',chk:['Dimona IN/OUT < 8s','ONSS contributions 13.07%','PDF payslips','Quarterly DmfA XML','Belcotax 281.10','SEPA pain.001','Electronic signature'],chkH:'What Aureus automates',
@@ -328,7 +328,7 @@ T.de={
   nw:{ey:'Newsletter',h:'Kein Sozialrecht-Update verpassen.',sub:'Gesetz\u00e4nderungen, aktualisierte Tarife, praktische Tipps.',ph:'ihre@email.de',btn:'Abonnieren',note:'Datenschutzrichtlinie Aureus IA SPRL.',ok:'\u2713 Anmeldung best\u00e4tigt \u2014 willkommen!',feats:[['\u2696\uFE0F','T\u00e4gliche Rechts\u00fcberwachung','Meldungen wenn ein Gesetz Ihre Pflichten betrifft'],['\u{1F9EE}','Aktualisierte Tarife 2026','Neue PK-Raster vor Inkrafttreten'],['\u{1F4A1}','Expertenrat','Praxismerkbl\u00e4tter unserer Juristen']]},
   cta:{h:'Bereit, Ihre Sozialverwaltung zu modernisieren?',sub:'Erster Monat kostenlos \u00b7 Sofortiger Zugang \u00b7 Migrationsbegleitung',btn:'Jetzt starten \u2192'},
   ft:{col1:'L\u00f6sungen',col2:'Produkt',col3:'Rechtliches',copy:'\u00a9 2026 Aureus IA SPRL \u00b7 Alle Rechte vorbehalten',links:['Disclaimer','Datenschutz','Cookie-Richtlinie','AGB'],desc:'Digitales belgisches Sozialsekretariat. 132 Module, 166 Kommissionen.',c1:[['Selbst\u00e4ndige','independant'],['Arbeitgeber werden','employeur'],['Arbeitgeber','employeurs'],['Buchhalter','experts'],['Schulungen','formations']],c2:[['Demo anfordern','contact'],['Dokumentation',null],['Status',null]],c3:[['Datenschutz',null],['AGB',null],['DSGVO',null],['Disclaimer',null]]},
-  articles:T.fr.articles,
+  articles:T.articles,
   ind:{ey:'Selbst\u00e4ndige',bc:'Selbst\u00e4ndige',h:'Selbst\u00e4ndig werden\nin Belgien.',sub:'Der vollst\u00e4ndige Schritt-f\u00fcr-Schritt-Leitfaden.',c1:'Mit einem Experten sprechen',c2:'Demo anfordern',
     card:{label:'Aureus Social Pro',title:'Ihr soziales Back-Office',sub:'Automatisieren Sie Ihre Pflichten.',stats:[['166','PK verwaltet'],['<8s','Dimona'],['100%','Konform'],['24/7','Zugang']]},
     sy:{ey:'Schritt f\u00fcr Schritt',h:'In 6 Schritten starten',chk:['Dimona IN/OUT < 8s','ONSS-Beitr\u00e4ge 13,07%','PDF-Gehaltszettel','Viertelj\u00e4hrliche DmfA XML','Belcotax 281.10','SEPA pain.001','Elektronische Unterschrift'],chkH:'Was Aureus automatisiert',
@@ -1080,7 +1080,7 @@ function PageCon({t,go,goBack,lang}) {
 }
 
 function PageArticle({t,go,goBack,slug}) {
-  const art=t.articles&&t.articles[slug];
+  const art=(T.articles&&T.articles[slug])||(t.articles&&t.articles[slug]);
   useEffect(()=>{ window.scrollTo({top:0}); },[slug]);
   useFadeIn();
   if(!art) return(<div style={{padding:'120px 0',textAlign:'center'}}><p>{t.artBack||'Article introuvable'}</p><button className="btn-p" style={{margin:'20px auto',display:'inline-flex'}} onClick={goBack}>{t.back||'← Retour'}</button></div>);
