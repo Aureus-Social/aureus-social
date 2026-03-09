@@ -70,9 +70,9 @@ const REDUCTIONS_PREMIERS_EMPLOYES = [
   { rang: 1, label:tText('1er employé'), exo: 'TOTALE', montant: null, duree: tText('Illimitée'), detail: 'Exonération totale des cotisations patronales de base. Art. 334 Loi 22/12/2003. Aucune limite dans le temps. Montant moyen économisé : ~8.000–12.000 EUR/an selon salaire.' },
   { rang: 2, label: '2e employé', exo: 'PARTIELLE', montant: 3100, duree: '13 trimestres', detail: 'Réduction forfaitaire 3.100 EUR/trimestre pendant 13 trimestres (3,25 ans). Art. 2 §2 Loi 27/06/1969. Économie totale : ~40.300 EUR.' },
   { rang: 3, label: '3e employé', exo: 'PARTIELLE', montant: 1000, duree: '13 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 13 trimestres. Économie totale : ~13.000 EUR.' },
-  { rang: 4, label: '4e employé', exo: 'PARTIELLE', montant: 1000, duree: '8 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 8 trimestres (2 ans). Économie totale : ~8.000 EUR.' },
-  { rang: 5, label: '5e employé', exo: 'PARTIELLE', montant: 1000, duree: '8 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 8 trimestres. Économie totale : ~8.000 EUR.' },
-  { rang: 6, label: '6e employé', exo: 'PARTIELLE', montant: 1000, duree: '4 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 4 trimestres (1 an). Économie totale : ~4.000 EUR.' },
+  { rang: 4, label: tText('4e employé'), exo: 'PARTIELLE', montant: 1000, duree: '8 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 8 trimestres (2 ans). Économie totale : ~8.000 EUR.' },
+  { rang: 5, label: tText('5e employé'), exo: 'PARTIELLE', montant: 1000, duree: '8 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 8 trimestres. Économie totale : ~8.000 EUR.' },
+  { rang: 6, label: tText('6e employé'), exo: 'PARTIELLE', montant: 1000, duree: '4 trimestres', detail: 'Réduction forfaitaire 1.000 EUR/trimestre pendant 4 trimestres (1 an). Économie totale : ~4.000 EUR.' },
 ];
 
 // ══ PRIMES ACTIVA / ART.60 2026 ══
@@ -80,14 +80,14 @@ const PRIMES_EMPLOI = [
   {
     id: 'activa_bxl',
     label:tText('Activa.brussels'),
-    montant: '350 EUR/mois',
+    montant: tText('350 EUR/mois'),
     duree: tText('24 mois'),
     region: 'Bruxelles',
     organisme: 'Actiris',
     conditions: 'Demandeur d\'emploi bruxellois inoccupé ≥ 6 mois. 18–64 ans.',
     demarches: 'Attestation Actiris + formulaire C53W chez l\'employeur. Actiris verse directement.',
     base_legale: 'Ord. 22/12/2016',
-    calcul: '350 EUR/mois × 24 mois = 8.400 EUR total',
+    calcul: tText('350 EUR/mois × 24 mois = 8.400 EUR total'),
   },
   {
     id: 'activa_bxl_ap',
@@ -116,7 +116,7 @@ const PRIMES_EMPLOI = [
   {
     id: 'activa_jeune',
     label:tText('Activa Jeunes < 30 ans'),
-    montant: '350 EUR/mois',
+    montant: tText('350 EUR/mois'),
     duree: tText('12–24 mois'),
     region: 'Bruxelles / Flandre / Wallonie',
     organisme: 'Actiris / VDAB / FOREM',

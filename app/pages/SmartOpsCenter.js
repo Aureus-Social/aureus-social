@@ -50,9 +50,9 @@ export function SmartAlertsEngine({s, d, state, dispatch, defaultTab}){
       if([0,3,6,9].includes(month)&&day<=10) a.push({id:'DL-DMFA-Q'+quarter,sev:'critical',cat:tText('ONSS'),rule:'deadline',title:tText('DmfA trimestrielle T')+quarter,desc:'Declaration DmfA Q'+quarter+'/'+yr+' — Delai: 10 '+mois[month],deadline:10-day,icon:'🏛',action:{page:'onss'},remedy:'Module ONSS → Batch DmfA → Generer XML'});
       // Annual
       if(month===1&&day<=28) a.push({id:'DL-BELCOTAX',sev:'critical',cat:tText('Fiscal'),rule:'deadline',title:tText('Belcotax 281.10 / 281.20'),desc:'Fiches fiscales annuelles — Deadline 1er mars',deadline:28-day,icon:'🧾',action:{page:'fiscal'},remedy:'Module Fiscal → Generer fiches 281'});
-      if(month===11&&day<=20) a.push({id:'DL-13MOIS',sev:'critical',cat:tText('Paie'),rule:'deadline',title:'13eme mois / Prime fin annee',desc:'Versement avant le 20 decembre',deadline:20-day,icon:'🎄',action:{page:'payslip'},remedy:'Calculer prime fin annee par CP sectorielle'});
+      if(month===11&&day<=20) a.push({id:'DL-13MOIS',sev:'critical',cat:tText('Paie'),rule:'deadline',title:tText('13ème mois / Prime fin annee'),desc:tText('Versement avant le 20 decembre'),deadline:20-day,icon:'🎄',action:{page:'payslip'},remedy:'Calculer prime fin annee par CP sectorielle'});
       // Pécule vacances
-      if((month===3||month===4)&&day<=30) a.push({id:'DL-PECULE',sev:'high',cat:tText('Paie'),rule:'deadline',title:tText('Pecule vacances employes'),desc:'Versement pecule entre mai et juin',deadline:(month===3?30-day:60-day),icon:'🌴',action:{page:'payslip'},remedy:'Calculer pecule simple + double vacation'});
+      if((month===3||month===4)&&day<=30) a.push({id:'DL-PECULE',sev:'high',cat:tText('Paie'),rule:'deadline',title:tText('Pecule vacances employes'),desc:tText('Versement pecule entre mai et juin'),deadline:(month===3?30-day:60-day),icon:'🌴',action:{page:'payslip'},remedy:'Calculer pecule simple + double vacation'});
       // Indexation CP200 janvier
       if(month===0&&day<=31) a.push({id:'DL-INDEX',sev:'high',cat:'RH',rule:'deadline',title:tText('Indexation salariale CP 200'),desc:'Verifier index sante janvier '+yr,deadline:31-day,icon:'📊',action:{page:'employees'},remedy:'Appliquer nouvel index aux baremes'});
     }
@@ -63,7 +63,7 @@ export function SmartAlertsEngine({s, d, state, dispatch, defaultTab}){
         const co=cl.company||{};const emps=cl.emps||[];
         if(!co.vat&&emps.length>0) a.push({id:'COMP-TVA-'+cl.id,sev:'high',cat:tText('Compliance'),rule:'compliance',title:tText('TVA manquante —')+(co.name||tText('Client')),desc:emps.length+' employes — Declarations incompletes sans TVA',icon:'🏢',action:{page:'admin',sub:'config',client:cl.id},remedy:'Completer le numero de TVA dans la fiche client'});
         if(!co.onss&&emps.length>0) a.push({id:'COMP-ONSS-'+cl.id,sev:'high',cat:tText('Compliance'),rule:'compliance',title:tText('N° ONSS manquant —')+(co.name||tText('Client')),desc:'Declarations DmfA impossibles sans numero ONSS',icon:'🏛',action:{page:'admin',sub:'config',client:cl.id},remedy:'Encoder le numero ONSS employeur'});
-        if(emps.length>=1&&!co.reglementTravail) a.push({id:'COMP-RT-'+cl.id,sev:'medium',cat:tText('Compliance'),rule:'compliance',title:tText('Reglement travail absent —')+(co.name||''),desc:'Obligatoire des le 1er travailleur',icon:'📋',action:{page:'gendocsjur',client:cl.id},remedy:'Generer un reglement de travail via le module Documents'});
+        if(emps.length>=1&&!co.reglementTravail) a.push({id:'COMP-RT-'+cl.id,sev:'medium',cat:tText('Compliance'),rule:'compliance',title:tText('Reglement travail absent —')+(co.name||''),desc:tText('Obligatoire des le 1er travailleur'),icon:'📋',action:{page:'gendocsjur',client:cl.id},remedy:'Generer un reglement de travail via le module Documents'});
         if(emps.length>=50&&!co.cppt) a.push({id:'COMP-CPPT-'+cl.id,sev:'critical',cat:tText('Compliance'),rule:'compliance',title:tText('CPPT obligatoire —')+(co.name||''),desc:emps.length+' travailleurs — Seuil 50 depasse',icon:'⚖️',action:{page:'rh',client:cl.id},remedy:'Mettre en place le CPPT (Comite Prevention Protection Travail)'});
         if(emps.length>=100&&!co.ce) a.push({id:'COMP-CE-'+cl.id,sev:'critical',cat:tText('Compliance'),rule:'compliance',title:tText('CE obligatoire —')+(co.name||''),desc:emps.length+' travailleurs — Seuil 100 depasse',icon:'🏛',action:{page:'rh',client:cl.id},remedy:'Mettre en place le Conseil d\'Entreprise'});
       });
@@ -118,7 +118,7 @@ export function SmartAlertsEngine({s, d, state, dispatch, defaultTab}){
       else if(turnover>8) a.push({id:'TREND-TURNOVER',sev:'medium',cat:tText('Tendance'),rule:'trends',title:tText('Turnover modere:')+' '+turnover+'%',desc:totalSortis+' depart(s) en '+yr,icon:'📊',action:{page:'tableaudirection',sub:'rh'}});
       const totalAbsDays=allEmps.reduce((acc,e)=>acc+(+(e.joursMaladie||e.sickDays||0))+(+(e.joursAbsence||e.absDays||0)),0);
       const absRate=totalEmps>0?Math.round(totalAbsDays/(totalEmps*220)*10000)/100:0;
-      if(absRate>5) a.push({id:'TREND-ABS',sev:'high',cat:tText('Tendance'),rule:'trends',title:tText('Absenteisme eleve:')+' '+absRate+'%',desc:totalAbsDays+' jours — Seuil Belgique: 5.8%',icon:'📊',action:{page:'tableaudirection',sub:'bradford'},remedy:'Analyser Bradford + entretiens retour + plan bien-etre'});
+      if(absRate>5) a.push({id:'TREND-ABS',sev:'high',cat:tText('Tendance'),rule:'trends',title:tText('Absenteisme eleve:')+' '+absRate+'%',desc:totalAbsDays+' jours — Seuil Belgique: 5.8%',icon:'📊',action:{page:'tableaudirection',sub:'bradford'},remedy:tText('Analyser Bradford + entretiens retour + plan bien-etre')});
       const masseBrute=allEmps.reduce((acc,e)=>acc+(+(e.monthlySalary||e.gross||e.brut||0)),0);
       if(masseBrute>0&&totalEmps>0){
         const coutMoyen=masseBrute*(1+TX_ONSS_E)/totalEmps;
@@ -389,7 +389,7 @@ export function NotificationCenterV2({s,d}){
 
     {/* PREFERENCES */}
     {tab==='prefs'&&<C title="Preferences de declenchement" sub="Choisissez quelles notifications vous souhaitez recevoir">
-      {[{id:'deadlines',l:tText('Deadlines legales'),desc:'ONSS, PP, DmfA, Belcotax, pecule, 13eme mois',icon:'📅'},
+      {[{id:'deadlines',l:tText('Deadlines legales'),desc:tText('ONSS, PP, DmfA, Belcotax, pecule, 13eme mois'),icon:'📅'},
         {id:'compliance',l:tText('Conformite'),desc:'TVA, ONSS, NISS manquants, reglement travail',icon:'⚖️'},
         {id:'contracts',l:tText('Contrats'),desc:'CDD expirant, evaluations, renouvellements',icon:'📝'},
         {id:'payroll',l:tText('Paie'),desc:'Salaire=0, IBAN manquant, virements',icon:'💰'},

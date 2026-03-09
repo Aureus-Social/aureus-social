@@ -127,7 +127,7 @@ const categories=[
   {k:'atn.electricite.cadre',l:tText('ATN electricite (cadre)'),v:fmt(L.atn.electricite.cadre)+' EUR/an',t:'num'},
   {k:'atn.chauffage.cadre',l:tText('ATN chauffage (cadre)'),v:fmt(L.atn.chauffage.cadre)+' EUR/an',t:'num'},
 ]},
-{id:'travail',nom:'Temps de travail',icon:'⏰',color:'#eab308',params:[
+{id:'travail',nom:tText('Temps de travail'),icon:'⏰',color:'#eab308',params:[
   {k:'tempsTravail.dureeHebdoLegale',l:tText('Duree hebdo legale'),v:L.tempsTravail.dureeHebdoLegale+'h',t:'num'},
   {k:'tempsTravail.heuresSupp.majoration50',l:tText('Heures supp (+50%)'),v:pct(L.tempsTravail.heuresSupp.majoration50),t:'pct'},
   {k:'tempsTravail.heuresSupp.plafondAnnuel',l:tText('Plafond heures supp/an'),v:L.tempsTravail.heuresSupp.plafondAnnuel+'h',t:'num'},
@@ -191,7 +191,7 @@ const applyUpdate=(newValues)=>{
 };
 
 const resetAll=()=>{
-  if(confirm('Reinitialiser toutes les valeurs personnalisees? Les valeurs par defaut 2026 seront restaurees.')){
+  if(confirm(tText('Reinitialiser toutes les valeurs personnalisees? Les valeurs par defaut 2026 seront restaurees.'))){
     setCustomLois({});
     safeLS.remove('aureus_lois_custom');
   }
@@ -509,7 +509,7 @@ export default function LoisWrapped({ s, d, tab }) {
   const TAB_LABELS = {
     seuilssociaux:       '📐 Seuils Sociaux 2026',
     ccts:                '📜 Conventions CCT',
-    delegations:         '🏛 Délégations',
+    delegations:         tText('🏛 Délégations'),
     delegationsyndicale: tText('🏛 Délégation Syndicale'),
     egalitehf:           tText('⚖️ Égalité H/F'),
     electionsociales:    tText('🗳 Élections Sociales'),

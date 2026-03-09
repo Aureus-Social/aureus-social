@@ -435,7 +435,7 @@ function NotificationCenter({ state, dispatch, defaultTab }) {
           <h3 style={{ color: TEXT, margin: '0 0 12px 0', fontSize: 14 }}>{tText('Notifications Push')}</h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ fontSize: 13, color: MUTED }}>
-              Statut : {pushStatus === 'granted' ? '✅ Activées' : pushStatus === 'denied' ? '❌ Refusées' : '⏸ Non configurées'}
+              Statut : {pushStatus === 'granted' ? tText('✅ Activées') : pushStatus === 'denied' ? tText('❌ Refusées') : tText('⏸ Non configurées')}
             </span>
             {pushStatus !== 'granted' && pushStatus !== 'denied' && (
               <button

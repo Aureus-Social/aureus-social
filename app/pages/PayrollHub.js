@@ -358,7 +358,7 @@ export function CoutsAnnuelsV2({s}){
 
   // Primes sectorielles
   const primesSectorielles=[
-    {cp:'200',prime:'Prime de fin année',montant:'Barème CP 200',mois:'Décembre'},
+    {cp:'200',prime:tText('Prime de fin année'),montant:'Barème CP 200',mois:'Décembre'},
     {cp:'200',prime:'Eco-cheques',montant:'Max 250 EUR/an',mois:'Juin'},
     {cp:'124',prime:'Timbre fidelite',montant:'Variable',mois:'Juin-Juillet'},
     {cp:'302',prime:'Prime horeca',montant:'Selon heures',mois:'Variable'},

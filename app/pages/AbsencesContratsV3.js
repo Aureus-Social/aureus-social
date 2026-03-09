@@ -64,7 +64,7 @@ export function PlanningCongesV3({s, defaultTab}){
     </div>
 
     <div style={{display:'flex',gap:6,marginBottom:16}}>
-      {[{v:'calendrier',l:'📅 Calendrier'},{v:'chevauchements',l:'⚠ Chevauchements ('+alertDays+')'},{v:'regles',l:'⚖ Règles présence'},{v:'soldes',l:'📊 Soldes'}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}
+      {[{v:'calendrier',l:'📅 Calendrier'},{v:'chevauchements',l:'⚠ Chevauchements ('+alertDays+')'},{v:'regles',l:tText('⚖ Règles présence')},{v:'soldes',l:'📊 Soldes'}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}
       <div style={{marginLeft:'auto',display:'flex',gap:4}}>
         {moisNoms.map((m,i)=><button key={i} onClick={()=>setMonth(i)} style={{padding:'4px 8px',borderRadius:4,border:'none',background:month===i?'rgba(198,163,78,.15)':'transparent',color:month===i?'#c6a34e':'#555',fontSize:9,cursor:'pointer'}}>{m.substring(0,3)}</button>)}
       </div>
@@ -121,11 +121,11 @@ export function PlanningCongesV3({s, defaultTab}){
       {[
         {r:tText('Présence minimum globale'),d:'Au moins '+minPresence+'% de l\'effectif doit être présent chaque jour ouvrable.',base:'Règlement de travail — Art. Organisation'},
         {r:tText('Règle du département'),d:'Chaque département/équipe doit avoir au minimum 1 personne présente à tout moment.',base:'Convention interne — Continuité de service'},
-        {r:'Congés simultanés managers',d:'Maximum 1 manager absent simultanément (sauf accord direction).',base:'Politique interne — Gouvernance'},
-        {r:'Période de blocage',d:'Pas de congés les 5 derniers jours ouvrables du mois (clôture) sauf autorisation RH.',base:'Convention interne — Clôture mensuelle'},
+        {r:tText('Congés simultanés managers'),d:'Maximum 1 manager absent simultanément (sauf accord direction).',base:'Politique interne — Gouvernance'},
+        {r:tText('Période de blocage'),d:'Pas de congés les 5 derniers jours ouvrables du mois (clôture) sauf autorisation RH.',base:'Convention interne — Clôture mensuelle'},
         {r:'Vacances collectives',d:'Fermeture annuelle (si applicable): semaine 30-31 (construction CP 124) ou selon CCT sectorielle.',base:'CCT sectorielle / Conseil d\'entreprise'},
         {r:tText('Premier arrivé, premier servi'),d:'En cas de conflit: priorité au collaborateur ayant introduit sa demande en premier. Exception: parents enfants scolarisés pour juillet-août.',base:'Convention d\'entreprise — Équité'},
-        {r:'Délai de demande',d:'Congé ≤ 3 jours: demande 1 semaine avant. Congé > 3 jours: demande 1 mois avant.',base:'Règlement de travail — Art. Congés'},
+        {r:tText('Délai de demande'),d:'Congé ≤ 3 jours: demande 1 semaine avant. Congé > 3 jours: demande 1 mois avant.',base:'Règlement de travail — Art. Congés'},
       ].map((r,i)=><div key={i} style={{padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
         <div style={{fontSize:12,fontWeight:600,color:'#e8e6e0'}}>{r.r}</div>
         <div style={{fontSize:10.5,color:'#9e9b93',marginTop:2}}>{r.d}</div>
@@ -169,23 +169,23 @@ export function BilanSocialV3({s}){
   const avgAnc=emps.length>0?emps.reduce((a,e)=>{const sd=e.startDate||e.start;if(!sd)return a+2;return a+((new Date()-new Date(sd))/(365.25*24*3600*1000));},0)/n:0;
 
   const sections=[
-    {num:'I',titre:'État du personnel',rubrique:'Rubrique 100',items:[
+    {num:'I',titre:tText('État du personnel'),rubrique:'Rubrique 100',items:[
       {code:'1001',label:tText('Travailleurs inscrits au registre du personnel au 31/12'),value:n,unit:''},
       {code:'1001a',label:'→ Temps plein',value:n-tp,unit:''},
       {code:'1001b',label:'→ Temps partiel',value:tp,unit:''},
       {code:'1002',label:tText('Effectif moyen (ETP)'),value:(n-tp*0.5).toFixed(1),unit:'ETP'},
       {code:'1003',label:tText('Nombre heures prestées'),value:fi(n*1710),unit:'h'},
       {code:'1004',label:tText('Frais de personnel (total)'),value:fmt(masseBrut*12*(1+TX_ONSS_E+0.19))+' €',unit:''},
-      {code:'1004a',label:'→ Rémunérations et avantages',value:fmt(masseBrut*12)+' €',unit:''},
+      {code:'1004a',label:tText('→ Rémunérations et avantages'),value:fmt(masseBrut*12)+' €',unit:''},
       {code:'1004b',label:'→ Cotisations patronales ONSS',value:fmt(masseBrut*12*TX_ONSS_E)+' €',unit:''},
-      {code:'1004c',label:'→ Provisions pécules/primes',value:fmt(masseBrut*12*0.19)+' €',unit:''},
+      {code:'1004c',label:tText('→ Provisions pécules/primes'),value:fmt(masseBrut*12*0.19)+' €',unit:''},
     ]},
     {num:'II',titre:'Tableau mouvement du personnel',rubrique:'Rubrique 200',items:[
       {code:'2001',label:'Entrées pendant l\'exercice',value:Math.round(n*0.15),unit:''},
       {code:'2001a',label:'→ CDI',value:Math.round(n*0.12),unit:''},
       {code:'2001b',label:'→ CDD',value:Math.round(n*0.03),unit:''},
       {code:'2002',label:'Sorties pendant l\'exercice',value:Math.round(n*0.10),unit:''},
-      {code:'2002a',label:'→ Pension/prépension',value:Math.round(n*0.02),unit:''},
+      {code:'2002a',label:tText('→ Pension/prépension'),value:Math.round(n*0.02),unit:''},
       {code:'2002b',label:'→ Licenciement',value:Math.round(n*0.03),unit:''},
       {code:'2002c',label:'→ Démission',value:Math.round(n*0.04),unit:''},
       {code:'2002d',label:'→ Fin CDD',value:Math.round(n*0.01),unit:''},

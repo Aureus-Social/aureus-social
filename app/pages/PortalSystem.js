@@ -281,7 +281,7 @@ export function EmployeeLeave({s, d, employee}) {
 
   const [demandes, setDemandes] = useState([
     {id:1,type:tText('Congé annuel'),debut:'2026-03-15',fin:'2026-03-19',jours:5,status:tText('approuvé'),by:'Marie D.'},
-    {id:2,type:tText('Récupération'),debut:'2026-02-14',fin:'2026-02-14',jours:1,status:'approuvé',by:'Marie D.'},
+    {id:2,type:tText('Récupération'),debut:'2026-02-14',fin:'2026-02-14',jours:1,status:tText('approuvé'),by:'Marie D.'},
     {id:3,type:tText('Congé annuel'),debut:'2026-04-21',fin:'2026-04-25',jours:5,status:'en_attente',by:null},
   ]);
 
@@ -301,7 +301,7 @@ export function EmployeeLeave({s, d, employee}) {
   const daysInCalMonth=new Date(calYear,calMonth+1,0).getDate();
   const firstDow=(new Date(calYear,calMonth,1).getDay()+6)%7;
   const calCells=Array.from({length:42},(_, i)=>{const day=i-firstDow+1;return day>=1&&day<=daysInCalMonth?day:null;});
-  const getLeaveColor=(day)=>{const d2=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;const match=demandes.find(r=>d2>=r.debut&&d2<=r.fin);if(!match)return null;return match.status==='approuvé'?GREEN:match.status==='en_attente'?'#eab308':RED;};
+  const getLeaveColor=(day)=>{const d2=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;const match=demandes.find(r=>d2>=r.debut&&d2<=r.fin);if(!match)return null;return match.status===tText('approuvé')?GREEN:match.status==='en_attente'?'#eab308':RED;};
 
   return React.createElement('div',{style:{maxWidth:960,margin:'0 auto'}},
     React.createElement('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}},
@@ -380,9 +380,9 @@ export function EmployeeLeave({s, d, employee}) {
             React.createElement('td',{style:{padding:'10px 12px',fontSize:13,fontWeight:600,color:'#e5e5e5'}},r.jours),
             React.createElement('td',{style:{padding:'10px 12px'}},
               React.createElement('span',{style:{padding:'3px 10px',borderRadius:50,fontSize:10,fontWeight:600,
-                background:r.status==='approuvé'?'rgba(34,197,94,.1)':r.status==='en_attente'?'rgba(234,179,8,.1)':'rgba(239,68,68,.1)',
-                color:r.status==='approuvé'?GREEN:r.status==='en_attente'?'#eab308':RED}},
-                r.status==='approuvé'?tText('✓ Approuvé'):r.status==='en_attente'?'⏳ En attente':tText('✕ Refusé'))
+                background:r.status===tText('approuvé')?'rgba(34,197,94,.1)':r.status==='en_attente'?'rgba(234,179,8,.1)':'rgba(239,68,68,.1)',
+                color:r.status===tText('approuvé')?GREEN:r.status==='en_attente'?'#eab308':RED}},
+                r.status===tText('approuvé')?tText('✓ Approuvé'):r.status==='en_attente'?'⏳ En attente':tText('✕ Refusé'))
             ),
             React.createElement('td',{style:{padding:'10px 12px',fontSize:12,color:'#888'}},r.by||'—')
           )))
