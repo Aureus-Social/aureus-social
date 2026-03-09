@@ -32,12 +32,12 @@ fr:{
     {ico:'📚',title:'Formations',desc:'Webinaires sur le droit social belge.',page:'formations'},
   ]},
   art:{ey:"Toujours prêt pour l'avenir",h:'Ressources & actualités',filters:[['tout','Tout'],['paie','Paie'],['rh','RH'],['legal','Législation'],['onss','ONSS']],items:[
-    {cat:'paie',ico:'🧮',tag:'Paie',title:'Barèmes sectoriels 2026 : ce qui change',desc:'Mise à jour des 166 CP intégrée dans Aureus Social Pro avant le 1er janvier.'},
-    {cat:'legal',ico:'⚖️',tag:'Législation',title:'Bonus emploi 2026 : nouveaux plafonds',desc:'Le plafond salarial a été révisé. Impact sur vos calculs.'},
-    {cat:'onss',ico:'🏛',tag:'ONSS',title:'DmfA Q1 2026 : délai et nouveautés',desc:'Date limite, nouveaux codes travailleurs et réduction structurelle.'},
-    {cat:'rh',ico:'👥',tag:'RH',title:'Portail employé : fiches, documents, congés',desc:'Vos collaborateurs accèdent à leurs fiches sans solliciter le service paie.'},
-    {cat:'paie',ico:'🏦',tag:'Paie',title:'SEPA pain.001 : automatisez vos virements',desc:'Fichiers virement batch ISO 20022.'},
-    {cat:'legal',ico:'🔐',tag:'RGPD',title:'RGPD Art. 32 & paie belge',desc:'Chiffrement NISS, registre Art. 30, DPA — conformité complète.'},
+    {cat:'paie',ico:'🧮',tag:'Paie',title:'Barèmes sectoriels 2026 : ce qui change',slug:'baremes-2026',desc:'Mise à jour des 166 CP intégrée dans Aureus Social Pro avant le 1er janvier.'},
+    {cat:'legal',ico:'⚖️',tag:'Législation',title:'Bonus emploi 2026 : nouveaux plafonds',slug:'bonus-emploi-2026',desc:'Le plafond salarial a été révisé. Impact sur vos calculs.'},
+    {cat:'onss',ico:'🏛',tag:'ONSS',title:'DmfA Q1 2026 : délai et nouveautés',slug:'dmfa-q1-2026',desc:'Date limite, nouveaux codes travailleurs et réduction structurelle.'},
+    {cat:'rh',ico:'👥',tag:'RH',title:'Portail employé : fiches, documents, congés',slug:'portail-employe',desc:'Vos collaborateurs accèdent à leurs fiches sans solliciter le service paie.'},
+    {cat:'paie',ico:'🏦',tag:'Paie',title:'SEPA pain.001 : automatisez vos virements',slug:'sepa-pain001',desc:'Fichiers virement batch ISO 20022.'},
+    {cat:'legal',ico:'🔐',tag:'RGPD',title:'RGPD Art. 32 & paie belge',slug:'rgpd-paie-belge',desc:'Chiffrement NISS, registre Art. 30, DPA — conformité complète.'},
   ]},
   nw:{ey:'Newsletter',h:'Ne manquez aucune actualité sociale.',sub:'Changements législatifs, barèmes mis à jour, conseils pratiques.',ph:'votre@email.be',btn:"S'inscrire",note:'Politique de confidentialité Aureus IA SPRL.',ok:'✓ Inscription confirmée — bienvenue !',feats:[['⚖️','Veille législative quotidienne','Alertes dès qu\'une loi impacte vos obligations'],['🧮','Barèmes 2026 mis à jour','Nouvelles grilles CP avant entrée en vigueur'],['💡',"Conseils d'experts","Fiches pratiques de nos juristes"]]},
   cta:{h:'Prêt à moderniser votre gestion sociale ?',sub:'Premier mois offert · Accès immédiat · Migration assistée',btn:'Accéder maintenant →'},
@@ -132,59 +132,17 @@ fr:{
     ch:[['✉️','E-mail','info@aureus-ia.com'],['💻','Application','app.aureussocial.be'],['📍','Adresse','Place Marcel Broodthaers 8, 1060 Saint-Gilles, Bruxelles']],
     cr:[['BCE','BE 1028.230.781'],['Mahis','DGIII/MAHI011'],['Peppol','0208:1028230781'],['Réponse','< 4h ouvrables']],
     f:{t:'Demande de démo',s:'Réponse garantie sous 4h ouvrables.',fn:'Prénom *',ln:'Nom *',em:'E-mail professionnel *',co:'Société',ro:'Vous êtes *',ms:'Message',fnp:'Jean',lnp:'Dupont',emp:'jean.dupont@fiduciaire.be',cop:'Cabinet Dupont & Associés',msp:'Décrivez votre situation…',sub:'Envoyer la demande',note:'En soumettant ce formulaire, vous acceptez notre politique RGPD.',ok:'✓ Message envoyé — nous vous répondrons sous 4h ouvrables.',roles:['Sélectionnez...','Indépendant / Starter','Fiduciaire / Expert-comptable','Employeur direct','Secrétariat social','Courtier / Partenaire','Autre']}},
-},
+  },
+  articles:{
+    'baremes-2026':{tag:'Paie',ico:'🧮',title:'Barèmes sectoriels 2026 : ce qui change',slug:'baremes-2026',date:'1 janvier 2026',readTime:'5 min',intro:"Chaque début d'année, les conventions collectives de travail (CCT) sont négociées au sein des commissions paritaires. Pour 2026, Aureus Social Pro a intégré les nouvelles grilles avant le 1er janvier.",sections:[{h:"Qu'est-ce qu'un barème sectoriel ?",p:"Un barème sectoriel est la grille de salaires minimums fixée par la commission paritaire (CP) applicable à votre secteur. Il définit le salaire minimum légal par catégorie de fonction et ancienneté. En Belgique, il existe 166 commissions paritaires, chacune pouvant avoir ses propres barèmes."},{h:'Les changements clés en 2026',p:"L'index santé a été dépassé à 1,59% en décembre 2025, entraînant une adaptation automatique des barèmes.\n\nCP 200 — Employés : catégorie 1 passe de 2.180€ à 2.215€/mois brut. CP 226 — Commerce de détail : barème A porté à 1.990€/mois. CP 319 — Services de proximité : adaptation de +1,8%."},{h:'Comment Aureus gère-t-il les mises à jour ?',p:"Aureus Social Pro dispose d'un système de veille législative automatique. Un cron quotidien à 6h00 CET scrape les 8 sources officielles belges (Moniteur belge, SPF Emploi, ONSS…). Dès qu'une modification est détectée, une alerte email HTML est envoyée aux gestionnaires concernés.\n\nLes 166 CP sont encodées avec leurs barèmes, primes et règles spécifiques. Le calcul de paie applique automatiquement la bonne grille selon la CP de chaque travailleur."},{h:'Que faire si votre CP a changé ?',p:"1. Vérifiez dans Aureus la CP attribuée à chaque travailleur (Travailleurs → Fiche)\n\n2. Le recalcul est automatique lors de la prochaine fiche de paie\n\n3. En cas de régularisation rétroactive, utilisez l'outil Correction paie dans Gestion Paie\n\n4. Pour toute question : info@aureus-ia.com"}],cta:{title:"Votre CP est-elle à jour dans Aureus ?",sub:"Notre équipe vérifie votre configuration sans frais.",btn:"Vérifier maintenant"}},
+    'bonus-emploi-2026':{tag:'Législation',ico:'⚖️',title:'Bonus emploi 2026 : nouveaux plafonds',slug:'bonus-emploi-2026',date:'15 janvier 2026',readTime:'4 min',intro:"Le bonus à l'emploi (réduction de cotisations personnelles pour travailleurs à bas salaire) a été revu pour 2026. Voici ce que cela change concrètement sur vos fiches de paie.",sections:[{h:"Qu'est-ce que le bonus à l'emploi ?",p:"Le bonus à l'emploi est une réduction des cotisations personnelles de sécurité sociale accordée aux travailleurs dont le salaire brut est inférieur à un certain plafond. Il se traduit par un montant déduit directement du précompte professionnel, augmentant le salaire net sans coût supplémentaire pour l'employeur."},{h:'Les nouveaux plafonds 2026',p:"Plafond de salaire brut mensuel : 3.190,23 € (contre 3.144,00 € en 2025). Montant maximum du bonus : 264,16 €/mois pour les bas salaires. Réduction progressive de 100% pour les salaires inférieurs à 2.075 € à 0% au seuil de 3.190 €.\n\nLe calcul suit la formule SPF Finances : Bonus = Max × (1 - (S - S1)/(S2 - S1)) où S = salaire brut."},{h:'Impact sur vos calculs Aureus',p:"Aureus Social Pro applique la formule officielle SPF Finances Annexe III. La constante LOIS_BELGES.BONUS_EMPLOI_PLAFOND est automatiquement mise à jour.\n\nImpact typique pour un employé à 2.500 €/mois brut : bonus de +187 € net par mois. Pour un employé à 1.900 €/mois : bonus maximal de +264 €."},{h:"Cumul avec d'autres avantages",p:"Le bonus à l'emploi est cumulable avec la prime de mobilité (vélo, transports en commun) et les chèques-repas. Il n'est pas cumulable avec certaines allocations de chômage ou d'activation."}],cta:{title:"Vérifiez que votre calcul de paie intègre le bon bonus emploi.",sub:"Démo gratuite — 30 minutes sur vos données.",btn:"Demander une démo"}},
+    'dmfa-q1-2026':{tag:'ONSS',ico:'🏛',title:'DmfA Q1 2026 : délai et nouveautés',slug:'dmfa-q1-2026',date:'20 janvier 2026',readTime:'6 min',intro:"La déclaration multifonctionnelle (DmfA) du premier trimestre 2026 est due avant le 30 avril. Voici les changements à connaître et comment Aureus vous prépare.",sections:[{h:"Rappel : qu'est-ce que la DmfA ?",p:"La DmfA (Déclaration multifonctionnelle) est la déclaration trimestrielle que tout employeur doit soumettre à l'ONSS. Elle reprend le détail des salaires, heures prestées et cotisations pour chaque travailleur. Elle sert de base au calcul des droits sociaux (chômage, maladie, pension)."},{h:'Délais Q1 2026',p:"Date limite de soumission : 30 avril 2026 (avant minuit). Date limite de paiement : 5 mai 2026. Correction possible jusqu'au 31 juillet 2026 sans majoration.\n\nEn cas de retard : majoration de 10% des cotisations dues + intérêts de retard de 7%/an (depuis 01/01/2024)."},{h:'Nouveautés codes travailleurs Q1 2026',p:"Nouveau code 884 : télétravail structurel (plus de 3j/semaine). Modification code 200 : extension aux CDD de remplacement. Suppression code 015 : fusionné avec code 016 (apprentissage).\n\nCes changements sont intégrés automatiquement dans Aureus Social Pro v18. Le générateur DmfA XML produit un fichier conforme au schéma XSD ONSS mis à jour."},{h:'Comment soumettre via Aureus ?',p:"1. Menu Déclarations → DmfA → Nouveau trimestre\n\n2. Sélectionner Q1 2026 (01/01 – 31/03/2026)\n\n3. Vérifier l'aperçu des cotisations par travailleur\n\n4. Générer le fichier XML et soumettre via le bouton Envoyer à l'ONSS (connexion Mahis/CSAM)\n\n5. Télécharger l'accusé de réception"}],cta:{title:"Votre DmfA Q1 est-elle prête ?",sub:"Audit gratuit de vos déclarations ONSS.",btn:"Contacter l'équipe"}},
+    'portail-employe':{tag:'RH',ico:'👥',title:'Portail employé : fiches, documents, congés',slug:'portail-employe',date:'5 février 2026',readTime:'3 min',intro:"Le portail employé d'Aureus Social Pro permet à chaque collaborateur d'accéder en autonomie à ses fiches de paie, documents RH et demandes de congé — sans solliciter le service paie.",sections:[{h:'Le problème résolu',p:"Dans la plupart des PME belges, les employés envoient des emails au service paie pour récupérer une fiche de paie ou vérifier leur solde de congé. Chaque demande prend 5 à 15 minutes. Avec 20 employés, c'est potentiellement 2h/semaine de travail administratif évité."},{h:'Fonctionnalités du portail',p:"Fiches de paie : accès à l'historique complet, téléchargement PDF, signature électronique.\n\nDocuments RH : contrat de travail, avenants, attestations, règlement de travail.\n\nCongés : solde en temps réel, historique, formulaire de demande avec validation managériale.\n\nAlertes : notifications pour nouvelles fiches, documents à signer, approbations de congé."},{h:'Sécurité et RGPD',p:"Chaque employé n'accède qu'à ses propres données (Row Level Security Supabase). L'authentification est sécurisée via CSRF tokens et sessions chiffrées. Les données sensibles (NISS, IBAN) sont chiffrées en AES-256-GCM.\n\nConformément au RGPD Art. 15, chaque employé peut exporter l'intégralité de ses données en un clic."},{h:'Comment activer le portail ?',p:"Le portail employé est inclus dans tous les plans Aureus Social Pro. Activation dans Administration → Portail Employé → Activer. Chaque travailleur reçoit un email d'invitation avec son lien d'accès personnel."}],cta:{title:"Offrez l'autonomie à vos collaborateurs.",sub:"Démo du portail employé en 20 minutes.",btn:"Demander une démo"}},
+    'sepa-pain001':{tag:'Paie',ico:'🏦',title:'SEPA pain.001 : automatisez vos virements',slug:'sepa-pain001',date:'10 février 2026',readTime:'4 min',intro:"Le format SEPA pain.001 permet d'automatiser l'envoi des salaires en un seul fichier batch vers votre banque. Aureus Social Pro génère ce fichier automatiquement après validation de la paie.",sections:[{h:"Qu'est-ce que SEPA pain.001 ?",p:"SEPA pain.001 est le standard XML ISO 20022 pour les ordres de virement en euros. Il est accepté par toutes les banques belges (BNP Paribas Fortis, KBC, ING, Belfius, Bpost…). Un seul fichier peut contenir des centaines de virements individuels, exécutés simultanément."},{h:'Avantages vs virements manuels',p:"Sans SEPA pain.001 : saisie manuelle dans votre banque en ligne, risque d'erreur IBAN, 5+ min par employé, aucune traçabilité automatique.\n\nAvec Aureus + SEPA pain.001 : 1 fichier en 3 clics, validation IBAN/BIC automatique, import direct dans votre interface bancaire, archivage automatique, zéro erreur."},{h:'Comment générer le fichier dans Aureus ?',p:"1. Menu Paie → Validation de paie → Approuver\n\n2. Cliquer sur Générer SEPA pain.001\n\n3. Vérifier l'aperçu : nombre de virements, montant total, date d'exécution\n\n4. Télécharger le fichier XML\n\n5. Importer dans votre banque (Isabel 6, CODA, interface web)\n\n6. Valider — les salaires sont virés à la date prévue"},{h:'Structure technique',p:"Le fichier XML contient : en-tête GrpHdr (montant total, date, initiateur), instructions PmtInf (compte débiteur), transactions CdtTrfTxInf (IBAN bénéficiaire, montant, référence).\n\nAureus génère la référence unique au format AUREUS-YYYYMMDD-EMPID pour faciliter le rapprochement comptable."}],cta:{title:"Automatisez vos virements salariaux dès ce mois.",sub:"Configuration SEPA incluse dans l'onboarding.",btn:"Commencer maintenant"}},
+    'rgpd-paie-belge':{tag:'RGPD',ico:'🔐',title:'RGPD Art. 32 & paie belge : guide complet',slug:'rgpd-paie-belge',date:'1 mars 2026',readTime:'7 min',intro:"La paie belge implique le traitement de données particulièrement sensibles : NISS, IBAN, salaire, situation familiale, absences maladie. Le RGPD Art. 32 impose des mesures de sécurité appropriées. Voici comment Aureus vous met en conformité.",sections:[{h:'Quelles données sont concernées ?',p:"En paie belge, vous traitez : le numéro NISS, l'IBAN du travailleur, le salaire brut et net, la situation familiale (isolé, cohabitant, enfants à charge), les absences pour maladie ou accident du travail, les données bancaires pour le virement SEPA."},{h:'Obligations RGPD Art. 32',p:"L'article 32 du RGPD impose des mesures techniques et organisationnelles appropriées selon le niveau de risque. Pour la paie : chiffrement au repos et en transit, pseudonymisation des données sensibles, journalisation des accès (audit trail), procédure de restauration en cas d'incident."},{h:"Ce qu'Aureus implémente",p:"Chiffrement AES-256-GCM : les champs NISS et IBAN sont chiffrés en base de données. Même un accès direct à Supabase ne révèle pas les données en clair.\n\nRow Level Security : chaque utilisateur ne voit que les données de son périmètre, implémenté au niveau base de données.\n\nAudit trail complet : chaque modification est horodatée avec l'identité de l'opérateur. Conservé 7 ans.\n\nBackup nocturne chiffré vers Backblaze B2 avec chiffrement AES-256 au repos."},{h:'Registre Art. 30 et DPA Art. 28',p:"Aureus génère automatiquement votre registre des traitements (Art. 30) pré-rempli avec les activités de paie. La convention DPA Art. 28 entre Aureus IA SPRL et votre entreprise est générée en Phase 0.\n\nCes documents sont téléchargeables depuis Administration → RGPD → Documents légaux."}],cta:{title:"Votre paie est-elle conforme RGPD Art. 32 ?",sub:"Audit de conformité RGPD gratuit — 1h.",btn:"Demander l'audit"}},
+  },
 };
 
-// NL
-T.nl=JSON.parse(JSON.stringify(T.fr));
-T.nl.topbar={country:'🇧🇪 België',bce:'KBO BE 1028.230.781',contact:'Contact',client:'Klantenzone'};
-T.nl.nav={demo:'Demo aanvragen',login:'Inloggen'};
-T.nl.mega[1].label='Zelfstandigen';T.nl.mega[2].label='Werkgever worden';T.nl.mega[3].label='Werkgevers';T.nl.mega[4].label='Opleidingen';T.nl.mega[5].label='Accountants';
-T.nl.hero={badge:'Digitaal sociaal secretariaat — v18 in productie',h1:'Uw Belgische sociale\npartner.\nEindelijk digitaal.',sub:'Van Dimona tot kwartaalaangiften — alles wat u nodig heeft, op één plek.',cta1:'Naar de applicatie',cta2:'Demo bekijken',stats:[['166','Paritaire comités'],['< 8s','Dimona ingediend'],['132','Actieve modules'],['99.97%','Uptime']]};
-T.nl.logos={title:'Zij vertrouwen op Aureus Social Pro',items:['KMO Brussel','Fiduciaire Dupont','Kantoor Janssen','HR Partners','Comptaflex','StartBE']};
-T.nl.mockup={badge:'Real-time interface',title:'Uw volledige sociale cyclus\nin één dashboard.',sub:'Unified dashboard, real-time ONSS alerts, boekhoudexport in één klik.',features:['Loonfiche in 3 klikken','Dimona IN/OUT < 8 seconden','DmfA XML klaar op de 5e','Versleutelde nachtelijke backup']};
-T.nl.testimonials={ey:'Getuigenissen',title:'Wat onze klanten zeggen.',items:[
-  {name:'Sophie Renard',role:'HR-manager — KMO 12 werknemers, Brussel',text:"We hebben SD Worx na 8 jaar verlaten. De migratie duurde 3 dagen en we besparen 340€/maand. Support antwoordt binnen een uur.",stars:5,initials:'SR',color:'#B8913A'},
-  {name:'Marc Janssen',role:'Accountant — 23 dossiers',text:"Het multi-klant portaal is precies wat ontbrak. Ik beheer 23 werkgevers vanuit één dashboard. Mahis-mandaten worden automatisch gegenereerd.",stars:5,initials:'MJ',color:'#1A5C42'},
-  {name:'Amira Benali',role:'Zelfstandige, PC 200',text:"Ik heb mijn eerste Dimona in 7 seconden ingediend. De loonberekening is perfect — ONSS, bedrijfsvoorheffing, werkbonus. Alles klopt.",stars:5,initials:'AB',color:'#18396A'},
-]};
-T.nl.roi={ey:'ROI Calculator',title:'Hoeveel bespaart u\ndoor SD Worx te verlaten?',sub:'Schat uw jaarlijkse besparing in 30 seconden.',employees:'Aantal werknemers',current:'Huidige prestataire',providers:['SD Worx','Partena','Securex','Sodexo','Andere'],result:{saving:'Geschatte jaarlijkse besparing',months:'Return on investment',per:'per maand bespaard',cta:'Nu een demo aanvragen',note:'Schatting gebaseerd op onze publieke tarieven vs gemiddelde Belgische markttarieven.'},tiers:[{label:'Basic',aureus:15,sdworx:42},{label:'Standard',aureus:25,sdworx:68},{label:'Premium',aureus:38,sdworx:95}]};
-T.nl.cta={h:'Klaar om uw sociaal beheer te moderniseren?',sub:'Eerste maand gratis · Directe toegang · Migratiebegeleiding',btn:'Nu beginnen →'};
-T.nl.cookie={text:'Deze website gebruikt cookies om uw ervaring te verbeteren.',accept:'Accepteren',refuse:'Weigeren',settings:'Instellingen'};
-
-// EN
-T.en=JSON.parse(JSON.stringify(T.fr));
-T.en.topbar={country:'🇧🇪 Belgium',bce:'VAT BE 1028.230.781',contact:'Contact',client:'Client area'};
-T.en.nav={demo:'Book a demo',login:'Log in'};
-T.en.mega[1].label='Freelancers';T.en.mega[2].label='Become an employer';T.en.mega[3].label='Employers';T.en.mega[4].label='Training';T.en.mega[5].label='Accountants';
-T.en.hero={badge:'Belgian digital payroll platform — v18 in production',h1:'Your Belgian social\npartner.\nFinally digital.',sub:'From Dimona to quarterly declarations — everything you need, in one place.',cta1:'Go to application',cta2:'Watch demo',stats:[['166','Joint committees'],['< 8s','Dimona submitted'],['132','Deployed modules'],['99.97%','Uptime']]};
-T.en.logos={title:'They trust Aureus Social Pro',items:['SME Brussels','Dupont Fiduciary','Janssen Office','HR Partners','Comptaflex','StartBE']};
-T.en.mockup={badge:'Real-time interface',title:'Your entire social cycle\nin one dashboard.',sub:'Unified dashboard, real-time ONSS alerts, accounting export in one click.',features:['Payslip generated in 3 clicks','Dimona IN/OUT < 8 seconds','DmfA XML ready by the 5th','AES-256 encrypted nightly backup']};
-T.en.testimonials={ey:'Testimonials',title:'What our clients say.',items:[
-  {name:'Sophie Renard',role:'HR Manager — 12 employees SME, Brussels',text:"We left SD Worx after 8 years. Migration took 3 days and we save €340/month. Support responds in under an hour.",stars:5,initials:'SR',color:'#B8913A'},
-  {name:'Marc Janssen',role:'Accountant — 23 client files',text:"The multi-client portal is exactly what was missing. I manage 23 employers from one dashboard. Mahis mandates are generated automatically.",stars:5,initials:'MJ',color:'#1A5C42'},
-  {name:'Amira Benali',role:'Freelancer, JC 200',text:"I submitted my first Dimona in 7 seconds. The payroll calculation is perfect — ONSS, withholding tax, employment bonus. Everything works.",stars:5,initials:'AB',color:'#18396A'},
-]};
-T.en.roi={ey:'ROI Calculator',title:'How much do you save\nby leaving SD Worx?',sub:'Estimate your annual savings in 30 seconds.',employees:'Number of employees',current:'Current provider',providers:['SD Worx','Partena','Securex','Sodexo','Other'],result:{saving:'Estimated annual savings',months:'Return on investment',per:'saved per month',cta:'Book a demo now',note:'Estimate based on our public rates vs average Belgian market rates.'},tiers:[{label:'Basic',aureus:15,sdworx:42},{label:'Standard',aureus:25,sdworx:68},{label:'Premium',aureus:38,sdworx:95}]};
-T.en.cta={h:'Ready to modernize your HR administration?',sub:'First month free · Immediate access · Assisted migration',btn:'Get started →'};
-T.en.cookie={text:'This site uses cookies to improve your experience.',accept:'Accept',refuse:'Decline',settings:'Settings'};
-
-// DE
-T.de=JSON.parse(JSON.stringify(T.fr));
-T.de.topbar={country:'🇧🇪 Belgien',bce:'USt BE 1028.230.781',contact:'Kontakt',client:'Kundenbereich'};
-T.de.nav={demo:'Demo anfordern',login:'Anmelden'};
-T.de.mega[1].label='Selbständige';T.de.mega[2].label='Arbeitgeber werden';T.de.mega[3].label='Arbeitgeber';T.de.mega[4].label='Schulungen';T.de.mega[5].label='Buchhalter';
-T.de.hero={badge:'Digitales belgisches Sozialsekretariat — v18 in Produktion',h1:'Ihr belgischer\nSozialpartner.\nEndlich digital.',sub:'Von Dimona bis Quartalsmeldungen — alles, was Sie brauchen, an einem Ort.',cta1:'Zur Anwendung',cta2:'Demo ansehen',stats:[['166','Paritätische Kommissionen'],['< 8s','Dimona eingereicht'],['132','Aktive Module'],['99.97%','Uptime']]};
-T.de.logos={title:'Sie vertrauen Aureus Social Pro',items:['KMU Brüssel','Fiduziaire Dupont','Büro Janssen','HR Partners','Comptaflex','StartBE']};
-T.de.mockup={badge:'Echtzeit-Interface',title:'Ihr gesamter Sozialdatenzyklus\nin einem Dashboard.',sub:'Unified Dashboard, ONSS-Echtzeit-Benachrichtigungen, Buchhalterexport per Klick.',features:['Gehaltszettel in 3 Klicks','Dimona IN/OUT < 8 Sekunden','DmfA XML am 5. fertig','AES-256-verschlüsseltes Nacht-Backup']};
-T.de.testimonials={ey:'Referenzen',title:'Was unsere Kunden sagen.',items:[
-  {name:'Sophie Renard',role:'HR-Leiterin — KMU 12 Mitarbeiter, Brüssel',text:"Wir haben SD Worx nach 8 Jahren verlassen. Migration dauerte 3 Tage, wir sparen 340€/Monat. Support antwortet in unter einer Stunde.",stars:5,initials:'SR',color:'#B8913A'},
-  {name:'Marc Janssen',role:'Buchhalter — 23 Akten',text:"Das Multi-Mandanten-Portal ist genau das, was gefehlt hat. Ich verwalte 23 Arbeitgeber von einem Dashboard. Mahis-Mandate werden automatisch erstellt.",stars:5,initials:'MJ',color:'#1A5C42'},
-  {name:'Amira Benali',role:'Selbständige, PK 200',text:"Ich habe meine erste Dimona in 7 Sekunden eingereicht. Die Gehaltsberechnung stimmt — ONSS, Lohnsteuer, Beschäftigungsbonus. Alles perfekt.",stars:5,initials:'AB',color:'#18396A'},
-]};
-T.de.roi={ey:'ROI-Rechner',title:'Wie viel sparen Sie,\nwenn Sie SD Worx verlassen?',sub:'Schätzen Sie Ihre jährlichen Einsparungen in 30 Sekunden.',employees:'Anzahl Mitarbeiter',current:'Aktueller Anbieter',providers:['SD Worx','Partena','Securex','Sodexo','Andere'],result:{saving:'Geschätzte jährliche Einsparung',months:'Return on Investment',per:'pro Monat gespart',cta:'Jetzt Demo anfordern',note:'Schätzung basierend auf unseren öffentlichen Tarifen vs. durchschnittlichen belgischen Markttarifen.'},tiers:[{label:'Basic',aureus:15,sdworx:42},{label:'Standard',aureus:25,sdworx:68},{label:'Premium',aureus:38,sdworx:95}]};
-T.de.cta={h:'Bereit, Ihre Sozialverwaltung zu modernisieren?',sub:'Erster Monat kostenlos · Sofortiger Zugang · Migrationsbegleitung',btn:'Jetzt starten →'};
-T.de.cookie={text:'Diese Website verwendet Cookies zur Verbesserung Ihrer Erfahrung.',accept:'Akzeptieren',refuse:'Ablehnen',settings:'Einstellungen'};
 
 // ═══════ STYLES ═══════
 const G='#B8913A',G2='#D4A84C',INK='#0E0D0A',CREAM='#F9F6F0',BORDER='#E8E4DC',STONE='#56524A',MIST='#9A968E',WHITE='#fff';
@@ -699,7 +657,7 @@ function PageHome({t,go}) {
           {art.filters.map(([k,l])=>(<button key={k} className={`ttab${filter===k?' active':''}`} onClick={()=>setFilter(k)}>{l}</button>))}
         </div>
         <div className="tc-grid">
-          {vis.map(a=>(<div key={a.title} className="tc"><div className="tc-img">{a.ico}</div><div className="tc-body"><span className="tc-tag">{a.tag}</span><h4>{a.title}</h4><p>{a.desc}</p><div className="tc-cta">{t.readmore} <Arr/></div></div></div>))}
+          {vis.map(a=>(<div key={a.title} className="tc" onClick={()=>a.slug&&go('article:'+a.slug)} style={{cursor:a.slug?'pointer':'default'}}><div className="tc-img">{a.ico}</div><div className="tc-body"><span className="tc-tag">{a.tag}</span><h4>{a.title}</h4><p>{a.desc}</p><div className="tc-cta">{t.readmore} <Arr/></div></div></div>))}
         </div>
       </div>
     </section>
@@ -879,6 +837,67 @@ function PageCon({t,go,lang}) {
   </>);
 }
 
+function PageArticle({t,go,slug}) {
+  const art=t.articles&&t.articles[slug];
+  useEffect(()=>{ window.scrollTo({top:0}); },[slug]);
+  useFadeIn();
+  if(!art) return(<div style={{padding:'120px 0',textAlign:'center'}}><p>Article introuvable.</p><button className="btn-p" style={{margin:'20px auto',display:'inline-flex'}} onClick={()=>go('home')}>Retour</button></div>);
+  return(<>
+    <section style={{background:CREAM,padding:'60px 0 48px',borderBottom:`1px solid ${BORDER}`}}>
+      <div className="vt-wrap">
+        <div style={{display:'flex',alignItems:'center',gap:8,fontSize:13,color:MIST,marginBottom:24,cursor:'pointer'}} onClick={()=>go('home')}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          Retour aux ressources
+        </div>
+        <div style={{display:'flex',gap:10,marginBottom:16}}>
+          <span className="vt-tag vt-tag-au">{art.tag}</span>
+          <span style={{fontSize:13,color:MIST}}>{art.date} · {art.readTime} de lecture</span>
+        </div>
+        <h1 style={{maxWidth:760,marginBottom:20}}>{art.title}</h1>
+        <p style={{fontSize:18,color:STONE,maxWidth:680,lineHeight:1.75,fontWeight:300}}>{art.intro}</p>
+      </div>
+    </section>
+    <section style={{padding:'56px 0 80px'}}>
+      <div className="vt-wrap">
+        <div style={{display:'grid',gridTemplateColumns:'1fr 320px',gap:64,alignItems:'start'}}>
+          <div>
+            {art.sections.map((sec,i)=>(
+              <div key={i} className="fade-in" style={{marginBottom:48}}>
+                <h2 style={{fontSize:'clamp(22px,2.4vw,28px)',marginBottom:16}}>{sec.h}</h2>
+                {sec.p.split('\n\n').map((para,j)=>(
+                  <p key={j} style={{fontSize:16,lineHeight:1.85,color:STONE,marginBottom:16}}>{para}</p>
+                ))}
+              </div>
+            ))}
+            <div style={{marginTop:48,padding:'32px',background:CREAM,border:`2px solid ${G}`,borderRadius:12}} className="fade-in">
+              <h3 style={{marginBottom:8,fontSize:22}}>{art.cta.title}</h3>
+              <p style={{marginBottom:20,fontSize:15}}>{art.cta.sub}</p>
+              <button className="btn-gold" onClick={()=>go('contact')}>{art.cta.btn} <Arr/></button>
+            </div>
+          </div>
+          <div style={{position:'sticky',top:120}}>
+            <div style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:10,padding:24,marginBottom:16}}>
+              <div style={{fontSize:12,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:MIST,marginBottom:14}}>Dans cet article</div>
+              {art.sections.map((sec,i)=>(
+                <div key={i} style={{display:'flex',gap:10,padding:'8px 0',borderBottom:i<art.sections.length-1?`1px solid ${BORDER}`:'none'}}>
+                  <span style={{color:G,fontWeight:700,fontSize:13,flexShrink:0}}>{String(i+1).padStart(2,'0')}</span>
+                  <span style={{fontSize:13,color:STONE,lineHeight:1.5}}>{sec.h}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{background:INK,borderRadius:10,padding:24,color:WHITE}}>
+              <div style={{fontSize:12,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:G2,marginBottom:12}}>Aureus Social Pro</div>
+              <p style={{fontSize:13,color:'rgba(255,255,255,.6)',marginBottom:16,lineHeight:1.6}}>Tous ces sujets sont gérés automatiquement dans Aureus Social Pro.</p>
+              <button className="btn-gold" style={{width:'100%',justifyContent:'center',fontSize:13}} onClick={()=>go('contact')}>Demander une démo <Arr/></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <Footer t={t} go={go}/>
+  </>);
+}
+
 const PAGES={home:PageHome,independant:PageInd,employeur:PageEmp,employeurs:PageEmps,experts:PageExp,formations:PageForm,contact:PageCon};
 
 export default function VitrinePage() {
@@ -895,6 +914,7 @@ export default function VitrinePage() {
     setPage(p);setOpenMega(null);
     window.scrollTo({top:0,behavior:'smooth'});
   };
+  const articleSlug=page.startsWith('article:')?page.slice(8):null;
 
   useEffect(()=>{
     const onScroll=()=>{
@@ -973,7 +993,10 @@ export default function VitrinePage() {
       </nav>
 
       <div style={{paddingTop:36+64}}>
-        <PageComp t={t} go={go} lang={lang}/>
+        {articleSlug
+          ? <PageArticle t={t} go={go} slug={articleSlug}/>
+          : <PageComp t={t} go={go} lang={lang}/>
+        }
       </div>
 
       <StickyCTA t={t} go={go} show={showSticky&&page==='home'}/>
