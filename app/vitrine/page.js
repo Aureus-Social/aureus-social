@@ -16,7 +16,7 @@ fr:{
   discover:'Découvrir',readmore:'Lire',
   hero:{badge:'Secrétariat social numérique — v18 en production',h1:'Votre partenaire\nsocial belge.\nEnfin numérique.',sub:"De la Dimona aux déclarations trimestrielles — tout ce dont vous avez besoin, en un seul endroit.",cta1:"Accéder à l'application",cta2:'Voir la démo',stats:[['166','Commissions paritaires'],['< 8s','Dimona soumise'],['12K+','Fiches de paie'],['420+','Entreprises gérées']]},
   logos:{title:'Ils ont fait confiance à Aureus Social Pro',items:['PME Bruxelles','Fiduciaire Dupont','Cabinet Janssen','RH Partners','Comptaflex','StartBE']},
-  mockup:{badge:'Interface temps réel',title:'Tout votre cycle social\nen un tableau de bord.',sub:'Tableau de bord unifié, alertes ONSS en temps réel, export comptable en un clic.',features:['Fiche de paie générée en 3 clics','Dimona IN/OUT < 8 secondes','DmfA XML prête au 5 du mois','Backup nocturne chiffré AES-256']},
+  mockup:{badge:'Interface temps réel',title:'Tout votre cycle social\nen un tableau de bord.',sub:'Tableau de bord unifié, alertes ONSS en temps réel, export comptable en un clic.',features:['Fiche de paie générée en 3 clics','Dimona IN/OUT < 8 secondes','DmfA XML prête au 5 du mois','Backup nocturne chiffré AES-256'],db:{title:'Tableau de bord',stats:[['12.4K','Fiches de paie','📄'],['3.9K','Déclarations ONSS','📋'],['420+','Entreprises','🏢'],['99.97%','Uptime','⚡']],chart:'Paie Q1 2026',badges:[{l:'Dimona',c:'#22C55E',v:'8 min ago'},{l:'DmfA Q1',c:'#D4A84C',v:'Prêt'},{l:'Belcotax',c:'#60A5FA',v:'Avant le 5/04'}]}},
   testimonials:{ey:'Témoignages',title:'Ce que nos clients disent.',items:[
     {name:'Sophie Renard',role:'DRH — PME 12 employés, Bruxelles',text:"Nous avons quitté SD Worx après 8 ans. La migration a pris 3 jours et on économise 340€/mois. Le support répond en moins d'une heure.",stars:5,initials:'SR',color:'#B8913A'},
     {name:'Marc Janssen',role:'Expert-comptable — 23 dossiers',text:"Le portail multi-clients est exactement ce qu'il manquait. Je gère 23 employeurs depuis un seul tableau de bord. Les mandats Mahis sont générés automatiquement.",stars:5,initials:'MJ',color:'#1A5C42'},
@@ -41,7 +41,7 @@ fr:{
   ]},
   nw:{ey:'Newsletter',h:'Ne manquez aucune actualité sociale.',sub:'Changements législatifs, barèmes mis à jour, conseils pratiques.',ph:'votre@email.be',btn:"S'inscrire",note:'Politique de confidentialité Aureus IA SPRL.',ok:'✓ Inscription confirmée — bienvenue !',feats:[['⚖️','Veille législative quotidienne','Alertes dès qu\'une loi impacte vos obligations'],['🧮','Barèmes 2026 mis à jour','Nouvelles grilles CP avant entrée en vigueur'],['💡',"Conseils d'experts","Fiches pratiques de nos juristes"]]},
   cta:{h:'Prêt à moderniser votre gestion sociale ?',sub:'Premier mois offert · Accès immédiat · Migration assistée',btn:'Accéder maintenant →'},
-  ft:{col1:'Solutions',col2:'Produit',col3:'Légal',copy:'© 2026 Aureus IA SPRL · Tous droits réservés',links:['Disclaimer','Privacy','Cookie policy','CGU'],
+  ft:{col1:'Solutions',col2:'Produit',col3:'Légal',copy:'© 2026 Aureus IA SPRL · Tous droits réservés',links:['Disclaimer','Privacy','Cookie policy','CGU'],desc:'Secrétariat social numérique belge. 132 modules, 166 CP.',
     c1:[['Indépendants','independant'],['Devenir employeur','employeur'],['Employeurs','employeurs'],['Experts-comptables','experts'],['Formations','formations']],
     c2:[['Demander une démo','contact'],['Documentation',null],['Statut',null]],
     c3:[['Confidentialité',null],['CGU',null],['RGPD',null],['Disclaimer',null]]},
@@ -163,12 +163,16 @@ Object.assign(T.nl,{
 T.nl.mega[1].label='Zelfstandigen'; T.nl.mega[2].label='Werkgever worden'; T.nl.mega[3].label='Werkgevers'; T.nl.mega[4].label='Opleidingen'; T.nl.mega[5].label='Accountants';
 T.nl.hero={badge:'Digitaal sociaal secretariaat — v18 in productie',h1:'Uw Belgische sociale\npartner.\nEindelijk digitaal.',sub:'Van Dimona tot kwartaalaangiften — alles wat u nodig heeft, op één plek.',cta1:'Naar de applicatie',cta2:'Demo bekijken',stats:[['166','Paritaire comités'],['< 8s','Dimona ingediend'],['12K+','Loonfiches'],['420+','Bedrijven']]};
 T.nl.logos={title:'Zij vertrouwen op Aureus Social Pro',items:['KMO Brussel','Fiduciaire Dupont','Kantoor Janssen','HR Partners','Comptaflex','StartBE']};
-T.nl.mockup={badge:'Real-time interface',title:'Uw volledige sociale cyclus\nin één dashboard.',sub:'Unified dashboard, real-time ONSS-meldingen, export per klik.',features:['Loonfiche in 3 klikken','Dimona IN/OUT < 8 seconden','DmfA XML klaar op de 5e','AES-256 versleutelde nachtback-up']};
+T.nl.mockup={badge:'Real-time interface',title:'Uw volledige sociale cyclus\nin één dashboard.',sub:'Unified dashboard, real-time ONSS-meldingen, export per klik.',features:['Loonfiche in 3 klikken','Dimona IN/OUT < 8 seconden','DmfA XML klaar op de 5e','AES-256 versleutelde nachtback-up'],db:{title:'Dashboard',stats:[['12.4K','Loonfiches','📄'],['3.9K','ONSS-aangiften','📋'],['420+','Bedrijven','🏢'],['99.97%','Uptime','⚡']],chart:'Loon K1 2026',badges:[{l:'Dimona',c:'#22C55E',v:'8 min geleden'},{l:'DmfA K1',c:'#D4A84C',v:'Klaar'},{l:'Belcotax',c:'#60A5FA',v:'Voor 5 apr'}]}};
 T.nl.testimonials={ey:'Getuigenissen',title:'Wat onze klanten zeggen.',items:[{name:'Sophie Renard',role:'HR-manager — KMO 12 werknemers, Brussel',text:"We hebben SD Worx na 8 jaar verlaten. Migratie duurde 3 dagen, we besparen 340€/maand.",stars:5,initials:'SR',color:'#B8913A'},{name:'Marc Janssen',role:'Accountant — 23 dossiers',text:"Het multi-klant portaal is precies wat ontbrak. 23 werkgevers vanuit één dashboard. Mahis-mandaten automatisch.",stars:5,initials:'MJ',color:'#1A5C42'},{name:'Amira Benali',role:'Zelfstandige, PC 200',text:"Eerste Dimona in 7 seconden. Loonberekening perfect — ONSS, bedrijfsvoorheffing, werkbonus.",stars:5,initials:'AB',color:'#18396A'}]};
 T.nl.roi={ey:'ROI Calculator',title:'Hoeveel bespaart u\ndoor SD Worx te verlaten?',sub:'Schat uw jaarlijkse besparing in 30 seconden.',employees:'Aantal werknemers',current:'Huidige prestataire',providers:['SD Worx','Partena','Securex','Sodexo','Andere'],result:{saving:'Geschatte jaarlijkse besparing',months:'Return on investment',per:'per maand bespaard',cta:'Nu een demo aanvragen',note:'Schatting op basis van onze tarieven vs. gemiddelde Belgische markttarieven.'},tiers:T.fr.roi.tiers};
 T.nl.sol={ey:'Onze oplossingen',h:'Voor elk profiel de juiste oplossing.',sub:'Zelfstandige, werkgever of accountant — Aureus Social Pro past zich aan.',items:[{ico:'🚀',title:'Zelfstandige worden',desc:'Statuut, ONSS, verplichtingen — alles om rustig te starten.',page:'independant'},{ico:'👤',title:'Werkgever worden',desc:'Inschrijving, contract, Dimona, eerste lonen.',page:'employeur',featured:true},{ico:'🏢',title:'Werkgevers',desc:'Automatiseer lonen, DmfA, boekhoudexport.',page:'employeurs'},{ico:'🏛',title:'Accountants',desc:'Multi-klant portaal, Mahis/CSAM mandaten, REST API.',page:'experts'},{ico:'📊',title:'Aangiften & Belcotax',desc:'Kwartaal DmfA, fiches 281.10/20/30, MyMinfin.',page:'employeurs'},{ico:'📚',title:'Opleidingen',desc:'Webinars over Belgisch sociaal recht.',page:'formations'}]};
 T.nl.art={ey:'Altijd klaar voor de toekomst',h:'Bronnen & nieuws',filters:[['tout','Alles'],['paie','Loon'],['rh','HR'],['legal','Wetgeving'],['onss','ONSS']],items:T.fr.art.items};
 T.nl.nw={ey:'Nieuwsbrief',h:'Mis geen sociaal nieuws.',sub:'Wetswijzigingen, bijgewerkte barema\'s, praktische tips.',ph:'uw@email.be',btn:'Inschrijven',note:'Privacybeleid Aureus IA SPRL.',ok:'✓ Inschrijving bevestigd — welkom!',feats:[['⚖️','Dagelijkse wettelijke watch','Meldingen zodra een wet uw verplichtingen beïnvloedt'],['🧮','Barema\'s 2026 bijgewerkt','Nieuwe CP-roosters voor inwerkingtreding'],['💡','Expertadvies','Praktijkfiches van onze juristen']]};
+T.nl.ft={...T.fr.ft,col1:'Oplossingen',col2:'Product',col3:'Juridisch',copy:'© 2026 Aureus IA SPRL · Alle rechten voorbehouden',desc:'Digitaal Belgisch sociaal secretariaat. 132 modules, 166 PC.',
+    c1:[['Zelfstandigen','independant'],['Werkgever worden','employeur'],['Werkgevers','employeurs'],['Accountants','experts'],['Opleidingen','formations']],
+    c2:[['Demo aanvragen','contact'],['Documentatie',null],['Status',null]],
+    c3:[['Privacy',null],['Gebruiksvoorwaarden',null],['GDPR',null],['Disclaimer',null]]};
 T.nl.cta={h:'Klaar om uw sociaal beheer te moderniseren?',sub:'Eerste maand gratis · Directe toegang · Migratiebegeleiding',btn:'Nu beginnen →'};
 
 // ── EN ──
@@ -181,12 +185,16 @@ Object.assign(T.en,{
 T.en.mega[1].label='Freelancers'; T.en.mega[2].label='Become an employer'; T.en.mega[3].label='Employers'; T.en.mega[4].label='Training'; T.en.mega[5].label='Accountants';
 T.en.hero={badge:'Belgian digital payroll platform — v18 in production',h1:'Your Belgian social\npartner.\nFinally digital.',sub:'From Dimona to quarterly declarations — everything you need, in one place.',cta1:'Go to application',cta2:'Watch demo',stats:[['166','Joint committees'],['< 8s','Dimona submitted'],['12K+','Payslips'],['420+','Companies']]};
 T.en.logos={title:'They trust Aureus Social Pro',items:['SME Brussels','Dupont Fiduciary','Janssen Office','HR Partners','Comptaflex','StartBE']};
-T.en.mockup={badge:'Real-time interface',title:'Your entire social cycle\nin one dashboard.',sub:'Unified dashboard, real-time ONSS alerts, accounting export in one click.',features:['Payslip in 3 clicks','Dimona IN/OUT < 8 seconds','DmfA XML ready by the 5th','AES-256 encrypted nightly backup']};
+T.en.mockup={badge:'Real-time interface',title:'Your entire social cycle\nin one dashboard.',sub:'Unified dashboard, real-time ONSS alerts, accounting export in one click.',features:['Payslip in 3 clicks','Dimona IN/OUT < 8 seconds','DmfA XML ready by the 5th','AES-256 encrypted nightly backup'],db:{title:'Dashboard',stats:[['12.4K','Payslips','📄'],['3.9K','ONSS Declarations','📋'],['420+','Companies','🏢'],['99.97%','Uptime','⚡']],chart:'Payroll Q1 2026',badges:[{l:'Dimona',c:'#22C55E',v:'8 min ago'},{l:'DmfA Q1',c:'#D4A84C',v:'Ready'},{l:'Belcotax',c:'#60A5FA',v:'Due Apr 5'}]}};
 T.en.testimonials={ey:'Testimonials',title:'What our clients say.',items:[{name:'Sophie Renard',role:'HR Manager — 12 employees SME, Brussels',text:"We left SD Worx after 8 years. Migration took 3 days and we save €340/month.",stars:5,initials:'SR',color:'#B8913A'},{name:'Marc Janssen',role:'Accountant — 23 client files',text:"The multi-client portal is exactly what was missing. 23 employers from one dashboard. Mahis mandates auto-generated.",stars:5,initials:'MJ',color:'#1A5C42'},{name:'Amira Benali',role:'Freelancer, JC 200',text:"Submitted my first Dimona in 7 seconds. Payroll calculation perfect — ONSS, withholding tax, employment bonus.",stars:5,initials:'AB',color:'#18396A'}]};
 T.en.roi={ey:'ROI Calculator',title:'How much do you save\nby leaving SD Worx?',sub:'Estimate your annual savings in 30 seconds.',employees:'Number of employees',current:'Current provider',providers:['SD Worx','Partena','Securex','Sodexo','Other'],result:{saving:'Estimated annual savings',months:'Return on investment',per:'saved per month',cta:'Book a demo now',note:'Estimate based on our public rates vs average Belgian market rates.'},tiers:T.fr.roi.tiers};
 T.en.sol={ey:'Our solutions',h:'The right solution for every profile.',sub:'Freelancer, employer or accountant — Aureus Social Pro adapts.',items:[{ico:'🚀',title:'Become a freelancer',desc:'Status, ONSS, obligations — everything to start with confidence.',page:'independant'},{ico:'👤',title:'Become an employer',desc:'Registration, contract, Dimona, first payroll.',page:'employeur',featured:true},{ico:'🏢',title:'Employers',desc:'Automate payroll, DmfA, accounting exports.',page:'employeurs'},{ico:'🏛',title:'Accountants',desc:'Multi-client portal, Mahis/CSAM mandates, REST API.',page:'experts'},{ico:'📊',title:'Declarations & Belcotax',desc:'Quarterly DmfA, 281.10/20/30 slips, MyMinfin.',page:'employeurs'},{ico:'📚',title:'Training',desc:'Webinars on Belgian social law.',page:'formations'}]};
 T.en.art={ey:'Always ready for the future',h:'Resources & news',filters:[['tout','All'],['paie','Payroll'],['rh','HR'],['legal','Legislation'],['onss','ONSS']],items:T.fr.art.items};
 T.en.nw={ey:'Newsletter',h:'Never miss a social update.',sub:'Legal changes, updated scales, practical advice.',ph:'your@email.com',btn:'Subscribe',note:'Aureus IA SPRL privacy policy.',ok:'✓ Subscription confirmed — welcome!',feats:[['⚖️','Daily legal watch','Alerts when a law impacts your obligations'],['🧮','Updated 2026 scales','New CP grids before entry into force'],['💡','Expert advice','Practical guides from our lawyers']]};
+T.en.ft={...T.fr.ft,col1:'Solutions',col2:'Product',col3:'Legal',copy:'© 2026 Aureus IA SPRL · All rights reserved',desc:'Belgian digital payroll platform. 132 modules, 166 joint committees.',
+    c1:[['Freelancers','independant'],['Become an employer','employeur'],['Employers','employeurs'],['Accountants','experts'],['Training','formations']],
+    c2:[['Book a demo','contact'],['Documentation',null],['Status',null]],
+    c3:[['Privacy',null],['Terms',null],['GDPR',null],['Disclaimer',null]]};
 T.en.cta={h:'Ready to modernize your HR administration?',sub:'First month free · Immediate access · Assisted migration',btn:'Get started →'};
 
 // ── DE ──
@@ -199,20 +207,40 @@ Object.assign(T.de,{
 T.de.mega[1].label='Selbständige'; T.de.mega[2].label='Arbeitgeber werden'; T.de.mega[3].label='Arbeitgeber'; T.de.mega[4].label='Schulungen'; T.de.mega[5].label='Buchhalter';
 T.de.hero={badge:'Digitales belgisches Sozialsekretariat — v18 in Produktion',h1:'Ihr belgischer\nSozialpartner.\nEndlich digital.',sub:'Von Dimona bis Quartalsmeldungen — alles, was Sie brauchen, an einem Ort.',cta1:'Zur Anwendung',cta2:'Demo ansehen',stats:[['166','Paritätische Kommissionen'],['< 8s','Dimona eingereicht'],['12K+','Gehaltszettel'],['420+','Unternehmen']]};
 T.de.logos={title:'Sie vertrauen Aureus Social Pro',items:['KMU Brüssel','Fiduziaire Dupont','Büro Janssen','HR Partners','Comptaflex','StartBE']};
-T.de.mockup={badge:'Echtzeit-Interface',title:'Ihr gesamter Sozialdatenzyklus\nin einem Dashboard.',sub:'Unified Dashboard, ONSS-Echtzeit-Benachrichtigungen, Buchhalterexport per Klick.',features:['Gehaltszettel in 3 Klicks','Dimona IN/OUT < 8 Sekunden','DmfA XML am 5. fertig','AES-256-verschlüsseltes Nacht-Backup']};
+T.de.mockup={badge:'Echtzeit-Interface',title:'Ihr gesamter Sozialdatenzyklus\nin einem Dashboard.',sub:'Unified Dashboard, ONSS-Echtzeit-Benachrichtigungen, Buchhalterexport per Klick.',features:['Gehaltszettel in 3 Klicks','Dimona IN/OUT < 8 Sekunden','DmfA XML am 5. fertig','AES-256-verschlüsseltes Nacht-Backup'],db:{title:'Dashboard',stats:[['12.4K','Gehaltszettel','📄'],['3.9K','ONSS-Meldungen','📋'],['420+','Unternehmen','🏢'],['99.97%','Uptime','⚡']],chart:'Gehalt Q1 2026',badges:[{l:'Dimona',c:'#22C55E',v:'vor 8 Min.'},{l:'DmfA Q1',c:'#D4A84C',v:'Bereit'},{l:'Belcotax',c:'#60A5FA',v:'Vor 5. Apr.'}]}};
 T.de.testimonials={ey:'Referenzen',title:'Was unsere Kunden sagen.',items:[{name:'Sophie Renard',role:'HR-Leiterin — KMU 12 Mitarbeiter, Brüssel',text:"SD Worx nach 8 Jahren verlassen. Migration 3 Tage, wir sparen 340€/Monat.",stars:5,initials:'SR',color:'#B8913A'},{name:'Marc Janssen',role:'Buchhalter — 23 Akten',text:"Das Multi-Mandanten-Portal ist genau das, was gefehlt hat. 23 Arbeitgeber aus einem Dashboard. Mahis-Mandate automatisch.",stars:5,initials:'MJ',color:'#1A5C42'},{name:'Amira Benali',role:'Selbständige, PK 200',text:"Erste Dimona in 7 Sekunden. Gehaltsberechnung perfekt — ONSS, Lohnsteuer, Beschäftigungsbonus.",stars:5,initials:'AB',color:'#18396A'}]};
 T.de.roi={ey:'ROI-Rechner',title:'Wie viel sparen Sie,\nwenn Sie SD Worx verlassen?',sub:'Schätzen Sie Ihre jährlichen Einsparungen in 30 Sekunden.',employees:'Anzahl Mitarbeiter',current:'Aktueller Anbieter',providers:['SD Worx','Partena','Securex','Sodexo','Andere'],result:{saving:'Geschätzte jährliche Einsparung',months:'Return on Investment',per:'pro Monat gespart',cta:'Jetzt Demo anfordern',note:'Schätzung basierend auf unseren Tarifen vs. belgischen Marktdurchschnittstarifen.'},tiers:T.fr.roi.tiers};
 T.de.sol={ey:'Unsere Lösungen',h:'Für jedes Profil die richtige Lösung.',sub:'Selbständige, Arbeitgeber oder Buchhalter — Aureus Social Pro passt sich an.',items:[{ico:'🚀',title:'Selbständig werden',desc:'Statut, ONSS, Pflichten — alles für einen ruhigen Start.',page:'independant'},{ico:'👤',title:'Arbeitgeber werden',desc:'Anmeldung, Vertrag, Dimona, erste Gehälter.',page:'employeur',featured:true},{ico:'🏢',title:'Arbeitgeber',desc:'Gehaltsabrechnung, DmfA, Buchhalterexport automatisieren.',page:'employeurs'},{ico:'🏛',title:'Buchhalter',desc:'Multi-Mandanten-Portal, Mahis/CSAM-Mandate, REST API.',page:'experts'},{ico:'📊',title:'Meldungen & Belcotax',desc:'Quartals-DmfA, Fiches 281.10/20/30, MyMinfin.',page:'employeurs'},{ico:'📚',title:'Schulungen',desc:'Webinare zum belgischen Sozialrecht.',page:'formations'}]};
 T.de.art={ey:'Immer bereit für die Zukunft',h:'Ressourcen & News',filters:[['tout','Alles'],['paie','Lohn'],['rh','HR'],['legal','Gesetzgebung'],['onss','ONSS']],items:T.fr.art.items};
 T.de.nw={ey:'Newsletter',h:'Kein Sozialrecht-Update verpassen.',sub:'Gesetzesänderungen, aktualisierte Tarife, praktische Tipps.',ph:'ihre@email.de',btn:'Abonnieren',note:'Datenschutzrichtlinie Aureus IA SPRL.',ok:'✓ Anmeldung bestätigt — willkommen!',feats:[['⚖️','Tägliche Rechtsüberwachung','Meldungen wenn ein Gesetz Ihre Pflichten betrifft'],['🧮','Aktualisierte Tarife 2026','Neue CP-Raster vor Inkrafttreten'],['💡','Expertenrat','Praxismerkblätter unserer Juristen']]};
+T.de.ft={...T.fr.ft,col1:'Lösungen',col2:'Produkt',col3:'Rechtliches',copy:'© 2026 Aureus IA SPRL · Alle Rechte vorbehalten',desc:'Digitales belgisches Sozialsekretariat. 132 Module, 166 Kommissionen.',
+    c1:[['Selbständige','independant'],['Arbeitgeber werden','employeur'],['Arbeitgeber','employeurs'],['Buchhalter','experts'],['Schulungen','formations']],
+    c2:[['Demo anfordern','contact'],['Dokumentation',null],['Status',null]],
+    c3:[['Datenschutz',null],['AGB',null],['DSGVO',null],['Disclaimer',null]]};
 T.de.cta={h:'Bereit, Ihre Sozialverwaltung zu modernisieren?',sub:'Erster Monat kostenlos · Sofortiger Zugang · Migrationsbegleitung',btn:'Jetzt starten →'};
+
+T.nl.mega[1].items=[['🚀','Zelfstandige worden','Statuut, verplichtingen, ONSS','independant'],['🧮','Bijdragen','ONSS-berekening per kwartaal','independant'],['📋','Verplichtingen','Dimona, DmfA, BTW, PB','independant'],['🛡️','Sociale bescherming','Ziekte, invaliditeit, pensioen','independant']];
+T.nl.mega[2].items=[['👤','Eerste werknemer','ONSS-inschrijving, contract','employeur'],['📄','Arbeidscontract','AOD, ODD — conforme modellen','employeur'],['⚡','Automatische Dimona','IN/OUT aangifte in 8 seconden','employeur'],['💶','Eerste lonen','Loonberekening, fiches, SEPA','employeur']];
+T.nl.mega[3].items=[['🏢','Loonbeheer','166 PC, barema’s, premies, ONSS','employeurs'],['📊','Kwartaalaangiften','DmfA XML, Belcotax 281.10/20/30','employeurs'],['📁','Boekhoudexport','WinBooks, BOB, Octopus, Exact Online','employeurs'],['🔐','Veiligheid & GDPR','AES-256-GCM, auditspoor, RLS','employeurs'],['👥','Werknemersportaal','Loonfiches, documenten, verlof','employeurs'],['✍️','Elektronische handtekening','Yousign / DocuSign','employeurs']];
+T.nl.mega[4].items=[['📚','Belgisch sociaal recht','ONSS, loon, Dimona','formations'],['🧮','Geavanceerde loonberekening','PC, barema’s, BV Bijlage III','formations'],['🏛','DmfA & Belcotax','Aangiften stap voor stap','formations'],['🚀','Aureus Pro Onboarding','Volledige ingebruikname','formations']];
+T.nl.mega[5].items=[['🏛','Multi-klant portaal','Alle dossiers gecentraliseerd','experts'],['🔗','REST API + Webhooks','ERP-integratie','experts'],['📤','ONSS-mandaten','Mahis/CSAM generatie','experts'],['🔄','Begeleide migratie','Vanaf SD Worx, Partena…','experts']];
+T.en.mega[1].items=[['🚀','Become a freelancer','Status, obligations, ONSS steps','independant'],['🧮','Contributions','Quarterly ONSS calculation','independant'],['📋','Obligations','Dimona, DmfA, VAT, PIT','independant'],['🛡️','Social protection','Illness, disability, pension','independant']];
+T.en.mega[2].items=[['👤','First employee','ONSS registration, contract','employeur'],['📄','Employment contract','Open-ended, fixed-term — compliant templates','employeur'],['⚡','Automatic Dimona','IN/OUT declaration in 8 seconds','employeur'],['💶','First payroll','Pay calculation, slips, SEPA','employeur']];
+T.en.mega[3].items=[['🏢','Payroll management','166 JC, scales, bonuses, ONSS','employeurs'],['📊','Quarterly declarations','DmfA XML, Belcotax 281.10/20/30','employeurs'],['📁','Accounting export','WinBooks, BOB, Octopus, Exact Online','employeurs'],['🔐','Security & GDPR','AES-256-GCM, audit trail, RLS','employeurs'],['👥','Employee portal','Payslips, documents, leave','employeurs'],['✍️','Electronic signature','Yousign / DocuSign','employeurs']];
+T.en.mega[4].items=[['📚','Belgian social law','ONSS, payroll, Dimona','formations'],['🧮','Advanced payroll','JC, scales, Annex III','formations'],['🏛','DmfA & Belcotax','Step-by-step declarations','formations'],['🚀','Aureus Pro Onboarding','Full onboarding','formations']];
+T.en.mega[5].items=[['🏛','Multi-client portal','All files centralized','experts'],['🔗','REST API + Webhooks','ERP integration','experts'],['📤','ONSS mandates','Mahis/CSAM generation','experts'],['🔄','Assisted migration','From SD Worx, Partena…','experts']];
+T.de.mega[1].items=[['🚀','Selbständig werden','Statut, Pflichten, ONSS','independant'],['🧮','Beiträge','Vierteljährliche ONSS-Berechnung','independant'],['📋','Pflichten','Dimona, DmfA, MwSt., ESt.','independant'],['🛡️','Sozialschutz','Krankheit, Invalidität, Rente','independant']];
+T.de.mega[2].items=[['👤','Erster Arbeitnehmer','ONSS-Anmeldung, Vertrag','employeur'],['📄','Arbeitsvertrag','Unbefristet, befristet — konforme Muster','employeur'],['⚡','Automatische Dimona','IN/OUT-Meldung in 8 Sekunden','employeur'],['💶','Erste Gehälter','Gehaltsberechnung, Zettel, SEPA','employeur']];
+T.de.mega[3].items=[['🏢','Gehaltsabrechnung','166 PK, Tarife, Prämien, ONSS','employeurs'],['📊','Quartalsmeldungen','DmfA XML, Belcotax 281.10/20/30','employeurs'],['📁','Buchhalterexport','WinBooks, BOB, Octopus, Exact Online','employeurs'],['🔐','Sicherheit & DSGVO','AES-256-GCM, Auditpfad, RLS','employeurs'],['👥','Mitarbeiterportal','Gehaltszettel, Dokumente, Urlaub','employeurs'],['✍️','Elektronische Unterschrift','Yousign / DocuSign','employeurs']];
+T.de.mega[4].items=[['📚','Belgisches Sozialrecht','ONSS, Lohn, Dimona','formations'],['🧮','Fortgeschrittene Lohnberechnung','PK, Tarife, Anlage III','formations'],['🏛','DmfA & Belcotax','Schritt-für-Schritt-Meldungen','formations'],['🚀','Aureus Pro Onboarding','Vollständige Einführung','formations']];
+T.de.mega[5].items=[['🏛','Multi-Mandanten-Portal','Alle Akten zentralisiert','experts'],['🔗','REST API + Webhooks','ERP-Integration','experts'],['📤','ONSS-Mandate','Mahis/CSAM-Generierung','experts'],['🔄','Begleitete Migration','Von SD Worx, Partena…','experts']];
 
 // ── NL — pages internes ──
 T.nl.ind={...T.fr.ind,ey:'Zelfstandigen',bc:'Zelfstandigen',h:'Zelfstandige worden\nin België.',sub:'De complete gids stap voor stap.',c1:'Praat met een expert',c2:'Demo aanvragen',card:{...T.fr.ind.card,label:'Aureus Social Pro',title:'Uw sociale back-office',sub:'Automatiseer uw verplichtingen.'},sy:{...T.fr.ind.sy,ey:'Stap voor stap',h:'Starten in 6 stappen',chkH:'✅ Wat Aureus automatiseert',tip:{h:'Goed om te weten',t:'In 2026 geniet de eerste werknemer van een volledige vrijstelling van werkgeversbijdragen gedurende 5 jaar.'}},faq:{ey:'Veelgestelde vragen',h:'Alles wat u wilt weten',items:[["Wat is de termijn voor aansluiting?","90 dagen vanaf het begin van uw activiteit. Bij overschrijding: ambtshalve aansluiting en verhogingen."],["Hoeveel bedragen de bijdragen in 2026?","20,5% tot 72.810 € en 14,16% daarboven. Minimum: 870,78 €/kwartaal."],["Kan ik bijkomend zelfstandige zijn?","Ja, onder voorbehoud van akkoord van uw werkgever. Verlaagde bijdragen via het aanvullend regime."],["Beheert Aureus zelfstandigen in vennootschap?","Ja. Natuurlijke personen en vennootschapsmandatarissen (SRL-zaakvoerders, SA-bestuurders)."]]},cta:{h:"Klaar om rustig te starten?",sub:"Onze experts begeleiden u van A tot Z.",btn:"Praat met een expert →"}};
 T.nl.emp={...T.fr.emp,ey:'Eerste werknemer',bc:'Werkgever worden',h:'Uw eerste medewerker\nin vertrouwen\naannemen.',sub:'ONSS-inschrijving, contract, Dimona, eerste lonen.',c1:'Demo aanvragen',c2:'Al werkgever →',card:{...T.fr.emp.card,label:'Eerste werknemer in België',title:'Wat Aureus doet',sub:'Volledige automatisering van de sociale cyclus.'},steps:{...T.fr.emp.steps,ey:'Belangrijkste stappen',h:'Van 0 naar uw eerste werknemer'},av:{...T.fr.emp.av,ey:'Voordelen 2026',h:'Vrijstellingen & aanwervingspremies'},cta:{h:"Neem morgen uw eerste medewerker aan.",sub:'Gratis demo · Volledige begeleiding · Eerste maand gratis',btn:'Starten →'}};
 T.nl.emps={...T.fr.emps,ey:'Werkgevers',bc:'Werkgevers',h:'Uw loon,\nuw aangiften,\ngeautomatiseerd.',sub:'166 paritaire comités, DmfA XML, Belcotax, WinBooks/BOB export — 132 modules.',c1:'Naar het platform',c2:'Demo aanvragen',card:{...T.fr.emps.card,label:'Platform in productie',title:'Echte cijfers — Maart 2026',sub:'132 modules · 44.246 regels code'},mods:{...T.fr.emps.mods,ey:'Functionaliteiten',h:'132 modules voor de volledige sociale cyclus'},cta:{h:"Zie het platform in actie.",sub:'Demo op uw eigen gegevens — 30 minuten.',btn:'Een demo reserveren →'}};
 T.nl.exp={...T.fr.exp,ey:'Accountants',bc:'Accountants',h:'Één portaal,\nalle sociale\ndossiers.',sub:'Mahis/CSAM mandaten, multi-klant portaal, REST API, migratie van SD Worx of Partena.',c1:'Fiduciaire demo aanvragen',c2:'Begeleide migratie',card:{...T.fr.exp.card,label:'Fiduciaire Plan',title:'Onbeperkte multi-dossiers',sub:'Portaal · API · SLA · Migratie'},it:{...T.fr.exp.it,ey:'Wat wij bieden',h:'Ontworpen voor cijferprofessionals'},mig:{...T.fr.exp.mig,ey:'Migratie',h:'SD Worx of Partena zonder risico verlaten.'},cta:{h:"Sluit u aan bij kantoren die voor onafhankelijkheid kozen.",sub:'Begeleide migratie · SLA 99.9% · Eerste maand gratis',btn:'Fiduciaire demo →'}};
-T.nl.form={...T.fr.form,ey:'Opleidingen',bc:'Opleidingen',h:'Het Belgische sociale recht\nbeheersen.\nIn uw tempo.',sub:'Webinars, praktijkgidsen en tutorials over Belgische loonberekening, ONSS, Dimona en Belcotax.',c1:'Programma bekijken',c2:'Contact opnemen',card:{...T.fr.form.card,label:'Aureus Opleidingen',title:'Leer van experts',sub:'Inhoud gebaseerd op echte praktijkgevallen.'},mods:{...T.fr.form.mods,ey:"Thema's",h:'Onze 6 opleidingsmodules'},arts:{...T.fr.form.arts,ey:'Inspiratie',h:'Altijd klaar voor de toekomst'},cta:{h:"Heeft u een activiteit of wilt u uw bedrijf ontwikkelen?",sub:'Wat uw vraag ook is, Aureus geeft u duidelijke antwoorden.',btn:'Neem contact op →'}};
+T.nl.form={...T.fr.form,ey:'Opleidingen',bc:'Opleidingen',h:'Het Belgische sociale recht\nbeheersen.\nIn uw tempo.',sub:'Webinars, praktijkgidsen en tutorials over Belgische loonberekening, ONSS, Dimona en Belcotax.',c1:'Programma bekijken',c2:'Contact opnemen',card:{...T.fr.form.card,label:'Aureus Opleidingen',title:'Leer van experts',sub:'Inhoud gebaseerd op echte praktijkgevallen.'},mods:{...T.fr.form.mods,ey:"Thema’s",h:'Onze 6 opleidingsmodules'},arts:{...T.fr.form.arts,ey:'Inspiratie',h:'Altijd klaar voor de toekomst'},cta:{h:"Heeft u een activiteit of wilt u uw bedrijf ontwikkelen?",sub:'Wat uw vraag ook is, Aureus geeft u duidelijke antwoorden.',btn:'Neem contact op →'}};
 T.nl.con={...T.fr.con,ey:'Contact',h:'Hoe kunnen wij\nu helpen?',sub:'Ons team antwoordt binnen 4 werkuren. Geen chatbot — echte experts in Belgisch sociaal recht.',ch:[['✉️','E-mail','info@aureus-ia.com'],['💻','Applicatie','app.aureussocial.be'],['📍','Adres','Place Marcel Broodthaers 8, 1060 Sint-Gillis, Brussel']],cr:[['KBO','BE 1028.230.781'],['Mahis','DGIII/MAHI011'],['Peppol','0208:1028230781'],['Reactie','< 4 werkuren']],f:{t:'Demo aanvragen',s:'Antwoord gegarandeerd binnen 4 werkuren.',fn:'Voornaam *',ln:'Achternaam *',em:'Professioneel e-mail *',co:'Bedrijf',ro:'U bent *',ms:'Bericht',fnp:'Jan',lnp:'Janssen',emp:'jan.janssen@fiduciaire.be',cop:'Kantoor Janssen & Partners',msp:'Beschrijf uw situatie…',sub:'Aanvraag verzenden',note:'Door dit formulier in te dienen gaat u akkoord met ons GDPR-beleid.',ok:'✓ Bericht verzonden — we antwoorden binnen 4 werkuren.',roles:['Selecteer...','Zelfstandige / Starter','Fiduciaire / Accountant','Directe werkgever','Sociaal secretariaat','Makelaar / Partner','Andere']}};
 
 // ── EN — pages internes ──
@@ -411,7 +439,17 @@ function StickyCTA({t,go,show}) {
   );
 }
 
-function MockupDashboard() {
+// ── TAG LABELS TRADUITS ──
+const TAG_MAP={
+  fr:{Paie:'Paie',Législation:'Législation',ONSS:'ONSS',RH:'RH',RGPD:'RGPD','Droit social':'Droit social'},
+  nl:{Paie:'Loon',Législation:'Wetgeving',ONSS:'ONSS',RH:'HR',RGPD:'GDPR','Droit social':'Sociaal recht'},
+  en:{Paie:'Payroll',Législation:'Legislation',ONSS:'ONSS',RH:'HR',RGPD:'GDPR','Droit social':'Social law'},
+  de:{Paie:'Lohn',Législation:'Gesetzgebung',ONSS:'ONSS',RH:'HR',RGPD:'DSGVO','Droit social':'Sozialrecht'},
+};
+function tagLabel(tag,lang){return(TAG_MAP[lang]&&TAG_MAP[lang][tag])||tag;}
+
+function MockupDashboard({t}) {
+  const db=t&&t.mockup&&t.mockup.db?t.mockup.db:{title:'Dashboard',stats:[['12.4K','Payslips','📄'],['3.9K','Declarations','📋'],['420+','Companies','🏢'],['99.97%','Uptime','⚡']],chart:'Payroll Q1 2026',badges:[{l:'Dimona',c:'#22C55E',v:'8 min ago'},{l:'DmfA Q1',c:'#D4A84C',v:'Ready'},{l:'Belcotax',c:'#60A5FA',v:'Due Apr 5'}]};
   return(
     <div className="mockup-screen">
       <div className="mockup-bar">
@@ -422,11 +460,11 @@ function MockupDashboard() {
       </div>
       <div style={{padding:20,background:'#1A1917'}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-          <div><div style={{fontSize:10,color:'rgba(255,255,255,.3)',letterSpacing:'.1em',textTransform:'uppercase',marginBottom:4}}>AUREUS SOCIAL PRO</div><div style={{fontSize:14,fontWeight:600,color:'#fff'}}>Tableau de bord</div></div>
+          <div><div style={{fontSize:10,color:'rgba(255,255,255,.3)',letterSpacing:'.1em',textTransform:'uppercase',marginBottom:4}}>AUREUS SOCIAL PRO</div><div style={{fontSize:14,fontWeight:600,color:'#fff'}}>{db.title}</div></div>
           <div className="mockup-badge"><span className="ldot"/> Live</div>
         </div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:10}}>
-          {[['12.4K','Fiches de paie','📄'],['3.9K','Déclarations ONSS','📋'],['420+','Entreprises','🏢'],['99.97%','Uptime','⚡']].map(([v,l,i])=>(
+          {db.stats.map(([v,l,i])=>(
             <div key={l} className="mockup-card">
               <div style={{fontSize:16,marginBottom:6}}>{i}</div>
               <div className="mockup-stat">{v}</div>
@@ -435,7 +473,7 @@ function MockupDashboard() {
           ))}
         </div>
         <div className="mockup-card">
-          <div style={{fontSize:11,color:'rgba(255,255,255,.3)',letterSpacing:'.06em',textTransform:'uppercase',marginBottom:10}}>Paie Q1 2026</div>
+          <div style={{fontSize:11,color:'rgba(255,255,255,.3)',letterSpacing:'.06em',textTransform:'uppercase',marginBottom:10}}>{db.chart}</div>
           <div className="mockup-bar-chart">
             {[45,72,58,88,65,92,78,96,71,85,90,100].map((h,i)=>(
               <div key={i} className="mbc" style={{height:`${h}%`,animationDelay:`${i*0.05}s`}}/>
@@ -443,7 +481,7 @@ function MockupDashboard() {
           </div>
         </div>
         <div style={{marginTop:10,display:'flex',gap:6}}>
-          {[{l:'Dimona',c:'#22C55E',v:'8 min ago'},{l:'DmfA Q1',c:'#D4A84C',v:'Ready'},{l:'Belcotax',c:'#60A5FA',v:'Due Apr 5'}].map(({l,c,v})=>(
+          {db.badges.map(({l,c,v})=>(
             <div key={l} style={{flex:1,background:'rgba(255,255,255,.05)',borderRadius:6,padding:'10px',border:`1px solid ${c}30`}}>
               <div style={{fontSize:10,color:c,fontWeight:700,letterSpacing:'.08em',marginBottom:3}}>{l}</div>
               <div style={{fontSize:11,color:'rgba(255,255,255,.4)'}}>{v}</div>
@@ -556,7 +594,7 @@ function RoiCalculator({t,go}) {
               <div style={{fontSize:14,color:'rgba(255,255,255,.5)',marginBottom:24}}>{monthly>0?`${monthly.toLocaleString('fr-BE')} € ${roi.result.per}`:''}</div>
               {annual>0&&<div style={{background:'rgba(255,255,255,.07)',borderRadius:8,padding:'16px',marginBottom:20}}>
                 <div style={{fontSize:12,color:'rgba(255,255,255,.4)',marginBottom:4}}>{roi.result.months}</div>
-                <div style={{fontSize:24,fontWeight:700,color:G2,fontFamily:"'Fraunces',serif"}}>{months} mois</div>
+                <div style={{fontSize:24,fontWeight:700,color:G2,fontFamily:"'Fraunces',serif"}}>{months} {t.lang==='nl'?'maanden':t.lang==='de'?'Monate':t.lang==='en'?'months':'mois'}</div>
               </div>}
               <button className="btn-gold" style={{width:'100%',justifyContent:'center'}} onClick={()=>go('contact')}>{roi.result.cta} <Arr/></button>
             </div>
@@ -626,7 +664,7 @@ function Footer({t,go}) {
               </div>
               <div><div style={{fontSize:14,fontWeight:700,color:'#fff',letterSpacing:'.04em'}}>AUREUS</div><div style={{fontSize:8,color:'rgba(255,255,255,.3)',letterSpacing:'.2em',textTransform:'uppercase'}}>Social Pro</div></div>
             </div>
-            <p style={{fontSize:14,color:'rgba(255,255,255,.4)',lineHeight:1.7,marginBottom:14,maxWidth:260}}>Secrétariat social numérique belge. 132 modules, 166 CP.</p>
+            <p style={{fontSize:14,color:'rgba(255,255,255,.4)',lineHeight:1.7,marginBottom:14,maxWidth:260}}>{ft.desc}</p>
             <div style={{fontFamily:"'Fira Code',monospace",fontSize:11,color:'rgba(255,255,255,.2)'}}>{t.topbar.bce} · Saint-Gilles</div>
           </div>
           {[[ft.col1,ft.c1],[ft.col2,ft.c2],[ft.col3,ft.c3]].map(([title,links])=>(
@@ -697,7 +735,7 @@ function PageHome({t,go}) {
           </div>
           <div style={{position:'relative'}}>
             <div style={{position:'absolute',inset:-20,background:'radial-gradient(ellipse at center,rgba(184,145,58,.15) 0%,transparent 70%)',pointerEvents:'none'}}/>
-            <MockupDashboard/>
+            <MockupDashboard t={t}/>
             <div style={{position:'absolute',top:-16,right:-16,background:INK,border:`1px solid ${G}`,borderRadius:10,padding:'12px 16px',boxShadow:'0 8px 32px rgba(0,0,0,.4)'}}>
               <div style={{fontSize:10,color:MIST,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:4}}>Dimona IN</div>
               <div style={{fontSize:14,fontWeight:700,color:'#22C55E'}}>✓ Soumise — 7.2s</div>
@@ -744,7 +782,7 @@ function PageHome({t,go}) {
           {art.filters.map(([k,l])=>(<button key={k} className={`ttab${filter===k?' active':''}`} onClick={()=>setFilter(k)}>{l}</button>))}
         </div>
         <div className="tc-grid">
-          {vis.map(a=>(<div key={a.title} className="tc" onClick={()=>a.slug&&go('article:'+a.slug)} style={{cursor:a.slug?'pointer':'default'}}><div className="tc-img">{a.ico}</div><div className="tc-body"><span className="tc-tag">{a.tag}</span><h4>{a.title}</h4><p>{a.desc}</p><div className="tc-cta">{t.readmore} <Arr/></div></div></div>))}
+          {vis.map(a=>(<div key={a.title} className="tc" onClick={()=>a.slug&&go('article:'+a.slug)} style={{cursor:a.slug?'pointer':'default'}}><div className="tc-img">{a.ico}</div><div className="tc-body"><span className="tc-tag">{tagLabel(a.tag,t.lang||'fr')}</span><h4>{a.title}</h4><p>{a.desc}</p><div className="tc-cta">{t.readmore} <Arr/></div></div></div>))}
         </div>
       </div>
     </section>
@@ -863,7 +901,7 @@ function PageForm({t,go,goBack}) {
     </div></section>
     <section className="vt-sec"><div className="vt-wrap">
       <div style={{marginBottom:48}} className="fade-in"><div className="vt-ey">{d.arts.ey}</div><h2>{d.arts.h}</h2></div>
-      <div className="tc-grid">{d.arts.items.map(a=>(<div key={a.t} className="tc" onClick={()=>a.slug&&go('article:'+a.slug)} style={{cursor:a.slug?'pointer':'default'}}><div className="tc-img">{a.ico}</div><div className="tc-body"><span className="tc-tag">{a.tag}</span><h4>{a.t}</h4><p>{a.d}</p><div className="tc-cta">{t.readmore} <Arr/></div></div></div>))}</div>
+      <div className="tc-grid">{d.arts.items.map(a=>(<div key={a.t} className="tc" onClick={()=>a.slug&&go('article:'+a.slug)} style={{cursor:a.slug?'pointer':'default'}}><div className="tc-img">{a.ico}</div><div className="tc-body"><span className="tc-tag">{tagLabel(a.tag,t.lang||'fr')}</span><h4>{a.t}</h4><p>{a.d}</p><div className="tc-cta">{t.readmore} <Arr/></div></div></div>))}</div>
     </div></section>
     <Newsletter t={t} go={go}/>
     <CtaBand h={d.cta.h} sub={d.cta.sub} btn={d.cta.btn} go={go}/><Footer t={t} go={go}/>
@@ -1002,6 +1040,7 @@ export default function VitrinePage() {
   const[showSticky,setShowSticky]=useState(false);
   const navRef=useRef(null);
   const t=T[lang]||T.fr;
+  if(t&&!t.lang)t.lang=lang;
 
   const go=(p)=>{
     if(p==='app'){window.location.href='/login';return;}
