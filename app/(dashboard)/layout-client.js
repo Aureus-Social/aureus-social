@@ -104,6 +104,8 @@ const MandatsAdminRaw = dynamic(() => import('../pages/MandatsAdminPage'), { ssr
 const MandatsAdminPg = ({ s, d, tab }) => <MandatsAdminRaw s={s} d={d} tab={tab} />;
 const ConnexionsHubRaw = dynamic(() => import('../pages/ConnexionsHub'), { ssr: false, loading: Loading });
 const ConnexionsHubPg = ({ s, d }) => <ConnexionsHubRaw s={s} d={d} />;
+const IntegrationsComptaRaw = dynamic(() => import('../pages/IntegrationsCompta'), { ssr: false, loading: Loading });
+const IntegrationsComptaPg = ({ s, d }) => <IntegrationsComptaRaw s={s} d={d} />;
 const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 
 // Reducer pour le state global
@@ -670,7 +672,7 @@ function DashboardLayoutInner({ user }) {
       case 'demodonnees': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'ged': return <SecurityPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'historique': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'integrations': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'integrations': return <IntegrationsComptaPg s={s} d={d} />;
       case 'massengine': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'mentionslegales': return <DocumentGeneratorPg s={s} d={d} tab={page} />;
       case 'monitoring': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
