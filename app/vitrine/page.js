@@ -1002,6 +1002,9 @@ function PageEmp({t,go,goBack}) {
       <h1 style={{marginBottom:18,whiteSpace:'pre-line'}}>{d.h.split('\n').map((l,i)=>(<span key={i}>{i>0&&<br/>}{i===2?<em>{l}</em>:l}</span>))}</h1>
       <p style={{fontSize:18,color:STONE,marginBottom:28,fontWeight:300}}>{d.sub}</p>
       <div style={{display:'flex',gap:12,flexWrap:'wrap'}}><button className="btn-p" onClick={()=>go('contact')}>{d.c1}</button><button className="btn-s" onClick={()=>go('employeurs')}>{d.c2}</button></div>
+      <div style={{marginTop:14,fontSize:13,color:MIST,display:'flex',gap:20,flexWrap:'wrap'}}>
+        <span>✓ Démo gratuite</span><span>✓ Sans engagement</span><span>✓ Réponse sous 24h</span><span>✓ Onboarding guidé inclus</span>
+      </div>
     </div><DkCard {...d.card}/></div></div></section>
     <section className="vt-sec"><div className="vt-wrap">
       <div style={{marginBottom:48}} className="fade-in"><div className="vt-ey">{d.steps.ey}</div><h2>{d.steps.h}</h2></div>
