@@ -37,6 +37,90 @@ function quickPP(brut) {
 function quickNet(brut) { return Math.round((brut||0) * NET_FACTOR * 100) / 100; }
 function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+function ChangePwd() {
+  const [cur, setCur] = useState('');
+  const [nw, setNw] = useState('');
+  const [nw2, setNw2] = useState('');
+  const [msg, setMsg] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [showCur, setShowCur] = useState(false);
+  const [showNw, setShowNw] = useState(false);
+
+  const handle = async () => {
+    if (!nw || !nw2) return setMsg({ok:false, t:'Remplis tous les champs.'});
+    if (nw !== nw2) return setMsg({ok:false, t:'Les nouveaux mots de passe ne correspondent pas.'});
+    if (nw.length < 8) return setMsg({ok:false, t:'Minimum 8 caractères requis.'});
+    setLoading(true); setMsg(null);
+    try {
+      // 1) Re-authentifier avec l'ancien mot de passe
+      const { data: { user }, error: loginErr } = await supabase.auth.signInWithPassword({
+        email: (await supabase.auth.getUser()).data.user?.email, password: cur
+      });
+      if (loginErr) { setMsg({ok:false, t:'Mot de passe actuel incorrect.'}); setLoading(false); return; }
+      // 2) Mettre à jour
+      const { error } = await supabase.auth.updateUser({ password: nw });
+      if (error) setMsg({ok:false, t: error.message});
+      else { setMsg({ok:true, t:'✅ Mot de passe mis à jour avec succès !'}); setCur(''); setNw(''); setNw2(''); }
+    } catch(e) { setMsg({ok:false, t:'Erreur: ' + e.message}); }
+    setLoading(false);
+  };
+
+  const inp = {width:'100%',padding:'11px 14px',borderRadius:9,border:'1px solid rgba(198,163,78,.15)',background:'rgba(0,0,0,.25)',color:'#e8e6e0',fontSize:13,fontFamily:'inherit',outline:'none',boxSizing:'border-box'};
+
+  return (
+    <div style={{marginBottom:18,padding:20,background:'linear-gradient(135deg,rgba(99,102,241,.06),rgba(99,102,241,.02))',border:'1px solid rgba(99,102,241,.2)',borderRadius:12}}>
+      <div style={{fontSize:14,fontWeight:700,color:'#818cf8',marginBottom:4}}>🔑 Changer le mot de passe</div>
+      <div style={{fontSize:11,color:'#5e5c56',marginBottom:16}}>Minimum 8 caractères</div>
+      {msg && (
+        <div style={{padding:'10px 14px',borderRadius:8,marginBottom:14,fontSize:12,
+          background: msg.ok ? 'rgba(34,197,94,.08)' : 'rgba(239,68,68,.08)',
+          color: msg.ok ? '#22c55e' : '#ef4444',
+          border:`1px solid ${msg.ok ? 'rgba(34,197,94,.2)' : 'rgba(239,68,68,.2)'}`}}>
+          {msg.t}
+        </div>
+      )}
+      <div style={{display:'grid',gap:10}}>
+        <div>
+          <div style={{fontSize:10,fontWeight:700,color:'#5e5c56',marginBottom:5,letterSpacing:.5}}>MOT DE PASSE ACTUEL</div>
+          <div style={{position:'relative'}}>
+            <input type={showCur?'text':'password'} value={cur} onChange={e=>setCur(e.target.value)} placeholder="••••••••" style={inp}/>
+            <button type="button" onClick={()=>setShowCur(v=>!v)} style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:14,color:'#5e5c56'}}>{showCur?'🙈':'👁'}</button>
+          </div>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          <div>
+            <div style={{fontSize:10,fontWeight:700,color:'#5e5c56',marginBottom:5,letterSpacing:.5}}>NOUVEAU MOT DE PASSE</div>
+            <div style={{position:'relative'}}>
+              <input type={showNw?'text':'password'} value={nw} onChange={e=>setNw(e.target.value)} placeholder="••••••••" style={inp}/>
+              <button type="button" onClick={()=>setShowNw(v=>!v)} style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:14,color:'#5e5c56'}}>{showNw?'🙈':'👁'}</button>
+            </div>
+            {nw && (
+              <div style={{marginTop:5,display:'flex',gap:3}}>
+                {[nw.length>=8, /[A-Z]/.test(nw), /[0-9]/.test(nw), /[^a-zA-Z0-9]/.test(nw)].map((ok,i)=>(
+                  <div key={i} style={{flex:1,height:3,borderRadius:2,background:ok?'#22c55e':'rgba(198,163,78,.15)'}}/>
+                ))}
+              </div>
+            )}
+          </div>
+          <div>
+            <div style={{fontSize:10,fontWeight:700,color:'#5e5c56',marginBottom:5,letterSpacing:.5}}>CONFIRMER LE MOT DE PASSE</div>
+            <input type="password" value={nw2} onChange={e=>setNw2(e.target.value)} placeholder="••••••••"
+              style={{...inp, borderColor: nw2 && nw!==nw2 ? 'rgba(239,68,68,.4)' : 'rgba(198,163,78,.15)'}}/>
+            {nw2 && nw===nw2 && <div style={{fontSize:10,color:'#22c55e',marginTop:4}}>✓ Identiques</div>}
+            {nw2 && nw!==nw2 && <div style={{fontSize:10,color:'#ef4444',marginTop:4}}>✗ Ne correspondent pas</div>}
+          </div>
+        </div>
+        <div style={{display:'flex',justifyContent:'flex-end'}}>
+          <button onClick={handle} disabled={loading||!cur||!nw||!nw2||nw!==nw2}
+            style={{padding:'10px 24px',borderRadius:9,border:'none',background:loading||!cur||!nw||!nw2||nw!==nw2?'rgba(99,102,241,.3)':'linear-gradient(135deg,#818cf8,#6366f1)',color:'#fff',fontSize:13,fontWeight:700,cursor:loading||!cur||!nw||!nw2||nw!==nw2?'not-allowed':'pointer',fontFamily:'inherit'}}>
+            {loading ? '...' : '🔑 Mettre à jour'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SettingsPage({s,d}) {
   const { t, lang, tText } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
@@ -73,6 +157,9 @@ function SettingsPage({s,d}) {
         <div style={{padding:8,background:'rgba(34,197,94,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#22c55e'}}>{Math.round(JSON.stringify(s).length/1024)} KB</div><div style={{fontSize:9,color:'#888'}}>{'Taille données'}</div></div>
       </div>
     </div>
+    {/* Changer mot de passe */}
+    <ChangePwd/>
+
     {/* 2FA / MFA TOTP */}
     <div style={{marginBottom:18,padding:16,background:'linear-gradient(135deg,rgba(198,163,78,.06),rgba(198,163,78,.02))',border:'1px solid rgba(198,163,78,.15)',borderRadius:12}}>
       <TwoFactorSetup/>
