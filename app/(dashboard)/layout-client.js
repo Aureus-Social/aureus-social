@@ -110,18 +110,38 @@ const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 function reducer(state, action) {
   // Audit trail serveur — actions sensibles tracées automatiquement
   if (typeof window !== 'undefined') {
-    const sensitiveActions = ['ADD_EMP','UPD_EMP','DEL_EMP','ADD_P','ADD_DIM'];
-    if (sensitiveActions.includes(action.type)) {
-      const labels = { ADD_EMP:'CREATE_EMPLOYEE', UPD_EMP:'UPDATE_EMPLOYEE', DEL_EMP:'DELETE_EMPLOYEE', ADD_P:'GENERATE_PAYSLIP', ADD_DIM:'SUBMIT_DIMONA' };
-      const emp = action.d || (action.type === 'DEL_EMP' ? state.emps?.find(e => e.id === action.id) : null);
+    const auditMap = {
+      ADD_EMP:        { label:'CREATE_EMPLOYEE',   table:'employees' },
+      UPD_EMP:        { label:'UPDATE_EMPLOYEE',   table:'employees' },
+      DEL_EMP:        { label:'DELETE_EMPLOYEE',   table:'employees' },
+      ADD_P:          { label:'GENERATE_PAYSLIP',  table:'fiches_paie' },
+      DEL_FICHE:      { label:'DELETE_PAYSLIP',    table:'fiches_paie' },
+      DEL_P:          { label:'DELETE_PAYSLIP',    table:'fiches_paie' },
+      DEL_PAYS_BATCH: { label:'DELETE_PAYSLIP_BATCH', table:'fiches_paie' },
+      ADD_DIM:        { label:'SUBMIT_DIMONA',     table:'dimona' },
+      ADD_CLIENT:     { label:'CREATE_CLIENT',     table:'clients' },
+      UPD_CLIENT:     { label:'UPDATE_CLIENT',     table:'clients' },
+      DEL_CLIENT:     { label:'DELETE_CLIENT',     table:'clients' },
+      SET_COMPANY:    { label:'UPDATE_COMPANY',    table:'app_state' },
+    };
+    const auditEntry = auditMap[action.type];
+    if (auditEntry) {
+      const emp = action.d || action.client ||
+        (action.type === 'DEL_EMP' ? state.emps?.find(e => e.id === action.id) :
+         action.type === 'DEL_CLIENT' ? state.clients?.find(c => c.id === action.id) :
+         action.type === 'DEL_FICHE' || action.type === 'DEL_P' ? state.pays?.find(p => p.id === action.id) : null);
       fetch('/api/audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: labels[action.type],
-          table_name: action.type.includes('EMP') ? 'employees' : action.type === 'ADD_P' ? 'fiches_paie' : 'dimona',
-          record_id: emp?.id || null,
-          details: emp ? { name: (emp.first||emp.fn||'')+ ' ' +(emp.last||emp.ln||''), action_type: action.type } : null
+          action: auditEntry.label,
+          table_name: auditEntry.table,
+          record_id: emp?.id || action.id || null,
+          details: {
+            action_type: action.type,
+            ...(emp ? { name: (emp.first_name||emp.prenom||emp.company_name||emp.fn||'') + ' ' + (emp.last_name||emp.nom||emp.ln||'') } : {}),
+            ...(action.ids ? { count: action.ids?.length } : {}),
+          }
         })
       }).catch(() => {});
     }
