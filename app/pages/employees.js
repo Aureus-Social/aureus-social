@@ -126,7 +126,7 @@ function Employees({s,d}) {
           status:'active',
         };
         if(emp.first||emp.last){
-          d({type:'ADD_E',d:emp});
+          d({type:'ADD_EMP',d:emp});
           added++;
         }
       }
@@ -160,7 +160,7 @@ function Employees({s,d}) {
   const roiSavingYear=roiSaving*12;
   const roiPercent=roiData.prixActuel>0?Math.round((1-roiData.prixAureus/roiData.prixActuel)*100):0;
 
-  const save=()=>{
+  const save=async()=>{
     if(!form.first||!form.last)return alert('Nom requis');
     // NISS validation
     if(form.niss){
@@ -174,7 +174,25 @@ function Employees({s,d}) {
       const ic=validateIBAN(form.iban);
       if(ic&&!ic.valid)return alert(ic.msg);
     }
-    if(ed)d({type:"UPD_E",d:form});else d({type:"ADD_E",d:form});setF(null);setEd(false);
+    // Persistance Supabase
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const sb = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      );
+      const { data: { user } } = await sb.auth.getUser();
+      if (user) {
+        const record = { ...form, user_id: user.id, updated_at: new Date().toISOString() };
+        if (ed) {
+          await sb.from('employees').upsert(record, { onConflict: 'id' });
+        } else {
+          const newRec = { ...record, id: record.id || `emp-${Date.now()}`, created_at: new Date().toISOString() };
+          await sb.from('employees').insert(newRec);
+        }
+      }
+    } catch(e) { console.warn('[Supabase] Save employee:', e.message); }
+    if(ed)d({type:"UPD_EMP",d:form});else d({type:"ADD_EMP",d:form});setF(null);setEd(false);
   };
 
   // Filter and search
@@ -222,7 +240,7 @@ function Employees({s,d}) {
       civil:'single',depChildren:0,sexe:'M',statut:'employe',status:'active',
       iban:'BE71 0961 2345 6769',mvT:10,mvW:CR_TRAV,mvE:8.91,expense:0,
     };
-    d({type:'ADD_E',d:exemple});
+    d({type:'ADD_EMP',d:exemple});
     d({type:'NAV',page:'payslip',sub:null,selectedEmpIdForPayslip:'E-Activa-Demo'});
     if(typeof addToast==='function')addToast('Jean DUPONT ajouté. Dans Fiches de Paie : choisir « Activa.brussels AP (350→800→350) » pour l\'allocation.');
     else alert('Jean DUPONT ajouté. Allez dans Fiches de Paie → sélectionnez-le → Activation ONEM : Activa.brussels AP (350→800→350).');
@@ -621,7 +639,13 @@ function Employees({s,d}) {
           </div>
           <div style={{marginTop:10,display:'flex',gap:6,justifyContent:'flex-end'}}>
             <B v="ghost" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();setF({...r});setEd(true);}}>✎ Modifier</B>
-            <B v="danger" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();if(confirm('Supprimer ?'))d({type:"DEL_E",id:r.id});}}>✕</B>
+            <B v="danger" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();if(confirm('Supprimer ?')){
+  d({type:"DEL_EMP",id:r.id});
+  import('@supabase/supabase-js').then(({createClient})=>{
+    const sb=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+    sb.from('employees').delete().eq('id',r.id).then(()=>{});
+  }).catch(()=>{});
+}}}>✕</B>
           </div>
         </C>
       );})}
@@ -641,7 +665,13 @@ function Employees({s,d}) {
         {k:'co',l:"Coût",a:'right',r:r=><span style={{color:'#a78bfa'}}>{fmt(calc(r,DPER,s.co).costTotal)}</span>},
         {k:'a',l:"",a:'right',r:r=><div style={{display:'flex',gap:5,justifyContent:'flex-end'}}>
           <B v="ghost" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();setF({...r});setEd(true);}}>✎</B>
-          <B v="danger" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();if(confirm('Supprimer ?'))d({type:"DEL_E",id:r.id});}}>✕</B>
+          <B v="danger" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();if(confirm('Supprimer ?')){
+  d({type:"DEL_EMP",id:r.id});
+  import('@supabase/supabase-js').then(({createClient})=>{
+    const sb=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+    sb.from('employees').delete().eq('id',r.id).then(()=>{});
+  }).catch(()=>{});
+}}}>✕</B>
         </div>},
       ]} data={filtered}/>
     </C>}

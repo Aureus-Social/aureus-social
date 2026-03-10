@@ -390,6 +390,22 @@ function DashboardLayoutInner({ user }) {
     }
   },[user]);
 
+  // Charger les employés depuis Supabase au login
+  useEffect(()=>{
+    if (!user?.id || !supabase) return;
+    supabase
+      .from('employees')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data) {
+          dispatch({ type: 'SET_EMPS', data });
+          console.log(`[Supabase] ${data.length} employé(s) chargé(s)`);
+        }
+      });
+  },[user?.id]);
+
     // Intercepte les dispatch NAV depuis les pages enfants
   useEffect(()=>{
     if(s._nav){
