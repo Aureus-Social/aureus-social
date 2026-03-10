@@ -9,7 +9,26 @@ export const TX_OUV_SPECIAL = 0.2714; // ONSS patronal ouvrier 108% (~25.07% × 
 export const BONUS_SEUIL1 = 2561.42; // LB.pp.bonusEmploi.seuilBrut1
 export const BONUS_SEUIL2 = 2997.59; // LB.pp.bonusEmploi.seuilBrut2
 export const CO2MIN = 31.34;          // LB.vehicules.cotCO2Min
-export const LEGAL = { WD: 21.67, WHD: 7.6 };
+export const LEGAL = {
+  WD: 21.67,
+  WHD: 7.6,
+  CP: {
+    '200': 'Employés (CPNAE)',
+    '111': 'Métal',
+    '118': 'Industrie alimentaire',
+    '119': 'Commerce alimentaire',
+    '121': 'Nettoyage',
+    '124': 'Construction',
+    '140': 'Transport',
+    '152': 'Enseignement libre',
+    '302': 'Hôtellerie',
+    '322': 'Titres-services',
+    '330': 'Santé',
+    '200.01': 'Employés commerce',
+    '226': 'Transformation du papier',
+    '218': 'Aide familiale',
+  },
+};
 export const DPER = { month: new Date().getMonth()+1, year: new Date().getFullYear(), days: 21.67 };
 export function calc(emp, per, co) {
   const brut = +(emp&&(emp.monthlySalary||emp.gross||emp.brut)||0);

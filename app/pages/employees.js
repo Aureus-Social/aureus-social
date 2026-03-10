@@ -8,6 +8,27 @@ const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
 // CP presets — pré-remplissage formulaire employé par commission paritaire
+const CAR_MODELS = {
+  'BMW':        ['Série 1','Série 3','Série 5','X1','X3','X5','iX','i4'],
+  'Mercedes':   ['Classe A','Classe C','Classe E','GLA','GLC','EQA','EQC'],
+  'Audi':       ['A1','A3','A4','A6','Q3','Q5','Q7','e-tron'],
+  'Volkswagen': ['Golf','Polo','Passat','Tiguan','ID.3','ID.4'],
+  'Toyota':     ['Yaris','Corolla','RAV4','Prius','C-HR','bZ4X'],
+  'Peugeot':    ['208','308','508','2008','3008','e-208','e-2008'],
+  'Renault':    ['Clio','Megane','Captur','Austral','Zoe','Megane E-Tech'],
+  'Volvo':      ['XC40','XC60','XC90','S60','V60','C40'],
+  'Tesla':      ['Model 3','Model Y','Model S','Model X'],
+  'Hyundai':    ['i20','i30','Tucson','Kona','Ioniq 5','Ioniq 6'],
+  'Kia':        ['Picanto','Ceed','Sportage','Niro','EV6'],
+  'Ford':       ['Fiesta','Focus','Puma','Kuga','Mustang Mach-E'],
+  'Skoda':      ['Fabia','Octavia','Superb','Karoq','Kodiaq','Enyaq'],
+  'Seat':       ['Ibiza','Leon','Arona','Ateca','Tarraco'],
+  'Opel':       ['Corsa','Astra','Crossland','Mokka','Insignia'],
+  'Citroën':    ['C3','C4','C5 X','Berlingo','e-C4'],
+  'Nissan':     ['Micra','Qashqai','X-Trail','Leaf','Ariya'],
+  'Mazda':      ['2','3','CX-3','CX-5','CX-30','MX-30'],
+};
+
 const CP_PRESETS_FULL = {
   '200': { fn: 'Employé', statut: 'employe', monthlySalary: 2500, whWeek: 38 },
   '111': { fn: 'Ouvrier métal', statut: 'ouvrier', monthlySalary: 2200, whWeek: 38 },

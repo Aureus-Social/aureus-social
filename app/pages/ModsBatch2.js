@@ -1,6 +1,7 @@
 // ═══ AUREUS SOCIAL PRO — Modules Batch 2 ═══
 // 35 composants extraits du monolithe
 "use client";
+const DOWS=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
 import { useLang } from '../lib/lang-context';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
