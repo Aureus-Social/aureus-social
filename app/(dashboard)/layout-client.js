@@ -5,7 +5,7 @@ import { MENU, GROUPS, getGroupItems, SEARCH_SUBSECTIONS } from '../lib/menu-con
 import { I18N } from '../lib/i18n';
 import { LangProvider, useLang } from '../lib/lang-context';
 import { supabase } from '../lib/supabase';
-import { initCryptoKey, encryptState, decryptState } from '../lib/crypto';
+import { initCryptoKey, encryptState, decryptState, getCryptoKey, decryptField } from '../lib/crypto';
 import { setAuditUser, audit } from '../lib/audit';
 
 const Loading = () => <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Chargement...</div>;
@@ -418,7 +418,6 @@ function DashboardLayoutInner({ user }) {
       .then(({ data, error }) => {
         if (!error && data) {
           // Déchiffrement RGPD Art.32 — NISS et IBAN
-          const { getCryptoKey, decryptField } = await import('../lib/crypto');
           const key = getCryptoKey();
           const decrypted = key ? await Promise.all(data.map(async emp => ({
             ...emp,
