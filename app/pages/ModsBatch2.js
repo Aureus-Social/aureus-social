@@ -2463,10 +2463,10 @@ export function APIDocMod({s,d}){
 export function MarketplaceMod({s,d}){
   const { t, lang, tText } = useLang();const loisRef=LOIS_BELGES;
   const [cat,setCat]=useState('all');
-  const [activatedMods,setActivatedMods]=useState(()=>{try{return JSON.parse(localStorage.getItem('aureus_marketplace_active')||'[]');}catch(e){return[];}});
-  const [notifiedMods,setNotifiedMods]=useState(()=>{try{return JSON.parse(localStorage.getItem('aureus_marketplace_notify')||'[]');}catch(e){return[];}});
-  const toggleMod=(modId,modName,price)=>{if(activatedMods.includes(modId)){const next=activatedMods.filter(m=>m!==modId);setActivatedMods(next);try{localStorage.setItem('aureus_marketplace_active',JSON.stringify(next));}catch(e){}}else{const next=[...activatedMods,modId];setActivatedMods(next);try{localStorage.setItem('aureus_marketplace_active',JSON.stringify(next));}catch(e){}alert('✅ Module "'+modName+'" activé ! ('+price+'€/mois)');}};
-  const toggleNotify=(modId,modName)=>{if(notifiedMods.includes(modId)){const next=notifiedMods.filter(m=>m!==modId);setNotifiedMods(next);try{localStorage.setItem('aureus_marketplace_notify',JSON.stringify(next));}catch(e){}}else{const next=[...notifiedMods,modId];setNotifiedMods(next);try{localStorage.setItem('aureus_marketplace_notify',JSON.stringify(next));}catch(e){}alert('🔔 Vous serez notifié quand "'+modName+'" sera disponible !');}};
+  const [activatedMods,setActivatedMods]=useState([]);
+  const [notifiedMods,setNotifiedMods]=useState([]);
+  const toggleMod=(modId,modName,price)=>{if(activatedMods.includes(modId)){setActivatedMods(activatedMods.filter(m=>m!==modId));}else{setActivatedMods([...activatedMods,modId]);alert('✅ Module "'+modName+'" activé ! ('+price+'€/mois)');}};
+  const toggleNotify=(modId,modName)=>{if(notifiedMods.includes(modId)){setNotifiedMods(notifiedMods.filter(m=>m!==modId));}else{setNotifiedMods([...notifiedMods,modId]);alert('🔔 Vous serez notifié quand "'+modName+'" sera disponible !');}}
   const modules=[
     {id:'mod_fleet',name:tText('Fleet Management'),desc:'Gestion de flotte véhicules de société. Budget mobilité, cartes carburant, TCO, avantage de toute nature auto.',icon:'🚗',price:49,cat:'mobilite',status:'available',rating:4.8,installs:342},
     {id:'mod_expense',name:tText('Expense Management'),desc:'Notes de frais automatisées avec OCR. Scan ticket → remboursement. Politique de dépenses configurable.',icon:'🧾',price:29,cat:'finance',status:'available',rating:4.6,installs:567},

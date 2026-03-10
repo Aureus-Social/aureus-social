@@ -404,7 +404,7 @@ CREATE INDEX idx_ip_whitelist_tenant ON ip_whitelist(tenant_id, active);`}
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:16}}>
           <button onClick={async()=>{
             try{
-              const{createFullBackup}=await import('@/app/lib/backup');
+              const{createFullBackup}=await import('@/app/lib/backup-secure');
               const res=await createFullBackup(supabase,user?.id);
               alert('Backup JSON téléchargé ('+Math.round(res.size/1024)+' KB, '+res.tables+' tables)');
             }catch(e){alert('Erreur: '+e.message)}
@@ -417,7 +417,7 @@ CREATE INDEX idx_ip_whitelist_tenant ON ip_whitelist(tenant_id, active);`}
             try{
               const emps=s?.employees||s?.emps||[];
               if(!emps.length){alert('Aucun employé trouvé');return;}
-              import('@/app/lib/backup').then(m=>{
+              import('@/app/lib/backup-secure').then(m=>{
                 const res=m.exportEmployeesCSV(emps);
                 alert('Export CSV employés: '+res.count+' lignes');
               });
@@ -431,7 +431,7 @@ CREATE INDEX idx_ip_whitelist_tenant ON ip_whitelist(tenant_id, active);`}
             try{
               const hist=s?.payrollHistory||s?.history||[];
               if(!hist.length){alert('Aucune fiche de paie trouvée');return;}
-              import('@/app/lib/backup').then(m=>{
+              import('@/app/lib/backup-secure').then(m=>{
                 const res=m.exportPayrollCSV(hist);
                 alert('Export CSV paie: '+res.count+' fiches');
               });
@@ -443,7 +443,7 @@ CREATE INDEX idx_ip_whitelist_tenant ON ip_whitelist(tenant_id, active);`}
           </button>
           <button onClick={async()=>{
             try{
-              const{exportAllData}=await import('@/app/lib/backup');
+              const{exportAllData}=await import('@/app/lib/backup-secure');
               const emps=s?.employees||s?.emps||[];
               const hist=s?.payrollHistory||s?.history||[];
               const res=await exportAllData(supabase,user?.id,emps,hist);
@@ -460,7 +460,7 @@ CREATE INDEX idx_ip_whitelist_tenant ON ip_whitelist(tenant_id, active);`}
             const file=e.target.files?.[0];
             if(!file)return;
             try{
-              const{restoreBackup}=await import('@/app/lib/backup');
+              const{restoreBackup}=await import('@/app/lib/backup-secure');
               const res=await restoreBackup(supabase,user?.id,file);
               alert('Restauration réussie: '+res.restored+' enregistrements dans '+res.tables+' tables');
             }catch(err){alert('Erreur restauration: '+err.message)}

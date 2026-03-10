@@ -1,5 +1,6 @@
 'use client'
 import { useLang } from '../lib/lang-context';
+import { supabase } from '@/app/lib/supabase';
 
 // ═══════════════════════════════════════════════════════
 //  AUREUS SOCIAL PRO — Module: Planning & Calendrier
@@ -190,11 +191,24 @@ function EmployeePlanning({ state, dispatch, defaultTab, initialView }) {
   const [selectedEmp, setSelectedEmp] = useState(null)
   const [showAddAbsence, setShowAddAbsence] = useState(false)
   const [newAbsence, setNewAbsence] = useState({ type: 'CONGE', startDate: '', endDate: '', reason: '' })
-  const [absences, setAbsences] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('aureus_absences') || '[]') }
-    catch { return [] }
-  })
+  const [absences, setAbsences] = useState([])
   const [filterDept, setFilterDept] = useState('all')
+
+  // Chargement absences depuis Supabase
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user?.id) return;
+      supabase.from('absences').select('*').eq('user_id', user.id)
+        .order('start_date', { ascending: false })
+        .then(({ data, error }) => {
+          if (!error && data) setAbsences(data.map(r => ({
+            id: r.id, employeeId: r.employee_id, employeeName: r.employee_name,
+            type: r.type, startDate: r.start_date, endDate: r.end_date, reason: r.reason
+          })));
+        });
+    }).catch(() => {});
+  }, []);
 
   const employees = state?.employees || []
   const activeEmployees = employees.filter(e => !e.endDate && !e.inactive)
@@ -238,8 +252,27 @@ function EmployeePlanning({ state, dispatch, defaultTab, initialView }) {
   }, [absences, days, joursFeries, month, year])
 
   const saveAbsences = useCallback((newList) => {
-    setAbsences(newList)
-    try { localStorage.setItem('aureus_absences', JSON.stringify(newList)); } catch(e) {}
+    setAbsences(newList);
+  }, [])
+
+  // Persister une absence dans Supabase
+  const persistAbsence = useCallback(async (absence) => {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: {} }));
+    if (!user?.id) return;
+    await supabase.from('absences').upsert({
+      id: absence.id, user_id: user.id,
+      employee_id: absence.employeeId, employee_name: absence.employeeName,
+      type: absence.type, start_date: absence.startDate,
+      end_date: absence.endDate, reason: absence.reason || '',
+      created_at: new Date().toISOString()
+    }, { onConflict: 'id' }).catch(() => {});
+  }, [])
+
+  const deleteAbsence = useCallback(async (absenceId) => {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: {} }));
+    if (user?.id) supabase.from('absences').delete().eq('id', absenceId).eq('user_id', user.id).catch(() => {});
   }, [])
 
   function handleAddAbsence() {

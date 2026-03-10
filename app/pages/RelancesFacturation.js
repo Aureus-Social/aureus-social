@@ -74,23 +74,40 @@ export default function RelancesFacturation({ supabase, user, clients = [] }) {
   const [filterNiveau, setFilterNiveau] = useState('all');
   const [sortBy, setSortBy] = useState('jours');
 
-  // Chargement initial
+  // Chargement initial depuis Supabase
   useEffect(() => {
-    try {
-      const raw = (() => { try { return localStorage.getItem('aureus_relances'); } catch(e) { return null; } })();
-      if (raw) {
-        setFactures(JSON.parse(raw));
-      } else {
-        // Premier lancement : données de test
-        try { localStorage.setItem('aureus_relances', JSON.stringify(DEMO_FACTURES)); } catch(e) {}
-        setFactures(DEMO_FACTURES);
-      }
-    } catch (e) { setFactures(DEMO_FACTURES); }
+    if (!supabase) { setFactures(DEMO_FACTURES); return; }
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user?.id) { setFactures(DEMO_FACTURES); return; }
+      supabase.from('relances').select('*').eq('user_id', user.id)
+        .order('date_facture', { ascending: true })
+        .then(({ data, error }) => {
+          if (!error && data && data.length > 0) {
+            setFactures(data.map(r => ({
+              id: r.id, client: r.client, montant: r.montant,
+              dateFacture: r.date_facture, statut: r.statut,
+              email: r.email, ref: r.ref, niveauActuel: r.niveau_actuel || 0
+            })));
+          } else {
+            setFactures(DEMO_FACTURES);
+          }
+        });
+    }).catch(() => setFactures(DEMO_FACTURES));
   }, []);
 
-  const save = useCallback((updated) => {
+  const save = useCallback(async (updated) => {
     setFactures(updated);
-    try { localStorage.setItem('aureus_relances', JSON.stringify(updated)); } catch(e) {}
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: {} }));
+    if (!user?.id) return;
+    // Upsert toutes les factures modifiées
+    const records = updated.map(f => ({
+      id: f.id, user_id: user.id, client: f.client, montant: f.montant,
+      date_facture: f.dateFacture, statut: f.statut,
+      email: f.email || '', ref: f.ref || '',
+      niveau_actuel: f.niveauActuel || 0, updated_at: new Date().toISOString()
+    }));
+    supabase.from('relances').upsert(records, { onConflict: 'id' }).catch(() => {});
   }, []);
 
   // Envoyer une relance individuelle
