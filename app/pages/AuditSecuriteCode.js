@@ -1,7 +1,7 @@
 'use client';
 import { useLang } from '../lib/lang-context';
 import { useState, useCallback } from 'react';
-import { C, B, ST, PH, Tbl, fmt, f2, f0 } from '@/app/lib/helpers';
+import { C, B, ST, PH, Tbl, fmt, f2, f0, calc, TX_ONSS_W, quickPP, RMMMG } from '@/app/lib/helpers';
 
 const GOLD='#c6a34e',GREEN='#22c55e',RED='#ef4444',BLUE='#3b82f6',ORANGE='#f97316';
 
@@ -165,14 +165,13 @@ function TestSuiteTab({s}) {
   const [results, setResults] = useState(null);
 
   const tests = [
-    { id:'t1', suite:'Calcul paie', label:'calc() — brut 3000€ isolé 0 enfant', fn: () => {
-      const { calc } = require('@/app/lib/helpers');
-      const r = calc({monthlySalary:3000});
-      return r.net > 0 && r.onssNet > 0 ? {ok:true,val:`Net: ${r.net}€ / ONSS: ${r.onssNet}€`} : {ok:false,val:'Résultat invalide'};
+    { id:'t1', suite:'Calcul paie', label:'TX_ONSS_W 2026 = 13.07%', fn: () => {
+      const ok = Math.abs(TX_ONSS_W - 0.1307) < 0.0001;
+      return ok ? {ok:true,val:`TX_ONSS_W = ${TX_ONSS_W}`} : {ok:false,val:`Attendu 0.1307, obtenu ${TX_ONSS_W}`};
     }},
     { id:'t2', suite:'Calcul paie', label:'RMMMG 2026 = 1,994.21€', fn: () => {
-      const RMMMG = 1994.21;
-      return {ok:true,val:`RMMMG: ${RMMMG}€`};
+      const ok = Math.abs(RMMMG - 1994.21) < 0.01;
+      return ok ? {ok:true,val:`RMMMG = ${RMMMG}€`} : {ok:false,val:`Attendu 1994.21, obtenu ${RMMMG}`};
     }},
     { id:'t3', suite:'NISS', label:'validateNISS — NISS valide', fn: () => {
       return {ok:true,val:'Validation structurelle OK (mod97)'};
