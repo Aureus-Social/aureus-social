@@ -4,7 +4,7 @@
 import { useLang } from '../lib/lang-context';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { B, BONUS_MAX, C, CR_MAX, CR_PAT, CR_TRAV, DPER, HEURES_HEBDO, I, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, SC, ST, TX_AT, TX_ONSS_E, TX_ONSS_W, TX_OUV108, TX_OUV_SPECIAL, Tbl, calc, f2, fmt, obf, quickNet, quickNetEst, quickPP } from "@/app/lib/helpers";
+import { B, BONUS_MAX, C, CR_MAX, CR_PAT, CR_TRAV, COUT_MED, DPER, HEURES_HEBDO, I, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, SC, ST, TX_AT, TX_ONSS_E, TX_ONSS_W, TX_OUV108, TX_OUV_SPECIAL, Tbl, calc, f2, fmt, obf, quickNet, quickNetEst, quickPP } from "@/app/lib/helpers";
 import { calcCSSS, calcBonusEmploi, calcPrecompteExact } from "@/app/lib/payroll-engine";
 import { aureuspdf } from "@/app/lib/pdf-aureus";
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
