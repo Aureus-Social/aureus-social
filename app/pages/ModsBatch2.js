@@ -2323,7 +2323,7 @@ export function DetectionAnomaliesMod({s,d}){
   
   ae.forEach(emp=>{
     const brut=parseFloat(emp.monthlySalary)||0;
-    const preset=CP_PRESETS_GLOBAL[emp.cp];
+    const preset=(typeof CP_PRESETS_GLOBAL !== "undefined" ? CP_PRESETS_GLOBAL : {})[emp.cp] || {};
     // Salaire à 0
     if(brut<=0)anomalies.push({emp,type:'error',cat:'Salaire',msg:'Salaire brut à 0€ — impossible de calculer la paie',fix:'Configurer le salaire brut mensuel'});
     // Salaire très bas (sous RMMMG)
