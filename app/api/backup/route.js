@@ -64,7 +64,16 @@ export async function POST(request) {
       if (lastBk) {
         const elapsed = Date.now() - new Date(lastBk.created_at).getTime();
         if (elapsed < 2 * 60 * 60 * 1000) {
-          return Response.json({ skipped: true, next_in_min: Math.ceil((7200000 - elapsed) / 60000) });
+          const { data: lastSnap } = await supabase.from('session_backups').select('records').eq('user_id', userId).maybeSingle();
+          return new Response(JSON.stringify({ skipped: true, next_in_min: Math.ceil((7200000 - elapsed) / 60000) }), {
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Backup-Records':   String(lastSnap?.records ?? 0),
+              'X-Backup-Encrypted': 'true',
+              'X-Backup-Role':      role,
+              'X-Backup-Skipped':   'true',
+            },
+          });
         }
       }
     }
