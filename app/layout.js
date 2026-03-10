@@ -13,18 +13,20 @@ export default function RootLayout({ children }) {
       <body style={{ margin: 0, padding: 0, fontFamily: "'Inter',system-ui,sans-serif", background: '#0c0b09', color: '#e8e6e0', minHeight: '100vh' }}>
         <style>{`
           input, select, textarea {
-            color: #111111 !important;
-            background-color: #ffffff !important;
+            color: #e8e6e0 !important;
+            background-color: #1e1c18 !important;
+            border: 1px solid #3a3830 !important;
           }
           input::placeholder, textarea::placeholder {
-            color: #888888 !important;
+            color: #6b6860 !important;
           }
           input[type="range"], input[type="checkbox"], input[type="radio"] {
             background-color: transparent !important;
+            border: none !important;
           }
           select option {
-            color: #111111 !important;
-            background-color: #ffffff !important;
+            color: #e8e6e0 !important;
+            background-color: #1e1c18 !important;
           }
         `}</style>
         {children}
