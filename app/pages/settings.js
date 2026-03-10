@@ -59,18 +59,18 @@ function SettingsPage({s,d}) {
           </label>
           <button onClick={()=>{
             let autoBackup=safeLS.get('aureus_autobackup');
-            if(!autoBackup){alert(tText('Aucune sauvegarde automatique trouvée'));return;}
+            if(!autoBackup){alert('Aucune sauvegarde automatique trouvée');return;}
             if(confirm('Restaurer la dernière sauvegarde automatique ?\n\nDate: '+new Date(safeLS.get('aureus_autobackup_date')).toLocaleString('fr-BE'))){
-              try{const b=(()=>{try{return JSON.parse(autoBackup)}catch(e){return null}})();if(b.co)d({type:'SET_COMPANY',data:b.co});if(b.emps)d({type:'SET_EMPS',data:b.emps});if(b.pays)d({type:'SET_PAYS',data:b.pays});alert(tText('✅ Restauration auto-backup réussie'));}catch(err){alert('❌ Erreur: '+err);}
+              try{const b=(()=>{try{return JSON.parse(autoBackup)}catch(e){return null}})();if(b.co)d({type:'SET_COMPANY',data:b.co});if(b.emps)d({type:'SET_EMPS',data:b.emps});if(b.pays)d({type:'SET_PAYS',data:b.pays});alert('✅ Restauration auto-backup réussie');}catch(err){alert('❌ Erreur: '+err);}
             }
           }} style={{padding:'8px 16px',borderRadius:8,border:'1px solid rgba(234,179,8,.3)',background:'rgba(234,179,8,.1)',color:'#eab308',fontSize:11,fontWeight:600,cursor:'pointer'}}>🔄 Auto-backup</button>
         </div>
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
-        <div style={{padding:8,background:'rgba(198,163,78,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#c6a34e'}}>{(s?.emps||[]).length}</div><div style={{fontSize:9,color:'#888'}}>{tText('Employés')}</div></div>
-        <div style={{padding:8,background:'rgba(59,130,246,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#3b82f6'}}>{(s.pays||[]).length}</div><div style={{fontSize:9,color:'#888'}}>{tText('Fiches paie')}</div></div>
-        <div style={{padding:8,background:'rgba(168,85,247,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#a855f7'}}>{(s?.clients||[]).length}</div><div style={{fontSize:9,color:'#888'}}>{tText('Clients')}</div></div>
-        <div style={{padding:8,background:'rgba(34,197,94,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#22c55e'}}>{Math.round(JSON.stringify(s).length/1024)} KB</div><div style={{fontSize:9,color:'#888'}}>{tText('Taille données')}</div></div>
+        <div style={{padding:8,background:'rgba(198,163,78,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#c6a34e'}}>{(s?.emps||[]).length}</div><div style={{fontSize:9,color:'#888'}}>{'Employés'}</div></div>
+        <div style={{padding:8,background:'rgba(59,130,246,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#3b82f6'}}>{(s.pays||[]).length}</div><div style={{fontSize:9,color:'#888'}}>{'Fiches paie'}</div></div>
+        <div style={{padding:8,background:'rgba(168,85,247,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#a855f7'}}>{(s?.clients||[]).length}</div><div style={{fontSize:9,color:'#888'}}>{'Clients'}</div></div>
+        <div style={{padding:8,background:'rgba(34,197,94,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#22c55e'}}>{Math.round(JSON.stringify(s).length/1024)} KB</div><div style={{fontSize:9,color:'#888'}}>{'Taille données'}</div></div>
       </div>
     </div>
     {/* 2FA / MFA TOTP */}
@@ -78,7 +78,7 @@ function SettingsPage({s,d}) {
       <TwoFactorSetup/>
     </div>
     <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
-      <C><ST>{tText('Identification')}</ST><div style={{display:'grid',gap:9}}>
+      <C><ST>{'Identification'}</ST><div style={{display:'grid',gap:9}}>
         <I label="Société" value={f.name} onChange={v=>setF({...f,name:v})}/>
         <I label="TVA" value={f.vat} onChange={v=>setF({...f,vat:v})}/>
         <I label="BCE" value={f.bce} onChange={v=>setF({...f,bce:v})}/>
@@ -88,17 +88,17 @@ function SettingsPage({s,d}) {
         <I label="CP" value={f.cp} onChange={v=>setF({...f,cp:v})} options={Object.entries(LEGAL.CP).map(([k,v])=>({v:k,l:v}))}/>
         <I label="IBAN (compte bancaire)" value={f.bank} onChange={v=>setF({...f,bank:v})}/>
         <I label="BIC (code banque)" value={f.bic} onChange={v=>setF({...f,bic:v})} options={[
-          {v:"GEBABEBB",l:tText('GEBABEBB — BNP Paribas Fortis')},
-          {v:"BBRUBEBB",l:tText('BBRUBEBB — ING Belgique')},
-          {v:"KREDBEBB",l:tText('KREDBEBB — KBC / CBC')},
-          {v:"GKCCBEBB",l:tText('GKCCBEBB — Belfius')},
-          {v:"ARSPBE22",l:tText('ARSPBE22 — Argenta')},
-          {v:"NICABEBB",l:tText('NICABEBB — Crelan')},
-          {v:"TRIOBEBB",l:tText('TRIOBEBB — Triodos')},
-          {v:"AXABBE22",l:tText('AXABBE22 — AXA Banque')},
+          {v:"GEBABEBB",l:'GEBABEBB — BNP Paribas Fortis'},
+          {v:"BBRUBEBB",l:'BBRUBEBB — ING Belgique'},
+          {v:"KREDBEBB",l:'KREDBEBB — KBC / CBC'},
+          {v:"GKCCBEBB",l:'GKCCBEBB — Belfius'},
+          {v:"ARSPBE22",l:'ARSPBE22 — Argenta'},
+          {v:"NICABEBB",l:'NICABEBB — Crelan'},
+          {v:"TRIOBEBB",l:'TRIOBEBB — Triodos'},
+          {v:"AXABBE22",l:'AXABBE22 — AXA Banque'},
         ]}/>
       </div></C>
-      <C><ST>{tText('Contact & Assurances')}</ST><div style={{display:'grid',gap:9}}>
+      <C><ST>{'Contact & Assurances'}</ST><div style={{display:'grid',gap:9}}>
         <I label="Contact" value={f.contact} onChange={v=>setF({...f,contact:v})}/>
         <I label="Email" value={f.email} onChange={v=>setF({...f,email:v})}/>
         <I label="Téléphone" value={f.phone} onChange={v=>setF({...f,phone:v})}/>
@@ -107,19 +107,19 @@ function SettingsPage({s,d}) {
         <I label="Secrétariat social" value={f.secSoc} onChange={v=>setF({...f,secSoc:v})}/>
       </div></C>
     </div>
-    <div style={{marginTop:14,display:'flex',justifyContent:'flex-end'}}><B onClick={()=>{d({type:"UPD_CO",d:f});alert(tText('Sauvegardé !'))}}>Sauvegarder</B></div>
+    <div style={{marginTop:14,display:'flex',justifyContent:'flex-end'}}><B onClick={()=>{d({type:"UPD_CO",d:f});alert('Sauvegardé !')}}>Sauvegarder</B></div>
     
     {/* 2FA Security Section */}
     <C style={{marginTop:20}}>
       <ST>🔐 Sécurité — Authentification à deux facteurs (2FA)</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
         <div>
-          <div style={{fontSize:12,color:'#e8e6e0',marginBottom:8,fontWeight:600}}>{tText('Statut 2FA')}</div>
+          <div style={{fontSize:12,color:'#e8e6e0',marginBottom:8,fontWeight:600}}>{'Statut 2FA'}</div>
           <div style={{display:'flex',alignItems:'center',gap:10,padding:14,background:'rgba(74,222,128,.04)',borderRadius:10,border:'1px solid rgba(74,222,128,.12)'}}>
             <span style={{fontSize:24}}>🔒</span>
             <div>
               <div style={{fontSize:13,fontWeight:600,color:'#4ade80'}}>2FA disponible via Supabase</div>
-              <div style={{fontSize:10.5,color:'#5e5c56',marginTop:2}}>{tText('Activez la vérification en deux étapes pour sécuriser votre compte')}</div>
+              <div style={{fontSize:10.5,color:'#5e5c56',marginTop:2}}>{'Activez la vérification en deux étapes pour sécuriser votre compte'}</div>
             </div>
           </div>
           <div style={{marginTop:12}}>
@@ -132,74 +132,74 @@ function SettingsPage({s,d}) {
                   const secret=data.totp?.secret;
                   alert('2FA activé !\\n\\nScannez le QR code avec Google Authenticator ou Authy.\\n\\nSecret: '+secret+'\\n\\n(Le QR code sera affiché dans une prochaine version)');
                 }
-              }catch(e){alert(tText('2FA via TOTP — Activez dans Supabase Dashboard > Authentication > MFA'));}
+              }catch(e){alert('2FA via TOTP — Activez dans Supabase Dashboard > Authentication > MFA');}
             }}>🔐 Activer 2FA (TOTP)</B>
           </div>
         </div>
         <div>
-          <div style={{fontSize:12,color:'#e8e6e0',marginBottom:8,fontWeight:600}}>{tText('Options de sécurité')}</div>
+          <div style={{fontSize:12,color:'#e8e6e0',marginBottom:8,fontWeight:600}}>{'Options de sécurité'}</div>
           <div style={{display:'flex',flexDirection:'column',gap:8}}>
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>📧</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{tText('Email de confirmation')}</div>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{'Email de confirmation'}</div>
                 <div style={{fontSize:9.5,color:'#5e5c56'}}>{tText('Requis à l\'inscription')}</div>
               </div>
-              <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>{tText('Actif ✓')}</span>
+              <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>{'Actif ✓'}</span>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>🔑</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{tText('Réinitialisation mot de passe')}</div>
-                <div style={{fontSize:9.5,color:'#5e5c56'}}>{tText('Par email sécurisé')}</div>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{'Réinitialisation mot de passe'}</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>{'Par email sécurisé'}</div>
               </div>
-              <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>{tText('Actif ✓')}</span>
+              <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>{'Actif ✓'}</span>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>⏱</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{tText('Session timeout')}</div>
-                <div style={{fontSize:9.5,color:'#5e5c56'}}>{tText('Déconnexion après inactivité')}</div>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{'Session timeout'}</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>{'Déconnexion après inactivité'}</div>
               </div>
-              <span style={{fontSize:10,color:'#fb923c',fontWeight:600}}>{tText('1 heure')}</span>
+              <span style={{fontSize:10,color:'#fb923c',fontWeight:600}}>{'1 heure'}</span>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>📱</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{tText('TOTP (Google Authenticator / Authy)')}</div>
-                <div style={{fontSize:9.5,color:'#5e5c56'}}>{tText('Code à 6 chiffres toutes les 30 secondes')}</div>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{'TOTP (Google Authenticator / Authy)'}</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>{'Code à 6 chiffres toutes les 30 secondes'}</div>
               </div>
-              <span style={{fontSize:10,color:'#fb923c',fontWeight:600}}>{tText('À activer')}</span>
+              <span style={{fontSize:10,color:'#fb923c',fontWeight:600}}>{'À activer'}</span>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>🛡</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{tText('Audit trail (Boîte noire)')}</div>
-                <div style={{fontSize:9.5,color:'#5e5c56'}}>{tText('Toute action est tracée dans audit_log')}</div>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{'Audit trail (Boîte noire)'}</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>{'Toute action est tracée dans audit_log'}</div>
               </div>
-              <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>{tText('Actif ✓')}</span>
+              <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>{'Actif ✓'}</span>
             </div>
           </div>
         </div>
       </div>
     </C>
     <C style={{marginTop:20}}>
-      <ST>{tText('Barèmes légaux')}</ST>
+      <ST>{'Barèmes légaux'}</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:20,marginTop:10}}>
-        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{tText('ONSS')}</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
+        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{'ONSS'}</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
           <div>Travailleur: <b style={{color:'#e8e6e0'}}>{fmtP(LEGAL.ONSS_W)}</b></div>
           <div>Employeur (marchand): <b style={{color:'#e8e6e0'}}>25,00%</b></div>
           <div>Employeur (non-march.): <b style={{color:'#e8e6e0'}}>32,40%</b></div>
-          <div>{tText('Ouvriers: brut × 108%')}</div>
+          <div>{'Ouvriers: brut × 108%'}</div>
           <div>Bonus max: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.BONUS_2026.A_MAX)}</b></div>
         </div></div>
-        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{tText('Avantages')}</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
+        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{'Avantages'}</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
           <div>CR empl. max: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.MV.emax)}</b> (2026)</div>
           <div>CR trav. min: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.MV.wmin)}</b></div>
           <div>CR valeur max: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.MV.maxTotal)}</b></div>
           <div>Éco-chèques: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.ECO)}/an</b></div>
         </div></div>
-        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{tText('Régime')}</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
+        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{'Régime'}</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
           <div>Heures/sem: <b style={{color:'#e8e6e0'}}>{LEGAL.WH}h</b></div>
           <div>Heures/jour: <b style={{color:'#e8e6e0'}}>{LEGAL.WHD}h</b></div>
           <div>Jours/mois: <b style={{color:'#e8e6e0'}}>{LEGAL.WD}</b></div>
@@ -314,18 +314,18 @@ function SettingsPage({s,d}) {
 // ═══════════════════════════════════════════════════════════════
 const DRS_DOCS={
   chomage:[
-    {code:'C4',l:tText('C4 — Certificat de chômage'),f:['motif',"brut","regime","preavis"]},
-    {code:'C4-RCC',l:tText('C4 Prépension (RCC)'),f:['motif',"brut","date_rcc"]},
-    {code:'C4-ENS',l:tText('C4 Enseignement'),f:['motif',"etablissement"]},
-    {code:'C3.2-CD',l:tText('C3.2 Constat du droit'),f:['regime',"heures"]},
-    {code:'C3.2-OUV',l:tText('C3.2 Employeur → Ouvriers'),f:['jours',"motif"]},
-    {code:'C3.2-EMP',l:tText('C3.2 Anti-crise → Employés'),f:['jours',"motif"]},
-    {code:'C131A',l:tText('C131A Employeur'),f:['debut',"motif","regime"]},
-    {code:'C131B',l:tText('C131B'),f:['debut',"regime"]},
-    {code:'C131A-E',l:tText('C131A Enseignement'),f:['debut',"etablissement"]},
-    {code:'C131B-E',l:tText('C131B Enseignement'),f:['debut']},
-    {code:'C78-ACT-BXL',l:tText('C78 Activa.brussels (Actiris)'),f:['type_activa',"debut","duree","montant_red"]},
-    {code:'C78-ACT-WAL',l:tText('C78 Impulsion -12/-25 mois (FOREM)'),f:['type_impulsion',"debut","duree","montant_red"]},
+    {code:'C4',l:'C4 — Certificat de chômage',f:['motif',"brut","regime","preavis"]},
+    {code:'C4-RCC',l:'C4 Prépension (RCC)',f:['motif',"brut","date_rcc"]},
+    {code:'C4-ENS',l:'C4 Enseignement',f:['motif',"etablissement"]},
+    {code:'C3.2-CD',l:'C3.2 Constat du droit',f:['regime',"heures"]},
+    {code:'C3.2-OUV',l:'C3.2 Employeur → Ouvriers',f:['jours',"motif"]},
+    {code:'C3.2-EMP',l:'C3.2 Anti-crise → Employés',f:['jours',"motif"]},
+    {code:'C131A',l:'C131A Employeur',f:['debut',"motif","regime"]},
+    {code:'C131B',l:'C131B',f:['debut',"regime"]},
+    {code:'C131A-E',l:'C131A Enseignement',f:['debut',"etablissement"]},
+    {code:'C131B-E',l:'C131B Enseignement',f:['debut']},
+    {code:'C78-ACT-BXL',l:'C78 Activa.brussels (Actiris)',f:['type_activa',"debut","duree","montant_red"]},
+    {code:'C78-ACT-WAL',l:'C78 Impulsion -12/-25 mois (FOREM)',f:['type_impulsion',"debut","duree","montant_red"]},
     {code:'C78-ACT-VL',l:"C78 Werkplekleren / Winwin (VDAB)",f:['type_vl',"debut","duree"]},
     {code:'C78-TRANS',l:"C78 Prime de transition (Bruxelles)",f:['debut',"duree","montant"]},
     {code:'C78-START',l:"C78 Activa Start (<26 ans)",f:['debut',"duree","age"]},
@@ -363,12 +363,12 @@ const DRS_DOCS={
     {code:'C4-P',l:"C4 DRS (papier)",f:['motif']},
     {code:'C4-RCC-P',l:"C4 DRS-RCC (papier)",f:['motif']},
     {code:'ATT-PV',l:"Attestation Pécules de vacances",f:['annee',"simple","double"]},
-    {code:'ATT-TRAV',l:tText('Attestation de travail'),f:['debut',"fin","fonction"]},
+    {code:'ATT-TRAV',l:'Attestation de travail',f:['debut',"fin","fonction"]},
     {code:'ATT-276',l:"Attestation 276 frontaliers",f:['pays',"annee"]},
   ],
 };
-const COMPTA=[{id:"bob",n:tText('BOB Software'),fmt:'CSV/XML'},{id:"winbooks",n:tText('Winbooks'),fmt:'TXT/CSV'},{id:"kluwer",n:'Kluwer Expert',fmt:'CSV'},{id:"popsy",n:'Popsy',fmt:'TXT'},{id:"soda",n:'Soda',fmt:'CSV'},{id:"exact",n:tText('Exact Online'),fmt:'CSV/XML'},{id:"octopus",n:tText('Octopus'),fmt:'CSV'},{id:"clearfact",n:tText('ClearFact'),fmt:'CSV/UBL'},{id:"yuki",n:tText('Yuki'),fmt:'XML'},{id:"horus",n:tText('Horus'),fmt:'CSV'},{id:"other",n:'Autre (txt/xls)',fmt:'TXT/XLS'}];
-const CR_PROV=[{id:"pluxee",n:'Pluxee (ex-Sodexo)',ic:'🟠'},{id:"edenred",n:tText('Edenred'),ic:'🔴'},{id:"monizze",n:tText('Monizze'),ic:'🟢'},{id:"got",n:'G.O.T. CONNECTION',ic:'🔵'}];
+const COMPTA=[{id:"bob",n:'BOB Software',fmt:'CSV/XML'},{id:"winbooks",n:'Winbooks',fmt:'TXT/CSV'},{id:"kluwer",n:'Kluwer Expert',fmt:'CSV'},{id:"popsy",n:'Popsy',fmt:'TXT'},{id:"soda",n:'Soda',fmt:'CSV'},{id:"exact",n:'Exact Online',fmt:'CSV/XML'},{id:"octopus",n:'Octopus',fmt:'CSV'},{id:"clearfact",n:'ClearFact',fmt:'CSV/UBL'},{id:"yuki",n:'Yuki',fmt:'XML'},{id:"horus",n:'Horus',fmt:'CSV'},{id:"other",n:'Autre (txt/xls)',fmt:'TXT/XLS'}];
+const CR_PROV=[{id:"pluxee",n:'Pluxee (ex-Sodexo)',ic:'🟠'},{id:"edenred",n:'Edenred',ic:'🔴'},{id:"monizze",n:'Monizze',ic:'🟢'},{id:"got",n:'G.O.T. CONNECTION',ic:'🔵'}];
 
 // ═══════════════════════════════════════════════════════════════
 //  SOUS-NAVIGATION — Breadcrumb + bouton retour + onglets

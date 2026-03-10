@@ -43,16 +43,16 @@ function getJoursFeries(year) {
 
   return [
     { date: new Date(year, 0, 1), label: tText('Jour de l\'An') },
-    { date: paq, label:tText('Pâques') },
-    { date: lunPaq, label:tText('Lundi de Pâques') },
-    { date: new Date(year, 4, 1), label:tText('Fête du Travail') },
-    { date: ascension, label:tText('Ascension') },
-    { date: lunPent, label:tText('Lundi de Pentecôte') },
-    { date: new Date(year, 6, 21), label:tText('Fête nationale') },
-    { date: new Date(year, 7, 15), label:tText('Assomption') },
-    { date: new Date(year, 10, 1), label:tText('Toussaint') },
-    { date: new Date(year, 10, 11), label:tText('Armistice') },
-    { date: new Date(year, 11, 25), label:tText('Noël') },
+    { date: paq, label:'Pâques' },
+    { date: lunPaq, label:'Lundi de Pâques' },
+    { date: new Date(year, 4, 1), label:'Fête du Travail' },
+    { date: ascension, label:'Ascension' },
+    { date: lunPent, label:'Lundi de Pentecôte' },
+    { date: new Date(year, 6, 21), label:'Fête nationale' },
+    { date: new Date(year, 7, 15), label:'Assomption' },
+    { date: new Date(year, 10, 1), label:'Toussaint' },
+    { date: new Date(year, 10, 11), label:'Armistice' },
+    { date: new Date(year, 11, 25), label:'Noël' },
   ]
 }
 

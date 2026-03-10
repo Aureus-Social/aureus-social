@@ -124,12 +124,12 @@ function AdminDashboard_Main({s,d}){
   return <div>
     <div style={{padding:'18px 24px',borderBottom:'1px solid rgba(139,115,60,.15)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
       <div>
-        <div style={{fontSize:18,fontWeight:700,color:'#e8e6e0'}}>{t(tText('admin.title'))||'Administration Aureus Social Pro'}</div>
-        <div style={{fontSize:11.5,color:'#9e9b93',marginTop:2}}>{t(tText('admin.subtitle'))||tText('Panneau de contrôle')}</div>
+        <div style={{fontSize:18,fontWeight:700,color:'#e8e6e0'}}>{t('admin.title')||'Administration Aureus Social Pro'}</div>
+        <div style={{fontSize:11.5,color:'#9e9b93',marginTop:2}}>{t('admin.subtitle')||'Panneau de contrôle'}</div>
       </div>
       <div style={{display:'flex',gap:8,alignItems:'center'}}>
-        <button onClick={loadData} style={{padding:'6px 14px',borderRadius:8,border:'1px solid rgba(198,163,78,.3)',background:'rgba(198,163,78,.08)',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:600}}>{t(tText('admin.refresh'))||tText('Rafraîchir')}</button>
-        <div style={{fontSize:10,color:loading?'#fb923c':'#4ade80'}}>● {loading?t(tText('admin.loading'))||tText('Chargement...'):t(tText('admin.connected'))||tText('Connecté')}</div>
+        <button onClick={loadData} style={{padding:'6px 14px',borderRadius:8,border:'1px solid rgba(198,163,78,.3)',background:'rgba(198,163,78,.08)',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:600}}>{t('admin.refresh')||'Rafraîchir'}</button>
+        <div style={{fontSize:10,color:loading?'#fb923c':'#4ade80'}}>● {loading?t('admin.loading')||'Chargement...':t('admin.connected')||'Connecté'}</div>
       </div>
     </div>
     
@@ -139,25 +139,25 @@ function AdminDashboard_Main({s,d}){
     {sub==='admin_users'&&<div>
       {/* KPIs */}
       <div style={{display:'flex',gap:12,marginBottom:20,flexWrap:'wrap'}}>
-        <Stat icon="👤" label={t(tText('admin.users_total'))||tText('Utilisateurs total')} value={totalUsers} sub={`${activeUsers} ${t(tText('admin.active'))||'actifs'}`} color="#c6a34e"/>
-        <Stat icon="🏢" label={t(tText('admin.clients'))||'Dossiers clients'} value={totalClients} sub={`${activeClients} actifs`} color="#60a5fa"/>
-        <Stat icon="👥" label={t(tText('admin.workers'))||tText('Travailleurs')} value={totalTrav} sub={`${activeTrav} actifs`} color="#4ade80"/>
-        <Stat icon="📄" label={t(tText('admin.payslips'))||tText('Fiches de paie')} value={totalFiches} sub={`${fichesMois} ${t(tText('admin.this_month'))||'ce mois'}`} color="#a78bfa"/>
-        <Stat icon="💰" label={t(tText('admin.revenue'))||tText('Revenu mensuel est.')} value={`€${revenuMensuelEstime.toLocaleString()}`} sub={`€${revenuAnnuelEstime.toLocaleString()}/an`} color="#c6a34e"/>
+        <Stat icon="👤" label={t('admin.users_total')||'Utilisateurs total'} value={totalUsers} sub={`${activeUsers} ${t('admin.active')||'actifs'}`} color="#c6a34e"/>
+        <Stat icon="🏢" label={t('admin.clients')||'Dossiers clients'} value={totalClients} sub={`${activeClients} actifs`} color="#60a5fa"/>
+        <Stat icon="👥" label={t('admin.workers')||'Travailleurs'} value={totalTrav} sub={`${activeTrav} actifs`} color="#4ade80"/>
+        <Stat icon="📄" label={t('admin.payslips')||'Fiches de paie'} value={totalFiches} sub={`${fichesMois} ${t('admin.this_month')||'ce mois'}`} color="#a78bfa"/>
+        <Stat icon="💰" label={t('admin.revenue')||'Revenu mensuel est.'} value={`€${revenuMensuelEstime.toLocaleString()}`} sub={`€${revenuAnnuelEstime.toLocaleString()}/an`} color="#c6a34e"/>
       </div>
 
       {/* Search */}
       <div style={{marginBottom:16}}>
-        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={`🔍 ${t(tText('admin.search_user'))||'Rechercher un utilisateur'}`} style={{width:'100%',padding:'10px 14px',background:'rgba(255,255,255,.04)',border:'1px solid rgba(198,163,78,.15)',borderRadius:8,color:'#e8e6e0',fontSize:12,outline:'none',boxSizing:'border-box'}}/>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={`🔍 ${t('admin.search_user')||'Rechercher un utilisateur'}`} style={{width:'100%',padding:'10px 14px',background:'rgba(255,255,255,.04)',border:'1px solid rgba(198,163,78,.15)',borderRadius:8,color:'#e8e6e0',fontSize:12,outline:'none',boxSizing:'border-box'}}/>
       </div>
 
       {/* Users table */}
       <div style={{background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)",overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'2fr 2fr 1fr 1fr 1.5fr 1.5fr 1fr',padding:'10px 14px',background:"rgba(198,163,78,.06)",borderBottom:'1px solid rgba(198,163,78,.1)',fontSize:10,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:.5}}>
-          <div>{t(tText('ui.name'))||tText('Nom')}</div><div>{t(tText('ui.email'))||tText('Email')}</div><div>{t(tText('ui.role'))||tText('Rôle')}</div><div>{t(tText('ui.language'))||'Langue'}</div><div>{t(tText('ui.lastlogin'))||tText('Dernière connexion')}</div><div>{t(tText('ui.registration'))||tText('Inscription')}</div><div>{t(tText('ui.status'))||tText('Statut')}</div>
+          <div>{t('ui.name')||'Nom'}</div><div>{t('ui.email')||'Email'}</div><div>{t('ui.role')||'Rôle'}</div><div>{t('ui.language')||'Langue'}</div><div>{t('ui.lastlogin')||'Dernière connexion'}</div><div>{t('ui.registration')||'Inscription'}</div><div>{t('ui.status')||'Statut'}</div>
         </div>
         {users.length===0?<div style={{padding:30,textAlign:'center',color:'#5e5c56',fontSize:12}}>
-          {loading?(t(tText('admin.loading'))||tText('Chargement...')):(t(tText('admin.no_users'))||'Aucun utilisateur inscrit.')}
+          {loading?(t('admin.loading')||'Chargement...'):(t('admin.no_users')||'Aucun utilisateur inscrit.')}
         </div>:
         users.filter(u=>{
           if(!search)return true;
@@ -176,7 +176,7 @@ function AdminDashboard_Main({s,d}){
             <div style={{color:'#9e9b93',fontSize:11}}>{(u.lang||'fr').toUpperCase()}</div>
             <div style={{color:'#9e9b93',fontSize:10.5}}>{timeAgo(u.last_login)}</div>
             <div style={{color:'#9e9b93',fontSize:10.5}}>{fDate(u.created_at)}</div>
-            <div><Badge text={u.active?(t(tText('ui.active'))||tText('Actif')):(t(tText('ui.inactive'))||tText('Inactif'))} color={u.active?'#4ade80':'#f87171'}/></div>
+            <div><Badge text={u.active?(t('ui.active')||'Actif'):(t('ui.inactive')||'Inactif')} color={u.active?'#4ade80':'#f87171'}/></div>
           </div>;
         })}
         
@@ -198,14 +198,14 @@ function AdminDashboard_Main({s,d}){
                 <Stat icon="💰" label="Revenu/mois" value={`€${revenu}`} sub={`€${revenu*12}/an`} color="#c6a34e"/>
               </div>
               {uClients.length>0&&<div>
-                <div style={{fontSize:11,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{tText('Ses dossiers clients :')}</div>
+                <div style={{fontSize:11,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{'Ses dossiers clients :'}</div>
                 {uClients.map(c=><div key={c.id} style={{display:'flex',alignItems:'center',gap:10,padding:'6px 10px',background:"rgba(255,255,255,.02)",borderRadius:6,marginBottom:4}}>
                   <div style={{fontSize:11,fontWeight:600,color:'#e8e6e0',flex:1}}>{c.nom}</div>
                   <div style={{fontSize:10,color:'#9e9b93'}}>TVA: {c.tva||'-'}</div>
                   <div style={{fontSize:10,color:'#9e9b93'}}>ONSS: {c.onss||'-'}</div>
                   <div style={{fontSize:10,color:'#9e9b93'}}>CP: {c.cp_number||'-'}</div>
                   <div style={{fontSize:10,color:'#9e9b93'}}>{travParClient[c.id]||0} trav.</div>
-                  <Badge text={c.active?tText('Actif'):tText('Inactif')} color={c.active?'#4ade80':'#f87171'}/>
+                  <Badge text={c.active?'Actif':'Inactif'} color={c.active?'#4ade80':'#f87171'}/>
                 </div>)}
               </div>}
             </div>;
@@ -229,9 +229,9 @@ function AdminDashboard_Main({s,d}){
 
       <div style={{background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)",overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'2.5fr 1.5fr 1fr 1fr 1fr 1fr 1fr',padding:'10px 14px',background:"rgba(198,163,78,.06)",borderBottom:'1px solid rgba(198,163,78,.1)',fontSize:10,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:.5}}>
-          <div>{tText('Société')}</div><div>{tText('TVA / ONSS')}</div><div>CP</div><div>{tText('Secteur')}</div><div>{tText('Travailleurs')}</div><div>{tText('Inscription')}</div><div>{tText('Statut')}</div>
+          <div>{'Société'}</div><div>{'TVA / ONSS'}</div><div>CP</div><div>{'Secteur'}</div><div>{'Travailleurs'}</div><div>{'Inscription'}</div><div>{'Statut'}</div>
         </div>
-        {clients.length===0?<div style={{padding:30,textAlign:'center',color:'#5e5c56',fontSize:12}}>{tText('Aucun dossier client.')}</div>:
+        {clients.length===0?<div style={{padding:30,textAlign:'center',color:'#5e5c56',fontSize:12}}>{'Aucun dossier client.'}</div>:
         clients.filter(c=>{
           if(!search)return true;
           const s=search.toLowerCase();
@@ -249,7 +249,7 @@ function AdminDashboard_Main({s,d}){
             <div style={{fontSize:10.5,color:'#9e9b93'}}>{c.secteur||'-'}</div>
             <div style={{fontWeight:600,color:nb>0?'#4ade80':'#5e5c56'}}>{nb}</div>
             <div style={{fontSize:10.5,color:'#9e9b93'}}>{fDate(c.created_at)}</div>
-            <div><Badge text={c.active?tText('Actif'):tText('Inactif')} color={c.active?'#4ade80':'#f87171'}/></div>
+            <div><Badge text={c.active?'Actif':'Inactif'} color={c.active?'#4ade80':'#f87171'}/></div>
           </div>;
         })}
       </div>
@@ -269,7 +269,7 @@ function AdminDashboard_Main({s,d}){
       {/* Répartition par forme juridique */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16}}>
         <div style={{padding:16,background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)"}}>
-          <div style={{fontSize:12,fontWeight:600,color:'#c6a34e',marginBottom:10}}>{tText('Repartition par forme juridique')}</div>
+          <div style={{fontSize:12,fontWeight:600,color:'#c6a34e',marginBottom:10}}>{'Repartition par forme juridique'}</div>
           {(()=>{
             const formes={};
             clients.forEach(c=>{const f=c.forme_juridique||'SRL';formes[f]=(formes[f]||0)+1;});
@@ -287,7 +287,7 @@ function AdminDashboard_Main({s,d}){
         </div>
 
         <div style={{padding:16,background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)"}}>
-          <div style={{fontSize:12,fontWeight:600,color:'#c6a34e',marginBottom:10}}>{tText('Repartition par secteur')}</div>
+          <div style={{fontSize:12,fontWeight:600,color:'#c6a34e',marginBottom:10}}>{'Repartition par secteur'}</div>
           {(()=>{
             const secteurs={};
             clients.forEach(c=>{const s=c.secteur||'Non defini';secteurs[s]=(secteurs[s]||0)+1;});
@@ -307,7 +307,7 @@ function AdminDashboard_Main({s,d}){
 
       {/* Répartition par CP */}
       <div style={{padding:16,background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)"}}>
-        <div style={{fontSize:12,fontWeight:600,color:'#c6a34e',marginBottom:10}}>{tText('Top Commissions Paritaires')}</div>
+        <div style={{fontSize:12,fontWeight:600,color:'#c6a34e',marginBottom:10}}>{'Top Commissions Paritaires'}</div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))',gap:8}}>
           {(()=>{
             const cps={};
@@ -325,7 +325,7 @@ function AdminDashboard_Main({s,d}){
         <div style={{fontSize:12,fontWeight:600,color:'#c6a34e',marginBottom:10}}>💰 Projection revenus (modele €12/fiche/mois)</div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12}}>
           {[
-            {l:tText('Actuel'),users:totalUsers,trav:totalTrav},
+            {l:'Actuel',users:totalUsers,trav:totalTrav},
             {l:'+3 mois',users:Math.ceil(totalUsers*1.5)||5,trav:Math.ceil(totalTrav*1.5)||50},
             {l:'+6 mois',users:Math.ceil(totalUsers*3)||15,trav:Math.ceil(totalTrav*3)||150},
             {l:'+12 mois',users:Math.ceil(totalUsers*8)||50,trav:Math.ceil(totalTrav*8)||500},
@@ -348,7 +348,7 @@ function AdminDashboard_Main({s,d}){
       
       <div style={{background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)",overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'1.5fr 1.5fr 2fr 2fr 2fr',padding:'10px 14px',background:"rgba(198,163,78,.06)",borderBottom:'1px solid rgba(198,163,78,.1)',fontSize:10,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:.5}}>
-          <div>{tText('Date')}</div><div>{tText('Utilisateur')}</div><div>{tText('Action')}</div><div>{tText('Table')}</div><div>{tText('Details')}</div>
+          <div>{'Date'}</div><div>{'Utilisateur'}</div><div>{'Action'}</div><div>{'Table'}</div><div>{'Details'}</div>
         </div>
         {audit.length===0?<div style={{padding:30,textAlign:'center',color:'#5e5c56',fontSize:12}}>
           Aucune entree dans le journal d'audit. Les actions seront enregistrees automatiquement.
@@ -382,7 +382,7 @@ function AdminDashboard_Main({s,d}){
       {/* Facturation par client */}
       <div style={{background:"rgba(255,255,255,.02)",borderRadius:12,border:"1px solid rgba(255,255,255,.04)",overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'2.5fr 1fr 1fr 1fr 1fr 1fr',padding:'10px 14px',background:"rgba(198,163,78,.06)",borderBottom:'1px solid rgba(198,163,78,.1)',fontSize:10,fontWeight:600,color:'#c6a34e',textTransform:'uppercase',letterSpacing:.5}}>
-          <div>{tText('Client')}</div><div>{tText('Travailleurs')}</div><div>{tText('Tarif/fiche')}</div><div>{tText('Mensuel')}</div><div>{tText('Annuel')}</div><div>{tText('Entree')}</div>
+          <div>{'Client'}</div><div>{'Travailleurs'}</div><div>{'Tarif/fiche'}</div><div>{'Mensuel'}</div><div>{'Annuel'}</div><div>{'Entree'}</div>
         </div>
         {clients.filter(c=>c.active).map((c,i)=>{
           const nb=travParClient[c.id]||0;
@@ -401,7 +401,7 @@ function AdminDashboard_Main({s,d}){
         })}
         {/* Total row */}
         <div style={{display:'grid',gridTemplateColumns:'2.5fr 1fr 1fr 1fr 1fr 1fr',padding:'12px 14px',background:"rgba(198,163,78,.08)",fontSize:12,fontWeight:700,alignItems:'center',borderTop:'2px solid rgba(198,163,78,.2)'}}>
-          <div style={{color:'#c6a34e'}}>{tText('TOTAL')}</div>
+          <div style={{color:'#c6a34e'}}>{'TOTAL'}</div>
           <div style={{color:'#e8e6e0'}}>{totalTrav}</div>
           <div style={{color:'#9e9b93'}}>-</div>
           <div style={{color:'#4ade80'}}>€{revenuMensuelEstime.toLocaleString()}</div>
@@ -522,7 +522,7 @@ function BackupRestorePanel({s}) {
       </div>
 
       <div style={{marginBottom:12}}>
-        <label style={{display:'block',fontSize:11,color:'#9e9b93',marginBottom:6}}>{tText('Étape 1 — Sélectionner le fichier backup')}</label>
+        <label style={{display:'block',fontSize:11,color:'#9e9b93',marginBottom:6}}>{'Étape 1 — Sélectionner le fichier backup'}</label>
         <input type="file" accept=".json" onChange={loadFile} style={{fontSize:11,color:'#e8e6e0'}} />
         {restoreFile && <div style={{fontSize:11,color:'#22c55e',marginTop:4}}>✅ {restoreFile}</div>}
       </div>
@@ -579,18 +579,18 @@ function BackupRestorePanel({s}) {
 function HistoriquePage({s}) {
   const now = new Date();
   const events = [
-    {icon:'💰',label:tText('Fiche de paie générée'),detail:'Salem Abdellah — Mars 2026 — 2,800€ brut',ts:'07/03/2026 14:32',type:'paie'},
-    {icon:'📤',label:tText('Dimona IN simulée'),detail:'Réf SIM-1741360000 — Salem Abdellah',ts:'07/03/2026 09:15',type:'dimona'},
-    {icon:'✏️',label:tText('Employé modifié'),detail:'Salem Abdellah — NISS, salaire mis à jour',ts:'06/03/2026 16:44',type:'rh'},
-    {icon:'⚙️',label:tText('Paramètres société mis à jour'),detail:tText('Aureus IA SPRL — BCE, ONSS, adresse'),ts:'05/03/2026 11:20',type:'admin'},
-    {icon:'📥',label:tText('Import CSV travailleurs'),detail:'3 enregistrements importés',ts:'04/03/2026 09:00',type:'import'},
-    {icon:'📋',label:tText('DmfA T4/2025 préparée'),detail:'0 travailleur déclaré — période test',ts:'01/03/2026 08:30',type:'onss'},
-    {icon:'🔐',label:tText('Première connexion admin'),detail:'info@aureus-ia.com — IP 91.183.xx.xx',ts:'02/02/2026 10:00',type:'auth'},
+    {icon:'💰',label:'Fiche de paie générée',detail:'Salem Abdellah — Mars 2026 — 2,800€ brut',ts:'07/03/2026 14:32',type:'paie'},
+    {icon:'📤',label:'Dimona IN simulée',detail:'Réf SIM-1741360000 — Salem Abdellah',ts:'07/03/2026 09:15',type:'dimona'},
+    {icon:'✏️',label:'Employé modifié',detail:'Salem Abdellah — NISS, salaire mis à jour',ts:'06/03/2026 16:44',type:'rh'},
+    {icon:'⚙️',label:'Paramètres société mis à jour',detail:'Aureus IA SPRL — BCE, ONSS, adresse',ts:'05/03/2026 11:20',type:'admin'},
+    {icon:'📥',label:'Import CSV travailleurs',detail:'3 enregistrements importés',ts:'04/03/2026 09:00',type:'import'},
+    {icon:'📋',label:'DmfA T4/2025 préparée',detail:'0 travailleur déclaré — période test',ts:'01/03/2026 08:30',type:'onss'},
+    {icon:'🔐',label:'Première connexion admin',detail:'info@aureus-ia.com — IP 91.183.xx.xx',ts:'02/02/2026 10:00',type:'auth'},
   ];
   const GOLD='#c6a34e';
   return <div>
     <div style={{fontSize:18,fontWeight:800,color:GOLD,marginBottom:4}}>📜 Historique des actions</div>
-    <div style={{fontSize:11,color:'#5e5c56',marginBottom:20}}>{tText('Toutes les opérations effectuées dans Aureus Social Pro')}</div>
+    <div style={{fontSize:11,color:'#5e5c56',marginBottom:20}}>{'Toutes les opérations effectuées dans Aureus Social Pro'}</div>
     <div style={{background:'rgba(198,163,78,.03)',borderRadius:12,border:'1px solid rgba(198,163,78,.06)',padding:'16px 20px'}}>
       {events.map((e,i)=><div key={i} style={{display:'flex',gap:14,padding:'10px 0',borderBottom:i<events.length-1?'1px solid rgba(255,255,255,.04)':''}}>
         <span style={{fontSize:18,marginTop:2}}>{e.icon}</span>
@@ -607,21 +607,21 @@ function HistoriquePage({s}) {
 function IntegrationsPage({s}) {
   const GOLD='#c6a34e',GREEN='#22c55e',RED='#ef4444',ORANGE='#f97316';
   const integrations = [
-    {name:tText('Supabase'),icon:'🗄️',desc:'Base de données & Auth',status:'connected',detail:tText('Instance: qcunxnadjxggizdksvay · Frankfurt')},
-    {name:tText('Vercel'),icon:'▲',desc:'Déploiement & Edge Functions',status:'connected',detail:'www.aureussocial.be · auto-deploy main'},
-    {name:tText('ONSS / WIDE'),icon:'🏛️',desc:'Déclarations sociales belges',status:'partial',detail:'Matricule provisoire 51357716-02 · validation en cours'},
-    {name:tText('Dimona REST API'),icon:'📤',desc:'Déclarations travailleurs',status:'simulation',detail:'Mode simulation — credentials prod à configurer'},
-    {name:tText('DmfA / Belcotax'),icon:'📊',desc:'Déclarations trimestrielles & fiches fiscales',status:'pending',detail:'XML généré — soumission manuelle'},
-    {name:tText('Activa.brussels'),icon:'💼',desc:'Primes emploi bruxelloises',status:'active',detail:tText('Attestation N°829605 · deadline MonBEE 01/06/2026')},
-    {name:tText('Peppol e-invoicing'),icon:'📧',desc:'Facturation électronique',status:'active',detail:tText('ID: 0208:1028230781')},
-    {name:tText('WinBooks / BOB / Exact'),icon:'💹',desc:'Export comptable',status:'ready',detail:'6 formats disponibles — PCMN mappings Supabase'},
-    {name:tText('SEPA XML'),icon:'🏦',desc:'Virements salaires',status:'ready',detail:tText('Format ISO 20022 · pain.001.003.03')},
-    {name:tText('SendGrid / Mailgun'),icon:'📬',desc:'Emails automatiques',status:'pending',detail:'À configurer — relances facturation, alertes'},
+    {name:'Supabase',icon:'🗄️',desc:'Base de données & Auth',status:'connected',detail:'Instance: qcunxnadjxggizdksvay · Frankfurt'},
+    {name:'Vercel',icon:'▲',desc:'Déploiement & Edge Functions',status:'connected',detail:'www.aureussocial.be · auto-deploy main'},
+    {name:'ONSS / WIDE',icon:'🏛️',desc:'Déclarations sociales belges',status:'partial',detail:'Matricule provisoire 51357716-02 · validation en cours'},
+    {name:'Dimona REST API',icon:'📤',desc:'Déclarations travailleurs',status:'simulation',detail:'Mode simulation — credentials prod à configurer'},
+    {name:'DmfA / Belcotax',icon:'📊',desc:'Déclarations trimestrielles & fiches fiscales',status:'pending',detail:'XML généré — soumission manuelle'},
+    {name:'Activa.brussels',icon:'💼',desc:'Primes emploi bruxelloises',status:'active',detail:'Attestation N°829605 · deadline MonBEE 01/06/2026'},
+    {name:'Peppol e-invoicing',icon:'📧',desc:'Facturation électronique',status:'active',detail:'ID: 0208:1028230781'},
+    {name:'WinBooks / BOB / Exact',icon:'💹',desc:'Export comptable',status:'ready',detail:'6 formats disponibles — PCMN mappings Supabase'},
+    {name:'SEPA XML',icon:'🏦',desc:'Virements salaires',status:'ready',detail:'Format ISO 20022 · pain.001.003.03'},
+    {name:'SendGrid / Mailgun',icon:'📬',desc:'Emails automatiques',status:'pending',detail:'À configurer — relances facturation, alertes'},
   ];
   const statusInfo = {
-    connected:{label:tText('Connecté'),color:GREEN},partial:{label:tText('Partiel'),color:ORANGE},
-    simulation:{label:tText('Simulation'),color:'#a855f7'},pending:{label:tText('À configurer'),color:'#5e5c56'},
-    active:{label:tText('Actif'),color:GREEN},ready:{label:tText('Prêt'),color:'#3b82f6'}
+    connected:{label:'Connecté',color:GREEN},partial:{label:'Partiel',color:ORANGE},
+    simulation:{label:'Simulation',color:'#a855f7'},pending:{label:'À configurer',color:'#5e5c56'},
+    active:{label:'Actif',color:GREEN},ready:{label:'Prêt',color:'#3b82f6'}
   };
   return <div>
     <div style={{fontSize:18,fontWeight:800,color:GOLD,marginBottom:4}}>🔌 Intégrations</div>
@@ -650,12 +650,12 @@ function IntegrationsPage({s}) {
 function MonitoringPage({s}) {
   const GOLD='#c6a34e',GREEN='#22c55e',RED='#ef4444';
   const metrics = [
-    {label:tText('Uptime Vercel (30j)'),val:'99.98%',color:GREEN,icon:'▲'},
-    {label:tText('Build time moyen'),val:'32s',color:GOLD,icon:'⏱'},
-    {label:tText('Bundle size'),val:'2.1 MB',color:GOLD,icon:'📦'},
-    {label:tText('Modules actifs'),val:'100',color:GREEN,icon:'🧩'},
-    {label:tText('Erreurs ErrorBoundary (24h)'),val:'0',color:GREEN,icon:'🛡'},
-    {label:tText('Dernier déploiement'),val:'il y a <1h',color:GREEN,icon:'🚀'},
+    {label:'Uptime Vercel (30j)',val:'99.98%',color:GREEN,icon:'▲'},
+    {label:'Build time moyen',val:'32s',color:GOLD,icon:'⏱'},
+    {label:'Bundle size',val:'2.1 MB',color:GOLD,icon:'📦'},
+    {label:'Modules actifs',val:'100',color:GREEN,icon:'🧩'},
+    {label:'Erreurs ErrorBoundary (24h)',val:'0',color:GREEN,icon:'🛡'},
+    {label:'Dernier déploiement',val:'il y a <1h',color:GREEN,icon:'🚀'},
   ];
   return <div>
     <div style={{fontSize:18,fontWeight:800,color:GOLD,marginBottom:4}}>📡 Monitoring</div>
