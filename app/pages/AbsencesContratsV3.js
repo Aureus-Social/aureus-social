@@ -1,7 +1,7 @@
 'use client';
 import { useLang } from '../lib/lang-context';
 import { C, CR_PAT, DPER, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, obf, quickNet, quickPP } from '@/app/lib/helpers';
-import{useState,useMemo}from'react';
+import React,{useState,useMemo}from'react';
 
 const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
 const Row=({l,v,c,b,sub})=><div style={{display:'flex',justifyContent:'space-between',padding:b?'8px 0':'5px 0',borderBottom:b?'2px solid rgba(198,163,78,.2)':'1px solid rgba(255,255,255,.03)',fontWeight:b?700:400}}><span style={{color:sub?'#888':'#e8e6e0',fontSize:sub?10:11.5}}>{l}</span><span style={{color:c||'#c6a34e',fontWeight:600,fontSize:12}}>{v}</span></div>;
@@ -644,10 +644,10 @@ export function ContratsLegauxV3({s}){
             {label:tText('Durée max'),key:'dur',vals:[tText('Illimitée'),'3 ans','12 mois','Variable','Variable','2 ans']},
             {label:tText('Dimona'),key:'dimona',vals:['IN/OUT','IN/OUT','STU','Via agence','FLX','IN/OUT']},
             {label:tText('Préavis rupture'),key:'preavis',vals:['Selon anc.','= salaire restant','3j essai','Immédiat','Selon contrat','7j si anticipé']},
-          ].map((row,i)=><>
+          ].map((row,i)=><React.Fragment key={row.key||i}>
             <div key={'l'+i} style={{fontSize:10,fontWeight:600,color:'#e8e6e0',padding:'6px 4px',borderBottom:'1px solid rgba(255,255,255,.03)'}}>{row.label}</div>
             {row.vals.map((v,j)=><div key={j} style={{fontSize:10,color:'#9e9b93',textAlign:'center',padding:'6px 4px',borderBottom:'1px solid rgba(255,255,255,.03)'}}>{v}</div>)}
-          </>)}
+          </React.Fragment>)}
         </div>
       </div>
     </C>}

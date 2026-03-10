@@ -142,6 +142,9 @@ function reducer(state, action) {
     case 'DEL_PAYS_BATCH': return { ...state, pays: (state.pays||[]).filter(p => !action.ids.includes(p.id)) };
     case 'SET_COMPANY': return { ...state, co: { ...(state.co||{}), ...action.data } };
     case 'SELECT_CLIENT': return { ...state, activeClient: action.id };
+    case 'ADD_CLIENT': return { ...state, clients: [...(state.clients||[]), action.client] };
+    case 'UPD_CLIENT': return { ...state, clients: (state.clients||[]).map(c => c.id === action.client?.id ? { ...c, ...action.client } : c) };
+    case 'DEL_CLIENT': return { ...state, clients: (state.clients||[]).filter(c => c.id !== action.id) };
     default: return state;
   }
 }

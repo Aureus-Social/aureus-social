@@ -399,7 +399,7 @@ function KPIDashboardIA({ emps }) {
 export default function AureusSuitePage({ s, d }) {
   const { t, lang, tText } = useLang();
   const [sub, setSub] = useState('ia_turnover');
-  const emps = s?.emps || s.employees || [];
+  const emps = s?.emps || s?.employees || [];
 
   const tabs = [
     { id: 'ia_turnover', l: '🧠 Prediction Turnover', icon: '🧠' },
