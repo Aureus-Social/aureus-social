@@ -136,6 +136,8 @@ function reducer(state, action) {
     case 'UPD_EMP': return { ...state, emps: (state.emps||[]).map(e => e.id === action.d.id ? { ...e, ...action.d } : e) };
     case 'DEL_EMP': return { ...state, emps: (state.emps||[]).filter(e => e.id !== action.id) };
     case 'ADD_P': return { ...state, payrollHistory: [...(state.payrollHistory||[]), action.d] };
+    case 'SET_PAYROLL': return { ...state, payrollHistory: action.data };
+    case 'DEL_FICHE': return { ...state, payrollHistory: (state.payrollHistory||[]).filter(p => p.id !== action.id) };
     case 'ADD_DIM': return { ...state, dimonaHistory: [...(state.dimonaHistory||[]), action.d] };
     case 'SET_PAYS': return { ...state, pays: action.data };
     case 'DEL_P': return { ...state, pays: (state.pays||[]).filter(p => p.id !== action.id) };
@@ -415,7 +417,49 @@ function DashboardLayoutInner({ user }) {
       });
   },[user?.id]);
 
-    // Intercepte les dispatch NAV depuis les pages enfants
+    // Charger les fiches de paie depuis Supabase au login
+  useEffect(()=>{
+    if (!user?.id || !supabase) return;
+    supabase
+      .from('fiches_paie')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(500)
+      .then(({ data, error }) => {
+        if (!error && data) {
+          // Normaliser les colonnes snake_case → camelCase pour le state
+          const normalized = data.map(r => ({
+            id: r.id,
+            eid: r.eid,
+            ename: r.ename,
+            period: r.period,
+            month: r.month,
+            year: r.year,
+            base: r.base,
+            gross: r.gross,
+            onssNet: r.onss_net,
+            imposable: r.imposable,
+            pp: r.pp,
+            tax: r.pp,
+            css: r.css,
+            net: r.net,
+            onssE: r.onss_e,
+            costTotal: r.cost_total,
+            bonus: r.bonus,
+            overtime: r.overtime,
+            y13: r.y13,
+            sickPay: r.sick_pay,
+            batch: r.batch,
+            at: r.at,
+          }));
+          dispatch({ type: 'SET_PAYROLL', data: normalized });
+          console.log(`[Supabase] ${data.length} fiche(s) de paie chargée(s)`);
+        }
+      });
+  },[user?.id]);
+
+  // Intercepte les dispatch NAV depuis les pages enfants
   useEffect(()=>{
     if(s._nav){
       setPage(s._nav);

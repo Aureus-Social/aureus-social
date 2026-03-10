@@ -1,5 +1,6 @@
 'use client';
 import { useLang } from '../lib/lang-context';
+import { supabase } from '@/app/lib/supabase';
 import { B, BAREMES_CP_MIN, BONUS_MAX, BONUS_SEUIL1, BONUS_SEUIL2, C, CO2MIN, CR_MAX, CR_PAT, DPER, ECO_MAX, FORF_BUREAU, FORF_KM, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, AF_REGIONS, SAISIE_2026_TRAVAIL, SAISIE_IMMUN_ENFANT_2026, ST, TX_ONSS_E, TX_ONSS_W, TX_OUV108, Tbl, calc, f0, f2, fmt, generatePayslipPDF } from '@/app/lib/helpers';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
@@ -12,6 +13,43 @@ const MN = MN_FR;
 
 
 function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── Persistance Supabase d'une fiche de paie ──────────────────────────────
+async function persistFiche(fiche, userId) {
+  if (!supabase || !userId) return null;
+  const record = {
+    id:          fiche.id || `fp-${Date.now()}-${Math.random().toString(36).substr(2,5)}`,
+    user_id:     userId,
+    eid:         fiche.eid,
+    ename:       fiche.ename,
+    period:      fiche.period,
+    month:       fiche.month,
+    year:        fiche.year,
+    base:        fiche.base        || 0,
+    gross:       fiche.gross       || 0,
+    onss_net:    fiche.onssNet     || 0,
+    imposable:   fiche.imposable   || 0,
+    pp:          fiche.pp          || 0,
+    css:         fiche.css         || 0,
+    net:         fiche.net         || 0,
+    onss_e:      fiche.onssE       || 0,
+    cost_total:  fiche.costTotal   || 0,
+    bonus:       fiche.bonus       || 0,
+    overtime:    fiche.overtime    || 0,
+    y13:         fiche.y13         || 0,
+    sick_pay:    fiche.sickPay     || 0,
+    batch:       fiche.batch       || false,
+    at:          fiche.at          || new Date().toISOString(),
+  };
+  const { data, error } = await supabase
+    .from('fiches_paie')
+    .upsert(record, { onConflict: 'id' })
+    .select('id')
+    .single();
+  if (error) console.error('[Supabase] fiches_paie upsert error:', error.message);
+  return data?.id || record.id;
+}
+
 
 function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
   const { t, lang, tText } = useLang();
@@ -39,12 +77,15 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
   // ── BATCH PROCESSING ──
   const runBatch=()=>{
     setBatchRunning(true);
+    const fichesToPersist=[];
     const ae=(s?.emps||[]).filter(e=>e.status==='active'||!e.status);
     const results=[];
     for(const emp of ae){
       try{
         const r=calc(emp,per,s.co);
-        d({type:"ADD_P",d:{eid:emp.id,ename:`${emp.first||emp.fn||emp.prenom||''} ${emp.last||emp.ln||emp.nom||''}`.trim()||'Sans nom',period:`${MN[per.month-1]} ${per.year}`,month:per.month,year:per.year,...r,at:new Date().toISOString(),batch:true}});
+        const fiche={eid:emp.id,ename:`${emp.first||emp.fn||emp.prenom||''} ${emp.last||emp.ln||emp.nom||''}`.trim()||'Sans nom',period:`${MN[per.month-1]} ${per.year}`,month:per.month,year:per.year,...r,at:new Date().toISOString(),batch:true};
+        d({type:"ADD_P",d:fiche});
+        fichesToPersist.push(fiche);
         results.push({emp,r,ok:true});
       }catch(e){
         results.push({emp,error:e.message,ok:false});
@@ -52,13 +93,25 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
     }
     setBatchResults(results);
     setBatchRunning(false);
+    // Persistance Supabase batch
+    supabase?.auth?.getUser().then(({data:{user}})=>{
+      if(user?.id) fichesToPersist.forEach(f=>persistFiche(f,user.id).catch(()=>{}));
+    }).catch(()=>{});
     const ok=results.filter(r=>r.ok).length;
     const fail=results.filter(r=>!r.ok).length;
     alert(`✅ Batch terminé: ${ok} fiches calculées${fail>0?`, ${fail} erreurs`:''}`);
   };
 
-  const gen=()=>{if(!emp)return;const r=calc(emp,per,s.co);setRes(r);
-    d({type:"ADD_P",d:{eid:emp.id,ename:`${emp.first||emp.fn||emp.prenom||''} ${emp.last||emp.ln||emp.nom||''}`.trim()||'Sans nom',period:`${MN[per.month-1]} ${per.year}`,month:per.month,year:per.year,...r,at:new Date().toISOString()}});};
+  const gen=async()=>{
+    if(!emp)return;
+    const r=calc(emp,per,s.co);
+    setRes(r);
+    const fiche={eid:emp.id,ename:`${emp.first||emp.fn||emp.prenom||''} ${emp.last||emp.ln||emp.nom||''}`.trim()||'Sans nom',period:`${MN[per.month-1]} ${per.year}`,month:per.month,year:per.year,...r,at:new Date().toISOString()};
+    d({type:"ADD_P",d:fiche});
+    // Persistance Supabase
+    const { data:{user} } = await supabase.auth.getUser().catch(()=>({data:{}}));
+    if(user?.id) persistFiche(fiche, user.id).catch(()=>{});
+  };
 
   const PR=({l,rate,a,bold,neg,pos,sub})=><tr>
     <td style={{padding:'5px 0',fontWeight:bold?700:400,fontSize:sub?10.5:12,color:sub?'#999':'#333',fontStyle:sub?'italic':'normal'}}>{l}</td>
