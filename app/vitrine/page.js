@@ -966,7 +966,7 @@ function AvCards({items}) {
 
 
 function PageInd({t,go,goBack}) {
-  const d=t.ind;const[openFaq,setOpenFaq]=useState(null);useFadeIn();
+  const d=t.ind||T.fr.ind;const[openFaq,setOpenFaq]=useState(null);useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
       <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>{t.back||'← Retour'}</div>
@@ -994,7 +994,7 @@ function PageInd({t,go,goBack}) {
 }
 
 function PageEmp({t,go,goBack}) {
-  const d=t.emp;useFadeIn();
+  const d=t.emp||T.fr.emp;useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
       <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>{t.back||'← Retour'}</div>
@@ -1016,7 +1016,7 @@ function PageEmp({t,go,goBack}) {
 }
 
 function PageEmps({t,go,goBack}) {
-  const d=t.emps;useFadeIn();
+  const d=t.emps||T.fr.emps;useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
       <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>{t.back||'← Retour'}</div>
@@ -1034,7 +1034,7 @@ function PageEmps({t,go,goBack}) {
 }
 
 function PageExp({t,go,goBack}) {
-  const d=t.exp;useFadeIn();
+  const d=t.exp||T.fr.exp;useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
       <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>{t.back||'← Retour'}</div>
@@ -1058,7 +1058,7 @@ function PageExp({t,go,goBack}) {
 }
 
 function PageForm({t,go,goBack,lang}) {
-  const d=t.form;useFadeIn();
+  const d=t.form||T.fr.form;useFadeIn();
   return(<>
     <section style={{background:CREAM,padding:'60px 0 64px',borderBottom:`1px solid ${BORDER}`}}><div className="vt-wrap"><div className="phg"><div>
       <div style={{display:'flex',alignItems:'center',gap:7,fontSize:13,color:MIST,marginBottom:20,cursor:'pointer'}} onClick={goBack}><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>{t.back||'← Retour'}</div>
