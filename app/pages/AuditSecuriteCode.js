@@ -159,6 +159,7 @@ function AuditFiscalTab({s}) {
 // ONGLET 4 — TEST SUITE
 // ════════════════════════════
 function TestSuiteTab({s}) {
+  const { tText } = useLang();
   const [running, setRunning] = useState(false);
   const [results, setResults] = useState(null);
 
