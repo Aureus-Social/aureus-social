@@ -135,13 +135,19 @@ function reducer(state, action) {
     case 'ADD_EMP': return { ...state, emps: [...(state.emps||[]), action.d] };
     case 'UPD_EMP': return { ...state, emps: (state.emps||[]).map(e => e.id === action.d.id ? { ...e, ...action.d } : e) };
     case 'DEL_EMP': return { ...state, emps: (state.emps||[]).filter(e => e.id !== action.id) };
-    case 'ADD_P': return { ...state, payrollHistory: [...(state.payrollHistory||[]), action.d] };
-    case 'SET_PAYROLL': return { ...state, payrollHistory: action.data };
-    case 'DEL_FICHE': return { ...state, payrollHistory: (state.payrollHistory||[]).filter(p => p.id !== action.id) };
+    case 'ADD_P': {
+      const p = { id: action.d.id || `fp-${Date.now()}-${Math.random().toString(36).substr(2,5)}`, ...action.d };
+      return { ...state, pays: [...(state.pays||[]), p], payrollHistory: [...(state.payrollHistory||[]), p] };
+    }
+    case 'SET_PAYROLL': return { ...state, pays: action.data, payrollHistory: action.data };
+    case 'DEL_FICHE': {
+      const filtered = (state.pays||[]).filter(p => p.id !== action.id);
+      return { ...state, pays: filtered, payrollHistory: filtered };
+    }
     case 'ADD_DIM': return { ...state, dimonaHistory: [...(state.dimonaHistory||[]), action.d] };
-    case 'SET_PAYS': return { ...state, pays: action.data };
-    case 'DEL_P': return { ...state, pays: (state.pays||[]).filter(p => p.id !== action.id) };
-    case 'DEL_PAYS_BATCH': return { ...state, pays: (state.pays||[]).filter(p => !action.ids.includes(p.id)) };
+    case 'SET_PAYS': return { ...state, pays: action.data||[], payrollHistory: action.data||[] };
+    case 'DEL_P': { const f2=(state.pays||[]).filter(p=>p.id!==action.id); return {...state,pays:f2,payrollHistory:f2}; }
+    case 'DEL_PAYS_BATCH': { const f3=(state.pays||[]).filter(p=>!action.ids.includes(p.id)); return {...state,pays:f3,payrollHistory:f3}; }
     case 'SET_COMPANY': return { ...state, co: { ...(state.co||{}), ...action.data } };
     case 'SELECT_CLIENT': return { ...state, activeClient: action.id };
     case 'ADD_CLIENT': return { ...state, clients: [...(state.clients||[]), action.client] };
@@ -411,8 +417,16 @@ function DashboardLayoutInner({ user }) {
       .order('created_at', { ascending: false })
       .then(({ data, error }) => {
         if (!error && data) {
-          dispatch({ type: 'SET_EMPS', data });
-          console.log(`[Supabase] ${data.length} employé(s) chargé(s)`);
+          // Déchiffrement RGPD Art.32 — NISS et IBAN
+          const { getCryptoKey, decryptField } = await import('../lib/crypto');
+          const key = getCryptoKey();
+          const decrypted = key ? await Promise.all(data.map(async emp => ({
+            ...emp,
+            niss: emp.niss ? await decryptField(emp.niss, key) : emp.niss,
+            iban: emp.iban ? await decryptField(emp.iban, key) : emp.iban,
+          }))) : data;
+          dispatch({ type: 'SET_EMPS', data: decrypted });
+          console.log(`[Supabase] ${data.length} employé(s) chargé(s)${key ? ' (déchiffrés)' : ''}`);
         }
       });
   },[user?.id]);

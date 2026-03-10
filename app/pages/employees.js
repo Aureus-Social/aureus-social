@@ -1,6 +1,7 @@
 'use client';
 import { useLang } from '../lib/lang-context';
 import { supabase } from '@/app/lib/supabase';
+import { getCryptoKey, encryptField, decryptField } from '@/app/lib/crypto';
 import { B, C, CR_PAT, CR_TRAV, CR_MAX, DPER, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, validateNISS } from '@/app/lib/helpers';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
@@ -219,11 +220,17 @@ function Employees({s,d}) {
       if (!sb) throw new Error('Supabase non initialisé');
       const { data: { user } } = await sb.auth.getUser();
       if (user) {
-        const record = { ...form, user_id: user.id, updated_at: new Date().toISOString() };
+        const key = getCryptoKey();
+        const toStore = { ...form, user_id: user.id, updated_at: new Date().toISOString() };
+        // Chiffrement RGPD Art.32 — NISS et IBAN avant stockage Supabase
+        if (key) {
+          if (toStore.niss) toStore.niss = await encryptField(toStore.niss, key);
+          if (toStore.iban) toStore.iban = await encryptField(toStore.iban, key);
+        }
         if (ed) {
-          await sb.from('employees').upsert(record, { onConflict: 'id' });
+          await sb.from('employees').upsert(toStore, { onConflict: 'id' });
         } else {
-          const newRec = { ...record, id: record.id || `emp-${Date.now()}`, created_at: new Date().toISOString() };
+          const newRec = { ...toStore, id: toStore.id || `emp-${Date.now()}`, created_at: new Date().toISOString() };
           await sb.from('employees').insert(newRec);
         }
       }
