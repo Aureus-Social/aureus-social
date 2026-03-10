@@ -230,7 +230,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
             {res.atnBorne>0&&<PR l="ATN Borne recharge domicile (sans voiture soc.)" a={res.atnBorne}/>}
             {res.atnAutresTot>0&&<PR l="Total ATN autres (ajouté au revenu imposable)" a={res.atnAutresTot} sub/>}
             <PS t="Cotisations ONSS"/>
-            <PR l={`ONSS travailleur (${fmtP(LEGAL.ONSS_W)} sur ${emp.statut==='ouvrier'?'brut 108% = '+fmt(res.gross*TX_OUV108):'brut '+fmt(res.gross)})`} rate={fmtP(LEGAL.ONSS_W)} a={-res.onssW} neg/>
+            <PR l={`ONSS travailleur (${fmtP(TX_ONSS_W)} sur ${emp.statut==='ouvrier'?'brut 108% = '+fmt(res.gross*TX_OUV108):'brut '+fmt(res.gross)})`} rate={fmtP(TX_ONSS_W)} a={-res.onssW} neg/>
             {res.empBonus>0&&<PR l={`Bonus à l'emploi social (réduction ONSS bas salaires — AR 21/12/2017)`} a={res.empBonus} pos/>}
             {res.empBonusA>0&&<PR l={`  └ Volet A (bas salaires): ${fmt(res.empBonusA)}`} a={res.empBonusA} pos sub/>}
             {res.empBonusB>0&&<PR l={`  └ Volet B (très bas salaires): ${fmt(res.empBonusB)}`} a={res.empBonusB} pos sub/>}

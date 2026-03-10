@@ -12,6 +12,7 @@ export const CO2MIN = 31.34;          // LB.vehicules.cotCO2Min
 export const LEGAL = {
   WD: 21.67,
   WHD: 7.6,
+  ONSS_W: 0.1307,
   CP: {
     '200': 'Employés (CPNAE)',
     '111': 'Métal',
@@ -27,6 +28,18 @@ export const LEGAL = {
     '200.01': 'Employés commerce',
     '226': 'Transformation du papier',
     '218': 'Aide familiale',
+  },
+  DMFA_CODES: {
+    '495': 'Employé ordinaire',
+    '015': 'Ouvrier ordinaire',
+    '027': 'Apprenti industriel',
+    '046': 'Étudiant',
+    '050': 'Flexi-job',
+    '100': "Dirigeant d'entreprise assimilé",
+    '200': 'Travailleur à domicile',
+    '430': 'Travailleur occasionnel horeca',
+    '480': 'Agent nommé secteur public',
+    '485': 'Contractuel secteur public',
   },
 };
 export const DPER = { month: new Date().getMonth()+1, year: new Date().getFullYear(), days: 21.67 };

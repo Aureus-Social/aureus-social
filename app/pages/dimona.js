@@ -119,7 +119,7 @@ function DimonaPage({s,d}) {
   const statsIN=( s.dims||[]).filter(x=>x.action==='IN').length;
   const statsOUT=( s.dims||[]).filter(x=>x.action==='OUT').length;
   const statsUPD=( s.dims||[]).filter(x=>x.action==='UPDATE').length;
-  const filtered=filter==='all'?s.dims:( s.dims||[]).filter(x=>x.action===filter);
+  const filtered=filter==='all'?(s.dims||[]):(s.dims||[]).filter(x=>x.action===filter);
 
   return <div>
     <PH title="Déclarations Dimona" sub="Déclaration immédiate de l'emploi — ONSS REST v2 — Connecté via Chaman"/>
