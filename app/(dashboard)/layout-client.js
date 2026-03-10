@@ -437,7 +437,7 @@ function DashboardLayoutInner({ user }) {
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (!error && data) {
           // Déchiffrement RGPD Art.32 — NISS et IBAN
           const key = getCryptoKey();
