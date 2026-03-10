@@ -13,6 +13,7 @@ function Score({val,max,color}){const pct=Math.round((val/max)*100);return <div 
 // ONGLET 1 — AUDIT SÉCURITÉ CODE
 // ════════════════════════════
 function AuditSecuriteTab({s}) {
+  const { tText } = useLang();
   const checks = [
     { cat:'Authentification', items:[
       { id:'auth1', label:'Supabase Auth activé', status:'ok', detail:'Email/password via Supabase GoTrue' },

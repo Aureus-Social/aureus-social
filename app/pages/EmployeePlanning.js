@@ -260,6 +260,7 @@ function EmployeePlanning({ state, dispatch, defaultTab, initialView }) {
   }
 
   function handleCellClick(emp, day) {
+  const { tText } = useLang();
     setSelectedEmp(emp)
     const d = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     setNewAbsence(prev => ({ ...prev, startDate: d, endDate: d }))

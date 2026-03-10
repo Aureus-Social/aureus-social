@@ -245,6 +245,7 @@ export function NotifDropdown({ notifications, onClose, onMarkRead, onViewAll })
 
   useEffect(() => {
     function handleClick(e) {
+  const { tText } = useLang();
       if (ref.current && !ref.current.contains(e.target)) onClose?.()
     }
     document.addEventListener('mousedown', handleClick)

@@ -605,6 +605,7 @@ function HistoriquePage({s}) {
 }
 
 function IntegrationsPage({s}) {
+  const { tText } = useLang();
   const GOLD='#c6a34e',GREEN='#22c55e',RED='#ef4444',ORANGE='#f97316';
   const integrations = [
     {name:'Supabase',icon:'🗄️',desc:'Base de données & Auth',status:'connected',detail:'Instance: qcunxnadjxggizdksvay · Frankfurt'},
@@ -648,6 +649,7 @@ function IntegrationsPage({s}) {
 }
 
 function MonitoringPage({s}) {
+  const { tText } = useLang();
   const GOLD='#c6a34e',GREEN='#22c55e',RED='#ef4444';
   const metrics = [
     {label:'Uptime Vercel (30j)',val:'99.98%',color:GREEN,icon:'▲'},
@@ -674,6 +676,7 @@ function MonitoringPage({s}) {
 }
 
 function ChangelogPage({s}) {
+  const { tText } = useLang();
   const GOLD='#c6a34e';
   const releases = [
     {v:'Sprint 38 — v38',date:'07/03/2026',items:[
@@ -713,6 +716,7 @@ function ChangelogPage({s}) {
 }
 
 function RoadmapPage({s}) {
+  const { tText } = useLang();
   const GOLD='#c6a34e',GREEN='#22c55e',ORANGE='#f97316',RED='#ef4444';
   const items = [
     {phase:'🔴 Critique avant premier client',color:RED,tasks:[

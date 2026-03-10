@@ -169,6 +169,7 @@ export function DashboardRHV2({s,d,props_tab}){
 // ═══════════════════════════════════════════════════════════
   const { tText } = useLang();
 export function RegistrePersonnelV2({s}){
+  const { tText } = useLang();
   const clients= s?.clients||[];const [sel,setSel]=useState(0);const now=new Date();
   const cl=clients[sel];const co=cl?.company||{};const emps=cl?.emps||[];
 

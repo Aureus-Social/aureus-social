@@ -410,6 +410,7 @@ export const JOURS_FERIES_2026=[
 // UI COMPONENT — TRANSVERSAL VIEW
 // ════════════════════════════════════════════════════════════
 export function TransversalCPView({cp,initialTab,barData}){
+  const { tText } = useLang();
   const tab=initialTab||'majorations';
   const [expanded,setExpanded]=useState({});
   const maj=MAJORATIONS[cp]||MAJORATIONS['_default'];
