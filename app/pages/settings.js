@@ -2,14 +2,12 @@
 import { useLang } from '../lib/lang-context';
 import { supabase } from '@/app/lib/supabase';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { LOIS_BELGES, LB, RMMMG, TX_ONSS_W, TX_ONSS_E, NET_FACTOR, PV_DOUBLE, PV_SIMPLE, PP_EST } from '@/app/lib/lois-belges';
+import { LOIS_BELGES, LB, RMMMG, TX_ONSS_W, TX_ONSS_E, NET_FACTOR, PV_DOUBLE, PV_SIMPLE, PP_EST, BONUS_MAX, CR_MAX, CR_PAT, CR_TRAV, HEURES_HEBDO } from '@/app/lib/lois-belges';
+import { LEGAL, fmt, DPER } from '@/app/lib/helpers';
 
-const fmt = n => new Intl.NumberFormat('fr-BE', { style: 'currency', currency: 'EUR' }).format(n || 0);
 const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
 const AUREUS_INFO = { name:'Aureus IA SPRL', vat: 'BE 1028.230.781', version: 'v38', sprint: 'Sprint 38' };
-const LEGAL = { WD: 21.67, WHD: 7.6 };
-const DPER = { month: new Date().getMonth()+1, year: new Date().getFullYear(), days: 21.67 };
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
 function PH({title,sub}){return <div style={{marginBottom:16}}><div style={{fontSize:18,fontWeight:800,color:'#c6a34e',letterSpacing:'.3px'}}>{title}</div>{sub&&<div style={{fontSize:11,color:'#9e9b93',marginTop:2}}>{sub}</div>}</div>;}
@@ -274,20 +272,20 @@ function SettingsPage({s,d}) {
       <ST>{'Barèmes légaux'}</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:20,marginTop:10}}>
         <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{'ONSS'}</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
-          <div>Travailleur: <b style={{color:'#e8e6e0'}}>{fmtP(LEGAL.ONSS_W)}</b></div>
+          <div>Travailleur: <b style={{color:'#e8e6e0'}}>{fmtP(TX_ONSS_W)}</b></div>
           <div>Employeur (marchand): <b style={{color:'#e8e6e0'}}>25,00%</b></div>
           <div>Employeur (non-march.): <b style={{color:'#e8e6e0'}}>32,40%</b></div>
           <div>{'Ouvriers: brut × 108%'}</div>
-          <div>Bonus max: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.BONUS_2026.A_MAX)}</b></div>
+          <div>Bonus max: <b style={{color:'#e8e6e0'}}>{fmt(BONUS_MAX)}</b></div>
         </div></div>
         <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{'Avantages'}</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
-          <div>CR empl. max: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.MV.emax)}</b> (2026)</div>
-          <div>CR trav. min: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.MV.wmin)}</b></div>
-          <div>CR valeur max: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.MV.maxTotal)}</b></div>
-          <div>Éco-chèques: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.ECO)}/an</b></div>
+          <div>CR empl. max: <b style={{color:'#e8e6e0'}}>{fmt(CR_PAT)}</b> (2026)</div>
+          <div>CR trav. min: <b style={{color:'#e8e6e0'}}>{fmt(CR_TRAV)}</b></div>
+          <div>CR valeur max: <b style={{color:'#e8e6e0'}}>{fmt(CR_MAX)}</b></div>
+          <div>Éco-chèques: <b style={{color:'#e8e6e0'}}>{fmt(250)}/an</b></div>
         </div></div>
         <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{'Régime'}</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
-          <div>Heures/sem: <b style={{color:'#e8e6e0'}}>{LEGAL.WH}h</b></div>
+          <div>Heures/sem: <b style={{color:'#e8e6e0'}}>{HEURES_HEBDO}h</b></div>
           <div>Heures/jour: <b style={{color:'#e8e6e0'}}>{LEGAL.WHD}h</b></div>
           <div>Jours/mois: <b style={{color:'#e8e6e0'}}>{LEGAL.WD}</b></div>
         </div></div>
