@@ -1,4 +1,5 @@
 "use client";
+import React from 'react';
 import { useLang } from '../lib/lang-context';
 // ═══════════════════════════════════════════════════════════════════
 // SIMULATEUR PAIE AVANCÉ — Net↔Brut, Optimisation Package, Comparaison
