@@ -1,5 +1,6 @@
 'use client';
 import { useLang } from '../lib/lang-context';
+import { supabase } from '@/app/lib/supabase';
 import { B, C, CR_PAT, CR_TRAV, CR_MAX, DPER, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, validateNISS } from '@/app/lib/helpers';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
@@ -214,11 +215,8 @@ function Employees({s,d}) {
     }
     // Persistance Supabase
     try {
-      const { createClient } = await import('@supabase/supabase-js');
-      const sb = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      );
+      const sb = supabase;
+      if (!sb) throw new Error('Supabase non initialisé');
       const { data: { user } } = await sb.auth.getUser();
       if (user) {
         const record = { ...form, user_id: user.id, updated_at: new Date().toISOString() };
@@ -679,10 +677,7 @@ function Employees({s,d}) {
             <B v="ghost" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();setF({...r});setEd(true);}}>✎ Modifier</B>
             <B v="danger" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();if(confirm('Supprimer ?')){
   d({type:"DEL_EMP",id:r.id});
-  import('@supabase/supabase-js').then(({createClient})=>{
-    const sb=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-    sb.from('employees').delete().eq('id',r.id).then(()=>{});
-  }).catch(()=>{});
+  if(supabase)supabase.from('employees').delete().eq('id',r.id).catch(()=>{});
 }}}>✕</B>
           </div>
         </C>
@@ -705,10 +700,7 @@ function Employees({s,d}) {
           <B v="ghost" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();setF({...r});setEd(true);}}>✎</B>
           <B v="danger" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();if(confirm('Supprimer ?')){
   d({type:"DEL_EMP",id:r.id});
-  import('@supabase/supabase-js').then(({createClient})=>{
-    const sb=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-    sb.from('employees').delete().eq('id',r.id).then(()=>{});
-  }).catch(()=>{});
+  if(supabase)supabase.from('employees').delete().eq('id',r.id).catch(()=>{});
 }}}>✕</B>
         </div>},
       ]} data={filtered}/>
