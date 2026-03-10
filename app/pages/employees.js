@@ -7,6 +7,23 @@ const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
+// CP presets — pré-remplissage formulaire employé par commission paritaire
+const CP_PRESETS_FULL = {
+  '200': { fn: 'Employé', statut: 'employe', monthlySalary: 2500, whWeek: 38 },
+  '111': { fn: 'Ouvrier métal', statut: 'ouvrier', monthlySalary: 2200, whWeek: 38 },
+  '118': { fn: 'Employé alimentaire', statut: 'employe', monthlySalary: 2100, whWeek: 38 },
+  '119': { fn: 'Employé commerce', statut: 'employe', monthlySalary: 2050, whWeek: 38 },
+  '121': { fn: 'Agent nettoyage', statut: 'ouvrier', monthlySalary: 2030, whWeek: 38 },
+  '124': { fn: 'Ouvrier construction', statut: 'ouvrier', monthlySalary: 2100, whWeek: 38 },
+  '140': { fn: 'Chauffeur', statut: 'ouvrier', monthlySalary: 2200, whWeek: 38 },
+  '152': { fn: 'Enseignant', statut: 'employe', monthlySalary: 2300, whWeek: 38 },
+  '302': { fn: 'Employé hôtellerie', statut: 'employe', monthlySalary: 2050, whWeek: 38 },
+  '322': { fn: 'Aide titres-services', statut: 'ouvrier', monthlySalary: 2030, whWeek: 32 },
+  '330': { fn: 'Soignant', statut: 'employe', monthlySalary: 2400, whWeek: 38 },
+};
+
+
+
 
 
 
