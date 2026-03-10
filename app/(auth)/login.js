@@ -195,7 +195,7 @@ export default function LoginPage({ onLogin }) {
     if (!supabase) { onLogin({ email: email || 'demo@aureus-ia.com', role: 'admin' }); setLoading(false); return; }
     try {
       if (mode === 'magic') {
-        const { error } = await supabase.auth.signInWithOtp({ email });
+        const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: 'https://app.aureussocial.be' } });
         if (error) throw error;
         setError('✅ ' + t.btn + ' ' + email);
       } else {
