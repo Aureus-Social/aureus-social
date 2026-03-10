@@ -62,7 +62,7 @@ const DOC_TYPES = {
     required: ['name', 'startDate', 'salary', 'function', 'hoursPerWeek'],
   },
   ATTESTATION_EMPLOI: {
-    label: tText('Attestation d\'emploi'),
+    label: 'Attestation d\'emploi',
     category: 'attestation',
     icon: '✅',
     description: 'Certificat confirmant l\'emploi actuel du travailleur',
@@ -169,7 +169,7 @@ function buildContractHTML(type, data) {
     <div class="contract-signatures">
       <p>Fait en double exemplaire à ${city}, le ${dateStr}.</p>
       <table class="sign-table"><tr>
-        <td><strong>{tText('L\'employeur')}</strong><br/>${coName}<br/><em>(signature)</em></td>
+        <td><strong>{'L\'employeur'}</strong><br/>${coName}<br/><em>(signature)</em></td>
         <td><strong>{'Le travailleur'}</strong><br/>${workerName}<br/><em>(signature)</em></td>
       </tr></table>
       <p class="exemplaire">{'Chaque partie reconnaît avoir reçu un exemplaire du présent contrat.'}</p>
@@ -181,12 +181,12 @@ function buildContractHTML(type, data) {
       titleDoc = 'CONTRAT DE TRAVAIL À DURÉE INDÉTERMINÉE'; lawRef = 'Article 7 de la loi du 3 juillet 1978'
       bodyArticles = `
         <article class="contract-article"><strong>{'Article 1 — Objet'}</strong><br/>Le travailleur est engagé en qualité de ${workerFn}, contrat à durée indéterminée, à temps ${regime}.</article>
-        <article class="contract-article"><strong>{tText('Article 2 — Date d\'entrée')}</strong><br/>Le présent contrat prend effet le ${startDate}.</article>
+        <article class="contract-article"><strong>{'Article 2 — Date d\'entrée'}</strong><br/>Le présent contrat prend effet le ${startDate}.</article>
         <article class="contract-article"><strong>{'Article 3 — Fonction et lieu'}</strong><br/>Fonction : ${workerFn}. Lieu : ${workplace}.</article>
         <article class="contract-article"><strong>{'Article 4 — Rémunération'}</strong><br/>Salaire mensuel brut : ${salary} EUR pour ${hours} h/semaine.</article>
         <article class="contract-article"><strong>{'Article 5 — Horaire'}</strong><br/>Conforme au règlement de travail. Régime : ${hours} h/semaine.</article>
         <article class="contract-article"><strong>{'Article 6 — Commission paritaire'}</strong><br/>CP n° ${cp}.</article>
-        <article class="contract-article"><strong>{tText('Article 7 — Période d\'essai')}</strong><br/>Conformément à la loi du 26 décembre 2013, plus de clause d'essai depuis le 1er janvier 2014.</article>
+        <article class="contract-article"><strong>{'Article 7 — Période d\'essai'}</strong><br/>Conformément à la loi du 26 décembre 2013, plus de clause d'essai depuis le 1er janvier 2014.</article>
         <article class="contract-article"><strong>{'Article 8 — Préavis'}</strong><br/>Délais prévus par la loi du 26 décembre 2013 (statut unique).</article>
         <article class="contract-article"><strong>{'Article 9 — Divers'}</strong><br/>Respect du règlement de travail et secret professionnel.</article>`
       break
@@ -227,11 +227,11 @@ function buildContractHTML(type, data) {
 
   const partiesBlock = (type === 'CONVENTION_RUPTURE' || type === 'AVENANT') ? `
     <div class="contract-parties">
-      <p><strong>{tText('L\'employeur :')}</strong> ${coName} — BCE : ${coBce}<br/>${coAddr}</p>
+      <p><strong>{'L\'employeur :'}</strong> ${coName} — BCE : ${coBce}<br/>${coAddr}</p>
       <p><strong>{'Le travailleur :'}</strong> ${workerName}<br/>NISS : ${workerNiss}${type === 'CONVENTION_RUPTURE' ? `<br/>Domicile : ${workerAddr}` : ''}</p>
     </div>` : `
     <div class="contract-parties">
-      <p><strong>{tText('L\'employeur :')}</strong> ${coName}, siège ${coAddr}, BCE ${coBce}.</p>
+      <p><strong>{'L\'employeur :'}</strong> ${coName}, siège ${coAddr}, BCE ${coBce}.</p>
       <p><strong>{'Le travailleur :'}</strong> ${workerName}<br/>Domicile : ${workerAddr}<br/>NISS : ${workerNiss}${workerBirth !== '___' ? `<br/>Né(e) le : ${workerBirth}` : ''}</p>
     </div>`
 

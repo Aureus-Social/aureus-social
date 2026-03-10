@@ -151,7 +151,7 @@ const PRIMES_EMPLOI = [
   },
   {
     id: 'monbee',
-    label: tText('MonBEE (Économie d\'énergie employeur)'),
+    label: 'MonBEE (Économie d\'énergie employeur)',
     montant: 'Variable selon investissements',
     duree: 'Annuel',
     region: 'Bruxelles',

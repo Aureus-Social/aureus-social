@@ -311,13 +311,13 @@ function DashboardLayoutInner({ user }) {
   const [pageHistory, setPageHistory] = useState([]);
   const [cryptoKey, setCryptoKey] = useState(null);
   const { lang, setLang, t: tCtx } = useLang();
-  const [theme, setTheme] = useState(() => (typeof window !== 'undefined' ? localStorage.getItem('aureus_theme') || 'dark' : 'dark'));
+  const [theme, setTheme] = useState(() => { try { return typeof window !== 'undefined' ? localStorage.getItem('aureus_theme') || 'dark' : 'dark'; } catch(e) { return 'dark'; } });
 
   // Traduction helper
   const t = tCtx;
 
   // Persister préférences
-  useEffect(() => { if (typeof window !== 'undefined') localStorage.setItem('aureus_theme', theme); }, [theme]);
+  useEffect(() => { try { if (typeof window !== 'undefined') localStorage.setItem('aureus_theme', theme); } catch(e) {} }, [theme]);
 
   // Couleurs selon thème
   const TH = {

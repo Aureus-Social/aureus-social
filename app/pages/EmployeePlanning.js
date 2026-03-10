@@ -42,7 +42,7 @@ function getJoursFeries(year) {
   const lunPent = new Date(paq); lunPent.setDate(paq.getDate() + 50)
 
   return [
-    { date: new Date(year, 0, 1), label: tText('Jour de l\'An') },
+    { date: new Date(year, 0, 1), label: 'Jour de l\'An' },
     { date: paq, label:'Pâques' },
     { date: lunPaq, label:'Lundi de Pâques' },
     { date: new Date(year, 4, 1), label:'Fête du Travail' },
@@ -239,7 +239,7 @@ function EmployeePlanning({ state, dispatch, defaultTab, initialView }) {
 
   const saveAbsences = useCallback((newList) => {
     setAbsences(newList)
-    localStorage.setItem('aureus_absences', JSON.stringify(newList))
+    try { localStorage.setItem('aureus_absences', JSON.stringify(newList)); } catch(e) {}
   }, [])
 
   function handleAddAbsence() {

@@ -60,11 +60,11 @@ function emailRelance1(clientNom, factureId, montant, dateEcheance) {
       </div>
       <div style="padding:24px;background:#fff;color:#1a1a1a;line-height:1.8">
         <p>Cher/Chère <b>${clientNom}</b>,</p>
-        <p>{tText('Nous n\'avons pas encore reçu votre paiement concernant la facture ci-dessous :')}</p>
+        <p>{'Nous n\'avons pas encore reçu votre paiement concernant la facture ci-dessous :'}</p>
         <table style="width:100%;border-collapse:collapse;margin:16px 0">
           <tr style="background:#f8f7f4"><td style="padding:10px;font-weight:600">{'Facture'}</td><td style="padding:10px">${factureId}</td></tr>
           <tr><td style="padding:10px;font-weight:600">{'Montant'}</td><td style="padding:10px;color:#c6a34e;font-weight:700">${f2(montant)} EUR</td></tr>
-          <tr style="background:#f8f7f4"><td style="padding:10px;font-weight:600">{tText('Date d\'échéance')}</td><td style="padding:10px">${new Date(dateEcheance).toLocaleDateString('fr-BE')}</td></tr>
+          <tr style="background:#f8f7f4"><td style="padding:10px;font-weight:600">{'Date d\'échéance'}</td><td style="padding:10px">${new Date(dateEcheance).toLocaleDateString('fr-BE')}</td></tr>
         </table>
         <p>Nous vous saurions gré de bien vouloir procéder au règlement dans les meilleurs délais.</p>
         <p>Si le paiement a déjà été effectué, nous vous prions de ne pas tenir compte de ce rappel.</p>

@@ -570,9 +570,9 @@ function useFadeIn() {
 
 function CookieBanner({t}) {
   const[show,setShow]=useState(false);
-  useEffect(()=>{ if(!localStorage.getItem('ck_consent')) setShow(true); },[]);
-  const accept=()=>{ localStorage.setItem('ck_consent','1'); setShow(false); };
-  const refuse=()=>{ localStorage.setItem('ck_consent','0'); setShow(false); };
+  useEffect(()=>{ try { if(!localStorage.getItem('ck_consent')) setShow(true); } catch(e) { setShow(true); } },[]);
+  const accept=()=>{ try { localStorage.setItem('ck_consent','1'); } catch(e) {} setShow(false); };
+  const refuse=()=>{ try { localStorage.setItem('ck_consent','0'); } catch(e) {} setShow(false); };
   if(!show) return null;
   return(
     <div className="cookie-banner">

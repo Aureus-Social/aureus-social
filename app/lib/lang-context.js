@@ -8,13 +8,17 @@ export function LangProvider({ children, initialLang = 'fr' }) {
   const [lang, setLangState] = useState(initialLang);
 
   useEffect(() => {
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('aureus_lang') : null;
-    if (saved && ['fr','nl','en','de'].includes(saved)) setLangState(saved);
+    try {
+      const saved = typeof window !== 'undefined' ? localStorage.getItem('aureus_lang') : null;
+      if (saved && ['fr','nl','en','de'].includes(saved)) setLangState(saved);
+    } catch(e) { /* localStorage bloqué (iOS Safari protections) */ }
   }, []);
 
   const setLang = (l) => {
     setLangState(l);
-    if (typeof window !== 'undefined') localStorage.setItem('aureus_lang', l);
+    try {
+      if (typeof window !== 'undefined') localStorage.setItem('aureus_lang', l);
+    } catch(e) { /* localStorage bloqué (iOS Safari protections) */ }
   };
 
   const t = (key) => {

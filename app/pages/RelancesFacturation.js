@@ -77,12 +77,12 @@ export default function RelancesFacturation({ supabase, user, clients = [] }) {
   // Chargement initial
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('aureus_relances');
+      const raw = (() => { try { return localStorage.getItem('aureus_relances'); } catch(e) { return null; } })();
       if (raw) {
         setFactures(JSON.parse(raw));
       } else {
         // Premier lancement : données de test
-        localStorage.setItem('aureus_relances', JSON.stringify(DEMO_FACTURES));
+        try { localStorage.setItem('aureus_relances', JSON.stringify(DEMO_FACTURES)); } catch(e) {}
         setFactures(DEMO_FACTURES);
       }
     } catch (e) { setFactures(DEMO_FACTURES); }
@@ -90,7 +90,7 @@ export default function RelancesFacturation({ supabase, user, clients = [] }) {
 
   const save = useCallback((updated) => {
     setFactures(updated);
-    localStorage.setItem('aureus_relances', JSON.stringify(updated));
+    try { localStorage.setItem('aureus_relances', JSON.stringify(updated)); } catch(e) {}
   }, []);
 
   // Envoyer une relance individuelle
