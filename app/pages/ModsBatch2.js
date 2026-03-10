@@ -488,6 +488,97 @@ export function FraisGestionMod({s,d}){
 export function EnvoiMod({s,d}){
   const { t, lang, tText } = useLang();const ae=(s?.emps||[]).filter(e=>e.status==='active'||!e.status);const [tab,setTab]=useState("fiches");const [mois,setMois]=useState(new Date().getMonth());const moiNoms=[tText('Janvier'),tText('Février'),tText('Mars'),tText('Avril'),tText('Mai'),tText('Juin'),tText('Juillet'),tText('Août'),tText('Septembre'),tText('Octobre'),tText('Novembre'),tText('Décembre')];const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2}).format(v);return <div><PH title="Envoi Documents" sub={"Distribution fiches de paie & documents — "+ae.length+" destinataires — LOIS_BELGES"}/><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>{[{l:tText('Destinataires'),v:ae.length,c:"#c6a34e"},{l:tText('Période'),v:moiNoms[mois]+" "+new Date().getFullYear(),c:"#60a5fa"},{l:tText('Fiches à envoyer'),v:ae.length,c:"#22c55e"},{l:tText('NISS masqués'),v:"✅ obf",c:"#a78bfa"}].map((k,i)=><div key={i} style={{padding:"14px 16px",background:"rgba(198,163,78,.04)",borderRadius:10,border:"1px solid rgba(198,163,78,.08)"}}><div style={{fontSize:10,color:"#5e5c56",textTransform:"uppercase",letterSpacing:".5px"}}>{k.l}</div><div style={{fontSize:18,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}</div><C><ST>Liste d'envoi — {moiNoms[mois]}</ST><div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",fontSize:11}}><thead><tr style={{borderBottom:"2px solid rgba(198,163,78,.2)"}}>{["Nom","NISS","Email","Net estimé","Statut envoi"].map(h=><th key={h} style={{padding:"8px 6px",textAlign:"left",color:"#c6a34e",fontWeight:600,fontSize:10}}>{h}</th>)}</tr></thead><tbody>{ae.map((e,i)=>{const net=quickNet(+(e.gross||0));return <tr key={e.id||i} style={{borderBottom:"1px solid rgba(255,255,255,.03)"}}><td style={{padding:"6px"}}>{(e.first||e.fn||'')+" "+(e.last||e.ln||'')}</td><td style={{padding:"6px",fontFamily:"monospace",fontSize:9}}>{obf.maskNISS(e.niss)}</td><td style={{padding:"6px",fontSize:10}}>{e.email||"—"}</td><td style={{padding:"6px",fontWeight:600,color:"#22c55e"}}>{f2(net)}</td><td style={{padding:"6px"}}><span style={{fontSize:9,padding:"2px 8px",borderRadius:4,background:"rgba(74,222,128,.1)",color:"#4ade80"}}>{tText('Prêt')}</span></td></tr>;})}</tbody></table></div></C></div>;}
 
+/* ═══════════════════════════════════════════════════════
+   BELCOTAX — UTILITIES
+═══════════════════════════════════════════════════════ */
+
+function validateNISS(raw) {
+  const d = (raw||'').replace(/[^0-9]/g,'');
+  if(d.length !== 11) return {ok:false, msg:'11 chiffres requis'};
+  const base = parseInt(d.slice(0,9), 10);
+  const check = parseInt(d.slice(9,11), 10);
+  const mod1 = 97 - (base % 97);
+  const mod2 = 97 - ((2000000000 + base) % 97);
+  if(mod1 !== check && mod2 !== check) return {ok:false, msg:'Contrôle mod97 invalide'};
+  const mm = d.slice(2,4), dd = d.slice(4,6), yy = d.slice(0,2);
+  if(+mm<1||+mm>12||+dd<1||+dd>31) return {ok:false, msg:'Date invalide'};
+  const sexCode = parseInt(d.slice(6,9),10);
+  return {ok:true, msg:'NISS valide', sex:sexCode%2===0?'F':'M',
+    dob:`${+dd}/${+mm}/${+yy<30?'20':'19'}${yy}`};
+}
+
+function validateEmpBelcotax(emp) {
+  const errors = [], warnings = [];
+  const nv = validateNISS(emp.niss);
+  if(!emp.niss) errors.push('NISS manquant');
+  else if(!nv.ok) errors.push('NISS invalide: '+nv.msg);
+  if(!(emp.fn||emp.firstName)) errors.push('Prénom manquant');
+  if(!(emp.ln||emp.lastName)) errors.push('Nom manquant');
+  if(!(emp.addr||emp.address)) warnings.push('Adresse manquante');
+  if(!emp.zip) warnings.push('Code postal manquant');
+  if(!emp.city) warnings.push('Commune manquante');
+  if(!(+emp.gross>0)) errors.push('Salaire brut = 0');
+  return {errors, warnings, valid:errors.length===0};
+}
+
+function genFiche281Html(emp, co, annee, TX_ONSS_W_val, quickPP_fn) {
+  const r2l = n => Math.round((+n||0)*100)/100;
+  const brut = r2l(+emp.gross||0);
+  const brutAn = r2l(brut*12);
+  const onssAn = r2l(brutAn*TX_ONSS_W_val);
+  const ppAn = r2l(quickPP_fn(brut)*12);
+  const t = brut*3;
+  let csssAn=0;
+  if(t>6570&&t<=8829) csssAn=r2l(t*0.0764*12/3);
+  else if(t>8829&&t<=13635) csssAn=r2l((51.64+(t-8829)*0.011)*12/3);
+  else if(t>13635) csssAn=r2l(154.92*12/3);
+  const imposable=r2l(brutAn-onssAn);
+  const fmtM = n=>n.toLocaleString('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+  const bce=(co.bce||'').replace(/[^0-9]/g,'');
+  const beF=bce.length>=10?`BE ${bce.slice(0,4)}.${bce.slice(4,7)}.${bce.slice(7)}`:co.bce||'BE 1028.230.781';
+  const nr=(emp.niss||'').replace(/[^0-9]/g,'');
+  const nf=nr.length===11?`${nr.slice(0,2)}.${nr.slice(2,4)}.${nr.slice(4,6)}-${nr.slice(6,9)}.${nr.slice(9)}`:emp.niss||'NON RENSEIGNÉ';
+  const yr=annee||new Date().getFullYear()-1;
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Fiche 281.10 — ${emp.fn||''} ${emp.ln||''} — ${yr}</title>
+<style>body{font-family:Arial,sans-serif;font-size:11px;color:#111;margin:0;padding:0;background:#fff;}.page{width:210mm;min-height:297mm;padding:12mm 14mm;box-sizing:border-box;margin:0 auto;}.header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:8px;border-bottom:3px solid #1a1a6e;margin-bottom:12px;}.logo-box{font-weight:800;font-size:16px;color:#1a1a6e;}.logo-sub{font-size:9px;font-weight:400;color:#555;}.title-box{text-align:right;}.ft{font-size:18px;font-weight:800;color:#1a1a6e;}.fs{font-size:11px;color:#555;}.ab{background:#1a1a6e;color:#fff;padding:4px 12px;border-radius:4px;font-weight:700;font-size:14px;margin-top:4px;display:inline-block;}.st{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#fff;background:#1a1a6e;padding:3px 8px;margin-bottom:0;display:block;}table{width:100%;border-collapse:collapse;font-size:11px;}td{padding:4px 8px;border:1px solid #ccc;}td.lb{background:#f5f5f5;font-weight:600;width:50%;color:#333;}td.vl{font-family:monospace;}.tr td{background:#1a1a6e!important;color:#fff!important;font-weight:700!important;}.pr td{background:#fff3cd!important;font-weight:600!important;}.nr td{background:#d4edda!important;font-weight:700!important;}.footer{margin-top:16px;padding-top:8px;border-top:1px solid #ccc;font-size:9px;color:#888;text-align:center;}.lb2{background:#fff3cd;border:1px solid #ffc107;padding:6px 10px;font-size:9px;color:#555;margin:8px 0;border-radius:3px;}.sec{margin-bottom:10px;}@media print{body{margin:0;}@page{size:A4;margin:0;}}</style></head>
+<body><div class="page">
+<div class="header"><div class="logo-box">${(co.name||'AUREUS IA SPRL').toUpperCase()}<div class="logo-sub">BCE ${beF} — ONSS ${co.onss||'___________'}</div><div class="logo-sub">${co.addr||'Place Marcel Broodthaers 8'}, ${co.cp_addr||'1060'} ${co.city||'Saint-Gilles'}</div></div><div class="title-box"><div class="ft">FICHE 281.10</div><div class="fs">Rémunérations et avantages</div><div class="ab">Exercice ${yr}</div></div></div>
+<div class="sec"><span class="st">🏢 Débiteur des revenus</span><table><tr><td class="lb">Dénomination</td><td class="vl">${co.name||'Aureus IA SPRL'}</td><td class="lb">BCE</td><td class="vl">${beF}</td></tr><tr><td class="lb">Adresse</td><td class="vl">${co.addr||'Place Marcel Broodthaers 8'}, ${co.cp_addr||'1060'} ${co.city||'Saint-Gilles'}</td><td class="lb">N° ONSS</td><td class="vl">${co.onss||'___________'}</td></tr></table></div>
+<div class="sec"><span class="st">👤 Bénéficiaire</span><table><tr><td class="lb">NISS</td><td class="vl" style="font-size:13px;font-weight:700;color:#1a1a6e;">${nf}</td><td class="lb">Statut</td><td class="vl">${emp.statut==='ouvrier'?'Ouvrier':'Employé'}</td></tr><tr><td class="lb">Nom</td><td class="vl">${emp.ln||emp.lastName||''}</td><td class="lb">Prénom</td><td class="vl">${emp.fn||emp.firstName||''}</td></tr><tr><td class="lb">Adresse complète</td><td class="vl" colspan="3">${emp.addr||emp.address||''} ${emp.zip?', '+emp.zip:''} ${emp.city||''}</td></tr></table></div>
+<div class="sec"><span class="st">💶 Montants — Revenus ${yr}</span><table>
+<tr><td class="lb">Code 250 — Rémunérations brutes</td><td class="vl" style="text-align:right;">${fmtM(brutAn)}</td></tr>
+<tr><td class="lb">Code 286 — ONSS personnelle</td><td class="vl" style="text-align:right;color:#c00;">(${fmtM(onssAn)})</td></tr>
+<tr><td class="lb">Rémunération imposable</td><td class="vl" style="text-align:right;font-weight:700;">${fmtM(imposable)}</td></tr>
+<tr class="pr"><td class="lb">Code 225 — Précompte professionnel retenu</td><td class="vl" style="text-align:right;">(${fmtM(ppAn)})</td></tr>
+<tr><td class="lb">Code 287 — CSSS</td><td class="vl" style="text-align:right;">(${fmtM(csssAn)})</td></tr>
+<tr><td class="lb">Code 263 — Chèques-repas patronal</td><td class="vl" style="text-align:right;">${fmtM(0)}</td></tr>
+<tr><td class="lb">Code 268 — Frais propres employeur</td><td class="vl" style="text-align:right;">${fmtM(0)}</td></tr>
+<tr><td class="lb">Code 261 — Assurance groupe</td><td class="vl" style="text-align:right;">${fmtM(0)}</td></tr>
+<tr class="tr"><td class="lb">PRÉCOMPTE TOTAL RETENU</td><td class="vl" style="text-align:right;">${fmtM(ppAn)}</td></tr>
+<tr class="nr"><td class="lb">NET ESTIMÉ</td><td class="vl" style="text-align:right;">${fmtM(r2l(brutAn-onssAn-ppAn-csssAn))}</td></tr>
+</table></div>
+<div class="lb2">⚖️ <strong>Art. 57 CIR 1992</strong> — Fiche à remettre au bénéficiaire avant le 28/02/${yr+1} et déposée au SPF Finances via Belcotax-on-web avant le 01/03/${yr+1}.</div>
+<div class="footer">Fiche 281.10 générée par <strong>Aureus Social Pro</strong> — ${new Date().toLocaleDateString('fr-BE')} — Confidentiel</div>
+</div></body></html>`;
+}
+
+function genDmfaXml(emps, co, trimestre, annee, TX_ONSS_W_val, TX_ONSS_E_val) {
+  const r2l = n => Math.round((+n||0)*100)/100;
+  const esc2 = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const bce=(co.bce||'1028230781').replace(/[^0-9]/g,'');
+  const ts=new Date().toISOString().slice(0,10);
+  const mD=(trimestre-1)*3+1, mF=trimestre*3;
+  const actifs=emps.filter(e=>e.gross>0);
+  const workers=actifs.map((emp,i)=>{
+    const brut=r2l(+emp.gross||0), brutT=r2l(brut*3);
+    const niss=(emp.niss||'').replace(/[^0-9]/g,'');
+    return `    <Travailleur><Sequence>${i+1}</Sequence><NISS>${esc2(niss)}</NISS><Nom>${esc2(emp.ln||emp.lastName||'')}</Nom><Prenom>${esc2(emp.fn||emp.firstName||'')}</Prenom><TypeTravailleur>${emp.statut==='ouvrier'?'O':'E'}</TypeTravailleur><CommissionParitaire>${esc2(emp.cp||'200')}</CommissionParitaire><JoursTravailles>65</JoursTravailles><RemunerationTrimestre>${brutT.toFixed(2)}</RemunerationTrimestre><CotisationsTravailleur>${r2l(brutT*TX_ONSS_W_val).toFixed(2)}</CotisationsTravailleur><CotisationsPatronales>${r2l(brutT*TX_ONSS_E_val).toFixed(2)}</CotisationsPatronales></Travailleur>`;
+  }).join('\n');
+  const totBrut=r2l(actifs.reduce((a,e)=>(+e.gross||0)*3+a,0));
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<!-- DmfA T${trimestre}/${annee} — Généré par Aureus Social Pro -->\n<DmfA>\n  <Entete>\n    <Annee>${annee}</Annee>\n    <Trimestre>${trimestre}</Trimestre>\n    <PeriodeDebut>${annee}-${String(mD).padStart(2,'0')}-01</PeriodeDebut>\n    <PeriodeFin>${annee}-${String(mF).padStart(2,'0')}-30</PeriodeFin>\n    <DateCreation>${ts}</DateCreation>\n  </Entete>\n  <Employeur>\n    <NumeroBCE>${bce}</NumeroBCE>\n    <NumeroONSS>${esc2(co.onss||'')}</NumeroONSS>\n    <Denomination>${esc2(co.name||'Aureus IA SPRL')}</Denomination>\n    <NombreTravailleurs>${actifs.length}</NombreTravailleurs>\n    <MasseSalarialeBrute>${totBrut.toFixed(2)}</MasseSalarialeBrute>\n    <TotalCotisationsTravailleur>${r2l(totBrut*TX_ONSS_W_val).toFixed(2)}</TotalCotisationsTravailleur>\n    <TotalCotisationsPatronales>${r2l(totBrut*TX_ONSS_E_val).toFixed(2)}</TotalCotisationsPatronales>\n  </Employeur>\n  <Travailleurs>\n${workers}\n  </Travailleurs>\n</DmfA>`;
+}
+
+
 function r2(n){return Math.round((+n||0)*100)/100;}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
@@ -566,228 +657,418 @@ ${fiches}
 </Belcotax>`;
 }
 
-function BelcotaxGen({ae, co, tText, fmt, TX_ONSS_W, quickPP}) {
+function BelcotaxGen({ae, co, tText, fmt, TX_ONSS_W, TX_ONSS_E, quickPP}) {
   const anneeActuelle = new Date().getFullYear();
   const [annee, setAnnee] = useState(anneeActuelle - 1);
+  const [tab, setTab] = useState('fiches');
   const [selected, setSelected] = useState(null);
   const [xmlGen, setXmlGen] = useState('');
-  const [copied, setCopied] = useState(false);
+  const [dmfaTrim, setDmfaTrim] = useState(Math.ceil(new Date().getMonth()/3)||1);
+  const [dmfaXml, setDmfaXml] = useState('');
+  const [copiedXml, setCopiedXml] = useState(false);
+  const [copiedDmfa, setCopiedDmfa] = useState(false);
+  const [emailStatus, setEmailStatus] = useState({});
+  const [sendingAll, setSendingAll] = useState(false);
 
-  const empsValides = ae.filter(e => e.gross > 0);
+  const empsValides = ae.filter(e => +e.gross > 0);
   const totaux = empsValides.reduce((acc, emp) => {
     const f = calcFiche281(emp, TX_ONSS_W, quickPP);
-    acc.brutAn += f.brutAn;
-    acc.onssAn += f.onssAn;
-    acc.ppAn += f.ppAn;
-    acc.csssAn += f.csssAn;
+    acc.brutAn += f.brutAn; acc.onssAn += f.onssAn;
+    acc.ppAn += f.ppAn; acc.csssAn += f.csssAn;
     return acc;
-  }, {brutAn:0, onssAn:0, ppAn:0, csssAn:0});
+  }, {brutAn:0,onssAn:0,ppAn:0,csssAn:0});
 
-  const doGenerate = () => {
-    const xml = genXML281(empsValides, co, annee, TX_ONSS_W, quickPP);
-    setXmlGen(xml);
-  };
+  // Validation globale
+  const validations = empsValides.map(emp => ({emp, ...validateEmpBelcotax(emp)}));
+  const nbErrors = validations.reduce((a,v)=>a+v.errors.length,0);
+  const nbWarnings = validations.reduce((a,v)=>a+v.warnings.length,0);
 
-  const doDownload = () => {
-    const xml = xmlGen || genXML281(empsValides, co, annee, TX_ONSS_W, quickPP);
-    const blob = new Blob([xml], {type:'text/xml;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
+  const doGenXml = () => { setXmlGen(genXML281(empsValides, co, annee, TX_ONSS_W, quickPP)); };
+  const doGenDmfa = () => { setDmfaXml(genDmfaXml(empsValides, co, dmfaTrim, annee, TX_ONSS_W, TX_ONSS_E)); };
+
+  const doDownloadXml = () => {
+    const x = xmlGen || genXML281(empsValides, co, annee, TX_ONSS_W, quickPP);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `belcotax_281_10_${annee}_${(co.bce||'').replace(/[^0-9]/g,'')}.xml`;
-    a.click();
-    URL.revokeObjectURL(url);
+    a.href = URL.createObjectURL(new Blob([x],{type:'text/xml;charset=utf-8'}));
+    a.download = `belcotax_281_10_${annee}.xml`; a.click();
+  };
+  const doDownloadDmfa = () => {
+    const x = dmfaXml || genDmfaXml(empsValides, co, dmfaTrim, annee, TX_ONSS_W, TX_ONSS_E);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([x],{type:'text/xml;charset=utf-8'}));
+    a.download = `dmfa_T${dmfaTrim}_${annee}.xml`; a.click();
   };
 
-  const doCopy = () => {
-    navigator.clipboard?.writeText(xmlGen).then(() => { setCopied(true); setTimeout(()=>setCopied(false),2000); });
+  const doPrintFiche = (emp) => {
+    const html = genFiche281Html(emp, co, annee, TX_ONSS_W, quickPP);
+    const w = window.open('','_blank','width=900,height=1100');
+    w.document.write(html); w.document.close();
+    setTimeout(()=>w.print(),400);
   };
 
-  const fStr = n => '€ ' + r2(n).toLocaleString('fr-BE', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const doDownloadFiche = (emp) => {
+    const html = genFiche281Html(emp, co, annee, TX_ONSS_W, quickPP);
+    const fn = `fiche_281_10_${emp.ln||''}${emp.fn||''}_${annee}.html`.replace(/\s+/g,'_');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
+    a.download = fn; a.click();
+  };
+
+  const doSendEmail = async (emp) => {
+    if(!emp.email){ setEmailStatus(s=>({...s,[emp.id]:{status:'error',msg:'Email manquant'}})); return; }
+    setEmailStatus(s=>({...s,[emp.id]:{status:'sending',msg:'Envoi...'}}));
+    const html = genFiche281Html(emp, co, annee, TX_ONSS_W, quickPP);
+    const f = calcFiche281(emp, TX_ONSS_W, quickPP);
+    try {
+      const res = await fetch('/api/send-email',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          to: emp.email, subject: `Fiche 281.10 — Exercice ${annee} — ${emp.fn||''} ${emp.ln||''}`,
+          html: `<p>Bonjour ${emp.fn||''},</p><p>Veuillez trouver ci-joint votre fiche fiscale 281.10 pour l'exercice ${annee}.</p><p>Brut annuel : ${f.brutAn.toFixed(2)} €<br>PP retenu : ${f.ppAn.toFixed(2)} €</p><p>Cordialement,<br>${co.name||'Aureus IA SPRL'}</p>`,
+          attachmentHtml: html, attachmentName: `fiche_281_10_${annee}.html`
+        })
+      });
+      if(res.ok) setEmailStatus(s=>({...s,[emp.id]:{status:'ok',msg:'Envoyé ✓'}}));
+      else setEmailStatus(s=>({...s,[emp.id]:{status:'error',msg:'Erreur serveur'}}));
+    } catch(e) { setEmailStatus(s=>({...s,[emp.id]:{status:'error',msg:'Erreur réseau'}})); }
+  };
+
+  const doSendAll = async () => {
+    setSendingAll(true);
+    for(const emp of empsValides.filter(e=>e.email)){
+      await doSendEmail(emp);
+      await new Promise(r=>setTimeout(r,300));
+    }
+    setSendingAll(false);
+  };
+
+  const fStr = n => '€ '+r2(n).toLocaleString('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const TABS = [{v:'fiches',l:'📋 Fiches 281.10'},{v:'validation',l:`✅ Validation${nbErrors>0?` (${nbErrors}⚠️)`:'s'}`},{v:'xml',l:'📄 XML Belcotax'},{v:'dmfa',l:'🏛 DmfA XML'},{v:'email',l:'📧 Envoi email'}];
 
   return (
     <div>
-      {/* Header config */}
-      <C>
-        <ST>⚙️ Configuration — Exercice {annee}</ST>
-        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:16, marginBottom:16}}>
-          <div>
-            <div style={{fontSize:11,color:'#5e5c56',marginBottom:6}}>EXERCICE FISCAL</div>
-            <select value={annee} onChange={e=>setAnnee(+e.target.value)}
-              style={{width:'100%',padding:'10px 12px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'rgba(0,0,0,.3)',color:'#e8e6e0',fontSize:13,fontFamily:'inherit'}}>
-              {[anneeActuelle-1, anneeActuelle-2, anneeActuelle-3].map(y=>(
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
+      {/* Stats header */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,marginBottom:16}}>
+        {[
+          {l:'Travailleurs',v:empsValides.length,c:'#c6a34e',ico:'👥'},
+          {l:'Brut annuel total',v:fStr(totaux.brutAn),c:'#c6a34e',ico:'💰'},
+          {l:'PP retenu total',v:fStr(totaux.ppAn),c:'#f87171',ico:'🏛'},
+          {l:'Erreurs NISS',v:nbErrors,c:nbErrors>0?'#f87171':'#4ade80',ico:nbErrors>0?'❌':'✅'},
+          {l:'Avertissements',v:nbWarnings,c:nbWarnings>0?'#fb923c':'#4ade80',ico:nbWarnings>0?'⚠️':'✅'},
+        ].map((k,i)=>(
+          <div key={i} style={{padding:'12px 14px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)',textAlign:'center'}}>
+            <div style={{fontSize:16,marginBottom:4}}>{k.ico}</div>
+            <div style={{fontSize:i===0?22:13,fontWeight:700,color:k.c}}>{k.v}</div>
+            <div style={{fontSize:9,color:'#5e5c56',marginTop:2,textTransform:'uppercase',letterSpacing:.5}}>{k.l}</div>
           </div>
-          <div>
-            <div style={{fontSize:11,color:'#5e5c56',marginBottom:6}}>DÉPOSANT</div>
-            <div style={{padding:'10px 12px',borderRadius:8,border:'1px solid rgba(198,163,78,.1)',background:'rgba(0,0,0,.2)',fontSize:12,color:'#e8e6e0'}}>{co.name||'Aureus IA SPRL'}</div>
-          </div>
-          <div>
-            <div style={{fontSize:11,color:'#5e5c56',marginBottom:6}}>BCE</div>
-            <div style={{padding:'10px 12px',borderRadius:8,border:'1px solid rgba(198,163,78,.1)',background:'rgba(0,0,0,.2)',fontSize:12,color:'#60a5fa',fontFamily:'monospace'}}>{co.bce||co.vat||'BE 1028.230.781'}</div>
-          </div>
-        </div>
-        {/* Totaux */}
-        <div style={{display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:10, marginBottom:16}}>
-          {[
-            {l:'Travailleurs', v:empsValides.length, c:'#c6a34e', ico:'👥'},
-            {l:'Brut total annuel', v:fStr(totaux.brutAn), c:'#c6a34e', ico:'💰'},
-            {l:'ONSS retenu', v:fStr(totaux.onssAn), c:'#f87171', ico:'📉'},
-            {l:'PP retenu', v:fStr(totaux.ppAn), c:'#f87171', ico:'🏛'},
-            {l:'CSSS retenu', v:fStr(totaux.csssAn), c:'#fb923c', ico:'💊'},
-          ].map((k,i)=>(
-            <div key={i} style={{padding:'12px 14px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)',textAlign:'center'}}>
-              <div style={{fontSize:16,marginBottom:4}}>{k.ico}</div>
-              <div style={{fontSize:i===0?22:13,fontWeight:700,color:k.c}}>{k.v}</div>
-              <div style={{fontSize:9,color:'#5e5c56',marginTop:2,textTransform:'uppercase',letterSpacing:.5}}>{k.l}</div>
-            </div>
-          ))}
-        </div>
-        {empsValides.length === 0 && (
-          <div style={{padding:'12px 16px',borderRadius:8,background:'rgba(239,68,68,.08)',border:'1px solid rgba(239,68,68,.15)',fontSize:12,color:'#f87171',marginBottom:12}}>
-            ⚠️ Aucun travailleur avec salaire configuré. Ajoutez des employés via le module Travailleurs.
-          </div>
-        )}
-        <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-          <button onClick={doGenerate} disabled={empsValides.length===0}
-            style={{padding:'11px 24px',borderRadius:9,border:'none',background:empsValides.length===0?'rgba(198,163,78,.2)':'linear-gradient(135deg,#c6a34e,#a68a3c)',color:'#0c0b09',fontSize:13,fontWeight:700,cursor:empsValides.length===0?'not-allowed':'pointer',fontFamily:'inherit'}}>
-            ⚡ Générer XML 281.10
+        ))}
+      </div>
+
+      {/* Tabs */}
+      <div style={{display:'flex',gap:6,marginBottom:16,flexWrap:'wrap'}}>
+        {TABS.map(t=>(
+          <button key={t.v} onClick={()=>setTab(t.v)}
+            style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>
+            {t.l}
           </button>
-          {xmlGen && <>
-            <button onClick={doDownload}
-              style={{padding:'11px 24px',borderRadius:9,border:'1px solid rgba(74,222,128,.3)',background:'rgba(74,222,128,.08)',color:'#4ade80',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>
-              💾 Télécharger .xml
-            </button>
-            <button onClick={doCopy}
-              style={{padding:'11px 20px',borderRadius:9,border:'1px solid rgba(96,165,250,.3)',background:'rgba(96,165,250,.08)',color:'#60a5fa',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>
-              {copied ? '✅ Copié !' : '📋 Copier XML'}
-            </button>
-          </>}
+        ))}
+        <div style={{marginLeft:'auto',display:'flex',gap:6,alignItems:'center'}}>
+          <select value={annee} onChange={e=>setAnnee(+e.target.value)}
+            style={{padding:'6px 10px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'rgba(0,0,0,.3)',color:'#e8e6e0',fontSize:12,fontFamily:'inherit'}}>
+            {[anneeActuelle-1,anneeActuelle-2,anneeActuelle-3].map(y=><option key={y} value={y}>{y}</option>)}
+          </select>
         </div>
-      </C>
+      </div>
 
-      {/* Tableau récap des fiches */}
-      <C>
-        <ST>📋 Récapitulatif fiches 281.10 — {annee}</ST>
-        <div style={{overflowX:'auto'}}>
-          <table style={{width:'100%',borderCollapse:'collapse',fontSize:12}}>
-            <thead>
-              <tr style={{borderBottom:'2px solid rgba(198,163,78,.2)'}}>
-                {['#','Travailleur','NISS','Brut annuel','ONSS pers.','PP retenu','CSSS','Imposable','Aperçu'].map((h,i)=>(
-                  <th key={i} style={{padding:'8px 10px',textAlign:i>2?'right':'left',fontSize:10,color:'#5e5c56',fontWeight:700,textTransform:'uppercase',letterSpacing:.5,whiteSpace:'nowrap'}}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {empsValides.length === 0 ? (
-                <tr><td colSpan={9} style={{padding:'24px',textAlign:'center',color:'#5e5c56',fontSize:13}}>Aucun travailleur</td></tr>
-              ) : empsValides.map((emp, i) => {
-                const f = calcFiche281(emp, TX_ONSS_W, quickPP);
-                const nissOk = (emp.niss||'').replace(/[^0-9]/g,'').length === 11;
-                return (
-                  <tr key={i} style={{borderBottom:'1px solid rgba(255,255,255,.04)',background:selected===i?'rgba(198,163,78,.06)':'transparent',cursor:'pointer'}}
-                    onClick={()=>setSelected(selected===i?null:i)}>
-                    <td style={{padding:'8px 10px',color:'#5e5c56',fontSize:11}}>{String(i+1).padStart(2,'0')}</td>
-                    <td style={{padding:'8px 10px',fontWeight:600,color:'#e8e6e0'}}>{(emp.fn||'')} {(emp.ln||'')}</td>
-                    <td style={{padding:'8px 10px',fontFamily:'monospace',fontSize:11}}>
-                      <span style={{color:nissOk?'#60a5fa':'#f87171'}}>{emp.niss||'MANQUANT'}</span>
-                      {!nissOk&&<span style={{fontSize:9,color:'#f87171',marginLeft:4}}>⚠</span>}
-                    </td>
-                    <td style={{padding:'8px 10px',textAlign:'right',color:'#c6a34e',fontWeight:600}}>{fmt(f.brutAn)}</td>
-                    <td style={{padding:'8px 10px',textAlign:'right',color:'#f87171'}}>{fmt(f.onssAn)}</td>
-                    <td style={{padding:'8px 10px',textAlign:'right',color:'#f87171'}}>{fmt(f.ppAn)}</td>
-                    <td style={{padding:'8px 10px',textAlign:'right',color:'#fb923c'}}>{fmt(f.csssAn)}</td>
-                    <td style={{padding:'8px 10px',textAlign:'right',color:'#e8e6e0'}}>{fmt(f.imposableAn)}</td>
-                    <td style={{padding:'8px 10px',textAlign:'right'}}>
-                      <button onClick={e=>{e.stopPropagation();setSelected(selected===i?null:i)}}
-                        style={{background:'rgba(198,163,78,.1)',border:'1px solid rgba(198,163,78,.2)',borderRadius:6,padding:'3px 8px',color:'#c6a34e',fontSize:10,cursor:'pointer',fontFamily:'inherit'}}>
-                        {selected===i?'▲':'▼'}
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            {empsValides.length > 0 && (
-              <tfoot>
-                <tr style={{borderTop:'2px solid rgba(198,163,78,.3)'}}>
-                  <td colSpan={3} style={{padding:'10px',fontWeight:700,color:'#c6a34e',fontSize:12}}>TOTAL</td>
-                  <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#c6a34e'}}>{fmt(totaux.brutAn)}</td>
-                  <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#f87171'}}>{fmt(totaux.onssAn)}</td>
-                  <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#f87171'}}>{fmt(totaux.ppAn)}</td>
-                  <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#fb923c'}}>{fmt(totaux.csssAn)}</td>
-                  <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#e8e6e0'}}>{fmt(totaux.brutAn-totaux.onssAn)}</td>
-                  <td/>
-                </tr>
-              </tfoot>
-            )}
-          </table>
-        </div>
-        {/* Détail fiche sélectionnée */}
-        {selected !== null && empsValides[selected] && (() => {
-          const emp = empsValides[selected];
-          const f = calcFiche281(emp, TX_ONSS_W, quickPP);
-          return (
-            <div style={{marginTop:16,padding:16,background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.15)'}}>
-              <div style={{fontSize:13,fontWeight:700,color:'#c6a34e',marginBottom:12}}>
-                🔍 Fiche détaillée — {emp.fn} {emp.ln}
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
-                <div>
-                  <div style={{fontSize:11,fontWeight:700,color:'#5e5c56',marginBottom:8}}>IDENTIFICATION</div>
-                  {[
-                    {l:'NISS', v:emp.niss||'NON RENSEIGNÉ', c:(emp.niss||'').replace(/[^0-9]/g,'').length===11?'#60a5fa':'#f87171'},
-                    {l:'Nom', v:(emp.ln||'')},
-                    {l:'Prénom', v:(emp.fn||'')},
-                    {l:'Adresse', v:emp.addr||'—'},
-                    {l:'CP', v:emp.zip||'—'},
-                    {l:'Commune', v:emp.city||'—'},
-                  ].map((r,i)=>(
-                    <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.04)',fontSize:12}}>
-                      <span style={{color:'#5e5c56'}}>{r.l}</span>
-                      <span style={{color:r.c||'#e8e6e0',fontFamily:r.l==='NISS'?'monospace':'inherit'}}>{r.v}</span>
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <div style={{fontSize:11,fontWeight:700,color:'#5e5c56',marginBottom:8}}>MONTANTS ANNUELS — CODE 281</div>
-                  {[
-                    {l:'Code 250 — Brut total', v:fmt(f.brutAn), c:'#c6a34e'},
-                    {l:'Code 286 — ONSS personnelle', v:fmt(f.onssAn), c:'#f87171'},
-                    {l:'Code 225 — PP retenu', v:fmt(f.ppAn), c:'#f87171'},
-                    {l:'Code 287 — CSSS', v:fmt(f.csssAn), c:'#fb923c'},
-                    {l:'Imposable net', v:fmt(f.imposableAn), c:'#e8e6e0'},
-                    {l:'Net estimé', v:fmt(f.netAn), c:'#4ade80'},
-                  ].map((r,i)=>(
-                    <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.04)',fontSize:12}}>
-                      <span style={{color:'#5e5c56'}}>{r.l}</span>
-                      <span style={{fontWeight:600,color:r.c}}>{r.v}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          );
-        })()}
-      </C>
-
-      {/* Aperçu XML */}
-      {xmlGen && (
+      {/* ── TAB: FICHES ── */}
+      {tab==='fiches' && (
         <C>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
-            <ST style={{marginBottom:0}}>📄 XML généré — {empsValides.length} fiche(s)</ST>
-            <div style={{display:'flex',gap:8}}>
-              <button onClick={doCopy} style={{padding:'6px 14px',borderRadius:7,border:'1px solid rgba(96,165,250,.3)',background:'rgba(96,165,250,.08)',color:'#60a5fa',fontSize:11,cursor:'pointer',fontFamily:'inherit'}}>{copied?'✅ Copié !':'📋 Copier'}</button>
-              <button onClick={doDownload} style={{padding:'6px 14px',borderRadius:7,border:'1px solid rgba(74,222,128,.3)',background:'rgba(74,222,128,.08)',color:'#4ade80',fontSize:11,cursor:'pointer',fontFamily:'inherit'}}>💾 .xml</button>
-            </div>
+          <ST>📋 Fiches 281.10 par travailleur — {annee}</ST>
+          {empsValides.length===0 && (
+            <div style={{padding:'16px',textAlign:'center',color:'#5e5c56',fontSize:13}}>Aucun travailleur configuré</div>
+          )}
+          <div style={{overflowX:'auto'}}>
+            <table style={{width:'100%',borderCollapse:'collapse',fontSize:12}}>
+              <thead>
+                <tr style={{borderBottom:'2px solid rgba(198,163,78,.2)'}}>
+                  {['#','Travailleur','NISS','Brut annuel','PP retenu','Net estimé','Actions'].map((h,i)=>(
+                    <th key={i} style={{padding:'8px 10px',textAlign:i>2?'right':'left',fontSize:10,color:'#5e5c56',fontWeight:700,textTransform:'uppercase',letterSpacing:.5,whiteSpace:'nowrap'}}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {empsValides.map((emp,i)=>{
+                  const f=calcFiche281(emp,TX_ONSS_W,quickPP);
+                  const nv=validateNISS(emp.niss);
+                  return (
+                    <tr key={i} style={{borderBottom:'1px solid rgba(255,255,255,.04)'}}>
+                      <td style={{padding:'8px 10px',color:'#5e5c56',fontSize:11}}>{String(i+1).padStart(2,'0')}</td>
+                      <td style={{padding:'8px 10px',fontWeight:600,color:'#e8e6e0'}}>{emp.fn||''} {emp.ln||''}</td>
+                      <td style={{padding:'8px 10px',fontFamily:'monospace',fontSize:11}}>
+                        <span style={{color:nv.ok?'#60a5fa':'#f87171'}}>{emp.niss||'MANQUANT'}</span>
+                        {nv.ok && <span style={{fontSize:9,color:'#4ade80',marginLeft:4}}>✓</span>}
+                        {!nv.ok && <span style={{fontSize:9,color:'#f87171',marginLeft:4}}>⚠</span>}
+                      </td>
+                      <td style={{padding:'8px 10px',textAlign:'right',color:'#c6a34e',fontWeight:600}}>{fmt(f.brutAn)}</td>
+                      <td style={{padding:'8px 10px',textAlign:'right',color:'#f87171'}}>{fmt(f.ppAn)}</td>
+                      <td style={{padding:'8px 10px',textAlign:'right',color:'#4ade80',fontWeight:600}}>{fmt(f.netAn)}</td>
+                      <td style={{padding:'8px 10px',textAlign:'right'}}>
+                        <div style={{display:'flex',gap:4,justifyContent:'flex-end'}}>
+                          <button onClick={()=>doPrintFiche(emp)}
+                            style={{background:'rgba(198,163,78,.1)',border:'1px solid rgba(198,163,78,.2)',borderRadius:6,padding:'4px 8px',color:'#c6a34e',fontSize:10,cursor:'pointer',fontFamily:'inherit'}}>
+                            🖨️
+                          </button>
+                          <button onClick={()=>doDownloadFiche(emp)}
+                            style={{background:'rgba(74,222,128,.08)',border:'1px solid rgba(74,222,128,.2)',borderRadius:6,padding:'4px 8px',color:'#4ade80',fontSize:10,cursor:'pointer',fontFamily:'inherit'}}>
+                            💾
+                          </button>
+                          <button onClick={()=>setSelected(selected===i?null:i)}
+                            style={{background:'rgba(96,165,250,.08)',border:'1px solid rgba(96,165,250,.2)',borderRadius:6,padding:'4px 8px',color:'#60a5fa',fontSize:10,cursor:'pointer',fontFamily:'inherit'}}>
+                            {selected===i?'▲':'▼'}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              {empsValides.length>0 && (
+                <tfoot>
+                  <tr style={{borderTop:'2px solid rgba(198,163,78,.3)'}}>
+                    <td colSpan={3} style={{padding:'10px',fontWeight:700,color:'#c6a34e',fontSize:12}}>TOTAL</td>
+                    <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#c6a34e'}}>{fmt(totaux.brutAn)}</td>
+                    <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#f87171'}}>{fmt(totaux.ppAn)}</td>
+                    <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#4ade80'}}>{fmt(totaux.brutAn-totaux.onssAn-totaux.ppAn-totaux.csssAn)}</td>
+                    <td/>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
           </div>
-          <pre style={{background:'rgba(0,0,0,.4)',borderRadius:8,padding:16,fontSize:10,color:'#4ade80',overflowX:'auto',overflowY:'auto',maxHeight:360,fontFamily:'monospace',lineHeight:1.6,border:'1px solid rgba(74,222,128,.1)'}}>
-            {xmlGen}
-          </pre>
-          <div style={{marginTop:12,padding:12,background:'rgba(34,197,94,.06)',border:'1px solid rgba(34,197,94,.15)',borderRadius:8,fontSize:11,color:'#22c55e'}}>
-            ✅ Fichier XML conforme au schéma Belcotax-on-web. Déposez-le sur <b>https://www.belcotaxonweb.be</b> avant le 1er mars {annee+1}.
+          {/* Détail fiche */}
+          {selected!==null && empsValides[selected] && (()=>{
+            const emp=empsValides[selected];
+            const f=calcFiche281(emp,TX_ONSS_W,quickPP);
+            return (
+              <div style={{marginTop:16,padding:16,background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.15)'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+                  <div style={{fontSize:13,fontWeight:700,color:'#c6a34e'}}>🔍 {emp.fn} {emp.ln} — Fiche 281.10 {annee}</div>
+                  <div style={{display:'flex',gap:8}}>
+                    <button onClick={()=>doPrintFiche(emp)} style={{padding:'6px 14px',borderRadius:7,border:'1px solid rgba(198,163,78,.3)',background:'rgba(198,163,78,.1)',color:'#c6a34e',fontSize:11,cursor:'pointer',fontFamily:'inherit'}}>🖨️ Imprimer</button>
+                    <button onClick={()=>doDownloadFiche(emp)} style={{padding:'6px 14px',borderRadius:7,border:'1px solid rgba(74,222,128,.3)',background:'rgba(74,222,128,.08)',color:'#4ade80',fontSize:11,cursor:'pointer',fontFamily:'inherit'}}>💾 Télécharger</button>
+                  </div>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+                  <div>
+                    {[{l:'NISS',v:emp.niss||'—',mono:true},{l:'Nom',v:emp.ln||'—'},{l:'Prénom',v:emp.fn||'—'},{l:'Adresse',v:emp.addr||'—'},{l:'CP / Ville',v:`${emp.zip||''} ${emp.city||''}`||'—'}].map((r,i)=>(
+                      <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.04)',fontSize:12}}>
+                        <span style={{color:'#5e5c56'}}>{r.l}</span>
+                        <span style={{color:'#e8e6e0',fontFamily:r.mono?'monospace':'inherit'}}>{r.v}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div>
+                    {[
+                      {l:'Code 250 — Brut annuel',v:fmt(f.brutAn),c:'#c6a34e'},
+                      {l:'Code 286 — ONSS',v:fmt(f.onssAn),c:'#f87171'},
+                      {l:'Code 225 — PP retenu',v:fmt(f.ppAn),c:'#f87171'},
+                      {l:'Code 287 — CSSS',v:fmt(f.csssAn),c:'#fb923c'},
+                      {l:'Imposable',v:fmt(f.imposableAn),c:'#e8e6e0'},
+                      {l:'Net estimé',v:fmt(f.netAn),c:'#4ade80'},
+                    ].map((r,i)=>(
+                      <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.04)',fontSize:12}}>
+                        <span style={{color:'#5e5c56'}}>{r.l}</span>
+                        <span style={{fontWeight:600,color:r.c}}>{r.v}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </C>
+      )}
+
+      {/* ── TAB: VALIDATION ── */}
+      {tab==='validation' && (
+        <C>
+          <ST>✅ Validation NISS et données manquantes</ST>
+          {empsValides.length===0 && <div style={{padding:'16px',textAlign:'center',color:'#5e5c56'}}>Aucun travailleur</div>}
+          {empsValides.map((emp,i)=>{
+            const v=validateEmpBelcotax(emp);
+            const nv=validateNISS(emp.niss);
+            return (
+              <div key={i} style={{marginBottom:10,padding:12,borderRadius:8,border:`1px solid ${v.valid&&v.warnings.length===0?'rgba(74,222,128,.2)':v.errors.length>0?'rgba(239,68,68,.3)':'rgba(251,146,60,.25)'}`,background:v.errors.length>0?'rgba(239,68,68,.04)':v.warnings.length>0?'rgba(251,146,60,.04)':'rgba(74,222,128,.03)'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+                  <div style={{fontWeight:700,color:'#e8e6e0',fontSize:13}}>{emp.fn||''} {emp.ln||''}</div>
+                  <span style={{fontSize:10,fontWeight:700,padding:'2px 8px',borderRadius:4,background:v.errors.length>0?'rgba(239,68,68,.15)':v.warnings.length>0?'rgba(251,146,60,.15)':'rgba(74,222,128,.15)',color:v.errors.length>0?'#f87171':v.warnings.length>0?'#fb923c':'#4ade80'}}>
+                    {v.errors.length>0?`${v.errors.length} ERREUR(S)`:v.warnings.length>0?`${v.warnings.length} WARNING(S)`:'✓ VALIDE'}
+                  </span>
+                </div>
+                {/* NISS detail */}
+                <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6,padding:'6px 8px',background:'rgba(0,0,0,.2)',borderRadius:6}}>
+                  <span style={{fontSize:11,color:'#5e5c56'}}>NISS:</span>
+                  <span style={{fontFamily:'monospace',fontSize:12,color:nv.ok?'#60a5fa':'#f87171'}}>{emp.niss||'— MANQUANT —'}</span>
+                  {nv.ok && <span style={{fontSize:10,color:'#4ade80'}}>✓ valide · {nv.sex} · né(e) {nv.dob}</span>}
+                  {!nv.ok && <span style={{fontSize:10,color:'#f87171'}}>✗ {nv.msg}</span>}
+                </div>
+                {v.errors.length>0 && (
+                  <div style={{marginBottom:4}}>
+                    {v.errors.map((e,j)=><div key={j} style={{fontSize:11,color:'#f87171',padding:'2px 0'}}>❌ {e}</div>)}
+                  </div>
+                )}
+                {v.warnings.length>0 && (
+                  <div>
+                    {v.warnings.map((w,j)=><div key={j} style={{fontSize:11,color:'#fb923c',padding:'2px 0'}}>⚠️ {w}</div>)}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          {empsValides.length>0 && (
+            <div style={{marginTop:12,padding:12,background:nbErrors===0?'rgba(74,222,128,.06)':'rgba(239,68,68,.06)',border:`1px solid ${nbErrors===0?'rgba(74,222,128,.2)':'rgba(239,68,68,.2)'}`,borderRadius:8}}>
+              <div style={{fontWeight:700,color:nbErrors===0?'#4ade80':'#f87171',fontSize:13}}>
+                {nbErrors===0?'✅ Tous les travailleurs sont conformes pour le dépôt Belcotax':`⚠️ ${nbErrors} erreur(s) bloquante(s) — corrigez avant dépôt`}
+              </div>
+              {nbWarnings>0 && <div style={{fontSize:11,color:'#fb923c',marginTop:4}}>{nbWarnings} donnée(s) manquante(s) non bloquante(s)</div>}
+            </div>
+          )}
+        </C>
+      )}
+
+      {/* ── TAB: XML BELCOTAX ── */}
+      {tab==='xml' && (
+        <C>
+          <ST>📄 Génération XML 281.10 — Belcotax-on-web</ST>
+          <div style={{display:'flex',gap:10,marginBottom:16,flexWrap:'wrap',alignItems:'center'}}>
+            <button onClick={doGenXml} disabled={empsValides.length===0}
+              style={{padding:'11px 24px',borderRadius:9,border:'none',background:empsValides.length===0?'rgba(198,163,78,.2)':'linear-gradient(135deg,#c6a34e,#a68a3c)',color:'#0c0b09',fontSize:13,fontWeight:700,cursor:empsValides.length===0?'not-allowed':'pointer',fontFamily:'inherit'}}>
+              ⚡ Générer XML 281.10
+            </button>
+            {xmlGen && <>
+              <button onClick={doDownloadXml} style={{padding:'11px 24px',borderRadius:9,border:'1px solid rgba(74,222,128,.3)',background:'rgba(74,222,128,.08)',color:'#4ade80',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>💾 Télécharger .xml</button>
+              <button onClick={()=>{navigator.clipboard?.writeText(xmlGen);setCopiedXml(true);setTimeout(()=>setCopiedXml(false),2000);}}
+                style={{padding:'11px 20px',borderRadius:9,border:'1px solid rgba(96,165,250,.3)',background:'rgba(96,165,250,.08)',color:'#60a5fa',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>
+                {copiedXml?'✅ Copié !':'📋 Copier XML'}
+              </button>
+            </>}
+          </div>
+          {empsValides.length===0 && <div style={{padding:'12px',borderRadius:8,background:'rgba(239,68,68,.08)',border:'1px solid rgba(239,68,68,.15)',fontSize:12,color:'#f87171'}}>⚠️ Aucun travailleur avec salaire configuré.</div>}
+          {xmlGen && (
+            <>
+              <pre style={{background:'rgba(0,0,0,.4)',borderRadius:8,padding:16,fontSize:10,color:'#4ade80',overflowX:'auto',overflowY:'auto',maxHeight:360,fontFamily:'monospace',lineHeight:1.6,border:'1px solid rgba(74,222,128,.1)'}}>
+                {xmlGen}
+              </pre>
+              <div style={{marginTop:12,padding:12,background:'rgba(34,197,94,.06)',border:'1px solid rgba(34,197,94,.15)',borderRadius:8,fontSize:11,color:'#22c55e'}}>
+                ✅ XML conforme Belcotax-on-web. Déposez sur <strong>belcotaxonweb.be</strong> avant le 1er mars {annee+1}.
+              </div>
+            </>
+          )}
+        </C>
+      )}
+
+      {/* ── TAB: DmfA XML ── */}
+      {tab==='dmfa' && (
+        <C>
+          <ST>🏛 Génération DmfA trimestrielle — ONSS</ST>
+          <div style={{display:'flex',gap:12,marginBottom:16,alignItems:'center',flexWrap:'wrap'}}>
+            <div>
+              <div style={{fontSize:11,color:'#5e5c56',marginBottom:6}}>TRIMESTRE</div>
+              <select value={dmfaTrim} onChange={e=>setDmfaTrim(+e.target.value)}
+                style={{padding:'10px 12px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'rgba(0,0,0,.3)',color:'#e8e6e0',fontSize:13,fontFamily:'inherit'}}>
+                {[1,2,3,4].map(t=><option key={t} value={t}>T{t} — {['Jan-Mars','Avr-Juin','Juil-Sep','Oct-Déc'][t-1]}</option>)}
+              </select>
+            </div>
+            <div>
+              <div style={{fontSize:11,color:'#5e5c56',marginBottom:6}}>ANNÉE</div>
+              <select value={annee} onChange={e=>setAnnee(+e.target.value)}
+                style={{padding:'10px 12px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'rgba(0,0,0,.3)',color:'#e8e6e0',fontSize:13,fontFamily:'inherit'}}>
+                {[anneeActuelle,anneeActuelle-1,anneeActuelle-2].map(y=><option key={y} value={y}>{y}</option>)}
+              </select>
+            </div>
+            <div style={{paddingTop:22}}>
+              <button onClick={doGenDmfa} disabled={empsValides.length===0}
+                style={{padding:'11px 24px',borderRadius:9,border:'none',background:empsValides.length===0?'rgba(198,163,78,.2)':'linear-gradient(135deg,#c6a34e,#a68a3c)',color:'#0c0b09',fontSize:13,fontWeight:700,cursor:empsValides.length===0?'not-allowed':'pointer',fontFamily:'inherit'}}>
+                ⚡ Générer DmfA T{dmfaTrim}/{annee}
+              </button>
+            </div>
+            {dmfaXml && <>
+              <div style={{paddingTop:22}}>
+                <button onClick={doDownloadDmfa} style={{padding:'11px 20px',borderRadius:9,border:'1px solid rgba(74,222,128,.3)',background:'rgba(74,222,128,.08)',color:'#4ade80',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>💾 Télécharger</button>
+              </div>
+              <div style={{paddingTop:22}}>
+                <button onClick={()=>{navigator.clipboard?.writeText(dmfaXml);setCopiedDmfa(true);setTimeout(()=>setCopiedDmfa(false),2000);}}
+                  style={{padding:'11px 20px',borderRadius:9,border:'1px solid rgba(96,165,250,.3)',background:'rgba(96,165,250,.08)',color:'#60a5fa',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>
+                  {copiedDmfa?'✅ Copié !':'📋 Copier'}
+                </button>
+              </div>
+            </>}
+          </div>
+          {dmfaXml && (
+            <>
+              <pre style={{background:'rgba(0,0,0,.4)',borderRadius:8,padding:16,fontSize:10,color:'#60a5fa',overflowX:'auto',overflowY:'auto',maxHeight:360,fontFamily:'monospace',lineHeight:1.6,border:'1px solid rgba(96,165,250,.1)'}}>
+                {dmfaXml}
+              </pre>
+              <div style={{marginTop:12,padding:12,background:'rgba(96,165,250,.06)',border:'1px solid rgba(96,165,250,.15)',borderRadius:8,fontSize:11,color:'#60a5fa'}}>
+                ℹ️ DmfA T{dmfaTrim}/{annee} prête. Déposez via <strong>socialsecurity.be/site/fr/employer/applics/dmfa</strong> avant le dernier jour du mois suivant la fin du trimestre.
+              </div>
+            </>
+          )}
+        </C>
+      )}
+
+      {/* ── TAB: EMAIL ── */}
+      {tab==='email' && (
+        <C>
+          <ST>📧 Envoi fiches 281.10 par email</ST>
+          <div style={{marginBottom:16,padding:12,background:'rgba(96,165,250,.06)',border:'1px solid rgba(96,165,250,.15)',borderRadius:8,fontSize:12,color:'#60a5fa'}}>
+            ℹ️ Les fiches sont envoyées en HTML à chaque travailleur via l'adresse email enregistrée dans son dossier.
+          </div>
+          <div style={{marginBottom:16}}>
+            <button onClick={doSendAll} disabled={sendingAll||empsValides.filter(e=>e.email).length===0}
+              style={{padding:'11px 24px',borderRadius:9,border:'none',background:'linear-gradient(135deg,#c6a34e,#a68a3c)',color:'#0c0b09',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:'inherit',opacity:sendingAll?0.6:1}}>
+              {sendingAll?'⏳ Envoi en cours...':'📧 Envoyer toutes les fiches'}
+            </button>
+            <span style={{fontSize:11,color:'#5e5c56',marginLeft:12}}>
+              {empsValides.filter(e=>e.email).length}/{empsValides.length} email(s) configuré(s)
+            </span>
+          </div>
+          <div style={{overflowX:'auto'}}>
+            <table style={{width:'100%',borderCollapse:'collapse',fontSize:12}}>
+              <thead>
+                <tr style={{borderBottom:'2px solid rgba(198,163,78,.2)'}}>
+                  {['Travailleur','Email','Brut annuel','Statut','Action'].map((h,i)=>(
+                    <th key={i} style={{padding:'8px 10px',textAlign:i>1?'right':'left',fontSize:10,color:'#5e5c56',fontWeight:700,textTransform:'uppercase',letterSpacing:.5}}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {empsValides.map((emp,i)=>{
+                  const f=calcFiche281(emp,TX_ONSS_W,quickPP);
+                  const st=emailStatus[emp.id];
+                  return (
+                    <tr key={i} style={{borderBottom:'1px solid rgba(255,255,255,.04)'}}>
+                      <td style={{padding:'8px 10px',fontWeight:600,color:'#e8e6e0'}}>{emp.fn||''} {emp.ln||''}</td>
+                      <td style={{padding:'8px 10px',color:emp.email?'#60a5fa':'#f87171',fontFamily:'monospace',fontSize:11}}>{emp.email||'— manquant —'}</td>
+                      <td style={{padding:'8px 10px',textAlign:'right',color:'#c6a34e'}}>{fmt(f.brutAn)}</td>
+                      <td style={{padding:'8px 10px',textAlign:'right'}}>
+                        {st ? (
+                          <span style={{fontSize:11,color:st.status==='ok'?'#4ade80':st.status==='error'?'#f87171':'#fb923c'}}>{st.msg}</span>
+                        ) : (
+                          <span style={{fontSize:11,color:'#5e5c56'}}>—</span>
+                        )}
+                      </td>
+                      <td style={{padding:'8px 10px',textAlign:'right'}}>
+                        <button onClick={()=>doSendEmail(emp)} disabled={!emp.email||sendingAll||(emailStatus[emp.id]?.status==='sending')}
+                          style={{padding:'5px 12px',borderRadius:7,border:'1px solid rgba(96,165,250,.3)',background:'rgba(96,165,250,.08)',color:emp.email?'#60a5fa':'#5e5c56',fontSize:11,cursor:emp.email?'pointer':'not-allowed',fontFamily:'inherit',opacity:!emp.email?0.4:1}}>
+                          📧 Envoyer
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </C>
       )}
@@ -797,7 +1078,7 @@ function BelcotaxGen({ae, co, tText, fmt, TX_ONSS_W, quickPP}) {
 
 
 export function FichesMod({s,d}){
-  const { t, lang, tText } = useLang();const ae= s?.emps||[];const [tab,setTab]=useState("fiches");return <div><PH title="Fiches Fiscales 281" sub="Fiches 281.10 - Belcotax - Declaration annuelle"/><div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"fiches",l:"Fiches 281.10"},{v:"belcotax",l:"Belcotax XML"},{v:"contenu",l:"Contenu"},{v:"legal",l:"Deadlines"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="fiches"&&<C><ST>Fiches 281.10 par travailleur</ST><Tbl cols={[{k:"n",l:tText('Nom'),b:1,r:r=>(r.fn||"")+" "+(r.ln||"")},{k:"ni",l:tText('NISS'),r:r=><span style={{fontFamily:"monospace",fontSize:10,color:"#60a5fa"}}>{r.niss||"MANQUANT"}</span>},{k:"b",l:tText('Brut annuel'),a:"right",r:r=><span style={{color:"#c6a34e"}}>{fmt((+r.gross||0)*12)}</span>},{k:"o",l:"ONSS retenu",a:"right",r:r=><span style={{color:"#f87171"}}>{fmt((+r.gross||0)*12*TX_ONSS_W)}</span>},{k:"p",l:"PP retenu",a:"right",r:r=><span style={{color:"#f87171"}}>{fmt(quickPP(+r.gross||0)*12)}</span>}]} data={ae}/></C>}{tab==="belcotax"&&<BelcotaxGen ae={ae} co={s?.co||{}} tText={tText} fmt={fmt} TX_ONSS_W={TX_ONSS_W} quickPP={quickPP}/>}
+  const { t, lang, tText } = useLang();const ae= s?.emps||[];const [tab,setTab]=useState("fiches");return <div><PH title="Fiches Fiscales 281" sub="Fiches 281.10 - Belcotax - Declaration annuelle"/><div style={{display:"flex",gap:6,marginBottom:16}}>{[{v:"fiches",l:"Fiches 281.10"},{v:"belcotax",l:"Belcotax XML"},{v:"contenu",l:"Contenu"},{v:"legal",l:"Deadlines"}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:"8px 16px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:"inherit",background:tab===t.v?"rgba(198,163,78,.15)":"rgba(255,255,255,.03)",color:tab===t.v?"#c6a34e":"#9e9b93"}}>{t.l}</button>)}</div>{tab==="fiches"&&<C><ST>Fiches 281.10 par travailleur</ST><Tbl cols={[{k:"n",l:tText('Nom'),b:1,r:r=>(r.fn||"")+" "+(r.ln||"")},{k:"ni",l:tText('NISS'),r:r=><span style={{fontFamily:"monospace",fontSize:10,color:"#60a5fa"}}>{r.niss||"MANQUANT"}</span>},{k:"b",l:tText('Brut annuel'),a:"right",r:r=><span style={{color:"#c6a34e"}}>{fmt((+r.gross||0)*12)}</span>},{k:"o",l:"ONSS retenu",a:"right",r:r=><span style={{color:"#f87171"}}>{fmt((+r.gross||0)*12*TX_ONSS_W)}</span>},{k:"p",l:"PP retenu",a:"right",r:r=><span style={{color:"#f87171"}}>{fmt(quickPP(+r.gross||0)*12)}</span>}]} data={ae}/></C>}{tab==="belcotax"&&<BelcotaxGen ae={ae} co={s?.co||{}} tText={tText} fmt={fmt} TX_ONSS_W={TX_ONSS_W} TX_ONSS_E={TX_ONSS_E} quickPP={quickPP}/>}
 {tab==="contenu"&&<C><ST>Contenu fiche 281.10</ST>{["Rémunérations brutes (code 250)","ONSS personnelle retenue (code 286)","Précompte professionnel retenu (code 225)","Avantages de toute nature — ATN (code 250)","Cotisation spéciale sécurité sociale — CSSS (code 287)","Frais propres à l'employeur (code 268)","Chèques-repas — valeur patronale (code 263)","Bonus CCT 90 (code 314)","Assurance groupe — cotisations (code 261)","Éco-chèques (code 281)","Prime de fin d'année / 13ème mois (code 250)","Pécule de vacances double — employés (code 250)","Allocations de chômage temporaire (code 252)","Indemnités de rupture (code 251)"].map((r,i)=><div key={i} style={{padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,.03)",fontSize:12,color:"#e8e6e0",display:"flex",gap:8}}><span style={{color:"#c6a34e",minWidth:20,fontWeight:700}}>{i+1}.</span>{r}</div>)}</C>}
 {tab==="legal"&&<C><ST>Deadlines fiscales</ST><div style={{marginBottom:16,padding:12,background:"rgba(239,68,68,.06)",border:"1px solid rgba(239,68,68,.15)",borderRadius:8}}><div style={{fontSize:12,fontWeight:700,color:"#f87171",marginBottom:4}}>⚠️ Obligations légales — Art. 57 CIR 1992</div><div style={{fontSize:11,color:"#9e9b93",lineHeight:1.7}}>Les fiches 281.10 doivent être remises au travailleur et déposées au SPF Finances via Belcotax-on-web avant le 1er mars de l'année suivant l'exercice. Le non-respect entraîne le rejet de la déductibilité des rémunérations comme charge professionnelle.</div></div>{[{d:"28 fév. N+1",t:"Remise fiches 281.10 aux travailleurs",c:"#f87171",ico:"👤"},{d:"1er mars N+1",t:"Dépôt Belcotax XML au SPF Finances",c:"#f87171",ico:"🏛"},{d:"30 juin N+1",t:"Déclaration IPP (si papier)",c:"#fb923c",ico:"📄"},{d:"15 juillet N+1",t:"Déclaration IPP électronique — Tax-on-web",c:"#fb923c",ico:"💻"},{d:"31 déc. N",t:"Clôture exercice — réconciliation PP",c:"#60a5fa",ico:"📊"}].map((r,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,.03)"}}><span style={{fontSize:18}}>{r.ico}</span><div style={{flex:1}}><div style={{fontSize:12,color:"#e8e6e0"}}>{r.t}</div></div><b style={{color:r.c,fontSize:13,whiteSpace:"nowrap"}}>{r.d}</b></div>)}</C>}</div>;}
 
