@@ -398,7 +398,7 @@ function KPIDashboardIA({ emps }) {
 // ═══ PAGE PRINCIPALE ═══
 export default function AureusSuitePage({ s, d }) {
   const { t, lang, tText } = useLang();
-  const sub = s.sub || 'ia_turnover';
+  const [sub, setSub] = useState('ia_turnover');
   const emps = s?.emps || s.employees || [];
 
   const tabs = [
@@ -421,7 +421,7 @@ export default function AureusSuitePage({ s, d }) {
 
       <div style={{ display: 'flex', gap: 6, padding: '12px 24px', borderBottom: '1px solid rgba(255,255,255,.04)', flexWrap: 'wrap' }}>
         {tabs.map(tab => (
-          <button key={tab.id} onClick={() => d({ type: 'SET_PAGE', page: 'aureussuite', sub: tab.id })} style={{ padding: '7px 14px', borderRadius: 8, border: '1px solid ' + (sub === tab.id ? 'rgba(198,163,78,.4)' : 'rgba(255,255,255,.06)'), background: sub === tab.id ? 'rgba(198,163,78,.1)' : 'transparent', color: sub === tab.id ? '#c6a34e' : '#9e9b93', fontSize: 11, cursor: 'pointer', fontWeight: sub === tab.id ? 600 : 400 }}>
+          <button key={tab.id} onClick={() => setSub(tab.id)} style={{ padding: '7px 14px', borderRadius: 8, border: '1px solid ' + (sub === tab.id ? 'rgba(198,163,78,.4)' : 'rgba(255,255,255,.06)'), background: sub === tab.id ? 'rgba(198,163,78,.1)' : 'transparent', color: sub === tab.id ? '#c6a34e' : '#9e9b93', fontSize: 11, cursor: 'pointer', fontWeight: sub === tab.id ? 600 : 400 }}>
             {tab.l}
           </button>
         ))}
