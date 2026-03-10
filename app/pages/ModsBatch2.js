@@ -1138,7 +1138,7 @@ export function PortailEmployeurMod({s,d,per}){
     <C style={{padding:'14px 18px',marginBottom:14}}>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
         <div>
-          <div style={{fontWeight:700,fontSize:15,color:'#e8e6e0'}}>🏢 Portail Employeur — {s.co.name}</div>
+          <div style={{fontWeight:700,fontSize:15,color:'#e8e6e0'}}>🏢 Portail Employeur — {s?.co?.name}</div>
           <div style={{fontSize:11,color:'#5e5c56',marginTop:2}}>{tText('Interface d\'accès pour votre client • Données isolées de votre back-office')}</div>
         </div>
         <div style={{display:'flex',gap:8}}>
@@ -1190,11 +1190,11 @@ export function PortailEmployeurMod({s,d,per}){
         <div style={{display:'flex',alignItems:'center',gap:10}}>
           <span style={{fontSize:16}}>🏢</span>
           <div>
-            <div style={{fontWeight:600,fontSize:13,color:'#e8e6e0'}}>{s.co.name} — Portail Employeur</div>
+            <div style={{fontWeight:600,fontSize:13,color:'#e8e6e0'}}>{s?.co?.name} — Portail Employeur</div>
             <div style={{fontSize:9.5,color:'#5e5c56'}}>{tText('Vue client • Données isolées • Aureus Social Pro')}</div>
           </div>
         </div>
-        <div style={{fontSize:10,color:'#60a5fa',padding:'3px 10px',borderRadius:4,background:"rgba(96,165,250,.1)"}}>👤 {s.co.name}</div>
+        <div style={{fontSize:10,color:'#60a5fa',padding:'3px 10px',borderRadius:4,background:"rgba(96,165,250,.1)"}}>👤 {s?.co?.name}</div>
       </div>
 
       <div style={{padding:18}}>
@@ -1442,11 +1442,11 @@ export function PortailEmployeurMod({s,d,per}){
             {k:'d',l:"Deadline",r:r=>'05/' + String(selectedMonth+1>12?1:selectedMonth+1).padStart(2,"0")},
             {k:'p',l:"Fiches",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:"rgba(74,222,128,.1)",color:'#4ade80'}}>{tText('Prêtes')}</span>},
             {k:'m',l:"Messages",a:'right',r:r=><span style={{color:'#a78bfa'}}>{Math.floor(Math.random()*5)}</span>},
-          ]} data={s.clients.length>0?s.clients:[{name:s.co.name,emps:ae,company:s.co}]}/>
+          ]} data={(s?.clients||[]).length>0?(s?.clients||[]):[{name:s?.co?.name,emps:ae,company:s?.co}]}/>
           <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginTop:14}}>
             {[
-              {l:"Clients ayant encodé",v:`${Math.floor((s.clients.length||1)*0.6)}/${s.clients.length||1}`,c:'#4ade80',ic:'✅'},
-              {l:"En retard (>5 du mois)",v:Math.ceil((s.clients.length||1)*0.2),c:'#f87171',ic:'⏰'},
+              {l:"Clients ayant encodé",v:`${Math.floor((( s?.clients||[]).length||1)*0.6)}/${(s?.clients||[]).length||1}`,c:'#4ade80',ic:'✅'},
+              {l:"En retard (>5 du mois)",v:Math.ceil((( s?.clients||[]).length||1)*0.2),c:'#f87171',ic:'⏰'},
               {l:"Demandes en attente",v:demandes.filter(d=>d.status==='en_attente').length,c:'#c6a34e',ic:'📋'},
             ].map((x,i)=><C key={i} style={{padding:'14px',textAlign:'center'}}>
               <div style={{fontSize:20,marginBottom:4}}>{x.ic}</div>
@@ -1637,14 +1637,14 @@ export function PeppolMod({s,d}){
   const [currency,setCurrency]=useState('EUR');
   const [note,setNote]=useState('');
   // Supplier (from company settings)
-  const [suppVAT,setSuppVAT]=useState(s.co.bce?`BE${(s.co.bce||'').replace(/\D/g,"")}`:'');
-  const [suppName,setSuppName]=useState(s.co.name||'');
-  const [suppAddr,setSuppAddr]=useState(s.co.address||'');
+  const [suppVAT,setSuppVAT]=useState(s?.co?.bce?`BE${(s.co.bce||'').replace(/\D/g,"")}`:'');
+  const [suppName,setSuppName]=useState(s?.co?.name||'');
+  const [suppAddr,setSuppAddr]=useState(s?.co?.address||'');
   const [suppCity,setSuppCity]=useState('Bruxelles');
-  const [suppZip,setSuppZip]=useState(s.co.zip||'1000');
+  const [suppZip,setSuppZip]=useState(s?.co?.zip||'1000');
   const [suppCountry,setSuppCountry]=useState('BE');
   const [suppPeppolId,setSuppPeppolId]=useState('');
-  const [suppIBAN,setSuppIBAN]=useState(s.co.bank||'');
+  const [suppIBAN,setSuppIBAN]=useState(s?.co?.bank||'');
   // Customer
   const [custName,setCustName]=useState('');
   const [custVAT,setCustVAT]=useState('');
