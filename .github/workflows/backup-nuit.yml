@@ -1,0 +1,195 @@
+name: Backup Nuit — DB + Storage
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # 3h UTC = 4h Belgique
+  workflow_dispatch:      # déclenchement manuel possible
+
+jobs:
+  backup-db:
+    name: 🗄️ Backup PostgreSQL
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install pg_dump
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+
+      - name: Dump DB
+        env:
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          DATE=$(date +%Y-%m-%d_%H-%M)
+          FILENAME="aureus-db-${DATE}.sql.gz"
+          pg_dump \
+            -h db.jwjtlpewwdjxdboxtbdf.supabase.co \
+            -U postgres \
+            -d postgres \
+            --no-password \
+            -Fp | gzip > "/tmp/${FILENAME}"
+          echo "FILENAME=${FILENAME}" >> $GITHUB_ENV
+          echo "FILEPATH=/tmp/${FILENAME}" >> $GITHUB_ENV
+          SIZE=$(du -sh "/tmp/${FILENAME}" | cut -f1)
+          echo "SIZE=${SIZE}" >> $GITHUB_ENV
+
+      - name: Upload DB to B2
+        uses: jakejarvis/s3-sync-action@master
+        env:
+          AWS_S3_BUCKET: aureus-backups
+          AWS_ACCESS_KEY_ID: ${{ secrets.B2_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.B2_APP_KEY }}
+          AWS_S3_ENDPOINT: https://s3.eu-central-003.backblazeb2.com
+          SOURCE_DIR: /tmp
+        with:
+          args: --exclude "*" --include "${{ env.FILENAME }}"
+
+      - name: Email succès DB
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.MAIL_USER }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "✅ Backup DB Aureus — ${{ env.FILENAME }}"
+          to: ${{ secrets.MAIL_USER }}
+          from: Aureus Backup <${{ secrets.MAIL_USER }}>
+          body: |
+            Backup DB réussi ✅
+            Fichier : ${{ env.FILENAME }}
+            Taille : ${{ env.SIZE }}
+            Bucket : aureus-backups / s3.eu-central-003.backblazeb2.com
+            Date : ${{ github.run_id }}
+
+      - name: Email échec DB
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.MAIL_USER }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "❌ ALERTE — Backup DB Aureus ÉCHOUÉ"
+          to: ${{ secrets.MAIL_USER }}
+          from: Aureus Backup <${{ secrets.MAIL_USER }}>
+          body: |
+            ⚠️ Le backup DB a échoué !
+            Vérifier GitHub Actions : https://github.com/Aureus-Social/aureus-social/actions
+
+  backup-storage:
+    name: 🗂️ Backup Supabase Storage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install AWS CLI
+        run: pip install awscli --quiet
+
+      - name: Download Storage depuis Supabase
+        env:
+          SUPABASE_URL: https://jwjtlpewwdjxdboxtbdf.supabase.co
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          DATE=$(date +%Y-%m-%d_%H-%M)
+          mkdir -p /tmp/storage-backup
+
+          # Lister les buckets Supabase Storage
+          BUCKETS=$(curl -s \
+            "${SUPABASE_URL}/storage/v1/bucket" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_KEY}" \
+            -H "apikey: ${SUPABASE_SERVICE_KEY}" | \
+            python3 -c "import sys,json; [print(b['name']) for b in json.load(sys.stdin)]" 2>/dev/null || echo "")
+
+          echo "Buckets trouvés: ${BUCKETS}"
+
+          for BUCKET in $BUCKETS; do
+            mkdir -p "/tmp/storage-backup/${BUCKET}"
+            # Lister les fichiers du bucket
+            FILES=$(curl -s \
+              "${SUPABASE_URL}/storage/v1/object/list/${BUCKET}" \
+              -H "Authorization: Bearer ${SUPABASE_SERVICE_KEY}" \
+              -H "apikey: ${SUPABASE_SERVICE_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"limit":1000,"offset":0}' | \
+              python3 -c "import sys,json; [print(f['name']) for f in json.load(sys.stdin) if isinstance(f, dict) and 'name' in f]" 2>/dev/null || echo "")
+
+            for FILE in $FILES; do
+              curl -s \
+                "${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILE}" \
+                -H "Authorization: Bearer ${SUPABASE_SERVICE_KEY}" \
+                -H "apikey: ${SUPABASE_SERVICE_KEY}" \
+                -o "/tmp/storage-backup/${BUCKET}/${FILE}" 2>/dev/null || true
+            done
+          done
+
+          # Compresser
+          ARCHIVE="aureus-storage-${DATE}.tar.gz"
+          tar -czf "/tmp/${ARCHIVE}" -C /tmp storage-backup/
+          echo "STORAGE_ARCHIVE=${ARCHIVE}" >> $GITHUB_ENV
+          SIZE=$(du -sh "/tmp/${ARCHIVE}" | cut -f1)
+          echo "STORAGE_SIZE=${SIZE}" >> $GITHUB_ENV
+
+      - name: Upload Storage à B2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.B2_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.B2_APP_KEY }}
+        run: |
+          aws s3 cp "/tmp/${{ env.STORAGE_ARCHIVE }}" \
+            "s3://aureus-backups/${{ env.STORAGE_ARCHIVE }}" \
+            --endpoint-url https://s3.eu-central-003.backblazeb2.com
+
+      - name: Email succès Storage
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.MAIL_USER }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "✅ Backup Storage Aureus — ${{ env.STORAGE_ARCHIVE }}"
+          to: ${{ secrets.MAIL_USER }}
+          from: Aureus Backup <${{ secrets.MAIL_USER }}>
+          body: |
+            Backup Storage réussi ✅
+            Fichier : ${{ env.STORAGE_ARCHIVE }}
+            Taille : ${{ env.STORAGE_SIZE }}
+            Bucket B2 : aureus-backups
+
+      - name: Email échec Storage
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.MAIL_USER }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "❌ ALERTE — Backup Storage Aureus ÉCHOUÉ"
+          to: ${{ secrets.MAIL_USER }}
+          from: Aureus Backup <${{ secrets.MAIL_USER }}>
+          body: |
+            ⚠️ Le backup Storage a échoué !
+            Vérifier : https://github.com/Aureus-Social/aureus-social/actions
+
+  cleanup-old-backups:
+    name: 🧹 Nettoyage backups +30 jours
+    runs-on: ubuntu-latest
+    needs: [backup-db, backup-storage]
+    if: success()
+    steps:
+      - name: Supprimer fichiers anciens de B2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.B2_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.B2_APP_KEY }}
+        run: |
+          pip install awscli --quiet
+          CUTOFF=$(date -d '30 days ago' +%Y-%m-%d)
+          echo "Suppression des backups antérieurs à ${CUTOFF}"
+          aws s3 ls s3://aureus-backups/ \
+            --endpoint-url https://s3.eu-central-003.backblazeb2.com | \
+          while read -r line; do
+            FILE_DATE=$(echo $line | awk '{print $1}')
+            FILE_NAME=$(echo $line | awk '{print $4}')
+            if [[ "$FILE_DATE" < "$CUTOFF" ]] && [[ -n "$FILE_NAME" ]]; then
+              echo "Suppression: ${FILE_NAME}"
+              aws s3 rm "s3://aureus-backups/${FILE_NAME}" \
+                --endpoint-url https://s3.eu-central-003.backblazeb2.com
+            fi
+          done
