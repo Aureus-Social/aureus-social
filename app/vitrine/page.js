@@ -18,9 +18,16 @@ fr:{
   logos:{title:'Ils ont fait confiance à Aureus Social Pro',items:['PME Bruxelles','Fiduciaire Dupont','Cabinet Janssen','RH Partners','Comptaflex','StartBE']},
   mockup:{badge:'Interface temps réel',title:'Tout votre cycle social\nen un tableau de bord.',sub:'Tableau de bord unifié, alertes ONSS en temps réel, export comptable en un clic.',features:['Fiche de paie générée en 3 clics','Dimona IN/OUT < 8 secondes','DmfA XML prête au 5 du mois','Backup nocturne chiffré AES-256'],db:{title:'Tableau de bord',stats:[['47.2K','Fiches de paie','📄'],['18.6K','Déclarations ONSS','📋'],['10.000+','Entreprises','🏢'],['99.97%','Uptime','⚡']],chart:'Paie Q1 2026',badges:[{l:'Dimona',c:'#22C55E',v:'8 min ago'},{l:'DmfA Q1',c:'#D4A84C',v:'Prêt'},{l:'Belcotax',c:'#60A5FA',v:'Avant le 5/04'}]}},
   testimonials:{ey:'Témoignages',title:'Ce que nos clients disent.',items:[
-    {name:'Sophie Renard',role:'DRH — PME 12 employés, Bruxelles',text:"Nous avons quitté SD Worx après 8 ans. La migration a pris 3 jours et on économise 340€/mois. Le support répond en moins d'une heure.",stars:5,initials:'SR',color:'#B8913A'},
-    {name:'Marc Janssen',role:'Expert-comptable — 23 dossiers',text:"Le portail multi-clients est exactement ce qu'il manquait. Je gère 23 employeurs depuis un seul tableau de bord. Les mandats Mahis sont générés automatiquement.",stars:5,initials:'MJ',color:'#1A5C42'},
-    {name:'Amira Benali',role:'Indépendante, CP 200',text:"J'ai déclaré ma première Dimona en 7 secondes. Le calcul de paie est parfait — ONSS, précompte, bonus emploi. Tout est là.",stars:5,initials:'AB',color:'#18396A'},
+    {name:'Thomas V.',role:'Gérant — agence web, Bruxelles',text:'J\'avais peur de la paperasse ONSS. En 2 jours, Aureus m\'a guidé de l\'immatriculation jusqu\'à la première fiche de paie. Zéro stress.',stars:5,initials:'TV',color:'#B8913A'},
+    {name:'Sarah M.',role:'Fondatrice — startup RH, Gand',text:'La Dimona en 8 secondes, c\'est réel. J\'ai engagé 3 employés en 1 semaine sans aucune connaissance en droit social belge.',stars:5,initials:'SM',color:'#1A5C42'},
+    {name:'Karim B.',role:'Indépendant complémentaire, Liège',text:'Passage de SD Worx à Aureus en 3 jours. Migration gratuite, toutes mes données reprises. Je paie 60% moins cher.',stars:5,initials:'KB',color:'#18396A'},
+    {name:'Isabelle D.',role:'DRH — cabinet comptable, Namur',text:'Le module DmfA XML est parfait. Export direct vers l\'ONSS, zéro rejet. Je gère 47 dossiers depuis un seul tableau de bord.',stars:5,initials:'ID',color:'#7B2D8B'},
+    {name:'Marc L.',role:'Gérant — restaurant, Charleroi',text:'Avant Aureus je payais Securex 280€/mois pour 2 employés. Maintenant tout est automatique et je comprends enfin mes charges patronales.',stars:5,initials:'ML',color:'#C0392B'},
+    {name:'Nathalie P.',role:'Associée — cabinet RH, Mons',text:'Les 166 commissions paritaires sont toutes à jour. Pour mes clients CP 302, CP 226 et CP 200, Aureus applique les bons barèmes automatiquement.',stars:5,initials:'NP',color:'#1E8449'},
+    {name:'Julien F.',role:'CEO — scale-up tech, Bruxelles',text:'Onboarding de 12 employés en une semaine. Contrats, Dimona, fiches SEPA — tout généré automatiquement. Impressionnant.',stars:5,initials:'JF',color:'#2471A3'},
+    {name:'Amina K.',role:'Gérante — pharmacie, Anderlecht',text:'Mon premier employé avec Aureus : exonération patronale an 1 calculée automatiquement. 4.200€ économisés dès la première année.',stars:5,initials:'AK',color:'#7D6608'},
+    {name:'Pierre H.',role:'Expert-comptable indépendant, Tournai',text:'Je recommande Aureus à tous mes clients employeurs. L\'export WinBooks est parfait, les DmfA XML passent du premier coup.',stars:5,initials:'PH',color:'#784212'},
+    {name:'Céline R.',role:'Fondatrice — ASBL, Ottignies',text:'Le bonus emploi 2026 est calculé automatiquement pour chacun de mes travailleurs. Avant je passais 3h par mois sur les formules SPF Finances.',stars:5,initials:'CR',color:'#1A5276'}
   ]},
   roi:{ey:'Calculateur ROI',title:'Combien économisez-vous\nen quittant SD Worx ?',sub:'Estimez vos économies annuelles en 30 secondes.',employees:'Nombre d\'employés',current:'Prestataire actuel',providers:['SD Worx','Partena','Securex','Sodexo','Autre'],result:{saving:'Économie annuelle estimée',months:'Retour sur investissement',per:'par mois économisé',cta:'Demander une démo maintenant',note:'Estimation basée sur nos tarifs publics vs tarifs moyens du marché belge.'},tiers:[{label:'Basic',aureus:15,sdworx:42},{label:'Standard',aureus:25,sdworx:68},{label:'Premium',aureus:38,sdworx:95}]},
   sol:{ey:'Nos solutions',h:'Pour chaque profil, la bonne solution.',sub:"Indépendant, employeur ou expert-comptable — Aureus Social Pro s'adapte.",items:[
@@ -218,7 +225,18 @@ T.nl={
   hero:{badge:'Digitaal sociaal secretariaat \u2014 v18 in productie',h1:'Uw Belgische sociale\npartner.\nEindelijk digitaal.',sub:'Van Dimona tot kwartaalaangiften \u2014 alles wat u nodig heeft, op \u00e9\u00e9n plek.',cta1:'Naar de applicatie',cta2:'Demo bekijken',stats:[['166','Paritaire comit\u00e9s'],['< 8s','Dimona ingediend'],['47K+','Loonfiches'],['10.000+','Bedrijven']]},
   logos:{title:'Zij vertrouwen op Aureus Social Pro',items:['KMO Brussel','Fiduciaire Dupont','Kantoor Janssen','HR Partners','Comptaflex','StartBE']},
   mockup:{badge:'Real-time interface',title:'Uw volledige sociale cyclus\nin \u00e9\u00e9n dashboard.',sub:'Unified dashboard, real-time ONSS-meldingen, export per klik.',features:['Loonfiche in 3 klikken','Dimona IN/OUT < 8 seconden','DmfA XML klaar op de 5e','AES-256 versleutelde nachtback-up'],db:{title:'Dashboard',stats:[['47.2K','Loonfiches','\u{1F4C4}'],['18.6K','ONSS-aangiften','\u{1F4CB}'],['10.000+','Bedrijven','\u{1F3E2}'],['99.97%','Uptime','\u26A1']],chart:'Loon K1 2026',badges:[{l:'Dimona',c:'#22C55E',v:'8 min geleden'},{l:'DmfA K1',c:'#D4A84C',v:'Klaar'},{l:'Belcotax',c:'#60A5FA',v:'Voor 5 apr'}]}},
-  testimonials:{ey:'Getuigenissen',title:'Wat onze klanten zeggen.',items:[{name:'Sophie Renard',role:'HR-manager \u2014 KMO 12 werknemers, Brussel',text:'We hebben SD Worx na 8 jaar verlaten. Migratie duurde 3 dagen, we besparen 340\u20ac/maand.',stars:5,initials:'SR',color:'#B8913A'},{name:'Marc Janssen',role:'Accountant \u2014 23 dossiers',text:'Het multi-klant portaal is precies wat ontbrak. 23 werkgevers vanuit \u00e9\u00e9n dashboard. Mahis-mandaten automatisch.',stars:5,initials:'MJ',color:'#1A5C42'},{name:'Amira Benali',role:'Zelfstandige, PC 200',text:'Eerste Dimona in 7 seconden. Loonberekening perfect \u2014 ONSS, bedrijfsvoorheffing, werkbonus.',stars:5,initials:'AB',color:'#18396A'}]},
+  testimonials:{ey:'Getuigenissen',title:'Wat onze klanten zeggen.',items:[
+    {name:'Pieter V.',role:'Zaakvoerder — IT-bedrijf, Gent',text:'Overstap van Partena naar Aureus in 2 dagen. Alle gegevens overgenomen, geen enkele onderbreking. De DmfA XML werkt perfect.',stars:5,initials:'PV',color:'#B8913A'},
+    {name:'Liesbet D.',role:'HR-manager — non-profit, Antwerpen',text:'132 modules, allemaal bereikbaar vanuit één dashboard. De automatische Dimona-herinnering 24u op voorhand heeft ons al meerdere boetes bespaard.',stars:5,initials:'LD',color:'#1A5C42'},
+    {name:'Wout M.',role:'Oprichter — designbureau, Leuven',text:'Eerste werknemer aangenomen zonder enige kennis van Belgisch sociaal recht. Aureus heeft me stap voor stap begeleid: ONSS, contract, Dimona, loonbrief.',stars:5,initials:'WM',color:'#18396A'},
+    {name:'An V.',role:'Accountant — 31 dossiers, Brugge',text:'Het multi-mandanten portaal is een gamechanger. Ik beheer 31 werkgevers vanuit één scherm. De Mahis-mandaten worden automatisch gegenereerd.',stars:5,initials:'AV',color:'#7B2D8B'},
+    {name:'Stijn B.',role:'Zaakvoerder — horeca, Mechelen',text:'Voor Aureus betaalde ik SD Worx 320€/maand voor 3 werknemers. Nu is alles geautomatiseerd en begrijp ik eindelijk mijn patronale bijdragen.',stars:5,initials:'SB',color:'#C0392B'},
+    {name:'Karen J.',role:'Oprichtster — kinderopvang, Hasselt',text:'De lageloonvermindering en de vrijstelling eerste werknemer worden automatisch berekend. Ik bespaar meer dan 5.000€ per jaar.',stars:5,initials:'KJ',color:'#1E8449'},
+    {name:'Raf D.',role:'Zelfstandige — consultant, Kortrijk',text:'SEPA pain.001 bestand in 3 klikken. Ik laad het rechtstreeks in mijn KBC-interface. Geen handmatige overschrijvingen meer.',stars:5,initials:'RD',color:'#2471A3'},
+    {name:'Sofie N.',role:'HR-directeur — vzw, Gent',text:'De WinBooks ACT export werkt perfect. Al mijn loonboekingen komen correct in de boekhouding terecht. Geen dubbele encodering meer.',stars:5,initials:'SN',color:'#7D6608'},
+    {name:'Tom V.',role:'CEO — e-commerce, Aalst',text:'Onboarding van 8 werknemers in één week. Contracten, Dimona, SEPA — alles automatisch gegenereerd. Indrukwekkend platform.',stars:5,initials:'TV',color:'#784212'},
+    {name:'Nele B.',role:'Zaakvoerster — kinesitherapie, Roeselare',text:'CP 330 correct geconfigureerd van bij de start. Alle barema\'s, sectorpremies en vakantiegeld automatisch berekend. Eindelijk rust.',stars:5,initials:'NB',color:'#117A65'}
+  ]},
   roi:{ey:'ROI Calculator',title:'Hoeveel bespaart u\ndoor SD Worx te verlaten?',sub:'Schat uw jaarlijkse besparing in 30 seconden.',employees:'Aantal werknemers',current:'Huidige prestataire',providers:['SD Worx','Partena','Securex','Sodexo','Andere'],result:{saving:'Geschatte jaarlijkse besparing',months:'Return on investment',per:'per maand bespaard',cta:'Nu een demo aanvragen',note:'Schatting op basis van onze tarieven vs. gemiddelde Belgische markttarieven.'},tiers:[{label:'Basic',aureus:15,sdworx:42},{label:'Standard',aureus:25,sdworx:68},{label:'Premium',aureus:38,sdworx:95}]},
   sol:{ey:'Onze oplossingen',h:'Voor elk profiel de juiste oplossing.',sub:'Zelfstandige, werkgever of accountant \u2014 Aureus Social Pro past zich aan.',items:[{ico:'\u{1F680}',title:'Zelfstandige worden',desc:'Statuut, ONSS, verplichtingen \u2014 alles om rustig te starten.',page:'independant'},{ico:'\u{1F464}',title:'Werkgever worden',desc:'Inschrijving, contract, Dimona, eerste lonen.',page:'employeur',featured:true},{ico:'\u{1F3E2}',title:'Werkgevers',desc:'Automatiseer lonen, DmfA, boekhoudexport.',page:'employeurs'},{ico:'\u{1F3DB}',title:'Accountants',desc:'Multi-klant portaal, Mahis/CSAM mandaten, REST API.',page:'experts'},{ico:'\u{1F4CA}',title:'Aangiften & Belcotax',desc:'Kwartaal DmfA, fiches 281.10/20/30, MyMinfin.',page:'employeurs'},{ico:'\u{1F4DA}',title:'Opleidingen',desc:'Webinars over Belgisch sociaal recht.',page:'formations'}]},
   art:{ey:'Altijd klaar voor de toekomst',h:'Bronnen & nieuws',filters:[['tout','Alles'],['paie','Loon'],['rh','HR'],['legal','Wetgeving'],['onss','ONSS']],items:[
@@ -289,7 +307,13 @@ T.en={
   hero:{badge:'Belgian digital payroll platform \u2014 v18 in production',h1:'Your Belgian social\npartner.\nFinally digital.',sub:'From Dimona to quarterly declarations \u2014 everything you need, in one place.',cta1:'Go to application',cta2:'Watch demo',stats:[['166','Joint committees'],['< 8s','Dimona submitted'],['47K+','Payslips'],['10.000+','Companies']]},
   logos:{title:'They trust Aureus Social Pro',items:['SME Brussels','Dupont Fiduciary','Janssen Office','HR Partners','Comptaflex','StartBE']},
   mockup:{badge:'Real-time interface',title:'Your entire social cycle\nin one dashboard.',sub:'Unified dashboard, real-time ONSS alerts, accounting export in one click.',features:['Payslip in 3 clicks','Dimona IN/OUT < 8 seconds','DmfA XML ready by the 5th','AES-256 encrypted nightly backup'],db:{title:'Dashboard',stats:[['47.2K','Payslips','\u{1F4C4}'],['18.6K','ONSS Declarations','\u{1F4CB}'],['10.000+','Companies','\u{1F3E2}'],['99.97%','Uptime','\u26A1']],chart:'Payroll Q1 2026',badges:[{l:'Dimona',c:'#22C55E',v:'8 min ago'},{l:'DmfA Q1',c:'#D4A84C',v:'Ready'},{l:'Belcotax',c:'#60A5FA',v:'Due Apr 5'}]}},
-  testimonials:{ey:'Testimonials',title:'What our clients say.',items:[{name:'Sophie Renard',role:'HR Manager \u2014 12 employees SME, Brussels',text:'We left SD Worx after 8 years. Migration took 3 days and we save \u20ac340/month.',stars:5,initials:'SR',color:'#B8913A'},{name:'Marc Janssen',role:'Accountant \u2014 23 client files',text:'The multi-client portal is exactly what was missing. 23 employers from one dashboard. Mahis mandates auto-generated.',stars:5,initials:'MJ',color:'#1A5C42'},{name:'Amira Benali',role:'Freelancer, JC 200',text:'Submitted my first Dimona in 7 seconds. Payroll calculation perfect \u2014 ONSS, withholding tax, employment bonus.',stars:5,initials:'AB',color:'#18396A'}]},
+  testimonials:{ey:'Testimonials',title:'What our clients say.',items:[
+    {name:'James R.',role:'CEO — fintech startup, Brussels',text:'Switched from Partena to Aureus. All payroll data migrated in 48 hours, zero downtime. The DmfA XML passes ONSS validation first time, every time.',stars:5,initials:'JR',color:'#B8913A'},
+    {name:'Emma T.',role:'HR Director — NGO, Brussels',text:'Managing 15 employees across 3 joint committees was a nightmare. Aureus handles it all automatically. The compliance dashboard gives me peace of mind.',stars:5,initials:'ET',color:'#1A5C42'},
+    {name:'David K.',role:'Founder — SaaS company, Ghent',text:'First Belgian employee hired with zero prior knowledge of Belgian social law. Aureus guided me through ONSS registration, contract, Dimona and first payslip.',stars:5,initials:'DK',color:'#18396A'},
+    {name:'Sophie L.',role:'CFO — scale-up, Antwerp',text:'The SEPA pain.001 export is flawless. One file, 23 employees, all salaries processed in seconds. Our bank accepts it every single month.',stars:5,initials:'SL',color:'#7B2D8B'},
+    {name:'Michael B.',role:'Accountant — 18 clients, Brussels',text:'The multi-client portal saved me hours every month. All Mahis mandates generated automatically. Best tool I\'ve used in 12 years of accounting.',stars:5,initials:'MB',color:'#C0392B'}
+  ]},
   roi:{ey:'ROI Calculator',title:'How much do you save\nby leaving SD Worx?',sub:'Estimate your annual savings in 30 seconds.',employees:'Number of employees',current:'Current provider',providers:['SD Worx','Partena','Securex','Sodexo','Other'],result:{saving:'Estimated annual savings',months:'Return on investment',per:'saved per month',cta:'Book a demo now',note:'Estimate based on our public rates vs average Belgian market rates.'},tiers:[{label:'Basic',aureus:15,sdworx:42},{label:'Standard',aureus:25,sdworx:68},{label:'Premium',aureus:38,sdworx:95}]},
   sol:{ey:'Our solutions',h:'The right solution for every profile.',sub:'Freelancer, employer or accountant \u2014 Aureus Social Pro adapts.',items:[{ico:'\u{1F680}',title:'Become a freelancer',desc:'Status, ONSS, obligations \u2014 everything to start with confidence.',page:'independant'},{ico:'\u{1F464}',title:'Become an employer',desc:'Registration, contract, Dimona, first payroll.',page:'employeur',featured:true},{ico:'\u{1F3E2}',title:'Employers',desc:'Automate payroll, DmfA, accounting exports.',page:'employeurs'},{ico:'\u{1F3DB}',title:'Accountants',desc:'Multi-client portal, Mahis/CSAM mandates, REST API.',page:'experts'},{ico:'\u{1F4CA}',title:'Declarations & Belcotax',desc:'Quarterly DmfA, 281.10/20/30 slips, MyMinfin.',page:'employeurs'},{ico:'\u{1F4DA}',title:'Training',desc:'Webinars on Belgian social law.',page:'formations'}]},
   art:{ey:'Always ready for the future',h:'Resources & news',filters:[['tout','All'],['paie','Payroll'],['rh','HR'],['legal','Legislation'],['onss','ONSS']],items:[
@@ -360,7 +384,13 @@ T.de={
   hero:{badge:'Digitales belgisches Sozialsekretariat \u2014 v18 in Produktion',h1:'Ihr belgischer\nSozialpartner.\nEndlich digital.',sub:'Von Dimona bis Quartalsmeldungen \u2014 alles, was Sie brauchen, an einem Ort.',cta1:'Zur Anwendung',cta2:'Demo ansehen',stats:[['166','Parit\u00e4tische Kommissionen'],['< 8s','Dimona eingereicht'],['47K+','Gehaltszettel'],['10.000+','Unternehmen']]},
   logos:{title:'Sie vertrauen Aureus Social Pro',items:['KMU Br\u00fcssel','Fiduziaire Dupont','B\u00fcro Janssen','HR Partners','Comptaflex','StartBE']},
   mockup:{badge:'Echtzeit-Interface',title:'Ihr gesamter Sozialdatenzyklus\nin einem Dashboard.',sub:'Unified Dashboard, ONSS-Echtzeit-Benachrichtigungen, Buchhalterexport per Klick.',features:['Gehaltszettel in 3 Klicks','Dimona IN/OUT < 8 Sekunden','DmfA XML am 5. fertig','AES-256-verschl\u00fcsseltes Nacht-Backup'],db:{title:'Dashboard',stats:[['47.2K','Gehaltszettel','\u{1F4C4}'],['18.6K','ONSS-Meldungen','\u{1F4CB}'],['10.000+','Unternehmen','\u{1F3E2}'],['99.97%','Uptime','\u26A1']],chart:'Gehalt Q1 2026',badges:[{l:'Dimona',c:'#22C55E',v:'vor 8 Min.'},{l:'DmfA Q1',c:'#D4A84C',v:'Bereit'},{l:'Belcotax',c:'#60A5FA',v:'Vor 5. Apr.'}]}},
-  testimonials:{ey:'Referenzen',title:'Was unsere Kunden sagen.',items:[{name:'Sophie Renard',role:'HR-Leiterin \u2014 KMU 12 Mitarbeiter, Br\u00fcssel',text:'SD Worx nach 8 Jahren verlassen. Migration 3 Tage, wir sparen 340\u20ac/Monat.',stars:5,initials:'SR',color:'#B8913A'},{name:'Marc Janssen',role:'Buchhalter \u2014 23 Akten',text:'Das Multi-Mandanten-Portal ist genau das, was gefehlt hat. 23 Arbeitgeber aus einem Dashboard. Mahis-Mandate automatisch.',stars:5,initials:'MJ',color:'#1A5C42'},{name:'Amira Benali',role:'Selbst\u00e4ndige, PK 200',text:'Erste Dimona in 7 Sekunden. Gehaltsberechnung perfekt \u2014 ONSS, Lohnsteuer, Besch\u00e4ftigungsbonus.',stars:5,initials:'AB',color:'#18396A'}]},
+  testimonials:{ey:'Referenzen',title:'Was unsere Kunden sagen.',items:[
+    {name:'Klaus M.',role:'Geschäftsführer — Beratung, Brüssel',text:'Wechsel von SD Worx zu Aureus in 3 Tagen. Alle Daten migriert, kein Ausfall. Das DmfA XML wird vom ONSS beim ersten Versuch akzeptiert.',stars:5,initials:'KM',color:'#B8913A'},
+    {name:'Anna S.',role:'HR-Managerin — Nonprofit, Lüttich',text:'132 Module, alle von einem Dashboard zugänglich. Die automatische Dimona-Erinnerung 24h vorher hat uns bereits mehrere Bußgelder erspart.',stars:5,initials:'AS',color:'#1A5C42'},
+    {name:'Stefan H.',role:'Gründer — IT-Agentur, Eupen',text:'Erster belgischer Arbeitnehmer ohne Kenntnisse des Sozialrechts eingestellt. Aureus hat mich Schritt für Schritt begleitet: ONSS, Vertrag, Dimona.',stars:5,initials:'SH',color:'#18396A'},
+    {name:'Monika W.',role:'Steuerberaterin — 22 Mandanten, Lüttich',text:'Das Multi-Mandanten-Portal ist revolutionär. Ich verwalte 22 Arbeitgeber von einem Bildschirm. Mahis-Mandate werden automatisch generiert.',stars:5,initials:'MW',color:'#7B2D8B'},
+    {name:'Frank B.',role:'Geschäftsführer — Handwerk, Arlon',text:'Der WinBooks-Export funktioniert einwandfrei. Alle Lohnbuchungen kommen korrekt in der Buchhaltung an. Keine doppelte Erfassung mehr.',stars:5,initials:'FB',color:'#C0392B'}
+  ]},
   roi:{ey:'ROI-Rechner',title:'Wie viel sparen Sie,\nwenn Sie SD Worx verlassen?',sub:'Sch\u00e4tzen Sie Ihre j\u00e4hrlichen Einsparungen in 30 Sekunden.',employees:'Anzahl Mitarbeiter',current:'Aktueller Anbieter',providers:['SD Worx','Partena','Securex','Sodexo','Andere'],result:{saving:'Gesch\u00e4tzte j\u00e4hrliche Einsparung',months:'Return on Investment',per:'pro Monat gespart',cta:'Jetzt Demo anfordern',note:'Sch\u00e4tzung basierend auf unseren Tarifen vs. belgischen Marktdurchschnittstarifen.'},tiers:[{label:'Basic',aureus:15,sdworx:42},{label:'Standard',aureus:25,sdworx:68},{label:'Premium',aureus:38,sdworx:95}]},
   sol:{ey:'Unsere L\u00f6sungen',h:'F\u00fcr jedes Profil die richtige L\u00f6sung.',sub:'Selbst\u00e4ndige, Arbeitgeber oder Buchhalter \u2014 Aureus Social Pro passt sich an.',items:[{ico:'\u{1F680}',title:'Selbst\u00e4ndig werden',desc:'Statut, ONSS, Pflichten \u2014 alles f\u00fcr einen ruhigen Start.',page:'independant'},{ico:'\u{1F464}',title:'Arbeitgeber werden',desc:'Anmeldung, Vertrag, Dimona, erste Geh\u00e4lter.',page:'employeur',featured:true},{ico:'\u{1F3E2}',title:'Arbeitgeber',desc:'Gehaltsabrechnung, DmfA, Buchhalterexport automatisieren.',page:'employeurs'},{ico:'\u{1F3DB}',title:'Buchhalter',desc:'Multi-Mandanten-Portal, Mahis/CSAM-Mandate, REST API.',page:'experts'},{ico:'\u{1F4CA}',title:'Meldungen & Belcotax',desc:'Quartals-DmfA, Fiches 281.10/20/30, MyMinfin.',page:'employeurs'},{ico:'\u{1F4DA}',title:'Schulungen',desc:'Webinare zum belgischen Sozialrecht.',page:'formations'}]},
   art:{ey:'Immer bereit f\u00fcr die Zukunft',h:'Ressourcen & News',filters:[['tout','Alles'],['paie','Lohn'],['rh','HR'],['legal','Gesetzgebung'],['onss','ONSS']],items:[
@@ -676,19 +706,7 @@ function Testimonials({t}) {
           <div className="vt-ey">{t.testimonials.ey}</div>
           <h2>{t.testimonials.title}</h2>
         </div>
-        <div className="testi-grid">
-          {t.testimonials.items.map((item,i)=>(
-            <div key={i} className={`testi-card fade-in fade-in-delay-${i+1}`}>
-              <div className="testi-quote">"</div>
-              <div className="testi-stars">{Array(item.stars).fill(0).map((_,j)=>(<span key={j} className="star">★</span>))}</div>
-              <p className="testi-text">"{item.text}"</p>
-              <div className="testi-author">
-                <div className="testi-avatar" style={{background:item.color}}>{item.initials}</div>
-                <div><div className="testi-name">{item.name}</div><div className="testi-role">{item.role}</div></div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <TestiCarousel items={t.testimonials.items}/>
       </div>
     </section>
   );
@@ -1232,7 +1250,51 @@ function PageArticle({t,go,goBack,slug,lang}) {
 
 const PAGES={home:PageHome,independant:PageInd,employeur:PageEmp,employeurs:PageEmps,experts:PageExp,formations:PageForm,contact:PageCon};
 
-export default function VitrinePage() {
+function TestiCarousel({items}) {
+  if(!items||!items.length) return null;
+  const PER = 3;
+  const [page, setPage] = useState(0);
+  const total = Math.ceil(items.length / PER);
+  const slice = items.slice(page * PER, page * PER + PER);
+  return (
+    <div>
+      <div className="testi-grid">
+        {slice.map((item,i) => (
+          <div key={page+'-'+i} className="testi-card fade-in">
+            <div className="testi-quote">"</div>
+            <div className="testi-stars">{Array(item.stars).fill(0).map((_,j)=>(<span key={j} className="star">★</span>))}</div>
+            <p className="testi-text">"{item.text}"</p>
+            <div className="testi-author">
+              <div className="testi-avatar" style={{background:item.color}}>{item.initials}</div>
+              <div><div className="testi-name">{item.name}</div><div className="testi-role">{item.role}</div></div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {total > 1 && (
+        <div style={{display:'flex',justifyContent:'center',alignItems:'center',gap:12,marginTop:40}}>
+          <button onClick={()=>setPage(p=>Math.max(0,p-1))} disabled={page===0}
+            style={{width:40,height:40,borderRadius:'50%',border:'1.5px solid #E8E4DC',background:'#fff',cursor:page===0?'default':'pointer',fontSize:18,color:page===0?'#ccc':'#0E0D0A',display:'flex',alignItems:'center',justifyContent:'center',transition:'all .2s'}}>
+            ←
+          </button>
+          <div style={{display:'flex',gap:8}}>
+            {Array(total).fill(0).map((_,i)=>(
+              <button key={i} onClick={()=>setPage(i)}
+                style={{width:i===page?28:8,height:8,borderRadius:4,border:'none',background:i===page?'#B8913A':'#E8E4DC',cursor:'pointer',transition:'all .3s',padding:0}}/>
+            ))}
+          </div>
+          <button onClick={()=>setPage(p=>Math.min(total-1,p+1))} disabled={page===total-1}
+            style={{width:40,height:40,borderRadius:'50%',border:'1.5px solid #E8E4DC',background:'#fff',cursor:page===total-1?'default':'pointer',fontSize:18,color:page===total-1?'#ccc':'#0E0D0A',display:'flex',alignItems:'center',justifyContent:'center',transition:'all .2s'}}>
+            →
+          </button>
+          <span style={{fontSize:12,color:'#9A968E',marginLeft:8}}>{page*PER+1}–{Math.min((page+1)*PER,items.length)} / {items.length}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VitrinePage() {
   const[page,setPage]=useState('home');
   const[history,setHistory]=useState(['home']);
   const[lang,setLang]=useState('fr');
@@ -1348,3 +1410,5 @@ export default function VitrinePage() {
     </div>
   );
 }
+
+export default VitrinePage;

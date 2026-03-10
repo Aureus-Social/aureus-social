@@ -2,6 +2,39 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
+const TESTIMONIALS_ALL = [
+  {name:"Thomas V.",role:"Gérant — agence web, Bruxelles",text:"J'avais peur de la paperasse ONSS. En 2 jours, Aureus m'a guidé de l'immatriculation jusqu'à la première fiche de paie. Zéro stress.",stars:5,lang:"fr"},
+  {name:"Sarah M.",role:"Fondatrice — startup RH, Gand",text:"La Dimona en 8 secondes, c'est réel. J'ai engagé 3 employés en 1 semaine sans aucune connaissance en droit social belge.",stars:5,lang:"fr"},
+  {name:"Karim B.",role:"Indépendant complémentaire, Liège",text:"Passage de SD Worx à Aureus en 3 jours. Migration gratuite, toutes mes données reprises. Je paie 60% moins cher.",stars:5,lang:"fr"},
+  {name:"Isabelle D.",role:"DRH — cabinet comptable, Namur",text:"Le module DmfA XML est parfait. Export direct vers l'ONSS, zéro rejet. Je gère 47 dossiers depuis un seul tableau de bord.",stars:5,lang:"fr"},
+  {name:"Marc L.",role:"Gérant — restaurant, Charleroi",text:"Avant Aureus je payais Securex 280€/mois pour 2 employés. Maintenant tout est automatique et je comprends enfin mes charges patronales.",stars:5,lang:"fr"},
+  {name:"Nathalie P.",role:"Associée — cabinet RH, Mons",text:"Les 166 commissions paritaires sont toutes à jour. Pour mes clients CP 302, CP 226 et CP 200, Aureus applique les bons barèmes automatiquement.",stars:5,lang:"fr"},
+  {name:"Julien F.",role:"CEO — scale-up tech, Bruxelles",text:"Onboarding de 12 employés en une semaine. Contrats, Dimona, fiches SEPA — tout généré automatiquement. Impressionnant.",stars:5,lang:"fr"},
+  {name:"Amina K.",role:"Gérante — pharmacie, Anderlecht",text:"Mon premier employé avec Aureus : exonération patronale an 1 calculée automatiquement. 4.200€ économisés dès la première année.",stars:5,lang:"fr"},
+  {name:"Pierre H.",role:"Expert-comptable indépendant, Tournai",text:"Je recommande Aureus à tous mes clients employeurs. L'export WinBooks est parfait, les DmfA XML passent du premier coup.",stars:5,lang:"fr"},
+  {name:"Céline R.",role:"Fondatrice — ASBL, Ottignies",text:"Le bonus emploi 2026 est calculé automatiquement pour chacun de mes travailleurs. Avant je passais 3h par mois sur les formules SPF Finances.",stars:5,lang:"fr"},
+  {name:"Pieter V.",role:"Zaakvoerder — IT-bedrijf, Gent",text:"Overstap van Partena naar Aureus in 2 dagen. Alle gegevens overgenomen, geen enkele onderbreking. De DmfA XML werkt perfect.",stars:5,lang:"nl"},
+  {name:"Liesbet D.",role:"HR-manager — non-profit, Antwerpen",text:"132 modules, allemaal bereikbaar vanuit één dashboard. De automatische Dimona-herinnering 24u op voorhand heeft ons al meerdere boetes bespaard.",stars:5,lang:"nl"},
+  {name:"Wout M.",role:"Oprichter — designbureau, Leuven",text:"Eerste werknemer aangenomen zonder enige kennis van Belgisch sociaal recht. Aureus heeft me stap voor stap begeleid: ONSS, contract, Dimona, loonbrief.",stars:5,lang:"nl"},
+  {name:"An V.",role:"Accountant — 31 dossiers, Brugge",text:"Het multi-mandanten portaal is een gamechanger. Ik beheer 31 werkgevers vanuit één scherm. De Mahis-mandaten worden automatisch gegenereerd.",stars:5,lang:"nl"},
+  {name:"Stijn B.",role:"Zaakvoerder — horeca, Mechelen",text:"Voor Aureus betaalde ik SD Worx 320€/maand voor 3 werknemers. Nu is alles geautomatiseerd en begrijp ik eindelijk mijn patronale bijdragen.",stars:5,lang:"nl"},
+  {name:"Karen J.",role:"Oprichtster — kinderopvang, Hasselt",text:"De lageloonvermindering en de vrijstelling eerste werknemer worden automatisch berekend. Ik bespaar meer dan 5.000€ per jaar.",stars:5,lang:"nl"},
+  {name:"Raf D.",role:"Zelfstandige — consultant, Kortrijk",text:"SEPA pain.001 bestand in 3 klikken. Ik laad het rechtstreeks in mijn KBC-interface. Geen handmatige overschrijvingen meer.",stars:5,lang:"nl"},
+  {name:"Sofie N.",role:"HR-directeur — vzw, Gent",text:"De WinBooks ACT export werkt perfect. Al mijn loonboekingen komen correct in de boekhouding terecht. Geen dubbele encodering meer.",stars:5,lang:"nl"},
+  {name:"Tom V.",role:"CEO — e-commerce, Aalst",text:"Onboarding van 8 werknemers in één week. Contracten, Dimona, SEPA — alles automatisch gegenereerd. Indrukwekkend platform.",stars:5,lang:"nl"},
+  {name:"Nele B.",role:"Zaakvoerster — kinesitherapie, Roeselare",text:"CP 330 correct geconfigureerd van bij de start. Alle barema's, sectorpremies en vakantiegeld automatisch berekend. Eindelijk rust.",stars:5,lang:"nl"},
+  {name:"James R.",role:"CEO — fintech startup, Brussels",text:"Switched from Partena to Aureus. All payroll data migrated in 48 hours, zero downtime. The DmfA XML passes ONSS validation first time, every time.",stars:5,lang:"en"},
+  {name:"Emma T.",role:"HR Director — NGO, Brussels",text:"Managing 15 employees across 3 joint committees was a nightmare. Aureus handles it all automatically. The compliance dashboard gives me peace of mind.",stars:5,lang:"en"},
+  {name:"David K.",role:"Founder — SaaS company, Ghent",text:"First Belgian employee hired with zero prior knowledge of Belgian social law. Aureus guided me through ONSS registration, contract, Dimona and first payslip.",stars:5,lang:"en"},
+  {name:"Sophie L.",role:"CFO — scale-up, Antwerp",text:"The SEPA pain.001 export is flawless. One file, 23 employees, all salaries processed in seconds. Our bank accepts it every single month.",stars:5,lang:"en"},
+  {name:"Michael B.",role:"Accountant — 18 clients, Brussels",text:"The multi-client portal saved me hours every month. All Mahis mandates generated automatically. Best tool I've used in 12 years of accounting.",stars:5,lang:"en"},
+  {name:"Klaus M.",role:"Geschäftsführer — Beratung, Brüssel",text:"Wechsel von SD Worx zu Aureus in 3 Tagen. Alle Daten migriert, kein Ausfall. Das DmfA XML wird vom ONSS beim ersten Versuch akzeptiert.",stars:5,lang:"de"},
+  {name:"Anna S.",role:"HR-Managerin — Nonprofit, Lüttich",text:"132 Module, alle von einem Dashboard aus zugänglich. Die automatische Dimona-Erinnerung 24h vorher hat uns bereits mehrere Bußgelder erspart.",stars:5,lang:"de"},
+  {name:"Stefan H.",role:"Gründer — IT-Agentur, Eupen",text:"Erster belgischer Arbeitnehmer ohne Kenntnisse des belgischen Sozialrechts eingestellt. Aureus hat mich Schritt für Schritt begleitet.",stars:5,lang:"de"},
+  {name:"Monika W.",role:"Steuerberaterin — 22 Mandanten, Lüttich",text:"Das Multi-Mandanten-Portal ist revolutionär. Ich verwalte 22 Arbeitgeber von einem Bildschirm. Mahis-Mandate automatisch generiert.",stars:5,lang:"de"},
+  {name:"Frank B.",role:"Geschäftsführer — Handwerk, Arlon",text:"Der WinBooks-Export funktioniert einwandfrei. Alle Lohnbuchungen kommen korrekt in der Buchhaltung an. Keine doppelte Erfassung mehr.",stars:5,lang:"de"},
+];
+
 const TR = {
   fr: {
     headline: 'Le secrétariat social\nbelge nouvelle génération.',
@@ -249,22 +282,38 @@ export default function LoginPage({ onLogin }) {
           </div>
         </div>
 
-        {/* Témoignage */}
+        {/* Témoignages */}
         <div style={{ borderTop:`1px solid ${border}`, paddingTop:20, marginTop:8 }}>
-          <div style={{ fontSize:18, color:gold, marginBottom:8 }}>★★★★★</div>
-          <p style={{ fontSize:13, color:mist, fontStyle:'italic', lineHeight:1.7, marginBottom:10, minHeight:40 }}>
-            "{t.testimonials[slide % t.testimonials.length].text}"
-          </p>
-          <div style={{ fontSize:13, fontWeight:700, color:ink }}>{t.testimonials[slide % t.testimonials.length].name}</div>
-          <div style={{ fontSize:11, color:stone }}>{t.testimonials[slide % t.testimonials.length].role}</div>
-          <div style={{ display:'flex', gap:5, marginTop:10 }}>
-            {[0,1].map(i => (
-              <div key={i} onClick={() => setSlide(i)} style={{ width:i===slide%2?18:5, height:5, borderRadius:3, background:i===slide%2?gold:border, cursor:'pointer', transition:'all .3s' }}/>
-            ))}
-          </div>
+          {(() => {
+            const filtered = TESTIMONIALS_ALL.filter(a => a.lang === lang);
+            const cur = filtered[slide % filtered.length];
+            return cur ? (
+              <>
+                <div style={{ fontSize:16, color:gold, marginBottom:8 }}>★★★★★</div>
+                <p style={{ fontSize:13, color:mist, fontStyle:'italic', lineHeight:1.7, marginBottom:10, minHeight:52 }}>
+                  "{cur.text}"
+                </p>
+                <div style={{ fontSize:13, fontWeight:700, color:ink }}>{cur.name}</div>
+                <div style={{ fontSize:11, color:stone, marginBottom:12 }}>{cur.role}</div>
+                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                  <button onClick={()=>setSlide(s=>(s-1+filtered.length)%filtered.length)}
+                    style={{background:'none',border:`1px solid ${border}`,borderRadius:'50%',width:28,height:28,cursor:'pointer',color:mist,fontSize:14,display:'flex',alignItems:'center',justifyContent:'center'}}>←</button>
+                  <div style={{ display:'flex', gap:4 }}>
+                    {filtered.map((_,i)=>(
+                      <div key={i} onClick={()=>setSlide(i)}
+                        style={{width:i===slide%filtered.length?16:5,height:5,borderRadius:3,background:i===slide%filtered.length?gold:border,cursor:'pointer',transition:'all .3s'}}/>
+                    ))}
+                  </div>
+                  <button onClick={()=>setSlide(s=>(s+1)%filtered.length)}
+                    style={{background:'none',border:`1px solid ${border}`,borderRadius:'50%',width:28,height:28,cursor:'pointer',color:mist,fontSize:14,display:'flex',alignItems:'center',justifyContent:'center'}}>→</button>
+                  <span style={{fontSize:10,color:stone,marginLeft:4}}>{slide%filtered.length+1}/{filtered.length}</span>
+                </div>
+              </>
+            ) : null;
+          })()}
         </div>
 
-        <div style={{ marginTop:20, fontSize:10, color:stone, lineHeight:1.8, whiteSpace:'pre-line' }}>{t.legal}</div>
+                <div style={{ marginTop:20, fontSize:10, color:stone, lineHeight:1.8, whiteSpace:'pre-line' }}>{t.legal}</div>
       </div>
 
       {/* RIGHT — Formulaire */}
