@@ -1001,19 +1001,76 @@ function PageEmp({t,go,goBack}) {
       <div className="vt-ey">{d.ey}</div>
       <h1 style={{marginBottom:18,whiteSpace:'pre-line'}}>{d.h.split('\n').map((l,i)=>(<span key={i}>{i>0&&<br/>}{i===2?<em>{l}</em>:l}</span>))}</h1>
       <p style={{fontSize:18,color:STONE,marginBottom:28,fontWeight:300}}>{d.sub}</p>
-      <div style={{display:'flex',gap:12,flexWrap:'wrap'}}><button className="btn-p" onClick={()=>go('contact')}>{d.c1}</button><button className="btn-s" onClick={()=>go('employeurs')}>{d.c2}</button></div>
+      <div style={{display:'flex',gap:12,flexWrap:'wrap',alignItems:'center'}}><button className="btn-p" onClick={()=>go('contact')}>{d.c1}</button><button className="btn-s" onClick={()=>go('employeurs')}>{d.c2}</button></div>
       <div style={{marginTop:14,fontSize:13,color:MIST,display:'flex',gap:20,flexWrap:'wrap'}}>
         <span>✓ Démo gratuite</span><span>✓ Sans engagement</span><span>✓ Réponse sous 24h</span><span>✓ Onboarding guidé inclus</span>
       </div>
     </div><DkCard {...d.card}/></div></div></section>
+
     <section className="vt-sec"><div className="vt-wrap">
       <div style={{marginBottom:48}} className="fade-in"><div className="vt-ey">{d.steps.ey}</div><h2>{d.steps.h}</h2></div>
       <div style={{maxWidth:680}}>{d.steps.items.map(s=>(<div key={s.n} className="step"><div className="step-n">{s.n}</div><div><h4 style={{fontFamily:"'Cabinet Grotesk',sans-serif",fontSize:17,fontWeight:700,color:INK,marginBottom:8}}>{s.t}</h4><p style={{fontSize:15}}>{s.b}</p><div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:12}}>{s.tags.map(tag=>(<span key={tag} className={`vt-tag ${s.tc}`}>{tag}</span>))}</div></div></div>))}</div>
     </div></section>
-    <section className="vt-sec" style={{background:CREAM}}><div className="vt-wrap">
+
+    <section className="vt-sec" style={{background:'#F0EDE6'}}><div className="vt-wrap">
+      <div style={{textAlign:'center',marginBottom:48}} className="fade-in">
+        <div className="vt-ey">Tarification transparente</div>
+        <h2>Un prix simple, sans surprise</h2>
+        <p style={{color:STONE,fontSize:16,marginTop:12,maxWidth:520,margin:'12px auto 0'}}>Pas de frais de setup. Pas d'engagement minimum. Résiliable à tout moment.</p>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:20,maxWidth:860,margin:'0 auto'}}>
+        <div style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:14,padding:'32px 28px',textAlign:'center'}}>
+          <div style={{fontSize:13,fontWeight:700,color:MIST,letterSpacing:2,marginBottom:12}}>STARTER</div>
+          <div style={{fontFamily:"'Fraunces',serif",fontSize:42,color:INK,fontWeight:700,lineHeight:1}}>15€</div>
+          <div style={{fontSize:13,color:MIST,marginBottom:20}}>/ employé / mois</div>
+          <div style={{fontSize:14,color:STONE,lineHeight:2,textAlign:'left',marginBottom:24}}>✓ Fiches de paie illimitées<br/>✓ Dimona IN/OUT automatique<br/>✓ DmfA trimestrielle<br/>✓ Contrats conformes<br/>✓ Support email</div>
+          <button className="btn-p" onClick={()=>go('contact')} style={{width:'100%',justifyContent:'center'}}>Commencer →</button>
+        </div>
+        <div style={{background:INK,border:`2px solid ${GOLD}`,borderRadius:14,padding:'32px 28px',textAlign:'center',position:'relative'}}>
+          <div style={{position:'absolute',top:-13,left:'50%',transform:'translateX(-50%)',background:GOLD,color:INK,fontSize:11,fontWeight:800,padding:'4px 14px',borderRadius:20,letterSpacing:1}}>POPULAIRE</div>
+          <div style={{fontSize:13,fontWeight:700,color:GOLD,letterSpacing:2,marginBottom:12}}>PRO</div>
+          <div style={{fontFamily:"'Fraunces',serif",fontSize:42,color:'#fff',fontWeight:700,lineHeight:1}}>25€</div>
+          <div style={{fontSize:13,color:MIST,marginBottom:20}}>/ employé / mois</div>
+          <div style={{fontSize:14,color:'rgba(255,255,255,.75)',lineHeight:2,textAlign:'left',marginBottom:24}}>✓ Tout Starter<br/>✓ Export comptable 6 formats<br/>✓ SEPA pain.001 automatique<br/>✓ Portail employé<br/>✓ Support prioritaire</div>
+          <button className="btn-gold" onClick={()=>go('contact')} style={{width:'100%',justifyContent:'center'}}>Essai gratuit 30 jours →</button>
+        </div>
+        <div style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:14,padding:'32px 28px',textAlign:'center'}}>
+          <div style={{fontSize:13,fontWeight:700,color:MIST,letterSpacing:2,marginBottom:12}}>ENTREPRISE</div>
+          <div style={{fontFamily:"'Fraunces',serif",fontSize:42,color:INK,fontWeight:700,lineHeight:1}}>40€</div>
+          <div style={{fontSize:13,color:MIST,marginBottom:20}}>/ employé / mois</div>
+          <div style={{fontSize:14,color:STONE,lineHeight:2,textAlign:'left',marginBottom:24}}>✓ Tout Pro<br/>✓ Multi-mandants<br/>✓ API REST<br/>✓ SLA 99,99%<br/>✓ Account manager dédié</div>
+          <button className="btn-s" onClick={()=>go('contact')} style={{width:'100%',justifyContent:'center'}}>Contacter →</button>
+        </div>
+      </div>
+      <p style={{textAlign:'center',marginTop:20,fontSize:13,color:MIST}}>💬 Vous venez de SD Worx ou Partena ? <span style={{color:GOLD,cursor:'pointer',textDecoration:'underline'}} onClick={()=>go('contact')}>Migration gratuite incluse.</span></p>
+    </div></section>
+
+    <section className="vt-sec"><div className="vt-wrap">
       <div style={{textAlign:'center',marginBottom:48}} className="fade-in"><div className="vt-ey">{d.av.ey}</div><h2>{d.av.h}</h2></div>
       <div className="ic"><AvCards items={d.av.items}/></div>
     </div></section>
+
+    <section className="vt-sec" style={{background:CREAM}}><div className="vt-wrap">
+      <div style={{textAlign:'center',marginBottom:48}} className="fade-in">
+        <div className="vt-ey">Ils nous ont fait confiance</div>
+        <h2>Ce que disent nos premiers employeurs</h2>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:20,maxWidth:900,margin:'0 auto'}}>
+        {[
+          {name:'Thomas V.',role:'Gérant — agence web, Bruxelles',text:"J'avais peur de la paperasse ONSS. En 2 jours, Aureus m'a guidé de l'immatriculation jusqu'à la première fiche de paie. Zéro stress.",stars:5},
+          {name:'Sarah M.',role:'Fondatrice — startup RH, Gand',text:"La Dimona en 8 secondes, c'est réel. J'ai engagé 3 employés en 1 semaine sans aucune connaissance en droit social belge.",stars:5},
+          {name:'Karim B.',role:'Indépendant complémentaire, Liège',text:"Passage de SD Worx à Aureus en 3 jours. Migration gratuite, toutes mes données reprises. Je paie 60% moins cher.",stars:5},
+        ].map(({name,role,text,stars})=>(
+          <div key={name} style={{background:WHITE,border:`1px solid ${BORDER}`,borderRadius:12,padding:'24px'}}>
+            <div style={{color:GOLD,fontSize:14,marginBottom:12}}>{'★'.repeat(stars)}</div>
+            <p style={{fontSize:14,color:STONE,lineHeight:1.7,marginBottom:16,fontStyle:'italic'}}>"{text}"</p>
+            <div style={{fontWeight:700,fontSize:14,color:INK}}>{name}</div>
+            <div style={{fontSize:12,color:MIST}}>{role}</div>
+          </div>
+        ))}
+      </div>
+    </div></section>
+
     <CtaBand h={d.cta.h} sub={d.cta.sub} btn={d.cta.btn} go={go}/><Footer t={t} go={go}/>
   </>);
 }
