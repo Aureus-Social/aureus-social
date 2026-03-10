@@ -367,27 +367,26 @@ function DashboardLayoutInner({ user }) {
       else console.warn('[Crypto] Chiffrement non disponible');
     });
 
-    // Backup automatique silencieux à chaque session (4.3)
+    // Backup automatique sécurisé AES-256 à chaque session (backup-secure.js v2.0)
     if (user) {
-      const BACKUP_KEY = 'aureus_last_backup_' + (user.id || user.email);
-      const lastBackup = sessionStorage.getItem(BACKUP_KEY);
-      const now = Date.now();
-      const TWO_HOURS = 2 * 60 * 60 * 1000;
-      if (!lastBackup || (now - parseInt(lastBackup)) > TWO_HOURS) {
-        setTimeout(() => {
-          fetch('/api/backup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'silent', userEmail: user.email, userRole: user.user_metadata?.role || '' })
-          }).then(res => {
-            if (res.ok) {
-              sessionStorage.setItem(BACKUP_KEY, String(now));
-              const records = res.headers.get('X-Backup-Records');
-              console.log(`[Backup auto] ${records} enregistrements sauvegardés`);
-            }
-          }).catch(() => {});
-        }, 3000); // 3s après login pour ne pas bloquer le chargement
-      }
+      setTimeout(() => {
+        fetch('/api/backup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action:    'silent',
+            userId:    user.id,
+            userEmail: user.email,
+            userRole:  user.user_metadata?.role || '',
+          }),
+        }).then(res => {
+          if (res.ok) {
+            const records   = res.headers.get('X-Backup-Records');
+            const encrypted = res.headers.get('X-Backup-Encrypted');
+            console.log(`[Backup] ${records} enregistrements — chiffré AES-256: ${encrypted}`);
+          }
+        }).catch(() => {}); // Silencieux — backup non bloquant
+      }, 4000); // 4s après login pour ne pas bloquer le chargement initial
     }
   },[user]);
 
