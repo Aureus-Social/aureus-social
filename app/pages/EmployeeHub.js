@@ -12,6 +12,7 @@ const Badge=({text,color})=><span style={{padding:'2px 7px',borderRadius:5,fontS
 // 1. DASHBOARD RH — Vrais indicateurs calcules
 // ═══════════════════════════════════════════════════════════
 export function DashboardRHV2({s,d,props_tab}){
+  const { tText } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const clients= s?.clients||[];const now=new Date();const yr=now.getFullYear();
   const allEmps=clients.flatMap(c=>(c.emps||[]).map(e=>({...e,_co:c.company?.name||c.id})));
@@ -166,6 +167,7 @@ export function DashboardRHV2({s,d,props_tab}){
 // ═══════════════════════════════════════════════════════════
 // 2. REGISTRE PERSONNEL — Format legal + export PDF
 // ═══════════════════════════════════════════════════════════
+  const { tText } = useLang();
 export function RegistrePersonnelV2({s}){
   const clients= s?.clients||[];const [sel,setSel]=useState(0);const now=new Date();
   const cl=clients[sel];const co=cl?.company||{};const emps=cl?.emps||[];
@@ -264,6 +266,7 @@ td{padding:4px;border:1px solid #ddd;font-size:8.5px}
 // 3. PORTAIL EMPLOYE — Fiches paie + demandes fonctionnelles
 // ═══════════════════════════════════════════════════════════
 export function PortailEmployeV2({s,d}){
+  const { tText } = useLang();
   const clients= s?.clients||[];const [selC,setSelC]=useState(0);const [selE,setSelE]=useState(0);
   const [tab,setTab]=useState('accueil');const [demandes,setDemandes]=useState([]);
   const [newDem,setNewDem]=useState({type:'conge',dateDebut:'',dateFin:'',motif:''});
@@ -370,6 +373,7 @@ export function PortailEmployeV2({s,d}){
 // 4. GESTION INTERIMAIRES — Contrats + DIMONA + Couts
 // ═══════════════════════════════════════════════════════════
 export function GestionInterimairesV2({s,d}){
+  const { tText } = useLang();
   const clients= s?.clients||[];const [sel,setSel]=useState(0);
   const [ints,setInts]=useState([]);const [showAdd,setShowAdd]=useState(false);const [tab,setTab]=useState('liste');
   const agences=[{id:'randstad',n:'Randstad',c:'#0066cc'},{id:'adecco',n:'Adecco',c:'#ef4444'},{id:'manpower',n:'Manpower',c:'#3b82f6'},{id:'tempo',n:'Tempo-Team',c:'#22c55e'},{id:'start',n:'Start People',c:'#eab308'},{id:'unique',n:'Unique',c:'#a855f7'},{id:'robert',n:'Robert Half',c:'#06b6d4'}];
