@@ -1423,130 +1423,498 @@ export function NoteFraisV2({s}){
 // COMPOSANT 10: CHÈQUES-REPAS V2
 // ════════════════════════════════════════════════════════════
 export function CheqRepasV2({s}){
-  const { t, lang, tText } = useLang();
-  const emps=(s?.clients||[]).flatMap(c=>c.emps||[]);
-  const [valFaciale,setValFaciale]=useState(8);
-  const [partPatron,setPartPatron]=useState(6.91);
-  const [joursPrestes,setJoursPrestes]=useState(220);
-  const [regime,setRegime]=useState(100);
-  const [cp,setCp]=useState('200');
-  const [tab,setTab]=useState('simu');
-  const cpData={
-    '200':{nom:'CP 200 — Employés',valMax:8,patronMax:6.91,note:'CCT sectorielle — max 8 EUR'},
-    '118':{nom:'CP 118 — Alimentaire',valMax:7,patronMax:5.50,note:'CCT CP 118 — max 7 EUR, patron 5.50'},
-    '119':{nom:'CP 119 — Commerce alim.',valMax:7,patronMax:5.00,note:'CCT CP 119 — max 7 EUR, patron 5.00'},
-    '302':{nom:'CP 302 — Horeca',valMax:8,patronMax:6.91,note:'Uniquement si PAS de repas en nature'},
-    '124':{nom:'CP 124 — Construction',valMax:7,patronMax:5.91,note:'CCT CP 124'},
-    '330':{nom:'CP 330 — Santé',valMax:7,patronMax:5.91,note:'CCT CP 330'},
-    '111':{nom:'CP 111 — Métal',valMax:8,patronMax:6.91,note:'CCT CP 111'},
-    '140':{nom:'CP 140 — Transport',valMax:8,patronMax:6.91,note:'Non cumulable avec per diem même jour'},
-    '121':{nom:'CP 121 — Nettoyage',valMax:7,patronMax:5.50,note:'CCT CP 121'},
+  const { tText } = useLang();
+  const ae = (s?.emps || (s?.clients||[]).flatMap(c=>c.emps||[]));
+  const [tab, setTab] = useState('dashboard');
+  const [mois, setMois] = useState(new Date().getMonth()+1);
+  const [annee, setAnnee] = useState(new Date().getFullYear());
+  const [valFaciale, setValFaciale] = useState(8);
+  const [partPatron, setPartPatron] = useState(6.91);
+  const [fournisseur, setFournisseur] = useState('edenred');
+  const [empConfig, setEmpConfig] = useState({});
+  const [cp, setCp] = useState('200');
+  const [joursRef, setJoursRef] = useState(22);
+  const [copied, setCopied] = useState(false);
+
+  const cpData = {
+    '200':{nom:'CP 200 — Employés',valMax:8,patronMax:6.91},
+    '118':{nom:'CP 118 — Alimentaire',valMax:7,patronMax:5.50},
+    '302':{nom:'CP 302 — Horeca',valMax:8,patronMax:6.91},
+    '124':{nom:'CP 124 — Construction',valMax:7,patronMax:5.91},
+    '330':{nom:'CP 330 — Santé',valMax:7,patronMax:5.91},
+    '111':{nom:'CP 111 — Métal',valMax:8,patronMax:6.91},
+    '140':{nom:'CP 140 — Transport',valMax:8,patronMax:6.91},
+    '121':{nom:'CP 121 — Nettoyage',valMax:7,patronMax:5.50},
   };
-  const cpInfo=cpData[cp]||{nom:'Autre CP',valMax:8,patronMax:6.91,note:'Max légal 8 EUR'};
-  const vf=Math.min(+valFaciale||8,8);const pp=Math.min(+partPatron||6.91,6.91);const pw=Math.max(vf-pp,1.09);
-  const fTP=(+regime||100)/100;const j=Math.round((+joursPrestes||220)*fTP);
-  const coutPatronAn=pp*j;const retenueTravAn=pw*j;const avantageNetAn=vf*j;const n=emps.length||1;
-  return <div style={{padding:24}}>
-    <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>🍽 Chèques-Repas</h2>
-    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>AR 28/11/1969 — Calcul détaillé, prorata temps partiel, spécificités par CP</p>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:18}}>
-      {[{l:'Valeur faciale',v:fmt(vf)+' €',c:'#c6a34e'},{l:'Part patronale',v:fmt(pp)+' €',c:'#22c55e'},{l:'Jours éligibles',v:fi(j)+' j',c:'#3b82f6'},{l:'Avantage net/an',v:fmt(avantageNetAn)+' €',c:'#4ade80'}].map((k,i)=><div key={i} style={{padding:'12px 14px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}><div style={{fontSize:9,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'.5px'}}>{k.l}</div><div style={{fontSize:17,fontWeight:700,color:k.c,marginTop:4}}>{k.v}</div></div>)}
-    </div>
-    <div style={{display:'flex',gap:6,marginBottom:16}}>{[{v:'simu',l:'🧮 Simulateur'},{v:'conditions',l:'📋 Conditions exonération'},{v:'compare',l:'⚖️ Comparatif vs brut'},{v:'legal',l:'📜 Base légale'}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}</div>
-    {tab==='simu'&&<div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:16}}>
-      <C title="Paramètres">
-        <I label="Valeur faciale (EUR)" type="number" value={valFaciale} onChange={setValFaciale}/>
-        {vf>8&&<div style={{fontSize:10,color:'#f87171',marginTop:2}}>⚠ Max légal: 8.00 EUR</div>}
-        <div style={{marginTop:8}}><I label="Part patronale (EUR)" type="number" value={partPatron} onChange={setPartPatron}/></div>
-        {pp>6.91&&<div style={{fontSize:10,color:'#f87171',marginTop:2}}>⚠ Max exonéré: 6.91 EUR</div>}
-        <div style={{marginTop:8}}><I label="Jours prestés/an (base TP)" type="number" value={joursPrestes} onChange={setJoursPrestes}/></div>
-        <div style={{marginTop:8}}><I label="Régime horaire %" type="number" value={regime} onChange={setRegime}/></div>
-        <div style={{marginTop:8}}><I label="Commission paritaire" value={cp} onChange={setCp} options={Object.entries(cpData).map(([k,v])=>({v:k,l:v.nom}))}/></div>
-        <div style={{marginTop:10,padding:8,background:'rgba(34,197,94,.06)',borderRadius:6,fontSize:10,color:'#22c55e'}}>{cpInfo.note}</div>
-      </C>
-      <div>
-        <C title="Décomposition annuelle">
-          <Row l="Valeur faciale" v={fmt(vf)+' €/jour'}/>
-          <Row l="Part patronale (exonérée)" v={fmt(pp)+' €/jour'} c="#22c55e"/>
-          <Row l="Part travailleur (retenue salaire)" v={fmt(pw)+' €/jour'} c="#fb923c"/>
-          <Row l="Jours éligibles (après prorata TP)" v={fi(j)+' jours'}/>
-          <Row l="Avantage brut/an" v={fmt(avantageNetAn)+' €'} b/>
-          <Row l="Coût patronal annuel" v={fmt(coutPatronAn)+' €'} c="#c6a34e"/>
-          <Row l="Retenue travailleur/an" v={fmt(retenueTravAn)+' €'} c="#fb923c"/>
-          <Row l="ONSS" v="0.00 € (exonéré)" c="#22c55e"/>
-          <Row l="PP" v="0.00 € (exonéré)" c="#22c55e"/>
-          <Row l="NET travailleur/an" v={fmt(avantageNetAn-retenueTravAn)+' €'} c="#4ade80" b/>
-        </C>
-        <C title="Coût mensuel">
-          <Row l="Coût patronal/mois" v={fmt(coutPatronAn/12)+' €/mois'} c="#c6a34e"/>
-          <Row l="Retenue travailleur/mois" v={fmt(retenueTravAn/12)+' €/mois'} c="#fb923c"/>
-        </C>
-        {n>1&&<C title={'Impact total — '+n+' travailleur(s)'}>
-          <Row l="Budget patronal total/an" v={fmt(coutPatronAn*n)+' €'} c="#c6a34e" b/>
-          <Row l="Budget patronal total/mois" v={fmt(coutPatronAn*n/12)+' €'}/>
-        </C>}
-      </div>
-    </div>}
-    {tab==='conditions'&&<C title="Conditions d'exonération ONSS + IPP" color="#22c55e">
-      {[
-        {t:'1 chèque par jour presté',d:'Un seul chèque par jour effectivement travaillé. Pas pour maladie, vacances, absence.'},
-        {t:'Valeur faciale max 8.00 EUR',d:'Si dépassement: totalité requalifiée en rémunération soumise ONSS + PP.'},
-        {t:'Part patronale max 6.91 EUR',d:'Au-delà: requalification en rémunération pour l\'excédent.'},
-        {t:'Part travailleur min 1.09 EUR',d:'Retenue obligatoire sur salaire net. Si < 1.09: requalification.'},
-        {t:'Nominatif',d:'Au nom du travailleur. Non cessible.'},
-        {t:'Support électronique obligatoire',d:'Depuis 01/01/2022. Plus de chèques papier.'},
-        {t:'Validité 12 mois',d:'Utilisable 12 mois à compter de la mise à disposition.'},
-        {t:'Émetteur agréé',d:'Sodexo, Edenred, Monizze uniquement.'},
-        {t:'Non cumulable',d:'Pas cumulable avec indemnité de repas forfaitaire le même jour.'},
-        {t:'Pas en remplacement de salaire',d:'Ne peut pas se substituer à une rémunération existante (non-conversion).'},
-        {t:'Jours assimilés',d:'Petit chômage, formation, repos compensatoire = éligibles. Maladie, vacances = NON éligibles.'},
-      ].map((r,i)=><div key={i} style={{padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
-        <div style={{fontSize:12,fontWeight:600,color:'#22c55e'}}>{r.t}</div>
-        <div style={{fontSize:10.5,color:'#9e9b93',marginTop:2}}>{r.d}</div>
-      </div>)}
-      <div style={{marginTop:12,padding:10,background:'rgba(239,68,68,.06)',borderRadius:8,border:'1px solid rgba(239,68,68,.15)'}}>
-        <div style={{fontSize:11,fontWeight:600,color:'#ef4444'}}>⚠ Requalification</div>
-        <div style={{fontSize:10,color:'#ccc',marginTop:4}}>Si UNE SEULE condition non remplie → ONSS requalifie en rémunération → rappel ONSS 13.07% + 25.07% + PP sur la totalité.</div>
-      </div>
-    </C>}
-    {tab==='compare'&&<div>
-      <C title="Comparatif: Chèques-repas vs salaire brut (même coût employeur)" color="#3b82f6">
-        {(()=>{const coutEmp=coutPatronAn;const brutEq=coutEmp/(1+TX_ONSS_E);const netBrut=brutEq-brutEq*TX_ONSS_W-quickPP(brutEq/12)*12;const netCR=avantageNetAn-retenueTravAn;
-        return <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
-          <div style={{padding:16,background:'rgba(34,197,94,.05)',borderRadius:10,border:'1px solid rgba(34,197,94,.15)'}}>
-            <div style={{fontSize:13,fontWeight:700,color:'#22c55e',marginBottom:10}}>🍽 Chèques-repas</div>
-            <Row l="Coût employeur" v={fmt(coutEmp)+' €/an'}/>
-            <Row l="Avantage net travailleur" v={fmt(netCR)+' €/an'} c="#4ade80" b/>
-            <Row l="ONSS" v="0 €" c="#22c55e"/>
-            <Row l="PP" v="0 €" c="#22c55e"/>
+
+  const FOURNISSEURS = {
+    edenred: {nom:'Edenred', logo:'🔴', color:'#e63946', url:'https://edenred.be', csv:'edenred_order', note:'Format CSV: NISS;Nom;Prénom;Nb chèques;Valeur'},
+    pluxee:  {nom:'Pluxee (ex-Sodexo)', logo:'🟠', color:'#f4a261', url:'https://pluxee.be', csv:'pluxee_order', note:'Format CSV: référence;lastname;firstname;nb;valeur;rrn'},
+    monizze: {nom:'Monizze', logo:'🟢', color:'#2a9d8f', url:'https://monizze.be', csv:'monizze_order', note:'Format CSV: niss;nom;prenom;quantite;montant'},
+  };
+
+  const vf = Math.min(+valFaciale||8, 8);
+  const pp = Math.min(+partPatron||6.91, 6.91);
+  const pw = Math.max(vf-pp, 1.09);
+  const moisNom = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'][mois-1];
+
+  // Config par employé (jours, actif, absences)
+  const getEmpConf = (emp) => empConfig[emp.id||emp.niss] || {actif:true, joursPrestes:joursRef, absences:0};
+  const setEmpConf = (emp, key, val) => {
+    const id = emp.id||emp.niss||emp.fn+emp.ln;
+    setEmpConfig(prev => ({...prev, [id]: {...(prev[id]||{actif:true,joursPrestes:joursRef,absences:0}), [key]:val}}));
+  };
+
+  // Calcul par employé
+  const empCalcs = ae.map(emp => {
+    const conf = getEmpConf(emp);
+    const joursEff = Math.max(0, (+conf.joursPrestes||joursRef) - (+conf.absences||0));
+    const regime = (+emp.regime||100)/100;
+    const joursElig = Math.round(joursEff * regime);
+    const coutPat = pp * joursElig;
+    const retTrav = pw * joursElig;
+    const avantage = vf * joursElig;
+    return {...emp, conf, joursEff, joursElig, coutPat, retTrav, avantage, actif:conf.actif!==false};
+  }).filter(e => e.actif);
+
+  const totaux = empCalcs.reduce((a,e) => ({
+    joursElig: a.joursElig + e.joursElig,
+    coutPat: a.coutPat + e.coutPat,
+    retTrav: a.retTrav + e.retTrav,
+    avantage: a.avantage + e.avantage,
+  }), {joursElig:0,coutPat:0,retTrav:0,avantage:0});
+
+  // Générer CSV commande
+  const genCsvCommande = () => {
+    const f = fournisseur;
+    let rows = [];
+    if(f==='edenred') {
+      rows = ['NISS;Nom;Prenom;Nb_Cheques;Valeur_Faciale;Part_Patronale;Part_Travailleur'];
+      empCalcs.forEach(e => { if(e.joursElig>0) rows.push(`${e.niss||''};${e.ln||''};${e.fn||''};${e.joursElig};${vf.toFixed(2)};${pp.toFixed(2)};${pw.toFixed(2)}`); });
+    } else if(f==='pluxee') {
+      rows = ['reference;lastname;firstname;nb;valeur;rrn'];
+      empCalcs.forEach((e,i) => { if(e.joursElig>0) rows.push(`REF${String(i+1).padStart(3,'0')};${e.ln||''};${e.fn||''};${e.joursElig};${vf.toFixed(2)};${e.niss||''}`); });
+    } else {
+      rows = ['niss;nom;prenom;quantite;montant'];
+      empCalcs.forEach(e => { if(e.joursElig>0) rows.push(`${e.niss||''};${e.ln||''};${e.fn||''};${e.joursElig};${vf.toFixed(2)}`); });
+    }
+    return rows.join('\n');
+  };
+
+  const doDownloadCsv = () => {
+    const csv = genCsvCommande();
+    const fn = `${FOURNISSEURS[fournisseur].csv}_${moisNom}_${annee}.csv`;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+    a.download = fn; a.click();
+  };
+
+  const doCopyCsv = () => { navigator.clipboard?.writeText(genCsvCommande()); setCopied(true); setTimeout(()=>setCopied(false),2000); };
+
+  const fmt2 = n => (Math.round((+n||0)*100)/100).toLocaleString('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const btnStyle = (active) => ({padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:12,fontWeight:active?600:400,fontFamily:'inherit',background:active?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:active?'#c6a34e':'#9e9b93'});
+  const fournInfo = FOURNISSEURS[fournisseur];
+
+  const TABS = [{v:'dashboard',l:'📊 Dashboard'},{v:'employes',l:'👥 Par employé'},{v:'commande',l:'📦 Commande fournisseur'},{v:'simu',l:'🧮 Simulateur'},{v:'conditions',l:'📋 Règles légales'},{v:'compare',l:'⚖️ Comparatif vs brut'}];
+
+  return (
+    <div style={{padding:24}}>
+      <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>🍽 Chèques-Repas</h2>
+      <p style={{fontSize:12,color:'#888',margin:'0 0 16px'}}>AR 28/11/1969 — Gestion complète par employé, commande fournisseur, suivi mensuel</p>
+
+      {/* KPIs */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,marginBottom:18}}>
+        {[
+          {l:'Bénéficiaires',v:empCalcs.length,c:'#c6a34e',ico:'👥'},
+          {l:'Chèques ce mois',v:totaux.joursElig,c:'#60a5fa',ico:'🎟'},
+          {l:'Coût patronal/mois',v:'€ '+fmt2(totaux.coutPat),c:'#f87171',ico:'💸'},
+          {l:'Retenue trav./mois',v:'€ '+fmt2(totaux.retTrav),c:'#fb923c',ico:'💰'},
+          {l:'Avantage net/mois',v:'€ '+fmt2(totaux.avantage-totaux.retTrav),c:'#4ade80',ico:'✨'},
+        ].map((k,i)=>(
+          <div key={i} style={{padding:'12px 14px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)',textAlign:'center'}}>
+            <div style={{fontSize:16,marginBottom:4}}>{k.ico}</div>
+            <div style={{fontSize:i===0?22:13,fontWeight:700,color:k.c}}>{k.v}</div>
+            <div style={{fontSize:9,color:'#5e5c56',marginTop:2,textTransform:'uppercase',letterSpacing:.5}}>{k.l}</div>
           </div>
-          <div style={{padding:16,background:'rgba(248,113,113,.05)',borderRadius:10,border:'1px solid rgba(248,113,113,.15)'}}>
-            <div style={{fontSize:13,fontWeight:700,color:'#f87171',marginBottom:10}}>💶 Salaire brut équivalent</div>
-            <Row l="Coût employeur (identique)" v={fmt(coutEmp)+' €/an'}/>
-            <Row l="Brut avant ONSS" v={fmt(brutEq)+' €/an'}/>
-            <Row l="Net travailleur" v={fmt(netBrut)+' €/an'} c="#4ade80" b/>
-          </div>
-        </div>})()}
-        <div style={{marginTop:12,padding:10,background:'rgba(198,163,78,.06)',borderRadius:8,fontSize:12,color:'#c6a34e',textAlign:'center'}}>
-          Gain net via chèques-repas: <b style={{color:'#4ade80'}}>+{fmt((avantageNetAn-retenueTravAn)-(coutPatronAn/(1+TX_ONSS_E)-coutPatronAn/(1+TX_ONSS_E)*TX_ONSS_W-quickPP(coutPatronAn/(1+TX_ONSS_E)/12)*12))} €/an</b> pour le même coût employeur
+        ))}
+      </div>
+
+      {/* Config globale + nav */}
+      <div style={{display:'flex',gap:10,marginBottom:16,flexWrap:'wrap',alignItems:'center'}}>
+        {TABS.map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={btnStyle(tab===t.v)}>{t.l}</button>)}
+        <div style={{marginLeft:'auto',display:'flex',gap:8,alignItems:'center'}}>
+          <select value={mois} onChange={e=>setMois(+e.target.value)} style={{padding:'6px 10px',borderRadius:7,border:'1px solid rgba(198,163,78,.2)',background:'rgba(0,0,0,.3)',color:'#e8e6e0',fontSize:12,fontFamily:'inherit'}}>
+            {['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'].map((m,i)=><option key={i} value={i+1}>{m}</option>)}
+          </select>
+          <select value={annee} onChange={e=>setAnnee(+e.target.value)} style={{padding:'6px 10px',borderRadius:7,border:'1px solid rgba(198,163,78,.2)',background:'rgba(0,0,0,.3)',color:'#e8e6e0',fontSize:12,fontFamily:'inherit'}}>
+            {[2026,2025,2024].map(y=><option key={y} value={y}>{y}</option>)}
+          </select>
         </div>
-      </C>
-    </div>}
-    {tab==='legal'&&<C title="Base légale — Chèques-repas">
-      {[
-        {t:'AR 28/11/1969, Art. 19bis',d:'Exonération ONSS si toutes conditions remplies (faciale, patronale, travailleur, nominatif, 1/jour presté).'},
-        {t:'Art. 38/1 §2 CIR 1992',d:'Exonération IPP sous mêmes conditions.'},
-        {t:'CCT sectorielle',d:'Octroi prévu par CCT sectorielle (CP 200, 118, etc.) ou CCT d\'entreprise.'},
-        {t:'Loi 08/06/2008',d:'Introduction chèques électroniques. Obligation support électronique depuis 2022.'},
-        {t:'Déductibilité employeur',d:'Part patronale = charge déductible ISOC. TVA non récupérable.'},
-        {t:'Jours assimilés',d:'Petit chômage, formation, repos compensatoire = éligibles. Maladie/vacances = NON.'},
-      ].map((r,i)=><div key={i} style={{padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)'}}>
-        <b style={{color:'#c6a34e',fontSize:12}}>{r.t}</b>
-        <div style={{fontSize:10.5,color:'#9e9b93',marginTop:2}}>{r.d}</div>
-      </div>)}
-    </C>}
-  </div>;
+      </div>
+
+      {/* ── TAB DASHBOARD ── */}
+      {tab==='dashboard' && (
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+          <C>
+            <ST>⚙️ Paramètres en vigueur</ST>
+            {[
+              {l:'Valeur faciale',v:`${fmt2(vf)} €`,c:'#c6a34e'},
+              {l:'Part patronale (max exonéré)',v:`${fmt2(pp)} € / chèque`,c:'#22c55e'},
+              {l:'Part travailleur (min légal 1.09€)',v:`${fmt2(pw)} € / chèque`,c:'#fb923c'},
+              {l:'Exonération ONSS',v:'✅ OUI',c:'#4ade80'},
+              {l:'Exonération IPP',v:'✅ OUI',c:'#4ade80'},
+              {l:'Support électronique',v:'Obligatoire depuis 2022',c:'#60a5fa'},
+              {l:'Commission paritaire',v:cpData[cp]?.nom||'CP 200',c:'#e8e6e0'},
+            ].map((r,i)=>(
+              <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'7px 0',borderBottom:'1px solid rgba(255,255,255,.04)',fontSize:12}}>
+                <span style={{color:'#9e9b93'}}>{r.l}</span>
+                <span style={{fontWeight:600,color:r.c}}>{r.v}</span>
+              </div>
+            ))}
+            <div style={{marginTop:12,display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+              <div>
+                <div style={{fontSize:10,color:'#5e5c56',marginBottom:4}}>VALEUR FACIALE (€)</div>
+                <input type="number" value={valFaciale} onChange={e=>setValFaciale(+e.target.value)} min={1.09} max={8} step={0.01}
+                  style={{width:'100%',padding:'8px 10px',borderRadius:7,border:'1px solid rgba(198,163,78,.2)',background:'rgba(0,0,0,.3)',color:'#e8e6e0',fontSize:13,fontFamily:'inherit',boxSizing:'border-box'}}/>
+                {vf>8&&<div style={{fontSize:9,color:'#f87171',marginTop:2}}>⚠ Max légal: 8.00 €</div>}
+              </div>
+              <div>
+                <div style={{fontSize:10,color:'#5e5c56',marginBottom:4}}>PART PATRONALE (€)</div>
+                <input type="number" value={partPatron} onChange={e=>setPartPatron(+e.target.value)} min={0} max={6.91} step={0.01}
+                  style={{width:'100%',padding:'8px 10px',borderRadius:7,border:'1px solid rgba(198,163,78,.2)',background:'rgba(0,0,0,.3)',color:'#e8e6e0',fontSize:13,fontFamily:'inherit',boxSizing:'border-box'}}/>
+                {pp>6.91&&<div style={{fontSize:9,color:'#f87171',marginTop:2}}>⚠ Max exonéré: 6.91 €</div>}
+              </div>
+              <div>
+                <div style={{fontSize:10,color:'#5e5c56',marginBottom:4}}>JOURS RÉFÉRENCE/MOIS</div>
+                <input type="number" value={joursRef} onChange={e=>setJoursRef(+e.target.value)} min={1} max={31}
+                  style={{width:'100%',padding:'8px 10px',borderRadius:7,border:'1px solid rgba(198,163,78,.2)',background:'rgba(0,0,0,.3)',color:'#e8e6e0',fontSize:13,fontFamily:'inherit',boxSizing:'border-box'}}/>
+              </div>
+              <div>
+                <div style={{fontSize:10,color:'#5e5c56',marginBottom:4}}>COMMISSION PARITAIRE</div>
+                <select value={cp} onChange={e=>setCp(e.target.value)}
+                  style={{width:'100%',padding:'8px 10px',borderRadius:7,border:'1px solid rgba(198,163,78,.2)',background:'rgba(0,0,0,.3)',color:'#e8e6e0',fontSize:11,fontFamily:'inherit'}}>
+                  {Object.entries(cpData).map(([k,v])=><option key={k} value={k}>{v.nom}</option>)}
+                </select>
+              </div>
+            </div>
+          </C>
+          <C>
+            <ST>📈 Projection annuelle</ST>
+            {[
+              {l:'Chèques total/an',v:(totaux.joursElig*12)+' chèques',c:'#60a5fa'},
+              {l:'Coût patronal annuel',v:'€ '+fmt2(totaux.coutPat*12),c:'#f87171'},
+              {l:'Retenue travailleur/an',v:'€ '+fmt2(totaux.retTrav*12),c:'#fb923c'},
+              {l:'Avantage brut/an (valeur faciale)',v:'€ '+fmt2(totaux.avantage*12),c:'#c6a34e'},
+              {l:'Avantage NET/an (après retenue)',v:'€ '+fmt2((totaux.avantage-totaux.retTrav)*12),c:'#4ade80'},
+              {l:'ONSS sur chèques-repas',v:'0.00 € ✅',c:'#4ade80'},
+              {l:'PP sur chèques-repas',v:'0.00 € ✅',c:'#4ade80'},
+            ].map((r,i)=>(
+              <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.04)',fontSize:12}}>
+                <span style={{color:'#9e9b93'}}>{r.l}</span>
+                <span style={{fontWeight:600,color:r.c}}>{r.v}</span>
+              </div>
+            ))}
+            <div style={{marginTop:12,padding:10,background:'rgba(198,163,78,.04)',borderRadius:8,fontSize:11,color:'#c6a34e',fontWeight:600,textAlign:'center'}}>
+              💡 Part travailleur : {fmt2(pw)} € × {totaux.joursElig} j = <span style={{color:'#fb923c'}}>€ {fmt2(totaux.retTrav)}</span> retenu sur salaire ce mois
+            </div>
+          </C>
+        </div>
+      )}
+
+      {/* ── TAB EMPLOYÉS ── */}
+      {tab==='employes' && (
+        <C>
+          <ST>👥 Gestion chèques-repas par employé — {moisNom} {annee}</ST>
+          {ae.length===0 && <div style={{padding:'16px',textAlign:'center',color:'#5e5c56'}}>Aucun travailleur configuré</div>}
+          <div style={{overflowX:'auto'}}>
+            <table style={{width:'100%',borderCollapse:'collapse',fontSize:12}}>
+              <thead>
+                <tr style={{borderBottom:'2px solid rgba(198,163,78,.2)'}}>
+                  {['Travailleur','Actif','Jours prestés','Absences','Jours élig.','Nb chèques','Coût patron','Retenue trav.','Avantage net'].map((h,i)=>(
+                    <th key={i} style={{padding:'8px 8px',textAlign:i>1?'right':'left',fontSize:10,color:'#5e5c56',fontWeight:700,textTransform:'uppercase',letterSpacing:.5,whiteSpace:'nowrap'}}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {ae.map((emp,i) => {
+                  const conf = getEmpConf(emp);
+                  const actif = conf.actif !== false;
+                  const jo = +conf.joursPrestes||joursRef;
+                  const abs = +conf.absences||0;
+                  const jEff = Math.max(0, jo-abs);
+                  const reg = (+emp.regime||100)/100;
+                  const jElig = Math.round(jEff * reg);
+                  const cPat = pp*jElig; const rTrav = pw*jElig; const avNet = (vf-pw)*jElig;
+                  return (
+                    <tr key={i} style={{borderBottom:'1px solid rgba(255,255,255,.04)',opacity:actif?1:0.4}}>
+                      <td style={{padding:'8px',fontWeight:600,color:'#e8e6e0'}}>{emp.fn||''} {emp.ln||''}</td>
+                      <td style={{padding:'8px',textAlign:'right'}}>
+                        <div onClick={()=>setEmpConf(emp,'actif',!actif)}
+                          style={{width:36,height:20,borderRadius:10,background:actif?'rgba(74,222,128,.3)':'rgba(255,255,255,.1)',cursor:'pointer',position:'relative',display:'inline-block'}}>
+                          <div style={{width:16,height:16,borderRadius:'50%',background:actif?'#4ade80':'#5e5c56',position:'absolute',top:2,left:actif?18:2,transition:'left .15s'}}/>
+                        </div>
+                      </td>
+                      <td style={{padding:'8px',textAlign:'right'}}>
+                        <input type="number" value={jo} min={0} max={31} onChange={e=>setEmpConf(emp,'joursPrestes',+e.target.value)}
+                          style={{width:50,padding:'4px 6px',borderRadius:5,border:'1px solid rgba(198,163,78,.2)',background:'rgba(0,0,0,.3)',color:'#e8e6e0',fontSize:11,fontFamily:'inherit',textAlign:'right'}}/>
+                      </td>
+                      <td style={{padding:'8px',textAlign:'right'}}>
+                        <input type="number" value={abs} min={0} max={31} onChange={e=>setEmpConf(emp,'absences',+e.target.value)}
+                          style={{width:50,padding:'4px 6px',borderRadius:5,border:'1px solid rgba(239,68,68,.2)',background:'rgba(0,0,0,.3)',color:'#f87171',fontSize:11,fontFamily:'inherit',textAlign:'right'}}/>
+                      </td>
+                      <td style={{padding:'8px',textAlign:'right',color:'#60a5fa',fontWeight:600}}>{jElig}</td>
+                      <td style={{padding:'8px',textAlign:'right',color:'#c6a34e',fontWeight:700}}>{jElig}</td>
+                      <td style={{padding:'8px',textAlign:'right',color:'#f87171'}}>€ {fmt2(cPat)}</td>
+                      <td style={{padding:'8px',textAlign:'right',color:'#fb923c'}}>€ {fmt2(rTrav)}</td>
+                      <td style={{padding:'8px',textAlign:'right',color:'#4ade80',fontWeight:600}}>€ {fmt2(avNet)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              {ae.length>0 && (
+                <tfoot>
+                  <tr style={{borderTop:'2px solid rgba(198,163,78,.3)'}}>
+                    <td colSpan={4} style={{padding:'10px',fontWeight:700,color:'#c6a34e',fontSize:12}}>TOTAL</td>
+                    <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#60a5fa'}}>{totaux.joursElig}</td>
+                    <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#c6a34e'}}>{totaux.joursElig}</td>
+                    <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#f87171'}}>€ {fmt2(totaux.coutPat)}</td>
+                    <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#fb923c'}}>€ {fmt2(totaux.retTrav)}</td>
+                    <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#4ade80'}}>€ {fmt2(totaux.avantage-totaux.retTrav)}</td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
+          </div>
+        </C>
+      )}
+
+      {/* ── TAB COMMANDE FOURNISSEUR ── */}
+      {tab==='commande' && (
+        <div>
+          <C>
+            <ST>📦 Commande fournisseur — {moisNom} {annee}</ST>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:16}}>
+              {Object.entries(FOURNISSEURS).map(([k,f])=>(
+                <div key={k} onClick={()=>setFournisseur(k)}
+                  style={{padding:'16px',borderRadius:10,border:`2px solid ${fournisseur===k?f.color:'rgba(255,255,255,.06)'}`,cursor:'pointer',background:fournisseur===k?(k==='edenred'?'rgba(230,57,70,.08)':k==='pluxee'?'rgba(244,162,97,.08)':'rgba(42,157,143,.08)'):'rgba(0,0,0,.2)',transition:'all .15s'}}>
+                  <div style={{fontSize:24,marginBottom:8}}>{f.logo}</div>
+                  <div style={{fontSize:14,fontWeight:700,color:fournisseur===k?f.color:'#e8e6e0'}}>{f.nom}</div>
+                  <div style={{fontSize:10,color:'#5e5c56',marginTop:4}}>{f.note}</div>
+                  <a href={f.url} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()}
+                    style={{fontSize:10,color:'#60a5fa',marginTop:6,display:'block'}}>{f.url} ↗</a>
+                </div>
+              ))}
+            </div>
+            <div style={{padding:'12px 16px',background:`rgba(${fournisseur==='edenred'?'230,57,70':fournisseur==='pluxee'?'244,162,97':'42,157,143'}, .08)`,borderRadius:8,border:`1px solid ${fournInfo.color}33`,marginBottom:16}}>
+              <div style={{fontSize:12,fontWeight:700,color:fournInfo.color,marginBottom:4}}>{fournInfo.logo} {fournInfo.nom} sélectionné</div>
+              <div style={{fontSize:11,color:'#9e9b93'}}>{fournInfo.note}</div>
+            </div>
+            <div style={{display:'flex',gap:10,marginBottom:16}}>
+              <button onClick={doDownloadCsv}
+                style={{padding:'11px 24px',borderRadius:9,border:'none',background:'linear-gradient(135deg,#c6a34e,#a68a3c)',color:'#0c0b09',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
+                💾 Télécharger CSV commande
+              </button>
+              <button onClick={doCopyCsv}
+                style={{padding:'11px 20px',borderRadius:9,border:'1px solid rgba(96,165,250,.3)',background:'rgba(96,165,250,.08)',color:'#60a5fa',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>
+                {copied?'✅ Copié !':'📋 Copier CSV'}
+              </button>
+            </div>
+            <div style={{marginBottom:8,fontSize:11,color:'#5e5c56',fontWeight:700,textTransform:'uppercase',letterSpacing:.5}}>APERÇU FICHIER DE COMMANDE</div>
+            <pre style={{background:'rgba(0,0,0,.4)',borderRadius:8,padding:16,fontSize:10,color:'#c6a34e',overflowX:'auto',maxHeight:300,fontFamily:'monospace',lineHeight:1.6,border:'1px solid rgba(198,163,78,.1)'}}>
+              {genCsvCommande()||'— Aucun travailleur éligible —'}
+            </pre>
+          </C>
+          <C>
+            <ST>📊 Récapitulatif commande</ST>
+            <div style={{overflowX:'auto'}}>
+              <table style={{width:'100%',borderCollapse:'collapse',fontSize:12}}>
+                <thead>
+                  <tr style={{borderBottom:'2px solid rgba(198,163,78,.2)'}}>
+                    {['Travailleur','NISS','Nb chèques','Valeur/chèque','Montant total','Part patron','Part trav.'].map((h,i)=>(
+                      <th key={i} style={{padding:'8px',textAlign:i>1?'right':'left',fontSize:10,color:'#5e5c56',fontWeight:700,textTransform:'uppercase',letterSpacing:.5}}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {empCalcs.filter(e=>e.joursElig>0).map((e,i)=>(
+                    <tr key={i} style={{borderBottom:'1px solid rgba(255,255,255,.04)'}}>
+                      <td style={{padding:'8px',fontWeight:600,color:'#e8e6e0'}}>{e.fn||''} {e.ln||''}</td>
+                      <td style={{padding:'8px',fontFamily:'monospace',fontSize:10,color:'#60a5fa'}}>{e.niss||'—'}</td>
+                      <td style={{padding:'8px',textAlign:'right',color:'#c6a34e',fontWeight:700}}>{e.joursElig}</td>
+                      <td style={{padding:'8px',textAlign:'right',color:'#e8e6e0'}}>€ {fmt2(vf)}</td>
+                      <td style={{padding:'8px',textAlign:'right',color:'#c6a34e',fontWeight:600}}>€ {fmt2(e.avantage)}</td>
+                      <td style={{padding:'8px',textAlign:'right',color:'#f87171'}}>€ {fmt2(e.coutPat)}</td>
+                      <td style={{padding:'8px',textAlign:'right',color:'#fb923c'}}>€ {fmt2(e.retTrav)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr style={{borderTop:'2px solid rgba(198,163,78,.3)'}}>
+                    <td colSpan={2} style={{padding:'10px',fontWeight:700,color:'#c6a34e'}}>TOTAL COMMANDE</td>
+                    <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#c6a34e'}}>{totaux.joursElig} chèques</td>
+                    <td style={{padding:'10px',textAlign:'right',color:'#e8e6e0'}}>€ {fmt2(vf)}</td>
+                    <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#c6a34e'}}>€ {fmt2(totaux.avantage)}</td>
+                    <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#f87171'}}>€ {fmt2(totaux.coutPat)}</td>
+                    <td style={{padding:'10px',textAlign:'right',fontWeight:700,color:'#fb923c'}}>€ {fmt2(totaux.retTrav)}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </C>
+        </div>
+      )}
+
+      {/* ── TAB SIMULATEUR ── */}
+      {tab==='simu' && (
+        <div style={{display:'grid',gridTemplateColumns:'300px 1fr',gap:16}}>
+          <C>
+            <ST>⚙️ Paramètres simulation</ST>
+            {[
+              {l:'Valeur faciale (EUR)',val:valFaciale,fn:setValFaciale,max:8},
+              {l:'Part patronale (EUR)',val:partPatron,fn:setPartPatron,max:6.91},
+            ].map((r,i)=>(
+              <div key={i} style={{marginBottom:10}}>
+                <div style={{fontSize:10,color:'#5e5c56',marginBottom:4}}>{r.l}</div>
+                <input type="number" value={r.val} onChange={e=>r.fn(+e.target.value)} min={0} max={r.max} step={0.01}
+                  style={{width:'100%',padding:'8px 10px',borderRadius:7,border:'1px solid rgba(198,163,78,.2)',background:'rgba(0,0,0,.3)',color:'#e8e6e0',fontSize:13,fontFamily:'inherit',boxSizing:'border-box'}}/>
+              </div>
+            ))}
+            <div style={{marginTop:8,padding:10,background:'rgba(34,197,94,.06)',borderRadius:7,fontSize:11,color:'#22c55e'}}>
+              Part travailleur auto: <b>€ {fmt2(pw)}</b>/chèque
+              {pw<1.09&&<span style={{color:'#f87171'}}> ⚠ Min légal 1.09€!</span>}
+            </div>
+          </C>
+          <div>
+            <C>
+              <ST>🧮 Décomposition par chèque</ST>
+              {[
+                {l:'Valeur faciale',v:'€ '+fmt2(vf),c:'#c6a34e'},
+                {l:'Part patronale (exonérée ONSS+IPP)',v:'€ '+fmt2(pp),c:'#22c55e'},
+                {l:'Part travailleur (retenue sur net)',v:'€ '+fmt2(pw),c:'#fb923c'},
+                {l:'Avantage réel/chèque',v:'€ '+fmt2(vf-pw),c:'#4ade80'},
+              ].map((r,i)=>(
+                <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,.04)',fontSize:13}}>
+                  <span style={{color:'#9e9b93'}}>{r.l}</span>
+                  <span style={{fontWeight:700,color:r.c}}>{r.v}</span>
+                </div>
+              ))}
+            </C>
+            <C>
+              <ST>📅 Projection mensuelle & annuelle (base {joursRef}j/mois)</ST>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+                {[
+                  {t:'Mensuel',j:joursRef},{t:'Annuel',j:joursRef*12}
+                ].map((p,pi)=>(
+                  <div key={pi} style={{padding:12,background:'rgba(198,163,78,.04)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
+                    <div style={{fontSize:11,fontWeight:700,color:'#c6a34e',marginBottom:8}}>{p.t} ({p.j}j)</div>
+                    {[
+                      {l:'Avantage brut',v:'€ '+fmt2(vf*p.j),c:'#c6a34e'},
+                      {l:'Coût patron',v:'€ '+fmt2(pp*p.j),c:'#f87171'},
+                      {l:'Retenue trav.',v:'€ '+fmt2(pw*p.j),c:'#fb923c'},
+                      {l:'Avantage NET',v:'€ '+fmt2((vf-pw)*p.j),c:'#4ade80'},
+                    ].map((r,i)=>(
+                      <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.04)',fontSize:12}}>
+                        <span style={{color:'#9e9b93'}}>{r.l}</span>
+                        <span style={{fontWeight:600,color:r.c}}>{r.v}</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </C>
+          </div>
+        </div>
+      )}
+
+      {/* ── TAB CONDITIONS ── */}
+      {tab==='conditions' && (
+        <C>
+          <ST>📋 Conditions d'exonération ONSS + IPP</ST>
+          {[
+            {t:'1 chèque par jour PRESTÉ',d:'Un seul chèque par jour effectivement travaillé. Interdit pour jours de maladie, vacances, chômage.', ok:true},
+            {t:'Valeur faciale ≤ 8.00 EUR',d:'Dépassement → requalification TOTALE en rémunération soumise ONSS + PP. Pas de tolérance.', ok:vf<=8},
+            {t:'Part patronale ≤ 6.91 EUR',d:'Au-delà: l\'excédent est requalifié en rémunération. Vérifier CCT sectorielle.', ok:pp<=6.91},
+            {t:'Part travailleur ≥ 1.09 EUR',d:'Retenue obligatoire sur salaire net. Si < 1.09€: requalification totale.', ok:pw>=1.09},
+            {t:'Nominatif + électronique',d:'Au nom du travailleur. Plus de chèques papier depuis 01/01/2022. Émetteur agréé obligatoire.', ok:true},
+            {t:'Validité 12 mois',d:'Utilisable pendant 12 mois à compter de la mise à disposition du travailleur.', ok:true},
+            {t:'Émetteur agréé SPF',d:'Edenred, Pluxee (ex-Sodexo), Monizze uniquement. Tout autre émetteur = requalification.', ok:true},
+            {t:'Prévu par CCT ou contrat',d:'L\'octroi doit être prévu par CCT sectorielle (CP 200 etc.) ou CCT d\'entreprise ou contrat individuel.', ok:true},
+            {t:'Non-conversion salaire',d:'Impossible de convertir une rémunération existante en chèques-repas. Principe de non-régression.', ok:true},
+            {t:'Non-cumulable avec per diem repas',d:'Pas cumulable avec indemnité de repas forfaitaire (ex: 19.99€/jour déplacement) le MÊME jour.', ok:true},
+          ].map((r,i)=>(
+            <div key={i} style={{display:'flex',gap:12,padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,.03)',alignItems:'flex-start'}}>
+              <span style={{fontSize:18,flexShrink:0}}>{r.ok?'✅':'❌'}</span>
+              <div>
+                <div style={{fontSize:12,fontWeight:700,color:r.ok?'#22c55e':'#f87171'}}>{r.t}</div>
+                <div style={{fontSize:11,color:'#9e9b93',marginTop:2}}>{r.d}</div>
+              </div>
+            </div>
+          ))}
+          <div style={{marginTop:16,padding:12,background:'rgba(239,68,68,.06)',border:'1px solid rgba(239,68,68,.15)',borderRadius:8}}>
+            <div style={{fontSize:12,fontWeight:700,color:'#f87171',marginBottom:4}}>⚠️ Requalification en rémunération</div>
+            <div style={{fontSize:11,color:'#ccc',lineHeight:1.7}}>Si UNE SEULE condition non remplie → ONSS requalifie en rémunération → rappel ONSS travailleur (13.07%) + patronal (25.07%) + PP sur la TOTALITÉ. Plus les majorations de retard.</div>
+          </div>
+        </C>
+      )}
+
+      {/* ── TAB COMPARATIF ── */}
+      {tab==='compare' && (
+        <C>
+          <ST>⚖️ Chèques-repas vs salaire brut — même coût employeur</ST>
+          {(()=>{
+            const coutEmp = totaux.coutPat;
+            const brutEq = coutEmp / (1 + TX_ONSS_E);
+            const netBrut = brutEq - brutEq*TX_ONSS_W - quickPP(brutEq/12)*12;
+            const netCR = totaux.avantage - totaux.retTrav;
+            const gain = netCR - netBrut;
+            return (
+              <div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16}}>
+                  <div style={{padding:16,background:'rgba(34,197,94,.05)',borderRadius:10,border:'1px solid rgba(34,197,94,.15)'}}>
+                    <div style={{fontSize:14,fontWeight:700,color:'#22c55e',marginBottom:12}}>🍽 Option Chèques-repas</div>
+                    {[
+                      {l:'Coût employeur',v:'€ '+fmt2(coutEmp)+'/mois'},
+                      {l:'Nb chèques',v:totaux.joursElig+' chèques'},
+                      {l:'Valeur totale',v:'€ '+fmt2(totaux.avantage)},
+                      {l:'Retenue travailleur',v:'€ '+fmt2(totaux.retTrav)},
+                      {l:'Avantage net travailleur',v:'€ '+fmt2(netCR),bold:true,c:'#4ade80'},
+                      {l:'ONSS',v:'€ 0.00',c:'#22c55e'},
+                      {l:'PP',v:'€ 0.00',c:'#22c55e'},
+                    ].map((r,i)=>(
+                      <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.04)',fontSize:12}}>
+                        <span style={{color:'#9e9b93'}}>{r.l}</span>
+                        <span style={{fontWeight:r.bold?700:600,color:r.c||'#e8e6e0'}}>{r.v}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{padding:16,background:'rgba(248,113,113,.05)',borderRadius:10,border:'1px solid rgba(248,113,113,.15)'}}>
+                    <div style={{fontSize:14,fontWeight:700,color:'#f87171',marginBottom:12}}>💶 Option Salaire brut équivalent</div>
+                    {[
+                      {l:'Coût employeur (identique)',v:'€ '+fmt2(coutEmp)+'/mois'},
+                      {l:'Brut avant ONSS',v:'€ '+fmt2(brutEq)},
+                      {l:'ONSS trav. (13.07%)',v:'- € '+fmt2(brutEq*TX_ONSS_W),c:'#f87171'},
+                      {l:'PP retenu (barème)',v:'- € '+fmt2(quickPP(brutEq/12)*12),c:'#f87171'},
+                      {l:'Net travailleur',v:'€ '+fmt2(netBrut),bold:true,c:'#4ade80'},
+                    ].map((r,i)=>(
+                      <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.04)',fontSize:12}}>
+                        <span style={{color:'#9e9b93'}}>{r.l}</span>
+                        <span style={{fontWeight:r.bold?700:600,color:r.c||'#e8e6e0'}}>{r.v}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div style={{padding:14,background:'rgba(198,163,78,.06)',borderRadius:8,fontSize:13,color:'#c6a34e',textAlign:'center',fontWeight:700}}>
+                  💡 Gain net mensuel via chèques-repas : <span style={{color:gain>=0?'#4ade80':'#f87171'}}>€ {fmt2(Math.abs(gain))} {gain>=0?'de plus':'de moins'}</span> pour {ae.length} travailleur(s) — même coût employeur
+                </div>
+              </div>
+            );
+          })()}
+        </C>
+      )}
+    </div>
+  );
 }
+
 
 
 export default function PrimesAvantagesTabbed({ s, d, tab }) {
