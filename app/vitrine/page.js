@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // ═══════ TRANSLATIONS (condensed — FR only shown, others follow same structure) ═══════
 const T = {
@@ -950,7 +950,7 @@ function PageHome({t,go,lang}) {
 }
 
 function AvCards({items}) {
-  const [open,setOpen]=React.useState(null);
+  const [open,setOpen]=useState(null);
   return(<>{items.map(([ico,tt,desc,detail],i)=>(<div key={tt} className="ic-c" onClick={()=>setOpen(open===i?null:i)} style={{cursor:detail?'pointer':'default',transition:'box-shadow .2s'}}>
     <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:8}}>
       <div>
