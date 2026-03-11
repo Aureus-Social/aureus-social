@@ -3,6 +3,7 @@ import { useLang } from '../lib/lang-context';
 import { supabase } from '@/app/lib/supabase';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { LOIS_BELGES, LB, RMMMG, TX_ONSS_W, TX_ONSS_E, NET_FACTOR, PV_DOUBLE, PV_SIMPLE, PP_EST } from '@/app/lib/lois-belges';
+import { calcPrecompteExact } from '@/app/lib/payroll-engine';
 
 const fmt = n => new Intl.NumberFormat('fr-BE', { style: 'currency', currency: 'EUR' }).format(n || 0);
 const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
@@ -27,18 +28,9 @@ function calc(emp, per, co) {
 }
 
 function quickPP(brut) {
-  const imposable = brut - brut * TX_ONSS_W;
-  if (imposable <= 1110) return 0;
-  // Barème SPF 2026 — source: lois-belges.js IPP_TRANCHES_2026
-  // Utilise calcPrecompteExact si disponible, sinon barème de fallback
-  const ann = imposable * 12;
-  let ppAnn = 0;
-  if (ann <= 15820)  ppAnn = ann * 0.2675;
-  else if (ann <= 27920) ppAnn = 15820*0.2675 + (ann-15820)*0.4280;
-  else if (ann <= 48320) ppAnn = 15820*0.2675 + (27920-15820)*0.4280 + (ann-27920)*0.4815;
-  else ppAnn = 15820*0.2675 + (27920-15820)*0.4280 + (48320-27920)*0.4815 + (ann-48320)*0.5350;
-  const redQE = 1932.96 * (1 + 0.07); // quotité exemptée + taxe communale 7%
-  return Math.round((Math.max(0, ppAnn - redQE) / 12) * 100) / 100;
+  // Délègue à calcPrecompteExact — 100% depuis LOIS_BELGES, zéro hardcode
+  const res = calcPrecompteExact(brut, { situation: 'isole', enfants: 0 });
+  return res?.ppMensuel ?? 0;
 }
 
 function quickNet(brut) { return Math.round((brut||0) * NET_FACTOR * 100) / 100; }

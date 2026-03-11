@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useLang } from '../lib/lang-context';
-import { TX_ONSS_W, RMMMG, fmt } from '@/app/lib/helpers';
+import { TX_ONSS_W, TX_ONSS_E, RMMMG, fmt } from '@/app/lib/helpers';
 
 function PH({title,sub}){return <div style={{marginBottom:16}}><div style={{fontSize:18,fontWeight:800,color:'#c6a34e',letterSpacing:'.3px'}}>{title}</div>{sub&&<div style={{fontSize:11,color:'#9e9b93',marginTop:2}}>{sub}</div>}</div>;}
 function C({children,style}){return <div style={{padding:'16px 20px',background:'rgba(198,163,78,.03)',borderRadius:12,border:'1px solid rgba(198,163,78,.06)',marginBottom:14,...style}}>{children}</div>;}
@@ -84,8 +84,8 @@ export default function SalaireMaladie({ s }) {
           <C style={{background:'rgba(96,165,250,.03)',border:'1px solid rgba(96,165,250,.1)'}}>
             <ST>Charge employeur</ST>
             <Row l="Salaire garanti brut" v={fmt(r.garantiTotal)} color="#c6a34e"/>
-            <Row l="ONSS patronal (~27,19%)" v={fmt(r.garantiTotal*0.2719)} color="#f87171"/>
-            <Row l="Coût total employeur" v={fmt(r.garantiTotal*1.2719)} bold color="#f87171"/>
+            <Row l={`ONSS patronal (~${(TX_ONSS_E*100).toFixed(2)}%)`} v={fmt(r.garantiTotal*TX_ONSS_E)} color="#f87171"/>
+            <Row l="Coût total employeur" v={fmt(r.garantiTotal*(1+TX_ONSS_E))} bold color="#f87171"/>
             <div style={{fontSize:10,color:'#5e5c56',marginTop:8}}>
               Récupération possible via assurance revenu garanti complémentaire
             </div>

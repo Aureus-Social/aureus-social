@@ -1014,10 +1014,10 @@ function calc(emp, per, co) {
   r.empBonusA = 0; r.empBonusB = 0;
   if (isOuvrier) {
     // Ouvrier (déclaré à 108%)
-    if (r.gross * 1.08 <= BE.O_A_S2) r.empBonusA = BE.O_A_MAX;
-    else if (r.gross * 1.08 <= BE.O_A_S1) r.empBonusA = Math.max(0, BE.O_A_MAX - BE.O_A_COEFF * (r.gross * 1.08 - BE.O_A_S2));
-    if (r.gross * 1.08 <= BE.O_B_S2) r.empBonusB = BE.O_B_MAX;
-    else if (r.gross * 1.08 <= BE.O_B_S1) r.empBonusB = Math.max(0, BE.O_B_MAX - BE.O_B_COEFF * (r.gross * 1.08 - BE.O_B_S2));
+    if (r.gross * LOIS_BELGES.onss.ouvrier108 <= BE.O_A_S2) r.empBonusA = BE.O_A_MAX;
+    else if (r.gross * LOIS_BELGES.onss.ouvrier108 <= BE.O_A_S1) r.empBonusA = Math.max(0, BE.O_A_MAX - BE.O_A_COEFF * (r.gross * LOIS_BELGES.onss.ouvrier108 - BE.O_A_S2));
+    if (r.gross * LOIS_BELGES.onss.ouvrier108 <= BE.O_B_S2) r.empBonusB = BE.O_B_MAX;
+    else if (r.gross * LOIS_BELGES.onss.ouvrier108 <= BE.O_B_S1) r.empBonusB = Math.max(0, BE.O_B_MAX - BE.O_B_COEFF * (r.gross * LOIS_BELGES.onss.ouvrier108 - BE.O_B_S2));
   } else {
     // Employé (déclaré à 100%)
     if (r.gross <= BE.A_S2) r.empBonusA = BE.A_MAX;
@@ -1306,7 +1306,7 @@ function calc(emp, per, co) {
   r.tax = Math.max(0, r.baseTax);
   // ── Bonus à l'emploi FISCAL (réduction précompte professionnel) ──
   // 33,14% du volet A + 52,54% du volet B (depuis 01/04/2024)
-  r.empBonusFiscA = r.empBonusA * 0.3314;
+  r.empBonusFiscA = r.empBonusA * LOIS_BELGES.pp.bonusEmploi.pctReduction;
   r.empBonusFiscB = r.empBonusB * 0.5254;
   r.empBonusFisc = r.empBonusFiscA + r.empBonusFiscB;
   r.tax = Math.max(0, r.tax - r.empBonusFisc);
@@ -1317,16 +1317,16 @@ function calc(emp, per, co) {
   // Source: socialsecurity.be montants-socio-juridiques 2026
   r.css = 0;
   const grossTrim = r.gross * 3; // salaire trimestriel
-  const grossTrimOuv = isOuvrier ? grossTrim * 1.08 : grossTrim;
+  const grossTrimOuv = isOuvrier ? grossTrim * LOIS_BELGES.onss.ouvrier108 : grossTrim;
   // Calcul trimestriel puis division par 3
   if (emp.civil === 'married_2' || emp.civil === 'cohabit') {
     // MÉNAGE 2 REVENUS
     if (grossTrimOuv <= 5836.14) r.css = 0;
-    else if (grossTrimOuv <= 6570.54) r.css = Math.max(9.30, (grossTrimOuv - 5836.14) * 0.076) / 3;
-    else if (grossTrimOuv <= 18116.46) r.css = Math.min(51.64, 18.60 + (grossTrimOuv - 6570.54) * 0.011) / 3;
-    else r.css = 51.64 / 3;
+    else if (grossTrimOuv <= 6570.54) r.css = Math.max(LOIS_BELGES.csss.menage2revenus[2].montant, (grossTrimOuv - 5836.14) * 0.076) / 3;
+    else if (grossTrimOuv <= 18116.46) r.css = Math.min(LOIS_BELGES.csss.isole[4].montantFixe, 18.60 + (grossTrimOuv - 6570.54) * 0.011) / 3;
+    else r.css = LOIS_BELGES.csss.isole[4].montantFixe / 3;
     // Plafond mensuel ménage 2 revenus = 51.64€/trim = 17.21€/mois
-    r.css = Math.min(r.css, 51.64 / 3);
+    r.css = Math.min(r.css, LOIS_BELGES.csss.isole[4].montantFixe / 3);
   } else {
     // ISOLÉ / conjoint SANS revenus
     if (grossTrimOuv <= 5836.14) r.css = 0;
@@ -1788,7 +1788,7 @@ function calc(emp, per, co) {
   //
   r.peculeVacCalc = {
     type: isOuvrier ? 'ouvrier' : 'employe',
-    brutRef: isOuvrier ? (r.gross * 1.08 * 12) : (emp.monthlySalary || 0), // brut annuel N-1 à 108% pour ouvriers
+    brutRef: isOuvrier ? (r.gross * LOIS_BELGES.onss.ouvrier108 * 12) : (emp.monthlySalary || 0), // brut annuel N-1 à 108% pour ouvriers
     simple: 0,
     double: 0,
     total: 0,
