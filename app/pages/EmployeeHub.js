@@ -167,7 +167,6 @@ export function DashboardRHV2({s,d,props_tab}){
 // ═══════════════════════════════════════════════════════════
 // 2. REGISTRE PERSONNEL — Format legal + export PDF
 // ═══════════════════════════════════════════════════════════
-  const { tText } = useLang();
 export function RegistrePersonnelV2({s}){
   const { tText } = useLang();
   const clients= s?.clients||[];const [sel,setSel]=useState(0);const now=new Date();
