@@ -19,7 +19,7 @@ jobs:
           node-version: '20'
           cache: 'npm'
       
-      - run: npm ci --prefer-offline
+      - run: npm install --prefer-offline
       
       - name: Run RLS Isolation Tests
         env:
