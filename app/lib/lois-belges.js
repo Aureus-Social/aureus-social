@@ -556,223 +556,399 @@ export const BAREMES_CP_MIN = {
 //              primeSect (€/an), anciennete (€/an par tranche),
 //              indexation (type), cotisations_speciales }
 // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// CP_DATA — BASE COMPLÈTE PAR COMMISSION PARITAIRE (v3 — Précision Totale)
+// Champs:
+//   nom          : libellé officiel
+//   ouvrier      : true = ouvrier, false = employé
+//   cl1..cl5     : barèmes mensuels bruts par classe (€/mois, indexés 2026)
+//   anciennete   : [ { ans, pct, montantFixe? } ] — % OU montant fixe/mois
+//   onssE_extra  : cotisation patronale supplémentaire (décimal, ex: 0.021 = 2,1%)
+//   primeSect    : prime sectorielle ANNUELLE en € (CCT sectorielle)
+//   primeAncEuro : prime d'ancienneté fixe en €/mois par tranche (alternative au %)
+//   indexation   : 'IPC' (indice santé) | 'AGORIA' | 'CC' (commission centrale)
+//   coefIndex    : coefficient d'indexation sectoriel actuel (base 100 = jan 2024)
+//   fonds        : description fonds sectoriels obligatoires
+//   cotisSpec    : cotisations spéciales en plus (timbres, fonds, etc.)
+//   regimeOuvrier108: true = base ONSS × 1.08 (pécule ouvrier)
+// Source: SPF ETCS, CCT sectorielles, salairesminimums.be — MAJ: 2026-01-01
+// ═══════════════════════════════════════════════════════════════════
 export const CP_DATA = {
   '100': {
     nom: 'CP 100 — Ouvriers (général)', ouvrier: true,
     cl1: 2070.48, cl2: 2134.72, cl3: 2204.76, cl4: 2366.28,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 5 }, { ans: 20, pct: 8 }
+    ],
     onssE_extra: 0, primeSect: 0,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 5 }, { ans: 20, pct: 8 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '111': {
     nom: 'CP 111 — Métal Fabrications Métalliques', ouvrier: true,
     cl1: 2095.44, cl2: 2248.32, cl3: 2473.80, cl4: 2723.58,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 6 }, { ans: 15, pct: 9 }, { ans: 20, pct: 12 }
+    ],
     onssE_extra: 0.005, primeSect: 60,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 6 }, { ans: 15, pct: 9 }, { ans: 20, pct: 12 }],
-    indexation: 'IPC', fonds: 'Fonds de sécurité 0,5%', dateMAJ: '2026-01-01',
+    indexation: 'AGORIA', coefIndex: 1.0000,
+    fonds: 'Fonds de sécurité d'existence 0,5%',
+    cotisSpec: [{ label: 'Fonds sécurité', pct: 0.005, base: 'brut' }],
+    dateMAJ: '2026-01-01',
   },
   '112': {
     nom: 'CP 112 — Métal Électrotechnique', ouvrier: true,
     cl1: 2095.44, cl2: 2248.32, cl3: 2473.80, cl4: 2723.58,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 6 }, { ans: 20, pct: 12 }
+    ],
     onssE_extra: 0.005, primeSect: 60,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 6 }, { ans: 20, pct: 12 }],
-    indexation: 'IPC', fonds: 'Fonds formation 0,5%', dateMAJ: '2026-01-01',
+    indexation: 'AGORIA', coefIndex: 1.0000,
+    fonds: 'Fonds de formation 0,5%',
+    cotisSpec: [{ label: 'Fonds formation', pct: 0.005, base: 'brut' }],
+    dateMAJ: '2026-01-01',
   },
   '118': {
     nom: 'CP 118 — Industrie alimentaire', ouvrier: true,
     cl1: 2095.44, cl2: 2173.20, cl3: 2269.56, cl4: 2365.92, cl5: 2510.52,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 3, pct: 2 }, { ans: 5, pct: 3 }, { ans: 10, pct: 5 }, { ans: 20, pct: 8 }
+    ],
     onssE_extra: 0.003, primeSect: 45,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 3, pct: 2 }, { ans: 5, pct: 3 }, { ans: 10, pct: 5 }, { ans: 20, pct: 8 }],
-    indexation: 'IPC', fonds: 'Fonds formation 0,3%', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: 'Fonds de formation 0,3%',
+    cotisSpec: [{ label: 'Fonds formation', pct: 0.003, base: 'brut' }],
+    dateMAJ: '2026-01-01',
   },
   '119': {
     nom: 'CP 119 — Commerce alimentaire', ouvrier: true,
     cl1: 2029.88, cl2: 2134.72, cl3: 2269.56, cl4: 2414.40,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }
+    ],
     onssE_extra: 0, primeSect: 0,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '121': {
     nom: 'CP 121 — Nettoyage et désinfection', ouvrier: true,
     cl1: 2029.88, cl2: 2095.44, cl3: 2204.76, cl4: 2366.28,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 3, pct: 1 }, { ans: 5, pct: 2 }, { ans: 10, pct: 3 }
+    ],
     onssE_extra: 0.002, primeSect: 0,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 3, pct: 1 }, { ans: 5, pct: 2 }, { ans: 10, pct: 3 }],
-    indexation: 'IPC', fonds: 'Fonds RCC 0,2%', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: 'Fonds RCC 0,2%',
+    cotisSpec: [{ label: 'Fonds RCC', pct: 0.002, base: 'brut' }],
+    dateMAJ: '2026-01-01',
   },
   '124': {
     nom: 'CP 124 — Construction', ouvrier: true,
     cl1: 2095.44, cl2: 2204.76, cl3: 2366.28, cl4: 2594.16,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 4 }, { ans: 10, pct: 8 }, { ans: 20, pct: 12 }
+    ],
     onssE_extra: 0.021, primeSect: 80,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 4 }, { ans: 10, pct: 8 }, { ans: 20, pct: 12 }],
-    indexation: 'IPC', fonds: 'FFB 2,1% (timbres fidélité)', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: 'FFB 2,1% (timbres fidélité + intempéries)',
+    cotisSpec: [
+      { label: 'Timbres fidélité FFB', pct: 0.012, base: 'brut' },
+      { label: 'Fonds intempéries', pct: 0.009, base: 'brut' },
+    ],
+    dateMAJ: '2026-01-01',
   },
   '126': {
     nom: 'CP 126 — Bois & Ameublement', ouvrier: true,
     cl1: 2070.48, cl2: 2173.20, cl3: 2269.56, cl4: 2414.40,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 6 }
+    ],
     onssE_extra: 0.003, primeSect: 50,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 6 }],
-    indexation: 'IPC', fonds: 'Fonds 0,3%', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: 'Fonds de sécurité 0,3%',
+    cotisSpec: [{ label: 'Fonds sécurité', pct: 0.003, base: 'brut' }],
+    dateMAJ: '2026-01-01',
   },
   '130': {
     nom: 'CP 130 — Imprimerie', ouvrier: true,
     cl1: 2134.72, cl2: 2269.56, cl3: 2430.12, cl4: 2623.92,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 4 }, { ans: 10, pct: 8 }, { ans: 20, pct: 12 }
+    ],
     onssE_extra: 0.004, primeSect: 70,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 4 }, { ans: 10, pct: 8 }, { ans: 20, pct: 12 }],
-    indexation: 'IPC', fonds: 'Fonds form. 0,4%', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: 'Fonds de formation 0,4%',
+    cotisSpec: [{ label: 'Fonds formation', pct: 0.004, base: 'brut' }],
+    dateMAJ: '2026-01-01',
   },
   '140': {
     nom: 'CP 140 — Transport routier & Logistique', ouvrier: true,
     cl1: 2095.44, cl2: 2204.76, cl3: 2430.12, cl4: 2763.60,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }, { ans: 15, pct: 6 }
+    ],
     onssE_extra: 0.001, primeSect: 40,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }, { ans: 15, pct: 6 }],
-    indexation: 'IPC', fonds: 'Fonds 0,1%', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: 'Fonds de sécurité 0,1%',
+    cotisSpec: [{ label: 'Fonds sécurité', pct: 0.001, base: 'brut' }],
+    dateMAJ: '2026-01-01',
   },
   '149': {
     nom: 'CP 149 — Electricité', ouvrier: true,
     cl1: 2134.72, cl2: 2269.56, cl3: 2462.28, cl4: 2689.44,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 4 }, { ans: 10, pct: 7 }, { ans: 20, pct: 10 }
+    ],
     onssE_extra: 0.003, primeSect: 65,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 4 }, { ans: 10, pct: 7 }, { ans: 20, pct: 10 }],
-    indexation: 'IPC', fonds: 'Volta 0,3%', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: 'Volta Fonds 0,3%',
+    cotisSpec: [{ label: 'Fonds Volta', pct: 0.003, base: 'brut' }],
+    dateMAJ: '2026-01-01',
+  },
+  '152': {
+    nom: 'CP 152 — Enseignement libre subventionné', ouvrier: false,
+    cl1: 2029.88, cl2: 2134.72, cl3: 2269.56, cl4: 2462.28,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 6 }, { ans: 20, pct: 10 }
+    ],
+    onssE_extra: 0, primeSect: 0,
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '200': {
     nom: 'CP 200 — Employés (général)', ouvrier: false,
     cl1: 2070.48, cl2: 2174.00, cl3: 2266.16, cl4: 2614.86,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 6 }, { ans: 15, pct: 9 }, { ans: 20, pct: 12 }
+    ],
     onssE_extra: 0, primeSect: 0,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 6 }, { ans: 15, pct: 9 }, { ans: 20, pct: 12 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '218': {
-    nom: 'CP 218 — Aide alimentaire', ouvrier: false,
+    nom: 'CP 218 — Aide alimentaire (employés)', ouvrier: false,
     cl1: 2070.48, cl2: 2134.72, cl3: 2204.76, cl4: 2366.28,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }
+    ],
     onssE_extra: 0, primeSect: 0,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '220': {
     nom: 'CP 220 — Commerce détail alimentaire', ouvrier: false,
     cl1: 2070.48, cl2: 2134.72, cl3: 2204.76, cl4: 2366.28,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }
+    ],
     onssE_extra: 0, primeSect: 25,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '226': {
     nom: 'CP 226 — Peinture & décoration', ouvrier: false,
     cl1: 2095.44, cl2: 2204.76, cl3: 2366.28, cl4: 2582.76,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 5 }
+    ],
     onssE_extra: 0, primeSect: 50,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 5 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '227': {
     nom: 'CP 227 — Audio-visuel', ouvrier: false,
     cl1: 2134.72, cl2: 2269.56, cl3: 2462.28, cl4: 2689.44,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 6 }
+    ],
     onssE_extra: 0, primeSect: 0,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 6 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '302': {
     nom: 'CP 302 — Hôtellerie (ouvriers)', ouvrier: true,
     cl1: 2029.88, cl2: 2095.44, cl3: 2226.58, cl4: 2365.92, cl5: 2582.76,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }
+    ],
     onssE_extra: 0, primeSect: 30,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '308': {
     nom: 'CP 308 — Hôtels & Restaurants (employés)', ouvrier: false,
     cl1: 2029.88, cl2: 2095.44, cl3: 2204.76, cl4: 2366.28,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }
+    ],
     onssE_extra: 0, primeSect: 30,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '313': {
     nom: 'CP 313 — Pharmacies', ouvrier: false,
     cl1: 2134.72, cl2: 2269.56, cl3: 2430.12, cl4: 2689.44,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 3, pct: 3 }, { ans: 5, pct: 5 }, { ans: 10, pct: 8 }, { ans: 20, pct: 12 }
+    ],
     onssE_extra: 0, primeSect: 0,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 3, pct: 3 }, { ans: 5, pct: 5 }, { ans: 10, pct: 8 }, { ans: 20, pct: 12 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '315': {
     nom: 'CP 315 — Garages & Carrosseries', ouvrier: false,
     cl1: 2070.48, cl2: 2173.20, cl3: 2269.56, cl4: 2462.28,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 5 }
+    ],
     onssE_extra: 0, primeSect: 40,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 5 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '317': {
     nom: 'CP 317 — Transport & Logistique (employés)', ouvrier: false,
     cl1: 2095.44, cl2: 2204.76, cl3: 2366.28, cl4: 2582.76,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }
+    ],
     onssE_extra: 0, primeSect: 0,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '319': {
     nom: 'CP 319 — Assurances', ouvrier: false,
     cl1: 2134.72, cl2: 2366.28, cl3: 2582.76, cl4: 2916.24,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 3, pct: 4 }, { ans: 5, pct: 7 }, { ans: 10, pct: 12 }, { ans: 20, pct: 18 }
+    ],
     onssE_extra: 0, primeSect: 100,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 3, pct: 4 }, { ans: 5, pct: 7 }, { ans: 10, pct: 12 }, { ans: 20, pct: 18 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '322': {
     nom: 'CP 322 — Intérim (employés)', ouvrier: false,
     cl1: 2070.48, cl2: 2134.72,
+    anciennete: [{ ans: 0, pct: 0 }],
     onssE_extra: 0.0015, primeSect: 0,
-    anciennete: [{ ans: 1, pct: 0 }],
-    indexation: 'IPC', fonds: 'Fonds formation 0,15%', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: 'Fonds de formation intérim 0,15%',
+    cotisSpec: [{ label: 'Fonds formation intérim', pct: 0.0015, base: 'brut' }],
+    dateMAJ: '2026-01-01',
+  },
+  '32201': {
+    nom: 'CP 322.01 — Titres-services', ouvrier: true,
+    cl1: 2029.88, cl2: 2070.48,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }
+    ],
+    onssE_extra: 0.0028, primeSect: 0,
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: 'Fonds formation titres-services 0,28%',
+    cotisSpec: [{ label: 'Cotis. complémentaire titres-services', pct: 0.0028, base: 'brut' }],
+    dateMAJ: '2026-01-01',
   },
   '326': {
     nom: 'CP 326 — Commerce de gros alimentaire', ouvrier: false,
     cl1: 2070.48, cl2: 2173.20, cl3: 2269.56, cl4: 2430.12,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }
+    ],
     onssE_extra: 0, primeSect: 20,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '329': {
     nom: 'CP 329 — Socio-culturel', ouvrier: false,
     cl1: 2070.48, cl2: 2134.72, cl3: 2204.76, cl4: 2366.28,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 6 }
+    ],
     onssE_extra: 0.003, primeSect: 0,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 3 }, { ans: 10, pct: 6 }],
-    indexation: 'IPC', fonds: 'Maribel social 0,3%', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: 'Maribel social 0,3%',
+    cotisSpec: [{ label: 'Maribel social', pct: 0.003, base: 'brut' }],
+    dateMAJ: '2026-01-01',
   },
   '330': {
     nom: 'CP 330 — Santé privée', ouvrier: false,
     cl1: 2070.48, cl2: 2173.20, cl3: 2366.28, cl4: 2623.92, cl5: 2916.24,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 3, pct: 3 }, { ans: 5, pct: 5 }, { ans: 10, pct: 8 }, { ans: 20, pct: 12 }
+    ],
     onssE_extra: 0, primeSect: 35,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 3, pct: 3 }, { ans: 5, pct: 5 }, { ans: 10, pct: 8 }, { ans: 20, pct: 12 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '331': {
     nom: 'CP 331 — Crédit & Banques', ouvrier: false,
     cl1: 2366.28, cl2: 2582.76, cl3: 2916.24, cl4: 3249.72,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 3, pct: 5 }, { ans: 5, pct: 8 }, { ans: 10, pct: 14 }, { ans: 20, pct: 20 }
+    ],
     onssE_extra: 0, primeSect: 120,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 3, pct: 5 }, { ans: 5, pct: 8 }, { ans: 10, pct: 14 }, { ans: 20, pct: 20 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '332': {
     nom: 'CP 332 — Intérim (ouvriers)', ouvrier: true,
     cl1: 2070.48, cl2: 2134.72,
+    anciennete: [{ ans: 0, pct: 0 }],
     onssE_extra: 0.0015, primeSect: 0,
-    anciennete: [{ ans: 1, pct: 0 }],
-    indexation: 'IPC', fonds: 'Fonds formation 0,15%', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: 'Fonds de formation intérim 0,15%',
+    cotisSpec: [{ label: 'Fonds formation intérim', pct: 0.0015, base: 'brut' }],
+    dateMAJ: '2026-01-01',
   },
   '336': {
     nom: 'CP 336 — Grande distribution', ouvrier: false,
     cl1: 2070.48, cl2: 2134.72, cl3: 2204.76, cl4: 2366.28,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }
+    ],
     onssE_extra: 0, primeSect: 30,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 5, pct: 2 }, { ans: 10, pct: 4 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
   '337': {
     nom: 'CP 337 — Non-marchand & Aide sociale', ouvrier: false,
     cl1: 2070.48, cl2: 2134.72, cl3: 2204.76, cl4: 2366.28,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 3, pct: 3 }, { ans: 5, pct: 5 }, { ans: 10, pct: 8 }, { ans: 20, pct: 12 }
+    ],
     onssE_extra: 0.003, primeSect: 0,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 3, pct: 3 }, { ans: 5, pct: 5 }, { ans: 10, pct: 8 }, { ans: 20, pct: 12 }],
-    indexation: 'IPC', fonds: 'Maribel social renforcé 0,3%', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: 'Maribel social renforcé 0,3%',
+    cotisSpec: [{ label: 'Maribel social renforcé', pct: 0.003, base: 'brut' }],
+    dateMAJ: '2026-01-01',
   },
   '341': {
     nom: 'CP 341 — Services informatiques (IT)', ouvrier: false,
     cl1: 2366.28, cl2: 2582.76, cl3: 2916.24, cl4: 3249.72, cl5: 3749.16,
+    anciennete: [
+      { ans: 0, pct: 0 }, { ans: 3, pct: 5 }, { ans: 5, pct: 8 }, { ans: 10, pct: 14 }, { ans: 20, pct: 20 }
+    ],
     onssE_extra: 0, primeSect: 150,
-    anciennete: [{ ans: 1, pct: 0 }, { ans: 3, pct: 5 }, { ans: 5, pct: 8 }, { ans: 10, pct: 14 }, { ans: 20, pct: 20 }],
-    indexation: 'IPC', dateMAJ: '2026-01-01',
+    indexation: 'IPC', coefIndex: 1.0000,
+    fonds: null, cotisSpec: [],
+    dateMAJ: '2026-01-01',
   },
 };
 
