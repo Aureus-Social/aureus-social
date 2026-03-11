@@ -282,6 +282,7 @@ export function PayrollSimulatorAdvanced({ calcPayroll, LOIS_BELGES, props_tab }
           React.createElement('span', { style: { color: '#888' } }, '📋 ' + cpInfo.label),
           React.createElement('span', { style: { color: brut >= brutMinCP ? '#22c55e' : '#ef4444', fontWeight: 600 } }, 'Barème min : ' + fmt(brutMinCP) + ' €' + (brut >= brutMinCP ? ' ✓' : ' ⚠️'))
         ),
+        brutMinCP > 0 && brut < brutMinCP && React.createElement('div', { style: { margin: '10px 0', padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.25)', fontSize: 11, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4 } },
           React.createElement('span', { style: { color: '#ef4444', fontWeight: 700 } }, '⚠️ Sous le barème ' + cpInfo.label + ' : '),
           React.createElement('span', { style: { color: '#9e9b93' } }, 'minimum ' + fmt(brutMinCP) + ' € brut — écart : '),
           React.createElement('span', { style: { color: '#ef4444', fontWeight: 600 } }, fmt(brutMinCP - brut) + ' €'),
