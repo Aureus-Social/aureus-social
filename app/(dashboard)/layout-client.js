@@ -108,6 +108,9 @@ const MandatsAdminPg = ({ s, d, tab }) => <MandatsAdminRaw s={s} d={d} tab={tab}
 const ConnexionsHubRaw = dynamic(() => import('../pages/ConnexionsHub'), { ssr: false, loading: Loading });
 const ConnexionsHubPg = ({ s, d }) => <ConnexionsHubRaw s={s} d={d} />;
 const IntegrationsComptaRaw = dynamic(() => import('../pages/IntegrationsCompta'), { ssr: false, loading: Loading });
+const VehiculeATNRaw = dynamic(() => import('../pages/VehiculeATN'), { ssr: false, loading: Loading });
+const CalendrierSocialRaw = dynamic(() => import('../pages/CalendrierSocial'), { ssr: false, loading: Loading });
+const SalaireMaladieRaw = dynamic(() => import('../pages/SalaireMaladie'), { ssr: false, loading: Loading });
 const IntegrationsComptaPg = ({ s, d }) => <IntegrationsComptaRaw s={s} d={d} />;
 const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 
@@ -597,8 +600,8 @@ function DashboardLayoutInner({ user }) {
       case 'avantages': return <PrimesPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'baremespp': return <TransversalCPPg s={s} d={d} tab={page} />;
       case 'budget': return <PayrollGroupPg s={s} d={d} tab={page} />;
-      case 'calcmaladie': return <PayrollGroupPg s={s} d={d} tab={page} />;
-      case 'calendrier': return <PayrollGroupPg s={s} d={d} tab={page} />;
+      case 'calcmaladie': return <SalaireMaladieRaw s={s} d={d} />;
+      case 'calendrier': return <CalendrierSocialRaw s={s} d={d} />;
       case 'coutsannuel': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'echeancier': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'flexijobs': return <PayrollGroupPg s={s} d={d} tab={page} />;
@@ -614,7 +617,7 @@ function DashboardLayoutInner({ user }) {
       case 'soldetoutcompte': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'timeline': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'validation': return <PayrollGroupPg s={s} d={d} tab={page} />;
-      case 'vehiculesatn': return <PayrollGroupPg s={s} d={d} tab={page} />;
+      case 'vehiculesatn': return <VehiculeATNRaw s={s} d={d} />;
       case 'comparateur': return <PayrollSimPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'compteIndividuel': return <PayrollGroupPg s={s} d={d} tab={page} />;
       // DECLARATIONS & COMPTABILITE
@@ -687,6 +690,7 @@ function DashboardLayoutInner({ user }) {
       case 'support': return <NotificationCenterPg s={s} d={d} tab={page} />;
       case 'team': return <EmployeeHubPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'testsuite': return <AuditCodePage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'settings': return <SettingsPageComp s={s} d={d} t={t} lang={lang} />;
       default: return <PlaceholderPage id={page} label={t('menu.' + currentItem?.id) || currentItem?.label} />;
     }
   };
