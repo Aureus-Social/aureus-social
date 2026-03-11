@@ -6,7 +6,7 @@ import { useLang } from '../lib/lang-context';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { B, BONUS_MAX, C, CR_MAX, CR_PAT, CR_TRAV, COUT_MED, DPER, HEURES_HEBDO, I, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, SC, ST, TX_AT, TX_ONSS_E, TX_ONSS_W, TX_OUV108, TX_OUV_SPECIAL, Tbl, calc, f2, fmt, obf, quickNet, quickNetEst, quickPP } from "@/app/lib/helpers";
-import { calcCSSS, calcBonusEmploi, calcPrecompteExact } from "@/app/lib/payroll-engine";
+import { calcCSSS, calcBonusEmploi, calcPrecompteExact, calcPayrollFromEmp, calcMasseSalariale } from "@/app/lib/payroll-engine";
 import { aureuspdf } from "@/app/lib/pdf-aureus";
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
@@ -570,13 +570,23 @@ function genDmfaXml(emps, co, trimestre, annee, TX_ONSS_W_val, TX_ONSS_E_val) {
   const ts=new Date().toISOString().slice(0,10);
   const mD=(trimestre-1)*3+1, mF=trimestre*3;
   const actifs=emps.filter(e=>e.gross>0);
+  // ── Précision CP : calcul individuel par travailleur ──
+  let totBrut=0, totCotisW=0, totCotisE=0;
   const workers=actifs.map((emp,i)=>{
     const brut=r2l(+emp.gross||0), brutT=r2l(brut*3);
     const niss=(emp.niss||'').replace(/[^0-9]/g,'');
-    return `    <Travailleur><Sequence>${i+1}</Sequence><NISS>${esc2(niss)}</NISS><Nom>${esc2(emp.ln||emp.lastName||'')}</Nom><Prenom>${esc2(emp.fn||emp.firstName||'')}</Prenom><TypeTravailleur>${emp.statut==='ouvrier'?'O':'E'}</TypeTravailleur><CommissionParitaire>${esc2(emp.cp||'200')}</CommissionParitaire><JoursTravailles>65</JoursTravailles><RemunerationTrimestre>${brutT.toFixed(2)}</RemunerationTrimestre><CotisationsTravailleur>${r2l(brutT*TX_ONSS_W_val).toFixed(2)}</CotisationsTravailleur><CotisationsPatronales>${r2l(brutT*TX_ONSS_E_val).toFixed(2)}</CotisationsPatronales></Travailleur>`;
+    // Calcul ONSS précis : 108% ouvrier + cotis. sectorielle
+    const pr = calcPayrollFromEmp(emp) || {};
+    const onssBase = pr.isOuvrier ? r2l(brut*1.08) : brut;
+    const onssWT = r2l(onssBase*3*(pr.onssP/brut||TX_ONSS_W_val)); // proratisé
+    const onssET = r2l(brutT*(TX_ONSS_E_val + (pr.onssEExtra/brut||0)));
+    totBrut  += brutT;
+    totCotisW += onssWT;
+    totCotisE += onssET;
+    return `    <Travailleur><Sequence>${i+1}</Sequence><NISS>${esc2(niss)}</NISS><Nom>${esc2(emp.ln||emp.lastName||'')}</Nom><Prenom>${esc2(emp.fn||emp.firstName||'')}</Prenom><TypeTravailleur>${emp.statut==='ouvrier'?'O':'E'}</TypeTravailleur><CommissionParitaire>${esc2(emp.cp||'200')}</CommissionParitaire><JoursTravailles>65</JoursTravailles><RemunerationTrimestre>${brutT.toFixed(2)}</RemunerationTrimestre><CotisationsTravailleur>${onssWT.toFixed(2)}</CotisationsTravailleur><CotisationsPatronales>${onssET.toFixed(2)}</CotisationsPatronales></Travailleur>`;
   }).join('\n');
-  const totBrut=r2l(actifs.reduce((a,e)=>(+e.gross||0)*3+a,0));
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<!-- DmfA T${trimestre}/${annee} — Généré par Aureus Social Pro -->\n<DmfA>\n  <Entete>\n    <Annee>${annee}</Annee>\n    <Trimestre>${trimestre}</Trimestre>\n    <PeriodeDebut>${annee}-${String(mD).padStart(2,'0')}-01</PeriodeDebut>\n    <PeriodeFin>${annee}-${String(mF).padStart(2,'0')}-30</PeriodeFin>\n    <DateCreation>${ts}</DateCreation>\n  </Entete>\n  <Employeur>\n    <NumeroBCE>${bce}</NumeroBCE>\n    <NumeroONSS>${esc2(co.onss||'')}</NumeroONSS>\n    <Denomination>${esc2(co.name||'Aureus IA SPRL')}</Denomination>\n    <NombreTravailleurs>${actifs.length}</NombreTravailleurs>\n    <MasseSalarialeBrute>${totBrut.toFixed(2)}</MasseSalarialeBrute>\n    <TotalCotisationsTravailleur>${r2l(totBrut*TX_ONSS_W_val).toFixed(2)}</TotalCotisationsTravailleur>\n    <TotalCotisationsPatronales>${r2l(totBrut*TX_ONSS_E_val).toFixed(2)}</TotalCotisationsPatronales>\n  </Employeur>\n  <Travailleurs>\n${workers}\n  </Travailleurs>\n</DmfA>`;
+  totBrut=r2l(totBrut); totCotisW=r2l(totCotisW); totCotisE=r2l(totCotisE);
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<!-- DmfA T${trimestre}/${annee} — Généré par Aureus Social Pro (précision CP totale) -->\n<DmfA>\n  <Entete>\n    <Annee>${annee}</Annee>\n    <Trimestre>${trimestre}</Trimestre>\n    <PeriodeDebut>${annee}-${String(mD).padStart(2,'0')}-01</PeriodeDebut>\n    <PeriodeFin>${annee}-${String(mF).padStart(2,'0')}-30</PeriodeFin>\n    <DateCreation>${ts}</DateCreation>\n  </Entete>\n  <Employeur>\n    <NumeroBCE>${bce}</NumeroBCE>\n    <NumeroONSS>${esc2(co.onss||'')}</NumeroONSS>\n    <Denomination>${esc2(co.name||'Aureus IA SPRL')}</Denomination>\n    <NombreTravailleurs>${actifs.length}</NombreTravailleurs>\n    <MasseSalarialeBrute>${totBrut.toFixed(2)}</MasseSalarialeBrute>\n    <TotalCotisationsTravailleur>${totCotisW.toFixed(2)}</TotalCotisationsTravailleur>\n    <TotalCotisationsPatronales>${totCotisE.toFixed(2)}</TotalCotisationsPatronales>\n  </Employeur>\n  <Travailleurs>\n${workers}\n  </Travailleurs>\n</DmfA>`;
 }
 
 

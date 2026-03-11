@@ -3,7 +3,7 @@ import { useLang } from '../lib/lang-context';
 import { supabase } from '@/app/lib/supabase';
 import { useState } from 'react';
 import { TX_ONSS_W, TX_ONSS_E } from '@/app/lib/lois-belges';
-import { quickPP, quickNet } from '@/app/lib/payroll-engine';
+import { quickPP, quickNet, calcPayrollFromEmp } from '@/app/lib/payroll-engine';
 
 const ClotureMensuelle=({s,d,supabase,user})=>{
   const { t, tText } = useLang();
@@ -75,25 +75,37 @@ const ClotureMensuelle=({s,d,supabase,user})=>{
         const name=(e.first||e.fn||'')+' '+(e.last||e.ln||'');
         const brut=+(e.monthlySalary||e.gross||e.brut||0);
         if(brut<=0){addLog('⏭ '+name+' — Pas de salaire, ignoré','warn');continue;}
-        const onssWorker=Math.round(brut*TX_ONSS_W*100)/100;
-        const imposable=brut-onssWorker;
-        const precompte=quickPP(brut);
-        const net=Math.round((imposable-precompte)*100)/100;
-        const onssEmployer=Math.round(brut*TX_ONSS_E*100)/100;
-        const coutTotal=brut+onssEmployer;
+        // ── Précision CP totale (barème + prime sectorielle + cotis. extra) ──
+        const r = calcPayrollFromEmp(e) || {};
+        const onssWorker = r.onssP || Math.round(brut*TX_ONSS_W*100)/100;
+        const imposable  = r.imposable || (brut - onssWorker);
+        const precompte  = r.pp || quickPP(brut);
+        const net        = r.net || Math.round((imposable-precompte)*100)/100;
+        const onssEmployer = r.onssE || Math.round(brut*TX_ONSS_E*100)/100;
+        const coutTotal  = r.coutTotal || (brut+onssEmployer);
+        const baremeOk   = r.baremeOk !== false;
+        const primeSect  = r.primeSect || 0;
+        const cpId       = r.cpId || e.cp || '200';
         const pay={
           id:'PAY-'+Date.now()+'-'+count,
           ename:name,
           period:prevMonth+' '+prevYear,
           gross:brut,onssNet:onssWorker,imposable,precompte,net,
           onssEmployer,coutTotal,
+          // Précision CP
+          cpId, baremeOk, primeSect,
+          netAvecPrime: Math.round((net+primeSect)*100)/100,
+          baremeGap: r.baremeGap||0,
+          pctAnciennete: r.pctAnciennete||0,
+          cotisSpecTotal: r.cotisSpecTotal||0,
           empEmail:e.email||'',empId:e.id,
           generated:new Date().toISOString(),
           status:'calculated'
         };
         newPays.push(pay);
         count++;
-        addLog('✅ '+name+' — Brut: '+brut.toFixed(2)+'€ → Net: '+net.toFixed(2)+'€','success');
+        const cpWarn = !baremeOk ? ` ⚠ Barème CP ${cpId} non respecté (+${(r.baremeGap||0).toFixed(2)}€ requis)` : '';
+        addLog('✅ '+name+' — CP'+cpId+' — Brut: '+brut.toFixed(2)+'€ → Net: '+net.toFixed(2)+'€'+cpWarn, baremeOk?'success':'warn');
       }
     }
     if(newPays.length>0){

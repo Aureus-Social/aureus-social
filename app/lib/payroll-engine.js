@@ -441,3 +441,82 @@ export function calcAllocEnfant(region,birthYear,age){
   }
 }
 
+
+// ═══════════════════════════════════════════════════════════════════
+// calcPayrollFromEmp() — WRAPPER HAUTE PRÉCISION DEPUIS OBJET EMPLOYÉ
+// Prend directement un objet emp (DB/state) et retourne calcPayroll()
+// complet avec CP, ancienneté, classe, régime, situation familiale.
+// Usage: const r = calcPayrollFromEmp(emp); r.net, r.baremeOk, etc.
+// ═══════════════════════════════════════════════════════════════════
+export function calcPayrollFromEmp(emp, overrides) {
+  if (!emp) return null;
+  const ov = overrides || {};
+  const brut   = +(ov.brut || emp.monthlySalary || emp.gross || emp.brut || 0);
+  const statut = ov.statut || emp.statut || emp.status_type || 'employe';
+  const famil  = ov.familial || emp.civil || 'isole';
+  const enf    = +(ov.enfants !== undefined ? ov.enfants : (emp.depChildren || emp.children || 0));
+  const regime = +(ov.regime !== undefined ? ov.regime : (emp.regime || emp.whWeek ? (emp.whWeek ? Math.round(emp.whWeek / 38 * 100) : 100) : 100));
+  const cp     = String(ov.cp || emp.cp || '200');
+  const classe = +(ov.classe || emp.classe || emp.classeCp || 1);
+  const anc    = +(ov.anciennete !== undefined ? ov.anciennete : (emp.anciennete || 0));
+
+  return calcPayroll(brut, statut, famil, enf, regime, {
+    cp, classe, anciennete: anc,
+    taxeCom: ov.taxeCom || emp.taxeCom || 7,
+    enfants: enf,
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// calcEmployerCostFromEmp() — COÛT EMPLOYEUR PRÉCIS AVEC CP
+// Retourne coût total employeur incluant ONSS patronal + cotis. sect.
+// ═══════════════════════════════════════════════════════════════════
+export function calcEmployerCostFromEmp(emp, overrides) {
+  const r = calcPayrollFromEmp(emp, overrides);
+  if (!r) return { coutTotal: 0, onssE: 0, onssEExtra: 0, cotisSpecTotal: 0, brutR: 0 };
+  return {
+    coutTotal:      r.coutTotal,
+    onssE:          r.onssE,
+    onssEExtra:     r.onssEExtra,
+    cotisSpecTotal: r.cotisSpecTotal,
+    brutR:          r.brutR,
+    baremeOk:       r.baremeOk,
+    baremeGap:      r.baremeGap,
+    cpId:           r.cpId,
+    primeSect:      r.primeSect,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// calcMasseSalariale() — MASSE SALARIALE PRÉCISE SUR LISTE EMPLOYÉS
+// Agrège calcPayrollFromEmp() sur tous les employés actifs.
+// ═══════════════════════════════════════════════════════════════════
+export function calcMasseSalariale(emps) {
+  const actifs = (emps || []).filter(e => e.status === 'active' || !e.status);
+  let brutTotal = 0, netTotal = 0, onssWTotal = 0, onssETotal = 0,
+      coutTotal = 0, primeTotal = 0, nonConformes = 0;
+  const details = actifs.map(emp => {
+    const r = calcPayrollFromEmp(emp);
+    if (!r) return null;
+    brutTotal  += r.brutR;
+    netTotal   += r.net;
+    onssWTotal += r.onssP;
+    onssETotal += r.onssE;
+    coutTotal  += r.coutTotal;
+    primeTotal += r.primeSect;
+    if (!r.baremeOk) nonConformes++;
+    return { emp, r };
+  }).filter(Boolean);
+
+  return {
+    brutTotal:    Math.round(brutTotal * 100) / 100,
+    netTotal:     Math.round(netTotal * 100) / 100,
+    onssWTotal:   Math.round(onssWTotal * 100) / 100,
+    onssETotal:   Math.round(onssETotal * 100) / 100,
+    coutTotal:    Math.round(coutTotal * 100) / 100,
+    primeTotal:   Math.round(primeTotal * 100) / 100,
+    nonConformes,
+    nbActifs:     actifs.length,
+    details,
+  };
+}
