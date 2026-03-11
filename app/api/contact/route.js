@@ -94,6 +94,26 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Échec envoi' }, { status: 500 });
     }
 
+    // ── Log consentement RGPD Art. 6.1.a en BDD ──────────────────
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supa = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+      const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+      await supa.from('contact_consents').upsert({
+        email: email.toLowerCase().trim(),
+        prenom, nom: nom || null, societe: societe || null, role: role || null,
+        lang: lang || 'fr',
+        consent: true,
+        consent_ip: ip,
+        consent_date: new Date().toISOString(),
+        consent_text: 'En soumettant ce formulaire, vous acceptez notre politique RGPD.',
+        source: 'vitrine_contact',
+        message_excerpt: (message || '').slice(0, 200),
+      }, { onConflict: 'email' });
+    } catch (dbErr) {
+      console.warn('[contact] Consent log failed (non-blocking):', dbErr.message);
+    }
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Contact API error:', err);

@@ -46,6 +46,7 @@ export default function PortailEmploye({s, d}) {
     {id:'absences', icon:'📅', label:'Absences & congés'},
     {id:'docs',     icon:'📁', label:'Mes documents'},
     {id:'dimona',   icon:'📡', label:'Dimona'},
+    {id:'rgpd',     icon:'🔐', label:'Mes droits RGPD'},
   ];
 
   // ── Contenu de l'onglet ──
@@ -240,6 +241,46 @@ export default function PortailEmploye({s, d}) {
                   </div>
                 ))
             }
+          </C>
+        </div>
+      );
+
+      case 'rgpd': return (
+        <div>
+          <C style={{padding:'20px 22px',marginBottom:12}}>
+            <div style={{fontSize:12,fontWeight:700,color:GOLD,marginBottom:4}}>🔐 Mes droits RGPD (Art. 15 à 20)</div>
+            <div style={{fontSize:11,color:'#5e5c56',marginBottom:16}}>Conformément au RGPD, vous disposez des droits suivants sur vos données personnelles traitées par Aureus IA SPRL.</div>
+            {[
+              {icon:'👁️', art:'Art. 15', title:'Droit d\'accès', desc:'Obtenir une copie de toutes vos données personnelles traitées.', action:'Exporter mes données', color:'rgba(59,130,246,.15)', border:'rgba(59,130,246,.3)'},
+              {icon:'✏️', art:'Art. 16', title:'Droit de rectification', desc:'Corriger des données inexactes ou incomplètes vous concernant.', action:'Demander une rectification', color:'rgba(234,179,8,.1)', border:'rgba(234,179,8,.25)'},
+              {icon:'🗑️', art:'Art. 17', title:'Droit à l\'effacement', desc:'Demander la suppression de vos données (sous réserve obligations légales).', action:'Demander l\'effacement', color:'rgba(239,68,68,.1)', border:'rgba(239,68,68,.25)'},
+              {icon:'📦', art:'Art. 20', title:'Droit à la portabilité', desc:'Recevoir vos données dans un format structuré et lisible par machine (JSON).', action:'Télécharger JSON', color:'rgba(34,197,94,.1)', border:'rgba(34,197,94,.25)'},
+              {icon:'🚫', art:'Art. 21', title:'Droit d\'opposition', desc:'Vous opposer au traitement de vos données à des fins de prospection.', action:'Exercer ce droit', color:'rgba(168,85,247,.1)', border:'rgba(168,85,247,.25)'},
+              {icon:'⏸️', art:'Art. 18', title:'Droit à la limitation', desc:'Demander la suspension temporaire du traitement de vos données.', action:'Demander la limitation', color:'rgba(249,115,22,.1)', border:'rgba(249,115,22,.25)'},
+            ].map((r,i)=>(
+              <div key={i} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',background:r.color,border:`1px solid ${r.border}`,borderRadius:10,marginBottom:8}}>
+                <span style={{fontSize:20,flexShrink:0}}>{r.icon}</span>
+                <div style={{flex:1}}>
+                  <div style={{display:'flex',gap:8,alignItems:'center',marginBottom:2}}>
+                    <span style={{fontSize:9,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:GOLD}}>{r.art}</span>
+                    <span style={{fontSize:12,fontWeight:600,color:'#e8e6e0'}}>{r.title}</span>
+                  </div>
+                  <div style={{fontSize:11,color:'#5e5c56'}}>{r.desc}</div>
+                </div>
+                <button
+                  onClick={()=>window.open('mailto:info@aureus-ia.com?subject=RGPD '+r.art+' — '+r.title+'&body=Bonjour,%0A%0AJe souhaite exercer mon '+r.title.toLowerCase()+'.%0A%0ACordialement')}
+                  style={{padding:'6px 12px',borderRadius:7,border:`1px solid ${r.border}`,background:'transparent',color:'#e8e6e0',fontSize:10,cursor:'pointer',fontWeight:600,whiteSpace:'nowrap',flexShrink:0}}>
+                  {r.action} →
+                </button>
+              </div>
+            ))}
+          </C>
+          <C style={{padding:'16px 22px'}}>
+            <div style={{fontSize:11,color:'#5e5c56',lineHeight:1.7}}>
+              📬 <strong style={{color:GOLD}}>Contact DPO</strong> : <a href="mailto:info@aureus-ia.com" style={{color:GOLD}}>info@aureus-ia.com</a> — Réponse sous 30 jours (Art. 12 RGPD)<br/>
+              🏛️ <strong style={{color:'#e8e6e0'}}>Réclamation APD</strong> : <a href="https://www.autoriteprotectiondonnees.be" target="_blank" rel="noopener noreferrer" style={{color:'rgba(255,255,255,.4)'}}>autoriteprotectiondonnees.be ↗</a><br/>
+              🔒 Responsable du traitement : Aureus IA SPRL · BCE BE 1028.230.781 · Saint-Gilles, Bruxelles
+            </div>
           </C>
         </div>
       );

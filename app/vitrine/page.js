@@ -606,7 +606,10 @@ function CookieBanner({t}) {
   if(!show) return null;
   return(
     <div className="cookie-banner">
-      <p style={{fontSize:14,color:'rgba(255,255,255,.7)',margin:0,flex:1}}>{t.cookie.text}</p>
+      <p style={{fontSize:14,color:'rgba(255,255,255,.7)',margin:0,flex:1}}>
+        {t.cookie.text}{' '}
+        <a href="/cookies" target="_blank" rel="noopener noreferrer" style={{color:'#c6a34e',fontSize:12,textDecoration:'none'}}>En savoir plus ↗</a>
+      </p>
       <div style={{display:'flex',gap:10,flexShrink:0}}>
         <button onClick={refuse} style={{padding:'8px 16px',borderRadius:5,background:'transparent',color:'rgba(255,255,255,.5)',border:'1px solid rgba(255,255,255,.2)',cursor:'pointer',fontSize:13,fontFamily:"'Cabinet Grotesk',sans-serif"}}>{t.cookie.refuse}</button>
         <button onClick={accept} className="btn-gold" style={{padding:'8px 18px',fontSize:13}}>{t.cookie.accept}</button>
@@ -781,7 +784,18 @@ function RoiCalculator({t,go,lang}) {
 }
 
 function Newsletter({t,go}) {
-  const[email,setEmail]=useState('');const[sent,setSent]=useState(false);const nw=t.nw;
+  const[email,setEmail]=useState('');const[sent,setSent]=useState(false);
+  const[consent,setConsent]=useState(false);const[loading,setLoading]=useState(false);
+  const nw=t.nw;
+  const submit=async()=>{
+    if(!email||!consent)return;
+    setLoading(true);
+    try{
+      const res=await fetch('/api/newsletter',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,lang:t===T.nl?'nl':t===T.en?'en':t===T.de?'de':'fr',source:'vitrine',consent:true})});
+      if(res.ok)setSent(true);
+    }catch(e){}
+    setLoading(false);
+  };
   return(
     <section style={{background:INK,padding:'72px 0'}}>
       <div className="vt-wrap">
@@ -792,10 +806,18 @@ function Newsletter({t,go}) {
             <p style={{color:'rgba(255,255,255,.5)',marginBottom:28}}>{nw.sub}</p>
             {sent?(<div style={{padding:'14px 20px',borderRadius:10,background:'rgba(34,197,94,.15)',border:'1px solid rgba(34,197,94,.3)',color:'#86efac',fontSize:15}}>{nw.ok}</div>):(<>
               <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                <input className="nl-in" type="email" placeholder={nw.ph} value={email} onChange={e=>setEmail(e.target.value)}/>
-                <button className="btn-gold" onClick={()=>{if(email)setSent(true);}}>{nw.btn}</button>
+                <input className="nl-in" type="email" placeholder={nw.ph} value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()}/>
+                <button className="btn-gold" onClick={submit} disabled={!email||!consent||loading} style={{opacity:(!email||!consent)?0.5:1}}>{loading?'...':nw.btn}</button>
               </div>
-              <p style={{fontSize:12,color:'rgba(255,255,255,.3)',marginTop:10,lineHeight:1.6}}>{nw.note}</p>
+              <label style={{display:'flex',alignItems:'flex-start',gap:8,marginTop:10,cursor:'pointer'}}>
+                <input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)} style={{marginTop:2,accentColor:'#c6a34e',flexShrink:0}}/>
+                <span style={{fontSize:11,color:'rgba(255,255,255,.4)',lineHeight:1.5}}>
+                  {nw.note}{' '}
+                  <a onClick={()=>go('privacy')} style={{color:'#c6a34e',cursor:'pointer',textDecoration:'underline'}}>Politique de confidentialité</a>
+                  {' · '}
+                  <a onClick={()=>go('cookies')} style={{color:'rgba(255,255,255,.3)',cursor:'pointer'}}>Cookies</a>
+                </span>
+              </label>
             </>)}
           </div>
           <div style={{display:'flex',flexDirection:'column',gap:14}}>
@@ -1130,6 +1152,7 @@ function PageCon({t,go,goBack,lang}) {
   const[sent,setSent]=useState(false);
   const[loading,setLoading]=useState(false);
   const[errMsg,setErrMsg]=useState('');
+  const[consentContact,setConsentContact]=useState(false);
   const rPrenom=useRef(null),rNom=useRef(null),rEmail=useRef(null),rTel=useRef(null),rSociete=useRef(null),rRole=useRef(null),rMsg=useRef(null);
   useFadeIn();
 
@@ -1137,6 +1160,7 @@ function PageCon({t,go,goBack,lang}) {
     const prenom=rPrenom.current?.value?.trim();
     const email=rEmail.current?.value?.trim();
     if(!prenom||!email){setErrMsg('Prénom et e-mail sont requis.');return;}
+    if(!consentContact){setErrMsg('Veuillez accepter la politique de confidentialité pour continuer.');return;}
     setLoading(true);setErrMsg('');
     try{
       const res=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -1173,11 +1197,16 @@ function PageCon({t,go,goBack,lang}) {
               <div style={{gridColumn:'1/-1',display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:13,fontWeight:600,color:INK}}>{d.f.ms}</label><textarea ref={rMsg} className="fta" placeholder={d.f.msp}/></div>
             </div>
             {errMsg&&<div style={{marginTop:10,padding:'10px 14px',borderRadius:6,background:'rgba(239,68,68,.1)',border:'1px solid rgba(239,68,68,.3)',color:'#b91c1c',fontSize:13}}>{errMsg}</div>}
-            <button onClick={handleSubmit} disabled={loading} style={{width:'100%',marginTop:14,padding:14,borderRadius:5,border:'none',background:loading?'#9A968E':INK,color:WHITE,fontFamily:"'Cabinet Grotesk',sans-serif",fontSize:15,fontWeight:600,cursor:loading?'not-allowed':'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,transition:'all .22s'}}
-              onMouseOver={e=>{if(!loading)e.currentTarget.style.background='#252320';}} onMouseOut={e=>{if(!loading)e.currentTarget.style.background=INK;}}>
+            <label style={{display:'flex',alignItems:'flex-start',gap:8,marginTop:14,cursor:'pointer'}}>
+              <input type="checkbox" checked={consentContact} onChange={e=>setConsentContact(e.target.checked)} style={{marginTop:2,accentColor:'#B8913A',flexShrink:0}}/>
+              <span style={{fontSize:11,color:MIST,lineHeight:1.6}}>
+                J'accepte que mes données soient traitées pour traiter ma demande (base légale RGPD Art. 6.1.b). <a onClick={()=>go('privacy')} style={{color:GOLD,cursor:'pointer',textDecoration:'underline'}}>Politique de confidentialité</a> · <a onClick={()=>go('cookies')} style={{color:MIST,cursor:'pointer'}}>Cookies</a>
+              </span>
+            </label>
+            <button onClick={handleSubmit} disabled={loading||!consentContact} style={{width:'100%',marginTop:14,padding:14,borderRadius:5,border:'none',background:(loading||!consentContact)?'#9A968E':INK,color:WHITE,fontFamily:"'Cabinet Grotesk',sans-serif",fontSize:15,fontWeight:600,cursor:(loading||!consentContact)?'not-allowed':'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,transition:'all .22s'}}
+              onMouseOver={e=>{if(!loading&&consentContact)e.currentTarget.style.background='#252320';}} onMouseOut={e=>{if(!loading&&consentContact)e.currentTarget.style.background=INK;}}>
               {loading?'Envoi en cours…':<>{d.f.sub} <Arr/></>}
             </button>
-            <p style={{fontSize:11,color:MIST,textAlign:'center',marginTop:10,lineHeight:1.6}}>{d.f.note}</p>
           </>)}
         </div>
       </div>
