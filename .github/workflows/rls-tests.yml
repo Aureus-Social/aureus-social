@@ -1,0 +1,43 @@
+name: RLS Security Tests
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * *'  # 6h UTC = 7h belge, après backup 3h UTC
+  workflow_dispatch:
+
+jobs:
+  rls-isolation:
+    runs-on: ubuntu-latest
+    name: Multi-tenant RLS Isolation
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - run: npm ci --prefer-offline
+      
+      - name: Run RLS Isolation Tests
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          RLS_TOKEN_A:    ${{ secrets.RLS_TOKEN_A }}
+          RLS_TOKEN_B:    ${{ secrets.RLS_TOKEN_B }}
+          RLS_USER_A_ID:  ${{ secrets.RLS_USER_A_ID }}
+          RLS_USER_B_ID:  ${{ secrets.RLS_USER_B_ID }}
+          RLS_EMP_A_ID:   ${{ secrets.RLS_EMP_A_ID }}
+          RLS_EMP_B_ID:   ${{ secrets.RLS_EMP_B_ID }}
+        run: npm run test:rls
+
+      - name: Run Payroll Engine Tests
+        run: npm run test:payroll
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          curl -s -X POST "https://aureus-social.vercel.app/api/anomaly" \
+            -H "Content-Type: application/json" \
+            -d '{"type":"rls_test_failure","severity":"critical","message":"RLS isolation tests FAILED in CI"}'
