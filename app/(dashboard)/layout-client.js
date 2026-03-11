@@ -422,7 +422,7 @@ function DashboardLayoutInner({ user }) {
           if (res.ok) {
             const records   = res.headers.get('X-Backup-Records');
             const encrypted = res.headers.get('X-Backup-Encrypted');
-            console.info('[Backup] ${records} enregistrements — chiffré AES-256: ${encrypted}`);
+            console.info(`[Backup] ${records} enregistrements — chiffré AES-256: ${encrypted}`);
           }
         }).catch(() => {}); // Silencieux — backup non bloquant
       }, 4000); // 4s après login pour ne pas bloquer le chargement initial
@@ -447,7 +447,7 @@ function DashboardLayoutInner({ user }) {
             iban: emp.iban ? await decryptField(emp.iban, key) : emp.iban,
           }))) : data;
           dispatch({ type: 'SET_EMPS', data: decrypted });
-          console.info('[Supabase] ${data.length} employé(s) chargé(s)${key ? ' (déchiffrés)' : ''}`);
+          console.info(`[Supabase] ${data.length} employé(s) chargé(s)`);
         }
       });
   },[user?.id]);
@@ -489,7 +489,7 @@ function DashboardLayoutInner({ user }) {
             at: r.at,
           }));
           dispatch({ type: 'SET_PAYROLL', data: normalized });
-          console.info('[Supabase] ${data.length} fiche(s) de paie chargée(s)`);
+          console.info(`[Supabase] ${data.length} fiche(s) de paie chargée(s)`);
         }
       });
   },[user?.id]);

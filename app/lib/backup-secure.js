@@ -224,4 +224,49 @@ export async function downloadEncryptedBackup(supabase, user) {
 }
 
 // ─── Réexports compatibilité (fonctions backup.js conservées) ────────────
-export { exportEmployeesCSV, exportPayrollCSV, exportAllData } from './backup';
+// ─── Export CSV utilitaires (anciennement dans backup.js) ───────────────────
+function downloadFile(content, filename, mime) {
+  const blob = new Blob([content], { type: mime + ';charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 3000);
+}
+
+export function exportEmployeesCSV(employees) {
+  if (!employees || !employees.length) return { error: 'Aucun employé à exporter' };
+  const headers = ['Nom','Prénom','NISS','Email','Téléphone','Statut','Contrat','Date entrée','Date sortie','Fonction','Brut mensuel','Régime','CP','IBAN'];
+  const rows = employees.map(e => [
+    (e.last||e.ln||'').replace(/;/g,','), (e.first||e.fn||'').replace(/;/g,','),
+    e.niss||'', e.email||'', e.phone||'', e.statut||'Employé', e.contractType||'CDI',
+    e.startDate||'', e.endDate||'', e.fonction||e.jobTitle||'',
+    (+(e.monthlySalary||e.gross||0)).toFixed(2), (+(e.regime||100))+'%', e.cp||'', e.iban||''
+  ].join(';'));
+  const csv = '\uFEFF' + headers.join(';') + '\n' + rows.join('\n');
+  const date = new Date().toISOString().slice(0,10);
+  downloadFile(csv, `Employes_backup_${date}.csv`, 'text/csv');
+  return { count: employees.length, filename: `Employes_backup_${date}.csv` };
+}
+
+export function exportPayrollCSV(payrollHistory) {
+  if (!payrollHistory || !payrollHistory.length) return { error: 'Aucune fiche de paie à exporter' };
+  const headers = ['Période','Nom','Prénom','Brut','ONSS','Précompte','Net','Coût employeur','Statut'];
+  const rows = payrollHistory.map(p => [
+    p.periode||p.period||'', p.last||p.nom||p.ln||'', p.first||p.prenom||p.fn||'',
+    (+(p.brut||p.gross||0)).toFixed(2), (+(p.onss||p.cotisationsONSS||0)).toFixed(2),
+    (+(p.precompte||p.pp||0)).toFixed(2), (+(p.net||0)).toFixed(2),
+    (+(p.coutEmployeur||p.totalCost||0)).toFixed(2), p.status||p.statut||'Calculé'
+  ].join(';'));
+  const csv = '\uFEFF' + headers.join(';') + '\n' + rows.join('\n');
+  const date = new Date().toISOString().slice(0,10);
+  downloadFile(csv, `FichesPayroll_backup_${date}.csv`, 'text/csv');
+  return { count: payrollHistory.length, filename: `FichesPayroll_backup_${date}.csv` };
+}
+
+export async function exportAllData(supabase, userId, employees, payrollHistory) {
+  const results = {};
+  if (employees && employees.length) results.employees = exportEmployeesCSV(employees);
+  if (payrollHistory && payrollHistory.length) results.payroll = exportPayrollCSV(payrollHistory);
+  return results;
+}

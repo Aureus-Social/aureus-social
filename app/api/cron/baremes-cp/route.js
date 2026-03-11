@@ -226,7 +226,7 @@ async function pushGitHubCP(patches, msg) {
     const before = content;
     content = content.replace(pattern, replacement);
     if (content !== before) patchCount++;
-    else console.warn('⚠️ Pattern non trouvé: ${String(pattern).substring(0, 60)}`);
+    else console.warn(`⚠️ Pattern non trouvé: ${String(pattern).substring(0, 60)}`);
   }
 
   // Mise à jour du commentaire de date en haut du fichier
