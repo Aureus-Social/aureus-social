@@ -6,6 +6,7 @@ import { TX_ONSS_W, TX_ONSS_E } from '@/app/lib/lois-belges';
 import { quickPP, quickNet } from '@/app/lib/payroll-engine';
 
 const ClotureMensuelle=({s,d,supabase,user})=>{
+  const { t, tText } = useLang();
   const [step,setStep]=useState(0);
   const [running,setRunning]=useState(false);
   const [progress,setProgress]=useState({});

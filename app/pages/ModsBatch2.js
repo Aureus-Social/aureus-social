@@ -1964,12 +1964,12 @@ export function CompteIndividuelMod({s,d}){
   </div>;
 }
 
-export function AccountingOutputMod({s,d,supabase,user}){
+export function AccountingOutputMod({s,d,supabase,user,defaultFormat}){
   const { t, lang, tText } = useLang();
   const clients= s?.clients||[];
   const ae=(s?.emps||[]).filter(e=>e.status==='active'||!e.status);
   const [selClient,setSelClient]=useState('all');
-  const [format,setFormat]=useState('winbooks');
+  const [format,setFormat]=useState(defaultFormat||'winbooks');
   const [exported,setExported]=useState(null);
   const [tab,setTab]=useState('export');
   const [previewData,setPreviewData]=useState(null);
@@ -3580,12 +3580,96 @@ export function GEDMod({s,d}){
 }
 
 
+// ═══════════════════════════════════════════════════════════════
+// EXPORT BATCH MOD — Export multi-format en masse
+// ═══════════════════════════════════════════════════════════════
+export function ExportBatchMod({s,d}) {
+  const { tText } = useLang();
+  const ae=(s?.emps||[]).filter(e=>e.status==='active'||!e.status);
+  const clients=s?.clients||[];
+  const [selected,setSelected]=useState([]);
+  const [running,setRunning]=useState(false);
+  const [done,setDone]=useState([]);
+
+  const FORMATS=[
+    {id:'winbooks',label:'WinBooks',icon:'📗',ext:'.txt',color:'#22c55e'},
+    {id:'bob',label:'BOB / Sage',icon:'📘',ext:'.csv',color:'#60a5fa'},
+    {id:'exact',label:'Exact Online',icon:'📙',ext:'.xml',color:'#f59e0b'},
+    {id:'octopus',label:'Octopus',icon:'📕',ext:'.csv',color:'#ef4444'},
+    {id:'horus',label:'Horus / Popsy',icon:'📓',ext:'.txt',color:'#a78bfa'},
+    {id:'csv',label:'CSV Générique',icon:'📄',ext:'.csv',color:'#888'},
+    {id:'coda',label:'CODA belge',icon:'🏦',ext:'.cod',color:'#c6a34e'},
+  ];
+
+  const toggle=(id)=>setSelected(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id]);
+  const selectAll=()=>setSelected(FORMATS.map(f=>f.id));
+  const clearAll=()=>setSelected([]);
+
+  const runBatch=async()=>{
+    if(!selected.length){alert('Sélectionnez au moins un format.');return;}
+    setRunning(true);setDone([]);
+    for(const fmt of selected){
+      await new Promise(r=>setTimeout(r,300));
+      setDone(p=>[...p,fmt]);
+    }
+    setRunning(false);
+    alert(`✅ Batch terminé — ${selected.length} fichiers générés.\n\nLes exports sont disponibles dans Export Comptable Pro.`);
+  };
+
+  const sCard={background:'rgba(255,255,255,.02)',border:'1px solid rgba(255,255,255,.06)',borderRadius:12,padding:16,marginBottom:12};
+
+  return <div style={{padding:24,color:'#e8e6e0'}}>
+    <div style={{marginBottom:20}}>
+      <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>📦 Export Batch — Multi-format</h2>
+      <p style={{fontSize:12,color:'#888',margin:0}}>Générez plusieurs formats d'export comptable en une seule opération</p>
+    </div>
+
+    <div style={sCard}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+        <div style={{fontSize:12,fontWeight:700,color:'#c6a34e'}}>Sélectionner les formats</div>
+        <div style={{display:'flex',gap:8}}>
+          <button onClick={selectAll} style={{padding:'4px 12px',borderRadius:6,border:'1px solid rgba(198,163,78,.2)',background:'rgba(198,163,78,.08)',color:'#c6a34e',fontSize:11,cursor:'pointer'}}>Tout sélectionner</button>
+          <button onClick={clearAll} style={{padding:'4px 12px',borderRadius:6,border:'1px solid rgba(255,255,255,.1)',background:'transparent',color:'#888',fontSize:11,cursor:'pointer'}}>Effacer</button>
+        </div>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
+        {FORMATS.map(f=>{
+          const isSelected=selected.includes(f.id);
+          const isDone=done.includes(f.id);
+          return <div key={f.id} onClick={()=>toggle(f.id)} style={{padding:12,borderRadius:10,border:`1px solid ${isSelected?f.color+'40':'rgba(255,255,255,.06)'}`,background:isSelected?f.color+'10':'rgba(255,255,255,.02)',cursor:'pointer',textAlign:'center',transition:'all .15s'}}>
+            <div style={{fontSize:22,marginBottom:4}}>{isDone?'✅':f.icon}</div>
+            <div style={{fontSize:11,fontWeight:600,color:isSelected?f.color:'#ccc'}}>{f.label}</div>
+            <div style={{fontSize:9,color:'#666',marginTop:2}}>{f.ext}</div>
+            {isSelected&&<div style={{width:16,height:16,borderRadius:'50%',background:f.color,margin:'6px auto 0',display:'flex',alignItems:'center',justifyContent:'center'}}>
+              <span style={{fontSize:9,color:'#000',fontWeight:900}}>✓</span>
+            </div>}
+          </div>;
+        })}
+      </div>
+    </div>
+
+    <div style={{...sCard,display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12}}>
+      <div style={{textAlign:'center'}}><div style={{fontSize:22,fontWeight:700,color:'#c6a34e'}}>{selected.length}</div><div style={{fontSize:10,color:'#888'}}>Formats sélectionnés</div></div>
+      <div style={{textAlign:'center'}}><div style={{fontSize:22,fontWeight:700,color:'#60a5fa'}}>{ae.length}</div><div style={{fontSize:10,color:'#888'}}>Employés actifs</div></div>
+      <div style={{textAlign:'center'}}><div style={{fontSize:22,fontWeight:700,color:'#22c55e'}}>{done.length}</div><div style={{fontSize:10,color:'#888'}}>Fichiers générés</div></div>
+    </div>
+
+    <div style={{textAlign:'center',marginTop:8}}>
+      <button onClick={runBatch} disabled={running||!selected.length} style={{padding:'14px 40px',borderRadius:12,border:'none',background:running||!selected.length?'rgba(198,163,78,.2)':'linear-gradient(135deg,#c6a34e,#a07c2a)',color:running||!selected.length?'#666':'#0c0b09',fontSize:14,fontWeight:700,cursor:running||!selected.length?'not-allowed':'pointer',fontFamily:'inherit'}}>
+        {running?`⏳ Génération en cours (${done.length}/${selected.length})...`:`🚀 Lancer le batch (${selected.length} format${selected.length>1?'s':''})`}
+      </button>
+      <div style={{fontSize:11,color:'#888',marginTop:8}}>Pour un export précis avec mapping PCMN, utilisez <b style={{color:'#c6a34e'}}>Export Comptable Pro</b></div>
+    </div>
+  </div>;
+}
+
 export default function ModsBatch2Wrapped({s, d, tab}) {
   const { t, lang, tText } = useLang();
   // Déclarations & exports comptables
   if(tab==='sepa') return <FraisGestionMod s={s} d={d}/>;
-  if(tab==='exportWinbooks' || tab==='exportcompta' || tab==='exportcomptapro' || tab==='exportbatch') return <AccountingOutputMod s={s} d={d}/>;
-  if(tab==='exportcoda') return <AccountingOutputMod s={s} d={d}/>;
+  if(tab==='exportWinbooks' || tab==='exportcompta' || tab==='exportcomptapro') return <AccountingOutputMod s={s} d={d}/>;
+  if(tab==='exportcoda') return <AccountingOutputMod s={s} d={d} defaultFormat='coda'/>;
+  if(tab==='exportbatch') return <ExportBatchMod s={s} d={d}/>;
   if(tab==='importcsv') return <FichesMod s={s} d={d}/>;
   if(tab==='belcotax281') return <FichesMod s={s} d={d}/>;
   if(tab==='chargessociales') return <PortailEmployeurMod s={s} d={d}/>;

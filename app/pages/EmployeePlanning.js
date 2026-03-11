@@ -8,7 +8,7 @@ import { supabase } from '@/app/lib/supabase';
 //  Planning mensuel par équipe/département
 // ═══════════════════════════════════════════════════════
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 
 const GOLD = '#c6a34e'
 const DARK = '#0d1117'
