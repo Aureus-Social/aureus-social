@@ -83,6 +83,7 @@ const AnalyticsPage = ({ s, d, tab }) => <AnalyticsDashboardRaw s={s} d={d} tab=
 
 const ComplianceDashboardRaw = dynamic(() => import('../pages/ComplianceDashboard'), { ssr: false, loading: Loading });
 const CompliancePage = ({ s, d, tab }) => <ComplianceDashboardRaw s={s} d={d} tab={tab} />;
+const RGPDModuleRaw = dynamic(() => import('../pages/RGPDModule'), { ssr: false, loading: Loading });
 
 const DocumentGeneratorRaw = dynamic(() => import('../pages/DocumentGenerator'), { ssr: false, loading: Loading });
 const DocumentGeneratorPgW = ({ s, d, tab }) => <DocumentGeneratorRaw s={s} d={d} tab={tab} />;
@@ -688,7 +689,7 @@ function DashboardLayoutInner({ user }) {
       case 'monitoring': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'piloteauto': return <SmartOpsPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'queue': return <ModsBatch2Pg s={s} d={d} tab={page} />;
-      case 'rgpd': return <ComplianceDashboardRaw s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'rgpd': return <RGPDModuleRaw s={s} d={d} t={t} lang={lang} state={s} />;
       case 'roadmapinfra': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'support': return <NotificationCenterPg s={s} d={d} tab={page} />;
       case 'team': return <EmployeeHubPage s={s} d={d} t={t} lang={lang} tab={page} />;
