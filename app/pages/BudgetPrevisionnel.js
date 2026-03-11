@@ -1,5 +1,5 @@
 'use client';
-import { TX_ONSS_W, TX_ONSS_E } from '@/app/lib/helpers';
+import { LB, TX_ONSS_W, TX_ONSS_E, CR_PAT, CR_TRAV } from '@/app/lib/helpers';
 import { useState, useMemo } from 'react';
 import { useLang } from '../lib/lang-context';
 
@@ -33,7 +33,7 @@ export default function BudgetPrevisionnel({ s, d }) {
   const [inclureActiva, setInclureActiva] = useState(false);
   const [inclureCheques, setInclureCheques] = useState(false);
   const [joursChequesRepas, setJoursChequesRepas] = useState(21);
-  const [montantCheque, setMontantCheque] = useState(6.91);
+  const [montantCheque, setMontantCheque] = useState(CR_PAT);
   const [selectedEmp, setSelectedEmp] = useState('all');
   const [tab, setTab] = useState('mensuel');
 
@@ -49,7 +49,7 @@ export default function BudgetPrevisionnel({ s, d }) {
       const coutMensuel = brut + onssE;
       const pecule = inclurevacances ? brut * TX_VACANCES : 0;
       const treizieme = inclure13e ? brut : 0;
-      const cheques = inclureCheques ? joursChequesRepas * (montantCheque - 1.09) : 0; // part patronale nette
+      const cheques = inclureCheques ? joursChequesRepas * (montantCheque - CR_TRAV) : 0; // part patronale nette
       const activaDeduction = inclureActiva ? ACTIVA_DEDUCTION : 0;
       const coutAnnuel = (coutMensuel * 12) + pecule + treizieme + (cheques * 12) - (activaDeduction * 12);
       const mois = Array.from({length:12}, (_,i) => ({

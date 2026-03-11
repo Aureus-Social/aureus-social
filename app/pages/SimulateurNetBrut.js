@@ -1,7 +1,7 @@
 "use client";
 import { useLang } from '../lib/lang-context';
 import React, { useState, useMemo } from 'react';
-import { TX_ONSS_W, TX_ONSS_E, RMMMG, IPP_TRANCHES_2026, IPP_FRAIS_PRO_PCT, IPP_FRAIS_PRO_MAX, IPP_TAXE_COMMUNALE, IPP_QUOTITE_BASE, IPP_REDUC_ENFANTS, ONSS_E_SECTEURS, PRIMES_SECTORIELLES, BAREMES_CP_MIN } from '@/app/lib/helpers';
+import { TX_ONSS_W, TX_ONSS_E, TX_OUV108, RMMMG, IPP_TRANCHES_2026, IPP_FRAIS_PRO_PCT, IPP_FRAIS_PRO_MAX, IPP_TAXE_COMMUNALE, IPP_QUOTITE_BASE, IPP_REDUC_ENFANTS, ONSS_E_SECTEURS, PRIMES_SECTORIELLES, BAREMES_CP_MIN } from '@/app/lib/helpers';
 
 // ═══════════════════════════════════════════════════════════
 // CP DATABASE — barèmes minimums + spécificités sectorielles
@@ -55,7 +55,7 @@ export function SimulateurNetBrut({ props_tab }) {
 
   const result = useMemo(() => {
     const brut = brutInput;
-    const onssBase = isOuvrier ? Math.round(brut * 1.08 * 100) / 100 : brut;
+    const onssBase = isOuvrier ? Math.round(brut * TX_OUV108 * 100) / 100 : brut;
     const onssW = Math.round(onssBase * TX_ONSS_W * 100) / 100;
     const onssE = Math.round(brut * (TX_ONSS_E + (cp.onssE_extra||0)) * 100) / 100;
     const imposable = brut - onssW;

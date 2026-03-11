@@ -578,7 +578,7 @@ function genDmfaXml(emps, co, trimestre, annee, TX_ONSS_W_val, TX_ONSS_E_val) {
     const niss=(emp.niss||'').replace(/[^0-9]/g,'');
     // Calcul ONSS précis : 108% ouvrier + cotis. sectorielle
     const pr = calcPayrollFromEmp(emp) || {};
-    const onssBase = pr.isOuvrier ? r2l(brut*1.08) : brut;
+    const onssBase = pr.isOuvrier ? r2l(brut*TX_OUV108) : brut;
     const onssWT = r2l(onssBase*3*(pr.onssP/brut||TX_ONSS_W_val)); // proratisé
     const onssET = r2l(brutT*(TX_ONSS_E_val + (pr.onssEExtra/brut||0)));
     totBrut  += brutT;
@@ -2359,7 +2359,7 @@ export function DetectionAnomaliesMod({s,d}){
     // Salaire à 0
     if(brut<=0)anomalies.push({emp,type:'error',cat:'Salaire',msg:'Salaire brut à 0€ — impossible de calculer la paie',fix:'Configurer le salaire brut mensuel'});
     // Salaire très bas (sous RMMMG)
-    else if(brut<(BAREMES_CP_MIN?.["119"]?.cl1||RMMMG||2029.88)&&emp.contract!=='student'&&emp.contract!=='flexi')anomalies.push({emp,type:'error',cat:'Salaire',msg:`Salaire ${fmt(brut)} sous le RMMMG (2.029,88€ en 2026)`,fix:'Vérifier si le régime est temps partiel ou augmenter au minimum légal'});
+    else if(brut<(BAREMES_CP_MIN?.["119"]?.cl1||RMMMG)&&emp.contract!=='student'&&emp.contract!=='flexi')anomalies.push({emp,type:'error',cat:'Salaire',msg:`Salaire ${fmt(brut)} sous le RMMMG (2.070,48€ en 2026)`,fix:'Vérifier si le régime est temps partiel ou augmenter au minimum légal'});
     // Salaire aberrant > 15000€
     else if(brut>15000)anomalies.push({emp,type:'warning',cat:'Salaire',msg:`Salaire ${fmt(brut)} très élevé — vérifier la saisie`,fix:'Confirmer le montant ou corriger'});
     // NISS manquant

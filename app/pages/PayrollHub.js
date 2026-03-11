@@ -1,6 +1,6 @@
 'use client';
 import { useLang } from '../lib/lang-context';
-import { C, PV_DOUBLE, PV_SIMPLE, RMMMG, TX_ONSS_E, TX_ONSS_W, fmt, quickPP } from '@/app/lib/helpers';
+import { C, CR_PAT, PV_DOUBLE, PV_SIMPLE, RMMMG, TX_ONSS_E, TX_ONSS_W, fmt, quickPP } from '@/app/lib/helpers';
 import{useState,useMemo}from'react';
 
 const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
@@ -410,9 +410,9 @@ export function CoutsAnnuelsV2({s}){
         <Row l="13eme mois" v={fi(mb)+' €'} c="#c6a34e"/>
         <Row l="Assurance AT (~1.5%)" v={fi(mb*12*0.015)+' €'} c="#888"/>
         <Row l="Medecine travail" v={fi(n*100)+' €'} c="#888"/>
-        <Row l="Cheques-repas (est.)" v={fi(n*6.91*20*12)+' €'} c="#fb923c"/>
+        <Row l="Cheques-repas (est.)" v={fi(n*CR_PAT*20*12)+' €'} c="#fb923c"/>
         <Row l="Formation (2%)" v={fi(totalAnnuel*0.02)+' €'} c="#a78bfa"/>
-        <Row l="BUDGET COMPLET" v={fi(totalAnnuel+n*100+n*6.91*20*12)+' €'} b/>
+        <Row l="BUDGET COMPLET" v={fi(totalAnnuel+n*100+n*CR_PAT*20*12)+' €'} b/>
       </C>
     </div>
   </div>;

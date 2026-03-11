@@ -3,20 +3,23 @@
 // Conforme barèmes SPF Finances 2026
 // ═══════════════════════════════════════════════════════════
 
-const TX_ONSS_W = 0.1307;
-const TX_ONSS_E = 0.2719;
-const TX_OUV108 = 1.08;
-const RMMMG = (typeof globalThis !== "undefined" && globalThis.__LOIS_BELGES?.salaires?.RMMMG?.montant18ans) || 2070.48; // fallback uniquement — valeur réelle via LOIS_BELGES
-const CR_MAX = 8.00;
-const CR_PAT = 6.91;
-const CR_TRAV = 1.09;
-const PV_DOUBLE = 0.92;
-const PV_SIMPLE = 0.1534;
+// Toutes les constantes lisent depuis __LOIS_BELGES injecté au runtime (tests Jest)
+// Les fallbacks numériques sont uniquement des gardes de sécurité — NE PAS modifier directement
+const _LB = (typeof globalThis !== "undefined" && globalThis.__LOIS_BELGES) || {};
+const TX_ONSS_W = _LB.onss?.travailleur               || 0.1307;
+const TX_ONSS_E = _LB.onss?.employeur?.total           || 0.2719;
+const TX_OUV108 = _LB.onss?.ouvrier108                || 1.08;
+const RMMMG     = _LB.remuneration?.RMMMG?.montant18ans || 2070.48;
+const CR_MAX    = _LB.chequesRepas?.valeurFaciale?.max  || 8.00;
+const CR_PAT    = _LB.chequesRepas?.partPatronale?.max  || 6.91;
+const CR_TRAV   = _LB.chequesRepas?.partTravailleur?.min || 1.09;
+const PV_DOUBLE = _LB.remuneration?.peculeVacances?.double?.pct || 0.92;
+const PV_SIMPLE = _LB.remuneration?.peculeVacances?.simple?.pct || 0.1534;
 
 // Bonus emploi 2026
-const BONUS_SEUIL1 = 2024.24;
-const BONUS_SEUIL2 = 2968.70;
-const BONUS_MAX    = 181.42;
+const BONUS_SEUIL1 = _LB.pp?.bonusEmploi?.seuilBrut1 || 2024.24;
+const BONUS_SEUIL2 = _LB.pp?.bonusEmploi?.seuilBrut2 || 2968.70;
+const BONUS_MAX    = _LB.pp?.bonusEmploi?.maxMensuel  || 181.42;
 
 function calcBonusEmploi(brut) {
   if (brut <= BONUS_SEUIL1) return BONUS_MAX;
