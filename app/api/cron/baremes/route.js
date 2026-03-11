@@ -157,7 +157,7 @@ async function pushGitHub(patches, msg) {
   for(const {pattern,replacement} of patches){
     const before=content;
     content=content.replace(pattern,typeof replacement==='function'?replacement:replacement);
-    if(content===before) console.log(`⚠️ Pattern non trouvé: ${pattern}`);
+    if(content===before) console.warn('⚠️ Pattern non trouvé: ${pattern}`);
   }
   content=content.replace(/dateMAJ:\s*'[^']+'/, `dateMAJ: '${new Date().toISOString().split('T')[0]}'`);
 

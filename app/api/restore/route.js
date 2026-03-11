@@ -1,13 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
+import { getAuthUser } from '@/app/lib/supabase';
+import { hasPermission, getRoleFromUser } from '@/app/lib/permissions';
 
 export const dynamic = 'force-dynamic';
-import { hasPermission } from '@/app/lib/permissions';
 
 const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
   ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
   : null;
 
-// Tables autorisées par rôle pour la restauration
 const ROLE_RESTORE = {
   admin:     ['employees','travailleurs','fiches_paie','documents','audit_log','activity_log','app_state','payroll_history','dimona','dmfa','baremes_cp'],
   comptable: ['payroll_history','fiches_paie','documents'],
@@ -18,87 +18,80 @@ const ROLE_RESTORE = {
 
 export async function POST(request) {
   try {
-    const { backupData, userRole, dryRun } = await request.json();
+    // ✅ Auth JWT obligatoire — le rôle vient du JWT serveur, pas du client
+    const caller = await getAuthUser(request);
+    if (!caller) return Response.json({ error: 'Non autorisé — JWT requis' }, { status: 401 });
 
-    // Vérifier permission
-    if (!hasPermission(userRole || 'readonly', 'exporter_donnees')) {
+    // Rôle déterminé côté SERVEUR uniquement
+    const role = getRoleFromUser(caller) || caller?.user_metadata?.role || 'readonly';
+
+    if (!hasPermission(role, 'exporter_donnees')) {
       return Response.json({ error: 'Permission refusée — exporter_donnees requis' }, { status: 403 });
     }
+
+    const { backupData, dryRun } = await request.json();
 
     if (!backupData || !backupData.metadata || !backupData.data) {
       return Response.json({ error: 'Fichier backup invalide — format incorrect' }, { status: 400 });
     }
 
-    const role = userRole || 'readonly';
     const allowedTables = ROLE_RESTORE[role] || [];
-
     if (allowedTables.length === 0) {
       return Response.json({ error: 'Accès refusé — votre rôle ne permet pas la restauration' }, { status: 403 });
     }
 
-    // Vérification compatibilité de version
-    const backupVersion = backupData.metadata.version || '1.0';
     const backupRole = backupData.metadata.role || 'admin';
-
-    // Un RH ne peut pas restaurer un backup Admin
     if (backupRole === 'admin' && role !== 'admin') {
-      return Response.json({ error: `Incompatibilité de rôle — backup créé par ${backupRole}, restauration par ${role} impossible` }, { status: 403 });
+      return Response.json({ error: `Incompatibilité de rôle — backup admin, restauration par ${role} impossible` }, { status: 403 });
     }
 
-    const results = [];
-    const errors = [];
-    let totalRestored = 0;
-
-    // Mode dry-run : vérifier sans restaurer
     if (dryRun) {
       const tables = Object.keys(backupData.data).filter(t => allowedTables.includes(t));
       const totalRecords = tables.reduce((sum, t) => sum + (backupData.data[t]?.length || 0), 0);
       return Response.json({
-        ok: true,
-        dryRun: true,
+        ok: true, dryRun: true,
         preview: {
-          tables: tables.length,
-          records: totalRecords,
+          tables: tables.length, records: totalRecords,
           tables_detail: tables.map(t => ({ table: t, records: backupData.data[t]?.length || 0 })),
           backup_date: backupData.metadata.generated_at,
-          backup_role: backupRole,
           restore_role: role
         }
       });
     }
 
-    // Logger la restauration dans audit_log avant d'exécuter
+    // Logger avant restauration
     await supabase.from('audit_log').insert({
       action: 'RESTORE_INITIATED',
       table_name: 'system',
+      user_id: caller.id,
+      user_email: caller.email,
       details: {
         backup_date: backupData.metadata.generated_at,
-        backup_role: backupRole,
         restore_role: role,
         tables: Object.keys(backupData.data).filter(t => allowedTables.includes(t))
       },
       created_at: new Date().toISOString()
     });
 
-    // Restauration atomique table par table
+    const results = [];
+    const errors = [];
+    let totalRestored = 0;
+
     for (const [table, rows] of Object.entries(backupData.data)) {
       if (!allowedTables.includes(table)) {
         results.push({ table, skipped: true, reason: 'Non autorisé pour ce rôle' });
         continue;
       }
       if (!Array.isArray(rows) || rows.length === 0) {
-        results.push({ table, skipped: true, reason: 'Table vide dans le backup' });
+        results.push({ table, skipped: true, reason: 'Table vide' });
         continue;
       }
-
       try {
-        // Upsert par batch de 100 pour éviter les timeouts
-        const batchSize = 100;
         let restored = 0;
-        for (let i = 0; i < rows.length; i += batchSize) {
-          const batch = rows.slice(i, i + batchSize);
+        for (let i = 0; i < rows.length; i += 100) {
+          const batch = rows.slice(i, i + 100);
           const { error } = await supabase.from(table).upsert(batch, { onConflict: 'id', ignoreDuplicates: false });
-          if (error) { errors.push(`${table} batch ${i}: ${error.message}`); break; }
+          if (error) { errors.push(`${table}: ${error.message}`); break; }
           restored += batch.length;
         }
         results.push({ table, restored, total: rows.length, ok: restored === rows.length });
@@ -109,10 +102,11 @@ export async function POST(request) {
       }
     }
 
-    // Logger le résultat
     await supabase.from('audit_log').insert({
       action: errors.length > 0 ? 'RESTORE_PARTIAL' : 'RESTORE_COMPLETE',
       table_name: 'system',
+      user_id: caller.id,
+      user_email: caller.email,
       details: { total_restored: totalRestored, errors, results },
       created_at: new Date().toISOString()
     });
@@ -122,15 +116,12 @@ export async function POST(request) {
       summary: {
         tables_restored: results.filter(r => r.ok).length,
         records_restored: totalRestored,
-        errors: errors.length,
-        skipped: results.filter(r => r.skipped).length
+        errors: errors.length
       },
-      results,
-      errors
+      results, errors
     });
 
   } catch (e) {
-    console.error('[Restore] Erreur:', e.message);
     return Response.json({ error: e.message }, { status: 500 });
   }
 }

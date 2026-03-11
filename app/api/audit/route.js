@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { getAuthUser } from '@/app/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -6,9 +7,20 @@ const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SE
   ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
   : null;
 
+// Helper: vérifier JWT depuis Authorization header
+async function requireAuth(request) {
+  const user = await getAuthUser(request);
+  if (!user) return null;
+  return user;
+}
+
 export async function POST(request) {
   try {
-    const { action, table_name, record_id, details, user_id, user_email } = await request.json();
+    // ✅ Auth JWT obligatoire
+    const user = await requireAuth(request);
+    if (!user) return Response.json({ error: 'Non autorisé — JWT requis' }, { status: 401 });
+
+    const { action, table_name, record_id, details } = await request.json();
     if (!action) return Response.json({ error: 'action required' }, { status: 400 });
 
     const forwarded = request.headers.get('x-forwarded-for');
@@ -20,18 +32,14 @@ export async function POST(request) {
       table_name: table_name || null,
       record_id: record_id ? String(record_id) : null,
       details: details || null,
-      user_id: user_id || null,
-      user_email: user_email || null,
+      user_id: user.id,
+      user_email: user.email,
       ip_address: ip,
       user_agent: userAgent.substring(0, 200),
       created_at: new Date().toISOString()
     });
 
-    if (error) {
-      console.error('[Audit] Erreur insertion:', error.message);
-      return Response.json({ error: error.message }, { status: 500 });
-    }
-
+    if (error) return Response.json({ error: error.message }, { status: 500 });
     return Response.json({ success: true });
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });
@@ -40,6 +48,10 @@ export async function POST(request) {
 
 export async function GET(request) {
   try {
+    // ✅ Auth JWT obligatoire
+    const user = await requireAuth(request);
+    if (!user) return Response.json({ error: 'Non autorisé — JWT requis' }, { status: 401 });
+
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50');
     const table = searchParams.get('table');
