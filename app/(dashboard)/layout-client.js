@@ -76,6 +76,9 @@ const ProceduresRHHubPg = dynamic(() => import('../pages/procedures/ProceduresRH
 
 // Wrappers pour modules avec props non-standard
 const AnalyticsDashboardRaw = dynamic(() => import('../pages/AnalyticsDashboard'), { ssr: false, loading: Loading });
+const PortailEmployePg = dynamic(() => import('../pages/PortailEmploye'), { ssr: false, loading: Loading });
+const PortailClientPg = dynamic(() => import('../pages/PortailClient'), { ssr: false, loading: Loading });
+const RegistrePersonnelPg = dynamic(() => import('../pages/RegistrePersonnel'), { ssr: false, loading: Loading });
 const AnalyticsPage = ({ s, d, tab }) => <AnalyticsDashboardRaw s={s} d={d} tab={tab} />;
 
 const ComplianceDashboardRaw = dynamic(() => import('../pages/ComplianceDashboard'), { ssr: false, loading: Loading });
@@ -585,9 +588,10 @@ function DashboardLayoutInner({ user }) {
       case 'registrepersonnel': return <EmployeePlanningPg s={s} d={d} tab={page} />;
       case 'rh': return <EmployeeHubPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'proceduresrh': return <ProceduresRHHubPg s={s} d={d} />;
-      case 'portail': return <PortalSystemPg s={s} d={d} tab={page} />;
-      case 'portailclient': return <PortalSystemPg s={s} d={d} tab={page} />;
+      case 'portail': return <PortailEmployePg s={s} d={d} />;
+      case 'portailclient': return <PortailClientPg s={s} d={d} />;
       case 'portalmanager': return <PortalSystemPg s={s} d={d} tab={page} />;
+      case 'registrepersonnel': return <RegistrePersonnelPg s={s} d={d} />;
       case 'formC4': return <DocumentGeneratorPg s={s} d={d} tab={page} />;
       // PAIE & CALCULS
       case 'avantages': return <PrimesPage s={s} d={d} t={t} lang={lang} tab={page} />;
