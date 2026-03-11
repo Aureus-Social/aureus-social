@@ -278,10 +278,14 @@ export function PayrollSimulatorAdvanced({ calcPayroll, LOIS_BELGES, props_tab }
         React.createElement(ResultRow, { label: 'CSSS', value: -b2n.csss, color: RED }),
         b2n.bonusEmploi > 0 && React.createElement(ResultRow, { label: 'Bonus à l\'emploi', value: b2n.bonusEmploi, color: GREEN }),
         React.createElement(ResultRow, { label: 'SALAIRE NET', value: b2n.net, color: GREEN, bold: true, separator: true }),
-        brutMinCP > 0 && brut < brutMinCP && React.createElement('div', { style: { margin: '10px 0', padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.25)', fontSize: 11 } },
+        React.createElement('div', { style: { margin: '8px 0 4px', padding: '8px 12px', borderRadius: 8, background: 'rgba(198,163,78,.04)', border: '1px solid rgba(198,163,78,.12)', fontSize: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
+          React.createElement('span', { style: { color: '#888' } }, '📋 ' + cpInfo.label),
+          React.createElement('span', { style: { color: brut >= brutMinCP ? '#22c55e' : '#ef4444', fontWeight: 600 } }, 'Barème min : ' + fmt(brutMinCP) + ' €' + (brut >= brutMinCP ? ' ✓' : ' ⚠️'))
+        ),
           React.createElement('span', { style: { color: '#ef4444', fontWeight: 700 } }, '⚠️ Sous le barème ' + cpInfo.label + ' : '),
           React.createElement('span', { style: { color: '#9e9b93' } }, 'minimum ' + fmt(brutMinCP) + ' € brut — écart : '),
-          React.createElement('span', { style: { color: '#ef4444', fontWeight: 600 } }, fmt(brutMinCP - brut) + ' €')
+          React.createElement('span', { style: { color: '#ef4444', fontWeight: 600 } }, fmt(brutMinCP - brut) + ' €'),
+          React.createElement('button', { onClick: () => setBrut(brutMinCP), style: { marginLeft: 12, padding: '3px 10px', borderRadius: 6, border: 'none', background: 'rgba(198,163,78,.2)', color: '#c6a34e', fontSize: 10, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' } }, '→ Appliquer min. CP')
         ),
         brutMinCP > 0 && brut >= brutMinCP && React.createElement('div', { style: { margin: '10px 0', padding: '8px 14px', borderRadius: 8, background: 'rgba(34,197,94,.06)', border: '1px solid rgba(34,197,94,.2)', fontSize: 11, color: '#22c55e' } },
           '✅ Conforme ' + cpInfo.label + ' — min. ' + fmt(brutMinCP) + ' €'
@@ -330,7 +334,8 @@ export function PayrollSimulatorAdvanced({ calcPayroll, LOIS_BELGES, props_tab }
         React.createElement(ResultRow, { label: 'Net obtenu', value: n2b.net, color: GREEN, bold: true, separator: true }),
         brutMinCP > 0 && n2b.brut < brutMinCP && React.createElement('div', { style: { margin: '10px 0', padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.25)', fontSize: 11 } },
           React.createElement('span', { style: { color: '#ef4444', fontWeight: 700 } }, '⚠️ Brut calculé sous le barème ' + cpInfo.label + ' : '),
-          React.createElement('span', { style: { color: '#9e9b93' } }, 'minimum ' + fmt(brutMinCP) + ' € — le net réel serait ' + fmt(calcPayroll(brutMinCP, statut, fam, ch, reg).net) + ' €')
+          React.createElement('span', { style: { color: '#9e9b93' } }, 'minimum ' + fmt(brutMinCP) + ' € — le net réel serait ' + fmt(calcPayroll(brutMinCP, statut, fam, ch, reg).net) + ' €'),
+          React.createElement('button', { onClick: () => setTargetNet(R2(calcPayroll(brutMinCP, statut, fam, ch, reg).net)), style: { marginLeft: 12, padding: '3px 10px', borderRadius: 6, border: 'none', background: 'rgba(198,163,78,.2)', color: '#c6a34e', fontSize: 10, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' } }, '→ Net min. CP')
         ),
         brutMinCP > 0 && n2b.brut >= brutMinCP && React.createElement('div', { style: { margin: '10px 0', padding: '8px 14px', borderRadius: 8, background: 'rgba(34,197,94,.06)', border: '1px solid rgba(34,197,94,.2)', fontSize: 11, color: '#22c55e' } },
           '✅ Conforme ' + cpInfo.label + ' — brut ' + fmt(n2b.brut) + ' € ≥ min. ' + fmt(brutMinCP) + ' €'
