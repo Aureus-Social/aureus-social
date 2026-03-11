@@ -111,6 +111,9 @@ const IntegrationsComptaRaw = dynamic(() => import('../pages/IntegrationsCompta'
 const VehiculeATNRaw = dynamic(() => import('../pages/VehiculeATN'), { ssr: false, loading: Loading });
 const CalendrierSocialRaw = dynamic(() => import('../pages/CalendrierSocial'), { ssr: false, loading: Loading });
 const SalaireMaladieRaw = dynamic(() => import('../pages/SalaireMaladie'), { ssr: false, loading: Loading });
+const SimulateurPensionRaw = dynamic(() => import('../pages/SimulateurPension'), { ssr: false, loading: Loading });
+const SoldeToutCompteRaw = dynamic(() => import('../pages/SoldeToutCompte'), { ssr: false, loading: Loading });
+const FloatingLegalAgentRaw = dynamic(() => import('../pages/FloatingLegalAgent'), { ssr: false, loading: Loading });
 const IntegrationsComptaPg = ({ s, d }) => <IntegrationsComptaRaw s={s} d={d} />;
 const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 
@@ -588,13 +591,13 @@ function DashboardLayoutInner({ user }) {
       case 'workflowAbs': return <AbsencesContratsV3Pg s={s} d={d} tab={page} />;
       case 'interimaires': return <EmployeePlanningPg s={s} d={d} tab={page} />;
       case 'joursPrestes': return <EmployeePlanningPg s={s} d={d} tab={page} />;
-      case 'registrepersonnel': return <EmployeePlanningPg s={s} d={d} tab={page} />;
       case 'rh': return <EmployeeHubPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'proceduresrh': return <ProceduresRHHubPg s={s} d={d} />;
       case 'portail': return <PortailEmployePg s={s} d={d} />;
       case 'portailclient': return <PortailClientPg s={s} d={d} />;
       case 'portalmanager': return <PortalSystemPg s={s} d={d} tab={page} />;
       case 'registrepersonnel': return <RegistrePersonnelPg s={s} d={d} />;
+      case 'floatinglegal': return <FloatingLegalAgentRaw s={s} d={d} />;
       case 'formC4': return <DocumentGeneratorPg s={s} d={d} tab={page} />;
       // PAIE & CALCULS
       case 'avantages': return <PrimesPage s={s} d={d} t={t} lang={lang} tab={page} />;
@@ -612,9 +615,9 @@ function DashboardLayoutInner({ user }) {
       case 'simembauche': return <SimuNetBrutPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'simulateurspro': return <PayrollSimPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'simulicenciement': return <PayrollSimPage s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'simupension': return <PayrollSimPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'simupension': return <SimulateurPensionRaw s={s} d={d} />;
       case 'simutp': return <SimuNetBrutPage s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'soldetoutcompte': return <PayrollGroupPg s={s} d={d} tab={page} />;
+      case 'soldetoutcompte': return <SoldeToutCompteRaw s={s} d={d} />;
       case 'timeline': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'validation': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'vehiculesatn': return <VehiculeATNRaw s={s} d={d} />;

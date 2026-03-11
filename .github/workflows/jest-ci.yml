@@ -1,0 +1,55 @@
+name: Tests Jest CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Tests unitaires Jest
+    runs-on: ubuntu-latest
+    
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Jest tests
+        run: npx jest --ci --coverage --forceExit --passWithNoTests
+        timeout-minutes: 10
+
+      - name: Upload coverage report
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+      - name: Comment PR avec résultats
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ **Tests Jest échoués** — Vérifier les logs ci-dessus avant de merger.'
+            })

@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  env: {
+    // Constantes légales belges — mise à jour annuelle
+    RMMMG_CURRENT: process.env.RMMMG_CURRENT || '2070.48',
+    RMMMG_YEAR: process.env.RMMMG_YEAR || '2026',
+  },
   async headers() {
     return [
       {
