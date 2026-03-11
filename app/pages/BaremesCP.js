@@ -2,7 +2,7 @@
 import { useLang } from '../lib/lang-context';
 import{useState,useMemo}from'react';
 import{TransversalCPView}from'./TransversalCP';
-import{TX_ONSS_E,TX_ONSS_W,CR_PAT,CR_MAX,FORF_BUREAU,RMMMG}from'@/app/lib/helpers';
+import{TX_ONSS_E,TX_ONSS_W,CR_PAT,CR_MAX,FORF_BUREAU,RMMMG,CP_DATA,getBaremeCP,BAREMES_CP_MIN}from'@/app/lib/helpers';
 
 const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
 const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
@@ -27,7 +27,7 @@ export const BAREMES_DATA={
   info:'CP résiduelle pour les employés qui ne relèvent d\'aucune autre CP spécifique. Couvre la majorité des PME belges.',
   classes:[
     {id:'A',desc:'Personnel d\'exécution',exemples:'Réceptionniste, encodeur, employé administratif',
-      grille:[{anc:0,min:2070.48},{anc:1,min:2091.18},{anc:2,min:2111.88},{anc:3,min:2132.58},{anc:4,min:2153.28},{anc:5,min:2174.00},{anc:6,min:2194.70},{anc:8,min:2236.10},{anc:10,min:2277.50},{anc:12,min:2318.90},{anc:14,min:2360.30},{anc:16,min:2401.70},{anc:18,min:2443.10},{anc:20,min:2484.50},{anc:25,min:2587.50}]},
+      grille:[{anc:0,min:RMMMG},{anc:1,min:2091.18},{anc:2,min:2111.88},{anc:3,min:2132.58},{anc:4,min:2153.28},{anc:5,min:2174.00},{anc:6,min:2194.70},{anc:8,min:2236.10},{anc:10,min:2277.50},{anc:12,min:2318.90},{anc:14,min:2360.30},{anc:16,min:2401.70},{anc:18,min:2443.10},{anc:20,min:2484.50},{anc:25,min:2587.50}]},
     {id:'B',desc:'Personnel qualifié',exemples:'Comptable junior, assistant RH, technicien support',
       grille:[{anc:0,min:2174.00},{anc:1,min:2196.74},{anc:2,min:2219.48},{anc:3,min:2242.22},{anc:4,min:2264.96},{anc:5,min:2287.70},{anc:6,min:2310.44},{anc:8,min:2355.92},{anc:10,min:2401.40},{anc:12,min:2446.88},{anc:14,min:2492.36},{anc:16,min:2537.84},{anc:18,min:2583.32},{anc:20,min:2628.80},{anc:25,min:2742.00}]},
     {id:'C',desc:'Personnel spécialisé',exemples:'Comptable senior, analyste, chef de projet junior',
@@ -87,7 +87,7 @@ export const BAREMES_DATA={
   info:'Supermarchés, boucheries de détail, boulangeries de détail, poissonneries de détail, épiceries.',
   classes:[
     {id:'1',desc:'Personnel de base',exemples:'Caissier(ere), gondolier, magasinier',
-      grille:[{anc:0,min:2029.88},{anc:1,min:2050.18},{anc:2,min:2070.48},{anc:3,min:2090.78},{anc:5,min:2131.38},{anc:8,min:2192.28},{anc:10,min:2232.88},{anc:15,min:2334.28},{anc:20,min:2435.68}]},
+      grille:[{anc:0,min:2029.88},{anc:1,min:2050.18},{anc:2,min:RMMMG},{anc:3,min:2090.78},{anc:5,min:2131.38},{anc:8,min:2192.28},{anc:10,min:2232.88},{anc:15,min:2334.28},{anc:20,min:2435.68}]},
     {id:'2',desc:'Personnel qualifié',exemples:'Vendeur(se) boucherie, poissonnier, boulanger détail',
       grille:[{anc:0,min:2134.72},{anc:1,min:2157.07},{anc:2,min:2179.42},{anc:3,min:2201.77},{anc:5,min:2246.47},{anc:8,min:2313.52},{anc:10,min:2358.22},{anc:15,min:2469.97},{anc:20,min:2581.72}]},
     {id:'3',desc:'Personnel spécialisé',exemples:'Chef rayon boucherie, chef boulangerie',
@@ -115,7 +115,7 @@ export const BAREMES_DATA={
   info:'Hôtels, restaurants, cafés, bars, discoteques, traiteurs, fast-food, catering.',
   classes:[
     {id:'I',desc:'Personnel non qualifié',exemples:'Plongeur, femme de chambre, aide cuisine, commis débarrasseur',
-      grille:[{anc:0,min:2029.88},{anc:0.5,min:2050.18},{anc:1,min:2070.48},{anc:2,min:2111.08},{anc:3,min:2151.68},{anc:5,min:2232.88},{anc:10,min:2435.68}]},
+      grille:[{anc:0,min:2029.88},{anc:0.5,min:2050.18},{anc:1,min:RMMMG},{anc:2,min:2111.08},{anc:3,min:2151.68},{anc:5,min:2232.88},{anc:10,min:2435.68}]},
     {id:'II',desc:'Personnel semi-qualifié',exemples:'Commis de cuisine, garçon/serveuse, barman junior, femme de chambre 1ère',
       grille:[{anc:0,min:2095.44},{anc:0.5,min:2117.39},{anc:1,min:2139.34},{anc:2,min:2183.24},{anc:3,min:2227.14},{anc:5,min:2314.94},{anc:10,min:2534.44}]},
     {id:'III',desc:'Personnel qualifié',exemples:'Cuisinier, chef de rang, barman, réceptionniste',
@@ -180,7 +180,7 @@ export const BAREMES_DATA={
   info:'Aide-ménagères titres-services: nettoyage, repassage, courses, préparation repas légers à domicile.',
   classes:[
     {id:'A',desc:'Aide-ménagère',exemples:'Aide-ménagère titres-services',
-      grille:[{anc:0,min:2070.48},{anc:1,min:2091.18},{anc:2,min:2111.88},{anc:3,min:2132.58},{anc:4,min:2153.28},{anc:5,min:2174.00},{anc:6,min:2194.70},{anc:8,min:2236.10},{anc:10,min:2277.50},{anc:12,min:2318.90},{anc:14,min:2360.30},{anc:16,min:2401.70},{anc:18,min:2443.10},{anc:20,min:2484.50}]},
+      grille:[{anc:0,min:RMMMG},{anc:1,min:2091.18},{anc:2,min:2111.88},{anc:3,min:2132.58},{anc:4,min:2153.28},{anc:5,min:2174.00},{anc:6,min:2194.70},{anc:8,min:2236.10},{anc:10,min:2277.50},{anc:12,min:2318.90},{anc:14,min:2360.30},{anc:16,min:2401.70},{anc:18,min:2443.10},{anc:20,min:2484.50}]},
   ],
   avantages:{prime13ème:true,cheqRepas:{patronal:3,max:4},ecoCheques:{max:250},conges:20},
   primes:[{nom:'Prime de fin d\'année',montant:'Équivalent 4.33 semaines',mois:'Décembre'},
@@ -301,7 +301,7 @@ export const BAREMES_DATA={
   info:'Nettoyage de bureaux, industriel, vitres, moquettes, désinfection, nettoyage après sinistre.',
   classes:[
     {id:'IA',desc:'Agent d\'entretien',exemples:'Nettoyeur(se) bureaux, halls, sanitaires',
-      grille:[{anc:0,min:2029.88},{anc:1,min:2050.18},{anc:2,min:2070.48},{anc:3,min:2090.78},{anc:5,min:2131.38},{anc:8,min:2192.28},{anc:10,min:2232.88},{anc:15,min:2334.28},{anc:20,min:2435.68}]},
+      grille:[{anc:0,min:2029.88},{anc:1,min:2050.18},{anc:2,min:RMMMG},{anc:3,min:2090.78},{anc:5,min:2131.38},{anc:8,min:2192.28},{anc:10,min:2232.88},{anc:15,min:2334.28},{anc:20,min:2435.68}]},
     {id:'IB',desc:'Agent d\'entretien spécialisé',exemples:'Laveur de vitres, décapeur, nettoyeur industriel',
       grille:[{anc:0,min:2095.44},{anc:1,min:2117.39},{anc:2,min:2139.34},{anc:3,min:2161.29},{anc:5,min:2205.19},{anc:8,min:2271.04},{anc:10,min:2314.94},{anc:15,min:2424.69},{anc:20,min:2534.44}]},
     {id:'II',desc:'Chef d\'équipe',exemples:'Responsable chantier, controleur qualite, chef equipe',
@@ -329,7 +329,7 @@ export const BAREMES_DATA={
   info:'Écoles libres subventionnées, PMS, internats. Personnel non-enseignant (administr., éducateurs, ouvriers).',
   classes:[
     {id:'1',desc:'Personnel d\'entretien',exemples:'Agent d\'entretien, concierge, ouvrier polyvalent',
-      grille:[{anc:0,min:2029.88},{anc:2,min:2070.48},{anc:4,min:2111.08},{anc:6,min:2151.68},{anc:8,min:2192.28},{anc:10,min:2232.88},{anc:15,min:2334.28},{anc:20,min:2435.68},{anc:25,min:2537.08}]},
+      grille:[{anc:0,min:2029.88},{anc:2,min:RMMMG},{anc:4,min:2111.08},{anc:6,min:2151.68},{anc:8,min:2192.28},{anc:10,min:2232.88},{anc:15,min:2334.28},{anc:20,min:2435.68},{anc:25,min:2537.08}]},
     {id:'2',desc:'Personnel administratif',exemples:'Secrétaire, comptable, éducateur CESS',
       grille:[{anc:0,min:2134.72},{anc:2,min:2177.42},{anc:4,min:2220.12},{anc:6,min:2262.82},{anc:8,min:2305.52},{anc:10,min:2348.22},{anc:15,min:2455.97},{anc:20,min:2563.72},{anc:25,min:2671.47}]},
     {id:'3',desc:'Éducateur / Puéricultrice',exemples:'Éducateur A2, puéricultrice, auxiliaire puériculture',

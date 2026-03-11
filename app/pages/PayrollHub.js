@@ -349,7 +349,7 @@ export function CoutsAnnuelsV2({s}){
     let extra=0;let label='';
     if(i===0){extra=mb*0.02;label='Indexation';} // Jan: indexation provision
     if(i===4){extra=mb*0.1538;label='Pecule simple';} // Mai: pecule
-    if(i===5){extra=mb*0.0769;label='Pecule double';} // Juin: pecule double
+    if(i===5){extra=mb*PV_SIMPLE;label='Pecule double';} // Juin: pecule double
     if(i===11){extra=mb;label='13eme mois';} // Dec: 13eme
     return {mois:mn,brut:mb,cout:coutM,extra,label,total:coutM+extra*(1+TX_ONSS_E)};
   });

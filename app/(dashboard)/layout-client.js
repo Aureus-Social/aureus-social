@@ -220,7 +220,7 @@ function DashboardHome({ state, onNavigate }) {
   const alertes = [];
   ae.forEach(e => {
     const brut = +(e.monthlySalary || e.gross || 0);
-    if (brut > 0 && brut < 2070.48) alertes.push({ level: 'danger', icon: '⚠', msg: `${e.first||''} ${e.last||''} — Salaire ${fmtE(brut)} sous RMMMG (${fmtE(2070.48)})` });
+    if (brut > 0 && brut < RMMMG) alertes.push({ level: 'danger', icon: '⚠', msg: `${e.first||''} ${e.last||''} — Salaire ${fmtE(brut)} sous RMMMG (${fmtE(RMMMG)})` });
     if (!e.niss) alertes.push({ level: 'warning', icon: '◇', msg: `${e.first||''} ${e.last||''} — NISS manquant` });
     if (!e.iban) alertes.push({ level: 'warning', icon: '◇', msg: `${e.first||''} ${e.last||''} — IBAN manquant` });
   });
@@ -267,7 +267,7 @@ function DashboardHome({ state, onNavigate }) {
           <div style={{ fontSize: 11, color: '#5e5c56', marginTop: 3 }}>{mois[now.getMonth()]} {now.getFullYear()} — Aureus IA SPRL · BCE BE 1028.230.781</div>
         </div>
         <div style={{ fontSize: 10, color: '#5e5c56', textAlign: 'right' }}>
-          <div style={{ color: '#c6a34e', fontWeight: 600 }}>⚡ RMMMG: {fmtE(2070.48)}</div>
+          <div style={{ color: '#c6a34e', fontWeight: 600 }}>⚡ RMMMG: {fmtE(RMMMG)}</div>
           <div>Index santé: 2,0399 · Pivot: 125,60</div>
         </div>
       </div>

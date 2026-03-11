@@ -1495,8 +1495,8 @@ export function CaisseVacMod({s,d}){
   const masseOuv=ouvriers.reduce((a,e)=>{const p=calc(e,DPER,s.co);return a+p.gross*12*TX_OUV108},0);
   const cotOuv=masseOuv*COTIS_VAC_OUV;
   const masseEmp=employes.reduce((a,e)=>{const p=calc(e,DPER,s.co);return a+p.gross*12},0);
-  const pecSimple=masseEmp*0.0769;
-  const pecDouble=masseEmp*0.0769;
+  const pecSimple=masseEmp*PV_SIMPLE;
+  const pecDouble=masseEmp*PV_SIMPLE;
   const totalPec=pecSimple+pecDouble+cotOuv;
 
   // Detail par employe
@@ -1913,7 +1913,7 @@ export function CompteIndividuelMod({s,d}){
     const brut12=emp.monthlySalary*12+emp.monthlySalary; // 12 mois + 13e mois
     const onssW12=p.onssNet*13;const onssE12=p.onssE*13;
     const tax12=p.tax*13;const net12=p.net*12+emp.monthlySalary*0.6;
-    const simplePec=brut12*0.0769;const doublePec=brut12*0.0769;
+    const simplePec=brut12*PV_SIMPLE;const doublePec=brut12*PV_DOUBLE;
     return{emp:`${emp.first} ${emp.last}`,nn:emp.nn||'XX.XX.XX-XXX.XX',fn:emp.fn||tText('Employé'),
       brut12:brut12.toFixed(2),onssW:onssW12.toFixed(2),onssE:onssE12.toFixed(2),
       tax:tax12.toFixed(2),net:net12.toFixed(2),

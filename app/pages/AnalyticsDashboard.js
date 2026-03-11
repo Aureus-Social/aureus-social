@@ -140,7 +140,7 @@ function AnalyticsDashboard({ state, defaultTab }) {
       const gross = Math.round(base * variation)
       const onssW = Math.round(gross * TX_ONSS_W)
       const onssE = Math.round(gross * 0.2738)
-      const pp = Math.round((gross - onssW) * 0.25) // estimation
+      const pp = Math.round((gross - onssW) * PP_EST) // estimation
       const net = gross - onssW - pp
       return { month, gross, onssW, onssE, pp, net, cost: gross + onssE }
     })

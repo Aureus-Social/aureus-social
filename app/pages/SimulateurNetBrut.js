@@ -77,7 +77,7 @@ export function SimulateurNetBrut({ props_tab }) {
     if (enfants >= 2) exempt += 1140;
     if (enfants >= 3) exempt += 2000;
     if (enfants >= 4) exempt += 2370;
-    ppAn -= Math.max(0, Math.min(exempt, base)) * 0.25;
+    ppAn -= Math.max(0, Math.min(exempt, base)) * IPP_TRANCHES_2026[0].taux;
     const reducEnfants = IPP_REDUC_ENFANTS[Math.min(enfants, 4)] || 0;
     ppAn = Math.max(0, ppAn - reducEnfants) * (1 + IPP_TAXE_COMMUNALE);
     let bonusEmploi = 0;

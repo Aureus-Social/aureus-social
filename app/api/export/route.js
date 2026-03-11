@@ -37,7 +37,7 @@ export async function POST(req) {
     output = 'NISS;NOM;PRENOM;BRUT;ONSS_T;ONSS_P;PP;NET;PERIODE\n' +
       (fiches||[]).map(f => {
         const emp = (emps||[]).find(e => e.id === f.empId) || {};
-        return `${emp.niss||''};${emp.last||''};${emp.first||''};${(f.gross||0).toFixed(2)};${(f.onssNet||0).toFixed(2)};${((f.gross||0)*0.2507).toFixed(2)};${(f.pp||0).toFixed(2)};${(f.net||0).toFixed(2)};${period||''}`;
+        return `${emp.niss||''};${emp.last||''};${emp.first||''};${(f.gross||0).toFixed(2)};${(f.onssNet||0).toFixed(2)};${((f.gross||0)*TX_ONSS_E).toFixed(2)};${(f.pp||0).toFixed(2)};${(f.net||0).toFixed(2)};${period||''}`;
       }).join('\n');
   } else {
     return Response.json({ error: `Format inconnu: ${format}` }, { status: 400 });

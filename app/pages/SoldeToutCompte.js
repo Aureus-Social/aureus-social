@@ -62,7 +62,7 @@ export default function SoldeToutCompte({ s, d }) {
     const joursFin = d2.getDate();
     const prorata = joursFin / new Date(d2.getFullYear(), d2.getMonth()+1, 0).getDate();
     const salaireMoisFin = Math.round(brut * prorata * 100) / 100;
-    const peculeSimple = Math.round(brut * 0.1534 * anciennete * 100) / 100;
+    const peculeSimple = Math.round(brut * PV_SIMPLE * anciennete * 100) / 100;
     const peculeDouble = Math.round(brut * PV_DOUBLE * 100) / 100;
     const totalBrut = indemnite + salaireMoisFin + (motif !== 'demission' ? peculeSimple : 0);
     const onss = Math.round(totalBrut * TX_ONSS_W * 100) / 100;

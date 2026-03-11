@@ -8,7 +8,7 @@
 import { NextResponse } from 'next/server';
 
 import { RMMMG as RMMMG_LOIS } from '@/app/lib/helpers';
-const RMMMG_FALLBACK = RMMMG_LOIS || 2070.48; // Source: lois-belges.js — mis à jour par cron quotidien
+const RMMMG_FALLBACK = RMMMG_LOIS; // Source: lois-belges.js — mis à jour par cron quotidien
 
 async function fetchWithTimeout(url, ms = 8000) {
   const ctrl = new AbortController();

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { TX_ONSS_W } from '@/app/lib/helpers';
+import { TX_ONSS_W, TX_ONSS_E } from '@/app/lib/helpers';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CRON AUTO-UPDATE — TOUS LES PARAMÈTRES LÉGAUX BELGES
@@ -14,7 +14,7 @@ const FB = {
   // Chèques-repas
   chequeRepasMax:8.00, chequeRepasPatMax:6.91, chequeRepasTravMin:1.09,
   // ONSS
-  onssTravailleur:TX_ONSS_W, onssPatronal:0.2507, plafondONSS:75038.09,
+  onssTravailleur:TX_ONSS_W, onssPatronal:TX_ONSS_E, plafondONSS:75038.09,
   flexiJobPlafond:12000, flexiJobTaux:0.2807,
   // Bonus emploi
   bonusEmploiMax:194.03, bonusSeuil1:2561.42, bonusSeuil2:2997.59, bonusPct:0.3314,

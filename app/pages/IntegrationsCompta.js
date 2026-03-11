@@ -35,7 +35,7 @@ function generateIsabelXML(emps, co, period) {
     .map(e => {
       const brut = +(e.monthlySalary || e.gross || 0);
       const onss = Math.round(brut * TX_ONSS_W * 100) / 100;
-      const pp   = Math.round(brut * 0.18 * 100) / 100;
+      const pp   = Math.round(brut * TAUX_WARRANTS * 100) / 100;
       const net  = Math.round((brut - onss - pp) * 100) / 100;
       return {
         name: `${e.first||e.fn||''} ${e.last||e.ln||''}`.trim(),
@@ -99,7 +99,7 @@ function generateClearfactsPackage(emps, fiches, period, co) {
     ...emps.filter(e => e.status==='active'||!e.status).map(e => {
       const brut = +(e.monthlySalary||e.gross||0);
       const onss = +(brut*TX_ONSS_W).toFixed(2);
-      const pp   = +(brut*0.18).toFixed(2);
+      const pp   = +(brut*TAUX_WARRANTS).toFixed(2);
       const net  = +(brut-onss-pp).toFixed(2);
       return `"${e.last||e.ln||''}","${e.first||e.fn||''}","${e.niss||''}",${brut},${onss},${pp},${net},"${mois[period.month-1]} ${period.year}"`;
     })

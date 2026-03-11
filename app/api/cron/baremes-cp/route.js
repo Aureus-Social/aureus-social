@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { RMMMG } from '@/app/lib/helpers';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CRON AUTO-UPDATE — BARÈMES SECTORIELS CP (COMMISSIONS PARITAIRES)
@@ -9,17 +10,17 @@ import { NextResponse } from 'next/server';
 
 // Valeurs de référence actuelles (2026) — utilisées pour détecter les changements
 const CP_REF = {
-  '200': { cl1: 2070.48, cl2: 2174.00, cl3: 2266.16, cl4: 2614.86 },
+  '200': { cl1: RMMMG, cl2: 2174.00, cl3: 2266.16, cl4: 2614.86 },
   '118': { cl1: 2095.44, cl2: 2173.20, cl3: 2269.56, cl4: 2365.92, cl5: 2510.52 },
   '119': { cl1: 2029.88, cl2: 2134.72, cl3: 2269.56, cl4: 2414.40 },
   '302': { cl1: 2029.88, cl2: 2095.44, cl3: 2226.58, cl4: 2365.92, cl5: 2582.76 },
   '124': { cl1: 2095.44, cl2: 2204.76, cl3: 2366.28, cl4: 2594.16 },
-  '330': { cl1: 2070.48, cl2: 2173.20, cl3: 2366.28, cl4: 2623.92, cl5: 2916.24 },
+  '330': { cl1: RMMMG, cl2: 2173.20, cl3: 2366.28, cl4: 2623.92, cl5: 2916.24 },
   '111': { cl1: 2095.44, cl2: 2248.32, cl3: 2473.80, cl4: 2723.58 },
   '140': { cl1: 2095.44, cl2: 2204.76, cl3: 2430.12, cl4: 2763.60 },
   '121': { cl1: 2029.88, cl2: 2095.44, cl3: 2204.76, cl4: 2366.28 },
   '152': { cl1: 2029.88, cl2: 2134.72, cl3: 2269.56, cl4: 2462.28 },
-  '32201': { cl1: 2029.88, cl2: 2070.48 }, // titres-services
+  '32201': { cl1: 2029.88, cl2: RMMMG }, // titres-services
 };
 
 // Tolérance de changement (évite les faux positifs d'arrondi)
@@ -337,10 +338,10 @@ export async function GET(req) {
   }
 
   // ── RMMMG: alerte si différent de la valeur dans BaremesCP ──
-  if (rmmmg && Math.abs(rmmmg - 2070.48) > TOLERANCE) {
-    const pct = ((rmmmg - 2070.48) / 2070.48 * 100).toFixed(2);
+  if (rmmmg && Math.abs(rmmmg - RMMMG) > TOLERANCE) {
+    const pct = ((rmmmg - RMMMG) / RMMMG * 100).toFixed(2);
     log.push(`\n── RMMMG ──`);
-    log.push(`  📈 RMMMG détecté: ${rmmmg} (était 2070.48, +${pct}%)`);
+    log.push(`  📈 RMMMG détecté: ${rmmmg} (était ${RMMMG}, +${pct}%)`);
     if (Math.abs(parseFloat(pct)) <= 5) {
       // Met à jour les anc:0,min:2070.48 dans les grilles où c'est le RMMMG exact
       patches.push({
@@ -349,7 +350,7 @@ export async function GET(req) {
       });
       changes.push(`RMMMG: 2070.48→${rmmmg}`);
     } else {
-      alerts.push({ cp: 'RMMMG', old: 2070.48, new: rmmmg, pct });
+      alerts.push({ cp: 'RMMMG', old: RMMMG, new: rmmmg, pct });
       log.push(`  🚨 Variation RMMMG > 5% → validation humaine requise`);
     }
   }
