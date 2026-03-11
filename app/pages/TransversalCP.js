@@ -1,5 +1,6 @@
 'use client';
 import { useLang } from '../lib/lang-context';
+import { TX_ONSS_W } from '@/app/lib/helpers';
 import{useState,useMemo}from'react';
 
 const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);

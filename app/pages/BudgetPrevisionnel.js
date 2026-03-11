@@ -1,3 +1,4 @@
+import { TX_ONSS_W, TX_ONSS_E } from '@/app/lib/helpers';
 'use client';
 import { useState, useMemo } from 'react';
 import { useLang } from '../lib/lang-context';
@@ -11,7 +12,6 @@ const GOLD='#c6a34e',GREEN='#22c55e',RED='#ef4444',BLUE='#60a5fa',GRAY='#888';
 
 // Taux belges 2026
 const TX_ONSS_E = 0.2714;  // Cotisation patronale ~27.14%
-const TX_ONSS_W = 0.1307;  // Cotisation travailleur 13.07%
 const TX_VACANCES = 0.1538; // Pécule vacances travailleur ~15.38% brut
 const TX_13E = 1/12;        // 13e mois (si applicable)
 const ACTIVA_DEDUCTION = 350; // Réduction Activa.brussels 1er travailleur

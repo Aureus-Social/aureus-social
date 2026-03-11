@@ -526,3 +526,45 @@ export const BAREMES_CP_MIN = {
   '152':   { cl1: 2029.88, cl2: 2134.72, cl3: 2269.56, cl4: 2462.28, nom: 'CP 152 — Enseignement libre' },
   dateMAJ: '2026-03-08',
 };
+
+// ── Barèmes IPP annuels 2026 (Art. 130 CIR/92) ──
+export const IPP_TRANCHES_2026 = [
+  { max: 15200,  taux: 0.25 },
+  { max: 26440,  taux: 0.40 },
+  { max: 45500,  taux: 0.45 },
+  { max: Infinity, taux: 0.50 },
+];
+export const IPP_FRAIS_PRO_PCT  = 0.30;  // déduction forfaitaire frais pro
+export const IPP_FRAIS_PRO_MAX  = 5750;  // plafond annuel frais pro
+export const IPP_TAXE_COMMUNALE = 0.07;  // taux communal moyen (6-8%, base 7%)
+export const IPP_QUOTITE_BASE   = 10160; // quotité exemptée de base (revenu annuel)
+// Réductions enfants (annuelles, sur impôt à payer)
+export const IPP_REDUC_ENFANTS  = [0, 1850, 2990, 4990, 7410]; // 0,1,2,3,4+ enfants
+
+// ── Taux cotisations patronales sectoriels ──
+export const ONSS_E_SECTEURS = {
+  '100': 0, '111': 0.005, '112': 0.005, '118': 0.003, '121': 0.002,
+  '124': 0.021, '126': 0.003, '130': 0.004, '140': 0.001, '149': 0.003,
+  '200': 0, '220': 0, '226': 0, '308': 0, '313': 0, '315': 0,
+  '317': 0, '319': 0, '322': 0.0015, '326': 0, '329': 0.003,
+  '330': 0, '331': 0, '332': 0.0015, '336': 0, '337': 0.003, '341': 0,
+};
+export const PRIMES_SECTORIELLES = {
+  '100': 0, '111': 60, '112': 60, '118': 45, '121': 0, '124': 80,
+  '126': 50, '130': 70, '140': 40, '149': 65, '200': 0, '220': 25,
+  '226': 50, '308': 30, '313': 0, '315': 40, '317': 0, '319': 100,
+  '322': 0, '326': 20, '329': 0, '330': 35, '331': 120, '332': 0,
+  '336': 30, '337': 0, '341': 150,
+};
+
+// ── Régimes fiscaux spéciaux avantages & primes ──
+export const TAUX_WARRANTS         = 0.18;   // Loi 26/03/1999 — imposition forfaitaire warrants à l'attribution
+export const TAUX_PARTICIPATION    = 0.07;   // Loi 22/05/2001 — taxe spéciale participation bénéfices
+export const TAUX_CCT90_COTIS      = 0.1307; // CCT 90 — cotisation solidarité travailleur sur prime résultat
+export const TAUX_DOUBLE_PECULE    = 0.92;   // AR 30/03/2000 — pécule vacances double (92% brut mensuel)
+export const TAUX_HEURES_SUPP_SAL  = 0.50;   // AR 25/11/1991 — sursalaire heures supplémentaires (50%)
+export const TAUX_HEURES_SUPP_NW   = 1.00;   // Dimanche/férié — sursalaire 100%
+export const HEURES_MENSUELLES     = 173;    // 38h/semaine × 52/12 = 164.67 arrondi 173 (usage convention)
+export const HEURES_ATN_VOITURE    = 0.006;  // ATN voiture: coeff mensuel → voir LOIS_BELGES.atn
+export const TAUX_CCP28            = 0.28;   // Cotisation complémentaire CP 32201 titres-services
+export const PLANCHER_ETUDIANT_SOL = 0.0271; // Cotisations solidarité étudiant (2.71% W + 5.42% E hors contingent)

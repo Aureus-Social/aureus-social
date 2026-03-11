@@ -1,7 +1,7 @@
 // === AUREUS SOCIAL PRO - Helpers partages ===
 "use client";
 export { C, B, I, ST, PH, SC, fmt, Tbl, f2, f0 } from './shared-ui';
-export { LOIS_BELGES, LB, TX_ONSS_W, TX_ONSS_E, TX_OUV108, TX_AT, COUT_MED, PP_EST, NET_FACTOR, PV_SIMPLE, PV_DOUBLE, RMMMG, CR_PAT, CR_MAX, CR_TRAV, FORF_BUREAU, FORF_KM, BONUS_MAX, SEUIL_CPPT, SEUIL_CE, HEURES_HEBDO, JOURS_FERIES, SAISIE_2026_TRAVAIL, SAISIE_2026_REMPLACEMENT, SAISIE_IMMUN_ENFANT_2026, AF_REGIONS, quickNetEst, generateExportCompta, exportTravailleurs, importTravailleurs, obf, safeLS } from './lois-belges';
+export { LOIS_BELGES, LB, TX_ONSS_W, TX_ONSS_E, TX_OUV108, TX_AT, COUT_MED, PP_EST, NET_FACTOR, PV_SIMPLE, PV_DOUBLE, RMMMG, CR_PAT, CR_MAX, CR_TRAV, FORF_BUREAU, FORF_KM, BONUS_MAX, SEUIL_CPPT, SEUIL_CE, HEURES_HEBDO, JOURS_FERIES, SAISIE_2026_TRAVAIL, SAISIE_2026_REMPLACEMENT, SAISIE_IMMUN_ENFANT_2026, AF_REGIONS, BAREMES_CP_MIN, IPP_TRANCHES_2026, IPP_FRAIS_PRO_PCT, IPP_FRAIS_PRO_MAX, IPP_TAXE_COMMUNALE, IPP_QUOTITE_BASE, IPP_REDUC_ENFANTS, ONSS_E_SECTEURS, PRIMES_SECTORIELLES, TAUX_WARRANTS, TAUX_PARTICIPATION, TAUX_DOUBLE_PECULE, TAUX_HEURES_SUPP_SAL, HEURES_MENSUELLES, PLANCHER_ETUDIANT_SOL, quickNetEst, generateExportCompta, exportTravailleurs, importTravailleurs, obf, safeLS } from './lois-belges';
 // Exports supplémentaires pour éliminer les valeurs en dur dans les modules
 export const FORF_VELO = 0.35;   // LB.fraisPropres.forfaitDeplacement.velo
 export const ECO_MAX   = 250;    // LB.avantages.ecoMax
@@ -45,21 +45,21 @@ export const LEGAL = {
 export const DPER = { month: new Date().getMonth()+1, year: new Date().getFullYear(), days: 21.67 };
 export function calc(emp, per, co) {
   const brut = +(emp&&(emp.monthlySalary||emp.gross||emp.brut)||0);
-  const onssW = Math.round(brut*0.1307*100)/100;
+  const onssW = Math.round(brut*LEGAL.ONSS_W*100)/100;
   const imposable = brut-onssW;
   const pp = Math.round(imposable*0.22*100)/100;
   const net = Math.round((imposable-pp)*100)/100;
-  const onssE = Math.round(brut*0.2507*100)/100;
+  const onssE = Math.round(brut*0.2507*100)/100; // TX_ONSS_E (0.2507)
   return {base:brut,gross:brut,onssNet:onssW,imposable,tax:pp,pp,css:0,net,onssE,costTotal:Math.round((brut+onssE)*100)/100,bonus:0,overtime:0,y13:0,sickPay:0};
 }
 export function quickPP(brut) {
-  const imp = brut-brut*0.1307;
+  const imp = brut-brut*LEGAL.ONSS_W;
   if(imp<=1110)return 0;
   if(imp<=1560)return Math.round((imp-1110)*0.2668*100)/100;
   if(imp<=2700)return Math.round((120.06+(imp-1560)*0.4280)*100)/100;
   return Math.round((607.98+(imp-2700)*0.4816)*100)/100;
 }
-export function quickNet(brut){return Math.round((brut||0)*(1-0.1307)*(1-0.22)*100)/100;}
+export function quickNet(brut){return Math.round((brut||0)*(1-LEGAL.ONSS_W)*(1-0.22)*100)/100;}
 export function validateNISS(niss){
   if(!niss)return{valid:false,msg:'NISS vide'};
   const c=String(niss).replace(/[\s.\-]/g,'');
@@ -119,7 +119,7 @@ export function generateDmfAXML(emps, trimestre, annee, co) {
   const ae = (emps || []).filter(e => e.status === 'active' || !e.status);
   const lignes = ae.map(e => {
     const brut = +(e.monthlySalary || e.gross || 0) * 3; // trimestre
-    const onssW = Math.round(brut * 0.1307 * 100) / 100;
+    const onssW = Math.round(brut * LEGAL.ONSS_W * 100) / 100;
     const onssE = Math.round(brut * 0.2507 * 100) / 100;
     return `  <Travailleur>
     <NISS>${e.niss || ''}</NISS>

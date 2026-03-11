@@ -1,6 +1,6 @@
 'use client';
 import { useLang } from '../lib/lang-context';
-import { B, C, TX_ONSS_E, TX_ONSS_W, fmt, quickPP, LOIS_BELGES, FORF_KM, ECO_MAX } from '@/app/lib/helpers';
+import { B, C, TX_ONSS_E, TX_ONSS_W, fmt, quickPP, LOIS_BELGES, FORF_KM, ECO_MAX, TAUX_WARRANTS, TAUX_PARTICIPATION, TAUX_DOUBLE_PECULE, TAUX_HEURES_SUPP_SAL, HEURES_MENSUELLES, PV_DOUBLE, PLANCHER_ETUDIANT_SOL } from '@/app/lib/helpers';
 import{useState,useMemo}from'react';
 
 const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
@@ -40,13 +40,13 @@ const PRIMES_DB=[
     desc:'Régime fiscal spécifique — imposition à l\'attribution',
     base_legale:'Loi 26/03/1999 relative aux stock options + AR 25/08/2012',
     conditions:['Offre écrite avec valeur sous-jacent','Acceptation dans les 60 jours','Imposition forfaitaire à l\'attribution (pas à l\'exercice)','Pas de cotisations ONSS'],
-    calcul:(brut)=>{const tax=brut*0.18;return{brut,onssW:0,onssE:0,pp:tax,desc:'Taxation forfaitaire ~18% à l\'attribution. Pas d\'ONSS. Net ~82% de la valeur.'}},
+    calcul:(brut)=>{const tax=brut*TAUX_WARRANTS;return{brut,onssW:0,onssE:0,pp:tax,desc:'Taxation forfaitaire ~18% à l\'attribution. Pas d\'ONSS. Net ~82% de la valeur.'}},
     plafond:null,fiscal:'Imposition forfaitaire ~18% à l\'attribution (15% + 1%/an au-delà de 3ème année)'},
   {id:'participation_benefices',cat:'remvar',icon:'💰',nom:'Participation aux bénéfices',taxable:true,onss:false,
     desc:'Loi du 22/05/2001 — taxée à 7% (cotisation solidarité 13.07%)',
     base_legale:'Loi 22/05/2001 relative à la participation financière des travailleurs',
     conditions:['Décision AG avec majorité spéciale','Pas de substitution au salaire existant','Tous les travailleurs doivent en bénéficier'],
-    calcul:(brut)=>{const tax=brut*0.07;const cotW=brut*TX_ONSS_W;return{brut,onssW:cotW,onssE:0,pp:tax,desc:'Cotisation solidarité 13.07% + taxe spéciale 7%. Pas d\'ONSS employeur.'}},
+    calcul:(brut)=>{const tax=brut*TAUX_PARTICIPATION;const cotW=brut*TX_ONSS_W;return{brut,onssW:cotW,onssE:0,pp:tax,desc:'Cotisation solidarité 13.07% + taxe spéciale 7%. Pas d\'ONSS employeur.'}},
     fiscal:'Taxe spéciale 7% + cotisation solidarité 13.07%'},
   {id:'prime_resultat',cat:'remvar',icon:'📊',nom:'Prime de résultat',taxable:true,onss:true,
     desc:'Prime liée aux performances individuelles',
@@ -249,7 +249,7 @@ const PRIMES_DB=[
     desc:'Indemnité min 50% du salaire brut × durée (max 12 mois)',
     base_legale:'Art. 65 et suivants loi contrat de travail 03/07/1978',
     conditions:['Salaire annuel brut > 41.969 EUR (2026)','Durée max: 12 mois','Indemnité: min 50% du salaire brut × durée en mois','Clause nulle si conditions non remplies','L\'employeur peut renoncer dans les 15 jours du départ'],
-    calcul:(brut,mois)=>{const m=mois||6;const ind=brut*0.5*m;return{brut:ind,onssW:ind*TX_ONSS_W,onssE:ind*TX_ONSS_E,pp:quickPP(ind),desc:`50% × ${fmt(brut)} × ${m} mois = ${fmt(ind)} EUR.`}},
+    calcul:(brut,mois)=>{const m=mois||6;const ind=brut*TAUX_HEURES_SUPP_SAL*m;return{brut:ind,onssW:ind*TX_ONSS_W,onssE:ind*TX_ONSS_E,pp:quickPP(ind),desc:`50% × ${fmt(brut)} × ${m} mois = ${fmt(ind)} EUR.`}},
     fiscal:'Régime standard ONSS + PP'},
   {id:'outplacement',cat:'fin',icon:'🎯',nom:'Outplacement',taxable:false,onss:false,
     desc:'Obligatoire si préavis ≥ 30 semaines. Min 1.800 EUR / 60h',
@@ -261,7 +261,7 @@ const PRIMES_DB=[
     desc:'Simple (92%) + double (92%) versé en mai/juin',
     base_legale:'Loi 28/06/1971 sur les vacances annuelles + AR 30/03/1967',
     conditions:['Pécule simple: rémunération pendant les jours de congé','Pécule double: 92% du salaire mensuel brut','Anticipé si départ en cours d\'année (au prorata)','Ouvriers: via ONVA. Employés: par l\'employeur.'],
-    calcul:(brut,mois)=>{const m=mois||12;const simple=brut;const double_=brut*0.92;const prorata=m/12;return{brut:(simple+double_)*prorata,onssW:double_*prorata*TX_ONSS_W,onssE:0,pp:double_*prorata*0.1807,desc:`Simple: ${fmt(simple*prorata)} EUR + Double: ${fmt(double_*prorata)} EUR. PP double: 13.07% ONSS + 10.09% cotisation spéciale.`}},
+    calcul:(brut,mois)=>{const m=mois||12;const simple=brut;const double_=brut*TAUX_DOUBLE_PECULE;const prorata=m/12;return{brut:(simple+double_)*prorata,onssW:double_*prorata*TX_ONSS_W,onssE:0,pp:double_*prorata*0.1807,desc:`Simple: ${fmt(simple*prorata)} EUR + Double: ${fmt(double_*prorata)} EUR. PP double: 13.07% ONSS + 10.09% cotisation spéciale.`}},
     fiscal:'Double pécule: ONSS 13.07% + cotisation spéciale 10.09%. Pas de PP standard.'},
   {id:'supplement_heure_sup',cat:'sectoriel',icon:'⏰',nom:'Supplément heures supplémentaires',taxable:true,onss:true,
     desc:'Majoration 50% (semaine) ou 100% (dimanche/férié)',
@@ -309,7 +309,7 @@ const PRIMES_DB=[
     desc:'120h/an sans récupération — 180h avec dispense PP sur sursalaire',
     base_legale:'Loi 16/03/1971 Art. 25bis + Loi relance 2018',
     conditions:['Max 120h/an sans demande de récupération (volontariat)','Extension à 360h dans certains secteurs avec CCT','Sursalaire +50% (semaine), +100% (dimanche/férié)','Dispense PP sur sursalaire des 180 premières heures/an'],
-    calcul:(brut,heures)=>{const h=heures||120;const sursal=brut*0.5*h/173;return{brut:sursal,onssW:sursal*TX_ONSS_W,onssE:sursal*TX_ONSS_E,pp:0,desc:`${h}h × +50% = ${fmt(sursal)} EUR sursalaire. Dispense PP → quasi net.`}},
+    calcul:(brut,heures)=>{const h=heures||120;const sursal=brut*TAUX_HEURES_SUPP_SAL*h/HEURES_MENSUELLES;return{brut:sursal,onssW:sursal*TX_ONSS_W,onssE:sursal*TX_ONSS_E,pp:0,desc:`${h}h × +50% = ${fmt(sursal)} EUR sursalaire. Dispense PP → quasi net.`}},
     fiscal:'Dispense PP sur sursalaire des 180 premières h/an → net fiscal avantageux'},
   {id:'prime_innovation',cat:'remvar',icon:'💡',nom:'Prime d\'innovation',taxable:true,onss:true,
     desc:'Récompense pour invention/innovation — régime standard sauf si brevet',

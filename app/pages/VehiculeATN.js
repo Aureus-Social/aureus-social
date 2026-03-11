@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useLang } from '../lib/lang-context';
+import { TX_ONSS_W } from '@/app/lib/helpers';
 
 function PH({title,sub}){return <div style={{marginBottom:16}}><div style={{fontSize:18,fontWeight:800,color:'#c6a34e',letterSpacing:'.3px'}}>{title}</div>{sub&&<div style={{fontSize:11,color:'#9e9b93',marginTop:2}}>{sub}</div>}</div>;}
 function C({children,style}){return <div style={{padding:'16px 20px',background:'rgba(198,163,78,.03)',borderRadius:12,border:'1px solid rgba(198,163,78,.06)',marginBottom:14,...style}}>{children}</div>;}
@@ -40,7 +41,7 @@ export default function VehiculeATN({ s }) {
   const [age, setAge] = useState(0);
 
   const r = calcATN(valCat, co2, fuel, age);
-  const onssATN = Math.round(r.atnMens * 0.1307 * 100) / 100;
+  const onssATN = Math.round(r.atnMens * TX_ONSS_W * 100) / 100;
   const ppATN = Math.round(r.atnMens * 0.30 * 100) / 100; // approx
   const coutNet = Math.round((r.atnMens - onssATN - ppATN) * 100) / 100;
 
@@ -122,7 +123,7 @@ export default function VehiculeATN({ s }) {
               <td style={{padding:'8px',color:'#fb923c'}}>{ri.coef.toFixed(1)}%</td>
               <td style={{padding:'8px',color:'#c6a34e',fontWeight:600}}>{ri.atnAnn.toFixed(0)} €</td>
               <td style={{padding:'8px',color:'#fb923c'}}>{ri.atnMens.toFixed(0)} €</td>
-              <td style={{padding:'8px',color:'#ef4444'}}>{(ri.atnMens*0.1307).toFixed(0)} €</td>
+              <td style={{padding:'8px',color:'#ef4444'}}>{(ri.atnMens*TX_ONSS_W).toFixed(0)} €</td>
             </tr>;
           })}</tbody>
         </table>

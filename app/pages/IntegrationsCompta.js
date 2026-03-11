@@ -34,7 +34,7 @@ function generateIsabelXML(emps, co, period) {
     .filter(e => e.iban && (e.status === 'active' || !e.status))
     .map(e => {
       const brut = +(e.monthlySalary || e.gross || 0);
-      const onss = Math.round(brut * 0.1307 * 100) / 100;
+      const onss = Math.round(brut * TX_ONSS_W * 100) / 100;
       const pp   = Math.round(brut * 0.18 * 100) / 100;
       const net  = Math.round((brut - onss - pp) * 100) / 100;
       return {
@@ -98,7 +98,7 @@ function generateClearfactsPackage(emps, fiches, period, co) {
     'Nom,Prénom,NISS,Brut,ONSS_Travailleur,PP,Net,Période',
     ...emps.filter(e => e.status==='active'||!e.status).map(e => {
       const brut = +(e.monthlySalary||e.gross||0);
-      const onss = +(brut*0.1307).toFixed(2);
+      const onss = +(brut*TX_ONSS_W).toFixed(2);
       const pp   = +(brut*0.18).toFixed(2);
       const net  = +(brut-onss-pp).toFixed(2);
       return `"${e.last||e.ln||''}","${e.first||e.fn||''}","${e.niss||''}",${brut},${onss},${pp},${net},"${mois[period.month-1]} ${period.year}"`;
@@ -130,7 +130,7 @@ function generateBillitUBL(co, period, emps) {
   const total = emps.filter(e=>e.status==='active'||!e.status)
     .reduce((a,e) => {
       const b = +(e.monthlySalary||e.gross||0);
-      const net = b - b*0.1307 - b*0.18;
+      const net = b - b*TX_ONSS_W - b*TAUX_WARRANTS;
       return a + net;
     }, 0);
 
@@ -178,7 +178,7 @@ export default function IntegrationsCompta({ s }) {
   const activeEmps = emps.filter(e => e.status==='active'||!e.status);
   const totalNet = activeEmps.reduce((a,e) => {
     const b = +(e.monthlySalary||e.gross||0);
-    return a + b - b*0.1307 - b*0.18;
+    return a + b - b*TX_ONSS_W - b*TAUX_WARRANTS;
   }, 0);
 
   function dl(content, filename, type='text/xml') {
@@ -300,7 +300,7 @@ export default function IntegrationsCompta({ s }) {
           <div style={{display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8}}>
             {activeEmps.slice(0,6).map((e,i) => {
               const b = +(e.monthlySalary||e.gross||0);
-              const net = b - b*0.1307 - b*0.18;
+              const net = b - b*TX_ONSS_W - b*TAUX_WARRANTS;
               return (
                 <div key={i} style={{fontSize:10, color:'#888'}}>
                   <span style={{color:'#e5e5e5'}}>{e.first||e.fn||''} {e.last||e.ln||''}</span>

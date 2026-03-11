@@ -1,5 +1,6 @@
 'use client';
 import { useLang } from '../lib/lang-context';
+import { TX_ONSS_W } from '@/app/lib/helpers';
 import { useState, useEffect } from 'react';
 import { RMMMG } from '../lib/lois-belges';
 
@@ -222,7 +223,7 @@ export default function MandatsAdminPage({ s, d, tab }) {
     const bce = '1028230781';
     const lines = emps.map((emp, i) => {
       const brut = +(emp.gross || emp.monthlySalary || 0) * 12;
-      const onssW = Math.round(brut * 0.1307 * 100) / 100;
+      const onssW = Math.round(brut * TX_ONSS_W * 100) / 100;
       const imposable = brut - onssW;
       const pp = Math.round(imposable * 0.22 * 100) / 100;
       const niss = (emp.niss || '000000-000-00').replace(/[^0-9]/g, '').padStart(11, '0');
@@ -552,7 +553,7 @@ ${clientForm.nom || ''}`;
                     <tbody>
                       {(s?.emps||[]).map((emp, i) => {
                         const brut = +(emp.gross || emp.monthlySalary || 0) * 12;
-                        const onssW = Math.round(brut * 0.1307 * 100) / 100;
+                        const onssW = Math.round(brut * TX_ONSS_W * 100) / 100;
                         const imposable = Math.round((brut - onssW) * 100) / 100;
                         const pp = Math.round(imposable * 0.22 * 100) / 100;
                         const f2 = v => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2 }).format(v);

@@ -1,7 +1,7 @@
 "use client";
 import { useLang } from '../lib/lang-context';
 import React, { useState, useMemo } from 'react';
-import { TX_ONSS_W, TX_ONSS_E, RMMMG } from '@/app/lib/helpers';
+import { TX_ONSS_W, TX_ONSS_E, RMMMG, IPP_TRANCHES_2026, IPP_FRAIS_PRO_PCT, IPP_FRAIS_PRO_MAX, IPP_TAXE_COMMUNALE, IPP_QUOTITE_BASE, IPP_REDUC_ENFANTS, ONSS_E_SECTEURS, PRIMES_SECTORIELLES, BAREMES_CP_MIN } from '@/app/lib/helpers';
 
 // ═══════════════════════════════════════════════════════════
 // CP DATABASE — barèmes minimums + spécificités sectorielles
@@ -60,21 +60,26 @@ export function SimulateurNetBrut({ props_tab }) {
     const onssE = Math.round(brut * (TX_ONSS_E + (cp.onssE_extra||0)) * 100) / 100;
     const imposable = brut - onssW;
     const annuel = imposable * 12;
-    const fraisPro = Math.min(annuel * 0.30, 5750);
+    const fraisPro = Math.min(annuel * IPP_FRAIS_PRO_PCT, IPP_FRAIS_PRO_MAX);
     const base = Math.max(0, annuel - fraisPro);
-    let ppAn = 0;
-    if (base > 0)     ppAn += Math.min(base, 15200) * 0.25;
-    if (base > 15200) ppAn += Math.min(base-15200, 11240) * 0.40;
-    if (base > 26440) ppAn += Math.min(base-26440, 19060) * 0.45;
-    if (base > 45500) ppAn += (base-45500) * 0.50;
-    let exempt = 10160;
+    // Tranches IPP 2026 — Art. 130 CIR/92
+    let ppAn = 0, reste = base, prev = 0;
+    for (const t of IPP_TRANCHES_2026) {
+      const tranche = Math.min(reste, t.max === Infinity ? reste : t.max - prev);
+      if (tranche <= 0) break;
+      ppAn += tranche * t.taux;
+      reste -= tranche;
+      prev = t.max;
+    }
+    let exempt = IPP_QUOTITE_BASE;
     if (situation === 'marie1') exempt += 7370;
     if (enfants >= 1) exempt += 1850;
     if (enfants >= 2) exempt += 1140;
     if (enfants >= 3) exempt += 2000;
     if (enfants >= 4) exempt += 2370;
     ppAn -= Math.max(0, Math.min(exempt, base)) * 0.25;
-    ppAn = Math.max(0, ppAn) * 1.07;
+    const reducEnfants = IPP_REDUC_ENFANTS[Math.min(enfants, 4)] || 0;
+    ppAn = Math.max(0, ppAn - reducEnfants) * (1 + IPP_TAXE_COMMUNALE);
     let bonusEmploi = 0;
     if (brut <= 2968.70) bonusEmploi = Math.round(Math.min(((2968.70-brut)/2968.70)*180, 180)*100)/100;
     const ppMois = Math.max(0, Math.round((ppAn/12 - bonusEmploi)*100)/100);

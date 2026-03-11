@@ -6,7 +6,7 @@ import { useLang } from '../lib/lang-context';
 // ═══════════════════════════════════════════════════════════════════
 import React, { useState, useMemo } from 'react';
 import { calcPayroll } from '@/app/lib/payroll-engine';
-import { LOIS_BELGES } from '@/app/lib/helpers';
+import { LOIS_BELGES, BAREMES_CP_MIN, IPP_TRANCHES_2026, RMMMG } from '@/app/lib/helpers';
 
 const R2 = v => Math.round(v * 100) / 100;
 const fmt = v => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v || 0);
@@ -134,24 +134,29 @@ export function PayrollSimulatorAdvanced({ calcPayroll, LOIS_BELGES, props_tab }
   const [reg, setReg] = useState(100);
   const [cp, setCp] = useState('200');
 
+  // Barèmes CP — classe 1 (entrée) — source: BAREMES_CP_MIN (lois-belges.js) + CCT 2026
   const CP_BAREMES = {
-    '100':{ label:'CP 100 — Ouvriers (général)', min:2070.48 },
-    '111':{ label:'CP 111 — Métal Fabrications', min:2180 },
-    '118':{ label:'CP 118 — Alimentation', min:2100 },
-    '121':{ label:'CP 121 — Nettoyage', min:2070.48 },
-    '124':{ label:'CP 124 — Construction', min:2100 },
-    '140':{ label:'CP 140 — Transport routier', min:2150 },
-    '149':{ label:'CP 149 — Electricité', min:2200 },
-    '200':{ label:'CP 200 — Employés (général)', min:2070.48 },
-    '220':{ label:'CP 220 — Commerce détail', min:2080 },
-    '308':{ label:'CP 308 — Hôtels & Restaurants', min:2050 },
-    '313':{ label:'CP 313 — Pharmacies', min:2250 },
-    '319':{ label:'CP 319 — Assurances', min:2300 },
-    '322':{ label:'CP 322 — Intérim (employés)', min:2070.48 },
-    '326':{ label:'CP 326 — Commerce de gros', min:2090 },
-    '331':{ label:'CP 331 — Crédit (banques)', min:2400 },
-    '337':{ label:'CP 337 — Non-marchand', min:2070.48 },
-    '341':{ label:'CP 341 — Informatique', min:2500 },
+    '100':{ label:'CP 100 — Ouvriers (général)',       min: RMMMG },
+    '111':{ label:'CP 111 — Métal Fabrications',       min: BAREMES_CP_MIN['111']?.cl1 || 2095.44 },
+    '118':{ label:'CP 118 — Alimentation',             min: BAREMES_CP_MIN['118']?.cl1 || 2095.44 },
+    '121':{ label:'CP 121 — Nettoyage',                min: BAREMES_CP_MIN['121']?.cl1 || 2029.88 },
+    '124':{ label:'CP 124 — Construction',             min: BAREMES_CP_MIN['124']?.cl1 || 2095.44 },
+    '140':{ label:'CP 140 — Transport routier',        min: BAREMES_CP_MIN['140']?.cl1 || 2095.44 },
+    '149':{ label:'CP 149 — Electricité',              min: 2200 },
+    '200':{ label:'CP 200 — Employés (général)',       min: BAREMES_CP_MIN['200']?.cl1 || RMMMG },
+    '220':{ label:'CP 220 — Commerce détail',          min: 2080 },
+    '302':{ label:'CP 302 — Hôtels & restaurants',    min: BAREMES_CP_MIN['302']?.cl1 || 2029.88 },
+    '308':{ label:'CP 308 — Hôtels (employés)',        min: 2050 },
+    '313':{ label:'CP 313 — Pharmacies',               min: 2250 },
+    '319':{ label:'CP 319 — Assurances',               min: 2300 },
+    '322':{ label:'CP 322 — Intérim (employés)',       min: RMMMG },
+    '326':{ label:'CP 326 — Commerce de gros',         min: 2090 },
+    '330':{ label:'CP 330 — Santé (non-marchand)',     min: BAREMES_CP_MIN['330']?.cl1 || 2070.48 },
+    '331':{ label:'CP 331 — Crédit (banques)',         min: 2400 },
+    '336':{ label:'CP 336 — Grande distribution',      min: 2080 },
+    '337':{ label:'CP 337 — Secteur non-marchand',    min: RMMMG },
+    '341':{ label:'CP 341 — Services informatiques',  min: 2500 },
+    '152':{ label:'CP 152 — Enseignement libre',       min: BAREMES_CP_MIN['152']?.cl1 || 2029.88 },
   };
   const cpInfo = CP_BAREMES[cp] || CP_BAREMES['200'];
   const brutMinCP = R2(cpInfo.min * (reg / 100));
