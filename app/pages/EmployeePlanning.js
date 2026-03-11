@@ -300,6 +300,10 @@ function EmployeePlanning({ state, dispatch, defaultTab, initialView }) {
     setShowAddAbsence(true)
   }
 
+  // ── Vues dédiées selon initialView ──────────────────────────
+  if (view === 'interimaires') return <InterimairesView s={state} />
+  if (view === 'joursPrestes') return <JoursPrestesView s={state} year={year} month={month} setYear={setYear} setMonth={setMonth} />
+
   return (
     <div style={{ padding: 24 }}>
       {/* Header */}
@@ -624,6 +628,204 @@ function EmployeePlanning({ state, dispatch, defaultTab, initialView }) {
       )}
     </div>
   )
+}
+
+// ═══════════════════════════════════════════════════════════
+// VUE INTÉRIMAIRES
+// ═══════════════════════════════════════════════════════════
+function InterimairesView({ s }) {
+  const { tText } = useLang()
+  const GOLD = '#c6a34e', DARK = '#0d1117', BORDER = 'rgba(255,255,255,.08)', TEXT = '#e8e6e0', MUTED = '#9e9b93'
+  const fmt = v => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v || 0)
+  const clients = s?.clients || []
+  const allInts = clients.flatMap(c => (c.interimaires || c.interim || []).map(i => ({ ...i, _co: c.company?.name || c.id })))
+  const [showAdd, setShowAdd] = useState(false)
+  const [form, setForm] = useState({ first: '', last: '', niss: '', agence: 'Randstad', brutH: 15.50, heures: 152, motif: 'remplacement', debut: '', fin: '' })
+  const AGENCES = ['Randstad', 'Adecco', 'Manpower', 'Accent', 'Start People', 'Autre']
+  const MOTIFS = ['remplacement', 'surcroit', 'travail exceptionnel']
+  const sCard = { background: 'rgba(255,255,255,.02)', border: `1px solid ${BORDER}`, borderRadius: 12, padding: 16, marginBottom: 12 }
+  const coutInt = (i) => (+(i.brutH || 0)) * (+(i.heures || 152)) * (+(i.coeff || 2.0))
+
+  return <div style={{ padding: 24, color: TEXT }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      <div>
+        <h2 style={{ color: GOLD, margin: '0 0 4px', fontSize: 20 }}>👥 Gestion des Intérimaires</h2>
+        <p style={{ color: MUTED, margin: 0, fontSize: 12 }}>{allInts.length} intérimaire(s) enregistré(s) — Coeff. facturation moyen ×2.0</p>
+      </div>
+      <button onClick={() => setShowAdd(v => !v)} style={{ padding: '8px 18px', borderRadius: 8, border: 'none', background: 'rgba(198,163,78,.15)', color: GOLD, fontWeight: 600, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}>
+        {showAdd ? '✕ Fermer' : '+ Ajouter intérimaire'}
+      </button>
+    </div>
+
+    {showAdd && <div style={{ ...sCard, border: `1px solid ${GOLD}30` }}>
+      <div style={{ fontSize: 12, fontWeight: 700, color: GOLD, marginBottom: 12 }}>Nouvel intérimaire</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 12 }}>
+        {[['Prénom', 'first'], ['Nom', 'last'], ['NISS', 'niss']].map(([l, k]) =>
+          <div key={k}><div style={{ fontSize: 10, color: MUTED, marginBottom: 4 }}>{l}</div>
+            <input value={form[k]} onChange={e => setForm(p => ({ ...p, [k]: e.target.value }))}
+              style={{ width: '100%', padding: '6px 10px', background: DARK, border: `1px solid ${BORDER}`, borderRadius: 6, color: TEXT, fontSize: 12, boxSizing: 'border-box' }} /></div>)}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10, marginBottom: 12 }}>
+        <div><div style={{ fontSize: 10, color: MUTED, marginBottom: 4 }}>Agence</div>
+          <select value={form.agence} onChange={e => setForm(p => ({ ...p, agence: e.target.value }))}
+            style={{ width: '100%', padding: '6px 10px', background: DARK, border: `1px solid ${BORDER}`, borderRadius: 6, color: TEXT, fontSize: 12 }}>
+            {AGENCES.map(a => <option key={a}>{a}</option>)}
+          </select></div>
+        <div><div style={{ fontSize: 10, color: MUTED, marginBottom: 4 }}>Motif</div>
+          <select value={form.motif} onChange={e => setForm(p => ({ ...p, motif: e.target.value }))}
+            style={{ width: '100%', padding: '6px 10px', background: DARK, border: `1px solid ${BORDER}`, borderRadius: 6, color: TEXT, fontSize: 12 }}>
+            {MOTIFS.map(m => <option key={m}>{m}</option>)}
+          </select></div>
+        <div><div style={{ fontSize: 10, color: MUTED, marginBottom: 4 }}>Brut/heure (€)</div>
+          <input type="number" value={form.brutH} onChange={e => setForm(p => ({ ...p, brutH: e.target.value }))}
+            style={{ width: '100%', padding: '6px 10px', background: DARK, border: `1px solid ${BORDER}`, borderRadius: 6, color: TEXT, fontSize: 12, boxSizing: 'border-box' }} /></div>
+        <div><div style={{ fontSize: 10, color: MUTED, marginBottom: 4 }}>Heures/mois</div>
+          <input type="number" value={form.heures} onChange={e => setForm(p => ({ ...p, heures: e.target.value }))}
+            style={{ width: '100%', padding: '6px 10px', background: DARK, border: `1px solid ${BORDER}`, borderRadius: 6, color: TEXT, fontSize: 12, boxSizing: 'border-box' }} /></div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+        {[['Début', 'debut'], ['Fin', 'fin']].map(([l, k]) =>
+          <div key={k}><div style={{ fontSize: 10, color: MUTED, marginBottom: 4 }}>{l}</div>
+            <input type="date" value={form[k]} onChange={e => setForm(p => ({ ...p, [k]: e.target.value }))}
+              style={{ width: '100%', padding: '6px 10px', background: DARK, border: `1px solid ${BORDER}`, borderRadius: 6, color: TEXT, fontSize: 12, boxSizing: 'border-box' }} /></div>)}
+      </div>
+      <div style={{ padding: 10, background: 'rgba(198,163,78,.06)', borderRadius: 8, fontSize: 11, color: GOLD, marginBottom: 10 }}>
+        💰 Coût estimé : <b>{fmt(form.brutH * form.heures * 2.0)} €/mois</b> (coeff ×2.0 — facture agence)
+      </div>
+      <div style={{ padding: 8, background: 'rgba(255,255,255,.02)', borderRadius: 6, fontSize: 10, color: '#666', lineHeight: 1.6 }}>
+        Base légale: Loi 24/07/1987 — Durée max 3 mois renouvelable (motif remplacement) · Recours limité pour surcroît (max 6 mois) · Obligation déclaration Dimona via agence
+      </div>
+    </div>}
+
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 16 }}>
+      {[
+        { l: 'Intérimaires actifs', v: allInts.length, c: GOLD },
+        { l: 'Coût mensuel total', v: fmt(allInts.reduce((a, i) => a + coutInt(i), 0)) + ' €', c: '#f87171' },
+        { l: 'Agences partenaires', v: [...new Set(allInts.map(i => i.agence).filter(Boolean))].length || 0, c: '#60a5fa' },
+      ].map((k, i) => <div key={i} style={{ ...sCard, textAlign: 'center', marginBottom: 0 }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: k.c }}>{k.v}</div>
+        <div style={{ fontSize: 10, color: MUTED, marginTop: 4 }}>{k.l}</div>
+      </div>)}
+    </div>
+
+    <div style={sCard}>
+      <div style={{ fontSize: 12, fontWeight: 700, color: GOLD, marginBottom: 12 }}>Liste des intérimaires</div>
+      {allInts.length === 0 ? <div style={{ textAlign: 'center', padding: 30, color: MUTED }}>
+        Aucun intérimaire enregistré — utilisez le bouton + pour en ajouter
+      </div> : <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+        <thead><tr>{['Nom', 'Agence', 'Motif', 'Brut/h', 'Heures', 'Coût/mois', 'Début', 'Fin'].map(h =>
+          <th key={h} style={{ textAlign: 'left', padding: '8px 10px', borderBottom: `1px solid ${BORDER}`, color: MUTED, fontWeight: 600 }}>{h}</th>)}</tr></thead>
+        <tbody>{allInts.map((i, idx) => <tr key={idx} style={{ borderBottom: `1px solid ${BORDER}` }}>
+          <td style={{ padding: '8px 10px', color: TEXT }}>{i.first || i.firstName || '?'} {i.last || i.lastName || ''}</td>
+          <td style={{ padding: '8px 10px', color: '#60a5fa' }}>{i.agence || '—'}</td>
+          <td style={{ padding: '8px 10px', color: MUTED }}>{i.motif || '—'}</td>
+          <td style={{ padding: '8px 10px', color: GOLD }}>{fmt(i.brutH || 0)} €</td>
+          <td style={{ padding: '8px 10px', color: TEXT }}>{i.heures || 152}h</td>
+          <td style={{ padding: '8px 10px', color: '#f87171', fontWeight: 600 }}>{fmt(coutInt(i))} €</td>
+          <td style={{ padding: '8px 10px', color: MUTED, fontSize: 10 }}>{i.debut || i.startDate || '—'}</td>
+          <td style={{ padding: '8px 10px', color: MUTED, fontSize: 10 }}>{i.fin || i.endDate || '—'}</td>
+        </tr>)}</tbody>
+      </table>}
+    </div>
+  </div>
+}
+
+// ═══════════════════════════════════════════════════════════
+// VUE JOURS PRESTÉS
+// ═══════════════════════════════════════════════════════════
+function JoursPrestesView({ s, year, month, setYear, setMonth }) {
+  const { tText } = useLang()
+  const GOLD = '#c6a34e', DARK = '#0d1117', BORDER = 'rgba(255,255,255,.08)', TEXT = '#e8e6e0', MUTED = '#9e9b93'
+  const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
+  const employees = (s?.clients || []).flatMap(c => (c.emps || []).map(e => ({ ...e, _co: c.company?.name || c.id })))
+  const active = employees.filter(e => !e.endDate && !e.inactive)
+  const sCard = { background: 'rgba(255,255,255,.02)', border: `1px solid ${BORDER}`, borderRadius: 12, padding: 16, marginBottom: 12 }
+
+  // Calcul jours ouvrables du mois
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const joursFeries = getJoursFeries(year)
+  let ouvrables = 0
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(year, month, d)
+    const dow = date.getDay()
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+    if (dow !== 0 && dow !== 6 && !joursFeries.some(f => f.date === ds)) ouvrables++
+  }
+
+  // Stats prestations
+  const totalHeuresTheo = active.length * ouvrables * 8
+  const totalHeuresPrest = active.reduce((a, e) => {
+    const prest = (e.prestations || []).filter(p => {
+      const d = new Date(p.date || p.day || '')
+      return d.getFullYear() === year && d.getMonth() === month
+    })
+    return a + prest.reduce((b, p) => b + (+(p.heures || p.hours || 8)), 0)
+  }, 0)
+  const tauxPresence = totalHeuresTheo > 0 ? Math.round(totalHeuresPrest / totalHeuresTheo * 100) : 0
+
+  return <div style={{ padding: 24, color: TEXT }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      <div>
+        <h2 style={{ color: GOLD, margin: '0 0 4px', fontSize: 20 }}>📅 Jours Prestés</h2>
+        <p style={{ color: MUTED, margin: 0, fontSize: 12 }}>{MONTHS[month]} {year} — {ouvrables} jours ouvrables — {active.length} travailleurs</p>
+      </div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <select value={month} onChange={e => setMonth(+e.target.value)}
+          style={{ padding: '6px 12px', background: DARK, border: `1px solid ${BORDER}`, borderRadius: 6, color: TEXT, fontSize: 12 }}>
+          {MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
+        </select>
+        <select value={year} onChange={e => setYear(+e.target.value)}
+          style={{ padding: '6px 12px', background: DARK, border: `1px solid ${BORDER}`, borderRadius: 6, color: TEXT, fontSize: 12 }}>
+          {[2024, 2025, 2026].map(y => <option key={y}>{y}</option>)}
+        </select>
+      </div>
+    </div>
+
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 16 }}>
+      {[
+        { l: 'Jours ouvrables', v: ouvrables, c: GOLD },
+        { l: 'Heures théoriques', v: totalHeuresTheo + 'h', c: '#60a5fa' },
+        { l: 'Heures prestées', v: totalHeuresPrest + 'h', c: '#22c55e' },
+        { l: 'Taux de présence', v: tauxPresence + '%', c: tauxPresence >= 95 ? '#22c55e' : tauxPresence >= 85 ? '#eab308' : '#ef4444' },
+      ].map((k, i) => <div key={i} style={{ ...sCard, textAlign: 'center', marginBottom: 0 }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: k.c }}>{k.v}</div>
+        <div style={{ fontSize: 10, color: MUTED, marginTop: 4 }}>{k.l}</div>
+      </div>)}
+    </div>
+
+    <div style={sCard}>
+      <div style={{ fontSize: 12, fontWeight: 700, color: GOLD, marginBottom: 12 }}>Prestations par travailleur — {MONTHS[month]} {year}</div>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+        <thead><tr>{['Travailleur', 'Société', 'Régime', 'H. théo.', 'H. prestées', 'Absences', 'Taux'].map(h =>
+          <th key={h} style={{ textAlign: 'left', padding: '8px 10px', borderBottom: `1px solid ${BORDER}`, color: MUTED, fontWeight: 600 }}>{h}</th>)}</tr></thead>
+        <tbody>{active.length === 0
+          ? <tr><td colSpan={7} style={{ textAlign: 'center', padding: 30, color: MUTED }}>Aucun travailleur actif</td></tr>
+          : active.map((e, i) => {
+            const regime = +(e.regime || 100)
+            const hTheo = Math.round(ouvrables * 8 * regime / 100)
+            const prest = (e.prestations || []).filter(p => { const d = new Date(p.date || ''); return d.getFullYear() === year && d.getMonth() === month })
+            const hPrest = prest.reduce((a, p) => a + (+(p.heures || 8)), 0) || hTheo
+            const abs = Math.max(0, hTheo - hPrest)
+            const taux = hTheo > 0 ? Math.round(hPrest / hTheo * 100) : 100
+            return <tr key={i} style={{ borderBottom: `1px solid ${BORDER}` }}>
+              <td style={{ padding: '8px 10px', color: TEXT, fontWeight: 500 }}>{e.first || e.fn || '?'} {e.last || e.ln || ''}</td>
+              <td style={{ padding: '8px 10px', color: MUTED, fontSize: 10 }}>{e._co}</td>
+              <td style={{ padding: '8px 10px', color: regime < 100 ? '#eab308' : '#22c55e' }}>{regime}%</td>
+              <td style={{ padding: '8px 10px', color: MUTED }}>{hTheo}h</td>
+              <td style={{ padding: '8px 10px', color: '#22c55e', fontWeight: 600 }}>{hPrest}h</td>
+              <td style={{ padding: '8px 10px', color: abs > 0 ? '#ef4444' : '#4ade80' }}>{abs > 0 ? abs + 'h' : '—'}</td>
+              <td style={{ padding: '8px 10px' }}>
+                <span style={{ padding: '2px 8px', borderRadius: 4, fontSize: 10, fontWeight: 600, background: (taux >= 95 ? '#22c55e' : taux >= 85 ? '#eab308' : '#ef4444') + '20', color: taux >= 95 ? '#22c55e' : taux >= 85 ? '#eab308' : '#ef4444' }}>{taux}%</span>
+              </td>
+            </tr>
+          })}</tbody>
+      </table>
+    </div>
+
+    <div style={{ ...sCard, fontSize: 10, color: '#666', lineHeight: 1.7 }}>
+      ℹ️ Jours fériés {year} exclus du calcul · Taux basé sur le régime de travail (temps partiel proportionnel) · Source: Loi 16/03/1971 sur le travail + AR 25/06/1990
+    </div>
+  </div>
 }
 
 export { ABSENCE_TYPES, getJoursFeries, easterDate }
