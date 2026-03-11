@@ -7,7 +7,8 @@
 
 import { NextResponse } from 'next/server';
 
-const RMMMG_FALLBACK = 2070.48; // Valeur connue — fallback si scraping impossible
+import { RMMMG as RMMMG_LOIS } from '@/app/lib/helpers';
+const RMMMG_FALLBACK = RMMMG_LOIS || 2070.48; // Source: lois-belges.js — mis à jour par cron quotidien
 
 async function fetchWithTimeout(url, ms = 8000) {
   const ctrl = new AbortController();
@@ -30,13 +31,13 @@ function extractRMMMG(text) {
   let m;
   while ((m = re.exec(text)) !== null) {
     const v = parseFloat(m[1] + '.' + m[2]);
-    if (v >= 1800 && v <= 2500) found.push(v);
+    if (v >= RMMMG_FALLBACK * 0.85 && v <= RMMMG_FALLBACK * 1.15) found.push(v); // ±15% de la valeur connue
   }
   // Format avec séparateur milliers : 2.070,48
   const re2 = /\b(1|2)[.,](\d{3})[.,](\d{2})\b/g;
   while ((m = re2.exec(text)) !== null) {
     const v = parseFloat(m[1] + m[2] + '.' + m[3]);
-    if (v >= 1800 && v <= 2500) found.push(v);
+    if (v >= RMMMG_FALLBACK * 0.85 && v <= RMMMG_FALLBACK * 1.15) found.push(v); // ±15% de la valeur connue
   }
   if (!found.length) return null;
   // Valeur la plus fréquente

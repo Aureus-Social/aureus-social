@@ -5,10 +5,11 @@ const DOWS=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
 import { useLang } from '../lib/lang-context';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { B, BONUS_MAX, C, CR_MAX, CR_PAT, CR_TRAV, COUT_MED, DPER, HEURES_HEBDO, I, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, SC, ST, TX_AT, TX_ONSS_E, TX_ONSS_W, TX_OUV108, TX_OUV_SPECIAL, Tbl, calc, f2, fmt, obf, quickNet, quickNetEst, quickPP } from "@/app/lib/helpers";
+import { B, BONUS_MAX, C, CR_MAX, CR_PAT, CR_TRAV, COTIS_VAC_OUV, COUT_MED, DPER, HEURES_HEBDO, I, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, SC, ST, TX_AT, TX_ONSS_E, TX_ONSS_W, TX_OUV108, TX_OUV_SPECIAL, Tbl, calc, f2, fmt, obf, quickNet, quickNetEst, quickPP } from "@/app/lib/helpers";
 import { calcCSSS, calcBonusEmploi, calcPrecompteExact, calcPayrollFromEmp, calcMasseSalariale } from "@/app/lib/payroll-engine";
 import { aureuspdf } from "@/app/lib/pdf-aureus";
-const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
+
+// Cotisation vacances ouvriers — source: LOIS_BELGES (AR 30/03/2000)const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const MN = MN_FR;
 
@@ -1492,7 +1493,7 @@ export function CaisseVacMod({s,d}){
   const employes=ae.filter(e=>e.statut!=='ouvrier');
   
   const masseOuv=ouvriers.reduce((a,e)=>{const p=calc(e,DPER,s.co);return a+p.gross*12*TX_OUV108},0);
-  const cotOuv=masseOuv*0.1584;
+  const cotOuv=masseOuv*COTIS_VAC_OUV;
   const masseEmp=employes.reduce((a,e)=>{const p=calc(e,DPER,s.co);return a+p.gross*12},0);
   const pecSimple=masseEmp*0.0769;
   const pecDouble=masseEmp*0.0769;
@@ -1507,7 +1508,7 @@ export function CaisseVacMod({s,d}){
     const dp2=isO?0:double_*(7/92); // 2eme partie
     const onssDp2=dp2*TX_ONSS_W; // ONSS sur 2eme partie
     const cotSpec1=dp2*TX_AT; // cotisation speciale 1%
-    const cotONVA=isO?base108*0.1584:0;
+    const cotONVA=isO?base108*COTIS_VAC_OUV:0;
     const totalEmpl=isO?cotONVA:(simple+double_);
     return{...emp,name:(emp.first||'')+' '+(emp.last||''),isO,brut,brutAn,base108,simple,double_,dp2,onssDp2,cotSpec1,cotONVA,totalEmpl:Math.round(totalEmpl*100)/100};
   });
@@ -1516,7 +1517,7 @@ export function CaisseVacMod({s,d}){
   const simSortie=()=>{
     const brut=simBrut;const prorata=simMois/12;const isO=simStatut==='ouvrier';
     if(isO){
-      const base=brut*simMois*TX_OUV108;const cot=base*0.1584;
+      const base=brut*simMois*TX_OUV108;const cot=base*COTIS_VAC_OUV;
       return{type:'ouvrier',base,cot:Math.round(cot*100)/100,simple:0,double_:0,total:Math.round(cot*100)/100,note:'Ouvrier: pecule verse par ONVA. La cotisation patronale couvre le pecule.'};
     }else{
       const simple=Math.round(brut*prorata*100)/100;
@@ -2358,7 +2359,7 @@ export function DetectionAnomaliesMod({s,d}){
     // Salaire à 0
     if(brut<=0)anomalies.push({emp,type:'error',cat:'Salaire',msg:'Salaire brut à 0€ — impossible de calculer la paie',fix:'Configurer le salaire brut mensuel'});
     // Salaire très bas (sous RMMMG)
-    else if(brut<2029.88&&emp.contract!=='student'&&emp.contract!=='flexi')anomalies.push({emp,type:'error',cat:'Salaire',msg:`Salaire ${fmt(brut)} sous le RMMMG (2.029,88€ en 2026)`,fix:'Vérifier si le régime est temps partiel ou augmenter au minimum légal'});
+    else if(brut<(BAREMES_CP_MIN?.["119"]?.cl1||RMMMG||2029.88)&&emp.contract!=='student'&&emp.contract!=='flexi')anomalies.push({emp,type:'error',cat:'Salaire',msg:`Salaire ${fmt(brut)} sous le RMMMG (2.029,88€ en 2026)`,fix:'Vérifier si le régime est temps partiel ou augmenter au minimum légal'});
     // Salaire aberrant > 15000€
     else if(brut>15000)anomalies.push({emp,type:'warning',cat:'Salaire',msg:`Salaire ${fmt(brut)} très élevé — vérifier la saisie`,fix:'Confirmer le montant ou corriger'});
     // NISS manquant

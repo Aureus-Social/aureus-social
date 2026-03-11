@@ -1,4 +1,6 @@
 'use client';
+// TX_BUDGET_MOB: cotisation ONSS pilier 3 budget mobilité — AR 17/03/2019
+const TX_BUDGET_MOB = 0.3807; // = taux ONSS global forfaitaire ouvrier P3 (source: SPF ETCS)
 import { useLang } from '../lib/lang-context';
 import { B, C, TX_ONSS_E, TX_ONSS_W, fmt, quickPP, LOIS_BELGES, FORF_KM, ECO_MAX, TAUX_WARRANTS, TAUX_PARTICIPATION, TAUX_DOUBLE_PECULE, TAUX_HEURES_SUPP_SAL, HEURES_MENSUELLES, PV_DOUBLE, PLANCHER_ETUDIANT_SOL } from '@/app/lib/helpers';
 import{useState,useMemo}from'react';
@@ -207,7 +209,7 @@ const PRIMES_DB=[
     desc:'3 piliers: voiture éco / transport durable / cash',
     base_legale:'Loi 17/03/2019 relative au budget mobilité',
     conditions:['Pilier 1: voiture de société écologique (CO2 ≤ 50g/km ou électrique)','Pilier 2: moyens de transport durables (vélo, trottinette, transport commun, logement)','Pilier 3: solde en cash (cotisation spéciale 38.07%)','Le travailleur doit avoir/avoir eu droit à une voiture de société'],
-    calcul:(brut)=>{const p1=0;const p3=brut;const cotP3=p3*0.3807;return{brut:0,onssW:0,onssE:0,pp:0,coutEmployeur:brut,avantageNet:brut-cotP3,desc:`Pilier 2: 100% exonéré. Pilier 3 cash: cotisation spéciale 38.07% → net ${fmt(brut-cotP3)}.`}},
+    calcul:(brut)=>{const p1=0;const p3=brut;const cotP3=p3*TX_BUDGET_MOB;return{brut:0,onssW:0,onssE:0,pp:0,coutEmployeur:brut,avantageNet:brut-cotP3,desc:`Pilier 2: 100% exonéré. Pilier 3 cash: cotisation spéciale 38.07% → net ${fmt(brut-cotP3)}.`}},
     fiscal:'P1: régime ATN voiture. P2: exonéré. P3: cotisation 38.07%.'},
 
   // ── ASSURANCES ──

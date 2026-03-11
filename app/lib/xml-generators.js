@@ -116,7 +116,7 @@ function genDMFAXML(co, emps, q, y) {
       <ContributionWorkerRecord>
         <ContributionType>001</ContributionType>
         <ContributionBase>${baseONSS.toFixed(2)}</ContributionBase>
-        <ContributionPercentage>13.07</ContributionPercentage>
+        `<ContributionPercentage>${(TX_ONSS_W*100).toFixed(2)}</ContributionPercentage>`
         <ContributionAmount>${(baseONSS*LEGAL.ONSS_W).toFixed(2)}</ContributionAmount>
       </ContributionWorkerRecord>${p.empBonus>0?`
       <DeductionRecord>

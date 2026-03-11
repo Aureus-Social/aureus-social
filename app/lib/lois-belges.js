@@ -11,6 +11,7 @@ export const LOIS_BELGES = {
     employeur: { total: 0.2507, detail: { pension: 0.0886, maladie: 0.0370, chomage: 0.0138, accidents: 0.0087, maladiesPro: 0.0102, fermeture: 0.0012, moderation: 0.0560, cotisationsSpec: 0.0352 }},
     plafondAnnuel: null, // pas de plafond en Belgique
     ouvrier108: 1.08, // majoration 8% ouvriers
+    cotisVacancesOuv: 0.1584, // Cotisation patronale ONVA (Office National des Vacances Annuelles) — AR 30/03/2000
     reductionStructurelle: { seuil: 9932.40, forfait: 0, pctAuDessus: 0 },
     groupeCible: { jeunesNonQualifies: { age: 25, reduc: 1500 }, agees: { age: 55, reduc: 1500 }, handicapes: { reduc: 1500 }},
   },
@@ -252,6 +253,7 @@ export const LB=LOIS_BELGES;
 export const TX_ONSS_W=LB.onss.travailleur; // 0.1307
 export const TX_ONSS_E=LB.onss.employeur.total; // 0.2507
 export const TX_OUV108=LB.onss.ouvrier108; // 1.08
+export const COTIS_VAC_OUV=LB.onss.cotisVacancesOuv; // 0.1584 — ONVA cotisation patronale
 export const TX_AT=LB.assurances.accidentTravail.taux; // 0.01
 export const COUT_MED=LB.assurances.medecineTravail.cout; // COUT_MED
 export const CR_TRAV=LB.chequesRepas.partTravailleur.min; // CR_TRAV

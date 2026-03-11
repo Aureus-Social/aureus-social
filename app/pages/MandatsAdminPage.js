@@ -1,8 +1,7 @@
 'use client';
+import { TX_ONSS_W, TX_ONSS_E, PP_EST, RMMMG } from '@/app/lib/helpers';
 import { useLang } from '../lib/lang-context';
-import { TX_ONSS_W } from '@/app/lib/helpers';
 import { useState, useEffect } from 'react';
-import { RMMMG } from '../lib/lois-belges';
 
 const RMMMG_H  = (RMMMG / (52 * 38 / 12)).toFixed(2);
 const RMMMG_AN = (RMMMG * 12).toLocaleString('fr-BE', { minimumFractionDigits: 2 });
@@ -225,7 +224,7 @@ export default function MandatsAdminPage({ s, d, tab }) {
       const brut = +(emp.gross || emp.monthlySalary || 0) * 12;
       const onssW = Math.round(brut * TX_ONSS_W * 100) / 100;
       const imposable = brut - onssW;
-      const pp = Math.round(imposable * 0.22 * 100) / 100;
+      const pp = Math.round(imposable * PP_EST * 100) / 100; // PP_EST depuis lois-belges
       const niss = (emp.niss || '000000-000-00').replace(/[^0-9]/g, '').padStart(11, '0');
       const nom = (emp.last || emp.ln || 'NOM').toUpperCase().substring(0, 40);
       const prenom = (emp.first || emp.fn || 'PRENOM').substring(0, 40);
@@ -555,7 +554,7 @@ ${clientForm.nom || ''}`;
                         const brut = +(emp.gross || emp.monthlySalary || 0) * 12;
                         const onssW = Math.round(brut * TX_ONSS_W * 100) / 100;
                         const imposable = Math.round((brut - onssW) * 100) / 100;
-                        const pp = Math.round(imposable * 0.22 * 100) / 100;
+                        const pp = Math.round(imposable * PP_EST * 100) / 100; // PP_EST depuis lois-belges
                         const f2 = v => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2 }).format(v);
                         return (
                           <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,.03)' }}>

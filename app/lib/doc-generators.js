@@ -188,7 +188,7 @@ export function getAlertes(emps,co){
     if(e.startDate||e.start){const start=new Date(e.startDate||e.start);const diff=Math.ceil((now-start)/(1000*60*60*24));if(diff>=0&&diff<=7)alerts.push({type:"onboard",level:"info",icon:"👋",msg:"Nouvel employé "+name+" - onboarding en cours (J+"+diff+")",days:diff});}
     if(!e.niss&&(e.status==="active"||!e.status))alerts.push({type:"niss",level:"danger",icon:"⚠️",msg:"NISS manquant pour "+name,days:0});
     if(!e.iban&&(e.status==="active"||!e.status))alerts.push({type:"iban",level:"warning",icon:"🏦",msg:"IBAN manquant pour "+name,days:0});
-    if(e.status==="active"||!e.status){const brut=+(e.monthlySalary||e.gross||0);if(brut>0&&brut<2029.88)alerts.push({type:"rmmmg",level:"warning",icon:"💰",msg:name+" sous le RMMMG ("+brut.toFixed(2)+" < 2.029,88 EUR)",days:0});}
+    if(e.status==="active"||!e.status){const brut=+(e.monthlySalary||e.gross||0);if(brut>0&&brut<RMMMG)alerts.push({type:"rmmmg",level:"warning",icon:"💰",msg:name+" sous le RMMMG ("+brut.toFixed(2)+" < 2.029,88 EUR)",days:0});}
   });
   const d=now.getDate();const m=now.getMonth()+1;
   if(d<=5)alerts.push({type:"deadline",level:"info",icon:"📅",msg:"Avant le 5: encodage prestations du mois",days:5-d});

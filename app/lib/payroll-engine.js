@@ -2,7 +2,7 @@
 // Extrait du monolithe pour reutilisation dans les modules
 "use client";
 
-import { LOIS_BELGES, TX_ONSS_W, TX_ONSS_E, TX_AT, PV_SIMPLE, PV_DOUBLE, PP_EST, SAISIE_2026_TRAVAIL, SAISIE_2026_REMPLACEMENT, SAISIE_IMMUN_ENFANT_2026, AF_REGIONS, CP_DATA, BAREMES_CP_MIN, ONSS_E_SECTEURS, PRIMES_SECTORIELLES, RMMMG } from "@/app/lib/lois-belges";
+import { LOIS_BELGES, TX_ONSS_W, TX_ONSS_E, TX_AT, PV_SIMPLE, PV_DOUBLE, PP_EST, SAISIE_2026_TRAVAIL, SAISIE_2026_REMPLACEMENT, SAISIE_IMMUN_ENFANT_2026, AF_REGIONS, CP_DATA, BAREMES_CP_MIN, ONSS_E_SECTEURS, PRIMES_SECTORIELLES, RMMMG, COTIS_VAC_OUV } from "@/app/lib/lois-belges";
 
 export function calcPrecompteExact(brutMensuel, options) {
   const opts = options || {};
@@ -531,7 +531,7 @@ export function calcFiche(emp, per, co) {
   const brut = +(emp&&(emp.monthlySalary||emp.gross||emp.brut)||0);
   if (!brut) return {base:0,gross:0,onssNet:0,onssW:0,imposable:0,tax:0,pp:0,css:0,csss:0,net:0,onssE:0,onssEExtra:0,costTotal:0,coutTotal:0,bonus:0,bonusEmploi:0,overtime:0,y13:0,sickPay:0,baremeOk:true,baremeGap:0,primeSect:0,netAvecPrime:0,cpId:'200',cotisSpec:[],cotisSpecTotal:0};
   const r = calcPayrollFromEmp(emp);
-  if (!r) return {base:brut,gross:brut,onssNet:Math.round(brut*0.1307*100)/100,onssW:Math.round(brut*0.1307*100)/100,imposable:0,tax:0,pp:0,css:0,csss:0,net:0,onssE:Math.round(brut*0.2507*100)/100,onssEExtra:0,costTotal:Math.round(brut*1.2507*100)/100,coutTotal:Math.round(brut*1.2507*100)/100,bonus:0,bonusEmploi:0,overtime:0,y13:0,sickPay:0,baremeOk:true,baremeGap:0,primeSect:0,netAvecPrime:0,cpId:'200',cotisSpec:[],cotisSpecTotal:0};
+  if (!r) { const _ow=Math.round(brut*TX_ONSS_W*100)/100; const _oe=Math.round(brut*TX_ONSS_E*100)/100; return {base:brut,gross:brut,onssNet:_ow,onssW:_ow,imposable:0,tax:0,pp:0,css:0,csss:0,net:brut-_ow,onssE:_oe,onssEExtra:0,costTotal:Math.round((brut*(1+TX_ONSS_E))*100)/100,coutTotal:Math.round((brut*(1+TX_ONSS_E))*100)/100,bonus:0,bonusEmploi:0,overtime:0,y13:0,sickPay:0,baremeOk:true,baremeGap:0,primeSect:0,netAvecPrime:0,cpId:'200',cotisSpec:[],cotisSpecTotal:0}; }
   // Calculs supplémentaires période (heures sup, avantages, etc.)
   const hsVolontBrutNet = +(per?.hsVolontBrutNet||0) * (brut/((emp.whWeek||38)*4.33));
   const hsRelance       = +(per?.hsRelance||0)       * (brut/((emp.whWeek||38)*4.33));
@@ -546,14 +546,14 @@ export function calcFiche(emp, per, co) {
   const chRepTravail    = +(per?.mvW||emp?.mvW||0);
   const indemTeletravail= +(per?.indemTeletravail||emp?.indemTeletravail||0);
   const indemBureau     = +(per?.indemBureau||emp?.indemBureau||0);
-  const cotisVacOuv     = r.isOuvrier ? Math.round(r.brutR*0.1584*100)/100 : 0;
+  const cotisVacOuv     = r.isOuvrier ? Math.round(r.brutR*COTIS_VAC_OUV*100)/100 : 0;
   const empBonus        = r.bonusEmploi;
   const onssNet         = Math.round((r.onssP - empBonus)*100)/100;
   const net             = r.net;
   const mvEmployer      = Math.round((transport+chRepPatron+indemTeletravail+indemBureau+fraisPropres)*100)/100;
-  const onssE_rate      = r.isOuvrier ? 0.2507 : (TX_ONSS_E + (r.onssEExtra/r.brutR||0));
+  const onssE_rate      = r.isOuvrier ? (TX_OUV108||TX_ONSS_E) : (TX_ONSS_E + (r.onssEExtra/r.brutR||0));
   const pensionComplEmpl= Math.round(r.brutR*(emp?.assurGroupe||0)/100*100)/100;
-  const dispensePPTotal = Math.round((hsVolontBrutNet+hsRelance)*0.1307*100)/100;
+  const dispensePPTotal = Math.round((hsVolontBrutNet+hsRelance)*TX_ONSS_W*100)/100;
   const miTempsINAMI    = +(per?.miTempsINAMI||0);
   const allocTravail    = +(per?.allocTravail||emp?.allocTravail||emp?.allocTravailMontant||0);
   const allocTravailLabel = emp?.allocTravailType||'';

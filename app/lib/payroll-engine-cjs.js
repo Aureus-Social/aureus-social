@@ -6,7 +6,7 @@
 const TX_ONSS_W = 0.1307;
 const TX_ONSS_E = 0.2719;
 const TX_OUV108 = 1.08;
-const RMMMG = 2070.48;
+const RMMMG = (typeof globalThis !== "undefined" && globalThis.__LOIS_BELGES?.salaires?.RMMMG?.montant18ans) || 2070.48; // fallback uniquement — valeur réelle via LOIS_BELGES
 const CR_MAX = 8.00;
 const CR_PAT = 6.91;
 const CR_TRAV = 1.09;

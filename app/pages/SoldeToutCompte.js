@@ -1,4 +1,5 @@
 'use client';
+import { PV_DOUBLE } from '@/app/lib/helpers';
 // Solde de Tout Compte — Loi 03/07/1978 + AR 09/06/2004
 import { useState, useMemo } from 'react';
 import { C, fmt, f2, RMMMG, TX_ONSS_W, LOIS_BELGES } from '@/app/lib/helpers';
@@ -62,7 +63,7 @@ export default function SoldeToutCompte({ s, d }) {
     const prorata = joursFin / new Date(d2.getFullYear(), d2.getMonth()+1, 0).getDate();
     const salaireMoisFin = Math.round(brut * prorata * 100) / 100;
     const peculeSimple = Math.round(brut * 0.1534 * anciennete * 100) / 100;
-    const peculeDouble = Math.round(brut * 0.92 * 100) / 100;
+    const peculeDouble = Math.round(brut * PV_DOUBLE * 100) / 100;
     const totalBrut = indemnite + salaireMoisFin + (motif !== 'demission' ? peculeSimple : 0);
     const onss = Math.round(totalBrut * TX_ONSS_W * 100) / 100;
     const pp = Math.round(totalBrut * 0.26 * 100) / 100;

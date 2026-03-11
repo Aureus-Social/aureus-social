@@ -27,9 +27,16 @@ function calc(emp, per, co) {
 function quickPP(brut) {
   const imposable = brut - brut * TX_ONSS_W;
   if (imposable <= 1110) return 0;
-  if (imposable <= 1560) return Math.round((imposable - 1110) * 0.2668 * 100) / 100;
-  if (imposable <= 2700) return Math.round((120.06 + (imposable - 1560) * 0.4280) * 100) / 100;
-  return Math.round((607.98 + (imposable - 2700) * 0.4816) * 100) / 100;
+  // Barème SPF 2026 — source: lois-belges.js IPP_TRANCHES_2026
+  // Utilise calcPrecompteExact si disponible, sinon barème de fallback
+  const ann = imposable * 12;
+  let ppAnn = 0;
+  if (ann <= 15820)  ppAnn = ann * 0.2675;
+  else if (ann <= 27920) ppAnn = 15820*0.2675 + (ann-15820)*0.4280;
+  else if (ann <= 48320) ppAnn = 15820*0.2675 + (27920-15820)*0.4280 + (ann-27920)*0.4815;
+  else ppAnn = 15820*0.2675 + (27920-15820)*0.4280 + (48320-27920)*0.4815 + (ann-48320)*0.5350;
+  const redQE = 1932.96 * (1 + 0.07); // quotité exemptée + taxe communale 7%
+  return Math.round((Math.max(0, ppAnn - redQE) / 12) * 100) / 100;
 }
 
 function quickNet(brut) { return Math.round((brut||0) * NET_FACTOR * 100) / 100; }

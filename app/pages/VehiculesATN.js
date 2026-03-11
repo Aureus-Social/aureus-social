@@ -1,4 +1,5 @@
 'use client';
+import { TX_ONSS_E } from '@/app/lib/helpers';
 // ATN Voiture de société — Art. 36 CIR/92 + AR CO2 2026
 import { useState, useMemo } from 'react';
 import { C, fmt, TX_ONSS_W } from '@/app/lib/helpers';
@@ -39,7 +40,7 @@ export default function VehiculesATN({ s, d }) {
   const onssATN = Math.round(calc.atn * TX_ONSS_W * 100) / 100;
   const ppATN = Math.round(calc.atn * 0.26 * 100) / 100;
   const coutNetTrav = Math.round((onssATN + ppATN) * 100) / 100;
-  const coutTotalEmployeur = Math.round((calc.cotisationCO2 + calc.atn * 0.2507) * 100) / 100;
+  const coutTotalEmployeur = Math.round((calc.cotisationCO2 + calc.atn * TX_ONSS_E) * 100) / 100;
 
   // Simuler flotte
   const flotte = useMemo(() => (s.emps||[]).filter(e=>e.voiture).map(e => {

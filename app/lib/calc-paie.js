@@ -1,4 +1,5 @@
 // ═══ AUREUS SOCIAL PRO — Module: Moteur de calcul paie ═══
+const TX_BUDGET_MOB = 0.3807; // Cotisation ONSS budget mobilité pilier 3 — AR 17/03/2019
 // BAREMES, calc(), getBareme(), getCPAvantages()
 
 // Dépendances injectées via initCalcEngine()
@@ -1533,7 +1534,7 @@ function calc(emp, per, co) {
   r.budgetMobilite = per.budgetMobilite || 0;
   r.budgetMobPilier2 = per.budgetMobP2 || 0; // part exonérée
   r.budgetMobPilier3 = per.budgetMobP3 || 0; // part cash → cotisation 38,07%
-  r.budgetMobCotis38 = r.budgetMobPilier3 * 0.3807;
+  r.budgetMobCotis38 = r.budgetMobPilier3 * TX_BUDGET_MOB;
 
   // ── 19. RÉDUCTIONS GROUPES-CIBLES EMPLOYEUR (AR Groupes-cibles) ──
   // Réductions ONSS patronales ciblées — calculées AUTOMATIQUEMENT

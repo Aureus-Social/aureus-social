@@ -7,7 +7,7 @@ import { TX_ONSS_W, TX_ONSS_E, RMMMG, IPP_TRANCHES_2026, IPP_FRAIS_PRO_PCT, IPP_
 // CP DATABASE — barèmes minimums + spécificités sectorielles
 // ═══════════════════════════════════════════════════════════
 const CP_LIST = [
-  { id:'200',  label:'CP 200 — Employés (général)',         rmmmg: 2070.48, onssE_extra: 0,     primeSect: 0,   note:'Barème général employés' },
+  { id:'200',  label:'CP 200 — Employés (général)',         rmmmg: CP_DATA['200']?.cl1 || RMMMG, onssE_extra: 0,     primeSect: 0,   note:'Barème général employés' },
   { id:'218',  label:'CP 218 — Aide alimentaire',           rmmmg: 2100.00, onssE_extra: 0,     primeSect: 0,   note:'' },
   { id:'220',  label:'CP 220 — Commerce détail',            rmmmg: 2080.00, onssE_extra: 0,     primeSect: 25,  note:'Prime fin année' },
   { id:'226',  label:'CP 226 — Peinture',                   rmmmg: 2150.00, onssE_extra: 0,     primeSect: 50,  note:'Prime intempéries' },
@@ -17,26 +17,26 @@ const CP_LIST = [
   { id:'315',  label:'CP 315 — Garages',                    rmmmg: 2120.00, onssE_extra: 0,     primeSect: 40,  note:'Prime technique' },
   { id:'317',  label:'CP 317 — Transport & Logistique',     rmmmg: 2150.00, onssE_extra: 0,     primeSect: 0,   note:'' },
   { id:'319',  label:'CP 319 — Assurances',                 rmmmg: 2300.00, onssE_extra: 0,     primeSect: 100, note:'Secteur qualifié' },
-  { id:'322',  label:'CP 322 — Intérim (employés)',         rmmmg: 2070.48, onssE_extra: 0.0015,primeSect: 0,   note:'Fonds formation 0,15%' },
+  { id:'322',  label:'CP 322 — Intérim (employés)',         rmmmg: CP_DATA['200']?.cl1 || RMMMG, onssE_extra: 0.0015,primeSect: 0,   note:'Fonds formation 0,15%' },
   { id:'326',  label:'CP 326 — Commerce de gros',           rmmmg: 2090.00, onssE_extra: 0,     primeSect: 20,  note:'' },
   { id:'330',  label:'CP 330 — Commerce alimentaire',       rmmmg: 2100.00, onssE_extra: 0,     primeSect: 35,  note:'' },
   { id:'331',  label:'CP 331 — Crédit (banques)',           rmmmg: 2400.00, onssE_extra: 0,     primeSect: 120, note:'Barème élevé' },
   { id:'336',  label:'CP 336 — Grande distribution',        rmmmg: 2080.00, onssE_extra: 0,     primeSect: 30,  note:'GMS' },
-  { id:'337',  label:'CP 337 — Non-marchand',               rmmmg: 2070.48, onssE_extra: 0.003, primeSect: 0,   note:'Maribel social' },
+  { id:'337',  label:'CP 337 — Non-marchand',               rmmmg: CP_DATA['200']?.cl1 || RMMMG, onssE_extra: 0.003, primeSect: 0,   note:'Maribel social' },
   { id:'341',  label:'CP 341 — Services informatiques',     rmmmg: 2500.00, onssE_extra: 0,     primeSect: 150, note:'IT — barème élevé' },
-  { id:'100',  label:'CP 100 — Ouvriers (général)',         rmmmg: 2070.48, onssE_extra: 0,     primeSect: 0,   note:'Base 108% ONSS',         ouvrier: true },
+  { id:'100',  label:'CP 100 — Ouvriers (général)',         rmmmg: CP_DATA['200']?.cl1 || RMMMG, onssE_extra: 0,     primeSect: 0,   note:'Base 108% ONSS',         ouvrier: true },
   { id:'111',  label:'CP 111 — Métal Fabrications',         rmmmg: 2180.00, onssE_extra: 0.005, primeSect: 60,  note:'Fonds sécurité 0,5%',    ouvrier: true },
   { id:'112',  label:'CP 112 — Métal Électrotechnique',     rmmmg: 2180.00, onssE_extra: 0.005, primeSect: 60,  note:'',                        ouvrier: true },
   { id:'118',  label:'CP 118 — Alimentation',               rmmmg: 2100.00, onssE_extra: 0.003, primeSect: 45,  note:'Fonds formation',         ouvrier: true },
-  { id:'121',  label:'CP 121 — Nettoyage',                  rmmmg: 2070.48, onssE_extra: 0.002, primeSect: 0,   note:'Fonds RCC 0,2%',          ouvrier: true },
+  { id:'121',  label:'CP 121 — Nettoyage',                  rmmmg: CP_DATA['200']?.cl1 || RMMMG, onssE_extra: 0.002, primeSect: 0,   note:'Fonds RCC 0,2%',          ouvrier: true },
   { id:'124',  label:'CP 124 — Construction',               rmmmg: 2100.00, onssE_extra: 0.021, primeSect: 80,  note:'FFB 2,1% + fidélité',     ouvrier: true },
   { id:'126',  label:'CP 126 — Bois & Ameublement',         rmmmg: 2100.00, onssE_extra: 0.003, primeSect: 50,  note:'',                        ouvrier: true },
   { id:'130',  label:'CP 130 — Imprimerie',                 rmmmg: 2200.00, onssE_extra: 0.004, primeSect: 70,  note:'',                        ouvrier: true },
   { id:'140',  label:'CP 140 — Transport routier',          rmmmg: 2150.00, onssE_extra: 0.001, primeSect: 40,  note:'',                        ouvrier: true },
   { id:'149',  label:'CP 149 — Électricité',                rmmmg: 2200.00, onssE_extra: 0.003, primeSect: 65,  note:'Fonds Volta',             ouvrier: true },
   { id:'302',  label:'CP 302 — Hôtels (ouvriers)',          rmmmg: 2050.00, onssE_extra: 0,     primeSect: 30,  note:'',                        ouvrier: true },
-  { id:'329',  label:'CP 329 — Socio-culturel',             rmmmg: 2070.48, onssE_extra: 0.003, primeSect: 0,   note:'Maribel social' },
-  { id:'332',  label:'CP 332 — Intérim (ouvriers)',         rmmmg: 2070.48, onssE_extra: 0.0015,primeSect: 0,   note:'Fonds formation',         ouvrier: true },
+  { id:'329',  label:'CP 329 — Socio-culturel',             rmmmg: CP_DATA['200']?.cl1 || RMMMG, onssE_extra: 0.003, primeSect: 0,   note:'Maribel social' },
+  { id:'332',  label:'CP 332 — Intérim (ouvriers)',         rmmmg: CP_DATA['200']?.cl1 || RMMMG, onssE_extra: 0.0015,primeSect: 0,   note:'Fonds formation',         ouvrier: true },
 ];
 
 const GOLD='#c6a34e',GREEN='#22c55e',RED='#ef4444',BLUE='#60a5fa',ORANGE='#fb923c';
