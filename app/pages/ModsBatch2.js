@@ -2001,6 +2001,7 @@ export function AccountingOutputMod({s,d,supabase,user}){
     {id:'octopus',name:tText('Octopus'),icon:'📕',ext:'.csv',desc:'CSV Octopus Accountancy'},
     {id:'horus',name:tText('Horus'),icon:'📓',ext:'.txt',desc:'Format Horus/Popsy complet'},
     {id:'csv_generic',name:tText('CSV Générique'),icon:'📄',ext:'.csv',desc:'CSV universel (import manuel)'},
+    {id:'coda',name:'CODA',icon:'🏦',ext:'.cod',desc:'Format CODA belge — CodaBox/Isabel compatible'},
   ];
 
   const f2=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
@@ -2110,6 +2111,30 @@ export function AccountingOutputMod({s,d,supabase,user}){
       content+='G|SAL|'+exercice+'|'+periode+'|'+docNumH+'|004|'+pcmn.pp+'|Précompte professionnel|'+totalPP.toFixed(2)+'|C|'+isoDate+'|EUR|AUREUS_SAL\n';
       content+='G|SAL|'+exercice+'|'+periode+'|'+docNumH+'|005|'+pcmn.net+'|Net à payer|'+totalNet.toFixed(2)+'|C|'+isoDate+'|EUR|AUREUS_SAL\n';
       let seq=6;lines.forEach(l=>{content+='D|SAL|'+exercice+'|'+periode+'|'+docNumH+'|'+padN(seq,3)+'|'+pcmn.brut+'|'+l.employee+' - Brut|'+l.gross.toFixed(2)+'|D|'+isoDate+'|EUR|'+(l.niss||'')+'\n';seq++;});
+    }else if(fmt==='coda'){
+      const padL=(s,n,c=' ')=>(s+'').padEnd(n,c).slice(0,n);
+      const padR=(s,n,c=' ')=>((''+s).padStart(n,c)).slice(-n);
+      const codaDate=(d)=>{const dt=new Date(d);return (dt.getDate()+'').padStart(2,'0')+(''+(dt.getMonth()+1)).padStart(2,'0')+(dt.getFullYear()+'').slice(2);};
+      const amtFmt=(v)=>(Math.round(Math.abs(v)*100)+'').padStart(15,'0');
+      const creationDate=codaDate(now);
+      const refPeriod=(selMonth+1).toString().padStart(2,'0')+selYear.toString().slice(2);
+      content+='0'+' '.repeat(16)+creationDate+' '.repeat(2)+padL('AUREUS SOCIAL PRO',26)+' '.repeat(4)+'EUR'+' '.repeat(204)+'  1
+';
+      content+='1'+'0000'+padL('BE00000000000000',37)+'EUR'+padL('Salaires '+refPeriod,26)+' '.repeat(4)+'0'.repeat(5)+' '.repeat(34)+'0000
+';
+      let txSeq=1;
+      const writeTx=(compte,libelle,montant,dc)=>{content+='2'+(txSeq+'').padStart(4,'0')+'0000SAL'+padL(compte,12)+amtFmt(montant)+dc+creationDate+padL(libelle.slice(0,32),32)+'     '+' '.repeat(5)+'
+';txSeq++;};
+      writeTx(pcmn.brut,'Remunerations brutes '+refPeriod,totalBrut,'0');
+      writeTx(pcmn.onssE,'ONSS patronal '+refPeriod,totalOnssE,'0');
+      writeTx(pcmn.onssW,'ONSS travailleur '+refPeriod,totalOnssW,'1');
+      writeTx(pcmn.pp,'Precompte professionnel '+refPeriod,totalPP,'1');
+      writeTx(pcmn.net,'Net a payer '+refPeriod,totalNet,'1');
+      lines.forEach(l=>{writeTx(pcmn.brut,(l.employee||'Employe').slice(0,20)+' brut',l.gross,'0');});
+      content+='8'+'0000'+'0000'+amtFmt(totalBrut+totalOnssE)+'0'+'   '+(''+(txSeq-1)).padStart(6,'0')+' '.repeat(214)+'
+';
+      content+='9'+'0000'+'0000'+amtFmt(totalBrut+totalOnssE)+'0'+'   '+(''+(txSeq-1)).padStart(6,'0')+' '.repeat(214)+'
+';
     }else{
       content+='Compte;Libellé;Débit;Crédit;Journal;Date;Période\n';
       content+=pcmn.brut+';Rémunérations brutes;'+totalBrut.toFixed(2)+';;SAL;'+dateStr+';'+periodLabel+'\n';
