@@ -562,7 +562,8 @@ function DashboardLayoutInner({ user }) {
       case 'calcinstant': return <SimuNetBrutPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'diagnostic': case 'diagnosticv': return <DiagnosticPage s={s} d={d} t={t} lang={lang} />;
       case 'seuilssociaux': return <SeuilsPage s={s} d={d} t={t} lang={lang} />;
-      case 'onboarding': case 'onboardwizard': return <OnboardingPage s={s} d={d} t={t} lang={lang} />;
+      case 'onboarding': return <OnboardingPage s={s} d={d} t={t} lang={lang} tab="onboarding" />;
+      case 'onboardwizard': return <OnboardingPage s={s} d={d} t={t} lang={lang} tab="onboardwizard" />;
       case 'cloture': return <CloturePage s={s} d={d} t={t} lang={lang} />;
       case 'analytics': return <AnalyticsDashboardRaw s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'adminbaremes': return <AdminBaremesRaw s={s} d={d} t={t} lang={lang} />;

@@ -59,9 +59,9 @@ const generateDimonaPreview=(emp,company)=>{
 </DmfAConsult>`;
 };
 
-export function OnboardingWizardV2({s,d}){
+export function OnboardingWizardV2({s,d,initialMode}){
   const { t, lang, tText } = useLang();
-  const [mode,setMode]=useState('choose'); // choose | wizard | reprise
+  const [mode,setMode]=useState(initialMode||'choose'); // choose | wizard | reprise
   const [step,setStep]=useState(0);
   const [errors,setErrors]=useState([]);
   const [showDimona,setShowDimona]=useState(null);
@@ -417,4 +417,7 @@ export function OnboardingWizardV2({s,d}){
 }
 
 
-export default OnboardingWizardV2;
+export default function OnboardingHubWrapped({s, d, t, lang, tab}) {
+  const initialMode = tab === 'onboardwizard' ? 'wizard' : 'choose';
+  return <OnboardingWizardV2 s={s} d={d} initialMode={initialMode} />;
+}
