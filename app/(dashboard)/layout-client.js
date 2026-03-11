@@ -115,6 +115,8 @@ const SalaireMaladieRaw = dynamic(() => import('../pages/SalaireMaladie'), { ssr
 const SimulateurPensionRaw = dynamic(() => import('../pages/SimulateurPension'), { ssr: false, loading: Loading });
 const SoldeToutCompteRaw = dynamic(() => import('../pages/SoldeToutCompte'), { ssr: false, loading: Loading });
 const FloatingLegalAgentRaw = dynamic(() => import('../pages/FloatingLegalAgent'), { ssr: false, loading: Loading });
+const ChecklistClientRaw = dynamic(() => import('../pages/ChecklistClient'), { ssr: false, loading: Loading });
+const BudgetPrevisionnelRaw = dynamic(() => import('../pages/BudgetPrevisionnel'), { ssr: false, loading: Loading });
 const IntegrationsComptaPg = ({ s, d }) => <IntegrationsComptaRaw s={s} d={d} />;
 const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 
@@ -603,7 +605,7 @@ function DashboardLayoutInner({ user }) {
       // PAIE & CALCULS
       case 'avantages': return <PrimesPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'baremespp': return <TransversalCPPg s={s} d={d} tab={page} />;
-      case 'budget': return <PayrollGroupPg s={s} d={d} tab={page} />;
+      case 'budget': return <BudgetPrevisionnelRaw s={s} d={d} />;
       case 'calcmaladie': return <SalaireMaladieRaw s={s} d={d} />;
       case 'calendrier': return <CalendrierSocialRaw s={s} d={d} />;
       case 'coutsannuel': return <PayrollGroupPg s={s} d={d} tab={page} />;
@@ -662,7 +664,7 @@ function DashboardLayoutInner({ user }) {
       case 'plandiversite': return <LoisPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'social': return <LoisPage s={s} d={d} t={t} lang={lang} tab={page} />;
       // COMMERCIAL
-      case 'checklistclient': return <CommissionsModulePg s={s} d={d} tab={page} />;
+      case 'checklistclient': return <ChecklistClientRaw s={s} d={d} />;
       case 'comparatif': return <CommissionsModulePg s={s} d={d} tab={page} />;
       case 'fiduciaire': return <CommissionsModulePg s={s} d={d} tab={page} />;
       case 'guidecommercial': return <CommissionsModulePg s={s} d={d} tab={page} />;

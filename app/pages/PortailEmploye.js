@@ -2,9 +2,11 @@
 // ═══════════════════════════════════════════════════════════════
 // PORTAIL EMPLOYÉ SELF-SERVICE — Aureus Social Pro
 // Vue personnelle : fiches de paie, contrats, absences, documents
+// Auth Supabase → liaison automatique par email
 // ═══════════════════════════════════════════════════════════════
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { C, fmt, f2 } from '@/app/lib/helpers';
+import { supabase } from '@/app/lib/supabase';
 
 const GOLD='#c6a34e',GREEN='#22c55e',BLUE='#60a5fa',RED='#ef4444',PURPLE='#a78bfa';
 
@@ -27,6 +29,28 @@ export default function PortailEmploye({s, d}) {
   const [selectedEmpId, setSelectedEmpId] = useState((s.emps||[])[0]?.id||'');
   const [tab, setTab] = useState('fiches');
   const [docFilter, setDocFilter] = useState('all');
+  const [authEmail, setAuthEmail] = useState(null);
+  const [linkedEmp, setLinkedEmp] = useState(null);
+
+  // ── Liaison auth Supabase → employé par email ──
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email) {
+          setAuthEmail(user.email);
+          // Chercher l'employé avec cet email
+          const found = (s.emps || []).find(e =>
+            (e.email || '').toLowerCase() === user.email.toLowerCase()
+          );
+          if (found) {
+            setLinkedEmp(found);
+            setSelectedEmpId(found.id);
+          }
+        }
+      } catch(e) {}
+    })();
+  }, [s.emps]);
 
   const emp = useMemo(() => (s.emps||[]).find(e=>e.id===selectedEmpId)||(s.emps||[])[0], [selectedEmpId, s.emps]);
   const myFiches = useMemo(() => (s.pays||[]).filter(p=>p.empId===emp?.id||p.employee_id===emp?.id).sort((a,b)=>new Date(b.at||b.created_at||0)-new Date(a.at||a.created_at||0)), [emp, s.pays]);
