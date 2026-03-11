@@ -2118,23 +2118,18 @@ export function AccountingOutputMod({s,d,supabase,user}){
       const amtFmt=(v)=>(Math.round(Math.abs(v)*100)+'').padStart(15,'0');
       const creationDate=codaDate(now);
       const refPeriod=(selMonth+1).toString().padStart(2,'0')+selYear.toString().slice(2);
-      content+='0'+' '.repeat(16)+creationDate+' '.repeat(2)+padL('AUREUS SOCIAL PRO',26)+' '.repeat(4)+'EUR'+' '.repeat(204)+'  1
-';
-      content+='1'+'0000'+padL('BE00000000000000',37)+'EUR'+padL('Salaires '+refPeriod,26)+' '.repeat(4)+'0'.repeat(5)+' '.repeat(34)+'0000
-';
+      content+='0'+' '.repeat(16)+creationDate+' '.repeat(2)+padL('AUREUS SOCIAL PRO',26)+' '.repeat(4)+'EUR'+' '.repeat(204)+'  1\n';
+      content+='1'+'0000'+padL('BE00000000000000',37)+'EUR'+padL('Salaires '+refPeriod,26)+' '.repeat(4)+'0'.repeat(5)+' '.repeat(34)+'0000\n';
       let txSeq=1;
-      const writeTx=(compte,libelle,montant,dc)=>{content+='2'+(txSeq+'').padStart(4,'0')+'0000SAL'+padL(compte,12)+amtFmt(montant)+dc+creationDate+padL(libelle.slice(0,32),32)+'     '+' '.repeat(5)+'
-';txSeq++;};
+      const writeTx=(compte,libelle,montant,dc)=>{content+='2'+(txSeq+'').padStart(4,'0')+'0000SAL'+padL(compte,12)+amtFmt(montant)+dc+creationDate+padL(libelle.slice(0,32),32)+'     '+' '.repeat(5)+'\n';txSeq++;};
       writeTx(pcmn.brut,'Remunerations brutes '+refPeriod,totalBrut,'0');
       writeTx(pcmn.onssE,'ONSS patronal '+refPeriod,totalOnssE,'0');
       writeTx(pcmn.onssW,'ONSS travailleur '+refPeriod,totalOnssW,'1');
       writeTx(pcmn.pp,'Precompte professionnel '+refPeriod,totalPP,'1');
       writeTx(pcmn.net,'Net a payer '+refPeriod,totalNet,'1');
       lines.forEach(l=>{writeTx(pcmn.brut,(l.employee||'Employe').slice(0,20)+' brut',l.gross,'0');});
-      content+='8'+'0000'+'0000'+amtFmt(totalBrut+totalOnssE)+'0'+'   '+(''+(txSeq-1)).padStart(6,'0')+' '.repeat(214)+'
-';
-      content+='9'+'0000'+'0000'+amtFmt(totalBrut+totalOnssE)+'0'+'   '+(''+(txSeq-1)).padStart(6,'0')+' '.repeat(214)+'
-';
+      content+='8'+'0000'+'0000'+amtFmt(totalBrut+totalOnssE)+'0'+'   '+(''+(txSeq-1)).padStart(6,'0')+' '.repeat(214)+'\n';
+      content+='9'+'0000'+'0000'+amtFmt(totalBrut+totalOnssE)+'0'+'   '+(''+(txSeq-1)).padStart(6,'0')+' '.repeat(214)+'\n';
     }else{
       content+='Compte;Libellé;Débit;Crédit;Journal;Date;Période\n';
       content+=pcmn.brut+';Rémunérations brutes;'+totalBrut.toFixed(2)+';;SAL;'+dateStr+';'+periodLabel+'\n';
