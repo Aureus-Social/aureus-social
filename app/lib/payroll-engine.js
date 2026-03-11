@@ -2,7 +2,7 @@
 // Extrait du monolithe pour reutilisation dans les modules
 "use client";
 
-import { LOIS_BELGES, TX_ONSS_W, TX_ONSS_E, TX_AT, PV_SIMPLE, PV_DOUBLE, PP_EST, SAISIE_2026_TRAVAIL, SAISIE_2026_REMPLACEMENT, SAISIE_IMMUN_ENFANT_2026, AF_REGIONS } from "@/app/lib/lois-belges";
+import { LOIS_BELGES, TX_ONSS_W, TX_ONSS_E, TX_AT, PV_SIMPLE, PV_DOUBLE, PP_EST, SAISIE_2026_TRAVAIL, SAISIE_2026_REMPLACEMENT, SAISIE_IMMUN_ENFANT_2026, AF_REGIONS, CP_DATA, BAREMES_CP_MIN, ONSS_E_SECTEURS, PRIMES_SECTORIELLES, RMMMG } from "@/app/lib/lois-belges";
 
 export function calcPrecompteExact(brutMensuel, options) {
   const opts = options || {};
@@ -187,41 +187,133 @@ export function quickPP(brut,sit,enf){return calcPrecompteExact(brut,{situation:
 
 export function quickNet(brut,sit,enf){const o=Math.round(brut*TX_ONSS_W*100)/100;return Math.round((brut-o-quickPP(brut,sit,enf))*100)/100;}
 
-// ═══ CALCUL PAYROLL COMPLET ═══
-export function calcPayroll(brut,statut,familial,charges,regime){
-  if(!brut||brut<=0)return{brut:0,onssP:0,imposable:0,pp:0,csss:0,bonusEmploi:0,net:0,onssE:0,coutTotal:0,details:{}};
-  const r=(regime||100)/100;
-  const brutR=brut*r;
-  const onssP=Math.round(brutR*TX_ONSS_W*100)/100;
-  const imposable=Math.round((brutR-onssP)*100)/100;
-  const qe=statut==='independant'?0:880.83;
-  const chDed=(charges||0)*175;
-  const baseImp=Math.max(0,imposable-qe-chDed);
-  let pp=0;
-  if(baseImp>0){
-    const t1=Math.min(baseImp,1128.33)*0.2675;
-    const t2=baseImp>1128.33?Math.min(baseImp-1128.33,450)*0.3210:0;
-    const t3=baseImp>1578.33?Math.min(baseImp-1578.33,1140)*0.4280:0;
-    const t4=baseImp>2718.33?(baseImp-2718.33)*0.4815:0;
-    pp=Math.round((t1+t2+t3+t4)*100)/100;
+// ═══════════════════════════════════════════════════════════
+// CALCUL PAYROLL COMPLET — avec précision CP sectorielle
+// Paramètres: brut, statut, familial, charges, regime, opts
+// opts: { cp, classe, anciennete, indexation }
+//   cp         : identifiant CP (ex: '200', '124', '341')
+//   classe     : classe barémique (1-5, défaut 1)
+//   anciennete : années d'ancienneté (défaut 0)
+// Retourne: tous les montants + cpInfo complet
+// ═══════════════════════════════════════════════════════════
+export function calcPayroll(brut, statut, familial, charges, regime, opts) {
+  if (!brut || brut <= 0) return {
+    brut: 0, onssP: 0, imposable: 0, pp: 0, csss: 0, bonusEmploi: 0, net: 0,
+    onssE: 0, coutTotal: 0, primeSect: 0, netAvecPrime: 0,
+    baremeMin: 0, baremeOk: true, baremeGap: 0, cpInfo: null, details: {}
+  };
+
+  const o = opts || {};
+  const cpId = o.cp || '200';
+  const classe = o.classe || 1;
+  const anciennete = o.anciennete || 0;
+  const r = (regime || 100) / 100;
+  const brutR = Math.round(brut * r * 100) / 100;
+
+  // ── CP Data ──
+  const cpData = CP_DATA[cpId] || CP_DATA['200'];
+  const isOuvrier = cpData.ouvrier || statut === 'ouvrier';
+
+  // ── Barème minimum sectoriel avec ancienneté ──
+  const clKey = 'cl' + Math.min(Math.max(classe, 1), 5);
+  const baremeBase = cpData[clKey] || cpData.cl1 || RMMMG;
+  let pctAnc = 0;
+  for (const t of (cpData.anciennete || [])) {
+    if (anciennete >= t.ans) pctAnc = t.pct;
   }
-  if(familial==='marie_1rev')pp=Math.round(pp*0.70*100)/100;
-  if(familial==='marie_2rev')pp=Math.round(pp*PV_DOUBLE*100)/100;
-  let csss=0;
-  if(brutR<=1945.38)csss=0;
-  else if(brutR<=2190.18)csss=brutR*0.076-147.87;
-  else if(brutR<=6038.82)csss=brutR*0.011-5.25;
-  else csss=60.94;
-  csss=Math.round(Math.max(0,csss)*100)/100;
-  let bonusEmploi=0;
-  if(imposable<=1945.38)bonusEmploi=Math.min(pp,308.33);
-  else if(imposable<=2721.56)bonusEmploi=Math.min(pp,Math.max(0,308.33-((imposable-1945.38)*0.3969)));
-  bonusEmploi=Math.round(bonusEmploi*100)/100;
-  const ppFinal=Math.round(Math.max(0,pp-bonusEmploi)*100)/100;
-  const net=Math.round((brutR-onssP-ppFinal-csss)*100)/100;
-  const onssE=Math.round(brutR*TX_ONSS_E*100)/100;
-  const coutTotal=Math.round((brutR+onssE)*100)/100;
-  return{brut:brutR,onssP,imposable,pp:ppFinal,csss,bonusEmploi,baseImp:Math.round(baseImp*100)/100,coutTotal,onssE,net,details:{qe,chDed,ppBrut:Math.round(pp*100)/100,tauxPP:imposable>0?Math.round(ppFinal/imposable*10000)/100:0,tauxNet:brutR>0?Math.round(net/brutR*10000)/100:0}};
+  const baremeMin = Math.round(Math.max(RMMMG, baremeBase * (1 + pctAnc / 100)) * r * 100) / 100;
+  const baremeOk = brutR >= baremeMin;
+  const baremeGap = baremeOk ? 0 : Math.round((baremeMin - brutR) * 100) / 100;
+
+  // ── ONSS travailleur — base ×1.08 pour ouvriers ──
+  const onssBase = isOuvrier ? Math.round(brutR * 1.08 * 100) / 100 : brutR;
+  const onssP = Math.round(onssBase * TX_ONSS_W * 100) / 100;
+  const imposable = Math.round((brutR - onssP) * 100) / 100;
+
+  // ── PP (formule Annexe III simplifiée) ──
+  const qe = statut === 'independant' ? 0 : 880.83;
+  const chDed = (charges || 0) * 175;
+  const baseImp = Math.max(0, imposable - qe - chDed);
+  let pp = 0;
+  if (baseImp > 0) {
+    const t1 = Math.min(baseImp, 1128.33) * 0.2675;
+    const t2 = baseImp > 1128.33 ? Math.min(baseImp - 1128.33, 450) * 0.3210 : 0;
+    const t3 = baseImp > 1578.33 ? Math.min(baseImp - 1578.33, 1140) * 0.4280 : 0;
+    const t4 = baseImp > 2718.33 ? (baseImp - 2718.33) * 0.4815 : 0;
+    pp = Math.round((t1 + t2 + t3 + t4) * 100) / 100;
+  }
+  if (familial === 'marie_1rev') pp = Math.round(pp * 0.70 * 100) / 100;
+  if (familial === 'marie_2rev') pp = Math.round(pp * PV_DOUBLE * 100) / 100;
+
+  // ── CSSS ──
+  let csss = 0;
+  if (brutR <= 1945.38) csss = 0;
+  else if (brutR <= 2190.18) csss = brutR * 0.076 - 147.87;
+  else if (brutR <= 6038.82) csss = brutR * 0.011 - 5.25;
+  else csss = 60.94;
+  csss = Math.round(Math.max(0, csss) * 100) / 100;
+
+  // ── Bonus emploi (Art. 289ter CIR/92) ──
+  let bonusEmploi = 0;
+  if (imposable <= 1945.38) bonusEmploi = Math.min(pp, 308.33);
+  else if (imposable <= 2721.56) bonusEmploi = Math.min(pp, Math.max(0, 308.33 - ((imposable - 1945.38) * 0.3969)));
+  bonusEmploi = Math.round(bonusEmploi * 100) / 100;
+
+  const ppFinal = Math.round(Math.max(0, pp - bonusEmploi) * 100) / 100;
+
+  // ── Net travailleur ──
+  const net = Math.round((brutR - onssP - ppFinal - csss) * 100) / 100;
+
+  // ── ONSS patronal + cotisation extra sectorielle ──
+  const onssEExtra = cpData.onssE_extra || ONSS_E_SECTEURS[cpId] || 0;
+  const onssE = Math.round(brutR * (TX_ONSS_E + onssEExtra) * 100) / 100;
+  const coutTotal = Math.round((brutR + onssE) * 100) / 100;
+
+  // ── Prime sectorielle mensuelle (CCT) ──
+  const primeSectAnnuelle = cpData.primeSect || PRIMES_SECTORIELLES[cpId] || 0;
+  const primeSect = Math.round(primeSectAnnuelle / 12 * 100) / 100;
+  const netAvecPrime = Math.round((net + primeSect) * 100) / 100;
+
+  return {
+    brut: brutR,
+    onssBase: isOuvrier ? onssBase : null,
+    onssP,
+    imposable,
+    pp: ppFinal,
+    csss,
+    bonusEmploi,
+    baseImp: Math.round(baseImp * 100) / 100,
+    net,
+    netAvecPrime,
+    primeSect,
+    onssE,
+    onssEExtra: Math.round(brutR * onssEExtra * 100) / 100,
+    coutTotal,
+    // CP info
+    cpId,
+    baremeMin,
+    baremeOk,
+    baremeGap,
+    pctAnciennete: pctAnc,
+    isOuvrier,
+    cpInfo: {
+      id: cpId,
+      nom: cpData.nom,
+      cl1: cpData.cl1,
+      baremeClasse: baremeBase,
+      baremeAvecAnc: baremeMin,
+      primeSectAnnuelle,
+      onssE_extra: onssEExtra,
+      fonds: cpData.fonds || null,
+    },
+    details: {
+      qe, chDed,
+      ppBrut: Math.round(pp * 100) / 100,
+      tauxPP: imposable > 0 ? Math.round(ppFinal / imposable * 10000) / 100 : 0,
+      tauxNet: brutR > 0 ? Math.round(net / brutR * 10000) / 100 : 0,
+      tauxNetAvecPrime: brutR > 0 ? Math.round(netAvecPrime / brutR * 10000) / 100 : 0,
+    }
+  };
 }
 
 // ═══ PÉCULE VACANCES DOUBLE ═══
