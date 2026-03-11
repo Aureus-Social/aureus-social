@@ -8,6 +8,7 @@ import { B, C, CO2MIN, CR_MAX, CR_PAT, CR_TRAV, ECO_MAX, FORF_BUREAU, FORF_KM, F
 import { calcPrecompteExact } from "@/app/lib/payroll-engine";
 import { aureuspdf } from "@/app/lib/pdf-aureus";
 import { generateSEPAXML, previewHTML } from "@/app/lib/doc-generators";
+import { CompteIndividuelMod } from "./ModsBatch2";
 
 export function GestionPrimes({s,d}){
   const { t, lang, tText } = useLang();
@@ -48,12 +49,14 @@ export default function PayrollGroupWrapped({s, d, tab}) {
   s=s||{}; d=d||(()=>{});
   const _emps=s?.emps||[]; const _clients=s?.clients||[];
   const { t, lang, tText } = useLang();
+  const CompteIndividuelAnnuel = CompteIndividuelMod;
   if(tab==='echeancier') return <EcheancierPaiements s={s}/>;
   if(tab==='timeline') return <PayrollTimeline s={s} d={d}/>;
   if(tab==='autoindex') return <AutoIndexation s={s} d={d}/>;
   if(tab==='regulPP') return <RegulPPAnnuelle s={s} d={d}/>;
   if(tab==='calendrier' || tab==='joursPrestes') return <CalcJoursPrestes s={s} d={d}/>;
-  if(tab==='coutsannuel' || tab==='compteIndividuel' || tab==='compteindividuelannuel') return <RecapEmployeur s={s} d={d}/>;
+  if(tab==='coutsannuel') return <RecapEmployeur s={s} d={d}/>;
+  if(tab==='compteIndividuel' || tab==='compteindividuelannuel') return <CompteIndividuelAnnuel s={s} d={d}/>;
   if(tab==='validation') return <ValidationEngine s={s} d={d}/>;
   if(tab==='budget') return <BudgetPrev s={s} d={d}/>;
   if(tab==='calcmaladie' || tab==='soldetoutcompte') return <GestionPrimes s={s} d={d}/>;
