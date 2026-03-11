@@ -8,7 +8,7 @@
 jest.mock('next/dynamic', () => () => () => null);
 
 // Import du moteur
-const { calcPrecompteExact } = require('./app/lib/payroll-engine.js');
+const { calcPrecompteExact } = require('../app/lib/payroll-engine-cjs.js');
 
 describe('Moteur de paie belge 2026', () => {
 
