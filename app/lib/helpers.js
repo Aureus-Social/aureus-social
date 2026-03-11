@@ -15,7 +15,7 @@ export const CO2MIN = 31.34;          // LB.vehicules.cotCO2Min
 export const LEGAL = {
   WD: 21.67,
   WHD: 7.6,
-  ONSS_W: LB.onss.travailleur,
+  ONSS_W: _LB.onss.travailleur,
   CP: {
     '200': 'Employés (CPNAE)',
     '111': 'Métal',
