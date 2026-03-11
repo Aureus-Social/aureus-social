@@ -132,6 +132,36 @@ export function PayrollSimulatorAdvanced({ calcPayroll, LOIS_BELGES, props_tab }
   const [ch, setCh] = useState(0);
   const [statut, setStatut] = useState('employe');
   const [reg, setReg] = useState(100);
+  const [cp, setCp] = useState('200');
+
+  // Barèmes minimums par CP (brut mensuel temps plein, 2026)
+  const CP_BAREMES = {
+    '100': { label: 'CP 100 — Ouvriers industrie', min: 2100 },
+    '102': { label: 'CP 102 — Ouvriers construction', min: 2180 },
+    '111': { label: 'CP 111 — Métal fabrications', min: 2220 },
+    '118': { label: 'CP 118 — Alimentation', min: 2090 },
+    '124': { label: 'CP 124 — Bâtiment', min: 2180 },
+    '140': { label: 'CP 140 — Transport routier', min: 2150 },
+    '200': { label: 'CP 200 — Employés (général)', min: 2070.48 },
+    '201': { label: 'CP 201 — Commerce détail', min: 2100 },
+    '202': { label: 'CP 202 — Employés commerce', min: 2110 },
+    '207': { label: 'CP 207 — Banques', min: 2400 },
+    '218': { label: 'CP 218 — Assurances', min: 2350 },
+    '226': { label: 'CP 226 — Intérim', min: 2070.48 },
+    '302': { label: 'CP 302 — Hôtels & restaurants', min: 2070.48 },
+    '303': { label: 'CP 303 — Spectacles', min: 2070.48 },
+    '307': { label: 'CP 307 — Soins de santé', min: 2150 },
+    '310': { label: 'CP 310 — Banques (employés)', min: 2450 },
+    '318': { label: 'CP 318 — Aide ménagère', min: 2070.48 },
+    '319': { label: 'CP 319 — Nettoyage', min: 2095 },
+    '326': { label: 'CP 326 — Garderies & PMS', min: 2120 },
+    '330': { label: 'CP 330 — Santé privée', min: 2160 },
+    '336': { label: 'CP 336 — Économie sociale', min: 2100 },
+    '341': { label: 'CP 341 — Secteur public local', min: 2200 },
+    ''=>  { label: 'RMMMG (tous secteurs)', min: 2070.48 },
+  };
+  const cpInfo = CP_BAREMES[cp] || CP_BAREMES[''];
+  const brutMinCP = R2(cpInfo.min * (reg / 100));
 
   // ── Brut → Net ──
   const b2n = useMemo(() => calcPayroll(brut, statut, fam, ch, reg), [brut, statut, fam, ch, reg]);
@@ -159,7 +189,7 @@ export function PayrollSimulatorAdvanced({ calcPayroll, LOIS_BELGES, props_tab }
   const tabS = (a) => ({ padding: '8px 18px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: a ? 600 : 400, fontFamily: 'inherit', background: a ? 'rgba(198,163,78,.15)' : 'rgba(255,255,255,.03)', color: a ? GOLD : '#9e9b93', transition: 'all .2s' });
 
   // Shared controls
-  const Controls = () => React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10, marginBottom: 16 } },
+  const Controls = () => React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 2fr', gap: 10, marginBottom: 16 } },
     React.createElement('div', null,
       React.createElement('div', { style: labelS }, 'Statut'),
       React.createElement('select', { value: statut, onChange: e => setStatut(e.target.value), style: inputS },
@@ -184,6 +214,17 @@ export function PayrollSimulatorAdvanced({ calcPayroll, LOIS_BELGES, props_tab }
     React.createElement('div', null,
       React.createElement('div', { style: labelS }, 'Régime (%)'),
       React.createElement('input', { type: 'number', min: 1, max: 100, value: reg, onChange: e => setReg(+e.target.value), style: inputS })
+    ),
+    React.createElement('div', null,
+      React.createElement('div', { style: labelS }, 'Commission Paritaire'),
+      React.createElement('select', { value: cp, onChange: e => setCp(e.target.value), style: inputS },
+        Object.entries(CP_BAREMES).map(([k, v]) =>
+          React.createElement('option', { key: k, value: k }, v.label)
+        )
+      ),
+      React.createElement('div', { style: { fontSize: 10, marginTop: 4, color: brutMinCP > 0 ? '#c6a34e' : '#888' } },
+        `Barème min : ${fmt(brutMinCP)} € brut${reg < 100 ? ` (${reg}%)` : ''}`
+      )
     )
   );
 
@@ -237,6 +278,14 @@ export function PayrollSimulatorAdvanced({ calcPayroll, LOIS_BELGES, props_tab }
         React.createElement(ResultRow, { label: 'CSSS', value: -b2n.csss, color: RED }),
         b2n.bonusEmploi > 0 && React.createElement(ResultRow, { label: 'Bonus à l\'emploi', value: b2n.bonusEmploi, color: GREEN }),
         React.createElement(ResultRow, { label: 'SALAIRE NET', value: b2n.net, color: GREEN, bold: true, separator: true }),
+        brutMinCP > 0 && brut < brutMinCP && React.createElement('div', { style: { margin: '10px 0', padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.25)', fontSize: 11 } },
+          React.createElement('span', { style: { color: '#ef4444', fontWeight: 700 } }, '⚠️ Sous le barème ' + cpInfo.label + ' : '),
+          React.createElement('span', { style: { color: '#9e9b93' } }, 'minimum ' + fmt(brutMinCP) + ' € brut — écart : '),
+          React.createElement('span', { style: { color: '#ef4444', fontWeight: 600 } }, fmt(brutMinCP - brut) + ' €')
+        ),
+        brutMinCP > 0 && brut >= brutMinCP && React.createElement('div', { style: { margin: '10px 0', padding: '8px 14px', borderRadius: 8, background: 'rgba(34,197,94,.06)', border: '1px solid rgba(34,197,94,.2)', fontSize: 11, color: '#22c55e' } },
+          '✅ Conforme ' + cpInfo.label + ' — min. ' + fmt(brutMinCP) + ' €'
+        ),
         React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginTop: 16 } },
           [{ l: 'ONSS patronal', v: b2n.onssE, c: RED }, { l: 'Coût total', v: b2n.coûtTotal, c: GOLD }, { l: 'Taux net/brut', v: b2n.details?.tauxNet + '%', c: BLUE }].map((k, i) =>
             React.createElement('div', { key: i, style: { padding: 12, borderRadius: 10, background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.04)', textAlign: 'center' } },
@@ -279,6 +328,13 @@ export function PayrollSimulatorAdvanced({ calcPayroll, LOIS_BELGES, props_tab }
         React.createElement(ResultRow, { label: 'Précompte professionnel', value: -n2b.pp, color: RED }),
         React.createElement(ResultRow, { label: 'CSSS', value: -n2b.csss, color: RED }),
         React.createElement(ResultRow, { label: 'Net obtenu', value: n2b.net, color: GREEN, bold: true, separator: true }),
+        brutMinCP > 0 && n2b.brut < brutMinCP && React.createElement('div', { style: { margin: '10px 0', padding: '10px 14px', borderRadius: 8, background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.25)', fontSize: 11 } },
+          React.createElement('span', { style: { color: '#ef4444', fontWeight: 700 } }, '⚠️ Brut calculé sous le barème ' + cpInfo.label + ' : '),
+          React.createElement('span', { style: { color: '#9e9b93' } }, 'minimum ' + fmt(brutMinCP) + ' € — le net réel serait ' + fmt(calcPayroll(brutMinCP, statut, fam, ch, reg).net) + ' €')
+        ),
+        brutMinCP > 0 && n2b.brut >= brutMinCP && React.createElement('div', { style: { margin: '10px 0', padding: '8px 14px', borderRadius: 8, background: 'rgba(34,197,94,.06)', border: '1px solid rgba(34,197,94,.2)', fontSize: 11, color: '#22c55e' } },
+          '✅ Conforme ' + cpInfo.label + ' — brut ' + fmt(n2b.brut) + ' € ≥ min. ' + fmt(brutMinCP) + ' €'
+        ),
         React.createElement(ResultRow, { label: 'ONSS patronal', value: n2b.onssE, color: RED }),
         React.createElement(ResultRow, { label: 'Coût total employeur', value: n2b.coûtTotal, color: GOLD, bold: true })
       )
