@@ -17,6 +17,7 @@ function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(
 
 function Dashboard({s,d}) {
   const { t, lang, tText } = useLang();
+  const [fluxOpen, setFluxOpen] = useState(true);
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const ae=(s?.emps||[]).filter(e=>e.status==='active'||!e.status||e.status===undefined);
   const sortie=(s?.emps||[]).filter(e=>e.status==='sorti');
@@ -175,6 +176,147 @@ function Dashboard({s,d}) {
     </div>
 {(()=>{const al=getAlertes(s.emps||[],s.co);return al.length>0?<div style={{marginBottom:16,borderRadius:10,border:"1px solid rgba(198,163,78,.15)",padding:12,background:"rgba(198,163,78,.03)"}}><div style={{fontSize:12,fontWeight:700,color:"#c6a34e",marginBottom:8}}>Alertes ({al.length})</div>{al.slice(0,8).map((a,i)=><div key={i} style={{padding:"6px 8px",marginBottom:4,borderRadius:6,fontSize:11,background:a.level==="danger"?"rgba(248,113,113,.08)":a.level==="warning"?"rgba(251,146,60,.08)":"rgba(96,165,250,.08)",color:a.level==="danger"?"#f87171":a.level==="warning"?"#fb923c":"#60a5fa"}}>{a.icon} {a.msg}</div>)}{al.length>8?<div style={{fontSize:10,color:"#9e9b93",marginTop:4}}>+{al.length-8} autres alertes</div>:null}</div>:null})()}
     
+    {/* ══════════════════════════════════════════════════════════════
+        FLUX GUIDÉ A→Z — DÉCLARER UN TRAVAILLEUR DE A À Z
+        ══════════════════════════════════════════════════════════════ */}
+    {(()=>{
+      // flux guidé
+      // 5 phases, 14 étapes
+      const phases = [
+        {
+          id:'avant', label:'AVANT L\'ENTRÉE', color:'#60a5fa', icon:'📋',
+          sub:'À faire AVANT le 1er jour de travail',
+          steps:[
+            {n:1, icon:'🏅', title:'Vérifier primes emploi', detail:'1er employé (exonération illimitée ~52K€/5ans) · Activa.brussels N°829605 · MonBEE deadline 01/06/2026', urgent:true, page:'activabruxelles', badge:'AVANT DIMONA', badgeColor:'#ef4444'},
+            {n:2, icon:'👤', title:'Créer le dossier travailleur', detail:'NISS · IBAN · situation familiale · Commission Paritaire (CP)', page:'employees', badge:'Étape 1', badgeColor:'#60a5fa'},
+            {n:3, icon:'📝', title:'Rédiger & signer le contrat', detail:'CDI / CDD / étudiant / flexi · barème CP minimum · avantages extra-légaux · chèques-repas', page:'contratsmenu', badge:'Étape 2', badgeColor:'#60a5fa'},
+            {n:4, icon:'📡', title:'Dimona IN', detail:'⚠️ Obligatoire AVANT le 1er jour · Amende 5.000€ si oubli · IN / OUT / INTERM / STUDENT / FLEXI', page:'onss', urgent:true, badge:'AVANT J1', badgeColor:'#ef4444'},
+          ]
+        },
+        {
+          id:'mensuel', label:'CHAQUE MOIS', color:'#c6a34e', icon:'🔄',
+          sub:'Cycle mensuel — à répéter tous les mois',
+          steps:[
+            {n:5, icon:'📅', title:'Encoder les prestations', detail:'Jours prestés · heures supp · absences · congés · jours chèques-repas = jours effectivement prestés uniquement', page:'joursPrestes', badge:'Étape 3', badgeColor:'#c6a34e'},
+            {n:6, icon:'🧮', title:'Calculer la paie', detail:'Brut → ONSS 13,07% → Précompte → Net · Chèques-repas 8€/jour (6,91 patron + 1,09 retenu) · 57 primes & avantages', page:'payslip', badge:'Étape 4', badgeColor:'#c6a34e'},
+            {n:7, icon:'🔄', title:'Clôturer le mois', detail:'6 étapes auto : vérifier → calculer → générer → valider → distribuer → clôturer', page:'cloture', badge:'Étape 5', badgeColor:'#c6a34e'},
+            {n:8, icon:'💸', title:'Virement salaires SEPA', detail:'Isabel 6 pain.001.001.03 · XML à uploader dans ta banque · ou virement manuel si 1 employé', page:'sepa', badge:'Étape 6', badgeColor:'#c6a34e'},
+            {n:9, icon:'📤', title:'Export comptable', detail:'WinBooks / BOB / Exact Online / Octopus / Horus / CSV · À envoyer au comptable chaque mois', page:'exportcompta', badge:'Étape 7', badgeColor:'#c6a34e'},
+          ]
+        },
+        {
+          id:'trimestriel', label:'CHAQUE TRIMESTRE', color:'#a78bfa', icon:'📊',
+          sub:'Délai légal ONSS — ne pas rater',
+          steps:[
+            {n:10, icon:'📡', title:'DmfA trimestrielle ONSS', detail:'Délai : 31/01 · 30/04 · 31/07 · 31/10 · XML → portail ONSS · inclure réductions 1er employé · sanctions si retard', page:'onss', urgent:true, badge:'DÉLAI LÉGAL', badgeColor:'#ef4444'},
+          ]
+        },
+        {
+          id:'annuel', label:'CHAQUE ANNÉE', color:'#4ade80', icon:'📆',
+          sub:'Obligations fiscales annuelles',
+          steps:[
+            {n:11, icon:'🏛', title:'Belcotax — Fiches 281.10', detail:'Avant le 1er mars · 1 fiche/travailleur → Belcotax-on-web SPF Finances · Si oublié : salaires non déductibles (Art.57 CIR)', page:'belcotax281', urgent:true, badge:'1er MARS', badgeColor:'#ef4444'},
+            {n:12, icon:'🏖', title:'Certificat vacances C131', detail:'Ouvriers uniquement · Caisse de vacances · Avant fin décembre', page:'formC131', badge:'Ouvriers', badgeColor:'#4ade80'},
+          ]
+        },
+        {
+          id:'fincont', label:'FIN DE CONTRAT', color:'#fb923c', icon:'🚪',
+          sub:'Quand un travailleur quitte',
+          steps:[
+            {n:13, icon:'📡', title:'Dimona OUT', detail:'Le jour de fin de contrat · Motif : fin CDD / démission / licenciement / retraite', page:'onss', badge:'JOUR J', badgeColor:'#fb923c'},
+            {n:14, icon:'📑', title:'Documents de sortie', detail:'C4 chômage · Solde tout compte · Fiche paie finale + pécule de départ · Calcul préavis si licenciement', page:'soldetoutcompte', badge:'Étape finale', badgeColor:'#fb923c'},
+          ]
+        },
+      ];
+
+      // Chèques-repas info rapide
+      const crInfo = {
+        valeur: LB?.chequesRepas?.valeurFaciale?.max || 8,
+        patron: LB?.chequesRepas?.partPatronale?.max || 6.91,
+        travailleur: LB?.chequesRepas?.partTravailleur?.min || 1.09,
+      };
+
+      return (
+        <div style={{marginBottom:20,border:'1px solid rgba(198,163,78,.2)',borderRadius:14,overflow:'hidden'}}>
+          {/* Header cliquable */}
+          <div
+            onClick={()=>setFluxOpen(o=>!o)}
+            style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 20px',background:'linear-gradient(135deg,rgba(198,163,78,.08),rgba(198,163,78,.03))',cursor:'pointer',userSelect:'none'}}
+          >
+            <div style={{display:'flex',alignItems:'center',gap:12}}>
+              <span style={{fontSize:20}}>🗺️</span>
+              <div>
+                <div style={{fontSize:14,fontWeight:700,color:'#c6a34e'}}>Flux Guidé — Déclarer un travailleur de A à Z</div>
+                <div style={{fontSize:10,color:'#888',marginTop:2}}>5 phases · 14 étapes · Dimona · Chèques-repas · Belcotax · Tout dans l'ordre</div>
+              </div>
+            </div>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <span style={{fontSize:10,padding:'3px 10px',borderRadius:10,background:'rgba(239,68,68,.12)',color:'#f87171',fontWeight:700}}>3 étapes urgentes</span>
+              <span style={{fontSize:14,color:'#c6a34e',transition:'transform .2s',transform:fluxOpen?'rotate(180deg)':'rotate(0deg)'}}>▼</span>
+            </div>
+          </div>
+
+          {fluxOpen && (
+            <div style={{padding:'0 0 16px 0'}}>
+              {/* Chèques-repas encart rapide */}
+              <div style={{margin:'12px 16px 0',padding:'10px 14px',background:'rgba(34,197,94,.04)',border:'1px solid rgba(34,197,94,.12)',borderRadius:10,display:'flex',alignItems:'center',gap:16,flexWrap:'wrap'}}>
+                <span style={{fontSize:16}}>🍽️</span>
+                <div style={{fontSize:11,color:'#94a3b8'}}>
+                  <span style={{color:'#4ade80',fontWeight:700}}>Chèques-repas 2026</span>
+                  {' '}— Valeur faciale max <strong style={{color:'#e8e6e0'}}>{crInfo.valeur}€</strong> · Employeur max <strong style={{color:'#e8e6e0'}}>{crInfo.patron}€</strong> (exonéré ONSS+impôts) · Travailleur min <strong style={{color:'#e8e6e0'}}>{crInfo.travailleur}€</strong> · <span style={{color:'#f97316'}}>1 chèque par jour effectivement presté uniquement</span> · Via émetteur agréé (Sodexo · Edenred · Monizze) · Obligatoire par CCT ou contrat
+                </div>
+                <button onClick={()=>d({type:'NAV',page:'proceduresrh',sub:'cheques_repas'})} style={{padding:'5px 12px',borderRadius:7,border:'1px solid rgba(34,197,94,.2)',background:'transparent',color:'#4ade80',fontSize:10,cursor:'pointer',fontWeight:600,whiteSpace:'nowrap'}}>Voir procédure →</button>
+              </div>
+
+              {/* Phases */}
+              {phases.map((ph, pi) => (
+                <div key={ph.id} style={{margin:'12px 16px 0'}}>
+                  {/* Phase header */}
+                  <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8,padding:'6px 12px',background:`${ph.color}10`,borderRadius:8,border:`1px solid ${ph.color}20`}}>
+                    <span style={{fontSize:14}}>{ph.icon}</span>
+                    <span style={{fontSize:11,fontWeight:700,color:ph.color,letterSpacing:'1px'}}>{ph.label}</span>
+                    <span style={{fontSize:10,color:'#888',marginLeft:4}}>— {ph.sub}</span>
+                  </div>
+                  {/* Steps grid */}
+                  <div style={{display:'grid',gridTemplateColumns:`repeat(${Math.min(ph.steps.length,4)},1fr)`,gap:8}}>
+                    {ph.steps.map((st) => (
+                      <div
+                        key={st.n}
+                        onClick={()=>d({type:'NAV',page:st.page})}
+                        style={{padding:'12px 14px',borderRadius:10,background:st.urgent?'rgba(239,68,68,.04)':'rgba(255,255,255,.02)',border:`1px solid ${st.urgent?'rgba(239,68,68,.2)':`${ph.color}15`}`,cursor:'pointer',transition:'all .15s',position:'relative'}}
+                        onMouseEnter={e=>{e.currentTarget.style.background=st.urgent?'rgba(239,68,68,.08)':`${ph.color}10`;e.currentTarget.style.borderColor=st.urgent?'rgba(239,68,68,.4)':`${ph.color}40`;}}
+                        onMouseLeave={e=>{e.currentTarget.style.background=st.urgent?'rgba(239,68,68,.04)':'rgba(255,255,255,.02)';e.currentTarget.style.borderColor=st.urgent?'rgba(239,68,68,.2)':`${ph.color}15`;}}
+                      >
+                        <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:6}}>
+                          <div style={{display:'flex',alignItems:'center',gap:6}}>
+                            <span style={{width:20,height:20,borderRadius:'50%',background:`${ph.color}20`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,fontWeight:700,color:ph.color,flexShrink:0}}>{st.n}</span>
+                            <span style={{fontSize:14}}>{st.icon}</span>
+                          </div>
+                          <span style={{fontSize:8,padding:'2px 6px',borderRadius:5,background:`${st.badgeColor}18`,color:st.badgeColor,fontWeight:700,whiteSpace:'nowrap'}}>{st.badge}</span>
+                        </div>
+                        <div style={{fontSize:12,fontWeight:600,color:'#e8e6e0',marginBottom:5,lineHeight:1.3}}>{st.title}</div>
+                        <div style={{fontSize:10,color:'#888',lineHeight:1.5}}>{st.detail}</div>
+                        <div style={{marginTop:8,fontSize:9,color:ph.color,fontWeight:600}}>Ouvrir →</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              {/* Légende bas */}
+              <div style={{margin:'14px 16px 0',display:'flex',gap:16,flexWrap:'wrap'}}>
+                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:'#888'}}><span style={{width:10,height:10,borderRadius:2,background:'rgba(239,68,68,.3)',display:'inline-block'}}/> Étape urgente / délai légal strict</div>
+                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:'#888'}}><span style={{width:10,height:10,borderRadius:2,background:'rgba(96,165,250,.2)',display:'inline-block'}}/> Avant l'entrée en service</div>
+                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:'#888'}}><span style={{width:10,height:10,borderRadius:2,background:'rgba(198,163,78,.2)',display:'inline-block'}}/> Mensuel</div>
+                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:'#888'}}><span style={{width:10,height:10,borderRadius:2,background:'rgba(167,139,250,.2)',display:'inline-block'}}/> Trimestriel</div>
+                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:'#888'}}><span style={{width:10,height:10,borderRadius:2,background:'rgba(74,222,128,.2)',display:'inline-block'}}/> Annuel</div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    })()}
+
     {/* KPI ROW */}
     <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:14,marginBottom:22}}>
       {[
