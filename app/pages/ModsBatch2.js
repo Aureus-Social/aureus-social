@@ -2045,7 +2045,7 @@ export function AccountingOutputMod({s,d,supabase,user,defaultFormat}){
         const gross=+(emp.monthlySalary||emp.gross||emp.brut||0)*mult;
         const onssW=gross*TX_ONSS_W;const onssE=gross*TX_OUV_SPECIAL;
         const taxable=gross-onssW;
-        const pp=quickPP?quickPP(gross)*mult:taxable*0.2672;
+        const pp=quickPP?quickPP(gross)*mult:taxable*PP_EST;
         const net=taxable-pp;
         lines.push({client:client.company?.name||'N/A',employee:emp.firstName||emp.first||emp.fn?(emp.firstName||emp.first||emp.fn)+' '+(emp.lastName||emp.last||emp.ln||''):(emp.name||tText('Employé')),gross,onssW,onssE,pp,net,niss:emp.niss||emp.nationalNumber||'',period:periodType==='year'?selYear+'':periodType==='quarter'?'T'+Math.floor(selMonth/3+1)+'/'+selYear:moisNames[selMonth]+' '+selYear});
       });
@@ -2056,7 +2056,7 @@ export function AccountingOutputMod({s,d,supabase,user,defaultFormat}){
         const gross=+(emp.monthlySalary||emp.gross||emp.brut||0)*mult;
         const onssW=gross*TX_ONSS_W;const onssE=gross*TX_OUV_SPECIAL;
         const taxable=gross-onssW;
-        const pp=quickPP?quickPP(gross)*mult:taxable*0.2672;
+        const pp=quickPP?quickPP(gross)*mult:taxable*PP_EST;
         const net=taxable-pp;
         lines.push({client:'Direct',employee:emp.firstName||emp.first||emp.fn?(emp.firstName||emp.first||emp.fn)+' '+(emp.lastName||emp.last||emp.ln||''):(emp.name||tText('Employé')),gross,onssW,onssE,pp,net,niss:emp.niss||emp.nationalNumber||'',period:periodType==='year'?selYear+'':periodType==='quarter'?'T'+Math.floor(selMonth/3+1)+'/'+selYear:moisNames[selMonth]+' '+selYear});
       });

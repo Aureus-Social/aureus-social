@@ -1024,3 +1024,9 @@ export const HEURES_MENSUELLES     = 173;    // 38h/semaine × 52/12 = 164.67 ar
 export const HEURES_ATN_VOITURE    = 0.006;  // ATN voiture: coeff mensuel → voir LOIS_BELGES.atn
 export const TAUX_CCP28            = 0.28;   // Cotisation complémentaire CP 32201 titres-services
 export const PLANCHER_ETUDIANT_SOL = 0.0271; // Cotisations solidarité étudiant (2.71% W + 5.42% E hors contingent)
+export const CCT90_PLAFOND         = 4255;   // CCT 90 — plafond annuel prime résultat (AR 22/12/2023)
+export const CCT90_COTIS_E         = 0.33;   // CCT 90 — cotisation spéciale employeur (33% au lieu de 25.07%)
+export const TX_BUDGET_MOB         = 0.3807; // Budget mobilité pilier 3 — cotisation ONSS forfaitaire (AR 17/03/2019)
+export const BONUS_SEUIL1          = LB.pp.bonusEmploi.seuilBrut1; // 2561.42 — seuil bas bonus emploi
+export const BONUS_SEUIL2          = LB.pp.bonusEmploi.seuilBrut2; // 2997.59 — seuil haut bonus emploi
+export const ECO_MAX               = 250;    // CCT 98 — plafond éco-chèques annuel (temps plein)

@@ -1,7 +1,7 @@
 "use client";
 import { useLang } from '../lib/lang-context';
 import React, { useState, useMemo } from 'react';
-import { TX_ONSS_W, TX_ONSS_E, TX_OUV108, RMMMG, IPP_TRANCHES_2026, IPP_FRAIS_PRO_PCT, IPP_FRAIS_PRO_MAX, IPP_TAXE_COMMUNALE, IPP_QUOTITE_BASE, IPP_REDUC_ENFANTS, ONSS_E_SECTEURS, PRIMES_SECTORIELLES, BAREMES_CP_MIN } from '@/app/lib/helpers';
+import { TX_ONSS_W, TX_ONSS_E, TX_OUV108, RMMMG, BONUS_SEUIL2, IPP_TRANCHES_2026, IPP_FRAIS_PRO_PCT, IPP_FRAIS_PRO_MAX, IPP_TAXE_COMMUNALE, IPP_QUOTITE_BASE, IPP_REDUC_ENFANTS, ONSS_E_SECTEURS, PRIMES_SECTORIELLES, BAREMES_CP_MIN } from '@/app/lib/helpers';
 
 // ═══════════════════════════════════════════════════════════
 // CP DATABASE — barèmes minimums + spécificités sectorielles
@@ -81,7 +81,7 @@ export function SimulateurNetBrut({ props_tab }) {
     const reducEnfants = IPP_REDUC_ENFANTS[Math.min(enfants, 4)] || 0;
     ppAn = Math.max(0, ppAn - reducEnfants) * (1 + IPP_TAXE_COMMUNALE);
     let bonusEmploi = 0;
-    if (brut <= 2968.70) bonusEmploi = Math.round(Math.min(((2968.70-brut)/2968.70)*180, 180)*100)/100;
+    if (brut <= BONUS_SEUIL2) bonusEmploi = Math.round(Math.min(((BONUS_SEUIL2-brut)/BONUS_SEUIL2)*180, 180)*100)/100;
     const ppMois = Math.max(0, Math.round((ppAn/12 - bonusEmploi)*100)/100);
     const primeMensuelle = Math.round((cp.primeSect||0) / 12 * 100) / 100;
     const net = Math.round((brut - onssW - ppMois)*100)/100;

@@ -1,8 +1,6 @@
 'use client';
-// TX_BUDGET_MOB: cotisation ONSS pilier 3 budget mobilité — AR 17/03/2019
-const TX_BUDGET_MOB = 0.3807; // = taux ONSS global forfaitaire ouvrier P3 (source: SPF ETCS)
 import { useLang } from '../lib/lang-context';
-import { B, C, TX_ONSS_E, TX_ONSS_W, fmt, quickPP, LOIS_BELGES, FORF_KM, ECO_MAX, TAUX_WARRANTS, TAUX_PARTICIPATION, TAUX_DOUBLE_PECULE, TAUX_HEURES_SUPP_SAL, HEURES_MENSUELLES, PV_DOUBLE, PLANCHER_ETUDIANT_SOL } from '@/app/lib/helpers';
+import { B, C, TX_ONSS_E, TX_ONSS_W, fmt, quickPP, LOIS_BELGES, FORF_KM, ECO_MAX, CCT90_PLAFOND, CCT90_COTIS_E, TX_BUDGET_MOB, CR_PAT, CR_TRAV, TAUX_WARRANTS, TAUX_PARTICIPATION, TAUX_DOUBLE_PECULE, TAUX_HEURES_SUPP_SAL, HEURES_MENSUELLES, PV_DOUBLE, PLANCHER_ETUDIANT_SOL } from '@/app/lib/helpers';
 import{useState,useMemo}from'react';
 
 const fi=v=>new Intl.NumberFormat('fr-BE',{maximumFractionDigits:0}).format(v||0);
@@ -34,8 +32,8 @@ const PRIMES_DB=[
     desc:'Avantage non-récurrent lié aux résultats collectifs',
     base_legale:'CCT n° 90 du 20/12/2007 (CNT) + Loi 21/12/2007',
     conditions:['Objectifs collectifs mesurables et vérifiables','Plan bonus déposé au SPF ETCS','Période de référence: min 3 mois','Pas d\'objectifs individuels (seulement collectifs)','Montant max 4.255 EUR brut/an (2026)'],
-    calcul:(brut)=>{const m=Math.min(brut,4255);const cotE=m*0.33;const cotW=m*TX_ONSS_W;return{brut:m,onssW:cotW,onssE:cotE,pp:0,desc:'Cotisation spéciale 33% employeur + 13.07% travailleur. PAS de précompte professionnel.'}},
-    plafond:4255,prorata:false,
+    calcul:(brut)=>{const m=Math.min(brut,CCT90_PLAFOND);const cotE=m*CCT90_COTIS_E;const cotW=m*TX_ONSS_W;return{brut:m,onssW:cotW,onssE:cotE,pp:0,desc:'Cotisation spéciale 33% employeur + 13.07% travailleur. PAS de précompte professionnel.'}},
+    plafond:CCT90_PLAFOND,prorata:false,
     procedure:'1. Rédiger acte d\'adhésion ou CCT d\'entreprise\n2. Définir objectifs mesurables\n3. Déposer au SPF Emploi (greffe)\n4. Période de référence min 3 mois\n5. Paiement après vérification des objectifs',
     paiement:'Après clôture période de référence',fiscal:'PAS de PP. Cotisation solidarité 13.07% travailleur + 33% employeur.'},
   {id:'warrants',cat:'remvar',icon:'📈',nom:'Warrants / Stock Options',taxable:true,onss:false,
@@ -543,7 +541,7 @@ export function PrimeCalculatorV2({s,d,props_tab}){
         <Row l="Précompte professionnel" v="AUCUN" c="#22c55e"/>
       </C>
       <C title="Simulation CCT 90" color="#22c55e">
-        {(()=>{const m=Math.min(brut,4255);const cotE=m*0.33;const cotW=m*TX_ONSS_W;const netCCT=m-cotW;const coutCCT=m+cotE;
+        {(()=>{const m=Math.min(brut,CCT90_PLAFOND);const cotE=m*CCT90_COTIS_E;const cotW=m*TX_ONSS_W;const netCCT=m-cotW;const coutCCT=m+cotE;
         const brutNorm=brut;const onssWN=brutNorm*TX_ONSS_W;const ppN=quickPP(brutNorm);const netNorm=brutNorm-onssWN-ppN;const coutNorm=brutNorm+brutNorm*TX_ONSS_E;
         return <div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
@@ -618,7 +616,7 @@ export function OptiFiscaleV2({s}){
     const base={nom:'100% Salaire brut',icon:'💶',items:[{label:'Salaire brut',montant:b}],
       onssW:b*TX_ONSS_W,onssE:b*TX_ONSS_E,pp:quickPP(b),net:b-b*TX_ONSS_W-quickPP(b),cout:b+b*TX_ONSS_E};
 
-    const opti1_cheqRepas=Math.min(220*6.91,b*0.3);const opti1_eco=250;const opti1_tele=157.83*12;
+    const opti1_cheqRepas=Math.min(220*CR_PAT,b*0.3);const opti1_eco=ECO_MAX;const opti1_tele=157.83*12;
     const opti1_reste=Math.max(0,b-opti1_cheqRepas-opti1_eco-Math.min(opti1_tele,b*0.2));
     const opti1={nom:'Mix optimisé standard',icon:'🎯',
       items:[{label:'Chèques-repas',montant:opti1_cheqRepas,exo:true},{label:'Éco-chèques',montant:opti1_eco,exo:true},{label:'Indemnité télétravail',montant:Math.min(opti1_tele,b*0.2),exo:true},{label:'Solde salaire brut',montant:opti1_reste}],
@@ -627,24 +625,24 @@ export function OptiFiscaleV2({s}){
       net:opti1_cheqRepas+opti1_eco+Math.min(opti1_tele,b*0.2)+(opti1_reste-opti1_reste*TX_ONSS_W-quickPP(opti1_reste)),
       cout:opti1_cheqRepas+opti1_eco+Math.min(opti1_tele,b*0.2)+opti1_reste+opti1_reste*TX_ONSS_E};
 
-    const opti2_cct90=Math.min(4255,b);const opti2_reste=Math.max(0,b-opti2_cct90);
+    const opti2_cct90=Math.min(CCT90_PLAFOND,b);const opti2_reste=Math.max(0,b-opti2_cct90);
     const opti2={nom:'CCT 90 + solde brut',icon:'🎯',
       items:[{label:'Bonus CCT 90',montant:opti2_cct90,cot33:true},{label:'Solde salaire brut',montant:opti2_reste}],
-      onssW:opti2_cct90*TX_ONSS_W+opti2_reste*TX_ONSS_W,onssE:opti2_cct90*0.33+opti2_reste*TX_ONSS_E,
+      onssW:opti2_cct90*TX_ONSS_W+opti2_reste*TX_ONSS_W,onssE:opti2_cct90*CCT90_COTIS_E+opti2_reste*TX_ONSS_E,
       pp:quickPP(opti2_reste),
       net:(opti2_cct90-opti2_cct90*TX_ONSS_W)+(opti2_reste-opti2_reste*TX_ONSS_W-quickPP(opti2_reste)),
-      cout:opti2_cct90+opti2_cct90*0.33+opti2_reste+opti2_reste*TX_ONSS_E};
+      cout:opti2_cct90+opti2_cct90*CCT90_COTIS_E+opti2_reste+opti2_reste*TX_ONSS_E};
 
-    const opti3_cheq=Math.min(220*6.91,b*0.25);const opti3_eco=250;const opti3_cct=Math.min(4255,b*0.4);
+    const opti3_cheq=Math.min(220*CR_PAT,b*0.25);const opti3_eco=ECO_MAX;const opti3_cct=Math.min(CCT90_PLAFOND,b*0.4);
     const opti3_tele=Math.min(157.83*12,b*0.15);const opti3_velo=Math.min(2500,b*0.05);
     const opti3_reste=Math.max(0,b-opti3_cheq-opti3_eco-opti3_cct-opti3_tele-opti3_velo);
     const opti3={nom:'Optimisation maximale',icon:'🚀',
       items:[{label:'Chèques-repas',montant:opti3_cheq,exo:true},{label:'Éco-chèques',montant:opti3_eco,exo:true},{label:'Bonus CCT 90',montant:opti3_cct,cot33:true},{label:'Indemnité télétravail',montant:opti3_tele,exo:true},{label:'Indemnité vélo',montant:opti3_velo,exo:true},{label:'Solde brut',montant:opti3_reste}],
       onssW:opti3_cct*TX_ONSS_W+opti3_reste*TX_ONSS_W,
-      onssE:opti3_cct*0.33+opti3_reste*TX_ONSS_E,
+      onssE:opti3_cct*CCT90_COTIS_E+opti3_reste*TX_ONSS_E,
       pp:quickPP(opti3_reste),
       net:opti3_cheq+opti3_eco+opti3_tele+opti3_velo+(opti3_cct-opti3_cct*TX_ONSS_W)+(opti3_reste-opti3_reste*TX_ONSS_W-quickPP(opti3_reste)),
-      cout:opti3_cheq+opti3_eco+opti3_tele+opti3_velo+opti3_cct+opti3_cct*0.33+opti3_reste+opti3_reste*TX_ONSS_E};
+      cout:opti3_cheq+opti3_eco+opti3_tele+opti3_velo+opti3_cct+opti3_cct*CCT90_COTIS_E+opti3_reste+opti3_reste*TX_ONSS_E};
 
     return[base,opti1,opti2,opti3];
   },[b]);
@@ -983,16 +981,16 @@ export {PRIMES_DB,CATS,CAT_COLORS};
 export function EcoChequesV2({s}){
   const { t, lang, tText } = useLang();
   const emps=(s?.clients||[]).flatMap(c=>c.emps||[]);
-  const [montant,setMontant]=useState(250);
+  const [montant,setMontant]=useState(ECO_MAX);
   const [moisPrestes,setMoisPrestes]=useState(12);
   const [regime,setRegime]=useState(100);
   const [cp,setCp]=useState('200');
 
-  const plafonds={'200':250,'118':250,'119':250,'302':250,'124':250,'322.01':250,'330':250,'111':250,'140':250,'121':250};
-  const plafond=plafonds[cp]||250;
+  const plafonds={'200':ECO_MAX,'118':ECO_MAX,'119':ECO_MAX,'302':ECO_MAX,'124':ECO_MAX,'322.01':ECO_MAX,'330':ECO_MAX,'111':ECO_MAX,'140':ECO_MAX,'121':ECO_MAX};
+  const plafond=plafonds[cp]||ECO_MAX;
   const prorata=(+moisPrestes||12)/12;
   const fractionTP=(+regime||100)/100;
-  const montantFinal=Math.min(+montant||250,plafond)*prorata*fractionTP;
+  const montantFinal=Math.min(+montant||ECO_MAX,plafond)*prorata*fractionTP;
   const coutTotal=montantFinal*(emps.length||1);
 
   return <div style={{padding:24}}>
@@ -1045,7 +1043,7 @@ export function PlanCafeteriaV2({s}){
 
   // Options cafétéria avec leur traitement fiscal réel
   const options=[
-    {id:'cheqrepas',nom:'Chèques-repas (part patronale)',icon:'🍽',max:220*6.91,exoONSS:true,exoIPP:true,note:'Max 6.91€/jour × 220j = 1.520 EUR'},
+    {id:'cheqrepas',nom:'Chèques-repas (part patronale)',icon:'🍽',max:220*CR_PAT,exoONSS:true,exoIPP:true,note:'Max 6.91€/jour × 220j = 1.520 EUR'},
     {id:'eco',nom:'Éco-chèques',icon:'🌿',max:250,exoONSS:true,exoIPP:true,note:'Max 250 EUR/an'},
     {id:'sport',nom:'Chèques sport & culture',icon:'🏋',max:100,exoONSS:true,exoIPP:true,note:'Max 100 EUR/an'},
     {id:'cadeau',nom:'Chèques-cadeaux',icon:'🎁',max:40,exoONSS:true,exoIPP:true,note:'Max 40 EUR/an Noël'},
@@ -1152,9 +1150,9 @@ export function CCT90BonusV2({s}){
   const [montant,setMontant]=useState(3000);
   const [periodeRef,setPeriodeRef]=useState(12);
   const [tab,setTab]=useState('simu');
-  const plafond=4255;
+  const plafond=CCT90_PLAFOND;
   const m=Math.min(+montant||0,plafond);
-  const cotE=m*0.33;const cotW=m*TX_ONSS_W;const net=m-cotW;
+  const cotE=m*CCT90_COTIS_E;const cotW=m*TX_ONSS_W;const net=m-cotW;
   const coutTotal=(m+cotE)*n;
 
   // Objectifs types
@@ -1431,7 +1429,7 @@ export function CheqRepasV2({s}){
   const [mois, setMois] = useState(new Date().getMonth()+1);
   const [annee, setAnnee] = useState(new Date().getFullYear());
   const [valFaciale, setValFaciale] = useState(8);
-  const [partPatron, setPartPatron] = useState(6.91);
+  const [partPatron, setPartPatron] = useState(CR_PAT);
   const [fournisseur, setFournisseur] = useState('edenred');
   const [empConfig, setEmpConfig] = useState({});
   const [cp, setCp] = useState('200');
@@ -1439,13 +1437,13 @@ export function CheqRepasV2({s}){
   const [copied, setCopied] = useState(false);
 
   const cpData = {
-    '200':{nom:'CP 200 — Employés',valMax:8,patronMax:6.91},
+    '200':{nom:'CP 200 — Employés',valMax:8,patronMax:CR_PAT},
     '118':{nom:'CP 118 — Alimentaire',valMax:7,patronMax:5.50},
-    '302':{nom:'CP 302 — Horeca',valMax:8,patronMax:6.91},
+    '302':{nom:'CP 302 — Horeca',valMax:8,patronMax:CR_PAT},
     '124':{nom:'CP 124 — Construction',valMax:7,patronMax:5.91},
     '330':{nom:'CP 330 — Santé',valMax:7,patronMax:5.91},
-    '111':{nom:'CP 111 — Métal',valMax:8,patronMax:6.91},
-    '140':{nom:'CP 140 — Transport',valMax:8,patronMax:6.91},
+    '111':{nom:'CP 111 — Métal',valMax:8,patronMax:CR_PAT},
+    '140':{nom:'CP 140 — Transport',valMax:8,patronMax:CR_PAT},
     '121':{nom:'CP 121 — Nettoyage',valMax:7,patronMax:5.50},
   };
 
@@ -1456,8 +1454,8 @@ export function CheqRepasV2({s}){
   };
 
   const vf = Math.min(+valFaciale||8, 8);
-  const pp = Math.min(+partPatron||6.91, 6.91);
-  const pw = Math.max(vf-pp, 1.09);
+  const pp = Math.min(+partPatron||CR_PAT, CR_PAT);
+  const pw = Math.max(vf-pp, CR_TRAV);
   const moisNom = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'][mois-1];
 
   // Config par employé (jours, actif, absences)
@@ -1576,15 +1574,15 @@ export function CheqRepasV2({s}){
             <div style={{marginTop:12,display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
               <div>
                 <div style={{fontSize:10,color:'#5e5c56',marginBottom:4}}>VALEUR FACIALE (€)</div>
-                <input type="number" value={valFaciale} onChange={e=>setValFaciale(+e.target.value)} min={1.09} max={8} step={0.01}
+                <input type="number" value={valFaciale} onChange={e=>setValFaciale(+e.target.value)} min={CR_TRAV} max={8} step={0.01}
                   style={{width:'100%',padding:'8px 10px',borderRadius:7,border:'1px solid rgba(198,163,78,.2)',background:'rgba(0,0,0,.3)',color:'#e8e6e0',fontSize:13,fontFamily:'inherit',boxSizing:'border-box'}}/>
                 {vf>8&&<div style={{fontSize:9,color:'#f87171',marginTop:2}}>⚠ Max légal: 8.00 €</div>}
               </div>
               <div>
                 <div style={{fontSize:10,color:'#5e5c56',marginBottom:4}}>PART PATRONALE (€)</div>
-                <input type="number" value={partPatron} onChange={e=>setPartPatron(+e.target.value)} min={0} max={6.91} step={0.01}
+                <input type="number" value={partPatron} onChange={e=>setPartPatron(+e.target.value)} min={0} max={CR_PAT} step={0.01}
                   style={{width:'100%',padding:'8px 10px',borderRadius:7,border:'1px solid rgba(198,163,78,.2)',background:'rgba(0,0,0,.3)',color:'#e8e6e0',fontSize:13,fontFamily:'inherit',boxSizing:'border-box'}}/>
-                {pp>6.91&&<div style={{fontSize:9,color:'#f87171',marginTop:2}}>⚠ Max exonéré: 6.91 €</div>}
+                {pp>CR_PAT&&<div style={{fontSize:9,color:'#f87171',marginTop:2}}>⚠ Max exonéré: ${CR_PAT} €</div>}
               </div>
               <div>
                 <div style={{fontSize:10,color:'#5e5c56',marginBottom:4}}>JOURS RÉFÉRENCE/MOIS</div>
@@ -1783,7 +1781,7 @@ export function CheqRepasV2({s}){
             ))}
             <div style={{marginTop:8,padding:10,background:'rgba(34,197,94,.06)',borderRadius:7,fontSize:11,color:'#22c55e'}}>
               Part travailleur auto: <b>€ {fmt2(pw)}</b>/chèque
-              {pw<1.09&&<span style={{color:'#f87171'}}> ⚠ Min légal 1.09€!</span>}
+              {pw<CR_TRAV&&<span style={{color:'#f87171'}}> ⚠ Min légal ${CR_TRAV}€!</span>}
             </div>
           </C>
           <div>
@@ -1835,8 +1833,8 @@ export function CheqRepasV2({s}){
           {[
             {t:'1 chèque par jour PRESTÉ',d:'Un seul chèque par jour effectivement travaillé. Interdit pour jours de maladie, vacances, chômage.', ok:true},
             {t:'Valeur faciale ≤ 8.00 EUR',d:'Dépassement → requalification TOTALE en rémunération soumise ONSS + PP. Pas de tolérance.', ok:vf<=8},
-            {t:'Part patronale ≤ 6.91 EUR',d:'Au-delà: l\'excédent est requalifié en rémunération. Vérifier CCT sectorielle.', ok:pp<=6.91},
-            {t:'Part travailleur ≥ 1.09 EUR',d:'Retenue obligatoire sur salaire net. Si < 1.09€: requalification totale.', ok:pw>=1.09},
+            {t:'Part patronale ≤ 6.91 EUR',d:'Au-delà: l\'excédent est requalifié en rémunération. Vérifier CCT sectorielle.', ok:pp<=CR_PAT},
+            {t:'Part travailleur ≥ 1.09 EUR',d:'Retenue obligatoire sur salaire net. Si < 1.09€: requalification totale.', ok:pw>=CR_TRAV},
             {t:'Nominatif + électronique',d:'Au nom du travailleur. Plus de chèques papier depuis 01/01/2022. Émetteur agréé obligatoire.', ok:true},
             {t:'Validité 12 mois',d:'Utilisable pendant 12 mois à compter de la mise à disposition du travailleur.', ok:true},
             {t:'Émetteur agréé SPF',d:'Edenred, Pluxee (ex-Sodexo), Monizze uniquement. Tout autre émetteur = requalification.', ok:true},

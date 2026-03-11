@@ -1,5 +1,5 @@
 // ═══ AUREUS SOCIAL PRO — Module: Moteur de calcul paie ═══
-const TX_BUDGET_MOB = 0.3807; // Cotisation ONSS budget mobilité pilier 3 — AR 17/03/2019
+const TX_BUDGET_MOB = 0.3807; // Cotisation ONSS budget mobilité pilier 3 — AR 17/03/2019 — voir aussi export TX_BUDGET_MOB dans lois-belges.js
 // BAREMES, calc(), getBareme(), getCPAvantages()
 
 // Dépendances injectées via initCalcEngine()
