@@ -2,7 +2,7 @@
 // Extrait du monolithe pour reutilisation dans les modules
 "use client";
 
-import { LOIS_BELGES, TX_ONSS_W, TX_ONSS_E, TX_AT, PV_SIMPLE, PV_DOUBLE, PP_EST, SAISIE_2026_TRAVAIL, SAISIE_2026_REMPLACEMENT, SAISIE_IMMUN_ENFANT_2026, AF_REGIONS, CP_DATA, BAREMES_CP_MIN, ONSS_E_SECTEURS, PRIMES_SECTORIELLES, RMMMG, COTIS_VAC_OUV } from "@/app/lib/lois-belges";
+import { LOIS_BELGES, TX_ONSS_W, TX_ONSS_E, TX_AT, PV_SIMPLE, PV_DOUBLE, PP_EST, PP_SPEC, TX_OUV108, SAISIE_2026_TRAVAIL, SAISIE_2026_REMPLACEMENT, SAISIE_IMMUN_ENFANT_2026, AF_REGIONS, CP_DATA, BAREMES_CP_MIN, ONSS_E_SECTEURS, PRIMES_SECTORIELLES, RMMMG, COTIS_VAC_OUV } from "@/app/lib/lois-belges";
 
 export function calcPrecompteExact(brutMensuel, options) {
   const opts = options || {};
@@ -150,17 +150,17 @@ export function calcCSSS(brutMensuel, situation) {
   const annuel = imposable * 12;
   const isole = !situation || situation === 'isole';
   const baremes = isole ? LOIS_BELGES.csss.isole : LOIS_BELGES.csss.menage2revenus;
-  // Seuils CSSS dynamiques depuis LOIS_BELGES
-  const s0=baremes[0].max, s1=baremes[1].max, s2=baremes[2]?.max||60181.95;
-  const t1=baremes[1].taux, t2=baremes[2]?.taux||0.011;
-  const base2=baremes[2]?.montant||9.30;
-  const plafond=baremes[baremes.length-1].montantFixe||51.64;
+  // Seuils CSSS 100% depuis LOIS_BELGES — aucun fallback hardcodé
+  const s0=baremes[0].max, s1=baremes[1].max, s2=baremes[2]?.max;
+  const t1=baremes[1].taux, t2=baremes[2]?.taux;
+  const base2=baremes[2]?.montant;
+  const plafond=baremes[baremes.length-1].montantFixe;
   if (annuel <= s0) return 0;
   if (annuel <= s1) return Math.round((annuel - s0) * t1 / 12 * 100) / 100;
   if (isole && baremes.length > 4) {
-    const s3=baremes[3]?.min||37344.02, t3=baremes[3]?.taux||0.013;
+    const s3=baremes[3]?.min, t3=baremes[3]?.taux;
     if (annuel <= s3) return Math.round((base2 + (annuel - s1) * t2) / 12 * 100) / 100;
-    if (annuel <= baremes[4]?.min||60181.95) return Math.round((base2 + (s3 - s1) * t2 + (annuel - s3) * t3) / 12 * 100) / 100;
+    if (annuel <= baremes[4]?.min) return Math.round((base2 + (s3 - s1) * t2 + (annuel - s3) * t3) / 12 * 100) / 100;
   } else {
     if (annuel <= s2) return Math.round((base2 + (annuel - s1) * t2) / 12 * 100) / 100;
   }
@@ -244,7 +244,7 @@ export function calcPayroll(brut, statut, familial, charges, regime, opts) {
   const baremeGap  = baremeOk ? 0 : R2(baremeMin - brutR);
 
   // ── 3. Base ONSS — ×1.08 pour ouvriers (AR 28/11/1969) ─────
-  const onssBase = isOuvrier ? R2(brutR * 1.08) : brutR;
+  const onssBase = isOuvrier ? R2(brutR * TX_OUV108) : brutR;
   const onssP    = R2(onssBase * TX_ONSS_W);
   const imposable = R2(brutR - onssP);
 
@@ -384,7 +384,7 @@ export function calcPeculeDouble(brutAnnuel){
   const onss=Math.round(base*TX_ONSS_W*100)/100;
   const cotSpec=Math.round(base*TX_AT*100)/100;
   const imposable=Math.round((base-onss)*100)/100;
-  const pp=Math.round(imposable*0.2315*100)/100;
+  const pp=Math.round(imposable*PP_SPEC*100)/100;
   const net=Math.round((base-onss-cotSpec-pp)*100)/100;
   return{base,onss,cotSpec,imposable,pp,net};
 }
@@ -401,7 +401,7 @@ export function calc13eMois(brutMensuel){
   const brut=brutMensuel;
   const onss=Math.round(brut*TX_ONSS_W*100)/100;
   const imposable=Math.round((brut-onss)*100)/100;
-  const pp=Math.round(imposable*0.2315*100)/100;
+  const pp=Math.round(imposable*PP_SPEC*100)/100;
   const net=Math.round((brut-onss-pp)*100)/100;
   return{brut,onss,imposable,pp,net};
 }

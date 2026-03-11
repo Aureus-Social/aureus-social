@@ -37,6 +37,7 @@ export const LOIS_BELGES = {
     reductionPersonne65: 1992,
     reductionAutreCharge: 624,
     bonusEmploi: { pctReduction: 0.3314, maxMensuel: 194.03, seuilBrut1: 2561.42, seuilBrut2: 2997.59 },
+    tauxPPSpecial: 0.2315, // Taux PP forfaitaire pécule double + 13ème mois (Annexe III SPF Finances)
   },
 
   // ═══ CSSS — Cotisation Spéciale Sécurité Sociale ═══
@@ -257,6 +258,7 @@ export const COTIS_VAC_OUV=LB.onss.cotisVacancesOuv; // 0.1584 — ONVA cotisati
 export const TX_AT=LB.assurances.accidentTravail.taux; // 0.01
 export const COUT_MED=LB.assurances.medecineTravail.cout; // COUT_MED
 export const CR_TRAV=LB.chequesRepas.partTravailleur.min; // CR_TRAV
+export const PP_SPEC=LB.pp.tauxPPSpecial; // 0.2315 — PP forfaitaire pécule double + 13ème mois
 export const PP_EST=0.22; // PP estimation moyenne (~22% de l'imposable)
 export const NET_FACTOR=(1-TX_ONSS_W)*(1-PP_EST); // facteur net approx = ~0.5645
 export const quickNetEst=(b)=>Math.round(b*NET_FACTOR*100)/100; // estimation rapide net
