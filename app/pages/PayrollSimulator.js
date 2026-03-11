@@ -6,7 +6,7 @@ import { useLang } from '../lib/lang-context';
 // ═══════════════════════════════════════════════════════════════════
 import React, { useState, useMemo } from 'react';
 import { calcPayroll } from '@/app/lib/payroll-engine';
-import { LOIS_BELGES, BAREMES_CP_MIN, IPP_TRANCHES_2026, RMMMG } from '@/app/lib/helpers';
+import { LB, LOIS_BELGES, BAREMES_CP_MIN, IPP_TRANCHES_2026, RMMMG } from '@/app/lib/helpers';
 
 const R2 = v => Math.round(v * 100) / 100;
 const fmt = v => new Intl.NumberFormat('fr-BE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v || 0);

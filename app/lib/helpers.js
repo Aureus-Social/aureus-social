@@ -2,14 +2,15 @@
 "use client";
 export { C, B, I, ST, PH, SC, fmt, Tbl, f2, f0 } from './shared-ui';
 export { LOIS_BELGES, LB, TX_ONSS_W, TX_ONSS_E, TX_OUV108, COTIS_VAC_OUV, TX_AT, COUT_MED, PP_EST, NET_FACTOR, PV_SIMPLE, PV_DOUBLE, RMMMG, CR_PAT, CR_MAX, CR_TRAV, FORF_BUREAU, FORF_KM, BONUS_MAX, SEUIL_CPPT, SEUIL_CE, HEURES_HEBDO, JOURS_FERIES, SAISIE_2026_TRAVAIL, SAISIE_2026_REMPLACEMENT, SAISIE_IMMUN_ENFANT_2026, AF_REGIONS, BAREMES_CP_MIN, CP_DATA, getBaremeCP, getPrimeSectorielle, getOnssEExtra, IPP_TRANCHES_2026, IPP_FRAIS_PRO_PCT, IPP_FRAIS_PRO_MAX, IPP_TAXE_COMMUNALE, IPP_QUOTITE_BASE, IPP_REDUC_ENFANTS, ONSS_E_SECTEURS, PRIMES_SECTORIELLES, TAUX_WARRANTS, TAUX_PARTICIPATION, TAUX_DOUBLE_PECULE, TAUX_HEURES_SUPP_SAL, HEURES_MENSUELLES, PLANCHER_ETUDIANT_SOL, quickNetEst, generateExportCompta, exportTravailleurs, importTravailleurs, obf, safeLS } from './lois-belges';
+import { LB as _LB } from './lois-belges'; // import local pour utilisation dans ce fichier
 // ── Moteur de paie v3 — précision CP totale (barème+prime+indexation+ancienneté+cotisSpec) ──
 export { calcPayroll, calcPrecompteExact, calcCSSS, calcBonusEmploi, calcPeculeDouble, calcProrata, calc13eMois, calcQuotiteSaisissable, calcAllocEnfant, getBaremeMinCP, getCPSummary, calcPayrollFromEmp, calcEmployerCostFromEmp, calcMasseSalariale, calcFiche } from './payroll-engine';
 // Exports supplémentaires pour éliminer les valeurs en dur dans les modules
 export const FORF_VELO = 0.35;   // LB.fraisPropres.forfaitDeplacement.velo
 export const ECO_MAX   = 250;    // LB.avantages.ecoMax
-export const TX_OUV_SPECIAL = LB.onss.ouvrier108 * LB.onss.employeur.total; // ONSS patronal ouvrier 108% (~25.07% × 1.08)
-export const BONUS_SEUIL1 = LB.pp.bonusEmploi.seuilBrut1; // 2561.42
-export const BONUS_SEUIL2 = LB.pp.bonusEmploi.seuilBrut2; // 2997.59
+export const TX_OUV_SPECIAL = _LB.onss.ouvrier108 * _LB.onss.employeur.total; // ONSS patronal ouvrier 108% (~25.07% × 1.08)
+export const BONUS_SEUIL1 = _LB.pp.bonusEmploi.seuilBrut1; // 2561.42
+export const BONUS_SEUIL2 = _LB.pp.bonusEmploi.seuilBrut2; // 2997.59
 export const CO2MIN = 31.34;          // LB.vehicules.cotCO2Min
 export const LEGAL = {
   WD: 21.67,
