@@ -8,12 +8,20 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getAuthUser } from '@/app/lib/supabase';
-import { logAudit } from '@/app/lib/audit';
+import { auditLog } from '@/app/lib/audit';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+// ── Supabase initialisé dans chaque handler (évite erreur module-level) ──
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+}
+
+// ── Wrapper audit compatible avec l'API existante ──
+async function logAudit(userId, action, details, request) {
+  try { await auditLog(action, null, null, { user_id: userId, ...details }); } catch {}
+}
 
 // ── Constantes légales ──────────────────────────────────────────────
 const APD_CONTACT = 'contact@apd-gba.be';
@@ -138,9 +146,9 @@ export async function GET(request) {
 
     if (action === 'dashboard') {
       // Stats générales RGPD
-      const { count: reqCount } = await supabase.from('gdpr_requests').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
-      const { count: empCount } = await supabase.from('employees').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
-      const { count: auditCount } = await supabase.from('audit_log').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
+      const { count: reqCount } = await getSupabase().from('gdpr_requests').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
+      const { count: empCount } = await getSupabase().from('employees').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
+      const { count: auditCount } = await getSupabase().from('audit_log').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
 
       return NextResponse.json({
         requests: reqCount || 0,
@@ -173,10 +181,10 @@ export async function POST(request) {
     if (action === 'droit-acces') {
       const empId = employee_id;
       const [emp, fiches, absences, docs] = await Promise.all([
-        supabase.from('employees').select('*').eq('id', empId).eq('user_id', user.id).single(),
-        supabase.from('fiches_paie').select('*').eq('employee_id', empId).eq('user_id', user.id),
-        supabase.from('absences').select('*').eq('employee_id', empId).eq('user_id', user.id).catch(() => ({ data: [] })),
-        supabase.from('documents').select('*').eq('employee_id', empId).eq('user_id', user.id).catch(() => ({ data: [] })),
+        getSupabase().from('employees').select('*').eq('id', empId).eq('user_id', user.id).single(),
+        getSupabase().from('fiches_paie').select('*').eq('employee_id', empId).eq('user_id', user.id),
+        getSupabase().from('absences').select('*').eq('employee_id', empId).eq('user_id', user.id).catch(() => ({ data: [] })),
+        getSupabase().from('documents').select('*').eq('employee_id', empId).eq('user_id', user.id).catch(() => ({ data: [] })),
       ]);
 
       if (emp.error) return NextResponse.json({ error: 'Employé non trouvé ou accès refusé' }, { status: 404 });
@@ -203,7 +211,7 @@ export async function POST(request) {
       };
 
       // Enregistrer la demande
-      await supabase.from('gdpr_requests').insert({
+      await getSupabase().from('gdpr_requests').insert({
         user_id: user.id,
         employee_id: empId,
         requester_email: requester_email || user.email,
@@ -227,7 +235,7 @@ export async function POST(request) {
       if (empErr) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
 
       // Vérification légale: obligations de conservation (10 ans paie)
-      const { count: ficheCount } = await supabase.from('fiches_paie')
+      const { count: ficheCount } = await getSupabase().from('fiches_paie')
         .select('*', { count: 'exact', head: true }).eq('employee_id', empId);
 
       const legalBlock = ficheCount > 0;
@@ -238,12 +246,12 @@ export async function POST(request) {
       let deleted = [];
       if (!legalBlock) {
         // Effacement complet si aucune fiche de paie
-        await supabase.from('absences').delete().eq('employee_id', empId);
-        await supabase.from('documents').delete().eq('employee_id', empId);
+        await getSupabase().from('absences').delete().eq('employee_id', empId);
+        await getSupabase().from('documents').delete().eq('employee_id', empId);
         deleted.push('absences', 'documents');
       } else {
         // Anonymisation partielle: supprimer données non nécessaires
-        await supabase.from('employees').update({
+        await getSupabase().from('employees').update({
           email: null,
           phone: null,
           iban: null, // Garder NISS (obligation légale) — anonymiser le reste
@@ -253,7 +261,7 @@ export async function POST(request) {
       }
 
       // Enregistrer la demande
-      await supabase.from('gdpr_requests').insert({
+      await getSupabase().from('gdpr_requests').insert({
         user_id: user.id,
         employee_id: empId,
         requester_email: requester_email || user.email,
@@ -270,10 +278,10 @@ export async function POST(request) {
     // ── Portabilité (Art. 20) ──────────────────────────────────────
     if (action === 'portabilite') {
       const empId = employee_id;
-      const { data: emp } = await supabase.from('employees').select('*').eq('id', empId).eq('user_id', user.id).single();
+      const { data: emp } = await getSupabase().from('employees').select('*').eq('id', empId).eq('user_id', user.id).single();
       if (!emp) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
 
-      const { data: fiches } = await supabase.from('fiches_paie').select('*').eq('employee_id', empId).eq('user_id', user.id);
+      const { data: fiches } = await getSupabase().from('fiches_paie').select('*').eq('employee_id', empId).eq('user_id', user.id);
 
       const portableData = {
         format: 'JSON-LD',
@@ -298,7 +306,7 @@ export async function POST(request) {
         export_format: 'JSON (machine-readable)',
       };
 
-      await supabase.from('gdpr_requests').insert({
+      await getSupabase().from('gdpr_requests').insert({
         user_id: user.id, employee_id: empId,
         requester_email: requester_email || user.email,
         request_type: 'portabilite', status: 'completed',
@@ -313,10 +321,10 @@ export async function POST(request) {
     // ── Rectification (Art. 16) ────────────────────────────────────
     if (action === 'rectification') {
       const empId = employee_id;
-      const { data: emp } = await supabase.from('employees').select('id').eq('id', empId).eq('user_id', user.id).single();
+      const { data: emp } = await getSupabase().from('employees').select('id').eq('id', empId).eq('user_id', user.id).single();
       if (!emp) return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
 
-      await supabase.from('gdpr_requests').insert({
+      await getSupabase().from('gdpr_requests').insert({
         user_id: user.id, employee_id: empId,
         requester_email: requester_email || user.email,
         request_type: 'rectification', status: 'pending',
@@ -345,7 +353,7 @@ export async function POST(request) {
         apd_url: APD_NOTIFICATION_URL,
       };
 
-      await supabase.from('gdpr_requests').insert({
+      await getSupabase().from('gdpr_requests').insert({
         user_id: user.id,
         request_type: 'violation_notification',
         status: 'pending_apd',
@@ -360,7 +368,7 @@ export async function POST(request) {
 
     // ── Purge rétention (Art. 5.1.e) ─────────────────────────────
     if (action === 'purge-retention') {
-      const { data: purgeResult, error } = await supabase.rpc('rgpd_retention_purge');
+      const { data: purgeResult, error } = await getSupabase().rpc('rgpd_retention_purge');
       if (error) throw error;
 
       await logAudit(user.id, 'rgpd_purge_retention', { results: purgeResult }, request);
@@ -369,7 +377,7 @@ export async function POST(request) {
 
     // ── Registre des violations (consultation) ────────────────────
     if (action === 'liste-violations') {
-      const { data } = await supabase.from('gdpr_requests')
+      const { data } = await getSupabase().from('gdpr_requests')
         .select('*')
         .eq('user_id', user.id)
         .eq('request_type', 'violation_notification')

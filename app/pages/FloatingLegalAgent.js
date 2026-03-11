@@ -1,6 +1,17 @@
 'use client'
 import { useState, useRef, useEffect } from 'react';
-import { detectAgentLang } from './SprintComponents';
+
+// ── Détection de langue inline (anciennement dans SprintComponents) ──
+const detectAgentLang = (text = '') => {
+  const t = text.toLowerCase();
+  const nlWords = ['hoe','wat','wanneer','waar','waarom','werknemer','loon','verlof','ziekte','contract','ontslag','overuren'];
+  const enWords = ['how','what','when','where','why','employee','salary','leave','sick','contract','dismissal','overtime'];
+  const nlScore = nlWords.filter(w => t.includes(w)).length;
+  const enScore = enWords.filter(w => t.includes(w)).length;
+  if (nlScore > enScore && nlScore > 0) return 'nl';
+  if (enScore > nlScore && enScore > 0) return 'en';
+  return 'fr';
+};
 
 // ═══════════════════════════════════════════════════════════════
 //  AGENT IA JURIDIQUE — BOUTON FLOTTANT
