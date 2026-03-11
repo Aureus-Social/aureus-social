@@ -52,7 +52,7 @@ fr:{
   ft:{col1:'Solutions',col2:'Produit',col3:'Légal',copy:'© 2026 Aureus IA SPRL · Tous droits réservés',links:['Disclaimer','Privacy','Cookie policy','CGU'],desc:'Secrétariat social numérique belge. 132 modules, 166 CP.',
     c1:[['Indépendants','independant'],['Devenir employeur','employeur'],['Employeurs','employeurs'],['Experts-comptables','experts'],['Formations','formations']],
     c2:[['Demander une démo','contact'],['Documentation',null],['Statut',null]],
-    c3:[['Confidentialité',null],['CGU',null],['RGPD',null],['Disclaimer',null]]},
+    c3:[['Confidentialité','privacy'],['CGU','cgu'],['Cookies','cookies'],['Disclaimer','disclaimer']]},
   cookie:{text:'Ce site utilise des cookies pour améliorer votre expérience et mesurer l\'audience.',accept:'Accepter',refuse:'Refuser',settings:'Paramètres'},
   ind:{ey:'Indépendants',bc:'Indépendants',h:'Se lancer comme\nindépendant\nen Belgique.',sub:'Le guide complet étape par étape.',c1:'Parler à un expert',c2:'Demander une démo',
     card:{label:'Aureus Social Pro',title:'Votre back-office social',sub:'Automatisez vos obligations.',stats:[['166','CP gérées'],['<8s','Dimona'],['100%','Conforme'],['24/7','Accès']]},
@@ -249,7 +249,7 @@ T.nl={
   ]},
   nw:{ey:'Nieuwsbrief',h:'Mis geen sociaal nieuws.',sub:'Wetswijzigingen, bijgewerkte barema\u2019s, praktische tips.',ph:'uw@email.be',btn:'Inschrijven',note:'Privacybeleid Aureus IA SPRL.',ok:'\u2713 Inschrijving bevestigd \u2014 welkom!',feats:[['\u2696\uFE0F','Dagelijkse wettelijke watch','Meldingen zodra een wet uw verplichtingen be\u00efnvloedt'],['\u{1F9EE}','Barema\u2019s 2026 bijgewerkt','Nieuwe CP-roosters voor inwerkingtreding'],['\u{1F4A1}','Expertadvies','Praktijkfiches van onze juristen']]},
   cta:{h:'Klaar om uw sociaal beheer te moderniseren?',sub:'Eerste maand gratis \u00b7 Directe toegang \u00b7 Migratiebegeleiding',btn:'Nu beginnen \u2192'},
-  ft:{col1:'Oplossingen',col2:'Product',col3:'Juridisch',copy:'\u00a9 2026 Aureus IA SPRL \u00b7 Alle rechten voorbehouden',links:['Disclaimer','Privacy','Cookiebeleid','AVV'],desc:'Digitaal Belgisch sociaal secretariaat. 132 modules, 166 PC.',c1:[['Zelfstandigen','independant'],['Werkgever worden','employeur'],['Werkgevers','employeurs'],['Accountants','experts'],['Opleidingen','formations']],c2:[['Demo aanvragen','contact'],['Documentatie',null],['Status',null]],c3:[['Privacy',null],['Gebruiksvoorwaarden',null],['GDPR',null],['Disclaimer',null]]},
+  ft:{col1:'Oplossingen',col2:'Product',col3:'Juridisch',copy:'\u00a9 2026 Aureus IA SPRL \u00b7 Alle rechten voorbehouden',links:['Disclaimer','Privacy','Cookiebeleid','AVV'],desc:'Digitaal Belgisch sociaal secretariaat. 132 modules, 166 PC.',c1:[['Zelfstandigen','independant'],['Werkgever worden','employeur'],['Werkgevers','employeurs'],['Accountants','experts'],['Opleidingen','formations']],c2:[['Demo aanvragen','contact'],['Documentatie',null],['Status',null]],c3:[['Privacy','privacy'],['Gebruiksvoorwaarden','cgu'],['Cookies','cookies'],['Disclaimer','disclaimer']]},
   articles:T.articles,
   ind:{ey:'Zelfstandigen',bc:'Zelfstandigen',h:'Zelfstandige worden\nin Belgi\u00eb.',sub:'De complete gids stap voor stap.',c1:'Praat met een expert',c2:'Demo aanvragen',
     card:{label:'Aureus Social Pro',title:'Uw sociale back-office',sub:'Automatiseer uw verplichtingen.',stats:[['166','PC beheerd'],['<8s','Dimona'],['100%','Conform'],['24/7','Toegang']]},
@@ -326,7 +326,7 @@ T.en={
   ]},
   nw:{ey:'Newsletter',h:'Never miss a social update.',sub:'Legal changes, updated scales, practical advice.',ph:'your@email.com',btn:'Subscribe',note:'Aureus IA SPRL privacy policy.',ok:'\u2713 Subscription confirmed \u2014 welcome!',feats:[['\u2696\uFE0F','Daily legal watch','Alerts when a law impacts your obligations'],['\u{1F9EE}','Updated 2026 scales','New JC grids before entry into force'],['\u{1F4A1}','Expert advice','Practical guides from our lawyers']]},
   cta:{h:'Ready to modernize your HR administration?',sub:'First month free \u00b7 Immediate access \u00b7 Assisted migration',btn:'Get started \u2192'},
-  ft:{col1:'Solutions',col2:'Product',col3:'Legal',copy:'\u00a9 2026 Aureus IA SPRL \u00b7 All rights reserved',links:['Disclaimer','Privacy','Cookie policy','T&C'],desc:'Belgian digital payroll platform. 132 modules, 166 joint committees.',c1:[['Freelancers','independant'],['Become an employer','employeur'],['Employers','employeurs'],['Accountants','experts'],['Training','formations']],c2:[['Book a demo','contact'],['Documentation',null],['Status',null]],c3:[['Privacy',null],['Terms',null],['GDPR',null],['Disclaimer',null]]},
+  ft:{col1:'Solutions',col2:'Product',col3:'Legal',copy:'\u00a9 2026 Aureus IA SPRL \u00b7 All rights reserved',links:['Disclaimer','Privacy','Cookie policy','T&C'],desc:'Belgian digital payroll platform. 132 modules, 166 joint committees.',c1:[['Freelancers','independant'],['Become an employer','employeur'],['Employers','employeurs'],['Accountants','experts'],['Training','formations']],c2:[['Book a demo','contact'],['Documentation',null],['Status',null]],c3:[['Privacy','privacy'],['Terms','cgu'],['Cookies','cookies'],['Disclaimer','disclaimer']]},
   articles:T.articles,
   ind:{ey:'Freelancers',bc:'Freelancers',h:'Become a freelancer\nin Belgium.',sub:'The complete step-by-step guide.',c1:'Talk to an expert',c2:'Book a demo',
     card:{label:'Aureus Social Pro',title:'Your social back-office',sub:'Automate your obligations.',stats:[['166','JC managed'],['<8s','Dimona'],['100%','Compliant'],['24/7','Access']]},
@@ -403,7 +403,7 @@ T.de={
   ]},
   nw:{ey:'Newsletter',h:'Kein Sozialrecht-Update verpassen.',sub:'Gesetz\u00e4nderungen, aktualisierte Tarife, praktische Tipps.',ph:'ihre@email.de',btn:'Abonnieren',note:'Datenschutzrichtlinie Aureus IA SPRL.',ok:'\u2713 Anmeldung best\u00e4tigt \u2014 willkommen!',feats:[['\u2696\uFE0F','T\u00e4gliche Rechts\u00fcberwachung','Meldungen wenn ein Gesetz Ihre Pflichten betrifft'],['\u{1F9EE}','Aktualisierte Tarife 2026','Neue PK-Raster vor Inkrafttreten'],['\u{1F4A1}','Expertenrat','Praxismerkbl\u00e4tter unserer Juristen']]},
   cta:{h:'Bereit, Ihre Sozialverwaltung zu modernisieren?',sub:'Erster Monat kostenlos \u00b7 Sofortiger Zugang \u00b7 Migrationsbegleitung',btn:'Jetzt starten \u2192'},
-  ft:{col1:'L\u00f6sungen',col2:'Produkt',col3:'Rechtliches',copy:'\u00a9 2026 Aureus IA SPRL \u00b7 Alle Rechte vorbehalten',links:['Disclaimer','Datenschutz','Cookie-Richtlinie','AGB'],desc:'Digitales belgisches Sozialsekretariat. 132 Module, 166 Kommissionen.',c1:[['Selbst\u00e4ndige','independant'],['Arbeitgeber werden','employeur'],['Arbeitgeber','employeurs'],['Buchhalter','experts'],['Schulungen','formations']],c2:[['Demo anfordern','contact'],['Dokumentation',null],['Status',null]],c3:[['Datenschutz',null],['AGB',null],['DSGVO',null],['Disclaimer',null]]},
+  ft:{col1:'L\u00f6sungen',col2:'Produkt',col3:'Rechtliches',copy:'\u00a9 2026 Aureus IA SPRL \u00b7 Alle Rechte vorbehalten',links:['Disclaimer','Datenschutz','Cookie-Richtlinie','AGB'],desc:'Digitales belgisches Sozialsekretariat. 132 Module, 166 Kommissionen.',c1:[['Selbst\u00e4ndige','independant'],['Arbeitgeber werden','employeur'],['Arbeitgeber','employeurs'],['Buchhalter','experts'],['Schulungen','formations']],c2:[['Demo anfordern','contact'],['Dokumentation',null],['Status',null]],c3:[['Datenschutz','privacy'],['AGB','cgu'],['Cookies','cookies'],['Disclaimer','disclaimer']]},
   articles:T.articles,
   ind:{ey:'Selbst\u00e4ndige',bc:'Selbst\u00e4ndige',h:'Selbst\u00e4ndig werden\nin Belgien.',sub:'Der vollst\u00e4ndige Schritt-f\u00fcr-Schritt-Leitfaden.',c1:'Mit einem Experten sprechen',c2:'Demo anfordern',
     card:{label:'Aureus Social Pro',title:'Ihr soziales Back-Office',sub:'Automatisieren Sie Ihre Pflichten.',stats:[['166','PK verwaltet'],['<8s','Dimona'],['100%','Konform'],['24/7','Zugang']]},
@@ -1248,7 +1248,100 @@ function PageArticle({t,go,goBack,slug,lang}) {
   </>);
 }
 
-const PAGES={home:PageHome,independant:PageInd,employeur:PageEmp,employeurs:PageEmps,experts:PageExp,formations:PageForm,contact:PageCon};
+
+// ═══════════════════════════════════════════════════════════════
+//  PAGES LÉGALES RGPD — Privacy · CGU · Cookies · Disclaimer
+// ═══════════════════════════════════════════════════════════════
+
+const LEGAL_TEXTS = {
+  fr: {
+    privacy: {
+      title: 'Politique de confidentialité',
+      updated: 'Dernière mise à jour : 11 mars 2026',
+      sections: [
+        { h: '1. Responsable du traitement', p: 'Aureus IA SPRL · BCE BE 1028.230.781 · Rue du Fort 12, 1060 Saint-Gilles, Bruxelles · contact : info@aureus-ia.com' },
+        { h: '2. Données collectées', p: 'Sur la vitrine publique : adresse email (formulaire de contact / newsletter), données de navigation (IP, pages visitées, durée). Sur la plateforme SaaS : données d\'identité et d\'emploi de vos salariés, NISS, IBAN, fiches de paie, déclarations sociales.' },
+        { h: '3. Base légale du traitement', p: 'Vitrine : consentement (Art. 6.1.a) pour la newsletter, intérêt légitime (Art. 6.1.f) pour les logs de sécurité. Plateforme : exécution du contrat (Art. 6.1.b) et obligation légale (Art. 6.1.c) pour la gestion de la paie.' },
+        { h: '4. Finalités', p: 'Répondre à vos demandes · Envoi de la newsletter (si consentement) · Amélioration du service · Sécurité du système · Déclarations sociales et fiscales obligatoires (ONSS, SPF Finances).' },
+        { h: '5. Destinataires', p: 'Sous-traitants liés par un DPA Art. 28 : Supabase Inc. (BDD, auth — serveurs Frankfurt UE), Vercel Inc. (hébergement — Edge Frankfurt UE), Resend (emails transactionnels). Autorités légales : ONSS, SPF Finances (déclarations obligatoires uniquement).' },
+        { h: '6. Transferts hors UE', p: 'Aucun transfert de données personnelles vers des pays hors de l\'Espace Économique Européen. Tous nos sous-traitants traitent les données exclusivement dans l\'UE.' },
+        { h: '7. Durées de conservation', p: 'Newsletter : jusqu\'à désinscription. Logs de contact : 3 ans. Données paie/RH : 10 ans (obligation légale Art. 2262bis C.civ. belge). Logs de sécurité : 5 ans. Cookies analytiques : 13 mois max.' },
+        { h: '8. Vos droits (Art. 15 à 22 RGPD)', p: 'Droit d\'accès, rectification, effacement, portabilité, opposition et limitation. Contact : info@aureus-ia.com — réponse sous 30 jours. Réclamation : Autorité de Protection des Données (APD) — www.autoriteprotectiondonnees.be.' },
+        { h: '9. Sécurité (Art. 32)', p: 'Chiffrement AES-256-GCM (NISS, IBAN) · TLS 1.3 en transit · Row Level Security multi-tenant · Audit trail complet · Backup chiffré quotidien vers Backblaze B2 (EU-Central) · MFA TOTP.' },
+        { h: '10. DPO / Contact', p: 'Délégué à la Protection des Données : info@aureus-ia.com · Aureus IA SPRL, Saint-Gilles, Bruxelles, Belgique.' },
+      ]
+    },
+    cookies: {
+      title: 'Politique de cookies',
+      updated: 'Dernière mise à jour : 11 mars 2026',
+      sections: [
+        { h: '1. Qu\'est-ce qu\'un cookie ?', p: 'Un cookie est un petit fichier texte stocké dans votre navigateur. Il permet de mémoriser vos préférences et d\'améliorer votre expérience de navigation.' },
+        { h: '2. Cookies utilisés', p: 'Strictement nécessaires (pas de consentement requis) : ck_consent (choix cookie, 1 an), aureus_lang (langue, session), supabase-auth-token (session authentifiée). Fonctionnels (avec consentement) : aureus_theme (thème interface). Analytiques : AUCUN cookie de traçage tiers (pas de Google Analytics, pas de Facebook Pixel).' },
+        { h: '3. LocalStorage', p: 'Nous utilisons le localStorage pour vos préférences d\'interface (thème, langue). Ces données restent locales à votre navigateur et ne sont jamais transmises à nos serveurs.' },
+        { h: '4. Gestion de vos préférences', p: 'Acceptez ou refusez via la bannière à votre première visite. Modifiez à tout moment via les paramètres de votre navigateur ou en supprimant le cookie "ck_consent".' },
+        { h: '5. Cookies tiers', p: 'Notre site ne dépose aucun cookie publicitaire ou de suivi comportemental tiers. Aucune donnée n\'est partagée avec des régies publicitaires.' },
+        { h: '6. Contact', p: 'Questions sur les cookies : info@aureus-ia.com' },
+      ]
+    },
+    cgu: {
+      title: 'Conditions Générales d\'Utilisation',
+      updated: 'Dernière mise à jour : 11 mars 2026',
+      sections: [
+        { h: '1. Objet', p: 'Les présentes CGU régissent l\'accès et l\'utilisation de la plateforme Aureus Social Pro, éditée par Aureus IA SPRL (BCE BE 1028.230.781), ci-après « l\'Éditeur ».' },
+        { h: '2. Accès au service', p: 'Accès réservé aux professionnels (fiduciaires, experts-comptables, employeurs) après inscription et validation du compte. L\'Éditeur peut suspendre tout accès en cas de violation des présentes CGU.' },
+        { h: '3. Obligations de l\'utilisateur', p: 'Fournir des informations exactes · Maintenir la confidentialité des identifiants · Utiliser le service conformément au droit belge et européen · Ne pas tenter de contourner les mesures de sécurité.' },
+        { h: '4. Responsabilités de l\'Éditeur', p: 'Disponibilité (objectif 99,5% uptime) · Sécurité conforme RGPD Art. 32 · Notification incident sous 72h. L\'Éditeur n\'est pas responsable des décisions prises sur la base des calculs fournis.' },
+        { h: '5. Propriété intellectuelle', p: 'Tous les éléments (code, interfaces, algorithmes) sont la propriété exclusive d\'Aureus IA SPRL. Toute reproduction sans autorisation écrite est interdite.' },
+        { h: '6. Tarification', p: 'Tarifs publiés sur la plateforme au moment de la souscription. Facturation mensuelle ou annuelle selon le plan. Peppol ID : 0208:1028230781.' },
+        { h: '7. Résiliation', p: 'Préavis d\'un mois (fin de mois). En cas de résiliation, données exportées et supprimées sous 30 jours (RGPD Art. 17).' },
+        { h: '8. Droit applicable', p: 'Droit belge. Juridictions compétentes de l\'arrondissement judiciaire de Bruxelles.' },
+      ]
+    },
+    disclaimer: {
+      title: 'Disclaimer',
+      updated: 'Dernière mise à jour : 11 mars 2026',
+      sections: [
+        { h: '1. Exactitude des informations', p: 'Aureus IA SPRL s\'efforce de maintenir les informations à jour (barèmes, taux ONSS, législation). Les calculs fournis sont indicatifs et ne constituent pas un avis juridique ou fiscal professionnel.' },
+        { h: '2. Limites de responsabilité', p: 'L\'Éditeur décline toute responsabilité pour : données incorrectes saisies par l\'utilisateur, modifications législatives après dernière mise à jour, décisions de gestion basées sur les outputs de la plateforme.' },
+        { h: '3. Liens externes', p: 'Liens vers sites tiers (ONSS, SPF Finances, Moniteur Belge) sont fournis à titre informatif. Aureus IA SPRL n\'est pas responsable de leur contenu.' },
+        { h: '4. Disponibilité', p: 'Des interruptions pour maintenance ou force majeure peuvent survenir. L\'Éditeur informera les utilisateurs dans les meilleurs délais.' },
+        { h: '5. Contact', p: 'Aureus IA SPRL · BCE BE 1028.230.781 · info@aureus-ia.com · Saint-Gilles, 1060 Bruxelles, Belgique.' },
+      ]
+    }
+  }
+};
+
+function PageLegal({t, go, type}) {
+  const texts = LEGAL_TEXTS.fr[type];
+  if (!texts) return null;
+  return (
+    <>
+      <section style={{background:'#080706', minHeight:'100vh', paddingTop:100, paddingBottom:80}}>
+        <div style={{maxWidth:800, margin:'0 auto', padding:'0 36px'}}>
+          <button onClick={()=>go('home')} style={{marginBottom:32, padding:'8px 16px', borderRadius:6, border:'1px solid rgba(255,255,255,.15)', background:'transparent', color:'rgba(255,255,255,.5)', fontSize:12, cursor:'pointer', fontFamily:'inherit'}}>← Retour</button>
+          <div style={{marginBottom:8, fontSize:11, fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', color:'#c6a34e'}}>{t.ft.col3}</div>
+          <h1 style={{fontSize:32, fontWeight:800, color:'#fff', marginBottom:8}}>{texts.title}</h1>
+          <p style={{fontSize:12, color:'rgba(255,255,255,.3)', marginBottom:48}}>{texts.updated}</p>
+          {texts.sections.map((s,i) => (
+            <div key={i} style={{marginBottom:32, paddingBottom:32, borderBottom:'1px solid rgba(255,255,255,.06)'}}>
+              <h2 style={{fontSize:16, fontWeight:700, color:'#c6a34e', marginBottom:12}}>{s.h}</h2>
+              <p style={{fontSize:14, color:'rgba(255,255,255,.65)', lineHeight:1.8}}>{s.p}</p>
+            </div>
+          ))}
+          <div style={{marginTop:48, padding:'20px 24px', background:'rgba(198,163,78,.06)', border:'1px solid rgba(198,163,78,.15)', borderRadius:12}}>
+            <div style={{fontSize:12, color:'rgba(255,255,255,.5)'}}>
+              📬 Contact DPO : <a href="mailto:info@aureus-ia.com" style={{color:'#c6a34e'}}>info@aureus-ia.com</a>
+              {' · '}APD Belgique : <a href="https://www.autoriteprotectiondonnees.be" target="_blank" rel="noopener noreferrer" style={{color:'#c6a34e'}}>autoriteprotectiondonnees.be ↗</a>
+            </div>
+          </div>
+        </div>
+      </section>
+      <Footer t={t} go={go}/>
+    </>
+  );
+}
+
+const PAGES={home:PageHome,independant:PageInd,employeur:PageEmp,employeurs:PageEmps,experts:PageExp,formations:PageForm,contact:PageCon,privacy:(p)=><PageLegal {...p} type="privacy"/>,cookies:(p)=><PageLegal {...p} type="cookies"/>,cgu:(p)=><PageLegal {...p} type="cgu"/>,disclaimer:(p)=><PageLegal {...p} type="disclaimer"/>};
 
 function TestiCarousel({items}) {
   if(!items||!items.length) return null;
