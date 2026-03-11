@@ -593,7 +593,7 @@ export const CP_DATA = {
     ],
     onssE_extra: 0.005, primeSect: 60,
     indexation: 'AGORIA', coefIndex: 1.0000,
-    fonds: 'Fonds de sécurité d'existence 0,5%',
+    fonds: "Fonds de sécurité d'existence 0,5%",
     cotisSpec: [{ label: 'Fonds sécurité', pct: 0.005, base: 'brut' }],
     dateMAJ: '2026-01-01',
   },

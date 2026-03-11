@@ -520,3 +520,82 @@ export function calcMasseSalariale(emps) {
     details,
   };
 }
+
+
+// ── calc() — Version CP-aware complète (remplace estimation 22% fixe) ──
+// Utilise calcPayrollFromEmp() via payroll-engine pour précision totale :
+// barème CP, ancienneté, indexation sectorielle, cotisations spéciales.
+// Rétrocompatible : retourne les mêmes clés qu'avant + enrichissements CP.
+// ═══ calcFiche() — Fiche de paie complète depuis objet employé + période ═══
+export function calcFiche(emp, per, co) {
+  const brut = +(emp&&(emp.monthlySalary||emp.gross||emp.brut)||0);
+  if (!brut) return {base:0,gross:0,onssNet:0,onssW:0,imposable:0,tax:0,pp:0,css:0,csss:0,net:0,onssE:0,onssEExtra:0,costTotal:0,coutTotal:0,bonus:0,bonusEmploi:0,overtime:0,y13:0,sickPay:0,baremeOk:true,baremeGap:0,primeSect:0,netAvecPrime:0,cpId:'200',cotisSpec:[],cotisSpecTotal:0};
+  const r = calcPayrollFromEmp(emp);
+  if (!r) return {base:brut,gross:brut,onssNet:Math.round(brut*0.1307*100)/100,onssW:Math.round(brut*0.1307*100)/100,imposable:0,tax:0,pp:0,css:0,csss:0,net:0,onssE:Math.round(brut*0.2507*100)/100,onssEExtra:0,costTotal:Math.round(brut*1.2507*100)/100,coutTotal:Math.round(brut*1.2507*100)/100,bonus:0,bonusEmploi:0,overtime:0,y13:0,sickPay:0,baremeOk:true,baremeGap:0,primeSect:0,netAvecPrime:0,cpId:'200',cotisSpec:[],cotisSpecTotal:0};
+  // Calculs supplémentaires période (heures sup, avantages, etc.)
+  const hsVolontBrutNet = +(per?.hsVolontBrutNet||0) * (brut/((emp.whWeek||38)*4.33));
+  const hsRelance       = +(per?.hsRelance||0)       * (brut/((emp.whWeek||38)*4.33));
+  const hsBrutNetTotal  = Math.round((hsVolontBrutNet+hsRelance)*100)/100;
+  const atnCar          = r.brutR > 0 ? (per?.atnCar||emp?.atnCar||0) : 0;
+  const atnGSM          = per?.atnGSM||emp?.atnGSM||0;
+  const atnLogement     = per?.atnLogement||emp?.atnLogement||0;
+  const atnTotal        = Math.round(((+atnCar)+(+atnGSM)+(+atnLogement))*100)/100;
+  const fraisPropres    = +(per?.expense||emp?.expense||0);
+  const transport       = +(per?.mvT||emp?.mvT||0);
+  const chRepPatron     = +(per?.mvE||emp?.mvE||0);
+  const chRepTravail    = +(per?.mvW||emp?.mvW||0);
+  const indemTeletravail= +(per?.indemTeletravail||emp?.indemTeletravail||0);
+  const indemBureau     = +(per?.indemBureau||emp?.indemBureau||0);
+  const cotisVacOuv     = r.isOuvrier ? Math.round(r.brutR*0.1584*100)/100 : 0;
+  const empBonus        = r.bonusEmploi;
+  const onssNet         = Math.round((r.onssP - empBonus)*100)/100;
+  const net             = r.net;
+  const mvEmployer      = Math.round((transport+chRepPatron+indemTeletravail+indemBureau+fraisPropres)*100)/100;
+  const onssE_rate      = r.isOuvrier ? 0.2507 : (TX_ONSS_E + (r.onssEExtra/r.brutR||0));
+  const pensionComplEmpl= Math.round(r.brutR*(emp?.assurGroupe||0)/100*100)/100;
+  const dispensePPTotal = Math.round((hsVolontBrutNet+hsRelance)*0.1307*100)/100;
+  const miTempsINAMI    = +(per?.miTempsINAMI||0);
+  const allocTravail    = +(per?.allocTravail||emp?.allocTravail||emp?.allocTravailMontant||0);
+  const allocTravailLabel = emp?.allocTravailType||'';
+  const redGCPremier    = 0; // calculé séparément si nécessaire
+  const redGCAge        = 0;
+  const redGCJeune      = 0;
+  const redGCHandicap   = 0;
+  const redGCPremierLabel = '';
+  const ecoCheques      = Math.round((emp?.ecoCheques||0)/12*100)/100;
+  const cotCO2          = 0; // calculé dans VehiculeATN
+  const costTotal       = Math.round((r.coutTotal + cotisVacOuv + pensionComplEmpl + mvEmployer - redGCPremier - redGCAge - redGCJeune - allocTravail)*100)/100;
+
+  return {
+    // Rétrocompatibilité totale
+    base: r.brutR, gross: r.brutR,
+    onssNet, onssW: r.onssP, empBonus,
+    imposable: r.imposable,
+    tax: r.pp, pp: r.pp,
+    css: r.csss, csss: r.csss,
+    net: Math.round((net + hsBrutNetTotal)*100)/100,
+    onssE: r.onssE, onssE_rate, onssEExtra: r.onssEExtra,
+    costTotal, coutTotal: costTotal,
+    bonus: r.bonusEmploi, bonusEmploi: r.bonusEmploi,
+    overtime: 0, y13: 0, sickPay: 0,
+    // Précision CP
+    baremeOk: r.baremeOk, baremeGap: r.baremeGap,
+    baremeMin: r.baremeMin,
+    primeSect: r.primeSect, netAvecPrime: r.netAvecPrime,
+    cpId: r.cpId, cpInfo: r.cpInfo,
+    cotisSpec: r.cotisSpec, cotisSpecTotal: r.cotisSpecTotal,
+    pctAnciennete: r.pctAnciennete,
+    coefIndex: r.coefIndex,
+    isOuvrier: r.isOuvrier,
+    // Période
+    hsBrutNetTotal, hsVolontBrutNet, hsRelance,
+    atnCar, atnGSM, atnLogement, atnTotal,
+    fraisPropres, transport, chRepPatron, chRepTravail,
+    indemTeletravail, indemBureau, mvEmployer,
+    cotisVacOuv, cotCO2, pensionComplEmpl,
+    dispensePPTotal, miTempsINAMI,
+    allocTravail, allocTravailLabel,
+    redGCPremier, redGCAge, redGCJeune, redGCHandicap, redGCPremierLabel,
+    ecoCheques,
+  };
+}
