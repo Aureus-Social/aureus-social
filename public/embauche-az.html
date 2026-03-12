@@ -1993,16 +1993,51 @@ function wizGetMinForCP(cp, statut) {
 }
 
 function wizShowMin() {
-  var cp = document.getElementById('w-cp')?.value || 'DEFAULT';
+  var cp = document.getElementById('w-cp')?.value || '';
   var statut = document.getElementById('w-statut')?.value || '';
-  var info = wizGetMinForCP(cp, statut);
   var bloc = document.getElementById('w-salaire-min');
-  if (!bloc) return;
+  if (!bloc || !cp) { if(bloc) bloc.style.display='none'; return; }
+
+  // Récupérer le barème depuis BAREMES_CCT
+  var bareme = BAREMES_CCT[cp];
+  if (!bareme && cp.indexOf('.')>0) bareme = BAREMES_CCT[cp.split('.')[0]];
+  if (!bareme) bareme = BAREMES_CCT['RMMMG'];
+
+  // Formater les montants en format belge: 2.300,00 €
+  function fmtEur(n) {
+    return n.toLocaleString('fr-BE', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
+  }
+
+  // Construire le tableau HTML des catégories
+  var cats = bareme.categories;
+  var tableHTML = '<table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:11px;">'
+    + '<thead><tr>'
+    + '<th style="text-align:left;padding:4px 8px;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600;">Catégorie</th>'
+    + '<th style="text-align:right;padding:4px 8px;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600;">Brut/mois</th>'
+    + '</tr></thead><tbody>';
+
+  cats.forEach(function(c) {
+    var montant = c.brut;
+    // Si taux horaire, convertir en mensuel (38h × 52 / 12)
+    if (c.type === 'horaire') montant = montant * 38 * 52 / 12;
+    var isHourly = c.type === 'horaire';
+    tableHTML += '<tr>'
+      + '<td style="padding:5px 8px;color:var(--text);border-bottom:1px solid rgba(255,255,255,0.04);">' + c.cat + '</td>'
+      + '<td style="padding:5px 8px;text-align:right;color:var(--gold);font-weight:700;border-bottom:1px solid rgba(255,255,255,0.04);font-family:var(--mono,monospace);">' 
+      + fmtEur(montant) 
+      + (isHourly ? '<span style="color:var(--muted);font-size:9px;font-weight:400;"> ('+c.brut.toFixed(2)+' €/h)</span>' : '')
+      + '</td>'
+      + '</tr>';
+  });
+  tableHTML += '</tbody></table>';
+
+  // Mettre à jour le bloc
+  document.getElementById('w-salaire-min-label').innerHTML = '📊 <strong>' + bareme.label + '</strong>';
+  document.getElementById('w-salaire-min-note').innerHTML = 
+    '<span style="color:var(--muted);font-size:10px;">Source : ' + bareme.source + '</span>'
+    + tableHTML;
   bloc.style.display = 'block';
-  var isHourly = info.min < 100;
-  var minLabel = isHourly ? info.min.toFixed(2)+'€/heure' : info.min.toFixed(2)+'€/mois brut';
-  document.getElementById('w-salaire-min-label').textContent = '📊 Minimum 2026 — '+info.label+' : '+minLabel;
-  document.getElementById('w-salaire-min-note').textContent = info.note;
+  
   wizCheckSalaire();
 }
 
@@ -2898,6 +2933,13 @@ function wizLaunchDimona() {
           </select>
           
         </div>
+      <!-- ═══ BAREME CCT — pleine largeur, juste sous le select CP ═══ -->
+      <div id="w-bareme-cct" style="display:none;grid-column:1/-1;margin-top:4px;padding:14px 16px;border-radius:8px;background:linear-gradient(135deg,rgba(201,150,58,.12),rgba(201,150,58,.04));border:1px solid rgba(201,150,58,.4);">
+        <div id="w-bareme-titre" style="color:var(--gold);font-weight:700;font-size:13px;margin-bottom:3px;"></div>
+        <div id="w-bareme-source" style="color:var(--muted);font-size:10px;margin-bottom:2px;"></div>
+        <div id="w-bareme-note" style="color:#60a5fa;font-size:10px;margin-bottom:6px;display:none;"></div>
+        <table id="w-bareme-table" style="width:100%;border-collapse:collapse;margin-top:6px;"></table>
+      </div>
         <div>
           <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Fonction / Poste *</label>
           <input id="w-fonction" type="text" placeholder="Développeur, Comptable..." list="w-fonction-list" oninput="wizFonctionChange()" onchange="wizFonctionChange()" onblur="wizFonctionChange()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
@@ -3163,13 +3205,7 @@ function wizLaunchDimona() {
         </div>
       </div>
 
-      <!-- ═══ BAREME CCT — pleine largeur sous la grille ═══ -->
-      <div id="w-bareme-cct" style="display:none;margin-top:12px;padding:12px 16px;border-radius:8px;background:linear-gradient(135deg,rgba(201,150,58,.1),rgba(201,150,58,.03));border:1px solid rgba(201,150,58,.35);">
-        <div id="w-bareme-titre" style="color:var(--gold);font-weight:700;font-size:12px;margin-bottom:3px;"></div>
-        <div id="w-bareme-source" style="color:var(--muted);font-size:10px;margin-bottom:2px;"></div>
-        <div id="w-bareme-note" style="color:#60a5fa;font-size:10px;margin-bottom:6px;display:none;"></div>
-        <table id="w-bareme-table" style="width:100%;border-collapse:collapse;margin-top:6px;"></table>
-      </div>
+
 
       <!-- Panels conditionnels contrat -->
       <div id="w-therp-bloc" style="display:none;margin-top:12px;background:rgba(74,222,128,.05);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:14px;">
