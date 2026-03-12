@@ -17,24 +17,10 @@ export function setAuditUser(user) {
  */
 export async function auditLog(action, table_name = null, record_id = null, details = null) {
   try {
-    // Récupérer le token JWT depuis Supabase
-    let token = null;
-    try {
-      const { createClient } = await import('@supabase/supabase-js');
-      const sb = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-      );
-      const { data } = await sb.auth.getSession();
-      token = data?.session?.access_token || null;
-    } catch {}
-
-    await fetch('/api/audit', {
+    // Récupérer le token JWT depuis le singleton Supabase
+    const { authFetch } = await import('./auth-fetch');
+    await authFetch('/api/audit', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      },
       body: JSON.stringify({
         action,
         table_name,
