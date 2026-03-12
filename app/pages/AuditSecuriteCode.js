@@ -30,8 +30,8 @@ function AuditSecuriteTab({s}) {
     { cat:'API & Réseau', items:[
       { id:'api1', label:'HTTPS forcé (Vercel)', status:'ok', detail:'TLS 1.3 via Vercel Edge' },
       { id:'api2', label:'CORS configuré', status:'ok', detail:'Next.js headers config en place' },
-      { id:'api3', label:'Rate limiting API', status:'ok', detail:'60 req/min global + 10 req/min auth dans middleware.js — cleanup mémoire auto' },
-      { id:'api4', label:'Validation input server-side', status:'ok', detail:'Validation NISS/IBAN/email/prénom sur /api/employees — modules validate.js disponibles' },
+      { id:'api3', label:'Rate limiting API', status:'ok', detail:'60/min global · 10/min auth · 5/min endpoints critiques (restore/backup/sepa/onss) — middleware.js' },
+      { id:'api4', label:'JWT obligatoire sur /api/* protégés', status:'ok', detail:'middleware.js — 14 routes protégées · présence + structure Bearer vérifié avant handler. Validation crypto: getAuthUser()' },
     ]},
     { cat:'Code', items:[
       { id:'code1', label:'eval() — 0 occurrence', status:'ok', detail:'Scan complet : aucun eval() dans app/ — données du PDF d\'audit initial incorrectes' },
