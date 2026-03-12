@@ -5,7 +5,8 @@ import { useLang } from '../lib/lang-context';
 
 import { useState } from "react";
 import { B, C, CO2MIN, CR_MAX, CR_PAT, CR_TRAV, ECO_MAX, FORF_BUREAU, FORF_KM, FORF_VELO, BONUS_SEUIL1, BONUS_SEUIL2, HEURES_HEBDO, I, LB, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, SC, ST, TX_ONSS_E, TX_ONSS_W, f0, f2, fmt, quickNet, quickPP } from "@/app/lib/helpers";
-import { calcPrecompteExact, calcPayrollFromEmp, calcMasseSalariale } from "@/app/lib/payroll-engine";
+import { calcPrecompteExact } from "@/app/lib/payroll-engine";
+import { calcPayrollFromEmp, calcMasseSalariale } from "@/app/lib/helpers";
 import { aureuspdf } from "@/app/lib/pdf-aureus";
 import { generateSEPAXML, previewHTML } from "@/app/lib/doc-generators";
 import { CompteIndividuelMod } from "./ModsBatch2";

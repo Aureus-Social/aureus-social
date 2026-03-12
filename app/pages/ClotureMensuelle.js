@@ -3,7 +3,8 @@ import { useLang } from '../lib/lang-context';
 import { supabase } from '@/app/lib/supabase';
 import { useState } from 'react';
 import { TX_ONSS_W, TX_ONSS_E } from '@/app/lib/lois-belges';
-import { quickPP, quickNet, calcPayrollFromEmp } from '@/app/lib/payroll-engine';
+import { quickPP, quickNet } from '@/app/lib/payroll-engine';
+import { calcPayrollFromEmp } from '@/app/lib/helpers';
 
 const ClotureMensuelle=({s,d,supabase,user})=>{
   const { t, tText } = useLang();

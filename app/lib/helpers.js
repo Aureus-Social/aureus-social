@@ -66,6 +66,90 @@ export { BAREMES_CP_MIN } from './lois-belges';
 // ── SEPA depuis doc-generators ──
 export { generateSEPAXML } from './doc-generators';
 
+// ══════════════════════════════════════════════════════════════
+// CONSTANTES MANQUANTES — ajoutées pour éliminer les erreurs import
+// ══════════════════════════════════════════════════════════════
+
+// CCT 90 — Bonus collectif (loi 21/12/2007)
+export const CCT90_PLAFOND   = 3948;   // Plafond annuel exonéré 2026 (ONSS + PP)
+export const CCT90_COTIS_E   = 0.33;   // Cotisation patronale spéciale 33%
+
+// Temps de travail
+export const HEURES_MENSUELLES = 164.33; // 38h × 52 / 12
+
+// IPP — Tranches et paramètres 2026 (exercice d'imposition 2027)
+export const IPP_TRANCHES_2026 = [
+  { max: 15820,  taux: 0.25 },
+  { max: 27920,  taux: 0.40 },
+  { max: 48320,  taux: 0.45 },
+  { max: Infinity, taux: 0.50 },
+];
+export const IPP_QUOTITE_BASE    = 10160;  // Quotité exemptée de base 2026
+export const IPP_REDUC_ENFANTS   = [0, 1650, 4240, 9500, 15820]; // réduction par enfant (0,1,2,3,4+)
+export const IPP_FRAIS_PRO_PCT   = 0.30;   // Frais professionnels forfaitaires 30%
+export const IPP_FRAIS_PRO_MAX   = 5750;   // Plafond frais pro forfaitaires 2026
+export const IPP_TAXE_COMMUNALE  = 0.07;   // Taux moyen additionnel communal (7%)
+
+// Rémunération variable
+export const TAUX_DOUBLE_PECULE   = 0.92;  // = PV_DOUBLE, alias pour compatibilité
+export const TAUX_HEURES_SUPP_SAL = 0.50;  // Majoration heures sup ordinaires (50%)
+export const TAUX_PARTICIPATION   = 0.25;  // Participation bénéfices (cotis. spéciale 25%)
+export const TAUX_WARRANTS        = 0;     // Warrants: pas de cotis. ONSS ni PP (sous conditions)
+
+// Budget mobilité (loi 17/03/2019)
+export const TX_BUDGET_MOB = 0.38 + 0.025; // Cotis. mobilité: ONSS-like 38% + 2.5% spéciale
+
+// ══════════════════════════════════════════════════════════════
+// FONCTIONS MANQUANTES — payroll-engine wrappers
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * calcPayrollFromEmp — calcul complet pour un travailleur
+ * Wrapper autour de calc() avec sortie compatible payroll-engine
+ */
+export function calcPayrollFromEmp(emp, options = {}) {
+  const brut = +(emp?.monthlySalary || emp?.gross || emp?.brut || 0);
+  const regime = +(emp?.regime || 100) / 100;
+  const brutRegime = Math.round(brut * regime * 100) / 100;
+  const onssW = Math.round(brutRegime * 0.1307 * 100) / 100;
+  const imposable = Math.round((brutRegime - onssW) * 100) / 100;
+  const pp = quickPP(brutRegime);
+  const net = Math.round((imposable - pp) * 100) / 100;
+  const onssE = Math.round(brutRegime * 0.2507 * 100) / 100;
+  const coutTotal = Math.round((brutRegime + onssE) * 100) / 100;
+  return {
+    brut: brutRegime, gross: brutRegime, base: brutRegime,
+    onssW, onssE, imposable, pp, tax: pp,
+    net, coutTotal, costTotal: coutTotal,
+    pv: Math.round(brutRegime * PV_SIMPLE * 100) / 100,
+    regime, emp,
+  };
+}
+
+/**
+ * calcMasseSalariale — calcul masse salariale pour un tableau d'employés
+ */
+export function calcMasseSalariale(emps = [], options = {}) {
+  const ae = emps.filter(e => e.status === 'active' || !e.status);
+  const detail = ae.map(e => calcPayrollFromEmp(e, options));
+  const totBrut    = detail.reduce((a, r) => a + r.brut, 0);
+  const totOnssW   = detail.reduce((a, r) => a + r.onssW, 0);
+  const totOnssE   = detail.reduce((a, r) => a + r.onssE, 0);
+  const totPP      = detail.reduce((a, r) => a + r.pp, 0);
+  const totNet     = detail.reduce((a, r) => a + r.net, 0);
+  const totCout    = detail.reduce((a, r) => a + r.coutTotal, 0);
+  return {
+    n: ae.length, detail,
+    totBrut: Math.round(totBrut * 100) / 100,
+    totOnssW: Math.round(totOnssW * 100) / 100,
+    totOnssE: Math.round(totOnssE * 100) / 100,
+    totPP: Math.round(totPP * 100) / 100,
+    totNet: Math.round(totNet * 100) / 100,
+    totCout: Math.round(totCout * 100) / 100,
+    avgBrut: ae.length ? Math.round(totBrut / ae.length * 100) / 100 : 0,
+  };
+}
+
 // ── DmfA XML generator ──
 export function generateDmfAXML(emps, trimestre, annee, co) {
   const coName = co?.name || 'Aureus IA SPRL';
