@@ -917,6 +917,533 @@ body {
 
 
 
+
+<!-- ═══════════════════════════════════ WIZARD DOSSIER COMPLET ═══════════════════════════════════ -->
+<section id="wizard-dossier" style="margin:0 0 32px 0;background:var(--bg2);border:2px solid var(--gold);border-radius:16px;overflow:hidden;">
+
+  <!-- Header wizard -->
+  <div style="background:linear-gradient(135deg,rgba(201,150,58,.2),rgba(201,150,58,.05));padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="width:48px;height:48px;background:linear-gradient(135deg,#C9963A,#8B6420);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🗂️</div>
+      <div>
+        <div style="font-size:18px;font-weight:800;color:var(--gold);letter-spacing:-.3px;">Générateur Dossier Complet Employé</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Saisie unique → Checklist personnalisée + Documents + Calculs automatiques</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="wizReset()" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;font-family:inherit;">🔄 Réinitialiser</button>
+      <button onclick="wizGenerate()" style="padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(135deg,#C9963A,#A07D3E);color:#060810;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">⚡ Générer le dossier</button>
+    </div>
+  </div>
+
+  <!-- Steps indicator -->
+  <div style="display:flex;align-items:center;padding:14px 24px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.1);overflow-x:auto;gap:0;">
+    <div class="wiz-step-ind active" id="wsi-1" onclick="wizGo(1)" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;cursor:pointer;white-space:nowrap;background:rgba(201,150,58,.15);border:1px solid rgba(201,150,58,.4);">
+      <span style="width:20px;height:20px;border-radius:50%;background:var(--gold);color:#060810;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
+      <span style="font-size:11px;font-weight:600;color:var(--gold);">Identité</span>
+    </div>
+    <div style="width:20px;height:1px;background:var(--border);flex-shrink:0;"></div>
+    <div class="wiz-step-ind" id="wsi-2" onclick="wizGo(2)" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;cursor:pointer;white-space:nowrap;">
+      <span style="width:20px;height:20px;border-radius:50%;background:var(--border);color:var(--muted);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
+      <span style="font-size:11px;color:var(--muted);">Contrat</span>
+    </div>
+    <div style="width:20px;height:1px;background:var(--border);flex-shrink:0;"></div>
+    <div class="wiz-step-ind" id="wsi-3" onclick="wizGo(3)" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;cursor:pointer;white-space:nowrap;">
+      <span style="width:20px;height:20px;border-radius:50%;background:var(--border);color:var(--muted);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
+      <span style="font-size:11px;color:var(--muted);">Avantages</span>
+    </div>
+    <div style="width:20px;height:1px;background:var(--border);flex-shrink:0;"></div>
+    <div class="wiz-step-ind" id="wsi-4" onclick="wizGo(4)" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;cursor:pointer;white-space:nowrap;">
+      <span style="width:20px;height:20px;border-radius:50%;background:var(--border);color:var(--muted);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</span>
+      <span style="font-size:11px;color:var(--muted);">Situation</span>
+    </div>
+    <div style="width:20px;height:1px;background:var(--border);flex-shrink:0;"></div>
+    <div class="wiz-step-ind" id="wsi-5" onclick="wizGo(5)" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;cursor:pointer;white-space:nowrap;">
+      <span style="width:20px;height:20px;border-radius:50%;background:var(--border);color:var(--muted);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</span>
+      <span style="font-size:11px;color:var(--muted);">Dossier ✓</span>
+    </div>
+  </div>
+
+  <!-- STEP 1 : Identité -->
+  <div id="wiz-s1" class="wiz-panel" style="padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
+    <div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Prénom *</label>
+      <input id="w-prenom" type="text" placeholder="Mohamed" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Nom *</label>
+      <input id="w-nom" type="text" placeholder="Ben Youssef" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">NISS (N° national)</label>
+      <input id="w-niss" type="text" placeholder="90.01.01-123-45" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Date naissance</label>
+      <input id="w-dob" type="date" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Nationalité</label>
+      <select id="w-nat" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        <option value="BE">🇧🇪 Belge</option>
+        <option value="EU">🇪🇺 UE (hors BE)</option>
+        <option value="EXTRA">🌍 Hors UE</option>
+      </select>
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Situation familiale</label>
+      <select id="w-sitfam" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        <option value="isole">Isolé(e)</option>
+        <option value="marie">Marié(e) / Cohabitant légal</option>
+        <option value="chef">Chef de famille</option>
+        <option value="divorce">Divorcé(e)</option>
+      </select>
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Nb enfants à charge</label>
+      <input id="w-enfants" type="number" value="0" min="0" max="15" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Région employeur</label>
+      <select id="w-region" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        <option value="BXL">🏙️ Bruxelles-Capitale</option>
+        <option value="WAL">🌿 Wallonie</option>
+        <option value="VL">🔷 Flandre</option>
+      </select>
+    </div>
+    <div style="grid-column:1/-1;display:flex;justify-content:flex-end;margin-top:4px;">
+      <button onclick="wizGo(2)" style="padding:10px 24px;border-radius:8px;border:none;background:var(--gold);color:#060810;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">Suivant → Contrat</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 : Contrat -->
+  <div id="wiz-s2" class="wiz-panel" style="padding:24px;display:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
+    <div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Type de contrat *</label>
+      <select id="w-contrat" onchange="wizContratChange()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        <option value="CDI">CDI — Durée indéterminée</option>
+        <option value="CDD">CDD — Durée déterminée</option>
+        <option value="ETU">Étudiant jobiste (50j)</option>
+        <option value="FLEXI">Flexi-job</option>
+        <option value="REMP">Contrat de remplacement</option>
+        <option value="INT">Via intérim</option>
+      </select>
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Statut</label>
+      <select id="w-statut" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        <option value="EMP">👔 Employé</option>
+        <option value="OUV">🔧 Ouvrier</option>
+        <option value="DIR">🏢 Dirigeant d'entreprise</option>
+      </select>
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Commission paritaire</label>
+      <select id="w-cp" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        <option value="200">CP 200 — Employés (général)</option>
+        <option value="218">CP 218 — Alimentaire</option>
+        <option value="302">CP 302 — Hôtellerie</option>
+        <option value="100">CP 100 — Ouvriers (général)</option>
+        <option value="124">CP 124 — Bâtiment</option>
+        <option value="310">CP 310 — Banques</option>
+        <option value="330">CP 330 — Soins de santé</option>
+        <option value="326">CP 326 — Commerce détail</option>
+        <option value="autre">Autre</option>
+      </select>
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Date d'entrée *</label>
+      <input id="w-debut" type="date" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+    </div>
+    <div id="w-fin-bloc">
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Date de fin (CDD)</label>
+      <input id="w-fin" type="date" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Salaire brut mensuel (€)</label>
+      <input id="w-brut" type="number" placeholder="2800" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Régime de travail</label>
+      <select id="w-regime" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        <option value="100">Temps plein (100%)</option>
+        <option value="80">4/5 (80%)</option>
+        <option value="50">Mi-temps (50%)</option>
+        <option value="autre">Autre fraction</option>
+      </select>
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Motif d'engagement *</label>
+      <select id="w-motif" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        <option value="normal">Engagement normal</option>
+        <option value="1er">1er employé de la société</option>
+        <option value="chomeur">Chômeur longue durée (+1an)</option>
+        <option value="chomeur6">Chômeur (+6 mois)</option>
+        <option value="jeune">Jeune (-26 ans)</option>
+        <option value="senior">Senior (+55 ans)</option>
+        <option value="handicap">Handicap reconnu</option>
+        <option value="article60">Article 60 (CPAS)</option>
+      </select>
+    </div>
+    <div style="grid-column:1/-1;display:flex;justify-content:space-between;margin-top:4px;">
+      <button onclick="wizGo(1)" style="padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;">← Retour</button>
+      <button onclick="wizGo(3)" style="padding:10px 24px;border-radius:8px;border:none;background:var(--gold);color:#060810;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">Suivant → Avantages</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 : Avantages -->
+  <div id="wiz-s3" class="wiz-panel" style="padding:24px;display:none;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px;">
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-cheqrep" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🍽️ Chèques-repas</div><div style="font-size:10px;color:var(--muted);">8€/j — exonéré ONSS+PP</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-voiture" onchange="wizAtnChange()" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🚗 Voiture de société</div><div style="font-size:10px;color:var(--muted);">ATN imposable — pas ONSS</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-gsm" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">📱 GSM société</div><div style="font-size:10px;color:var(--muted);">ATN 12,50€/mois</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-laptop" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">💻 Laptop société</div><div style="font-size:10px;color:var(--muted);">ATN 6€/mois</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-internet" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🌐 Internet domicile</div><div style="font-size:10px;color:var(--muted);">ATN 5€/mois</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-ecocheq" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🌱 Éco-chèques</div><div style="font-size:10px;color:var(--muted);">max 250€/an — exonéré</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-assgrp" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🛡️ Assurance groupe</div><div style="font-size:10px;color:var(--muted);">Pension complémentaire</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-hospit" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🏥 Hospitalisation</div><div style="font-size:10px;color:var(--muted);">Cotis. patronale exonérée</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-teletravail" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🏠 Télétravail structurel</div><div style="font-size:10px;color:var(--muted);">148,73€/m — CCT 149</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-warrant" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">📊 Warrants</div><div style="font-size:10px;color:var(--muted);">Fiscalement avantageux</div></div>
+      </label>
+    </div>
+    <div id="w-voiture-bloc" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:10px;">🚗 Détails voiture de société</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Valeur catalogue (€)</label>
+          <input id="w-car-val" type="number" value="35000" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit;font-size:12px;">
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">CO₂ g/km</label>
+          <input id="w-car-co2" type="number" value="0" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit;font-size:12px;">
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Motorisation</label>
+          <select id="w-car-type" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit;font-size:12px;">
+            <option value="elec">Électrique</option>
+            <option value="essence" selected>Essence/Hybride</option>
+            <option value="diesel">Diesel</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:8px;">
+      <button onclick="wizGo(2)" style="padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;">← Retour</button>
+      <button onclick="wizGo(4)" style="padding:10px 24px;border-radius:8px;border:none;background:var(--gold);color:#060810;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">Suivant → Situation</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 : Situation spéciale -->
+  <div id="wiz-s4" class="wiz-panel" style="padding:24px;display:none;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px;">
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-mitempstherp" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🏥 Mi-temps thérapeutique</div><div style="font-size:10px;color:var(--muted);">Reprise partielle après maladie</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-incapacite" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🤒 Incapacité de travail</div><div style="font-size:10px;color:var(--muted);">Maladie / accident privé</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-accidenttrav" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">⚠️ Accident du travail</div><div style="font-size:10px;color:var(--muted);">Déclaration assureur AT</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-credtemps" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">⏸️ Crédit-temps</div><div style="font-size:10px;color:var(--muted);">Diminution de carrière</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-limosa" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🌍 Travailleur étranger</div><div style="font-size:10px;color:var(--muted);">LIMOSA + permis travail</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-saisie" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">⚖️ Saisie sur salaire</div><div style="font-size:10px;color:var(--muted);">Tiers saisi / délégation</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-maternite" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🤱 Congé maternité/paternité</div><div style="font-size:10px;color:var(--muted);">15 sem. maternité / 20j naissance</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
+        <input type="checkbox" id="w-syndicat" style="accent-color:var(--gold);width:16px;height:16px;">
+        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🔵 Délégué syndical</div><div style="font-size:10px;color:var(--muted);">Protection contre licenciement</div></div>
+      </label>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:8px;">
+      <button onclick="wizGo(3)" style="padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;">← Retour</button>
+      <button onclick="wizGenerate()" style="padding:10px 28px;border-radius:8px;border:none;background:linear-gradient(135deg,#C9963A,#A07D3E);color:#060810;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">⚡ Générer le dossier complet</button>
+    </div>
+  </div>
+
+  <!-- STEP 5 : Résultat -->
+  <div id="wiz-s5" class="wiz-panel" style="padding:24px;display:none;">
+    <div id="wiz-result"></div>
+  </div>
+
+</section>
+
+<script>
+var wizStep = 1;
+
+function wizGo(n) {
+  document.querySelectorAll('.wiz-panel').forEach(function(p,i){ p.style.display = (i===n-1)?'block':'none'; });
+  document.querySelectorAll('.wiz-step-ind').forEach(function(el,i){
+    if(i<n-1){ el.style.background='rgba(74,222,128,.1)'; el.style.border='1px solid rgba(74,222,128,.3)'; el.querySelector('span').style.background='#4ade80'; el.querySelector('span').style.color='#060810'; el.querySelectorAll('span')[1] && (el.querySelectorAll('span')[1].style.color='#4ade80'); }
+    else if(i===n-1){ el.style.background='rgba(201,150,58,.15)'; el.style.border='1px solid rgba(201,150,58,.4)'; el.querySelector('span').style.background='var(--gold)'; el.querySelector('span').style.color='#060810'; }
+    else { el.style.background='transparent'; el.style.border='none'; el.querySelector('span').style.background='var(--border)'; el.querySelector('span').style.color='var(--muted)'; }
+  });
+  // Fix step 1 display
+  if(n===1) document.getElementById('wiz-s1').style.display='grid';
+  wizStep = n;
+  if(n===5) wizGenerate();
+}
+
+function wizContratChange() {
+  var t = document.getElementById('w-contrat').value;
+  document.getElementById('w-fin-bloc').style.display = (t==='CDD'||t==='ETU'||t==='FLEXI'||t==='REMP')?'block':'none';
+}
+
+function wizAtnChange() {
+  document.getElementById('w-voiture-bloc').style.display = document.getElementById('w-voiture').checked ? 'block' : 'none';
+}
+
+function wizReset() {
+  if(!confirm('Réinitialiser le formulaire ?')) return;
+  document.querySelectorAll('#wizard-dossier input, #wizard-dossier select').forEach(function(el){
+    if(el.type==='checkbox') el.checked=false;
+    else if(el.tagName==='SELECT') el.selectedIndex=0;
+    else el.value='';
+  });
+  document.getElementById('w-enfants').value='0';
+  wizGo(1);
+}
+
+function wizGet(id){ return document.getElementById(id); }
+function wizVal(id){ return wizGet(id)?wizGet(id).value:''; }
+function wizChk(id){ return wizGet(id)?wizGet(id).checked:false; }
+
+function wizCalcATNCar() {
+  var val = parseFloat(wizVal('w-car-val'))||35000;
+  var co2 = parseFloat(wizVal('w-car-co2'))||0;
+  var type = wizVal('w-car-type');
+  var taux = type==='elec' ? 4 : Math.min(18, Math.max(4, co2*0.1+5.5));
+  var atnAn = Math.max(1510, val*taux/100*6/7);
+  return {monthly: atnAn/12, annual: atnAn, taux: taux};
+}
+
+function wizCalcNet(brut, atnONSS, atnNoOnss, enfants, sitfam) {
+  var baseONSS = brut + atnONSS;
+  var onss = baseONSS * 0.1307;
+  var baseImp = brut + atnONSS + atnNoOnss - onss;
+  // PP simplifié
+  var pp = 0;
+  if(baseImp > 4500) pp = (baseImp-4500)*0.535 + 1100;
+  else if(baseImp > 3300) pp = (baseImp-3300)*0.45 + 560;
+  else if(baseImp > 2000) pp = (baseImp-2000)*0.35 + 104;
+  else if(baseImp > 1000) pp = (baseImp-1000)*0.104;
+  if(sitfam==='marie') pp = Math.max(0, pp-300);
+  if(enfants>0) pp = Math.max(0, pp - enfants*50);
+  return { onss: onss, pp: Math.max(0,pp), net: brut - onss - Math.max(0,pp) };
+}
+
+function wizGenerate() {
+  var prenom = wizVal('w-prenom')||'Travailleur';
+  var nom = wizVal('w-nom')||'';
+  var niss = wizVal('w-niss')||'—';
+  var nat = wizVal('w-nat');
+  var sitfam = wizVal('w-sitfam');
+  var enfants = parseInt(wizVal('w-enfants'))||0;
+  var region = wizVal('w-region');
+  var contrat = wizVal('w-contrat');
+  var statut = wizVal('w-statut');
+  var cp = wizVal('w-cp');
+  var debut = wizVal('w-debut');
+  var brut = parseFloat(wizVal('w-brut'))||0;
+  var regime = wizVal('w-regime');
+  var motif = wizVal('w-motif');
+
+  // ATN
+  var atnCar = wizChk('w-voiture') ? wizCalcATNCar() : null;
+  var atnForf = (wizChk('w-gsm')?12.5:0) + (wizChk('w-laptop')?6:0) + (wizChk('w-internet')?5:0);
+  var calc = brut > 0 ? wizCalcNet(brut, atnForf, atnCar?atnCar.monthly:0, enfants, sitfam) : null;
+
+  // Primes & réductions
+  var primes = [];
+  if(motif==='1er') primes.push({n:'🎯 Exonération ONSS patronal — 1er employé',d:'Exonération TOTALE et illimitée des cotisations ONSS patronales (env. 5.000€/an d'économie)',u:'ONSS/Dimona → activer lors Dimona IN',urgent:true});
+  if(motif==='1er'&&region==='BXL') primes.push({n:'🏙️ Activa.brussels — AP (Allocation de Promotion)',d:'350€/mois pendant 12 mois → 800€/mois mois 13-24 → 350€/mois mois 25-30 (30 mois total)',u:'Bruxelles Économie & Emploi — dossier dans 3 mois',urgent:true});
+  if(region==='BXL'&&(motif==='chomeur'||motif==='chomeur6'||motif==='jeune')) primes.push({n:'🏙️ Activa.brussels — chômeur',d:'Réduction ONSS patronal + allocation selon profil. Vérifier éligibilité sur actiris.brussels',u:'Actiris.brussels',urgent:false});
+  if(region==='BXL') primes.push({n:'💰 MonBEE — Prime recrutement',d:'Jusqu'à 10.000€ prime unique pour recrutement via MonBEE. Deadline : dans les 3 mois de l'engagement',u:'monbee.brussels — À faire AVANT le 3e mois !',urgent:true});
+  if(motif==='jeune') primes.push({n:'🧑 Réduction jeunes travailleurs ONSS',d:'Réduction cotisations ONSS pour -26 ans en 1ère embauche. Automatique via DmfA.',u:'Automatique via ONSS',urgent:false});
+  if(motif==='senior') primes.push({n:'👴 Activa.brussels Senior (+55 ans)',d:'Réduction ONSS patronal majorée pour travailleur +55 ans.',u:'Actiris',urgent:false});
+  if(motif==='article60') primes.push({n:'🏛️ Article 60 §7 CPAS',d:'Remboursement intégral salaire + cotisations par le CPAS. Convention obligatoire.',u:'CPAS communal',urgent:true});
+  if(contrat==='ETU') primes.push({n:'🎓 Cotisation solidarité étudiant 5,42%',d:'Au lieu des 13,07% ONSS normal. Valable 50j/an (475h). Quota annuel à surveiller !',u:'student@work.be — vérifier quota',urgent:true});
+  if(region==='WAL') primes.push({n:'🌿 Impulsion (Wallonie)',d:'Réduction groupe cible pour engagements en Wallonie. Vérifier sur leforem.be',u:'Le Forem',urgent:false});
+
+  // Documents obligatoires
+  var docs = [
+    {cat:'📋 AVANT LE 1ER JOUR', items:[
+      {d:'✅ DIMONA IN', detail:'Déclaration électronique ONSS OBLIGATOIRE avant début prestations — Amende 4.000€ si oubli', urgent:true},
+      {d:'✅ Contrat de travail signé', detail: contrat==='CDI'?'CDI — pas de date de fin, signature des 2 parties':'CDD — motif précis obligatoire + date de fin ('+wizVal('w-fin')+')', urgent:true},
+      {d:'✅ Règlement de travail', detail:'Remise contre accusé de réception — obligatoire J1'},
+      {d:'✅ Fiche fiscale vierge', detail:'Fiche de renseignements PP (situation familiale, enfants à charge) → impacte calcul précompte'},
+      {d:'✅ Compte individuel — ouverture', detail:'À créer dans le logiciel de paie dès le 1er mois'},
+    ]},
+    {cat:'📄 DOCUMENTS IDENTITÉ', items:[
+      {d:'✅ Copie carte d'identité / passeport', detail:'Conservation obligatoire (RGPD — avec base légale contrat)'},
+      {d:'✅ NISS vérifié', detail:'N° national : '+niss},
+      {d:'✅ Coordonnées bancaires (IBAN)', detail:'Pour virement salaire — obligatoire en Belgique'},
+      {d:'✅ Composition de ménage', detail:'Pour calcul PP et allocations familiales'},
+    ]},
+  ];
+
+  if(nat==='EU'||nat==='EXTRA') docs[1].items.push({d:'⚠️ Titre de séjour valide', detail:'Vérifier validité — photocopie à conserver', urgent:nat==='EXTRA'});
+  if(nat==='EXTRA') docs[1].items.push({d:'🌍 LIMOSA + Permis de travail B', detail:'Obligatoire pour ressortissant hors UE — demande AVANT engagement', urgent:true});
+
+  if(wizChk('w-cheqrep')) docs.push({cat:'🍽️ CHÈQUES-REPAS', items:[
+    {d:'✅ Convention collective ou accord individuel', detail:'Obligatoire — précise montant patron (6,91€) + travailleur (1,09€)', urgent:true},
+    {d:'✅ Compte Sodexo / Edenred / Monizze', detail:'Ouverture compte prépayé — uniquement via émetteur agréé'},
+    {d:'✅ Suivi jours effectivement prestés', detail:'1 chèque = 1 jour presté uniquement — pas les absences !'},
+  ]});
+
+  if(wizChk('w-voiture')) docs.push({cat:'🚗 VOITURE DE SOCIÉTÉ', items:[
+    {d:'✅ Politique voiture (Car Policy)', detail:'Document écrit décrivant utilisation pro/privé, entretien, carburant', urgent:true},
+    {d:'✅ Calcul ATN mensuel', detail:atnCar?'ATN = '+atnCar.monthly.toFixed(2)+'€/mois ('+atnCar.taux.toFixed(1)+'% × val. catalogue)':'À calculer selon formule SPF Finances'},
+    {d:'✅ Mention ATN sur fiche de paie', detail:'Obligatoire chaque mois — base imposable PP'},
+    {d:'✅ Déclaration ATN fiche 281.10', detail:'Annuel — Belcotax XML avant 28 février N+1'},
+  ]});
+
+  if(wizChk('w-teletravail')) docs.push({cat:'🏠 TÉLÉTRAVAIL STRUCTUREL', items:[
+    {d:'✅ Accord télétravail écrit (CCT 149)', detail:'Obligatoire — précise jours, matériel, connexion, heures joignabilité'},
+    {d:'✅ Indemnité télétravail', detail:'148,73€/mois exonérée ONSS+PP (si télétravail ≥ 1j/semaine)'},
+    {d:'✅ Attestation ONSS télétravail', detail:'Si travailleur frontalier — attestation A1'},
+  ]});
+
+  if(wizChk('w-mitempstherp')) docs.push({cat:'🏥 MI-TEMPS THÉRAPEUTIQUE', items:[
+    {d:'⚠️ Autorisation médecin-conseil mutuelle', detail:'OBLIGATOIRE avant reprise — sans autorisation = pas de couverture', urgent:true},
+    {d:'⚠️ Accord employeur écrit', detail:'Accord formel pour le régime de reprise partielle', urgent:true},
+    {d:'✅ Attestation de reprise partielle', detail:'Envoi à la mutuelle dans les 48h de la reprise'},
+    {d:'✅ Fiche de paie adaptée', detail:'Salaire employeur (partie prestée) + indemnité mutuelle (partie non-prestée)'},
+    {d:'✅ Suivi médecin du travail', detail:'Visite de reprise obligatoire après +4 semaines d'absence'},
+    {d:'ℹ️ Durée maximale', detail:'Mi-temps thérapeutique = max 1 an — prolongeable sur avis médecin-conseil'},
+  ]});
+
+  if(wizChk('w-incapacite')) docs.push({cat:'🤒 INCAPACITÉ DE TRAVAIL', items:[
+    {d:'✅ Certificat médical J1 ou J2', detail:'À envoyer dans 48h à l'employeur ET à la mutuelle'},
+    {d:'✅ Salaire garanti employeur', detail:statut==='OUV'?'Ouvrier : 7 jours à 100% + 7 jours à 85,88%':'Employé : 30 jours à 100% (1 mois de salaire garanti)'},
+    {d:'✅ Déclaration mutuelle', detail:'Après salaire garanti → mutuelle prend en charge (60% du salaire plafonné)'},
+    {d:'✅ Contrôle médical patronal', detail:'Employeur peut envoyer médecin-contrôle chez travailleur'},
+  ]});
+
+  if(wizChk('w-accidenttrav')) docs.push({cat:'⚠️ ACCIDENT DU TRAVAIL', items:[
+    {d:'🚨 Déclaration assureur AT dans 8 jours', detail:'DÉLAI LÉGAL STRICT — déclaration écrite à l'assureur accidents du travail', urgent:true},
+    {d:'🚨 Déclaration interne registre AT', detail:'Registre accidents du travail à tenir obligatoirement'},
+    {d:'✅ Certificat médical initial', detail:'Médecin remplit formulaire spécifique accident du travail'},
+    {d:'✅ PV circonstancié', detail:'Description détaillée des circonstances — témoins'},
+  ]});
+
+  if(wizChk('w-limosa')) docs.push({cat:'🌍 TRAVAILLEUR ÉTRANGER', items:[
+    {d:'⚠️ Déclaration LIMOSA', detail:'Obligatoire avant 1er jour — via limosa.be', urgent:true},
+    {d:'⚠️ Permis de travail B', detail:'Hors UE — demande à la Région AVANT engagement', urgent:nat==='EXTRA'},
+    {d:'✅ Formulaire A1 (UE)', detail:'Détachement UE — attestation sécurité sociale pays d'origine'},
+  ]});
+
+  // Calcul paie
+  var paySection = '';
+  if(calc && brut > 0) {
+    var atnTotal = (atnCar?atnCar.monthly:0) + atnForf;
+    paySection = '<div style="background:rgba(201,150,58,.08);border:1px solid rgba(201,150,58,.25);border-radius:10px;padding:18px;margin-bottom:18px;">'
+      +'<div style="font-size:14px;font-weight:700;color:var(--gold);margin-bottom:14px;">💶 Simulation paie mensuelle — '+prenom+' '+nom+'</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">'
+      +'<div style="text-align:center;padding:10px;background:var(--bg2);border-radius:8px;"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;">Brut</div><div style="font-size:20px;font-weight:700;color:var(--text);">€'+brut.toFixed(0)+'</div></div>'
+      +(atnTotal>0?'<div style="text-align:center;padding:10px;background:var(--bg2);border-radius:8px;"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;">ATN total</div><div style="font-size:20px;font-weight:700;color:var(--gold);">€'+atnTotal.toFixed(2)+'</div></div>':'')
+      +'<div style="text-align:center;padding:10px;background:var(--bg2);border-radius:8px;"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;">ONSS trav.</div><div style="font-size:20px;font-weight:700;color:var(--urgent);">-€'+calc.onss.toFixed(0)+'</div></div>'
+      +'<div style="text-align:center;padding:10px;background:var(--bg2);border-radius:8px;"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;">PP estimé</div><div style="font-size:20px;font-weight:700;color:var(--urgent);">-€'+calc.pp.toFixed(0)+'</div></div>'
+      +'<div style="text-align:center;padding:10px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);border-radius:8px;"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;">NET estimé</div><div style="font-size:20px;font-weight:700;color:#4ade80;">€'+calc.net.toFixed(0)+'</div></div>'
+      +'</div>'
+      +(primes.length>0?'<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--text);">Coût employeur brut : <strong style="color:var(--gold)">€'+((brut*1.27)+32).toFixed(0)+'</strong>/mois → après primes estimé : <strong style="color:#4ade80">€'+(((brut*1.27)+32)-(primes.reduce(function(a,p){return a+(p.n.includes('Activa')?350:p.n.includes('MonBEE')?83:p.n.includes('1er employé')?500:0)},0))).toFixed(0)+'</strong>/mois</div>':'')
+      +'</div>';
+  }
+
+  // Primes section HTML
+  var primesHtml = '';
+  if(primes.length > 0) {
+    primesHtml = '<div style="margin-bottom:18px;">'
+      +'<div style="font-size:14px;font-weight:700;color:#4ade80;margin-bottom:12px;">🎯 Primes & Réductions applicables ('+primes.length+')</div>';
+    primes.forEach(function(p){
+      primesHtml += '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:8px;border:1px solid '+(p.urgent?'rgba(74,222,128,.3)':'var(--border)')+';background:'+(p.urgent?'rgba(74,222,128,.05)':'var(--bg)')+';margin-bottom:8px;">'
+        +'<div style="flex:1;">'
+        +'<div style="font-size:12px;font-weight:700;color:'+(p.urgent?'#4ade80':'var(--text)')+'">'+p.n+'</div>'
+        +'<div style="font-size:11px;color:var(--muted);margin-top:3px;">'+p.d+'</div>'
+        +'<div style="font-size:10px;color:var(--gold);margin-top:4px;">→ '+p.u+'</div>'
+        +'</div>'
+        +(p.urgent?'<span style="font-size:9px;padding:3px 8px;border-radius:10px;background:rgba(74,222,128,.15);color:#4ade80;white-space:nowrap;font-weight:700;align-self:flex-start;">À FAIRE</span>':'')
+        +'</div>';
+    });
+    primesHtml += '</div>';
+  }
+
+  // Docs section HTML
+  var docsHtml = '<div style="margin-bottom:18px;">'
+    +'<div style="font-size:14px;font-weight:700;color:var(--gold);margin-bottom:12px;">📂 Checklist documents — '+prenom+' '+nom+'</div>';
+  docs.forEach(function(section){
+    docsHtml += '<div style="margin-bottom:14px;">'
+      +'<div style="font-size:11px;font-weight:700;color:var(--gold);padding:6px 10px;background:rgba(201,150,58,.1);border-radius:6px;margin-bottom:8px;">'+section.cat+'</div>';
+    section.items.forEach(function(item){
+      docsHtml += '<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:6px;border-left:3px solid '+(item.urgent?'var(--urgent)':'var(--border)')+';margin-bottom:4px;background:var(--bg);">'
+        +'<input type="checkbox" style="accent-color:var(--gold);margin-top:2px;flex-shrink:0;">'
+        +'<div><div style="font-size:12px;color:var(--text);">'+item.d+'</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">'+item.detail+'</div></div>'
+        +'</div>';
+    });
+    docsHtml += '</div>';
+  });
+  docsHtml += '</div>';
+
+  var html = '<div>'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">'
+    +'<div><div style="font-size:20px;font-weight:800;color:var(--gold);">Dossier : '+prenom+' '+nom+'</div>'
+    +'<div style="font-size:12px;color:var(--muted);">'+(['CDI','CDD','ETU','FLEXI','REMP','INT'][['CDI','CDD','ETU','FLEXI','REMP','INT'].indexOf(contrat)]||contrat)+' · CP '+cp+' · Entrée '+debut+' · '+(brut?'Brut €'+brut+'/m':'Salaire non renseigné')+'</div></div>'
+    +'<button onclick="window.print()" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:11px;cursor:pointer;font-family:inherit;">🖨️ Imprimer</button>'
+    +'</div>'
+    + paySection
+    + primesHtml
+    + docsHtml
+    +'</div>';
+
+  document.getElementById('wiz-result').innerHTML = html;
+  wizGo(5);
+}
+</script>
+
+
 <!-- ═══════════════════════════════════ CALCULATEURS -->
 <section class="phase phase-monthly" id="phase-calculateurs">
   <div class="phase-header">
