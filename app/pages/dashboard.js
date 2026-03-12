@@ -1,4 +1,11 @@
 'use client';
+
+  // Theme colors — mode jour/nuit
+  const TH = th || {
+    text: '#e8e6e0', text2: '#9e9b93', text3: '#5e5c56',
+    bg: '#0a0908', bg2: '#111009', surface: 'rgba(255,255,255,.03)',
+    border: 'rgba(198,163,78,.08)',
+  };
 import { useLang } from '../lib/lang-context';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { B, C, DPER, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, generatePayslipPDF, getAlertes, quickNet, quickPP, generateSEPAXML, generateDmfAXML } from '@/app/lib/helpers';
@@ -107,8 +114,8 @@ function Dashboard({s,d}) {
   return <div>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:24}}>
       <div>
-        <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:28,fontWeight:700,color:'#e8e6e0',margin:0}}>{'Tableau de bord'}</h1>
-        <div style={{fontSize:12.5,color:'#8b7340',marginTop:4}}>{MN[curMonth]} {curYear} — {s.co.name||'—'} {s.co.vat?`· ${s.co.vat}`:''}</div>
+        <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:28,fontWeight:700,color:TH.text,margin:0}}>{'Tableau de bord'}</h1>
+        <div style={{fontSize:12.5,color:TH.text2,marginTop:4}}>{MN[curMonth]} {curYear} — {s.co.name||'—'} {s.co.vat?`· ${s.co.vat}`:''}</div>
       </div>
       {urgentCount>0&&<div style={{padding:'8px 16px',background:"rgba(248,113,113,.08)",border:'1px solid rgba(248,113,113,.2)',borderRadius:10,display:'flex',alignItems:'center',gap:8,animation:'pulse 2s infinite'}}>
         <span style={{width:8,height:8,borderRadius:'50%',background:"#ef4444",display:'inline-block',animation:'blink 1.5s infinite'}}/>
@@ -122,7 +129,7 @@ function Dashboard({s,d}) {
     <div style={{marginBottom:20,padding:16,background:'linear-gradient(135deg,rgba(198,163,78,.06),rgba(198,163,78,.02))',border:'1px solid rgba(198,163,78,.15)',borderRadius:12,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
       <div style={{display:'flex',alignItems:'center',gap:10}}>
         <span style={{fontSize:18}}>⚡</span>
-        <div><div style={{fontSize:13,fontWeight:600,color:'#c6a34e'}}>{'Automatisation'}</div><div style={{fontSize:10,color:'#888'}}>{'Actions rapides'}</div></div>
+        <div><div style={{fontSize:13,fontWeight:600,color:'#c6a34e'}}>{'Automatisation'}</div><div style={{fontSize:10,color:TH.text3}}>{'Actions rapides'}</div></div>
       </div>
       <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
         <button onClick={()=>{if(confirm('Générer toutes les fiches de paie ?')){(s?.emps||[]).forEach(e=>generatePayslipPDF(e,s.co));alert((s?.emps||[]).length+' fiches de paie générées')}}} style={{padding:'7px 14px',borderRadius:8,border:'none',background:'rgba(198,163,78,.15)',color:'#c6a34e',fontSize:11,cursor:'pointer',fontWeight:600}}>📄 Fiches</button>
@@ -247,7 +254,7 @@ function Dashboard({s,d}) {
               <span style={{fontSize:20}}>🗺️</span>
               <div>
                 <div style={{fontSize:14,fontWeight:700,color:'#c6a34e'}}>Flux Guidé — Déclarer un travailleur de A à Z</div>
-                <div style={{fontSize:10,color:'#888',marginTop:2}}>5 phases · 14 étapes · Dimona · Chèques-repas · Belcotax · Tout dans l'ordre</div>
+                <div style={{fontSize:10,color:TH.text3,marginTop:2}}>5 phases · 14 étapes · Dimona · Chèques-repas · Belcotax · Tout dans l'ordre</div>
               </div>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:10}}>
@@ -261,9 +268,9 @@ function Dashboard({s,d}) {
               {/* Chèques-repas encart rapide */}
               <div style={{margin:'12px 16px 0',padding:'10px 14px',background:'rgba(34,197,94,.04)',border:'1px solid rgba(34,197,94,.12)',borderRadius:10,display:'flex',alignItems:'center',gap:16,flexWrap:'wrap'}}>
                 <span style={{fontSize:16}}>🍽️</span>
-                <div style={{fontSize:11,color:'#94a3b8'}}>
+                <div style={{fontSize:11,color:TH.text2}}>
                   <span style={{color:'#4ade80',fontWeight:700}}>Chèques-repas 2026</span>
-                  {' '}— Valeur faciale max <strong style={{color:'#e8e6e0'}}>{crInfo.valeur}€</strong> · Employeur max <strong style={{color:'#e8e6e0'}}>{crInfo.patron}€</strong> (exonéré ONSS+impôts) · Travailleur min <strong style={{color:'#e8e6e0'}}>{crInfo.travailleur}€</strong> · <span style={{color:'#f97316'}}>1 chèque par jour effectivement presté uniquement</span> · Via émetteur agréé (Sodexo · Edenred · Monizze) · Obligatoire par CCT ou contrat
+                  {' '}— Valeur faciale max <strong style={{color:TH.text}}>{crInfo.valeur}€</strong> · Employeur max <strong style={{color:TH.text}}>{crInfo.patron}€</strong> (exonéré ONSS+impôts) · Travailleur min <strong style={{color:TH.text}}>{crInfo.travailleur}€</strong> · <span style={{color:'#f97316'}}>1 chèque par jour effectivement presté uniquement</span> · Via émetteur agréé (Sodexo · Edenred · Monizze) · Obligatoire par CCT ou contrat
                 </div>
                 <button onClick={()=>d({type:'NAV',page:'proceduresrh',sub:'cheques_repas'})} style={{padding:'5px 12px',borderRadius:7,border:'1px solid rgba(34,197,94,.2)',background:'transparent',color:'#4ade80',fontSize:10,cursor:'pointer',fontWeight:600,whiteSpace:'nowrap'}}>Voir procédure →</button>
               </div>
@@ -275,7 +282,7 @@ function Dashboard({s,d}) {
                   <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8,padding:'6px 12px',background:`${ph.color}10`,borderRadius:8,border:`1px solid ${ph.color}20`}}>
                     <span style={{fontSize:14}}>{ph.icon}</span>
                     <span style={{fontSize:11,fontWeight:700,color:ph.color,letterSpacing:'1px'}}>{ph.label}</span>
-                    <span style={{fontSize:10,color:'#888',marginLeft:4}}>— {ph.sub}</span>
+                    <span style={{fontSize:10,color:TH.text3,marginLeft:4}}>— {ph.sub}</span>
                   </div>
                   {/* Steps grid */}
                   <div style={{display:'grid',gridTemplateColumns:`repeat(${Math.min(ph.steps.length,4)},1fr)`,gap:8}}>
@@ -294,8 +301,8 @@ function Dashboard({s,d}) {
                           </div>
                           <span style={{fontSize:8,padding:'2px 6px',borderRadius:5,background:`${st.badgeColor}18`,color:st.badgeColor,fontWeight:700,whiteSpace:'nowrap'}}>{st.badge}</span>
                         </div>
-                        <div style={{fontSize:12,fontWeight:600,color:'#e8e6e0',marginBottom:5,lineHeight:1.3}}>{st.title}</div>
-                        <div style={{fontSize:10,color:'#888',lineHeight:1.5}}>{st.detail}</div>
+                        <div style={{fontSize:12,fontWeight:600,color:TH.text,marginBottom:5,lineHeight:1.3}}>{st.title}</div>
+                        <div style={{fontSize:10,color:TH.text3,lineHeight:1.5}}>{st.detail}</div>
                         <div style={{marginTop:8,fontSize:9,color:ph.color,fontWeight:600}}>Ouvrir →</div>
                       </div>
                     ))}
@@ -305,11 +312,11 @@ function Dashboard({s,d}) {
 
               {/* Légende bas */}
               <div style={{margin:'14px 16px 0',display:'flex',gap:16,flexWrap:'wrap'}}>
-                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:'#888'}}><span style={{width:10,height:10,borderRadius:2,background:'rgba(239,68,68,.3)',display:'inline-block'}}/> Étape urgente / délai légal strict</div>
-                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:'#888'}}><span style={{width:10,height:10,borderRadius:2,background:'rgba(96,165,250,.2)',display:'inline-block'}}/> Avant l'entrée en service</div>
-                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:'#888'}}><span style={{width:10,height:10,borderRadius:2,background:'rgba(198,163,78,.2)',display:'inline-block'}}/> Mensuel</div>
-                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:'#888'}}><span style={{width:10,height:10,borderRadius:2,background:'rgba(167,139,250,.2)',display:'inline-block'}}/> Trimestriel</div>
-                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:'#888'}}><span style={{width:10,height:10,borderRadius:2,background:'rgba(74,222,128,.2)',display:'inline-block'}}/> Annuel</div>
+                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:TH.text3}}><span style={{width:10,height:10,borderRadius:2,background:'rgba(239,68,68,.3)',display:'inline-block'}}/> Étape urgente / délai légal strict</div>
+                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:TH.text3}}><span style={{width:10,height:10,borderRadius:2,background:'rgba(96,165,250,.2)',display:'inline-block'}}/> Avant l'entrée en service</div>
+                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:TH.text3}}><span style={{width:10,height:10,borderRadius:2,background:'rgba(198,163,78,.2)',display:'inline-block'}}/> Mensuel</div>
+                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:TH.text3}}><span style={{width:10,height:10,borderRadius:2,background:'rgba(167,139,250,.2)',display:'inline-block'}}/> Trimestriel</div>
+                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:10,color:TH.text3}}><span style={{width:10,height:10,borderRadius:2,background:'rgba(74,222,128,.2)',display:'inline-block'}}/> Annuel</div>
               </div>
             </div>
           )}
@@ -328,9 +335,9 @@ function Dashboard({s,d}) {
       ].map((kpi,i)=>
         <div key={i} style={{background:"linear-gradient(145deg,#0e1220,#131829)",border:'1px solid rgba(139,115,60,.12)',borderRadius:14,padding:'20px 18px',position:'relative',overflow:'hidden',animation:`fadeIn .4s ease ${i*0.08}s both`}}>
           <div style={{position:'absolute',top:12,right:14,fontSize:22,opacity:.08,color:kpi.color}}>{kpi.icon}</div>
-          <div style={{fontSize:10,color:'#5e5c56',marginBottom:8,textTransform:'uppercase',letterSpacing:'1.2px',fontWeight:600}}>{kpi.label}</div>
+          <div style={{fontSize:10,color:TH.text3,marginBottom:8,textTransform:'uppercase',letterSpacing:'1.2px',fontWeight:600}}>{kpi.label}</div>
           <div style={{fontSize:24,fontWeight:700,color:kpi.color,animation:'countUp .5s ease'}}>{kpi.value}</div>
-          {kpi.sub&&<div style={{fontSize:10,color:'#5e5c56',marginTop:5}}>{kpi.sub}</div>}
+          {kpi.sub&&<div style={{fontSize:10,color:TH.text3,marginTop:5}}>{kpi.sub}</div>}
         </div>
       )}
     </div>
@@ -340,10 +347,10 @@ function Dashboard({s,d}) {
       {/* 12-MONTH CHART */}
       <C style={{padding:'22px 24px'}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:18}}>
-          <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>{'Évolution coût salarial — 12 mois'}</div>
+          <div style={{fontSize:13,fontWeight:600,color:TH.text}}>{'Évolution coût salarial — 12 mois'}</div>
           <div style={{display:'flex',gap:14}}>
             {[{l:'Coût total',c:'#a78bfa'},{l:'Masse brute',c:'#c6a34e'},{l:'Net',c:'#4ade80'}].map(x=>
-              <div key={x.l} style={{display:'flex',alignItems:'center',gap:5,fontSize:10,color:'#5e5c56'}}>
+              <div key={x.l} style={{display:'flex',alignItems:'center',gap:5,fontSize:10,color:TH.text3}}>
                 <span style={{width:8,height:3,borderRadius:2,background:x.c,display:'inline-block'}}/>{x.l}
               </div>
             )}
@@ -355,7 +362,7 @@ function Dashboard({s,d}) {
             const hMass=Math.round((m.mass/maxChart)*150);
             const hNet=Math.round((m.net/maxChart)*150);
             return <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
-              <div style={{fontSize:9,color:'#5e5c56',fontWeight:500}}>{fmt(m.cost).replace(/\s€/,"")}</div>
+              <div style={{fontSize:9,color:TH.text3,fontWeight:500}}>{fmt(m.cost).replace(/\s€/,"")}</div>
               <div style={{width:'100%',position:'relative',height:155,display:'flex',alignItems:'flex-end',justifyContent:'center',gap:2}}>
                 <div style={{width:'30%',height:Math.max(hCost,2),background:"linear-gradient(180deg,#a78bfa,#7c3aed)",borderRadius:'3px 3px 0 0',transition:'height .5s ease',animation:`fadeIn .3s ease ${i*0.05}s both`}}/>
                 <div style={{width:'30%',height:Math.max(hMass,2),background:"linear-gradient(180deg,#c6a34e,#a68a3c)",borderRadius:'3px 3px 0 0',transition:'height .5s ease',animation:`fadeIn .3s ease ${i*0.05+0.1}s both`}}/>
@@ -369,7 +376,7 @@ function Dashboard({s,d}) {
 
       {/* DEADLINES */}
       <C style={{padding:'22px 20px'}}>
-        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0',marginBottom:16,display:'flex',alignItems:'center',gap:8}}>
+        <div style={{fontSize:13,fontWeight:600,color:TH.text,marginBottom:16,display:'flex',alignItems:'center',gap:8}}>
           Échéances & Obligations
           {urgentCount>0&&<span style={{fontSize:10,padding:'2px 8px',borderRadius:10,background:"rgba(248,113,113,.12)",color:'#f87171',fontWeight:700}}>{urgentCount}</span>}
         </div>
@@ -379,7 +386,7 @@ function Dashboard({s,d}) {
               <span style={{fontSize:16,opacity:.4}}>{dl.icon}</span>
               <div style={{flex:1}}>
                 <div style={{fontSize:12,color:dl.urgent?'#f87171':'#d4d0c8',fontWeight:dl.urgent?600:400}}>{dl.l}</div>
-                <div style={{fontSize:10,color:'#5e5c56',marginTop:2}}>{dl.d}</div>
+                <div style={{fontSize:10,color:TH.text3,marginTop:2}}>{dl.d}</div>
               </div>
               {dl.days!==null&&<div style={{textAlign:'right'}}>
                 <div style={{fontSize:14,fontWeight:700,color:dl.urgent?'#ef4444':dl.days<=30?'#fb923c':'#4ade80'}}>{dl.days}j</div>
@@ -398,9 +405,9 @@ function Dashboard({s,d}) {
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
         <div style={{display:'flex',alignItems:'center',gap:10}}>
           <span style={{fontSize:11,padding:'3px 10px',borderRadius:6,background:'linear-gradient(135deg,#c6a34e,#a68a3c)',color:'#060810',fontWeight:700}}>{AUREUS_INFO.version}</span>
-          <span style={{fontSize:12,fontWeight:600,color:'#e8e6e0'}}>Aureus Social Pro — {AUREUS_INFO.sprint}</span>
+          <span style={{fontSize:12,fontWeight:600,color:TH.text}}>Aureus Social Pro — {AUREUS_INFO.sprint}</span>
         </div>
-        <span style={{fontSize:10,color:'#5e5c56'}}>Dernière mise à jour: {new Date().toLocaleDateString('fr-BE')}</span>
+        <span style={{fontSize:10,color:TH.text3}}>Dernière mise à jour: {new Date().toLocaleDateString('fr-BE')}</span>
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
         {[
@@ -412,12 +419,12 @@ function Dashboard({s,d}) {
           {v:'v32',title:'Sprint 4',items:['⚡ Batch Processing','🔔 Alertes intelligentes','🔐 2FA (TOTP)','📡 DmfA améliorée'],color:'#a78bfa'},
           {v:'v31',title:'Sprint 3',items:['⚡ Workflow Embauche','⚡ Workflow Licenciement','⚡ Workflow Maladie','📂 Export 11 formats + ClearFact'],color:'#60a5fa'},
           {v:'v30',title:'Sprint 2',items:['📥 Import Excel','💰 ROI Calculator','🔒 Validation NISS/IBAN','🧠 153 CP pré-remplissage'],color:'#4ade80'},
-        ].map((sp,i)=><div key={i} style={{padding:12,borderRadius:10,background:'rgba(198,163,78,.02)',border:'1px solid rgba(198,163,78,.08)'}}>
+        ].map((sp,i)=><div key={i} style={{padding:12,borderRadius:10,background:TH.surface,border:`1px solid ${TH.border}`}}>
           <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:6}}>
             <span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:`${sp.color}22`,color:sp.color,fontWeight:700}}>{sp.v}</span>
-            <span style={{fontSize:11,fontWeight:600,color:'#e8e6e0'}}>{sp.title}</span>
+            <span style={{fontSize:11,fontWeight:600,color:TH.text}}>{sp.title}</span>
           </div>
-          {sp.items.map((it,j)=><div key={j} style={{fontSize:10,color:'#9e9b93',padding:'2px 0'}}>{it}</div>)}
+          {sp.items.map((it,j)=><div key={j} style={{fontSize:10,color:TH.text2,padding:'2px 0'}}>{it}</div>)}
         </div>)}
       </div>
     </C>
@@ -425,7 +432,7 @@ function Dashboard({s,d}) {
     {/* BOTTOM ROW: Alerts + Actions + Employees + Dept breakdown */}
     {alerts.length>0&&<C style={{marginBottom:16,border:'1px solid '+(alerts.some(a=>a.type==='error')?'rgba(248,113,113,.2)':'rgba(251,146,60,.15)')}}>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
-        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>🔔 Alertes intelligentes ({alerts.length})</div>
+        <div style={{fontSize:13,fontWeight:600,color:TH.text}}>🔔 Alertes intelligentes ({alerts.length})</div>
         <div style={{display:'flex',gap:8}}>
           <span style={{fontSize:10,padding:'2px 8px',borderRadius:10,background:'rgba(248,113,113,.1)',color:'#f87171'}}>{alerts.filter(a=>a.type==='error').length} critiques</span>
           <span style={{fontSize:10,padding:'2px 8px',borderRadius:10,background:'rgba(251,146,60,.1)',color:'#fb923c'}}>{alerts.filter(a=>a.type==='warning').length} avertissements</span>
@@ -436,14 +443,14 @@ function Dashboard({s,d}) {
         {alerts.map((a,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'8px 12px',borderRadius:8,background:a.type==='error'?'rgba(248,113,113,.04)':a.type==='warning'?'rgba(251,146,60,.04)':'rgba(96,165,250,.04)',border:'1px solid '+(a.type==='error'?'rgba(248,113,113,.1)':a.type==='warning'?'rgba(251,146,60,.1)':'rgba(96,165,250,.1)')}}>
           <span style={{fontSize:14}}>{a.icon}</span>
           <span style={{flex:1,fontSize:11.5,color:a.type==='error'?'#f87171':a.type==='warning'?'#fb923c':'#60a5fa'}}>{a.msg}</span>
-          <span style={{fontSize:9,padding:'2px 6px',borderRadius:4,background:'rgba(198,163,78,.06)',color:'#5e5c56'}}>{a.cat}</span>
+          <span style={{fontSize:9,padding:'2px 6px',borderRadius:4,background:TH.surface,color:TH.text3}}>{a.cat}</span>
         </div>)}
       </div>
     </C>}
     <div style={{display:'grid',gridTemplateColumns:'260px 1fr 300px',gap:14}}>
       {/* QUICK ACTIONS */}
       <C style={{padding:'20px 18px'}}>
-        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0',marginBottom:14}}>{'Actions rapides'}</div>
+        <div style={{fontSize:13,fontWeight:600,color:TH.text,marginBottom:14}}>{'Actions rapides'}</div>
         {[
           {l:"+ Nouvel employé",p:'employees',i:'◉',c:'#4ade80'},
           {l:'Générer fiche de paie',p:'payslip',i:'◈',c:'#60a5fa'},
@@ -452,7 +459,7 @@ function Dashboard({s,d}) {
           {l:'Belcotax 281.10',p:'fiscal',sb:'belcotax',i:'◇',c:'#fb923c'},
           {l:'Virement SEPA',p:'reporting',sb:'sepa',i:'▤',c:'#06b6d4'},
         ].map((a,i)=>
-          <button key={i} onClick={()=>d({type:"NAV",page:a.p,sub:a.sb})} style={{display:'flex',alignItems:'center',gap:10,width:'100%',padding:'10px 12px',marginBottom:4,background:"rgba(198,163,78,.03)",border:'1px solid rgba(198,163,78,.06)',borderRadius:8,color:'#d4d0c8',cursor:'pointer',fontSize:12,fontWeight:500,textAlign:'left',fontFamily:'inherit',transition:'all .15s'}}
+          <button key={i} onClick={()=>d({type:"NAV",page:a.p,sub:a.sb})} style={{display:'flex',alignItems:'center',gap:10,width:'100%',padding:'10px 12px',marginBottom:4,background:"rgba(198,163,78,.03)",border:'1px solid rgba(198,163,78,.06)',borderRadius:8,color:TH.text,cursor:'pointer',fontSize:12,fontWeight:500,textAlign:'left',fontFamily:'inherit',transition:'all .15s'}}
             onMouseEnter={e=>{e.currentTarget.style.background='rgba(198,163,78,.08)';e.currentTarget.style.borderColor='rgba(198,163,78,.2)';}}
             onMouseLeave={e=>{e.currentTarget.style.background='rgba(198,163,78,.03)';e.currentTarget.style.borderColor='rgba(198,163,78,.06)';}}>
             <span style={{fontSize:14,color:a.c,opacity:.7}}>{a.i}</span>{a.l}
@@ -463,7 +470,7 @@ function Dashboard({s,d}) {
       {/* EMPLOYEES LIST */}
       <C style={{padding:'20px 18px',maxHeight:340,overflowY:'auto'}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
-          <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>Équipe ({ae.length})</div>
+          <div style={{fontSize:13,fontWeight:600,color:TH.text}}>Équipe ({ae.length})</div>
           <button onClick={()=>d({type:"NAV",page:'employees'})} style={{fontSize:10,color:'#c6a34e',background:"none",border:'none',cursor:'pointer',fontFamily:'inherit',fontWeight:500}}>{'Voir tout →'}</button>
         </div>
         {calcs.slice(0,8).map(({e,c},i)=>(
@@ -471,48 +478,48 @@ function Dashboard({s,d}) {
             <div style={{display:'flex',alignItems:'center',gap:10}}>
               <div style={{width:32,height:32,borderRadius:8,background:`linear-gradient(135deg,${['#c6a34e',"#60a5fa","#a78bfa","#4ade80","#fb923c","#06b6d4"][i%6]}22,${['#c6a34e',"#60a5fa","#a78bfa","#4ade80","#fb923c","#06b6d4"][i%6]}08)`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:['#c6a34e',"#60a5fa","#a78bfa","#4ade80","#fb923c","#06b6d4"][i%6]}}>{(e.first||'')[0]}{(e.last||'')[0]}</div>
               <div>
-                <div style={{fontSize:12.5,fontWeight:500,color:'#e8e6e0'}}>{e.first||e.fn||'Employé'} {e.last||''}
+                <div style={{fontSize:12.5,fontWeight:500,color:TH.text}}>{e.first||e.fn||'Employé'} {e.last||''}
                   <span style={{fontSize:8.5,padding:'1px 5px',borderRadius:3,marginLeft:6,fontWeight:600,
                     background:e.status==='sorti'?'rgba(248,113,113,.12)':e.contract==='student'?'rgba(251,146,60,.12)':e.statut==='ouvrier'?'rgba(251,146,60,.1)':'rgba(96,165,250,.08)',
                     color:e.status==='sorti'?'#f87171':e.contract==='student'?'#fb923c':e.statut==='ouvrier'?'#fb923c':'#60a5fa',
                   }}>{e.status==='sorti'?'SORTI':e.contract==='student'?'ÉTU':e.statut==='ouvrier'?'OUV':'EMPL'}</span>
                 </div>
-                <div style={{fontSize:10,color:'#5e5c56'}}>{e.fn||'—'} · CP {e.cp||'200'}</div>
+                <div style={{fontSize:10,color:TH.text3}}>{e.fn||'—'} · CP {e.cp||'200'}</div>
               </div>
             </div>
             <div style={{textAlign:'right'}}>
               <div style={{fontSize:13,fontWeight:600,color:'#4ade80'}}>{fmt(c.net)}</div>
-              <div style={{fontSize:9,color:'#5e5c56'}}>coût: {fmt(c.costTotal)}</div>
+              <div style={{fontSize:9,color:TH.text3}}>coût: {fmt(c.costTotal)}</div>
             </div>
           </div>
         ))}
-        {ae.length>8&&<div style={{textAlign:'center',padding:'10px 0',fontSize:11,color:'#8b7340'}}>+ {ae.length-8} autre{ae.length-8>1?'s':''}</div>}
+        {ae.length>8&&<div style={{textAlign:'center',padding:'10px 0',fontSize:11,color:TH.text2}}>+ {ae.length-8} autre{ae.length-8>1?'s':''}</div>}
       </C>
 
       {/* DEPARTMENT BREAKDOWN */}
       <C style={{padding:'20px 18px'}}>
-        <div style={{fontSize:13,fontWeight:600,color:'#e8e6e0',marginBottom:16}}>{'Répartition par département'}</div>
+        <div style={{fontSize:13,fontWeight:600,color:TH.text,marginBottom:16}}>{'Répartition par département'}</div>
         {Object.entries(depts).sort((a,b)=>b[1].mass-a[1].mass).map(([dp,data],i)=>{
           const pct=tm>0?Math.round(data.mass/tm*100):0;
           return <div key={dp} style={{marginBottom:12,animation:`fadeIn .3s ease ${i*0.06}s both`}}>
             <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
-              <div style={{fontSize:11.5,color:'#d4d0c8',fontWeight:500}}>{dp} <span style={{color:'#5e5c56',fontWeight:400}}>({data.count})</span></div>
+              <div style={{fontSize:11.5,color:TH.text,fontWeight:500}}>{dp} <span style={{color:TH.text3,fontWeight:400}}>({data.count})</span></div>
               <div style={{fontSize:11,color:'#c6a34e',fontWeight:600}}>{fmt(data.mass)}</div>
             </div>
             <div style={{height:6,background:"rgba(198,163,78,.06)",borderRadius:3,overflow:'hidden'}}>
               <div style={{height:'100%',width:`${pct}%`,background:"linear-gradient(90deg,#c6a34e,#e2c878)",borderRadius:3,transition:'width .8s ease'}}/>
             </div>
-            <div style={{fontSize:9,color:'#5e5c56',marginTop:2}}>{pct}% de la masse salariale</div>
+            <div style={{fontSize:9,color:TH.text3,marginTop:2}}>{pct}% de la masse salariale</div>
           </div>;
         })}
-        {Object.keys(depts).length===0&&<div style={{textAlign:'center',color:'#5e5c56',fontSize:12,padding:20}}>{'Aucun employé'}</div>}
+        {Object.keys(depts).length===0&&<div style={{textAlign:'center',color:TH.text3,fontSize:12,padding:20}}>{'Aucun employé'}</div>}
         <div style={{marginTop:16,padding:'12px 14px',background:"rgba(198,163,78,.03)",borderRadius:8,border:'1px solid rgba(198,163,78,.06)'}}>
           <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
-            <span style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'1px'}}>{'Ratio net/brut'}</span>
+            <span style={{fontSize:10,color:TH.text3,textTransform:'uppercase',letterSpacing:'1px'}}>{'Ratio net/brut'}</span>
             <span style={{fontSize:13,fontWeight:700,color:'#4ade80'}}>{tm>0?Math.round(tn/tm*100):0}%</span>
           </div>
           <div style={{display:'flex',justifyContent:'space-between'}}>
-            <span style={{fontSize:10,color:'#5e5c56',textTransform:'uppercase',letterSpacing:'1px'}}>{'Coût/brut'}</span>
+            <span style={{fontSize:10,color:TH.text3,textTransform:'uppercase',letterSpacing:'1px'}}>{'Coût/brut'}</span>
             <span style={{fontSize:13,fontWeight:700,color:'#a78bfa'}}>{tm>0?((tc/tm)*100).toFixed(0):0}%</span>
           </div>
         </div>
