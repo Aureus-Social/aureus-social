@@ -781,12 +781,12 @@ body {
 <!-- ═══════════════════════════════════ WIZARD DOSSIER COMPLET ═══════════════════════════════════ -->
 <section id="wizard-dossier" style="margin:0 0 32px 0;background:var(--bg2);border:2px solid var(--gold);border-radius:16px;overflow:hidden;">
 
-  <!-- Header wizard -->
+  <!-- Header -->
   <div style="background:linear-gradient(135deg,rgba(201,150,58,.2),rgba(201,150,58,.05));padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <div style="display:flex;align-items:center;gap:14px;">
       <div style="width:48px;height:48px;background:linear-gradient(135deg,#C9963A,#8B6420);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🗂️</div>
       <div>
-        <div style="font-size:18px;font-weight:800;color:var(--gold);letter-spacing:-.3px;">Générateur Dossier Complet Employé</div>
+        <div style="font-size:18px;font-weight:800;color:var(--gold);">Générateur Dossier Complet Employé</div>
         <div style="font-size:12px;color:var(--muted);margin-top:2px;">Saisie unique → Checklist personnalisée + Documents + Calculs automatiques</div>
       </div>
     </div>
@@ -796,638 +796,436 @@ body {
     </div>
   </div>
 
-  <!-- Steps indicator -->
-  <div style="display:flex;align-items:center;padding:14px 24px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.1);overflow-x:auto;gap:0;">
-    <div class="wiz-step-ind active" id="wsi-1" onclick="wizGo(1)" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;cursor:pointer;white-space:nowrap;background:rgba(201,150,58,.15);border:1px solid rgba(201,150,58,.4);">
-      <span style="width:20px;height:20px;border-radius:50%;background:var(--gold);color:#060810;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
-      <span style="font-size:11px;font-weight:600;color:var(--gold);">Identité</span>
-    </div>
-    <div style="width:20px;height:1px;background:var(--border);flex-shrink:0;"></div>
-    <div class="wiz-step-ind" id="wsi-2" onclick="wizGo(2)" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;cursor:pointer;white-space:nowrap;">
-      <span style="width:20px;height:20px;border-radius:50%;background:var(--border);color:var(--muted);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
-      <span style="font-size:11px;color:var(--muted);">Contrat</span>
-    </div>
-    <div style="width:20px;height:1px;background:var(--border);flex-shrink:0;"></div>
-    <div class="wiz-step-ind" id="wsi-3" onclick="wizGo(3)" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;cursor:pointer;white-space:nowrap;">
-      <span style="width:20px;height:20px;border-radius:50%;background:var(--border);color:var(--muted);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
-      <span style="font-size:11px;color:var(--muted);">Avantages</span>
-    </div>
-    <div style="width:20px;height:1px;background:var(--border);flex-shrink:0;"></div>
-    <div class="wiz-step-ind" id="wsi-4" onclick="wizGo(4)" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;cursor:pointer;white-space:nowrap;">
-      <span style="width:20px;height:20px;border-radius:50%;background:var(--border);color:var(--muted);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</span>
-      <span style="font-size:11px;color:var(--muted);">Situation</span>
-    </div>
-    <div style="width:20px;height:1px;background:var(--border);flex-shrink:0;"></div>
-    <div class="wiz-step-ind" id="wsi-5" onclick="wizGo(5)" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;cursor:pointer;white-space:nowrap;">
-      <span style="width:20px;height:20px;border-radius:50%;background:var(--border);color:var(--muted);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</span>
-      <span style="font-size:11px;color:var(--muted);">Dossier ✓</span>
-    </div>
-  </div>
+  <div style="padding:24px;">
 
-  <!-- STEP 1 : Identité -->
-  <div id="wiz-s1" class="wiz-panel" style="padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
-    <div style="grid-column:1/-1;margin-bottom:4px;">
-      <div style="position:relative;">
-        <input id="wiz-search" type="text" placeholder="🔍 Rechercher un travailleur existant (Supabase)..." oninput="wizSearchWorkers(this.value)"
-          style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(201,150,58,.4);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-        <div id="wiz-search-results" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:8px;z-index:100;max-height:200px;overflow-y:auto;"></div>
-      </div>
-      <div style="font-size:10px;color:var(--muted);margin-top:4px;">Ou remplis manuellement ci-dessous pour un nouveau travailleur</div>
-    </div>
-    <div>
-      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Prénom *</label>
-      <input id="w-prenom" type="text" placeholder="Mohamed" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-    </div>
-    <div>
-      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Nom *</label>
-      <input id="w-nom" type="text" placeholder="Ben Youssef" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-    </div>
-    <div>
-      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">NISS (N° national)</label>
-      <input id="w-niss" type="text" placeholder="90.01.01-123-45" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-    </div>
-    <div>
-      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Date naissance</label>
-      <input id="w-dob" type="date" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-    </div>
-    <div>
-      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Nationalité</label>
-      <select id="w-nat" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-        <option value="BE">🇧🇪 Belge</option>
-        <option value="EU">🇪🇺 UE (hors BE)</option>
-        <option value="EXTRA">🌍 Hors UE</option>
-      </select>
-    </div>
-    <div>
-      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Situation familiale</label>
-      <select id="w-sitfam" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-        <option value="isole">Isolé(e)</option>
-        <option value="marie">Marié(e) / Cohabitant légal</option>
-        <option value="chef">Chef de famille</option>
-        <option value="divorce">Divorcé(e)</option>
-      </select>
-    </div>
-    <div>
-      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Nb enfants à charge</label>
-      <input id="w-enfants" type="number" value="0" min="0" max="15" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-    </div>
-    <div>
-      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Région employeur</label>
-      <select id="w-region" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-        <option value="BXL">🏙️ Bruxelles-Capitale</option>
-        <option value="WAL">🌿 Wallonie</option>
-        <option value="VL">🔷 Flandre</option>
-      </select>
-    </div>
-    <div style="grid-column:1/-1;display:flex;justify-content:flex-end;margin-top:4px;">
-      <button onclick="wizGo(2)" style="padding:10px 24px;border-radius:8px;border:none;background:var(--gold);color:#060810;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">Suivant → Contrat</button>
-    </div>
-  </div>
-
-  <!-- STEP 2 : Contrat -->
-  <div id="wiz-s2" class="wiz-panel" style="padding:24px;display:none;">
-
-    <!-- Ligne 1 : Type contrat + Statut -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:12px;">
-      <div>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Type de contrat *</label>
-        <select id="w-contrat" onchange="wizContratChange()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-          <optgroup label="── STANDARD ──">
-            <option value="CDI">CDI — Durée indéterminée</option>
-            <option value="CDD">CDD — Durée déterminée</option>
-            <option value="CDDJUSTIF">CDD — Travail nettement défini</option>
-            <option value="REMP">CDD — Remplacement travailleur absent</option>
-          </optgroup>
-          <optgroup label="── SPÉCIAUX ──">
-            <option value="ETU">👨‍🎓 Étudiant jobiste (contrat étudiant 50j)</option>
-            <option value="FLEXI">⚡ Flexi-job (déjà actif 4/5 ailleurs)</option>
-            <option value="INT">🔄 Via intérim (agence)</option>
-            <option value="ART60">🏛️ Article 60 §7 (CPAS)</option>
-            <option value="FIRSTJOB">🌱 First Job Agreement (primo-sortant)</option>
-          </optgroup>
-          <optgroup label="── SITUATIONS MÉDICALES ──">
-            <option value="MITHERP">🏥 Mi-temps thérapeutique</option>
-            <option value="REPRISE">↩️ Reprise progressive après maladie</option>
-            <option value="INCAP">🤒 Retour après incapacité longue durée</option>
-          </optgroup>
-          <optgroup label="── TEMPS PARTIEL ──">
-            <option value="4_5">4/5 temps (80%)</option>
-            <option value="MITEMPS">Mi-temps (50%)</option>
-            <option value="PARTIEL">Autre temps partiel</option>
-            <option value="CREDTEMPS">⏸️ Crédit-temps</option>
-          </optgroup>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Statut *</label>
-        <select id="w-statut" onchange="wizStatutChange()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-          <optgroup label="── SECTEUR PRIVÉ ──">
-            <option value="EMP">👔 Employé</option>
-            <option value="OUV">🔧 Ouvrier</option>
-            <option value="DIR">🏢 Dirigeant d'entreprise (mandataire)</option>
-            <option value="ETU">👨‍🎓 Étudiant jobiste</option>
-            <option value="FLEXI">⚡ Flexi-worker</option>
-            <option value="VOLONT">🤝 Volontaire (indemnités forfaitaires)</option>
-          </optgroup>
-          <optgroup label="── PROFESSIONS LIBÉRALES ──">
-            <option value="MEDECIN">🩺 Médecin / Dentiste / Vétérinaire</option>
-            <option value="AVOCAT">⚖️ Avocat (stagiaire ou associé)</option>
-            <option value="NOTAIRE">📜 Notaire / Huissier</option>
-            <option value="ARCH">📐 Architecte / Ingénieur conseil</option>
-            <option value="COMPTA">📊 Expert-comptable / Réviseur</option>
-            <option value="PHARMA">💊 Pharmacien</option>
-            <option value="PLIB">🎓 Autre profession libérale</option>
-          </optgroup>
-          <optgroup label="── SECTEUR PUBLIC ──">
-            <option value="FONC_STAT">🏛️ Fonctionnaire statutaire (nommé)</option>
-            <option value="FONC_CONT">📋 Agent contractuel secteur public</option>
-            <option value="ENSEIGNANT">📚 Enseignant (nommé / temporaire)</option>
-            <option value="MILITAIRE">🎖️ Militaire / Police</option>
-            <option value="INTERCOMMUNAL">🏙️ Intercommunale / CPAS / Parastataux</option>
-          </optgroup>
-          <optgroup label="── SITUATIONS SPÉCIALES ──">
-            <option value="ARTISTE">🎨 Artiste (avec carte artiste)</option>
-            <option value="SPORTIF">⚽ Sportif rémunéré</option>
-            <option value="DOMESTIQUE">🏠 Travailleur domestique</option>
-            <option value="INDEPENDANT_COMP">💼 Indépendant complémentaire</option>
-          </optgroup>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Commission paritaire *</label>
-        <select id="w-cp" onchange="wizCPChange()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-          <optgroup label="── EMPLOYÉS ──">
-            <option value="200">CP 200 — Employés secteur privé (général)</option>
-            <option value="201">CP 201 — Commerce alimentaire (détail)</option>
-            <option value="202">CP 202 — Employés secteur alimentaire</option>
-            <option value="207">CP 207 — Industrie chimique</option>
-            <option value="209">CP 209 — Construction (employés)</option>
-            <option value="211">CP 211 — Transport & logistique</option>
-            <option value="218">CP 218 — Industrie alimentaire</option>
-            <option value="219">CP 219 — Commerce international</option>
-            <option value="220">CP 220 — Diamantaire</option>
-            <option value="223">CP 223 — Assurances</option>
-            <option value="226">CP 226 — Intérimaires</option>
-            <option value="302">CP 302 — Hôtellerie & restauration</option>
-            <option value="309">CP 309 — Gardiennage & surveillance</option>
-            <option value="310">CP 310 — Banques</option>
-            <option value="313">CP 313 — Pharmacies</option>
-            <option value="317">CP 317 — Commerce alimentaire</option>
-            <option value="318">CP 318 — Coiffure & soins beauté</option>
-            <option value="320">CP 320 — Transport routier (employés)</option>
-            <option value="322">CP 322 — Transport aérien</option>
-            <option value="324">CP 324 — Agences de voyage</option>
-            <option value="326">CP 326 — Commerce de détail</option>
-            <option value="327">CP 327 — Entreprises travail adapté</option>
-            <option value="329">CP 329 — Grandes surfaces alimentaires</option>
-            <option value="330">CP 330 — Santé (général)</option>
-            <option value="331">CP 331 — Soins santé Flandre</option>
-            <option value="332">CP 332 — Soins santé Wal-Bxl</option>
-            <option value="333">CP 333 — Commerce détail indépendant</option>
-            <option value="335">CP 335 — Travail intérimaire</option>
-            <option value="336">CP 336 — Titres-services</option>
-            <option value="337">CP 337 — PME (employés)</option>
-            <option value="338">CP 338 — Nettoyage (employés)</option>
-            <option value="340">CP 340 — Construction (commerce)</option>
-          </optgroup>
-          <optgroup label="── OUVRIERS ──">
-            <option value="100">CP 100 — Ouvriers (général)</option>
-            <option value="105">CP 105 — Véhicules neufs & garage</option>
-            <option value="106">CP 106 — Carburants</option>
-            <option value="107">CP 107 — Hôtellerie (ouvriers)</option>
-            <option value="108">CP 108 — Nettoyage (ouvriers)</option>
-            <option value="112">CP 112 — Garages</option>
-            <option value="115">CP 115 — Confection & textile</option>
-            <option value="118">CP 118 — Alimentation (ouvriers)</option>
-            <option value="119">CP 119 — Boulangerie & pâtisserie</option>
-            <option value="121">CP 121 — Nettoyage à sec</option>
-            <option value="124">CP 124 — Bâtiment & travaux publics</option>
-            <option value="125">CP 125 — Bois (ouvriers)</option>
-            <option value="126">CP 126 — Ameublement</option>
-            <option value="128">CP 128 — Métal (ouvriers)</option>
-            <option value="130">CP 130 — Imprimeries</option>
-            <option value="132">CP 132 — Agriculture</option>
-            <option value="133">CP 133 — Horticulture</option>
-            <option value="136">CP 136 — Chimique (ouvriers)</option>
-            <option value="140">CP 140 — Transport routier (ouvriers)</option>
-            <option value="142">CP 142 — Jardiniers & paysagistes</option>
-            <option value="143">CP 143 — Garde d'enfants</option>
-            <option value="144">CP 144 — Chèques-repas (ouvriers)</option>
-            <option value="149">CP 149 — Électricité (ouvriers)</option>
-            <option value="150">CP 150 — Travail adapté (ouvriers)</option>
-          </optgroup>
-          <optgroup label="── SECTEUR PUBLIC / ÉDUCATION ──">
-            <option value="319">CP 319 — Éducation & formation</option>
-            <option value="319.01">CP 319.01 — Enseignement libre subventionné</option>
-          </optgroup>
-          <optgroup label="── DIVERS ──">
-            <option value="000">CP 000 — Dirigeant / Non assujetti</option>
-            <option value="autre">Autre / À préciser</option>
-          </optgroup>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Fonction / Intitulé poste *</label>
-        <input id="w-fonction" type="text" placeholder="Développeur, Comptable, Vendeur..." style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-      </div>
-    </div>
-
-    <!-- Ligne 2 : Dates + Salaire -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:12px;">
-      <div>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Date d'entrée *</label>
-        <input id="w-debut" type="date" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-      </div>
-      <div id="w-fin-bloc">
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Date de fin</label>
-        <input id="w-fin" type="date" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-      </div>
-      <div>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Salaire brut mensuel (€)</label>
-        <input id="w-brut" type="number" placeholder="2800" oninput="wizCheckSalaire()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-        <div id="w-salaire-min" style="margin-top:6px;padding:8px 10px;border-radius:6px;background:rgba(201,150,58,.08);border:1px solid rgba(201,150,58,.15);font-size:11px;display:none;">
-          <div id="w-salaire-min-label" style="color:var(--gold);font-weight:600;"></div>
-          <div id="w-salaire-min-note" style="color:var(--muted);margin-top:3px;line-height:1.5;"></div>
-          <div id="w-salaire-min-alert" style="margin-top:5px;display:none;"></div>
+    <!-- ══ BLOC 1 : IDENTITÉ ══ -->
+    <div style="margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+        <div style="width:28px;height:28px;border-radius:8px;background:rgba(201,150,58,.2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">👤</div>
+        <div style="font-size:14px;font-weight:700;color:var(--gold);">1 — Identité du travailleur</div>
+        <div style="flex:1;height:1px;background:rgba(201,150,58,.15);"></div>
+        <div style="position:relative;">
+          <input id="wiz-search" type="text" placeholder="🔍 Travailleur existant..." oninput="wizSearchWorkers(this.value)"
+            style="padding:6px 12px;border-radius:6px;border:1px solid rgba(201,150,58,.3);background:var(--bg);color:var(--text);font-family:inherit;font-size:11px;width:220px;">
+          <div id="wiz-search-results" style="display:none;position:absolute;top:calc(100% + 4px);right:0;width:320px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;z-index:100;max-height:200px;overflow-y:auto;"></div>
         </div>
       </div>
-      <div>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Régime de travail</label>
-        <select id="w-regime" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-          <option value="100">Temps plein (100%)</option>
-          <option value="80">4/5 temps (80%)</option>
-          <option value="50">Mi-temps (50%)</option>
-          <option value="60">60%</option>
-          <option value="autre">Autre fraction</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Horaire hebdomadaire</label>
-        <select id="w-horaire" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-          <option value="38">38h/semaine (légal)</option>
-          <option value="40">40h/semaine</option>
-          <option value="36">36h/semaine</option>
-          <option value="32">32h — 4 jours/semaine</option>
-          <option value="19">19h — mi-temps</option>
-          <option value="variable">Horaire variable</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Lieu de travail</label>
-        <input id="w-lieu" type="text" placeholder="Bruxelles / Télétravail..." style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-      </div>
-    </div>
-
-    <!-- Ligne 3 : Motif + Ancienneté + Niveau + Essai -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:12px;">
-      <div>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Motif d'engagement</label>
-        <select id="w-motif" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-          <option value="normal">Engagement normal</option>
-          <option value="1er">⭐ 1er employé de la société</option>
-          <option value="chomeur">Chômeur longue durée (+1 an)</option>
-          <option value="chomeur6">Chômeur (+6 mois)</option>
-          <option value="jeune">Jeune travailleur (-26 ans)</option>
-          <option value="senior">Senior (+55 ans)</option>
-          <option value="handicap">Travailleur handicapé reconnu</option>
-          <option value="article60">Article 60 §7 (CPAS)</option>
-          <option value="sine">SINE (économie sociale)</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Ancienneté sectorielle</label>
-        <select id="w-anciennete" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-          <option value="0">0 — Première embauche</option>
-          <option value="1">1 à 4 ans</option>
-          <option value="5">5 à 9 ans</option>
-          <option value="10">10 à 19 ans</option>
-          <option value="20">20 ans et plus</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Niveau de classification</label>
-        <select id="w-niveau" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-          <option value="">— Non précisé —</option>
-          <option value="1">Niveau 1 — Non qualifié</option>
-          <option value="2">Niveau 2 — Qualifié / Junior</option>
-          <option value="3">Niveau 3 — Technicien / Expérimenté</option>
-          <option value="4">Niveau 4 — Cadre / Expert</option>
-          <option value="5">Niveau 5 — Cadre supérieur / Direction</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Période d'essai</label>
-        <select id="w-essai" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-          <option value="non">Aucune (CDI depuis 2014 = supprimée)</option>
-          <option value="1sem">1 semaine (CDD ≤ 3 mois)</option>
-          <option value="1mois">1 mois (CDD 3-6 mois)</option>
-          <option value="clause">Clause dans contrat (CDD > 6 mois)</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Panel mi-temps thérapeutique (conditionnel) -->
-    <div id="w-therp-bloc" style="display:none;background:rgba(74,222,128,.05);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:16px;margin-bottom:12px;">
-      <div style="font-size:12px;font-weight:700;color:#4ade80;margin-bottom:12px;">🏥 Mi-temps thérapeutique — Informations complémentaires</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;">
         <div>
-          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Date début reprise partielle</label>
-          <input id="w-therp-debut" type="date" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Prénom *</label>
+          <input id="w-prenom" type="text" placeholder="Mohamed" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
         </div>
         <div>
-          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">% de reprise</label>
-          <select id="w-therp-pct" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
-            <option value="50">50% — Mi-temps</option>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Nom *</label>
+          <input id="w-nom" type="text" placeholder="Ben Youssef" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">N° NISS *</label>
+          <input id="w-niss" type="text" placeholder="90.01.01-123-45" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Date naissance</label>
+          <input id="w-dob" type="date" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Email travailleur</label>
+          <input id="w-email" type="email" placeholder="nom@email.com" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Téléphone</label>
+          <input id="w-tel" type="text" placeholder="+32 4XX XX XX XX" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Nationalité</label>
+          <select id="w-nat" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="BE">🇧🇪 Belge</option>
+            <option value="EU">🇪🇺 UE (hors BE)</option>
+            <option value="EXTRA">🌍 Hors UE</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Situation familiale</label>
+          <select id="w-sitfam" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="isole">Isolé(e)</option>
+            <option value="marie">Marié(e) / Cohabitant légal</option>
+            <option value="chef">Chef de famille</option>
+            <option value="divorce">Divorcé(e)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Enfants à charge</label>
+          <input id="w-enfants" type="number" value="0" min="0" max="15" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">IBAN</label>
+          <input id="w-iban" type="text" placeholder="BE68 XXXX XXXX XXXX" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Adresse domicile</label>
+          <input id="w-adresse" type="text" placeholder="Rue, N° — Code postal Ville" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Région employeur</label>
+          <select id="w-region" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="BXL">🏙️ Bruxelles-Capitale</option>
+            <option value="WAL">🌿 Wallonie</option>
+            <option value="VL">🔷 Flandre</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BLOC 2 : CONTRAT ══ -->
+    <div style="margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+        <div style="width:28px;height:28px;border-radius:8px;background:rgba(201,150,58,.2);display:flex;align-items:center;justify-content:center;font-size:13px;">📋</div>
+        <div style="font-size:14px;font-weight:700;color:var(--gold);">2 — Contrat & Fonction</div>
+        <div style="flex:1;height:1px;background:rgba(201,150,58,.15);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;">
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Type de contrat *</label>
+          <select id="w-contrat" onchange="wizContratChange()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <optgroup label="── STANDARD ──">
+              <option value="CDI">CDI — Durée indéterminée</option>
+              <option value="CDD">CDD — Durée déterminée</option>
+              <option value="CDDJUSTIF">CDD — Travail nettement défini</option>
+              <option value="REMP">CDD — Remplacement absence</option>
+            </optgroup>
+            <optgroup label="── SPÉCIAUX ──">
+              <option value="ETU">👨‍🎓 Étudiant jobiste (50j)</option>
+              <option value="FLEXI">⚡ Flexi-job</option>
+              <option value="INT">🔄 Via intérim</option>
+              <option value="ART60">🏛️ Article 60 §7 (CPAS)</option>
+              <option value="FIRSTJOB">🌱 First Job Agreement</option>
+            </optgroup>
+            <optgroup label="── MÉDICAL ──">
+              <option value="MITHERP">🏥 Mi-temps thérapeutique</option>
+              <option value="REPRISE">↩️ Reprise progressive</option>
+              <option value="INCAP">🤒 Retour longue maladie</option>
+            </optgroup>
+            <optgroup label="── TEMPS PARTIEL ──">
+              <option value="4_5">4/5 temps (80%)</option>
+              <option value="MITEMPS">Mi-temps (50%)</option>
+              <option value="CREDTEMPS">⏸️ Crédit-temps</option>
+            </optgroup>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Statut *</label>
+          <select id="w-statut" onchange="wizStatutChange()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <optgroup label="── SECTEUR PRIVÉ ──">
+              <option value="EMP">👔 Employé</option>
+              <option value="OUV">🔧 Ouvrier</option>
+              <option value="DIR">🏢 Dirigeant d'entreprise</option>
+              <option value="ETU">👨‍🎓 Étudiant jobiste</option>
+              <option value="FLEXI">⚡ Flexi-worker</option>
+              <option value="VOLONT">🤝 Volontaire</option>
+            </optgroup>
+            <optgroup label="── PROFESSIONS LIBÉRALES ──">
+              <option value="MEDECIN">🩺 Médecin / Dentiste / Vétérinaire</option>
+              <option value="AVOCAT">⚖️ Avocat</option>
+              <option value="NOTAIRE">📜 Notaire / Huissier</option>
+              <option value="ARCH">📐 Architecte / Ingénieur conseil</option>
+              <option value="COMPTA">📊 Expert-comptable / Réviseur</option>
+              <option value="PHARMA">💊 Pharmacien</option>
+              <option value="PLIB">🎓 Autre profession libérale</option>
+            </optgroup>
+            <optgroup label="── SECTEUR PUBLIC ──">
+              <option value="FONC_STAT">🏛️ Fonctionnaire statutaire</option>
+              <option value="FONC_CONT">📋 Agent contractuel public</option>
+              <option value="ENSEIGNANT">📚 Enseignant</option>
+              <option value="MILITAIRE">🎖️ Militaire / Police</option>
+              <option value="INTERCOMMUNAL">🏙️ Intercommunale / CPAS</option>
+            </optgroup>
+            <optgroup label="── SPÉCIAUX ──">
+              <option value="ARTISTE">🎨 Artiste (carte artiste)</option>
+              <option value="SPORTIF">⚽ Sportif rémunéré</option>
+              <option value="INDEPENDANT_COMP">💼 Indépendant complémentaire</option>
+            </optgroup>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Commission paritaire *</label>
+          <select id="w-cp" onchange="wizCPChange()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <optgroup label="── EMPLOYÉS ──">
+              <option value="200">CP 200 — Employés secteur privé</option>
+              <option value="201">CP 201 — Commerce alimentaire détail</option>
+              <option value="202">CP 202 — Secteur alimentaire</option>
+              <option value="207">CP 207 — Industrie chimique</option>
+              <option value="209">CP 209 — Construction (emp.)</option>
+              <option value="211">CP 211 — Transport & logistique</option>
+              <option value="218">CP 218 — Industrie alimentaire</option>
+              <option value="219">CP 219 — Commerce international</option>
+              <option value="220">CP 220 — Diamantaire</option>
+              <option value="223">CP 223 — Assurances</option>
+              <option value="226">CP 226 — Intérimaires</option>
+              <option value="302">CP 302 — Hôtellerie & restauration</option>
+              <option value="309">CP 309 — Gardiennage</option>
+              <option value="310">CP 310 — Banques</option>
+              <option value="313">CP 313 — Pharmacies</option>
+              <option value="317">CP 317 — Commerce alimentaire</option>
+              <option value="318">CP 318 — Coiffure & beauté</option>
+              <option value="320">CP 320 — Transport routier</option>
+              <option value="322">CP 322 — Transport aérien</option>
+              <option value="324">CP 324 — Agences de voyage</option>
+              <option value="326">CP 326 — Commerce de détail</option>
+              <option value="327">CP 327 — Travail adapté</option>
+              <option value="329">CP 329 — Grandes surfaces</option>
+              <option value="330">CP 330 — Soins de santé</option>
+              <option value="331">CP 331 — Soins santé Flandre</option>
+              <option value="332">CP 332 — Soins santé Wal-Bxl</option>
+              <option value="333">CP 333 — Commerce détail indép.</option>
+              <option value="335">CP 335 — Travail intérimaire</option>
+              <option value="336">CP 336 — Titres-services</option>
+              <option value="337">CP 337 — PME</option>
+              <option value="338">CP 338 — Nettoyage</option>
+              <option value="340">CP 340 — Construction commerce</option>
+            </optgroup>
+            <optgroup label="── OUVRIERS ──">
+              <option value="100">CP 100 — Ouvriers (général)</option>
+              <option value="105">CP 105 — Véhicules neufs</option>
+              <option value="106">CP 106 — Carburants</option>
+              <option value="107">CP 107 — Hôtellerie (ouv.)</option>
+              <option value="108">CP 108 — Nettoyage (ouv.)</option>
+              <option value="112">CP 112 — Garages</option>
+              <option value="115">CP 115 — Confection & textile</option>
+              <option value="118">CP 118 — Alimentation (ouv.)</option>
+              <option value="119">CP 119 — Boulangerie</option>
+              <option value="121">CP 121 — Nettoyage à sec</option>
+              <option value="124">CP 124 — Bâtiment & TP</option>
+              <option value="125">CP 125 — Bois (ouv.)</option>
+              <option value="126">CP 126 — Ameublement</option>
+              <option value="128">CP 128 — Métal (ouv.)</option>
+              <option value="130">CP 130 — Imprimeries</option>
+              <option value="132">CP 132 — Agriculture</option>
+              <option value="133">CP 133 — Horticulture</option>
+              <option value="136">CP 136 — Chimique (ouv.)</option>
+              <option value="140">CP 140 — Transport routier (ouv.)</option>
+              <option value="142">CP 142 — Jardiniers</option>
+              <option value="143">CP 143 — Garde d'enfants</option>
+              <option value="149">CP 149 — Électricité (ouv.)</option>
+              <option value="150">CP 150 — Travail adapté (ouv.)</option>
+            </optgroup>
+            <optgroup label="── PUBLIC / DIVERS ──">
+              <option value="319">CP 319 — Éducation</option>
+              <option value="319.01">CP 319.01 — Enseignement libre</option>
+              <option value="000">CP 000 — Dirigeant / Non assujetti</option>
+              <option value="autre">Autre / À préciser</option>
+            </optgroup>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Fonction / Poste *</label>
+          <input id="w-fonction" type="text" placeholder="Développeur, Comptable..." style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Date d'entrée *</label>
+          <input id="w-debut" type="date" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div id="w-fin-bloc">
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Date de fin (CDD)</label>
+          <input id="w-fin" type="date" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Salaire brut mensuel (€) *</label>
+          <input id="w-brut" type="number" placeholder="2800" oninput="wizCheckSalaire()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+          <div id="w-salaire-min" style="margin-top:5px;padding:7px 10px;border-radius:6px;background:rgba(201,150,58,.08);border:1px solid rgba(201,150,58,.15);font-size:10px;display:none;">
+            <div id="w-salaire-min-label" style="color:var(--gold);font-weight:600;"></div>
+            <div id="w-salaire-min-note" style="color:var(--muted);margin-top:2px;line-height:1.4;"></div>
+            <div id="w-salaire-min-alert" style="margin-top:4px;display:none;"></div>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Régime de travail</label>
+          <select id="w-regime" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="100">Temps plein (100%)</option>
+            <option value="80">4/5 temps (80%)</option>
+            <option value="50">Mi-temps (50%)</option>
             <option value="60">60%</option>
-            <option value="80">80% — 4/5</option>
+            <option value="autre">Autre fraction</option>
           </select>
         </div>
         <div>
-          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Mutualité</label>
-          <select id="w-therp-mut" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
-            <option value="MC">Mutualité Chrétienne (MC)</option>
-            <option value="SSMG">Solidaris (ancienne SSMG)</option>
-            <option value="MLOZ">MLOZ / OZ</option>
-            <option value="CAAMI">CAAMI / Euromut</option>
-            <option value="INAMI">Caisse auxiliaire INAMI</option>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Horaire hebdomadaire</label>
+          <select id="w-horaire" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="38">38h/semaine (légal)</option>
+            <option value="40">40h/semaine</option>
+            <option value="36">36h/semaine</option>
+            <option value="32">32h — 4 jours</option>
+            <option value="19">19h — mi-temps</option>
+            <option value="variable">Horaire variable</option>
           </select>
         </div>
         <div>
-          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Autorisation médecin-conseil</label>
-          <select id="w-therp-auth" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
-            <option value="oui">✅ Obtenue</option>
-            <option value="en_cours">⏳ En cours</option>
-            <option value="non">❌ Pas encore</option>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Lieu de travail</label>
+          <input id="w-lieu" type="text" placeholder="Bruxelles / Télétravail..." style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Motif d'engagement</label>
+          <select id="w-motif" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="normal">Engagement normal</option>
+            <option value="1er">⭐ 1er employé de la société</option>
+            <option value="chomeur">Chômeur longue durée (+1 an)</option>
+            <option value="chomeur6">Chômeur (+6 mois)</option>
+            <option value="jeune">Jeune travailleur (-26 ans)</option>
+            <option value="senior">Senior (+55 ans)</option>
+            <option value="handicap">Travailleur handicapé reconnu</option>
+            <option value="article60">Article 60 §7 (CPAS)</option>
+            <option value="sine">SINE (économie sociale)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Ancienneté sectorielle</label>
+          <select id="w-anciennete" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="0">0 — Première embauche</option>
+            <option value="1">1 à 4 ans</option>
+            <option value="5">5 à 9 ans</option>
+            <option value="10">10 à 19 ans</option>
+            <option value="20">20 ans et plus</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Niveau classification</label>
+          <select id="w-niveau" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="">— Non précisé —</option>
+            <option value="1">Niveau 1 — Non qualifié</option>
+            <option value="2">Niveau 2 — Qualifié / Junior</option>
+            <option value="3">Niveau 3 — Technicien / Expérimenté</option>
+            <option value="4">Niveau 4 — Cadre / Expert</option>
+            <option value="5">Niveau 5 — Cadre supérieur / Direction</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Période d'essai</label>
+          <select id="w-essai" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="non">Aucune (CDI depuis 2014)</option>
+            <option value="1sem">1 semaine (CDD ≤ 3 mois)</option>
+            <option value="1mois">1 mois (CDD 3-6 mois)</option>
+            <option value="clause">Clause dans contrat</option>
           </select>
         </div>
       </div>
-      <div style="margin-top:10px;padding:10px;background:rgba(239,68,68,.08);border-radius:6px;font-size:11px;color:var(--urgent);">
-        ⚠️ OBLIGATOIRE : Autorisation préalable médecin-conseil mutuelle AVANT la reprise. Sans autorisation = pas de couverture INAMI + risque perte droit aux indemnités.
+
+      <!-- Panels conditionnels contrat -->
+      <div id="w-therp-bloc" style="display:none;margin-top:12px;background:rgba(74,222,128,.05);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#4ade80;margin-bottom:10px;">🏥 Mi-temps thérapeutique</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Date reprise</label><input id="w-therp-debut" type="date" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">% reprise</label><select id="w-therp-pct" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="50">50% mi-temps</option><option value="60">60%</option><option value="80">80% — 4/5</option></select></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Mutualité</label><select id="w-therp-mut" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="MC">MC (Mutualité Chrétienne)</option><option value="SSMG">Solidaris</option><option value="MLOZ">MLOZ / OZ</option><option value="CAAMI">CAAMI / Euromut</option><option value="INAMI">Caisse INAMI</option></select></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Autorisation médecin-conseil</label><select id="w-therp-auth" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="oui">✅ Obtenue</option><option value="en_cours">⏳ En cours</option><option value="non">❌ Pas encore</option></select></div>
+        </div>
+        <div style="margin-top:8px;padding:8px;background:rgba(239,68,68,.08);border-radius:6px;font-size:10px;color:var(--urgent);">⚠️ OBLIGATOIRE : Autorisation préalable médecin-conseil AVANT la reprise — sans autorisation = risque perte indemnités INAMI</div>
+      </div>
+
+      <div id="w-etu-bloc" style="display:none;margin-top:12px;background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#60a5fa;margin-bottom:10px;">👨‍🎓 Contrat étudiant</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Jours déjà utilisés/an</label><input id="w-etu-jours" type="number" value="0" min="0" max="50" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Jours prévus ce contrat</label><input id="w-etu-jours-contrat" type="number" value="10" min="1" max="50" oninput="wizEtuCheck()" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">student@work vérifié</label><select id="w-etu-studentwork" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="oui">✅ Oui</option><option value="non">❌ Non — à faire</option></select></div>
+        </div>
+        <div id="w-etu-warning" style="margin-top:8px;padding:8px;background:rgba(96,165,250,.08);border-radius:6px;font-size:10px;color:#60a5fa;">✅ Cotisation solidarité 5,42% valable 50j/an — vérifier sur student@work.be</div>
+      </div>
+
+      <div id="w-flexi-bloc" style="display:none;margin-top:12px;background:rgba(234,179,8,.05);border:1px solid rgba(234,179,8,.2);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#eab308;margin-bottom:8px;">⚡ Flexi-job — Conditions obligatoires</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.9;">✅ Travailleur déjà occupé à <strong>4/5 minimum</strong> chez autre employeur · ✅ <strong>Dimona FLEXI</strong> (pas Dimona normale) · ✅ Min <strong>11,54€/h</strong> · ✅ Cotisation patronale <strong>25%</strong> · ⚠️ Vérifier attestation 4/5</div>
+      </div>
+
+      <div id="w-plib-bloc" style="display:none;margin-top:12px;background:rgba(167,139,250,.05);border:1px solid rgba(167,139,250,.25);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:8px;">🎓 Profession libérale</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Régime ONSS</label><select id="w-plib-onss" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="salarie">Salarié (ONSS)</option><option value="independant">Indépendant (INASTI)</option><option value="mixte">Mixte</option></select></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Ordre professionnel</label><select id="w-plib-ordre" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="">— Aucun —</option><option value="barreau">Barreau</option><option value="onm">ONM (médecins)</option><option value="architectes">Architectes</option><option value="iec">IEC (comptables)</option><option value="irev">IRE (réviseurs)</option></select></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.7;">⚖️ Avocat salarié: CP 460, Dimona DWD · 🩺 Médecin salarié: CP 330 · 📐 Architecte: souvent indépendant INASTI</div>
+      </div>
+
+      <div id="w-fonc-bloc" style="display:none;margin-top:12px;background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#3b82f6;margin-bottom:8px;">🏛️ Secteur public</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Administration</label><select id="w-fonc-admin" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="federal">SPF fédéral</option><option value="region">Région / Communauté</option><option value="commune">Commune / CPAS</option><option value="enseignement">Enseignement</option><option value="para">Parastataux</option><option value="police">Police</option><option value="armee">Armée</option></select></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Recrutement</label><select id="w-fonc-mode" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="selor">Via SELOR</option><option value="contrat">Contrat direct</option><option value="stage">Stage probatoire</option><option value="interim">Intérim</option></select></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.7;">📋 Statutaire: pas ONSS, régime pension propre · 📋 Contractuel: ONSS normal CP 319 · ⚠️ Cumul privé: autorisation hiérarchique obligatoire</div>
+      </div>
+
+      <div id="w-avocat-bloc" style="display:none;margin-top:12px;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#f59e0b;margin-bottom:8px;">⚖️ Avocat — Spécificités</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.9;">📌 CP 460 · 📌 Dimona type <strong>DWD</strong> · 📌 Notifier le bâtonnier · 📌 RC Pro obligatoire · 📌 Clause secret professionnel dans contrat</div>
+      </div>
+
+      <div id="w-artiste-bloc" style="display:none;margin-top:12px;background:rgba(236,72,153,.05);border:1px solid rgba(236,72,153,.25);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#ec4899;margin-bottom:8px;">🎨 Artiste rémunéré</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.9;">📌 Carte artiste obligatoire · 📌 Dimona type <strong>A17</strong> · 📌 Déduction frais pro 50% forfaitaire · 📌 Caisse congés spectacles (ONEM)</div>
       </div>
     </div>
 
-    <!-- Panel étudiant (conditionnel) -->
-    <div id="w-etu-bloc" style="display:none;background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:16px;margin-bottom:12px;">
-      <div style="font-size:12px;font-weight:700;color:#60a5fa;margin-bottom:12px;">👨‍🎓 Contrat étudiant — Informations complémentaires</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
-        <div>
-          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Jours déjà utilisés ce trimestre</label>
-          <input id="w-etu-jours" type="number" value="0" min="0" max="50" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
-        </div>
-        <div>
-          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Nb jours prévus ce contrat</label>
-          <input id="w-etu-jours-contrat" type="number" value="10" min="1" max="50" oninput="wizEtuCheck()" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
-        </div>
-        <div>
-          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Inscrit student@work ?</label>
-          <select id="w-etu-studentwork" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
-            <option value="oui">✅ Oui — quota vérifié</option>
-            <option value="non">❌ Non — à faire</option>
-          </select>
-        </div>
+    <!-- ══ BLOC 3 : AVANTAGES ══ -->
+    <div style="margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+        <div style="width:28px;height:28px;border-radius:8px;background:rgba(201,150,58,.2);display:flex;align-items:center;justify-content:center;font-size:13px;">🎁</div>
+        <div style="font-size:14px;font-weight:700;color:var(--gold);">3 — Avantages extralégaux</div>
+        <div style="flex:1;height:1px;background:rgba(201,150,58,.15);"></div>
       </div>
-      <div id="w-etu-warning" style="margin-top:10px;padding:10px;background:rgba(96,165,250,.08);border-radius:6px;font-size:11px;color:#60a5fa;">
-        ✅ Cotisation solidarité 5,42% (au lieu de 13,07%) valable pour les 50 premiers jours/an. Vérifier quota sur <strong>student@work.be</strong>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;">
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-cheqrep" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🍽️ Chèques-repas</div><div style="font-size:10px;color:var(--muted);">8€/j — exonéré ONSS+PP</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-voiture" onchange="wizAtnChange()" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🚗 Voiture société</div><div style="font-size:10px;color:var(--muted);">ATN imposable — pas ONSS</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-gsm" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">📱 GSM société</div><div style="font-size:10px;color:var(--muted);">ATN 12,50€/mois</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-laptop" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">💻 Laptop société</div><div style="font-size:10px;color:var(--muted);">ATN 6€/mois</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-internet" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🌐 Internet domicile</div><div style="font-size:10px;color:var(--muted);">ATN 5€/mois</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-ecocheq" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🌱 Éco-chèques</div><div style="font-size:10px;color:var(--muted);">max 250€/an — exonéré</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-assgrp" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🛡️ Assurance groupe</div><div style="font-size:10px;color:var(--muted);">Pension complémentaire</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-hospit" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🏥 Hospitalisation</div><div style="font-size:10px;color:var(--muted);">Cotis. patronale exonérée</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-teletravail" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🏠 Télétravail</div><div style="font-size:10px;color:var(--muted);">148,73€/m — CCT 149</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-warrant" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">📊 Warrants</div><div style="font-size:10px;color:var(--muted);">Fiscalement avantageux</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-transport" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🚇 Abonnement transport</div><div style="font-size:10px;color:var(--muted);">STIB/SNCB — exonéré PP</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-cafeteria" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">☕ Plan cafétéria</div><div style="font-size:10px;color:var(--muted);">Choix avantages flexibles</div></div></label>
+      </div>
+      <div id="w-voiture-bloc" style="display:none;margin-top:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;">
+        <div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:8px;">🚗 Voiture — Calcul ATN</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Valeur catalogue (€)</label><input id="w-car-val" type="number" value="35000" style="width:100%;padding:7px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit;font-size:12px;"></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">CO₂ g/km</label><input id="w-car-co2" type="number" value="0" style="width:100%;padding:7px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit;font-size:12px;"></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Motorisation</label><select id="w-car-type" style="width:100%;padding:7px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit;font-size:12px;"><option value="elec">Électrique</option><option value="essence" selected>Essence/Hybride</option><option value="diesel">Diesel</option></select></div>
+        </div>
       </div>
     </div>
 
-    <!-- Panel flexi (conditionnel) -->
-    <div id="w-flexi-bloc" style="display:none;background:rgba(234,179,8,.05);border:1px solid rgba(234,179,8,.2);border-radius:8px;padding:16px;margin-bottom:12px;">
-      <div style="font-size:12px;font-weight:700;color:#eab308;margin-bottom:10px;">⚡ Flexi-job — Conditions obligatoires</div>
-      <div style="font-size:11px;color:var(--text);line-height:1.9;">
-        ✅ Le travailleur est déjà occupé à <strong>4/5 minimum</strong> chez un autre employeur<br>
-        ✅ <strong>Dimona FLEXI</strong> obligatoire (pas la Dimona normale)<br>
-        ✅ Salaire flexi minimum : <strong>11,54€/h</strong> (2026) — exonéré PP travailleur<br>
-        ✅ <strong>Cotisation patronale spéciale</strong> : 25% (pas les taux normaux)<br>
-        ✅ Pas de droit au chômage, ni aux indemnités maladie via flexi<br>
-        ⚠️ Vérifier attestation employeur principal (preuve 4/5)
+    <!-- ══ BLOC 4 : SITUATION SPÉCIALE ══ -->
+    <div style="margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+        <div style="width:28px;height:28px;border-radius:8px;background:rgba(201,150,58,.2);display:flex;align-items:center;justify-content:center;font-size:13px;">⚡</div>
+        <div style="font-size:14px;font-weight:700;color:var(--gold);">4 — Situations spéciales</div>
+        <div style="flex:1;height:1px;background:rgba(201,150,58,.15);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;">
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-mitempstherp" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🏥 Mi-temps thérapeutique</div><div style="font-size:10px;color:var(--muted);">Autorisation médecin-conseil</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-incapacite" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🤒 Incapacité de travail</div><div style="font-size:10px;color:var(--muted);">Maladie / accident privé</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-accidenttrav" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">⚠️ Accident du travail</div><div style="font-size:10px;color:var(--muted);">Déclaration assureur 8j</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-credtemps" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">⏸️ Crédit-temps</div><div style="font-size:10px;color:var(--muted);">Diminution carrière</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-limosa" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🌍 Travailleur étranger</div><div style="font-size:10px;color:var(--muted);">LIMOSA + permis travail</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-saisie" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">⚖️ Saisie sur salaire</div><div style="font-size:10px;color:var(--muted);">Tiers saisi / délégation</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-maternite" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🤱 Congé maternité</div><div style="font-size:10px;color:var(--muted);">15 sem. / 20j naissance</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-syndicat" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🔵 Délégué syndical</div><div style="font-size:10px;color:var(--muted);">Protection licenciement</div></div></label>
       </div>
     </div>
 
-    <!-- Panel professions libérales -->
-    <div id="w-plib-bloc" style="display:none;background:rgba(167,139,250,.05);border:1px solid rgba(167,139,250,.25);border-radius:8px;padding:16px;margin-bottom:12px;">
-      <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:12px;">🎓 Profession libérale — Règles spécifiques</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div>
-          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Régime ONSS</label>
-          <select id="w-plib-onss" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
-            <option value="salarie">Salarié (assujetti ONSS — contrat de travail)</option>
-            <option value="independant">Indépendant (cotisations sociales INASTI)</option>
-            <option value="mixte">Mixte (salarié + activité libérale)</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Ordre professionnel</label>
-          <select id="w-plib-ordre" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
-            <option value="">— Aucun —</option>
-            <option value="barreau">Barreau (avocat)</option>
-            <option value="onm">ONM (médecins)</option>
-            <option value="architectes">Ordre des architectes</option>
-            <option value="iec">IEC (experts-comptables)</option>
-            <option value="irev">IRE (réviseurs)</option>
-            <option value="pharmacie">APB (pharmaciens)</option>
-          </select>
-        </div>
-      </div>
-      <div style="font-size:11px;line-height:1.9;color:var(--text);">
-        <div style="font-weight:600;color:#a78bfa;margin-bottom:6px;">Points d'attention :</div>
-        <div>⚖️ <strong>Avocat salarié</strong> : possible depuis 2014 — CP 460 — assujetti ONSS sauf barreau spécifique</div>
-        <div>🩺 <strong>Médecin salarié</strong> : CP 330/331/332 (hôpital) ou CP 339 (cabinet privé) — ONSS normal</div>
-        <div>📐 <strong>Architecte / Ingénieur</strong> : souvent indépendant — vérifier assujettissement ONSS</div>
-        <div>📊 <strong>Expert-comptable</strong> : CP 200 si salarié d'un cabinet — ONSS normal</div>
-        <div>⚠️ <strong>Incompatibilités</strong> : certaines professions interdisent le cumul salarié (vérifier statut de l'ordre)</div>
-      </div>
-    </div>
-
-    <!-- Panel fonctionnaire -->
-    <div id="w-fonc-bloc" style="display:none;background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:16px;margin-bottom:12px;">
-      <div style="font-size:12px;font-weight:700;color:#3b82f6;margin-bottom:12px;">🏛️ Secteur public — Règles spécifiques</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-        <div>
-          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Type d'administration</label>
-          <select id="w-fonc-admin" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
-            <option value="federal">Administration fédérale (SPF)</option>
-            <option value="region">Région / Communauté</option>
-            <option value="commune">Administration communale / CPAS</option>
-            <option value="enseignement">Enseignement (réseau libre / officiel)</option>
-            <option value="para">Parastataux / Organismes d'intérêt public</option>
-            <option value="police">Police fédérale / locale</option>
-            <option value="armee">Armée / Défense</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Mode de recrutement</label>
-          <select id="w-fonc-mode" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
-            <option value="selor">Via SELOR (concours)</option>
-            <option value="contrat">Contrat direct</option>
-            <option value="stage">Stage probatoire → nomination</option>
-            <option value="interim">Interim / Remplacement</option>
-          </select>
-        </div>
-      </div>
-      <div style="font-size:11px;line-height:1.9;color:var(--text);">
-        <div style="font-weight:600;color:#3b82f6;margin-bottom:6px;">Points d'attention :</div>
-        <div>📋 <strong>Statutaire (nommé)</strong> : pas assujetti ONSS — régime propre de pension — inamovible</div>
-        <div>📋 <strong>Contractuel public</strong> : assujetti ONSS comme secteur privé — CP 319/329 selon secteur</div>
-        <div>🏫 <strong>Enseignant</strong> : DIMONA obligatoire — CP 319.01 (libre) ou officiel selon réseau</div>
-        <div>⚠️ <strong>Cumul</strong> : fonctionnaire nommé + activité privée = autorisation hiérarchique obligatoire</div>
-        <div>📑 <strong>Dimona</strong> : obligatoire même pour fonctionnaires contractuels — type selon régime</div>
-      </div>
-    </div>
-
-    <!-- Panel avocat spécifique -->
-    <div id="w-avocat-bloc" style="display:none;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:16px;margin-bottom:12px;">
-      <div style="font-size:12px;font-weight:700;color:#f59e0b;margin-bottom:12px;">⚖️ Avocat — Régime spécifique</div>
-      <div style="font-size:11px;line-height:2;color:var(--text);">
-        <div>📌 <strong>Avocat salarié</strong> : CP 460 — assujetti ONSS depuis loi 03/06/2007</div>
-        <div>📌 <strong>Stagiaire avocat</strong> : convention de stage ≠ contrat travail — pas ONSS si honoraires seulement</div>
-        <div>📌 <strong>DIMONA</strong> : type <strong>DWD</strong> (Dimona Juridique) pour avocats salariés — <em>pas</em> le type normal</div>
-        <div>📌 <strong>Bâtonnier à notifier</strong> : engagement d'un avocat salarié doit être communiqué au barreau</div>
-        <div>📌 <strong>Secret professionnel</strong> : clause obligatoire dans tout contrat avocat</div>
-        <div>📌 <strong>Assurance RC Pro</strong> : couverture obligatoire — vérifier si employeur ou avocat lui-même</div>
-      </div>
-    </div>
-
-    <!-- Panel artiste -->
-    <div id="w-artiste-bloc" style="display:none;background:rgba(236,72,153,.05);border:1px solid rgba(236,72,153,.25);border-radius:8px;padding:16px;margin-bottom:12px;">
-      <div style="font-size:12px;font-weight:700;color:#ec4899;margin-bottom:12px;">🎨 Artiste rémunéré — Régime spécifique</div>
-      <div style="font-size:11px;line-height:2;color:var(--text);">
-        <div>📌 <strong>Carte artiste</strong> : obligatoire pour le régime fiscal/social artiste — délivrée par SPF Finances</div>
-        <div>📌 <strong>ONSS artiste</strong> : cotisations réduites si &lt; 30 prestations/an chez même employeur</div>
-        <div>📌 <strong>Dimona</strong> : type <strong>A17</strong> spécifique artistes</div>
-        <div>📌 <strong>PP</strong> : régime fiscal avantageux — déduction frais professionnels 50% forfaitaire</div>
-        <div>📌 <strong>Caisse congés spectacles</strong> : affiliation obligatoire (ONEM)</div>
-      </div>
-    </div>
-
-    <!-- Boutons navigation -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:8px;padding-top:12px;border-top:1px solid var(--border);">
-      <button onclick="wizGo(1)" style="padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;">← Retour</button>
+    <!-- ══ BOUTONS FINAUX ══ -->
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap;gap:10px;">
+      <div style="font-size:11px;color:var(--muted);">💡 Tous les champs sont optionnels sauf * — plus tu remplis, plus le dossier est complet</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button onclick="wizOpenDimona()" style="padding:10px 20px;border-radius:8px;border:1px solid rgba(74,222,128,.3);background:rgba(74,222,128,.1);color:#4ade80;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">📡 Dimona IN maintenant</button>
-        <button onclick="wizGo(3)" style="padding:10px 24px;border-radius:8px;border:none;background:var(--gold);color:#060810;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">Suivant → Avantages</button>
+        <button onclick="wizOpenDimona()" style="padding:10px 20px;border-radius:8px;border:1px solid rgba(74,222,128,.3);background:rgba(74,222,128,.1);color:#4ade80;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">📡 Dimona IN</button>
+        <button onclick="wizGenerate()" style="padding:10px 28px;border-radius:8px;border:none;background:linear-gradient(135deg,#C9963A,#A07D3E);color:#060810;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;">⚡ Générer le dossier complet</button>
       </div>
     </div>
-  </div>
 
-<!-- STEP 3 : Avantages -->
-  <div id="wiz-s3" class="wiz-panel" style="padding:24px;display:none;">
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px;">
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-cheqrep" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🍽️ Chèques-repas</div><div style="font-size:10px;color:var(--muted);">8€/j — exonéré ONSS+PP</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-voiture" onchange="wizAtnChange()" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🚗 Voiture de société</div><div style="font-size:10px;color:var(--muted);">ATN imposable — pas ONSS</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-gsm" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">📱 GSM société</div><div style="font-size:10px;color:var(--muted);">ATN 12,50€/mois</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-laptop" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">💻 Laptop société</div><div style="font-size:10px;color:var(--muted);">ATN 6€/mois</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-internet" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🌐 Internet domicile</div><div style="font-size:10px;color:var(--muted);">ATN 5€/mois</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-ecocheq" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🌱 Éco-chèques</div><div style="font-size:10px;color:var(--muted);">max 250€/an — exonéré</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-assgrp" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🛡️ Assurance groupe</div><div style="font-size:10px;color:var(--muted);">Pension complémentaire</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-hospit" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🏥 Hospitalisation</div><div style="font-size:10px;color:var(--muted);">Cotis. patronale exonérée</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-teletravail" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🏠 Télétravail structurel</div><div style="font-size:10px;color:var(--muted);">148,73€/m — CCT 149</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-warrant" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">📊 Warrants</div><div style="font-size:10px;color:var(--muted);">Fiscalement avantageux</div></div>
-      </label>
-    </div>
-    <div id="w-voiture-bloc" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;">
-      <div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:10px;">🚗 Détails voiture de société</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
-        <div>
-          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Valeur catalogue (€)</label>
-          <input id="w-car-val" type="number" value="35000" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit;font-size:12px;">
-        </div>
-        <div>
-          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">CO₂ g/km</label>
-          <input id="w-car-co2" type="number" value="0" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit;font-size:12px;">
-        </div>
-        <div>
-          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Motorisation</label>
-          <select id="w-car-type" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit;font-size:12px;">
-            <option value="elec">Électrique</option>
-            <option value="essence" selected>Essence/Hybride</option>
-            <option value="diesel">Diesel</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div style="display:flex;justify-content:space-between;margin-top:8px;">
-      <button onclick="wizGo(2)" style="padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;">← Retour</button>
-      <button onclick="wizGo(4)" style="padding:10px 24px;border-radius:8px;border:none;background:var(--gold);color:#060810;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">Suivant → Situation</button>
-    </div>
-  </div>
+    <!-- ══ RÉSULTAT ══ -->
+    <div id="wiz-result" style="margin-top:20px;"></div>
 
-  <!-- STEP 4 : Situation spéciale -->
-  <div id="wiz-s4" class="wiz-panel" style="padding:24px;display:none;">
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px;">
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-mitempstherp" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🏥 Mi-temps thérapeutique</div><div style="font-size:10px;color:var(--muted);">Reprise partielle après maladie</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-incapacite" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🤒 Incapacité de travail</div><div style="font-size:10px;color:var(--muted);">Maladie / accident privé</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-accidenttrav" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">⚠️ Accident du travail</div><div style="font-size:10px;color:var(--muted);">Déclaration assureur AT</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-credtemps" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">⏸️ Crédit-temps</div><div style="font-size:10px;color:var(--muted);">Diminution de carrière</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-limosa" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🌍 Travailleur étranger</div><div style="font-size:10px;color:var(--muted);">LIMOSA + permis travail</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-saisie" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">⚖️ Saisie sur salaire</div><div style="font-size:10px;color:var(--muted);">Tiers saisi / délégation</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-maternite" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🤱 Congé maternité/paternité</div><div style="font-size:10px;color:var(--muted);">15 sem. maternité / 20j naissance</div></div>
-      </label>
-      <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);">
-        <input type="checkbox" id="w-syndicat" style="accent-color:var(--gold);width:16px;height:16px;">
-        <div><div style="font-size:12px;font-weight:600;color:var(--text);">🔵 Délégué syndical</div><div style="font-size:10px;color:var(--muted);">Protection contre licenciement</div></div>
-      </label>
-    </div>
-    <div style="display:flex;justify-content:space-between;margin-top:8px;">
-      <button onclick="wizGo(3)" style="padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;">← Retour</button>
-      <button onclick="wizGenerate()" style="padding:10px 28px;border-radius:8px;border:none;background:linear-gradient(135deg,#C9963A,#A07D3E);color:#060810;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">⚡ Générer le dossier complet</button>
-    </div>
   </div>
-
-  <!-- STEP 5 : Résultat -->
-  <div id="wiz-s5" class="wiz-panel" style="padding:24px;display:none;">
-    <div id="wiz-result"></div>
-  </div>
-
 </section>
 
 <script>
@@ -1790,6 +1588,8 @@ function wizGenerate() {
   wizGo(5);
 }
 </script>
+
+
 
 
 <!-- ═══════════════════════════════════ CALCULATEURS -->
