@@ -1039,16 +1039,123 @@ body {
     </div>
     <div>
       <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Commission paritaire</label>
-      <select id="w-cp" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-        <option value="200">CP 200 — Employés (général)</option>
-        <option value="218">CP 218 — Alimentaire</option>
-        <option value="302">CP 302 — Hôtellerie</option>
-        <option value="100">CP 100 — Ouvriers (général)</option>
-        <option value="124">CP 124 — Bâtiment</option>
-        <option value="310">CP 310 — Banques</option>
-        <option value="330">CP 330 — Soins de santé</option>
-        <option value="326">CP 326 — Commerce détail</option>
-        <option value="autre">Autre</option>
+      <select id="w-cp" onchange="wizCPChange()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        <optgroup label="── EMPLOYÉS ──">
+          <option value="200">CP 200 — Employés secteur privé (général)</option>
+          <option value="201">CP 201 — Employés du commerce de détail alimentaire</option>
+          <option value="202">CP 202 — Employés secteur alimentaire</option>
+          <option value="207">CP 207 — Employés secteur chimique</option>
+          <option value="209">CP 209 — Employés construction</option>
+          <option value="210">CP 210 — Journalistes</option>
+          <option value="211">CP 211 — Employés transport & logistique</option>
+          <option value="214">CP 214 — Employés métaux non-ferreux</option>
+          <option value="215">CP 215 — Employés industrie textile</option>
+          <option value="216">CP 216 — Employés papier-carton</option>
+          <option value="218">CP 218 — Employés industrie alimentaire</option>
+          <option value="219">CP 219 — Employés commerce international</option>
+          <option value="220">CP 220 — Employés secteur diamantaire</option>
+          <option value="221">CP 221 — Employés industrie du bois</option>
+          <option value="222">CP 222 — Employés industrie graphique</option>
+          <option value="223">CP 223 — Employés assurances</option>
+          <option value="224">CP 224 — Employés agriculture & horticulture</option>
+          <option value="225">CP 225 — Employés secteur linguistique</option>
+          <option value="226">CP 226 — Employés intérimaires</option>
+          <option value="227">CP 227 — Employés industrie du verre</option>
+          <option value="228">CP 228 — Employés industrie extractive</option>
+          <option value="302">CP 302 — Hôtellerie & restauration</option>
+          <option value="304">CP 304 — Spectacle (employés)</option>
+          <option value="307">CP 307 — Ports (employés)</option>
+          <option value="308">CP 308 — Dragage & génie civil (employés)</option>
+          <option value="309">CP 309 — Services de gardiennage</option>
+          <option value="310">CP 310 — Banques</option>
+          <option value="311">CP 311 — Bourses de travail</option>
+          <option value="312">CP 312 — Assurances (autre)</option>
+          <option value="313">CP 313 — Pharmacies</option>
+          <option value="314">CP 314 — Commerce électro & photo</option>
+          <option value="315">CP 315 — Pompes funèbres</option>
+          <option value="317">CP 317 — Commerce alimentaire (détail)</option>
+          <option value="318">CP 318 — Coiffure & soins beauté</option>
+          <option value="320">CP 320 — Transport routier (employés)</option>
+          <option value="321">CP 321 — Manutention portuaire (employés)</option>
+          <option value="322">CP 322 — Transport aérien</option>
+          <option value="323">CP 323 — Intérim (utilisateurs)</option>
+          <option value="324">CP 324 — Agences de voyage</option>
+          <option value="325">CP 325 — Location de véhicules</option>
+          <option value="326">CP 326 — Commerce de détail (non-alimentaire)</option>
+          <option value="327">CP 327 — Entreprises de travail adapté</option>
+          <option value="328">CP 328 — Commerces de journaux</option>
+          <option value="329">CP 329 — Grandes surfaces alimentaires</option>
+          <option value="330">CP 330 — Établissements et services de santé</option>
+          <option value="331">CP 331 — Soins de santé (Flandre)</option>
+          <option value="332">CP 332 — Soins de santé (Wallonie-Bruxelles)</option>
+          <option value="333">CP 333 — Commerce de détail indépendant</option>
+          <option value="334">CP 334 — Services de repassage industriel</option>
+          <option value="335">CP 335 — Travail intérimaire</option>
+          <option value="336">CP 336 — Services de proximité (titres-services)</option>
+          <option value="337">CP 337 — Petites et moyennes entreprises</option>
+          <option value="338">CP 338 — Services de nettoyage</option>
+          <option value="339">CP 339 — Commerce de détail alimentaire indépendant</option>
+          <option value="340">CP 340 — Commerce de la construction (employés)</option>
+        </optgroup>
+        <optgroup label="── OUVRIERS ──">
+          <option value="100">CP 100 — Commission paritaire nationale auxiliaire ouvriers</option>
+          <option value="102">CP 102 — Transport public (ouvriers)</option>
+          <option value="104">CP 104 — Industrie diamantaire</option>
+          <option value="105">CP 105 — Véhicules neufs</option>
+          <option value="106">CP 106 — Commerce carburants</option>
+          <option value="107">CP 107 — Hôtellerie (ouvriers)</option>
+          <option value="108">CP 108 — Nettoyage (ouvriers)</option>
+          <option value="109">CP 109 — Batellerie</option>
+          <option value="110">CP 110 — Blanchisseries industrielles</option>
+          <option value="111">CP 111 — Maroquinerie</option>
+          <option value="112">CP 112 — Garages</option>
+          <option value="113">CP 113 — Pêche maritime</option>
+          <option value="114">CP 114 — Industrie des tabacs</option>
+          <option value="115">CP 115 — Industrie vestimentaire (ouvriers)</option>
+          <option value="116">CP 116 — Industrie du vêtement et tricotage</option>
+          <option value="117">CP 117 — Industrie du textile</option>
+          <option value="118">CP 118 — Industrie alimentaire (ouvriers)</option>
+          <option value="119">CP 119 — Industrie de la boulangerie</option>
+          <option value="120">CP 120 — Industrie du papier-carton (ouvriers)</option>
+          <option value="121">CP 121 — Nettoyage à sec</option>
+          <option value="122">CP 122 — Industrie des carrières</option>
+          <option value="123">CP 123 — Industrie de la céramique</option>
+          <option value="124">CP 124 — Bâtiment & travaux publics</option>
+          <option value="125">CP 125 — Bois (ouvriers)</option>
+          <option value="126">CP 126 — Ameublement & industrie du bois</option>
+          <option value="127">CP 127 — Industrie du verre (ouvriers)</option>
+          <option value="128">CP 128 — Industrie du métal (ouvriers)</option>
+          <option value="129">CP 129 — Industrie de la construction électrique</option>
+          <option value="130">CP 130 — Imprimeries</option>
+          <option value="131">CP 131 — Mines & minières</option>
+          <option value="132">CP 132 — Agriculture</option>
+          <option value="133">CP 133 — Horticulture</option>
+          <option value="134">CP 134 — Dragage & génie civil</option>
+          <option value="135">CP 135 — Industrie du béton</option>
+          <option value="136">CP 136 — Industrie chimique (ouvriers)</option>
+          <option value="137">CP 137 — Industrie pharmaceutique (ouvriers)</option>
+          <option value="138">CP 138 — Industrie plastique & caoutchouc</option>
+          <option value="139">CP 139 — Industrie des métaux non-ferreux</option>
+          <option value="140">CP 140 — Transport routier (ouvriers)</option>
+          <option value="142">CP 142 — Jardiniers & paysagistes</option>
+          <option value="143">CP 143 — Secteur de la garde d'enfants</option>
+          <option value="144">CP 144 — Services de chèques-repas (ouvriers)</option>
+          <option value="145">CP 145 — Industrie du déménagement</option>
+          <option value="146">CP 146 — Ports maritimes (ouvriers)</option>
+          <option value="147">CP 147 — Ports intérieurs</option>
+          <option value="148">CP 148 — Industrie des poussières de fer</option>
+          <option value="149">CP 149 — Électricité (ouvriers)</option>
+          <option value="150">CP 150 — Entreprises de travail adapté (ouvriers)</option>
+        </optgroup>
+        <optgroup label="── SECTEUR PUBLIC ──">
+          <option value="319">CP 319 — Établissements et services d'éducation</option>
+          <option value="319.01">CP 319.01 — Enseignement libre subventionné</option>
+          <option value="329.01">CP 329.01 — Soins ambulatoires</option>
+        </optgroup>
+        <optgroup label="── DIVERS ──">
+          <option value="000">CP 000 — Non assujetti / Dirigeant d'entreprise</option>
+          <option value="autre">Autre / Inconnu</option>
+        </optgroup>
       </select>
     </div>
     <div>
@@ -2658,6 +2765,16 @@ function calcGlobal() {
     'À déclarer fiche 281.10 : <strong>€' + ((car + gsm + pc) * 12).toFixed(0) + '/an</strong>';
 }
 
+
+// ── Auto-detect statut depuis CP ──
+function wizCPChange() {
+  var cp = parseInt(document.getElementById('w-cp')?.value) || 0;
+  var statutEl = document.getElementById('w-statut');
+  if (!statutEl) return;
+  // CP 100-199 = ouvriers, 200+ = employés
+  if (cp >= 100 && cp < 200) statutEl.value = 'OUV';
+  else if (cp >= 200) statutEl.value = 'EMP';
+}
 
 // ── Wizard Dossier → Dimona IN ──
 function wizOpenDimona() {
