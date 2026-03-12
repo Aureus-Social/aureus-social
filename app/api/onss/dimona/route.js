@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 export const dynamic = 'force-dynamic';
 
-const ONSS_NUMBER = '51357716';
+const ONSS_NUMBER = '5135771602';
 const DIMONA_URL = 'https://services.socialsecurity.be/REST/dimona/v2/declarations';
 
 async function getToken() {
@@ -27,9 +27,8 @@ export async function POST(req) {
 
     const token = await getToken();
 
-    // Schema v2 ONSS
     const payload = {
-      employer: { nssoRegistrationNumber: ONSS_NUMBER },
+      employer: { provisionalNssoRegistrationNumber: ONSS_NUMBER },
       worker: { ssin: niss.replace(/[^0-9]/g, '') },
       dimonaIn: type === 'IN' ? {
         startDate: startDate,
