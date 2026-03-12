@@ -8,7 +8,7 @@ import{TX_ONSS_E,TX_ONSS_W,RMMMG,CR_MAX,CR_PAT,FORF_BUREAU}from'@/app/lib/helper
 // ═══════════════════════════════════════════════════════════
 // TX_ONSS_E importé depuis helpers → source unique lois-belges
 const C=({children,title:t,sub})=><div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)',marginBottom:14}}>{t&&<div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:sub?2:12}}>{t}</div>}{sub&&<div style={{fontSize:10,color:'#888',marginBottom:12}}>{sub}</div>}{children}</div>;
-const inputStyle={width:'100%',padding:'10px 12px',background:'#090c16',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,color:'#e5e5e5',fontSize:12,fontFamily:'inherit',boxSizing:'border-box'};
+const inputStyle={width:'100%',padding:'10px 12px',background:TH.bg,border:'1px solid rgba(139,115,60,.15)',borderRadius:8,color:TH.text,fontSize:12,fontFamily:'inherit',boxSizing:'border-box'};
 const labelStyle={fontSize:10,color:'#888',display:'block',marginBottom:4,fontWeight:500};
 const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
 const Field=({l,children,req})=><div style={{marginBottom:10}}><label style={labelStyle}>{l}{req&&<span style={{color:'#ef4444'}}> *</span>}</label>{children}</div>;
@@ -59,7 +59,8 @@ const generateDimonaPreview=(emp,company)=>{
 </DmfAConsult>`;
 };
 
-export function OnboardingWizardV2({s,d,initialMode}){
+export function OnboardingWizardV2({s,d,initialMode,th}){
+  const TH=th||{text:'#e8e6e0',text2:'#9e9b93',text3:'#5e5c56',bg:'#0a0908',bg2:'#111009',surface:'rgba(255,255,255,.03)',border:'rgba(198,163,78,.08)'};
   const { t, lang, tText } = useLang();
   const [mode,setMode]=useState(initialMode||'choose'); // choose | wizard | reprise
   const [step,setStep]=useState(0);
@@ -291,8 +292,8 @@ export function OnboardingWizardV2({s,d,initialMode}){
             <div>Prenom</div><div>Nom</div><div>NISS</div><div>Contrat</div><div>Brut</div><div>DIMONA</div><div/>
           </div>
           {data.employees.map((e,i)=><div key={e.id||i} style={{display:'grid',gridTemplateColumns:'1fr 1fr 110px 60px 80px 60px 30px',padding:'5px 12px',borderBottom:'1px solid rgba(255,255,255,.02)',fontSize:11,alignItems:'center'}}>
-            <span style={{color:'#e8e6e0'}}>{e.first}</span>
-            <span style={{color:'#e8e6e0'}}>{e.last}</span>
+            <span style={{color:TH.text}}>{e.first}</span>
+            <span style={{color:TH.text}}>{e.last}</span>
             <span style={{fontFamily:'monospace',fontSize:10,color:e.niss?'#e8e6e0':'#eab308'}}>{e.niss||'—'}</span>
             <Badge text={e.contractType||'CDI'} color={e.contractType==='CDD'?'#eab308':'#4ade80'}/>
             <span style={{color:'#c6a34e'}}>{fmt(+(e.monthlySalary||0))}</span>
@@ -322,9 +323,9 @@ export function OnboardingWizardV2({s,d,initialMode}){
 
       {/* DIMONA PREVIEW MODAL */}
       {showDimona&&<div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,.6)',zIndex:999,display:'flex',alignItems:'center',justifyContent:'center'}} onClick={()=>setShowDimona(null)}>
-        <div onClick={e=>e.stopPropagation()} style={{background:'#0d1117',border:'1px solid rgba(34,197,94,.2)',borderRadius:16,padding:24,width:540,maxHeight:'80vh',overflow:'auto'}}>
+        <div onClick={e=>e.stopPropagation()} style={{background:TH.bg2,border:'1px solid rgba(34,197,94,.2)',borderRadius:16,padding:24,width:540,maxHeight:'80vh',overflow:'auto'}}>
           <h3 style={{fontSize:16,fontWeight:700,color:'#4ade80',marginBottom:12}}>📡 Dimona IN Preview — {showDimona.first} {showDimona.last}</h3>
-          <pre style={{background:'#090c16',padding:12,borderRadius:8,fontSize:10,color:'#4ade80',whiteSpace:'pre-wrap',fontFamily:'monospace',lineHeight:1.6}}>{generateDimonaPreview(showDimona,data.company)}</pre>
+          <pre style={{background:TH.bg,padding:12,borderRadius:8,fontSize:10,color:'#4ade80',whiteSpace:'pre-wrap',fontFamily:'monospace',lineHeight:1.6}}>{generateDimonaPreview(showDimona,data.company)}</pre>
           <div style={{marginTop:10,fontSize:10,color:'#888'}}>Ce XML sera soumis a l'ONSS via le canal Dimona electronique apres creation du dossier.</div>
           <button onClick={()=>setShowDimona(null)} style={{marginTop:10,padding:'8px 20px',borderRadius:8,border:'1px solid rgba(34,197,94,.2)',background:'transparent',color:'#4ade80',cursor:'pointer',fontFamily:'inherit'}}>Fermer</button>
         </div>
@@ -359,13 +360,13 @@ export function OnboardingWizardV2({s,d,initialMode}){
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
           <div>
             <div style={{fontSize:11,fontWeight:600,color:'#c6a34e',marginBottom:8}}>🏢 Entreprise</div>
-            <div style={{fontSize:11,color:'#e8e6e0'}}><b>{data.company.name}</b></div>
+            <div style={{fontSize:11,color:TH.text}}><b>{data.company.name}</b></div>
             <div style={{fontSize:10,color:'#888'}}>TVA: {data.company.vat} — CP: {data.company.cp}</div>
             <div style={{fontSize:10,color:'#888'}}>{data.company.address} {data.company.zip} {data.company.city}</div>
           </div>
           <div>
             <div style={{fontSize:11,fontWeight:600,color:'#c6a34e',marginBottom:8}}>👤 Contact</div>
-            <div style={{fontSize:11,color:'#e8e6e0'}}>{data.contact.name} — {data.contact.function}</div>
+            <div style={{fontSize:11,color:TH.text}}>{data.contact.name} — {data.contact.function}</div>
             <div style={{fontSize:10,color:'#888'}}>{data.contact.email} {data.contact.phone}</div>
           </div>
           <div>
@@ -381,7 +382,7 @@ export function OnboardingWizardV2({s,d,initialMode}){
 
       <C title={"👥 "+data.employees.length+" employe(s) — Cout total: "+fmt(data.employees.reduce((a,e)=>a+(+(e.monthlySalary||0))*(1+TX_ONSS_E),0))+' EUR/mois'}>
         {data.employees.map((e,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:11}}>
-          <span style={{color:'#e8e6e0'}}>{e.first} {e.last} <span style={{color:'#888'}}>({e.contractType})</span></span>
+          <span style={{color:TH.text}}>{e.first} {e.last} <span style={{color:'#888'}}>({e.contractType})</span></span>
           <span style={{color:'#c6a34e',fontWeight:600}}>{fmt(+(e.monthlySalary||0))} EUR brut</span>
         </div>)}
         {data.employees.length===0&&<div style={{color:'#eab308',fontSize:11}}>⚠️ Aucun employe. Vous pouvez en ajouter plus tard.</div>}
@@ -401,7 +402,7 @@ export function OnboardingWizardV2({s,d,initialMode}){
       {data.employees.length>0&&<C title={"📡 DIMONA IN — "+data.employees.filter(e=>e.niss).length+"/"+data.employees.length+" prets"} sub="Les declarations Dimona seront generees automatiquement a la validation">
         {data.employees.map((e,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'4px 0',fontSize:11}}>
           <span style={{fontSize:14}}>{e.niss?'✅':'⚠️'}</span>
-          <span style={{color:'#e8e6e0'}}>{e.first} {e.last}</span>
+          <span style={{color:TH.text}}>{e.first} {e.last}</span>
           <span style={{color:e.niss?'#4ade80':'#eab308',fontSize:10}}>{e.niss?'DIMONA pret':'NISS manquant'}</span>
         </div>)}
       </C>}
@@ -417,7 +418,7 @@ export function OnboardingWizardV2({s,d,initialMode}){
 }
 
 
-export default function OnboardingHubWrapped({s, d, t, lang, tab}) {
+export default function OnboardingHubWrapped({s, d, t, lang, tab, th}) {
   const initialMode = tab === 'onboardwizard' ? 'wizard' : 'choose';
-  return <OnboardingWizardV2 s={s} d={d} initialMode={initialMode} />;
+  return <OnboardingWizardV2 s={s} d={d} th={th} initialMode={initialMode} />;
 }

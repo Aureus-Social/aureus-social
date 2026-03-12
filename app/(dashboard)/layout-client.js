@@ -313,7 +313,16 @@ function DashboardLayoutInner({ user }) {
   const t = tCtx;
 
   // Persister préférences
-  useEffect(() => { try { if (typeof window !== 'undefined') localStorage.setItem('aureus_theme', theme); } catch { /* handled */ } }, [theme]);
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('aureus_theme', theme);
+        // Sync avec iframe Embauche A→Z si ouvert
+        const iframes = document.querySelectorAll('iframe');
+        iframes.forEach(f => { try { f.contentWindow.postMessage({ theme }, '*'); } catch {} });
+      }
+    } catch { /* handled */ }
+  }, [theme]);
 
   // Couleurs selon thème
   const TH = {
