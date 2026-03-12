@@ -3,6 +3,7 @@ import { logInfo, logWarn } from '../lib/security/logger.js';
 import React, { useState, useReducer, useMemo, useEffect, useCallback, useRef, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { MENU, GROUPS, getGroupItems, SEARCH_SUBSECTIONS } from '../lib/menu-config';
+import { getRoleFromUser, canAccessPage, getMenuForRole, ROLE_LABELS, ROLE_COLORS } from '../lib/permissions';
 import { I18N } from '../lib/i18n';
 import { LangProvider, useLang } from '../lib/lang-context';
 import { supabase } from '../lib/supabase';
@@ -307,6 +308,12 @@ function DashboardLayoutInner({ user }) {
   const [page, setPage] = useState('dashboard');
   const [cryptoKey, setCryptoKey] = useState(null);
   const { lang, setLang, t: tCtx } = useLang();
+
+  // ── Rôle utilisateur (filtrage menu + accès pages) ───────
+  const userRole = getRoleFromUser(user);
+  const filteredMenu = getMenuForRole(MENU, userRole);
+  const filteredGroupItems = (gNum) => filteredMenu.filter(m => m.g === gNum && !m.group);
+
   const [theme, setTheme] = useState(() => (typeof window !== 'undefined' ? (()=>{ try { return localStorage.getItem('aureus_theme') || 'dark'; } catch { return 'dark'; } })() : 'dark'));
 
   // Traduction helper
@@ -470,6 +477,22 @@ function DashboardLayoutInner({ user }) {
   }, [user]);
 
   const renderPage = () => {
+    // ── Garde d'accès par rôle ──────────────────────────────
+    if (!canAccessPage(userRole, page)) {
+      return (
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'60vh', gap:16 }}>
+          <div style={{ fontSize:48 }}>🔒</div>
+          <div style={{ fontSize:20, fontWeight:700, color:'#c6a34e' }}>Accès non autorisé</div>
+          <div style={{ fontSize:13, color:'#9e9b93', textAlign:'center', maxWidth:380 }}>
+            Cette section n&apos;est pas accessible avec votre profil <strong style={{color: ROLE_COLORS[userRole]}}>{ROLE_LABELS[userRole]}</strong>.
+          </div>
+          <button onClick={() => setPage('dashboard')}
+            style={{ marginTop:8, padding:'8px 20px', borderRadius:8, border:'1px solid rgba(198,163,78,.3)', background:'rgba(198,163,78,.08)', color:'#c6a34e', cursor:'pointer', fontSize:12, fontFamily:'inherit' }}>
+            ← Retour au dashboard
+          </button>
+        </div>
+      );
+    }
     switch (page) {
       case 'dashboard': return <DashboardPage s={s} d={d} t={t} lang={lang} th={TH} onNavigate={setPage} />;
       case 'employees': return <EmployeesPage s={s} d={d} t={t} lang={lang} th={TH} />;
@@ -867,7 +890,8 @@ function DashboardLayoutInner({ user }) {
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
           {[1, 2, 3, 4, 5, 6, 7].map(gNum => {
             const group = GROUPS.find(g => g.id === `_g${gNum}`);
-            const items = getGroupItems(gNum) || [];
+            const items = filteredGroupItems(gNum) || [];
+            if (!items.length) return null;
             const isCollapsed = collapsed[gNum];
             return (
               <div key={gNum}>
@@ -932,7 +956,10 @@ function DashboardLayoutInner({ user }) {
             </button>
 
             <span title={cryptoKey ? 'Chiffrement AES-256 actif' : 'Chiffrement inactif'} style={{ fontSize: 12, color: cryptoKey ? '#22c55e' : '#ef4444' }}>{cryptoKey ? '🔒' : '🔓'}</span>
-            <span style={{ fontSize: 11, color: TH.text3, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email || 'demo'}</span>
+            <div style={{ display:'flex', flexDirection:'column', gap:1, maxWidth:160 }}>
+              <span style={{ fontSize: 11, color: TH.text3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email || 'demo'}</span>
+              <span style={{ fontSize: 10, fontWeight:700, color: ROLE_COLORS[userRole] || '#c6a34e', letterSpacing:'.3px' }}>{ROLE_LABELS[userRole] || 'Admin'}</span>
+            </div>
             <button onClick={handleLogout}
               style={{ padding: '5px 12px', borderRadius: 6, border: '1px solid rgba(239,68,68,.15)', background: 'rgba(239,68,68,.05)', color: '#ef4444', fontSize: 10, cursor: 'pointer', fontFamily: 'inherit' }}>
               {t('nav.logout') || 'Déconnexion'}
