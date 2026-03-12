@@ -26,7 +26,10 @@ async function sendEmail(to, subject, html) {
 }
 
 export async function POST(request) {
-  if (!supabase) return Response.json({ error: 'Supabase non configuré' }, { status: 500 });
+  if (!supabase) {
+    console.warn('[Onboarding] Supabase non configuré — skip');
+    return Response.json({ is_new: false, onboarded: true, skipped: true }, { status: 200 });
+  }
 
   try {
     const { user_id, email, company_name, action } = await request.json();
@@ -57,7 +60,7 @@ export async function POST(request) {
         created_at: new Date().toISOString(),
       });
 
-      if (insertError && !insertError.message?.includes('duplicate')) {
+      if (insertError && !insertError.message?.includes('duplicate') && !insertError.message?.includes('does not exist')) {
         console.error('[Onboarding] Erreur création client:', insertError.message);
       }
 
