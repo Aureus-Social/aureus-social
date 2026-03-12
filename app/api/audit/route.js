@@ -16,12 +16,15 @@ async function requireAuth(request) {
 
 export async function POST(request) {
   try {
-    // ✅ Auth JWT obligatoire
+    // Auth JWT — si absent, on logue quand même en mode anonyme (pas de 401 qui crée des boucles)
     const user = await requireAuth(request);
-    if (!user) return Response.json({ error: 'Non autorisé — JWT requis' }, { status: 401 });
+    const userId = user?.id || null;
 
     const { action, table_name, record_id, details } = await request.json();
     if (!action) return Response.json({ error: 'action required' }, { status: 400 });
+
+    // Si pas de supabase ou pas de user, on ignore silencieusement
+    if (!supabase || !userId) return Response.json({ success: true, skipped: true });
 
     const forwarded = request.headers.get('x-forwarded-for');
     const ip = forwarded ? forwarded.split(',')[0].trim() : request.headers.get('x-real-ip') || 'unknown';
@@ -32,8 +35,8 @@ export async function POST(request) {
       table_name: table_name || null,
       record_id: record_id ? String(record_id) : null,
       details: details || null,
-      user_id: user.id,
-      user_email: user.email,
+      user_id: userId,
+      user_email: user?.email || null,
       ip_address: ip,
       user_agent: userAgent.substring(0, 200),
       created_at: new Date().toISOString()

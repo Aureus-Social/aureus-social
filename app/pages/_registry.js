@@ -11,6 +11,7 @@ const SimulateurNetBrutPage = dynamic(() => import('../pages/SimulateurNetBrut')
 const SeuilsSociauxPage = dynamic(() => import('../pages/SeuilsSociaux'), { ssr: false, loading: () => <Loading /> });
 const PrimesAvantagesV2Page = dynamic(() => import('../pages/PrimesAvantagesV2'), { ssr: false, loading: () => <Loading /> });
 const OnboardingHubPage = dynamic(() => import('../pages/OnboardingHub'), { ssr: false, loading: () => <Loading /> });
+const ProceduresRHHubPage = dynamic(() => import('../pages/procedures/ProceduresRHHub'), { ssr: false, loading: () => <Loading /> });
 const ClotureMensuellePage = dynamic(() => import('../pages/ClotureMensuelle'), { ssr: false, loading: () => <Loading /> });
 const AnalyticsDashboardPage = dynamic(() => import('../pages/AnalyticsDashboard'), { ssr: false, loading: () => <Loading /> });
 const ComplianceDashboardPage = dynamic(() => import('../pages/ComplianceDashboard'), { ssr: false, loading: () => <Loading /> });
@@ -51,7 +52,8 @@ export function routePage(page, state, dispatch) {
     case 'baremescp': return <BaremesCPPage s={state} d={dispatch} />;
     case 'calcinstant': return <SimulateurNetBrutPage s={state} d={dispatch} />;
     case 'seuilssociaux': return <SeuilsSociauxPage s={state} d={dispatch} />;
-    case 'proceduresrh': return <PrimesAvantagesV2Page s={state} d={dispatch} />;
+    case 'embaucheaz': return <OnboardingHubPage s={state} d={dispatch} />;
+    case 'proceduresrh': return <ProceduresRHHubPage s={state} d={dispatch} />;
     case 'onboarding': return <OnboardingHubPage s={state} d={dispatch} />;
     case 'cloture': return <ClotureMensuellePage s={state} d={dispatch} />;
     case 'analytics': return <AnalyticsDashboardPage s={state} d={dispatch} />;

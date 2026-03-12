@@ -390,18 +390,19 @@ function DashboardLayoutInner({ user }) {
       const TWO_HOURS = 2 * 60 * 60 * 1000;
       if (!lastBackup || (now - parseInt(lastBackup)) > TWO_HOURS) {
         setTimeout(() => {
-          fetch('/api/backup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'silent', userEmail: user.email, userRole: user.user_metadata?.role || '' })
-          }).then(res => {
-            if (res.ok) {
-              sessionStorage.setItem(BACKUP_KEY, String(now));
-              const records = res.headers.get('X-Backup-Records');
-              logInfo('Layout', `Backup auto: ${records} enregistrements sauvegardés`);
-            }
-          }).catch(() => { /* fire-and-forget */ });
-        }, 3000); // 3s après login pour ne pas bloquer le chargement
+          import('../lib/auth-fetch').then(({ authFetch }) => {
+            authFetch('/api/backup', {
+              method: 'POST',
+              body: JSON.stringify({ action: 'silent', userEmail: user.email, userRole: user.user_metadata?.role || '' })
+            }).then(res => {
+              if (res.ok) {
+                sessionStorage.setItem(BACKUP_KEY, String(now));
+                const records = res.headers.get('X-Backup-Records');
+                logInfo('Layout', `Backup auto: ${records} enregistrements sauvegardés`);
+              }
+            }).catch(() => { /* fire-and-forget */ });
+          }).catch(() => {});
+        }, 3000);
       }
     }
   },[user]);
