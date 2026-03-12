@@ -187,3 +187,17 @@ ${lignes}
   setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 3000);
   return xml;
 }
+
+// ═══ CP_DATA — alias de BAREMES_CP_MIN pour compatibilité ═══
+export { BAREMES_CP_MIN as CP_DATA } from './lois-belges';
+
+// ═══ getBaremeCP — récupère le barème minimum d'une CP ═══
+export function getBaremeCP(cp) {
+  const key = String(cp || '200').replace(/[^0-9]/g, '');
+  const mins = {
+    '200':2070.48,'118':2095.44,'119':2029.88,'302':2029.88,
+    '124':2095.44,'32201':2029.88,'330':2070.48,'111':2095.44,
+    '140':2095.44,'121':2029.88,'152':2029.88
+  };
+  return { cl1: mins[key] || 2070.48, nom: 'CP '+key };
+}
