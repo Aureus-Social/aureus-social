@@ -1037,7 +1037,7 @@ body {
         </div>
         <div>
           <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Fonction / Poste *</label>
-          <input id="w-fonction" type="text" placeholder="Développeur, Comptable..." list="w-fonction-list" oninput="wizShowMinFonction()" onchange="wizShowMinFonction()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+          <input id="w-fonction" type="text" placeholder="Développeur, Comptable..." list="w-fonction-list" oninput="wizFonctionChange()" onchange="wizFonctionChange()" onblur="wizFonctionChange()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
           <div id="w-fonction-min" style="display:none;margin-top:6px;padding:8px 10px;border-radius:6px;background:rgba(201,150,58,.08);border:1px solid rgba(201,150,58,.2);font-size:11px;">
             <div id="w-fonction-min-label" style="color:var(--gold);font-weight:700;"></div>
             <div id="w-fonction-min-detail" style="color:var(--muted);margin-top:2px;line-height:1.5;"></div>
@@ -3191,12 +3191,7 @@ var FONCTION_MIN = {
   "consultant indépendant": { min: 3500, max: 8000, note: "Tarif jour 500-1200€/j selon domaine" },
 };
 
-function wizShowMinFonction() {
-  var val = (document.getElementById('w-fonction')?.value || '').toLowerCase().trim();
-  var bloc = document.getElementById('w-fonction-min');
-  var label = document.getElementById('w-fonction-min-label');
-  var detail = document.getElementById('w-fonction-min-detail');
-  if (!bloc || !val || val.length < 3) { if(bloc) bloc.style.display='none'; return; }
+// wizFonctionChange() remplace wizShowMinFonction
 
   // Cherche correspondance partielle
   var found = null;
@@ -3352,21 +3347,37 @@ var FONCTION_SAL = {
 };
 
 function wizFonctionChange() {
-  var val = document.getElementById('w-fonction')?.value || '';
+  var val = (document.getElementById('w-fonction')?.value || '').trim();
   var bloc = document.getElementById('w-fonction-min');
   var label = document.getElementById('w-fonction-min-label');
   var range = document.getElementById('w-fonction-min-range');
+  var cpInfo = document.getElementById('w-fonction-min-cp');
   if (!bloc) return;
   var info = FONCTION_SAL[val];
   if (info) {
     bloc.style.display = 'block';
-    label.textContent = '💼 Fourchette marché 2026 : ' + info.min.toLocaleString('fr-BE') + ' € — ' + info.max.toLocaleString('fr-BE') + ' € brut/mois';
-    range.textContent = info.note || '';
-    // Aussi mettre à jour le champ brut si vide
+    label.innerHTML = '💼 <strong>Fourchette marché belge 2026 :</strong> ' + info.min.toLocaleString('fr-BE') + ' € — ' + info.max.toLocaleString('fr-BE') + ' € brut/mois';
+    range.textContent = info.note ? '📌 ' + info.note : '';
+    // Afficher aussi le min CP sectoriel
+    var cp = document.getElementById('w-cp')?.value || 'DEFAULT';
+    var cpData = CP_MIN[cp] || CP_MIN['DEFAULT'];
+    if (cpData) cpInfo.textContent = '📊 Min légal CP ' + cp + ' : ' + (cpData.min < 100 ? cpData.min.toFixed(2)+'€/h' : cpData.min.toFixed(0)+'€/mois');
+    else cpInfo.textContent = '';
+    // Pré-remplir le salaire si vide
     var brutEl = document.getElementById('w-brut');
     if (brutEl && !brutEl.value) {
       brutEl.value = info.min;
       wizCheckSalaire();
+    }
+  } else if (val.length > 2) {
+    // Fonction saisie manuellement — afficher au moins le min CP
+    var cp = document.getElementById('w-cp')?.value || 'DEFAULT';
+    var cpData = CP_MIN[cp] || CP_MIN['DEFAULT'];
+    if (cpData) {
+      bloc.style.display = 'block';
+      label.innerHTML = '📊 <strong>Minimum légal CP ' + cp + ' :</strong> ' + (cpData.min < 100 ? cpData.min.toFixed(2)+'€/h' : cpData.min.toFixed(0)+'€/mois brut');
+      range.textContent = cpData.note || '';
+      cpInfo.textContent = '';
     }
   } else {
     bloc.style.display = 'none';
