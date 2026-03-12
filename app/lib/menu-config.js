@@ -95,7 +95,6 @@ export const MENU_REDIRECTS = {
   optifiscale:     'calcinstant',
   couttotal:       'calcinstant',
   avantages:       'gestionprimes',
-  gestionprimes:   'gestionprimes',
   vehiculesatn:    'gestionprimes',
   flexijobs:       'gestionprimes',
   baremespp:       'baremescp',
