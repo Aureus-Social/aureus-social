@@ -36,7 +36,7 @@ const SecProTab=({supabase,user,C})=>{
       // GitHub Actions runs (API publique)
       let ghRuns=[];
       try{
-        const r=await fetch('https://api.github.com/repos/Aureus-Social/aureus-social-v18/actions/workflows/backup-b2.yml/runs?per_page=20',
+        const r=await fetch('https://api.github.com/repos/Aureus-Social/aureus-social/actions/workflows/backup-b2.yml/runs?per_page=20',
           {headers:{'Accept':'application/vnd.github+json'}});
         if(r.ok){
           const g=await r.json();
@@ -151,11 +151,11 @@ const SecProTab=({supabase,user,C})=>{
         :backupError?<div style={{padding:12,background:'rgba(239,68,68,.08)',borderRadius:8,fontSize:10,color:'#fca5a5'}}>
           ⚠️ {backupError}
           <div style={{color:'#888',marginTop:4}}>Vérifier que la table <code>audit_log</code> existe dans Supabase.</div>
-          <a href='https://github.com/Aureus-Social/aureus-social-v18/actions/workflows/backup-b2.yml' target='_blank' rel='noreferrer' style={{color:'#c6a34e',fontSize:10}}>→ Voir directement GitHub Actions ↗</a>
+          <a href='https://github.com/Aureus-Social/aureus-social/actions/workflows/backup-b2.yml' target='_blank' rel='noreferrer' style={{color:'#c6a34e',fontSize:10}}>→ Voir directement GitHub Actions ↗</a>
         </div>
         :backupRuns.length===0?<div style={{textAlign:'center',padding:20,color:'#888',fontSize:11}}>
           Aucun historique trouvé.<br/>
-          <a href='https://github.com/Aureus-Social/aureus-social-v18/actions/workflows/backup-b2.yml' target='_blank' rel='noreferrer' style={{color:'#c6a34e',fontSize:10,display:'block',marginTop:8}}>→ Voir les runs sur GitHub Actions ↗</a>
+          <a href='https://github.com/Aureus-Social/aureus-social/actions/workflows/backup-b2.yml' target='_blank' rel='noreferrer' style={{color:'#c6a34e',fontSize:10,display:'block',marginTop:8}}>→ Voir les runs sur GitHub Actions ↗</a>
         </div>
         :<div>
           {/* Header tableau */}
@@ -185,7 +185,7 @@ const SecProTab=({supabase,user,C})=>{
 
       <div style={{marginTop:10,padding:12,background:'rgba(198,163,78,.04)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
         <div style={{fontSize:10,color:'#888',marginBottom:6}}>📎 Accès direct GitHub Actions (logs complets + taille fichiers)</div>
-        <a href='https://github.com/Aureus-Social/aureus-social-v18/actions/workflows/backup-b2.yml' target='_blank' rel='noreferrer' style={{fontSize:11,color:'#c6a34e',textDecoration:'none',fontWeight:600}}>
+        <a href='https://github.com/Aureus-Social/aureus-social/actions/workflows/backup-b2.yml' target='_blank' rel='noreferrer' style={{fontSize:11,color:'#c6a34e',textDecoration:'none',fontWeight:600}}>
           → Voir tous les runs backup-b2.yml ↗
         </a>
       </div>
