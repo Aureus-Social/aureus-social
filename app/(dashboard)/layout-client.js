@@ -652,11 +652,7 @@ function DashboardLayoutInner({ user }) {
       case 'support': return <NotificationCenterPgW s={s} d={d} tab={page} />;
       case 'team': return <EmployeeHubPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'testsuite': return <AuditCodePage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
-      case 'embaucheaz': return (
-        <div style={{ height: 'calc(100vh - 60px)', display: 'flex', flexDirection: 'column' }}>
-          <iframe src="/embauche-az.html" style={{ flex: 1, border: 'none', width: '100%' }} title="Embauche A→Z" />
-        </div>
-      );
+      case 'embaucheaz': return <OnboardingPage s={s} d={d} t={t} lang={lang} th={TH} />;
       default: return <PlaceholderPage id={page} label={currentItem.label} />;
     }
   };
