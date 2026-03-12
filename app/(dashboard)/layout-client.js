@@ -1,6 +1,6 @@
 'use client';
 import { logInfo, logWarn } from '../lib/security/logger.js';
-import React, { useState, useReducer, useMemo, useEffect, Suspense } from 'react';
+import React, { useState, useReducer, useMemo, useEffect, useCallback, useRef, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { MENU, GROUPS, getGroupItems, SEARCH_SUBSECTIONS } from '../lib/menu-config';
 import { I18N } from '../lib/i18n';
