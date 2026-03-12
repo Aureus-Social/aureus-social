@@ -7,7 +7,7 @@ function genDimonaXML(d) {
   const niss=(d.niss||'').replace(/[\.\-\s]/g,"");
   const onss=(d.onss||'').replace(/[\.\-\s]/g,"");
   const vat=(d.vat||'').replace(/[^0-9]/g,"");
-  const dimRef='DIM'+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,5).toUpperCase();
+  const dimRef='DIM'+crypto.randomUUID().replace(/-/g,'').substring(0,12).toUpperCase();
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!-- Dimona Declaration — ONSS / socialsecurity.be -->
 <!-- Generee par: Aureus Social Pro — Aureus IA SPRL -->
@@ -64,7 +64,7 @@ function genDMFAXML(co, emps, q, y) {
   const qStart=new Date(y,(q-1)*3,1);
   const qEnd=new Date(y,q*3,0);
   const fmtDt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-  const ref=`DMFAP${String(Math.floor(Math.random()*900000000)+100000000)}${String.fromCharCode(65+Math.floor(Math.random()*26))}`;
+  const ref='DMFAP'+crypto.randomUUID().replace(/-/g,'').substring(0,9).toUpperCase();
   const catEmpl=(co.cp==='330'||co.cp==='331'||co.cp==='332')?'010':'000';
   const nrONSS=(co.onss||'').replace(/[\.\-\s]/g,"")||'0000000000';
   const nrEnt=(co.vat||'').replace(/[^0-9]/g,"")||'0000000000';
@@ -116,7 +116,7 @@ function genDMFAXML(co, emps, q, y) {
       <ContributionWorkerRecord>
         <ContributionType>001</ContributionType>
         <ContributionBase>${baseONSS.toFixed(2)}</ContributionBase>
-        `<ContributionPercentage>${(TX_ONSS_W*100).toFixed(2)}</ContributionPercentage>`
+        <ContributionPercentage>13.07</ContributionPercentage>
         <ContributionAmount>${(baseONSS*LEGAL.ONSS_W).toFixed(2)}</ContributionAmount>
       </ContributionWorkerRecord>${p.empBonus>0?`
       <DeductionRecord>
@@ -176,7 +176,7 @@ ${wrs}
 
 // Genere un accuse de reception (ACRF) simule conforme ONSS
 function genDMFATicket(ref,co){
-  const ticket='DMFAP'+String(Math.floor(Math.random()*900000000)+100000000)+String.fromCharCode(65+Math.floor(Math.random()*26));
+  const ticket='DMFAP'+crypto.randomUUID().replace(/-/g,'').substring(0,9).toUpperCase();
   const fmtDt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
   return {ticket,xml:`<?xml version="1.0" encoding="UTF-8"?>
 <!-- Accuse de reception (ACRF) — ONSS -->
@@ -333,7 +333,7 @@ const CAR_MODELS={
 // Ref: ISO 20022 pain.001.001.03 — Virements SEPA zone EUR
 // Conforme: Reglement UE 260/2012 (Single Euro Payments Area)
 function genSEPAXML(co, emps, period) {
-  const msgId = 'AUREUS-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+  const msgId = 'AUREUS-' + crypto.randomUUID().replace(/-/g,'').substring(0,12).toUpperCase();
   const pmtInfId = 'SAL-' + (period?.month || new Date().getMonth() + 1).toString().padStart(2, '0') + '-' + (period?.year || new Date().getFullYear());
   const creationDate = new Date().toISOString().replace(/\.\d{3}Z$/, '');
   const reqDate = period?.execDate || new Date(new Date().setDate(new Date().getDate() + 2)).toISOString().split('T')[0];

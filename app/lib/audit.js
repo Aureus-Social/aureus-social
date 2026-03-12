@@ -1,3 +1,4 @@
+import { logWarn } from './security/logger.js';
 // ═══ AUREUS SOCIAL PRO — Audit Trail Serveur (RGPD Art. 30) ═══
 // Toutes les actions sensibles tracées côté serveur via /api/audit
 
@@ -29,7 +30,7 @@ export async function auditLog(action, table_name = null, record_id = null, deta
       })
     });
   } catch (e) {
-    console.warn('[Audit] Échec trace:', action, e.message);
+    logWarn('Audit', `Échec trace: ${action}`, e);
   }
 }
 

@@ -1,13 +1,23 @@
 // API Monitoring — déclenchement manuel depuis le Dashboard
+import { logInfo, logError, logWarn } from '../../lib/security/logger.js';
 import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
-const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
-  ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
-  : null;
+function getSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key);
+}
 
-export async function GET() {
+export async function GET(request) {
+  // Auth Bearer obligatoire
+  const auth = request.headers.get('Authorization');
+  if (!auth?.startsWith('Bearer ')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const supabase = getSupabase();
   try {
     const checks = [];
 
@@ -16,7 +26,16 @@ export async function GET() {
     checks.push({ label: 'Base de données', ok: !dbError, detail: dbError?.message || 'Connexion OK' });
 
     // 2. Compter employés actifs
-    const { data: emps, error: empError } = await supabase.from('employees').select('id, niss, iban, contractEnd, end_date, first, fn, last, ln').limit(500);
+    const { data: empsRaw, error: empError } = await supabase
+      .from('employees')
+      .select('id, contractEnd, end_date, first, fn, last, ln, niss_exists:niss, iban_exists:iban')
+      .limit(500);
+    // Masquer NISS/IBAN — on n'a besoin que de savoir s'ils existent
+    const emps = (empsRaw || []).map(e => ({
+      ...e,
+      niss: e.niss_exists ? '***' : null,
+      iban: e.iban_exists ? '***' : null,
+    }));
     checks.push({ label: 'Table employees', ok: !empError, detail: empError?.message || `${(emps||[]).length} enregistrements` });
 
     // 3. Analyser les employés
@@ -62,6 +81,6 @@ export async function GET() {
     });
 
   } catch (e) {
-    return Response.json({ ok: false, error: e.message }, { status: 500 });
+    return Response.json({ ok: false, error: 'Erreur interne du serveur' }, { status: 500 });
   }
 }

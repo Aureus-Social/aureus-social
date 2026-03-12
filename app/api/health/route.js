@@ -1,47 +1,59 @@
-// ═══ AUREUS SOCIAL PRO — Health Check API ═══
-// Endpoint public pour UptimeRobot / monitoring externe
-// GET /api/health → 200 OK avec statut des services
+/**
+ * AUREUS SOCIAL PRO — Health Check API
+ * GET /api/health
+ * 
+ * Destination: app/api/health/route.js
+ * Testé par les smoke tests Playwright + monitoring externe
+ */
 
+import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export const dynamic = 'force-dynamic';
-
-const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
-  ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
-  : null;
-
-export async function GET() {
+export async function GET(request) {
+  // Auth Bearer obligatoire
+  const auth = request.headers.get('Authorization');
+  if (!auth?.startsWith('Bearer ')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const start = Date.now();
   const checks = {};
 
-  // 1. Check Supabase connectivity
+  // ─── 1. Vérifier la connexion Supabase
   try {
-    const { error } = await supabase.from('audit_log').select('id').limit(1);
-    checks.supabase = error ? 'degraded' : 'ok';
+    const supabase = createClient(
+      (process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'),
+      (process.env.SUPABASE_SERVICE_ROLE_KEY || '')  // Service role pour le health check
+    );
+    const { error } = await supabase.from('app_state').select('id').limit(1);
+    checks.database = error ? 'degraded' : 'ok';
   } catch {
-    checks.supabase = 'down';
+    checks.database = 'down';
   }
 
-  // 2. Check env vars
-  checks.env = process.env.NEXT_PUBLIC_SUPABASE_URL &&
-               process.env.SUPABASE_SERVICE_ROLE_KEY ? 'ok' : 'missing';
+  // ─── 2. Variables d'environnement critiques
+  checks.env = {
+    supabase_url:    !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+    supabase_key:    !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    encryption_key:  !!process.env.ENCRYPTION_KEY,
+    storage_key:     !!process.env.NEXT_PUBLIC_STORAGE_KEY,
+  };
+  checks.env_ok = Object.values(checks.env).every(Boolean);
 
-  // 3. Check Resend
-  checks.resend = process.env.RESEND_API_KEY ? 'configured' : 'missing';
+  // ─── 3. Status global
+  const allOk = checks.database === 'ok' && checks.env_ok;
+  const status = allOk ? 'healthy' : 'degraded';
 
-  const allOk = Object.values(checks).every(v => v === 'ok' || v === 'configured');
-  const status = allOk ? 'healthy' : checks.supabase === 'down' ? 'degraded' : 'partial';
-
-  return Response.json({
+  return NextResponse.json({
     status,
-    version: 'v18',
+    version: process.env.npm_package_version || '18.0.0',
+    environment: process.env.NODE_ENV,
     timestamp: new Date().toISOString(),
     latency_ms: Date.now() - start,
     checks,
-    app: 'Aureus Social Pro',
-    company: 'Aureus IA SPRL',
   }, {
     status: allOk ? 200 : 503,
-    headers: { 'Cache-Control': 'no-store' }
+    headers: {
+      'Cache-Control': 'no-store, no-cache',
+    }
   });
 }

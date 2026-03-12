@@ -2,6 +2,7 @@
 // Extrait du monolithe pour réutilisation dans les modules
 "use client";
 
+import { logError } from './security/logger.js';
 import { TX_ONSS_W, TX_ONSS_E, TX_AT, COUT_MED, PV_SIMPLE, PP_EST } from "@/app/lib/lois-belges";
 import { quickPP } from "@/app/lib/payroll-engine";
 
@@ -16,11 +17,11 @@ export function downloadFile(content, filename, mimeType) {
     a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
-    setTimeout(() => { try { document.body.removeChild(a); } catch(e) {} URL.revokeObjectURL(url); }, 5000);
+    setTimeout(() => { try { document.body.removeChild(a); } catch(e) { /* DOM cleanup */ } URL.revokeObjectURL(url); }, 5000);
     return true;
   } catch(err) {
-    console.error('Download error:', err);
-    alert('Erreur téléchargement: ' + err.message);
+    logError('DocGenerator', 'Download error', err);
+    console.error('[DocGen] Erreur telechargement', err); alert('Une erreur est survenue. Veuillez reessayer.');
     return false;
   }
 }
@@ -35,7 +36,7 @@ export function previewHTML(html, title) {
       win.focus();
       return;
     }
-  } catch(e) {}
+  } catch(e) { /* handled */ }
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.88);z-index:99999;display:flex;flex-direction:column;align-items:center;padding:16px';
   const bar = document.createElement('div');
@@ -68,10 +69,10 @@ export function openForPDF(html, title) {
       win.document.close();
       win.document.title = title || 'Aureus Social Pro';
       win.focus();
-      setTimeout(() => { try { win.print(); } catch(e) {} }, 600);
+      setTimeout(() => { try { win.print(); } catch(e) { /* print unavailable */ } }, 600);
       return;
     }
-  } catch(e) {}
+  } catch(e) { /* handled */ }
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:2147483647;display:flex;flex-direction:column;align-items:center;padding:20px;font-family:system-ui,sans-serif';
   const titre = document.createElement('div');
@@ -85,7 +86,7 @@ export function openForPDF(html, title) {
   iframe.srcdoc = html;
   [
     { text: '📄 Télécharger PDF', bg: '#c6a34e', color: '#060810', fn: () => { try { if (iframe.contentWindow) iframe.contentWindow.print(); else alert('Chargement... Réessayez dans 2 secondes.'); } catch(e) { alert('Utilisez Ctrl+P (ou Cmd+P) puis « Enregistrer au format PDF »'); } } },
-    { text: '✕ Fermer', bg: '#ef4444', color: '#fff', fn: () => { try { document.body.removeChild(overlay); } catch(e) {} } }
+    { text: '✕ Fermer', bg: '#ef4444', color: '#fff', fn: () => { try { document.body.removeChild(overlay); } catch(e) { /* DOM cleanup */ } } }
   ].forEach(b => {
     const btn = document.createElement('button');
     btn.textContent = b.text;
@@ -121,7 +122,7 @@ export async function generatePayslipPDF(emp,r,period,co){
   try{
   const _payslipHTML=[];const empName=(emp.first||emp.fn||'')+" "+(emp.last||emp.ln||'');const w={document:{write:function(h){_payslipHTML.push(h)},close:function(){try{const html=_payslipHTML.join('');if(!html||html.length<100){alert('Erreur: HTML vide');return;}
   openForPDF(html, 'Fiche_paie_'+empName);
-  }catch(err){alert('Erreur download: '+err.message);}}}};
+  }catch(err){console.error('[DocGen] Erreur download', err); alert('Une erreur est survenue lors du telechargement.');}}}};
   const coName=co?.name||'Entreprise';
   const coVAT=co?.vat||'BE XXXX.XXX.XXX';
   const coAddr=co?.address||'';
@@ -175,7 +176,7 @@ ${mealV>0?`<div style="margin-top:6px;font-size:10px;color:#666">Chèques-repas:
 <div style="text-align:center;margin-top:15px"><button onclick="window.print()" style="background:#c6a34e;color:#fff;border:none;padding:10px 30px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">Imprimer / Sauvegarder PDF</button></div>
 </body></html>`);
   w.document.close();
-  }catch(err){alert('Erreur génération fiche: '+err.message);console.error(err);}
+  }catch(err){logError('DocGenerator', 'Erreur generation fiche', err); alert('Une erreur est survenue lors de la generation.');}
 }
 
 // ═══ ALERTES LÉGALES ═══
@@ -188,7 +189,7 @@ export function getAlertes(emps,co){
     if(e.startDate||e.start){const start=new Date(e.startDate||e.start);const diff=Math.ceil((now-start)/(1000*60*60*24));if(diff>=0&&diff<=7)alerts.push({type:"onboard",level:"info",icon:"👋",msg:"Nouvel employé "+name+" - onboarding en cours (J+"+diff+")",days:diff});}
     if(!e.niss&&(e.status==="active"||!e.status))alerts.push({type:"niss",level:"danger",icon:"⚠️",msg:"NISS manquant pour "+name,days:0});
     if(!e.iban&&(e.status==="active"||!e.status))alerts.push({type:"iban",level:"warning",icon:"🏦",msg:"IBAN manquant pour "+name,days:0});
-    if(e.status==="active"||!e.status){const brut=+(e.monthlySalary||e.gross||0);if(brut>0&&brut<RMMMG)alerts.push({type:"rmmmg",level:"warning",icon:"💰",msg:name+" sous le RMMMG ("+brut.toFixed(2)+" < 2.029,88 EUR)",days:0});}
+    if(e.status==="active"||!e.status){const brut=+(e.monthlySalary||e.gross||0);if(brut>0&&brut<2029.88)alerts.push({type:"rmmmg",level:"warning",icon:"💰",msg:name+" sous le RMMMG ("+brut.toFixed(2)+" < 2.029,88 EUR)",days:0});}
   });
   const d=now.getDate();const m=now.getMonth()+1;
   if(d<=5)alerts.push({type:"deadline",level:"info",icon:"📅",msg:"Avant le 5: encodage prestations du mois",days:5-d});

@@ -1,11 +1,12 @@
 'use client';
+import { logInfo, logWarn } from '../lib/security/logger.js';
 import React, { useState, useReducer, useMemo, useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { MENU, GROUPS, getGroupItems, SEARCH_SUBSECTIONS, SEARCH_DOCUMENTS } from '../lib/menu-config';
+import { MENU, GROUPS, getGroupItems, SEARCH_SUBSECTIONS } from '../lib/menu-config';
 import { I18N } from '../lib/i18n';
 import { LangProvider, useLang } from '../lib/lang-context';
 import { supabase } from '../lib/supabase';
-import { initCryptoKey, encryptState, decryptState, getCryptoKey, decryptField } from '../lib/crypto';
+import { initCryptoKey, encryptState, decryptState } from '../lib/crypto';
 import { setAuditUser, audit } from '../lib/audit';
 
 const Loading = () => <div style={{padding:40,textAlign:'center',color:'#5e5c56'}}>Chargement...</div>;
@@ -16,22 +17,17 @@ class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false, error: null }; }
   static getDerivedStateFromError(error) { return { hasError: true, error }; }
   componentDidUpdate(prevProps) {
-    // Reset automatique à chaque changement de page
-    if (prevProps.pageKey !== this.props.pageKey) {
+    if (prevProps.pageKey !== this.props.pageKey && this.state.hasError) {
       this.setState({ hasError: false, error: null });
     }
-  }
-  componentDidCatch(error, info) {
-    console.error('[Aureus] Module crash:', error?.message, info?.componentStack?.split('\n')[1]);
   }
   render() {
     if (this.state.hasError) {
       const msg = this.state.error?.message || 'Erreur inconnue';
-      return <div style={{padding:32,textAlign:'center'}}>
-        <div style={{fontSize:32,marginBottom:12}}>⚠️</div>
-        <div style={{fontSize:14,fontWeight:700,color:'#ef4444',marginBottom:8}}>{this.props.label || 'Module'} — Erreur de chargement</div>
-        <div style={{fontSize:10,color:'#5e5c56',marginBottom:16,fontFamily:'monospace',background:'rgba(239,68,68,.04)',padding:'8px 12px',borderRadius:6,border:'1px solid rgba(239,68,68,.1)',wordBreak:'break-all',maxWidth:500,margin:'0 auto 16px'}}>{msg}</div>
-        <button onClick={()=>this.setState({hasError:false,error:null})} style={{padding:'10px 24px',borderRadius:8,border:'1px solid rgba(198,163,78,.3)',background:'rgba(198,163,78,.08)',color:'#c6a34e',fontSize:12,cursor:'pointer',fontFamily:'inherit',fontWeight:600}}>🔄 Réessayer</button>
+      return <div style={{padding:40}}>
+        <div style={{fontSize:15,fontWeight:700,color:'#ef4444',marginBottom:8}}>❌ {this.props.label || 'Module'} — Erreur</div>
+        <div style={{fontSize:11,color:'#9e9b93',marginBottom:12,fontFamily:'monospace',background:'rgba(239,68,68,.06)',padding:'10px 14px',borderRadius:8,border:'1px solid rgba(239,68,68,.15)',wordBreak:'break-all'}}>{msg}</div>
+        <button onClick={()=>this.setState({hasError:false,error:null})} style={{padding:'8px 20px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>Réessayer</button>
       </div>;
     }
     return this.props.children;
@@ -61,6 +57,7 @@ const AureusIAPage = dynamic(() => import('../pages/AureusSuitePage'), { ssr: fa
 const EmployeeHubPage = dynamic(() => import('../pages/EmployeeHub'), { ssr: false, loading: Loading });
 const SmartOpsPage = dynamic(() => import('../pages/SmartOpsCenter'), { ssr: false, loading: Loading });
 const PrimesPage = dynamic(() => import('../pages/PrimesAvantagesV2'), { ssr: false, loading: Loading });
+const FloatingLegalAgentComp = dynamic(() => import('../pages/FloatingLegalAgent'), { ssr: false, loading: Loading });
 
 const AbsencesContratsV3Pg = dynamic(() => import('../pages/AbsencesContratsV3'), { ssr: false, loading: Loading });
 const CommissionsModulePg = dynamic(() => import('../pages/CommissionsModule'), { ssr: false, loading: Loading });
@@ -76,14 +73,10 @@ const ProceduresRHHubPg = dynamic(() => import('../pages/procedures/ProceduresRH
 
 // Wrappers pour modules avec props non-standard
 const AnalyticsDashboardRaw = dynamic(() => import('../pages/AnalyticsDashboard'), { ssr: false, loading: Loading });
-const PortailEmployePg = dynamic(() => import('../pages/PortailEmploye'), { ssr: false, loading: Loading });
-const PortailClientPg = dynamic(() => import('../pages/PortailClient'), { ssr: false, loading: Loading });
-const RegistrePersonnelPg = dynamic(() => import('../pages/RegistrePersonnel'), { ssr: false, loading: Loading });
 const AnalyticsPage = ({ s, d, tab }) => <AnalyticsDashboardRaw s={s} d={d} tab={tab} />;
 
 const ComplianceDashboardRaw = dynamic(() => import('../pages/ComplianceDashboard'), { ssr: false, loading: Loading });
 const CompliancePage = ({ s, d, tab }) => <ComplianceDashboardRaw s={s} d={d} tab={tab} />;
-const RGPDModuleRaw = dynamic(() => import('../pages/RGPDModule'), { ssr: false, loading: Loading });
 
 const DocumentGeneratorRaw = dynamic(() => import('../pages/DocumentGenerator'), { ssr: false, loading: Loading });
 const DocumentGeneratorPgW = ({ s, d, tab }) => <DocumentGeneratorRaw s={s} d={d} tab={tab} />;
@@ -108,56 +101,26 @@ const MandatsAdminRaw = dynamic(() => import('../pages/MandatsAdminPage'), { ssr
 const MandatsAdminPg = ({ s, d, tab }) => <MandatsAdminRaw s={s} d={d} tab={tab} />;
 const ConnexionsHubRaw = dynamic(() => import('../pages/ConnexionsHub'), { ssr: false, loading: Loading });
 const ConnexionsHubPg = ({ s, d }) => <ConnexionsHubRaw s={s} d={d} />;
-const IntegrationsComptaRaw = dynamic(() => import('../pages/IntegrationsCompta'), { ssr: false, loading: Loading });
-const VehiculeATNRaw = dynamic(() => import('../pages/VehiculeATN'), { ssr: false, loading: Loading });
-const CalendrierSocialRaw = dynamic(() => import('../pages/CalendrierSocial'), { ssr: false, loading: Loading });
-const SalaireMaladieRaw = dynamic(() => import('../pages/SalaireMaladie'), { ssr: false, loading: Loading });
-const SimulateurPensionRaw = dynamic(() => import('../pages/SimulateurPension'), { ssr: false, loading: Loading });
-const SoldeToutCompteRaw = dynamic(() => import('../pages/SoldeToutCompte'), { ssr: false, loading: Loading });
-const FloatingLegalAgentRaw = dynamic(() => import('../pages/FloatingLegalAgent'), { ssr: false, loading: Loading });
-const ChecklistClientRaw = dynamic(() => import('../pages/ChecklistClient'), { ssr: false, loading: Loading });
-const BudgetPrevisionnelRaw = dynamic(() => import('../pages/BudgetPrevisionnel'), { ssr: false, loading: Loading });
-const IntegrationsComptaPg = ({ s, d }) => <IntegrationsComptaRaw s={s} d={d} />;
 const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 
 // Reducer pour le state global
 function reducer(state, action) {
   // Audit trail serveur — actions sensibles tracées automatiquement
   if (typeof window !== 'undefined') {
-    const auditMap = {
-      ADD_EMP:        { label:'CREATE_EMPLOYEE',   table:'employees' },
-      UPD_EMP:        { label:'UPDATE_EMPLOYEE',   table:'employees' },
-      DEL_EMP:        { label:'DELETE_EMPLOYEE',   table:'employees' },
-      ADD_P:          { label:'GENERATE_PAYSLIP',  table:'fiches_paie' },
-      DEL_FICHE:      { label:'DELETE_PAYSLIP',    table:'fiches_paie' },
-      DEL_P:          { label:'DELETE_PAYSLIP',    table:'fiches_paie' },
-      DEL_PAYS_BATCH: { label:'DELETE_PAYSLIP_BATCH', table:'fiches_paie' },
-      ADD_DIM:        { label:'SUBMIT_DIMONA',     table:'dimona' },
-      ADD_CLIENT:     { label:'CREATE_CLIENT',     table:'clients' },
-      UPD_CLIENT:     { label:'UPDATE_CLIENT',     table:'clients' },
-      DEL_CLIENT:     { label:'DELETE_CLIENT',     table:'clients' },
-      SET_COMPANY:    { label:'UPDATE_COMPANY',    table:'app_state' },
-    };
-    const auditEntry = auditMap[action.type];
-    if (auditEntry) {
-      const emp = action.d || action.client ||
-        (action.type === 'DEL_EMP' ? state.emps?.find(e => e.id === action.id) :
-         action.type === 'DEL_CLIENT' ? state.clients?.find(c => c.id === action.id) :
-         action.type === 'DEL_FICHE' || action.type === 'DEL_P' ? state.pays?.find(p => p.id === action.id) : null);
+    const sensitiveActions = ['ADD_EMP','UPD_EMP','DEL_EMP','ADD_P','ADD_DIM'];
+    if (sensitiveActions.includes(action.type)) {
+      const labels = { ADD_EMP:'CREATE_EMPLOYEE', UPD_EMP:'UPDATE_EMPLOYEE', DEL_EMP:'DELETE_EMPLOYEE', ADD_P:'GENERATE_PAYSLIP', ADD_DIM:'SUBMIT_DIMONA' };
+      const emp = action.d || (action.type === 'DEL_EMP' ? state.emps?.find(e => e.id === action.id) : null);
       fetch('/api/audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: auditEntry.label,
-          table_name: auditEntry.table,
-          record_id: emp?.id || action.id || null,
-          details: {
-            action_type: action.type,
-            ...(emp ? { name: (emp.first_name||emp.prenom||emp.company_name||emp.fn||'') + ' ' + (emp.last_name||emp.nom||emp.ln||'') } : {}),
-            ...(action.ids ? { count: action.ids?.length } : {}),
-          }
+          action: labels[action.type],
+          table_name: action.type.includes('EMP') ? 'employees' : action.type === 'ADD_P' ? 'fiches_paie' : 'dimona',
+          record_id: emp?.id || null,
+          details: emp ? { name: (emp.first||emp.fn||'')+ ' ' +(emp.last||emp.ln||''), action_type: action.type } : null
         })
-      }).catch(() => {});
+      }).catch(() => { /* fire-and-forget */ });
     }
   }
 
@@ -169,24 +132,8 @@ function reducer(state, action) {
     case 'ADD_EMP': return { ...state, emps: [...(state.emps||[]), action.d] };
     case 'UPD_EMP': return { ...state, emps: (state.emps||[]).map(e => e.id === action.d.id ? { ...e, ...action.d } : e) };
     case 'DEL_EMP': return { ...state, emps: (state.emps||[]).filter(e => e.id !== action.id) };
-    case 'ADD_P': {
-      const p = { id: action.d.id || `fp-${Date.now()}-${Math.random().toString(36).substr(2,5)}`, ...action.d };
-      return { ...state, pays: [...(state.pays||[]), p], payrollHistory: [...(state.payrollHistory||[]), p] };
-    }
-    case 'SET_PAYROLL': return { ...state, pays: action.data, payrollHistory: action.data };
-    case 'DEL_FICHE': {
-      const filtered = (state.pays||[]).filter(p => p.id !== action.id);
-      return { ...state, pays: filtered, payrollHistory: filtered };
-    }
+    case 'ADD_P': return { ...state, payrollHistory: [...(state.payrollHistory||[]), action.d] };
     case 'ADD_DIM': return { ...state, dimonaHistory: [...(state.dimonaHistory||[]), action.d] };
-    case 'SET_PAYS': return { ...state, pays: action.data||[], payrollHistory: action.data||[] };
-    case 'DEL_P': { const f2=(state.pays||[]).filter(p=>p.id!==action.id); return {...state,pays:f2,payrollHistory:f2}; }
-    case 'DEL_PAYS_BATCH': { const f3=(state.pays||[]).filter(p=>!action.ids.includes(p.id)); return {...state,pays:f3,payrollHistory:f3}; }
-    case 'SET_COMPANY': return { ...state, co: { ...(state.co||{}), ...action.data } };
-    case 'SELECT_CLIENT': return { ...state, activeClient: action.id };
-    case 'ADD_CLIENT': return { ...state, clients: [...(state.clients||[]), action.client] };
-    case 'UPD_CLIENT': return { ...state, clients: (state.clients||[]).map(c => c.id === action.client?.id ? { ...c, ...action.client } : c) };
-    case 'DEL_CLIENT': return { ...state, clients: (state.clients||[]).filter(c => c.id !== action.id) };
     default: return state;
   }
 }
@@ -220,7 +167,7 @@ function DashboardHome({ state, onNavigate }) {
   const alertes = [];
   ae.forEach(e => {
     const brut = +(e.monthlySalary || e.gross || 0);
-    if (brut > 0 && brut < RMMMG) alertes.push({ level: 'danger', icon: '⚠', msg: `${e.first||''} ${e.last||''} — Salaire ${fmtE(brut)} sous RMMMG (${fmtE(RMMMG)})` });
+    if (brut > 0 && brut < 2070.48) alertes.push({ level: 'danger', icon: '⚠', msg: `${e.first||''} ${e.last||''} — Salaire ${fmtE(brut)} sous RMMMG (${fmtE(2070.48)})` });
     if (!e.niss) alertes.push({ level: 'warning', icon: '◇', msg: `${e.first||''} ${e.last||''} — NISS manquant` });
     if (!e.iban) alertes.push({ level: 'warning', icon: '◇', msg: `${e.first||''} ${e.last||''} — IBAN manquant` });
   });
@@ -267,7 +214,7 @@ function DashboardHome({ state, onNavigate }) {
           <div style={{ fontSize: 11, color: '#5e5c56', marginTop: 3 }}>{mois[now.getMonth()]} {now.getFullYear()} — Aureus IA SPRL · BCE BE 1028.230.781</div>
         </div>
         <div style={{ fontSize: 10, color: '#5e5c56', textAlign: 'right' }}>
-          <div style={{ color: '#c6a34e', fontWeight: 600 }}>⚡ RMMMG: {fmtE(RMMMG)}</div>
+          <div style={{ color: '#c6a34e', fontWeight: 600 }}>⚡ RMMMG: {fmtE(2070.48)}</div>
           <div>Index santé: 2,0399 · Pivot: 125,60</div>
         </div>
       </div>
@@ -358,16 +305,15 @@ function DashboardHome({ state, onNavigate }) {
 
 function DashboardLayoutInner({ user }) {
   const [page, setPage] = useState('dashboard');
-  const [pageHistory, setPageHistory] = useState([]);
   const [cryptoKey, setCryptoKey] = useState(null);
   const { lang, setLang, t: tCtx } = useLang();
-  const [theme, setTheme] = useState(() => { try { return typeof window !== 'undefined' ? localStorage.getItem('aureus_theme') || 'dark' : 'dark'; } catch(e) { return 'dark'; } });
+  const [theme, setTheme] = useState(() => (typeof window !== 'undefined' ? (()=>{ try { return localStorage.getItem('aureus_theme') || 'dark'; } catch { return 'dark'; } })() : 'dark'));
 
   // Traduction helper
   const t = tCtx;
 
   // Persister préférences
-  useEffect(() => { try { if (typeof window !== 'undefined') localStorage.setItem('aureus_theme', theme); } catch(e) {} }, [theme]);
+  useEffect(() => { try { if (typeof window !== 'undefined') localStorage.setItem('aureus_theme', theme); } catch { /* handled */ } }, [theme]);
 
   // Couleurs selon thème
   const TH = {
@@ -383,23 +329,12 @@ function DashboardLayoutInner({ user }) {
   };
   const [collapsed, setCollapsed] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const navigateTo = (newPage) => {
-    setPageHistory(h => newPage !== page ? [...h.slice(-19), page] : h);
-    setPage(newPage);
-  };
-  const navigateBack = () => {
-    if (pageHistory.length === 0) return;
-    const prev = pageHistory[pageHistory.length - 1];
-    setPageHistory(h => h.slice(0, -1));
-    setPage(prev);
-  };
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocus, setSearchFocus] = useState(false);
   const [scrollAnchor, setScrollAnchor] = useState(null);
   const [state, dispatch] = useReducer(reducer, {
     emps: [],
     clients: [],
-    pays: [],
     payrollHistory: [],
     dimonaHistory: [],
     co: { name: 'Aureus IA SPRL', vat: 'BE 1028.230.781' }
@@ -415,98 +350,34 @@ function DashboardLayoutInner({ user }) {
     audit.login(user?.email);
     initCryptoKey(userId).then(ok => {
       if(ok) setCryptoKey(true);
-      else console.warn('[Crypto] Chiffrement non disponible');
+      else logWarn('Layout', 'Chiffrement non disponible');
     });
 
-    // Backup automatique sécurisé AES-256 à chaque session (backup-secure.js v2.0)
+    // Backup automatique silencieux à chaque session (4.3)
     if (user) {
-      setTimeout(() => {
-        fetch('/api/backup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action:    'silent',
-            userId:    user.id,
-            userEmail: user.email,
-            userRole:  user.user_metadata?.role || '',
-          }),
-        }).then(res => {
-          if (res.ok) {
-            const records   = res.headers.get('X-Backup-Records');
-            const encrypted = res.headers.get('X-Backup-Encrypted');
-            console.info(`[Backup] ${records} enregistrements — chiffré AES-256: ${encrypted}`);
-          }
-        }).catch(() => {}); // Silencieux — backup non bloquant
-      }, 4000); // 4s après login pour ne pas bloquer le chargement initial
+      const BACKUP_KEY = 'aureus_last_backup_' + (user.id || user.email);
+      const lastBackup = sessionStorage.getItem(BACKUP_KEY);
+      const now = Date.now();
+      const TWO_HOURS = 2 * 60 * 60 * 1000;
+      if (!lastBackup || (now - parseInt(lastBackup)) > TWO_HOURS) {
+        setTimeout(() => {
+          fetch('/api/backup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'silent', userEmail: user.email, userRole: user.user_metadata?.role || '' })
+          }).then(res => {
+            if (res.ok) {
+              sessionStorage.setItem(BACKUP_KEY, String(now));
+              const records = res.headers.get('X-Backup-Records');
+              logInfo('Layout', `Backup auto: ${records} enregistrements sauvegardés`);
+            }
+          }).catch(() => { /* fire-and-forget */ });
+        }, 3000); // 3s après login pour ne pas bloquer le chargement
+      }
     }
   },[user]);
 
-  // Charger les employés depuis Supabase au login
-  useEffect(()=>{
-    if (!user?.id || !supabase) return;
-    supabase
-      .from('employees')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .then(async ({ data, error }) => {
-        if (!error && data) {
-          // Déchiffrement RGPD Art.32 — NISS et IBAN
-          const key = getCryptoKey();
-          const decrypted = key ? await Promise.all(data.map(async emp => ({
-            ...emp,
-            niss: emp.niss ? await decryptField(emp.niss, key) : emp.niss,
-            iban: emp.iban ? await decryptField(emp.iban, key) : emp.iban,
-          }))) : data;
-          dispatch({ type: 'SET_EMPS', data: decrypted });
-          console.info(`[Supabase] ${data.length} employé(s) chargé(s)`);
-        }
-      });
-  },[user?.id]);
-
-    // Charger les fiches de paie depuis Supabase au login
-  useEffect(()=>{
-    if (!user?.id || !supabase) return;
-    supabase
-      .from('fiches_paie')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(500)
-      .then(({ data, error }) => {
-        if (!error && data) {
-          // Normaliser les colonnes snake_case → camelCase pour le state
-          const normalized = data.map(r => ({
-            id: r.id,
-            eid: r.eid,
-            ename: r.ename,
-            period: r.period,
-            month: r.month,
-            year: r.year,
-            base: r.base,
-            gross: r.gross,
-            onssNet: r.onss_net,
-            imposable: r.imposable,
-            pp: r.pp,
-            tax: r.pp,
-            css: r.css,
-            net: r.net,
-            onssE: r.onss_e,
-            costTotal: r.cost_total,
-            bonus: r.bonus,
-            overtime: r.overtime,
-            y13: r.y13,
-            sickPay: r.sick_pay,
-            batch: r.batch,
-            at: r.at,
-          }));
-          dispatch({ type: 'SET_PAYROLL', data: normalized });
-          console.info(`[Supabase] ${data.length} fiche(s) de paie chargée(s)`);
-        }
-      });
-  },[user?.id]);
-
-  // Intercepte les dispatch NAV depuis les pages enfants
+    // Intercepte les dispatch NAV depuis les pages enfants
   useEffect(()=>{
     if(s._nav){
       setPage(s._nav);
@@ -562,69 +433,67 @@ function DashboardLayoutInner({ user }) {
       case 'calcinstant': return <SimuNetBrutPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'diagnostic': case 'diagnosticv': return <DiagnosticPage s={s} d={d} t={t} lang={lang} />;
       case 'seuilssociaux': return <SeuilsPage s={s} d={d} t={t} lang={lang} />;
-      case 'onboarding': return <OnboardingPage s={s} d={d} t={t} lang={lang} tab="onboarding" />;
-      case 'onboardwizard': return <OnboardingPage s={s} d={d} t={t} lang={lang} tab="onboardwizard" />;
+      case 'onboarding': case 'onboardwizard': return <OnboardingPage s={s} d={d} t={t} lang={lang} />;
       case 'cloture': return <CloturePage s={s} d={d} t={t} lang={lang} />;
-      case 'analytics': return <AnalyticsDashboardRaw s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'adminbaremes': return <AdminBaremesRaw s={s} d={d} t={t} lang={lang} />;
+      case 'analytics': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'adminbaremes': return <AdminBaremesPageW s={s} d={d} t={t} lang={lang} />;
       case 'auditsecuritecode': return <AuditCodePage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'optifiscale': case 'couttotal': return <PayrollSimPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'aureussuite': return <AureusIAPage s={s} d={d} t={t} lang={lang} />;
       case 'dashrh': return <EmployeeHubPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'commandcenter': return <SmartOpsPage s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'compliance': return <ComplianceDashboardRaw s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'securitedata': return <SecurityPage s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'facturation': return <RelancesRaw s={s} d={d} t={t} lang={lang} />;
+      case 'compliance': return <CompliancePage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'securitedata': return <SecurityPage s={s} d={d} t={t} lang={lang} tab={page} supabase={supabase} user={user} />;
+      case 'facturation': return <RelancesPage s={s} d={d} t={t} lang={lang} />;
       case 'gestionprimes': return <PrimesPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'seuilssociaux': return <LoisPage s={s} d={d} t={t} lang={lang} tab={page} />;
       // TABLEAU DE BORD
       case 'accidentTravail': return <AbsencesContratsV3Pg s={s} d={d} tab={page} />;
       case 'actionsrapides': return <SmartOpsPage s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'journal': return <NotificationCenterPg s={s} d={d} tab={page} />;
-      case 'tbdirection': return <AnalyticsDashboardRaw s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'smartalerts': return <NotificationCenterPg s={s} d={d} tab={page} />;
-      case 'notifications': return <NotificationCenterPg s={s} d={d} tab={page} />;
+      case 'journal': return <NotificationCenterPgW s={s} d={d} tab={page} />;
+      case 'tbdirection': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'smartalerts': return <NotificationCenterPgW s={s} d={d} tab={page} />;
+      case 'notifications': return <NotificationCenterPgW s={s} d={d} tab={page} />;
       // GESTION RH
-      case 'annexeReglement': return <DocumentGeneratorPg s={s} d={d} tab={page} />;
-      case 'contratgen': return <DocumentGeneratorPg s={s} d={d} tab={page} />;
-      case 'contratsmenu': return <DocumentGeneratorPg s={s} d={d} tab={page} />;
-      case 'gendocsjur': return <DocumentGeneratorPg s={s} d={d} tab={page} />;
+      case 'annexeReglement': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
+      case 'contratgen': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
+      case 'contratsmenu': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
+      case 'gendocsjur': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
       case 'dashabsent': return <AbsencesContratsV3Pg s={s} d={d} tab={page} />;
       case 'gestionabs': return <AbsencesContratsV3Pg s={s} d={d} tab={page} />;
       case 'planifconges': return <AbsencesContratsV3Pg s={s} d={d} tab={page} />;
       case 'workflowAbs': return <AbsencesContratsV3Pg s={s} d={d} tab={page} />;
-      case 'interimaires': return <EmployeePlanningPg s={s} d={d} tab={page} />;
-      case 'joursPrestes': return <EmployeePlanningPg s={s} d={d} tab={page} />;
+      case 'interimaires': return <EmployeePlanningPgW s={s} d={d} tab={page} />;
+      case 'joursPrestes': return <EmployeePlanningPgW s={s} d={d} tab={page} />;
+      case 'registrepersonnel': return <EmployeePlanningPgW s={s} d={d} tab={page} />;
       case 'rh': return <EmployeeHubPage s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'proceduresrh': return <ProceduresRHHubPg s={s} d={d} />;
-      case 'portail': return <PortailEmployePg s={s} d={d} />;
-      case 'portailclient': return <PortailClientPg s={s} d={d} />;
+      case 'proceduresrh': return <ProceduresRHHubPgW s={s} d={d} />;
+      case 'portail': return <PortalSystemPg s={s} d={d} tab={page} />;
+      case 'portailclient': return <PortalSystemPg s={s} d={d} tab={page} />;
       case 'portalmanager': return <PortalSystemPg s={s} d={d} tab={page} />;
-      case 'registrepersonnel': return <RegistrePersonnelPg s={s} d={d} />;
-      case 'floatinglegal': return <FloatingLegalAgentRaw s={s} d={d} />;
-      case 'formC4': return <DocumentGeneratorPg s={s} d={d} tab={page} />;
+      case 'formC4': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
       // PAIE & CALCULS
       case 'avantages': return <PrimesPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'baremespp': return <TransversalCPPg s={s} d={d} tab={page} />;
-      case 'budget': return <BudgetPrevisionnelRaw s={s} d={d} />;
-      case 'calcmaladie': return <SalaireMaladieRaw s={s} d={d} />;
-      case 'calendrier': return <CalendrierSocialRaw s={s} d={d} />;
+      case 'budget': return <PayrollGroupPg s={s} d={d} tab={page} />;
+      case 'calcmaladie': return <PayrollGroupPg s={s} d={d} tab={page} />;
+      case 'calendrier': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'coutsannuel': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'echeancier': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'flexijobs': return <PayrollGroupPg s={s} d={d} tab={page} />;
-      case 'formC131': return <DocumentGeneratorPg s={s} d={d} tab={page} />;
-      case 'joursPrestes': return <EmployeePlanningPg s={s} d={d} tab={page} />;
+      case 'formC131': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
+      case 'joursPrestes': return <EmployeePlanningPgW s={s} d={d} tab={page} />;
       case 'regulPP': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'salaires': return <PayrollHubPg s={s} d={d} tab={page} />;
       case 'simembauche': return <SimuNetBrutPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'simulateurspro': return <PayrollSimPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'simulicenciement': return <PayrollSimPage s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'simupension': return <SimulateurPensionRaw s={s} d={d} />;
+      case 'simupension': return <PayrollSimPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'simutp': return <SimuNetBrutPage s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'soldetoutcompte': return <SoldeToutCompteRaw s={s} d={d} />;
+      case 'soldetoutcompte': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'timeline': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'validation': return <PayrollGroupPg s={s} d={d} tab={page} />;
-      case 'vehiculesatn': return <VehiculeATNRaw s={s} d={d} />;
+      case 'vehiculesatn': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'comparateur': return <PayrollSimPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'compteIndividuel': return <PayrollGroupPg s={s} d={d} tab={page} />;
       // DECLARATIONS & COMPTABILITE
@@ -634,10 +503,10 @@ function DashboardLayoutInner({ user }) {
       case 'mandatonss': case 'belcotaxmandat': case 'domiciliation':
       case 'premieremploi': case 'activabruxelles': case 'art60cpas':
       case 'impulsion55': case 'monbee':
-        return <MandatsAdminRaw s={s} d={d} tab={page} />;
+        return <MandatsAdminPg s={s} d={d} tab={page} />;
       case 'connexionshub': case 'portailsbelges': case 'liensutiles':
-        return <ConnexionsHubRaw s={s} d={d} />;
-      case 'bilansocial': return <AnalyticsDashboardRaw s={s} d={d} t={t} lang={lang} tab={page} />;
+        return <ConnexionsHubPg s={s} d={d} />;
+      case 'bilansocial': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'chargessociales': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'chomagetemporaire': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'exportWinbooks': return <ModsBatch2Pg s={s} d={d} tab={page} />;
@@ -647,11 +516,11 @@ function DashboardLayoutInner({ user }) {
       case 'exportcomptapro': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'fiscal': return <TransversalCPPg s={s} d={d} tab={page} />;
       case 'importcsv': return <ModsBatch2Pg s={s} d={d} tab={page} />;
-      case 'rapportce': return <AnalyticsDashboardRaw s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'rapports': return <AnalyticsDashboardRaw s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'rapportsrole': return <AnalyticsDashboardRaw s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'reporting': return <AnalyticsDashboardRaw s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'reportingpro': return <AnalyticsDashboardRaw s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'rapportce': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'rapports': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'rapportsrole': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'reporting': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
+      case 'reportingpro': return <AnalyticsPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'sepa': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'compteindividuelannuel': return <PayrollGroupPg s={s} d={d} tab={page} />;
       // CONCERTATION SOCIALE
@@ -665,15 +534,15 @@ function DashboardLayoutInner({ user }) {
       case 'plandiversite': return <LoisPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'social': return <LoisPage s={s} d={d} t={t} lang={lang} tab={page} />;
       // COMMERCIAL
-      case 'checklistclient': return <ChecklistClientRaw s={s} d={d} />;
-      case 'comparatif': return <CommissionsModulePg s={s} d={d} tab={page} />;
-      case 'fiduciaire': return <CommissionsModulePg s={s} d={d} tab={page} />;
-      case 'guidecommercial': return <CommissionsModulePg s={s} d={d} tab={page} />;
-      case 'guidefiduciaire': return <CommissionsModulePg s={s} d={d} tab={page} />;
-      case 'landing': return <CommissionsModulePg s={s} d={d} tab={page} />;
-      case 'legal': return <DocumentGeneratorPg s={s} d={d} tab={page} />;
-      case 'parserConcurrent': return <CommissionsModulePg s={s} d={d} tab={page} />;
-      case 'repriseclient': return <CommissionsModulePg s={s} d={d} tab={page} />;
+      case 'checklistclient': return <CommissionsModulePgW s={s} d={d} tab={page} />;
+      case 'comparatif': return <CommissionsModulePgW s={s} d={d} tab={page} />;
+      case 'fiduciaire': return <CommissionsModulePgW s={s} d={d} tab={page} />;
+      case 'guidecommercial': return <CommissionsModulePgW s={s} d={d} tab={page} />;
+      case 'guidefiduciaire': return <CommissionsModulePgW s={s} d={d} tab={page} />;
+      case 'landing': return <CommissionsModulePgW s={s} d={d} tab={page} />;
+      case 'legal': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
+      case 'parserConcurrent': return <CommissionsModulePgW s={s} d={d} tab={page} />;
+      case 'repriseclient': return <CommissionsModulePgW s={s} d={d} tab={page} />;
       // ADMINISTRATION
       case 'archives': return <SecurityPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'auditfiscale': return <AuditCodePage s={s} d={d} t={t} lang={lang} tab={page} />;
@@ -681,24 +550,23 @@ function DashboardLayoutInner({ user }) {
       case 'authroles': return <RolesPermissionsPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'autoindex': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'autopilot': return <SmartOpsPage s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'cgvsaas': return <DocumentGeneratorPg s={s} d={d} tab={page} />;
+      case 'cgvsaas': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
       case 'changelog': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'demodonnees': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'ged': return <SecurityPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'historique': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'integrations': return <IntegrationsComptaPg s={s} d={d} />;
+      case 'integrations': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'massengine': return <ModsBatch2Pg s={s} d={d} tab={page} />;
-      case 'mentionslegales': return <DocumentGeneratorPg s={s} d={d} tab={page} />;
+      case 'mentionslegales': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
       case 'monitoring': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'piloteauto': return <SmartOpsPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'queue': return <ModsBatch2Pg s={s} d={d} tab={page} />;
-      case 'rgpd': return <RGPDModuleRaw s={s} d={d} t={t} lang={lang} state={s} />;
+      case 'rgpd': return <CompliancePage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'roadmapinfra': return <AdminPage s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'support': return <NotificationCenterPg s={s} d={d} tab={page} />;
+      case 'support': return <NotificationCenterPgW s={s} d={d} tab={page} />;
       case 'team': return <EmployeeHubPage s={s} d={d} t={t} lang={lang} tab={page} />;
       case 'testsuite': return <AuditCodePage s={s} d={d} t={t} lang={lang} tab={page} />;
-      case 'settings': return <SettingsPageComp s={s} d={d} t={t} lang={lang} />;
-      default: return <PlaceholderPage id={page} label={t('menu.' + currentItem?.id) || currentItem?.label} />;
+      default: return <PlaceholderPage id={page} label={currentItem.label} />;
     }
   };
 
@@ -718,7 +586,7 @@ function DashboardLayoutInner({ user }) {
             <span style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: '#5e5c56', pointerEvents: 'none' }}>🔍</span>
             <input
               type="text"
-              placeholder={t('nav.search') || "Rechercher..."}
+              placeholder="Rechercher..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               onFocus={() => setSearchFocus(true)}
@@ -737,56 +605,130 @@ function DashboardLayoutInner({ user }) {
           </div>
           {/* Dropdown résultats */}
           {(searchFocus || searchQuery) && searchQuery.length > 0 && (() => {
-            const q = searchQuery.toLowerCase();
-            // Résultats pages menu
+            const q = searchQuery.toLowerCase().trim();
+
+            // ── 1. Résultats menu principal ──────────────────────────────
             const menuResults = MENU.filter(m => !m.group && (
-              (t('menu.' + m.id) || m.label).toLowerCase().includes(q) || m.id.toLowerCase().includes(q)
-            )).slice(0, 5).map(m => ({ ...m, isSubsection: false }));
-            // Résultats sous-sections (paramètres légaux fiche de paie)
+              m.label.toLowerCase().includes(q) || m.id.toLowerCase().includes(q)
+            )).map(m => ({ ...m, type: 'page' }));
+
+            // ── 2. Sous-sections fiche de paie ───────────────────────────
             const subResults = (SEARCH_SUBSECTIONS || []).filter(s =>
               s.label.toLowerCase().includes(q) ||
               s.keywords.some(k => k.includes(q) || q.includes(k))
-            ).slice(0, 4).map(s => ({ ...s, isSubsection: true }));
-            // Résultats documents téléchargeables (PDF / DOCX)
-            const docResults = (SEARCH_DOCUMENTS || []).filter(d =>
-              d.label.toLowerCase().includes(q) ||
-              d.keywords.some(k => k.includes(q) || q.includes(k))
-            ).slice(0, 4).map(d => ({ ...d, isDoc: true }));
-            const results = [...docResults, ...subResults, ...menuResults].slice(0, 9);
+            ).map(s => ({ ...s, type: 'subsection' }));
+
+            // ── 3. Index étendu — tous les onglets internes ──────────────
+            const INNER_TABS = [
+              // Sécurité des Données
+              { id:'securitedata', label:'Vue d\'ensemble Sécurité', sub:'Sécurité des Données', icon:'🛡', tab:'overview', keywords:['securite','overview','score','controles'] },
+              { id:'securitedata', label:'N1 Urgent — Failles critiques', sub:'Sécurité des Données', icon:'🔴', tab:'niveau1', keywords:['urgent','failles','critique','p1'] },
+              { id:'securitedata', label:'N2 Chiffrement', sub:'Sécurité des Données', icon:'🟠', tab:'niveau2', keywords:['chiffrement','aes','crypto','encrypt'] },
+              { id:'securitedata', label:'N3 Blindage', sub:'Sécurité des Données', icon:'🟡', tab:'niveau3', keywords:['blindage','hardening','csp','cors'] },
+              { id:'securitedata', label:'N4 RGPD', sub:'Sécurité des Données', icon:'🔵', tab:'rgpd', keywords:['rgpd','gdpr','dpo','article'] },
+              { id:'securitedata', label:'Test mot de passe', sub:'Sécurité des Données', icon:'🔑', tab:'password', keywords:['password','mot de passe','force','test'] },
+              { id:'securitedata', label:'Headers HTTP', sub:'Sécurité des Données', icon:'📋', tab:'headers', keywords:['headers','http','csp','hsts','cors'] },
+              { id:'securitedata', label:'Documents RGPD', sub:'Sécurité des Données', icon:'📜', tab:'rgpddocs', keywords:['rgpd','documents','dpa','article 28','30'] },
+              { id:'securitedata', label:'IP Whitelist', sub:'Sécurité des Données', icon:'🌐', tab:'ipwhitelist', keywords:['ip','whitelist','blocklist','acces'] },
+              { id:'securitedata', label:'Backup données', sub:'Sécurité des Données', icon:'💾', tab:'backup', keywords:['backup','sauvegarde','export','restore'] },
+              { id:'securitedata', label:'Security Pro — Backups B2 & Intrusions', sub:'Sécurité des Données', icon:'🔐', tab:'secpro', keywords:['security pro','b2','backblaze','intrusion','geoip','brute force'] },
+              // Audit Sécurité Code
+              { id:'auditsecuritecode', label:'Audit Sécurité Code', sub:'Audit Code', icon:'🛡', tab:'securite', keywords:['audit','code','securite'] },
+              { id:'auditsecuritecode', label:'Audit Trail', sub:'Audit Code', icon:'🔍', tab:'trail', keywords:['audit trail','logs','historique','actions'] },
+              { id:'auditsecuritecode', label:'Test Suite', sub:'Audit Code', icon:'🧪', tab:'tests', keywords:['test','suite','jest','unit'] },
+              // Fiches de paie
+              { id:'payslip', label:'Nouvelle fiche de paie', sub:'Fiches de Paie', icon:'➕', tab:'new', keywords:['nouvelle','creer','fiche','paie'] },
+              { id:'payslip', label:'Historique fiches de paie', sub:'Fiches de Paie', icon:'📋', tab:'history', keywords:['historique','fiches','liste','archives'] },
+              { id:'payslip', label:'Paramètres légaux', sub:'Fiches de Paie', icon:'⚙️', tab:'params', keywords:['parametres','legaux','taux','baremes'] },
+              // Dashboard RH
+              { id:'dashrh', label:'Planning RH', sub:'Dashboard RH', icon:'📅', tab:'planning', keywords:['planning','calendrier','rh'] },
+              { id:'dashrh', label:'Absences RH', sub:'Dashboard RH', icon:'🏖', tab:'absences', keywords:['absences','conges','maladie'] },
+              { id:'dashrh', label:'Analytics RH', sub:'Dashboard RH', icon:'📊', tab:'analytics', keywords:['analytics','stats','rh','indicateurs'] },
+              // Declarations
+              { id:'declarations', label:'Dimona IN', sub:'Déclarations ONSS/SPF', icon:'📡', tab:'dimona-in', keywords:['dimona','in','entree','declaration'] },
+              { id:'declarations', label:'Dimona OUT', sub:'Déclarations ONSS/SPF', icon:'📡', tab:'dimona-out', keywords:['dimona','out','sortie','fin contrat'] },
+              { id:'declarations', label:'DMFA Trimestrielle', sub:'Déclarations ONSS/SPF', icon:'📊', tab:'dmfa', keywords:['dmfa','trimestrielle','onss','declaration'] },
+              { id:'declarations', label:'Belcotax XML', sub:'Déclarations ONSS/SPF', icon:'📄', tab:'belcotax', keywords:['belcotax','281','xml','fiscal'] },
+              // Export Comptable Pro
+              { id:'exportcomptapro', label:'Export WinBooks ACT', sub:'Export Comptable Pro', icon:'📤', tab:'winbooks', keywords:['winbooks','act','export','compta'] },
+              { id:'exportcomptapro', label:'Export BOB50', sub:'Export Comptable Pro', icon:'📒', tab:'bob', keywords:['bob','bob50','export','compta'] },
+              { id:'exportcomptapro', label:'Export Exact Online', sub:'Export Comptable Pro', icon:'🔵', tab:'exact', keywords:['exact','online','xml','export'] },
+              { id:'exportcomptapro', label:'Export Octopus', sub:'Export Comptable Pro', icon:'🐙', tab:'octopus', keywords:['octopus','export','compta'] },
+              { id:'exportcomptapro', label:'Export Horus/Popsy', sub:'Export Comptable Pro', icon:'📊', tab:'horus', keywords:['horus','popsy','export','compta'] },
+              // Admin
+              { id:'admin', label:'Gestion utilisateurs', sub:'Administration', icon:'👥', tab:'users', keywords:['utilisateurs','users','admin','gestion'] },
+              { id:'admin', label:'Paramètres app', sub:'Administration', icon:'⚙️', tab:'settings', keywords:['parametres','settings','config','app'] },
+              { id:'admin', label:'Logs système', sub:'Administration', icon:'📋', tab:'logs', keywords:['logs','systeme','erreurs','debug'] },
+              // Simulateurs Pro
+              { id:'simulateurspro', label:'Simulateur Net→Brut', sub:'Simulateurs Pro', icon:'🧮', tab:'netbrut', keywords:['net','brut','simulateur','calcul'] },
+              { id:'simulateurspro', label:'Simulateur Licenciement', sub:'Simulateurs Pro', icon:'⚖️', tab:'licenciement', keywords:['licenciement','preavis','indemnite','rupture'] },
+              { id:'simulateurspro', label:'Simulateur Pension', sub:'Simulateurs Pro', icon:'🏖', tab:'pension', keywords:['pension','retraite','simulateur'] },
+              { id:'simulateurspro', label:'Coût total employeur', sub:'Simulateurs Pro', icon:'💰', tab:'cout', keywords:['cout','total','employeur','charge'] },
+              // Compliance
+              { id:'compliance', label:'Veille légale', sub:'Compliance Radar', icon:'⚖️', tab:'veille', keywords:['veille','legale','loi','monitoring'] },
+              { id:'compliance', label:'Alertes conformité', sub:'Compliance Radar', icon:'🔔', tab:'alertes', keywords:['alertes','conformite','compliance','rgpd'] },
+              // GED
+              { id:'ged', label:'Documents GED', sub:'GED Documents', icon:'📁', tab:'docs', keywords:['ged','documents','fichiers','archive'] },
+              { id:'ged', label:'RGPD Docs', sub:'GED Documents', icon:'🔒', tab:'rgpddocs', keywords:['rgpd','documents','dpa','art30'] },
+              // Hub Connexions
+              { id:'connexionshub', label:'ONSS / Mahis', sub:'Hub Connexions H24', icon:'🏛', tab:'onss', keywords:['onss','mahis','connexion','portail'] },
+              { id:'connexionshub', label:'CSAM / eHealth', sub:'Hub Connexions H24', icon:'🏥', tab:'csam', keywords:['csam','ehealth','gap','designation'] },
+              { id:'connexionshub', label:'Belcotax Online', sub:'Hub Connexions H24', icon:'📄', tab:'belcotax', keywords:['belcotax','fiscal','fisc','online'] },
+              // Reporting Pro
+              { id:'reportingpro', label:'Rapports par rôle', sub:'Reporting Pro', icon:'📈', tab:'roles', keywords:['rapports','role','reporting'] },
+              { id:'reportingpro', label:'Export analytique', sub:'Reporting Pro', icon:'📊', tab:'export', keywords:['export','analytique','reporting'] },
+            ];
+
+            const tabResults = INNER_TABS.filter(t =>
+              t.label.toLowerCase().includes(q) ||
+              t.sub.toLowerCase().includes(q) ||
+              t.keywords.some(k => k.includes(q) || q.includes(k))
+            ).map(t => ({ ...t, type: 'tab' }));
+
+            // ── Fusion + déduplication ────────────────────────────────────
+            const all = [...subResults, ...tabResults, ...menuResults];
+            // Dédupliquer : garder le premier de chaque id+tab combo
+            const seen = new Set();
+            const results = all.filter(r => {
+              const key = r.id + '|' + (r.tab||'') + '|' + (r.anchor||'');
+              if (seen.has(key)) return false;
+              seen.add(key); return true;
+            }).slice(0, 12);
+
             const groupName = (g) => GROUPS.find(gr => gr.id === `_g${g}`)?.label || '';
             return results.length > 0 ? (
               <div style={{
                 position: 'absolute', left: 12, right: 12, top: '100%', zIndex: 999,
                 background: '#111009', border: '1px solid rgba(198,163,78,.2)',
                 borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,.6)', overflow: 'hidden',
+                maxHeight: 420, overflowY: 'auto',
               }}>
                 {results.map((item, idx) => (
                   <div key={idx}
                     onClick={() => {
-                      if (item.isDoc) {
-                        window.open(item.url, '_blank');
-                        setSearchQuery('');
-                        setSearchFocus(false);
-                        return;
-                      }
-                      navigateTo(item.id);
-                      if (item.isSubsection && item.anchor) {
-                        setScrollAnchor(item.anchor);
-                      }
+                      setPage(item.id);
+                      if (item.type === 'subsection' && item.anchor) setScrollAnchor(item.anchor);
+                      if (item.type === 'tab' && item.tab) setTimeout(() => {
+                        const ev = new CustomEvent('aureus:settab', { detail: { tab: item.tab } });
+                        window.dispatchEvent(ev);
+                      }, 400);
                       setSearchQuery('');
                       setSearchFocus(false);
                     }}
-                    style={{ padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid rgba(255,255,255,.03)', background: item.isDoc ? 'rgba(198,163,78,.05)' : item.isSubsection ? 'rgba(198,163,78,.03)' : 'transparent' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(198,163,78,.12)'}
-                    onMouseLeave={e => e.currentTarget.style.background = item.isDoc ? 'rgba(198,163,78,.05)' : item.isSubsection ? 'rgba(198,163,78,.03)' : 'transparent'}
+                    style={{ padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid rgba(255,255,255,.03)',
+                      background: item.type === 'subsection' ? 'rgba(198,163,78,.03)' : item.type === 'tab' ? 'rgba(100,160,255,.03)' : 'transparent' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(198,163,78,.08)'}
+                    onMouseLeave={e => e.currentTarget.style.background = item.type === 'subsection' ? 'rgba(198,163,78,.03)' : item.type === 'tab' ? 'rgba(100,160,255,.03)' : 'transparent'}
                   >
                     <span style={{ fontSize: 13, width: 18, textAlign: 'center' }}>{item.icon}</span>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 11.5, color: '#e8e6e0', fontWeight: 500 }}>{item.isDoc ? item.label : (t('menu.' + item.id) || item.label)}</div>
-                      <div style={{ fontSize: 9.5, color: item.isDoc || item.isSubsection ? '#c6a34e' : '#5e5c56', marginTop: 1 }}>{item.isDoc ? item.sub : item.isSubsection ? item.sub : groupName(item.g)}</div>
+                      <div style={{ fontSize: 11.5, color: '#e8e6e0', fontWeight: 500 }}>{item.label}</div>
+                      <div style={{ fontSize: 9.5, color: item.type !== 'page' ? '#c6a34e' : '#5e5c56', marginTop: 1 }}>
+                        {item.type === 'page' ? groupName(item.g) : item.sub}
+                      </div>
                     </div>
-                    {item.isDoc && <span style={{ fontSize: 9, color: '#c6a34e', background: 'rgba(198,163,78,.15)', padding: '2px 6px', borderRadius: 3, fontWeight: 700 }}>{item.ext}</span>}
-                    {item.isSubsection && !item.isDoc && <span style={{ fontSize: 9, color: '#c6a34e', opacity: 0.7 }}>↗ section</span>}
+                    {item.type === 'subsection' && <span style={{ fontSize: 9, color: '#c6a34e', opacity: 0.7 }}>↗ section</span>}
+                    {item.type === 'tab' && <span style={{ fontSize: 9, color: '#6ab0ff', opacity: 0.7 }}>↗ onglet</span>}
                   </div>
                 ))}
               </div>
@@ -794,9 +736,9 @@ function DashboardLayoutInner({ user }) {
               <div style={{
                 position: 'absolute', left: 12, right: 12, top: '100%', zIndex: 999,
                 background: '#111009', border: '1px solid rgba(198,163,78,.2)',
-                borderRadius: 8, padding: '10px 12px', fontSize: 11, color: '#5e5c56', textAlign: 'center',
-              }}>{t('nav.noresult') || 'Aucun résultat'}</div>
-            );
+                borderRadius: 8, padding: '12px', textAlign: 'center', color: '#5e5c56', fontSize: 11,
+              }}>Aucun résultat pour « {searchQuery} »</div>
+            )
           })()}
         </div>
 
@@ -811,12 +753,12 @@ function DashboardLayoutInner({ user }) {
                 <div onClick={() => toggleGroup(gNum)}
                   style={{ padding: '10px 18px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 10, fontWeight: 700, color: '#5e5c56', letterSpacing: '.5px', textTransform: 'uppercase' }}>
-                    {group?.icon} {t('menu.' + group?.id) || group?.label}
+                    {group?.icon} {group?.label}
                   </span>
                   <span style={{ fontSize: 10, color: '#5e5c56', transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0)', transition: 'transform .15s' }}>▼</span>
                 </div>
                 {!isCollapsed && items.map(item => (
-                  <div key={item.id} onClick={() => item.external ? window.open(item.external, '_blank') : navigateTo(item.id)}
+                  <div key={item.id} onClick={() => item.external ? window.open(item.external, '_blank') : setPage(item.id)}
                     style={{
                       padding: '7px 18px 7px 24px', cursor: 'pointer', fontSize: 11.5, display: 'flex', alignItems: 'center', gap: 8,
                       background: page === item.id ? 'rgba(198,163,78,.08)' : 'transparent',
@@ -826,7 +768,7 @@ function DashboardLayoutInner({ user }) {
                     onMouseEnter={e => { if (page !== item.id) e.currentTarget.style.background = 'rgba(255,255,255,.02)'; }}
                     onMouseLeave={e => { if (page !== item.id) e.currentTarget.style.background = 'transparent'; }}>
                     <span style={{ fontSize: 13, width: 20, textAlign: 'center' }}>{item.icon}</span>
-                    <span>{t('menu.' + item.id) || item.label}</span>
+                    <span>{item.label}</span>
                   </div>
                 ))}
               </div>
@@ -848,14 +790,7 @@ function DashboardLayoutInner({ user }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button onClick={() => setSidebarOpen(!sidebarOpen)}
               style={{ background: 'none', border: 'none', color: '#5e5c56', cursor: 'pointer', fontSize: 16, padding: 4 }}>☰</button>
-            {pageHistory.length > 0 && (
-              <button onClick={navigateBack}
-                title={t('ui.back') || 'Retour'}
-                style={{ background: 'rgba(198,163,78,.08)', border: '1px solid rgba(198,163,78,.2)', color: '#c6a34e', cursor: 'pointer', fontSize: 12, padding: '4px 10px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'inherit' }}>
-                ← <span style={{ fontSize: 11 }}>{t('ui.back') || 'Retour'}</span>
-              </button>
-            )}
-            <span style={{ fontSize: 13, fontWeight: 600, color: '#e8e6e0' }}>{currentItem.icon} {t('menu.' + currentItem?.id) || currentItem?.label}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#e8e6e0' }}>{currentItem.icon} {currentItem.label}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {/* Sélecteur de langue */}
@@ -885,7 +820,7 @@ function DashboardLayoutInner({ user }) {
         </div>
 
         {/* Content */}
-        <div key={page} style={{ flex: 1, overflowY: 'auto', padding: 24, background: TH.bg, color: TH.text }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: 24, background: TH.bg, color: TH.text }}>
           <ErrorBoundary pageKey={page} label={currentItem?.label}>{renderPage()}</ErrorBoundary>
         </div>
       </div>

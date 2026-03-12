@@ -1,6 +1,272 @@
 'use client';
-import { useLang } from '../lib/lang-context';
 import{useState,useEffect,useCallback}from'react';
+
+// ═══════════════════════════════════════════════════════════════
+// SECURITY PRO — Backup History B2 + Intrusion Monitor
+// ═══════════════════════════════════════════════════════════════
+const SecProTab=({supabase,user,C})=>{
+  console.log("[SecProTab] mounted, supabase=", !!supabase, "user=", !!user);
+  const[secTab,setSecTab]=useState('backup');
+  const[backupRuns,setBackupRuns]=useState([]);
+  const[backupLoading,setBackupLoading]=useState(false);
+  const[backupError,setBackupError]=useState(null);
+  const[intrusionLogs,setIntrusionLogs]=useState([]);
+  const[intrusionLoading,setIntrusionLoading]=useState(false);
+  const[geoCache,setGeoCache]=useState({});
+  const[lastRefresh,setLastRefresh]=useState(null);
+
+  const fmtDate=d=>{if(!d)return'—';const dt=new Date(d);return dt.toLocaleDateString('fr-BE')+' '+dt.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'});};
+  const timeSince=d=>{if(!d)return'—';const diff=Date.now()-new Date(d);const h=Math.floor(diff/3600000);const m=Math.floor((diff%3600000)/60000);if(h>24)return Math.floor(h/24)+'j';if(h>0)return h+'h'+m+'m';return m+'min';};
+  const bColor=a=>{if(!a)return'#888';if(a.includes('SUCCESS'))return'#22c55e';if(a.includes('FAILED'))return'#ef4444';if(a.includes('RUNNING'))return'#eab308';if(a==='RESTORE_COMPLETED')return'#a855f7';return'#c6a34e';};
+  const bIcon=a=>{if(!a)return'⬜';if(a.includes('SUCCESS'))return'✅';if(a.includes('FAILED'))return'❌';if(a.includes('RUNNING'))return'🔄';if(a==='RESTORE_COMPLETED')return'♻️';return'📦';};
+  const bLabel=a=>{if(a?.includes('SUCCESS'))return'Succès';if(a?.includes('FAILED'))return'Échec';if(a?.includes('RUNNING'))return'En cours';if(a==='RESTORE_COMPLETED')return'Restauration';return a?.replace(/_/g,' ')||'—';};
+  const iColor=a=>{if(!a)return'#888';if(a.includes('FAILED')||a.includes('BRUTE')||a.includes('UNAUTHORIZED')||a.includes('SUSPICIOUS'))return'#ef4444';if(a.includes('RATE_LIMIT')||a.includes('DENIED')||a.includes('INVALID'))return'#f97316';if(a.includes('LOGIN'))return'#22c55e';return'#888';};
+
+  const loadBackups=useCallback(async()=>{
+    if(!supabase)return;
+    setBackupLoading(true);setBackupError(null);
+    try{
+      // Audit log interne
+      const{data,error}=await supabase.from('audit_log')
+        .select('id,action,details,created_at,ip_address,user_email')
+        .in('action',['BACKUP_GENERATED','BACKUP_B2_SUCCESS','BACKUP_B2_FAILED','BACKUP_FAILED','RESTORE_COMPLETED'])
+        .order('created_at',{ascending:false}).limit(30);
+      if(error)throw error;
+
+      // GitHub Actions runs (API publique)
+      let ghRuns=[];
+      try{
+        const r=await fetch('https://api.github.com/repos/Aureus-Social/aureus-social-v18/actions/workflows/backup-b2.yml/runs?per_page=20',
+          {headers:{'Accept':'application/vnd.github+json'}});
+        if(r.ok){
+          const g=await r.json();
+          ghRuns=(g.workflow_runs||[]).map(r=>({
+            id:'gh_'+r.id,source:'github',
+            action:r.conclusion==='success'?'BACKUP_B2_SUCCESS':r.conclusion==='failure'?'BACKUP_B2_FAILED':'BACKUP_B2_RUNNING',
+            created_at:r.created_at,
+            details:{duration_s:r.updated_at?Math.round((new Date(r.updated_at)-new Date(r.run_started_at))/1000):null,
+              run_id:r.id,run_number:r.run_number,html_url:r.html_url,
+              conclusion:r.conclusion,status:r.status,trigger:r.event,
+              head_commit:r.head_commit?.message?.substring(0,60)},
+          }));
+        }
+      }catch(e){}
+
+      const all=[...ghRuns,...(data||[])].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+      setBackupRuns(all);setLastRefresh(new Date());
+    }catch(e){setBackupError(e.message);}
+    setBackupLoading(false);
+  },[supabase]);
+
+  const loadIntrusions=useCallback(async()=>{
+    if(!supabase)return;
+    setIntrusionLoading(true);
+    try{
+      const{data:a}=await supabase.from('audit_log')
+        .select('id,action,details,created_at,ip_address,user_email,user_agent')
+        .in('action',['LOGIN_FAILED','AUTH_ERROR','UNAUTHORIZED_ACCESS','RATE_LIMIT_HIT','INVALID_TOKEN','BRUTE_FORCE_DETECTED','USER_LOGIN','PERMISSION_DENIED','SUSPICIOUS_ACTIVITY'])
+        .order('created_at',{ascending:false}).limit(100);
+      const{data:e}=await supabase.from('error_logs')
+        .select('id,level,module,message,data,created_at')
+        .in('level',['WARN','ERROR'])
+        .or('message.ilike.%unauthorized%,message.ilike.%401%,message.ilike.%brute%,message.ilike.%rate limit%')
+        .order('created_at',{ascending:false}).limit(50);
+      const all=[
+        ...(a||[]).map(l=>({...l,source:'audit'})),
+        ...(e||[]).map(l=>({id:'err_'+l.id,action:l.level+'_'+l.module,ip_address:l.data?.ip||null,user_email:l.data?.email||null,user_agent:l.data?.user_agent||null,created_at:l.created_at,details:{message:l.message,...l.data},source:'error_log'})),
+      ].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+      setIntrusionLogs(all);
+
+      // Géolocalisation IPs uniques
+      const ips=[...new Set(all.map(l=>l.ip_address).filter(ip=>ip&&ip!=='unknown'&&ip!=='127.0.0.1'))];
+      const newGeo={};
+      await Promise.all(ips.slice(0,15).map(async ip=>{
+        if(geoCache[ip])return;
+        try{
+          const r=await fetch(`https://ipapi.co/${ip}/json/`);
+          if(r.ok){const d=await r.json();
+            newGeo[ip]={country:d.country_name||'?',country_code:d.country_code||'??',city:d.city||'?',org:d.org||'?',
+              flag:d.country_code?String.fromCodePoint(...[...d.country_code].map(c=>127397+c.charCodeAt(0))):'🌍',
+              isp:d.asn||'',is_vpn:d.threat?.is_vpn||false,is_tor:d.threat?.is_tor||false};
+          }
+        }catch(e){newGeo[ip]={country:'Inconnu',flag:'🌍',city:'?',org:'?'};}
+      }));
+      setGeoCache(prev=>({...prev,...newGeo}));
+    }catch(e){console.error('[SecPro]',e);}
+    setIntrusionLoading(false);
+  },[supabase,geoCache]);
+
+  useEffect(()=>{if(secTab==='backup')loadBackups();if(secTab==='intrusion')loadIntrusions();},[secTab]);
+
+  // Stats
+  const bSuccess=backupRuns.filter(r=>r.action?.includes('SUCCESS')).length;
+  const bFailed=backupRuns.filter(r=>r.action?.includes('FAILED')).length;
+  const bLast=backupRuns.find(r=>r.action?.includes('SUCCESS')||r.action?.includes('FAILED'));
+  const bRate=bSuccess+bFailed>0?Math.round(bSuccess/(bSuccess+bFailed)*100):null;
+  const iTotal=intrusionLogs.length;
+  const iFailed=intrusionLogs.filter(l=>l.action?.includes('FAILED')||l.action?.includes('BRUTE')||l.action?.includes('UNAUTHORIZED')).length;
+  const iUniqueIps=new Set(intrusionLogs.map(l=>l.ip_address).filter(Boolean)).size;
+  const iUniqueCountries=new Set(Object.values(geoCache).map(g=>g.country)).size;
+
+  const STBtn=({v,l})=><button onClick={()=>setSecTab(v)} style={{padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:11,fontWeight:secTab===v?700:400,fontFamily:'inherit',background:secTab===v?'rgba(198,163,78,.2)':'rgba(255,255,255,.04)',color:secTab===v?'#c6a34e':'#9e9b93',borderBottom:secTab===v?'2px solid #c6a34e':'2px solid transparent'}}>{l}</button>;
+  const Kpi=({l,v,c})=><div style={{padding:'12px 14px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}><div style={{fontSize:9,color:'#5e5c56',textTransform:'uppercase',marginBottom:4}}>{l}</div><div style={{fontSize:20,fontWeight:700,color:c||'#c6a34e'}}>{v}</div></div>;
+
+  return <div>
+    {/* Sous-onglets */}
+    <div style={{display:'flex',gap:8,marginBottom:16,alignItems:'center'}}>
+      <STBtn v='backup' l='💾 Historique Backups B2'/>
+      <STBtn v='intrusion' l="🚨 Tentatives d'Intrusion"/>
+      <button onClick={()=>secTab==='backup'?loadBackups():loadIntrusions()} style={{marginLeft:'auto',padding:'8px 14px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:11,cursor:'pointer',fontFamily:'inherit'}}>
+        🔄 Actualiser {lastRefresh?'· '+timeSince(lastRefresh):''}
+      </button>
+    </div>
+
+    {/* ── BACKUP ── */}
+    {secTab==='backup'&&<div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:16}}>
+        <Kpi l='Taux de succès' v={bRate!==null?bRate+'%':'—'} c={bRate>=90?'#22c55e':bRate>=70?'#eab308':'#ef4444'}/>
+        <Kpi l='Succès' v={bSuccess} c='#22c55e'/>
+        <Kpi l='Échecs' v={bFailed} c={bFailed>0?'#ef4444':'#22c55e'}/>
+        <Kpi l='Dernier backup' v={bLast?timeSince(bLast.created_at):'—'} c='#c6a34e'/>
+      </div>
+
+      {/* Statut dernier run */}
+      {bLast&&<div style={{padding:14,borderRadius:10,marginBottom:14,background:bLast.action?.includes('SUCCESS')?'rgba(34,197,94,.06)':'rgba(239,68,68,.06)',border:'1px solid '+(bLast.action?.includes('SUCCESS')?'rgba(34,197,94,.2)':'rgba(239,68,68,.2)')}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div><span style={{fontSize:18,marginRight:8}}>{bIcon(bLast.action)}</span>
+            <span style={{fontSize:12,fontWeight:700,color:bColor(bLast.action)}}>Dernier backup nightly : {bLabel(bLast.action)}</span>
+          </div>
+          <span style={{fontSize:11,color:'#888'}}>{fmtDate(bLast.created_at)}</span>
+        </div>
+        {bLast.details?.duration_s&&<div style={{fontSize:10,color:'#888',marginTop:4}}>
+          Durée : {bLast.details.duration_s}s
+          {bLast.details.html_url&&<a href={bLast.details.html_url} target='_blank' rel='noreferrer' style={{marginLeft:12,color:'#c6a34e',fontSize:10}}>→ Voir sur GitHub Actions ↗</a>}
+        </div>}
+        {bLast.action?.includes('FAILED')&&bLast.details?.error&&<div style={{marginTop:8,padding:8,background:'rgba(239,68,68,.08)',borderRadius:6,fontSize:10,color:'#fca5a5',fontFamily:'monospace'}}>❌ {bLast.details.error}</div>}
+      </div>}
+
+      {/* Historique */}
+      <C title='📋 Historique des runs backup' sub='GitHub Actions backup-b2.yml + backups manuels'>
+        {backupLoading?<div style={{textAlign:'center',padding:20,color:'#888',fontSize:11}}>⏳ Chargement...</div>
+        :backupError?<div style={{padding:12,background:'rgba(239,68,68,.08)',borderRadius:8,fontSize:10,color:'#fca5a5'}}>
+          ⚠️ {backupError}
+          <div style={{color:'#888',marginTop:4}}>Vérifier que la table <code>audit_log</code> existe dans Supabase.</div>
+          <a href='https://github.com/Aureus-Social/aureus-social-v18/actions/workflows/backup-b2.yml' target='_blank' rel='noreferrer' style={{color:'#c6a34e',fontSize:10}}>→ Voir directement GitHub Actions ↗</a>
+        </div>
+        :backupRuns.length===0?<div style={{textAlign:'center',padding:20,color:'#888',fontSize:11}}>
+          Aucun historique trouvé.<br/>
+          <a href='https://github.com/Aureus-Social/aureus-social-v18/actions/workflows/backup-b2.yml' target='_blank' rel='noreferrer' style={{color:'#c6a34e',fontSize:10,display:'block',marginTop:8}}>→ Voir les runs sur GitHub Actions ↗</a>
+        </div>
+        :<div>
+          {/* Header tableau */}
+          <div style={{display:'grid',gridTemplateColumns:'28px 80px 1fr 70px 80px',gap:8,padding:'6px 10px',borderBottom:'1px solid rgba(198,163,78,.15)',marginBottom:4}}>
+            {['','Statut','Détail / Erreur','Durée','Il y a'].map((h,i)=><span key={i} style={{fontSize:9,color:'#5e5c56',textTransform:'uppercase',fontWeight:700}}>{h}</span>)}
+          </div>
+          {backupRuns.slice(0,20).map((run,i)=><div key={run.id} style={{display:'grid',gridTemplateColumns:'28px 80px 1fr 70px 80px',gap:8,padding:'9px 10px',borderRadius:6,marginBottom:2,background:run.action?.includes('FAILED')?'rgba(239,68,68,.04)':i%2===0?'rgba(255,255,255,.015)':'transparent',alignItems:'start'}}>
+            <span style={{fontSize:14,marginTop:1}}>{bIcon(run.action)}</span>
+            <span style={{fontSize:10,fontWeight:700,color:bColor(run.action),marginTop:2}}>{bLabel(run.action)}</span>
+            <div>
+              {run.source==='github'?<div>
+                <div style={{fontSize:10,color:'#e8e6e0'}}>Run #{run.details?.run_number} — GitHub Actions</div>
+                {run.details?.head_commit&&<div style={{fontSize:9,color:'#888',marginTop:1}}>{run.details.head_commit}</div>}
+                {run.action?.includes('FAILED')&&<div style={{fontSize:9,color:'#fca5a5',marginTop:2}}>Ouvrir GitHub pour voir le log d'erreur complet</div>}
+                {run.details?.html_url&&<a href={run.details.html_url} target='_blank' rel='noreferrer' style={{fontSize:9,color:'#c6a34e',textDecoration:'none'}}>→ Ouvrir dans GitHub ↗</a>}
+              </div>:<div>
+                <div style={{fontSize:10,color:'#e8e6e0'}}>{run.action?.replace(/_/g,' ')}</div>
+                {run.details?.total_records&&<span style={{fontSize:9,color:'#888'}}>{run.details.total_records} enregistrements</span>}
+                {run.user_email&&<div style={{fontSize:9,color:'#888',marginTop:1}}>Par : {run.user_email}</div>}
+              </div>}
+            </div>
+            <span style={{fontSize:10,color:'#888',marginTop:2}}>{run.details?.duration_s?run.details.duration_s+'s':'—'}</span>
+            <span style={{fontSize:9,color:'#888',marginTop:2}}>{timeSince(run.created_at)}</span>
+          </div>)}
+        </div>}
+      </C>
+
+      <div style={{marginTop:10,padding:12,background:'rgba(198,163,78,.04)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
+        <div style={{fontSize:10,color:'#888',marginBottom:6}}>📎 Accès direct GitHub Actions (logs complets + taille fichiers)</div>
+        <a href='https://github.com/Aureus-Social/aureus-social-v18/actions/workflows/backup-b2.yml' target='_blank' rel='noreferrer' style={{fontSize:11,color:'#c6a34e',textDecoration:'none',fontWeight:600}}>
+          → Voir tous les runs backup-b2.yml ↗
+        </a>
+      </div>
+    </div>}
+
+    {/* ── INTRUSION ── */}
+    {secTab==='intrusion'&&<div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:16}}>
+        <Kpi l='Événements' v={iTotal} c={iTotal>10?'#ef4444':'#c6a34e'}/>
+        <Kpi l='Tentatives échouées' v={iFailed} c={iFailed>5?'#ef4444':iFailed>0?'#f97316':'#22c55e'}/>
+        <Kpi l='IPs uniques' v={iUniqueIps} c={iUniqueIps>3?'#f97316':'#22c55e'}/>
+        <Kpi l='Pays détectés' v={iUniqueCountries||'...'} c='#a855f7'/>
+      </div>
+
+      {/* Carte géo */}
+      {Object.keys(geoCache).length>0&&<C title='🌍 Géolocalisation des IPs' sub='Source: ipapi.co — données en temps réel'>
+        <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+          {Object.entries(geoCache).map(([ip,geo])=><div key={ip} style={{padding:'10px 14px',borderRadius:10,
+            background:geo.is_tor?'rgba(239,68,68,.1)':geo.is_vpn?'rgba(249,115,22,.1)':'rgba(255,255,255,.04)',
+            border:'1px solid '+(geo.is_tor?'rgba(239,68,68,.3)':geo.is_vpn?'rgba(249,115,22,.3)':'rgba(255,255,255,.06)'),
+            minWidth:180}}>
+            <div style={{fontSize:22,marginBottom:4}}>{geo.flag}</div>
+            <div style={{fontSize:11,fontWeight:700,color:'#e8e6e0',fontFamily:'monospace'}}>{ip}</div>
+            <div style={{fontSize:10,color:'#888',marginTop:2}}>{geo.city}, {geo.country}</div>
+            <div style={{fontSize:9,color:'#666',marginTop:1}}>{geo.org}</div>
+            {geo.is_vpn&&<div style={{fontSize:9,color:'#f97316',fontWeight:700,marginTop:4}}>⚠️ VPN détecté</div>}
+            {geo.is_tor&&<div style={{fontSize:9,color:'#ef4444',fontWeight:700,marginTop:4}}>🧅 TOR détecté</div>}
+          </div>)}
+        </div>
+      </C>}
+
+      {/* Journal événements */}
+      <C title='🚨 Journal des événements suspects' sub='Logins échoués · Accès non autorisés · Rate limits · Brute force'>
+        {intrusionLoading?<div style={{textAlign:'center',padding:20,color:'#888',fontSize:11}}>⏳ Chargement + géolocalisation des IPs...</div>
+        :intrusionLogs.length===0?<div style={{textAlign:'center',padding:24,color:'#22c55e',fontSize:12}}>
+          ✅ Aucun événement suspect détecté
+          <div style={{fontSize:10,color:'#888',marginTop:6}}>La table <code>audit_log</code> doit être alimentée pour afficher des données.</div>
+        </div>
+        :<div>
+          <div style={{display:'grid',gridTemplateColumns:'110px 110px 1fr 140px 70px',gap:8,padding:'6px 10px',borderBottom:'1px solid rgba(198,163,78,.15)',marginBottom:4}}>
+            {['Action','IP','Email / Détail','Localisation','Il y a'].map((h,i)=><span key={i} style={{fontSize:9,color:'#5e5c56',textTransform:'uppercase',fontWeight:700}}>{h}</span>)}
+          </div>
+          {intrusionLogs.slice(0,50).map((log,i)=>{
+            const geo=log.ip_address?geoCache[log.ip_address]:null;
+            const isAlert=log.action?.includes('FAILED')||log.action?.includes('BRUTE')||log.action?.includes('UNAUTHORIZED');
+            return <div key={log.id} style={{display:'grid',gridTemplateColumns:'110px 110px 1fr 140px 70px',gap:8,padding:'8px 10px',borderRadius:6,marginBottom:2,alignItems:'start',background:isAlert?'rgba(239,68,68,.05)':i%2===0?'rgba(255,255,255,.015)':'transparent'}}>
+              <span style={{fontSize:9,fontWeight:700,color:iColor(log.action),marginTop:1}}>{log.action?.replace(/_/g,' ').substring(0,18)}</span>
+              <div>
+                <div style={{fontSize:9,fontFamily:'monospace',color:'#e8e6e0'}}>{log.ip_address||'—'}</div>
+                {geo?.is_tor&&<span style={{fontSize:8,color:'#ef4444',fontWeight:700}}>🧅 TOR</span>}
+                {geo?.is_vpn&&<span style={{fontSize:8,color:'#f97316',fontWeight:700}}> ⚠️ VPN</span>}
+              </div>
+              <div>
+                <div style={{fontSize:10,color:'#e8e6e0'}}>{log.user_email||log.details?.email||'—'}</div>
+                {log.details?.message&&<div style={{fontSize:9,color:'#888',marginTop:1}}>{String(log.details.message).substring(0,70)}</div>}
+                {log.user_agent&&<div style={{fontSize:8,color:'#555',marginTop:1}}>{String(log.user_agent).substring(0,55)}</div>}
+              </div>
+              <div style={{fontSize:10,color:'#888'}}>
+                {geo?<span>{geo.flag} {geo.city}, {geo.country}</span>:log.ip_address&&log.ip_address!=='unknown'?<span style={{color:'#555'}}>Géoloc...</span>:<span style={{color:'#444'}}>—</span>}
+              </div>
+              <span style={{fontSize:9,color:'#888'}}>{timeSince(log.created_at)}</span>
+            </div>;
+          })}
+        </div>}
+      </C>
+
+      {/* Recommandations si attaques */}
+      {iFailed>0&&<div style={{marginTop:12,padding:14,background:'rgba(239,68,68,.06)',borderRadius:10,border:'1px solid rgba(239,68,68,.2)'}}>
+        <div style={{fontSize:12,fontWeight:700,color:'#ef4444',marginBottom:8}}>⚠️ Actions recommandées</div>
+        {[
+          iFailed>10?'🔴 Plus de 10 tentatives échouées — envisager un blocage IP dans Vercel Edge Config':null,
+          iUniqueIps>5?'🟠 IPs multiples simultanées — probable attaque distribuée (botnet)':null,
+          Object.values(geoCache).some(g=>g.is_tor)?'🧅 Réseau TOR détecté — bloquer dans middleware.js':null,
+          Object.values(geoCache).some(g=>g.is_vpn)?'⚠️ VPN détecté — surveiller les pays inhabituels':null,
+          '📧 Vérifier Supabase → Authentication → Audit Logs pour les détails complets',
+          '🔑 En cas de compromission suspectée — régénérer SUPABASE_SERVICE_ROLE_KEY immédiatement',
+        ].filter(Boolean).map((tip,i)=><div key={i} style={{fontSize:10,color:'#fca5a5',marginBottom:4}}>• {tip}</div>)}
+      </div>}
+    </div>}
+  </div>;
+};
 
 const C=({children,title:t,sub,color})=><div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid '+(color||'rgba(198,163,78,.08)'),marginBottom:14}}>{t&&<div style={{fontSize:13,fontWeight:600,color:color||'#c6a34e',marginBottom:sub?2:10}}>{t}</div>}{sub&&<div style={{fontSize:10,color:'#888',marginBottom:10}}>{sub}</div>}{children}</div>;
 const Row=({l,v,c,b})=><div style={{display:'flex',justifyContent:'space-between',padding:b?'8px 0':'5px 0',borderBottom:b?'2px solid rgba(198,163,78,.2)':'1px solid rgba(255,255,255,.03)',fontWeight:b?700:400}}><span style={{color:'#e8e6e0',fontSize:11.5}}>{l}</span><span style={{color:c||'#c6a34e',fontWeight:600,fontSize:12}}>{v}</span></div>;
@@ -10,8 +276,7 @@ const StatusDot=({ok})=><span style={{display:'inline-block',width:8,height:8,bo
 // ════════════════════════════════════════════════════════════
 // SECURITY DASHBOARD — Vue complète sécurité
 // ════════════════════════════════════════════════════════════
-export function SecurityDashboard({s,supabase,user,defaultTab}){
-  const { t, lang, tText } = useLang();
+export function SecurityDashboard({s,d,supabase,user,defaultTab}){
   const [tab,setTab]=useState(defaultTab||'overview');
   const [pwTest,setPwTest]=useState('');
   const [ipList,setIpList]=useState([
@@ -89,7 +354,7 @@ export function SecurityDashboard({s,supabase,user,defaultTab}){
       {[{l:'Score sécurité',v:secScore+'%',c:secScore>=80?'#22c55e':secScore>=60?'#eab308':'#f87171'},{l:'Contrôles actifs',v:doneChecks+'/'+totalChecks,c:'#22c55e'},{l:'À configurer',v:configChecks+'',c:'#eab308'},{l:'Planifiés',v:plannedChecks+'',c:'#3b82f6'},{l:'Chiffrement',v:'AES-256-GCM',c:'#a855f7'},{l:'Niveau RGPD',v:'Conforme',c:'#22c55e'}].map((k,i)=><div key={i} style={{padding:'10px 12px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}><div style={{fontSize:8,color:'#5e5c56',textTransform:'uppercase'}}>{k.l}</div><div style={{fontSize:14,fontWeight:700,color:k.c,marginTop:3}}>{k.v}</div></div>)}
     </div>
 
-    <div style={{display:'flex',gap:6,marginBottom:16,flexWrap:'wrap'}}>{[{v:'overview',l:'🛡 Vue d\'ensemble'},{v:'niveau1',l:'🔴 N1: Urgent ('+checks.filter(c=>c.level===1).length+')'},{v:'niveau2',l:'🟠 N2: Chiffrement ('+checks.filter(c=>c.level===2).length+')'},{v:'niveau3',l:'🟡 N3: Blindage ('+checks.filter(c=>c.level===3).length+')'},{v:'rgpd',l:'🔵 N4: RGPD ('+checks.filter(c=>c.level===4).length+')'},{v:'password',l:'🔑 Test mot de passe'},{v:'headers',l:'📋 Headers HTTP'},{v:'encryption',l:'🔒 Chiffrement'},{v:'rgpddocs',l:'📜 Documents RGPD'},{v:'ipwhitelist',l:'🌐 IP Whitelist'},{v:'backup',l:'💾 Backup données'}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'7px 14px',borderRadius:8,border:'none',cursor:'pointer',fontSize:11,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}</div>
+    <div style={{display:'flex',gap:4,marginBottom:16,overflowX:'auto',paddingBottom:4,flexShrink:0}}>{[{v:'overview',l:'🛡 Vue d\'ensemble'},{v:'niveau1',l:'🔴 N1 ('+checks.filter(c=>c.level===1).length+')'},{v:'niveau2',l:'🟠 N2 ('+checks.filter(c=>c.level===2).length+')'},{v:'niveau3',l:'🟡 N3 ('+checks.filter(c=>c.level===3).length+')'},{v:'rgpd',l:'🔵 N4 ('+checks.filter(c=>c.level===4).length+')'},{v:'password',l:'🔑 Test mot de passe'},{v:'headers',l:'📋 Headers HTTP'},{v:'encryption',l:'🔒 Chiffrement'},{v:'rgpddocs',l:'📜 Documents RGPD'},{v:'ipwhitelist',l:'🌐 IP Whitelist'},{v:'backup',l:'💾 Backup données'},{v:'secpro',l:'🔐 Sec Pro'}].map(t=><button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'6px 10px',borderRadius:8,border:'none',cursor:'pointer',fontSize:11,flexShrink:0,whiteSpace:'nowrap',fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}</div>
 
     {tab==='overview'&&<div>
       {[1,2,3,4].map(level=>{const lvlChecks=checks.filter(c=>c.level===level);const done=lvlChecks.filter(c=>c.status===true).length;const pct=Math.round(done/lvlChecks.length*100);
@@ -404,7 +669,7 @@ CREATE INDEX idx_ip_whitelist_tenant ON ip_whitelist(tenant_id, active);`}
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:16}}>
           <button onClick={async()=>{
             try{
-              const{createFullBackup}=await import('@/app/lib/backup-secure');
+              const{createFullBackup}=await import('@/app/lib/backup');
               const res=await createFullBackup(supabase,user?.id);
               alert('Backup JSON téléchargé ('+Math.round(res.size/1024)+' KB, '+res.tables+' tables)');
             }catch(e){alert('Erreur: '+e.message)}
@@ -417,7 +682,7 @@ CREATE INDEX idx_ip_whitelist_tenant ON ip_whitelist(tenant_id, active);`}
             try{
               const emps=s?.employees||s?.emps||[];
               if(!emps.length){alert('Aucun employé trouvé');return;}
-              import('@/app/lib/backup-secure').then(m=>{
+              import('@/app/lib/backup').then(m=>{
                 const res=m.exportEmployeesCSV(emps);
                 alert('Export CSV employés: '+res.count+' lignes');
               });
@@ -431,7 +696,7 @@ CREATE INDEX idx_ip_whitelist_tenant ON ip_whitelist(tenant_id, active);`}
             try{
               const hist=s?.payrollHistory||s?.history||[];
               if(!hist.length){alert('Aucune fiche de paie trouvée');return;}
-              import('@/app/lib/backup-secure').then(m=>{
+              import('@/app/lib/backup').then(m=>{
                 const res=m.exportPayrollCSV(hist);
                 alert('Export CSV paie: '+res.count+' fiches');
               });
@@ -443,7 +708,7 @@ CREATE INDEX idx_ip_whitelist_tenant ON ip_whitelist(tenant_id, active);`}
           </button>
           <button onClick={async()=>{
             try{
-              const{exportAllData}=await import('@/app/lib/backup-secure');
+              const{exportAllData}=await import('@/app/lib/backup');
               const emps=s?.employees||s?.emps||[];
               const hist=s?.payrollHistory||s?.history||[];
               const res=await exportAllData(supabase,user?.id,emps,hist);
@@ -460,7 +725,7 @@ CREATE INDEX idx_ip_whitelist_tenant ON ip_whitelist(tenant_id, active);`}
             const file=e.target.files?.[0];
             if(!file)return;
             try{
-              const{restoreBackup}=await import('@/app/lib/backup-secure');
+              const{restoreBackup}=await import('@/app/lib/backup');
               const res=await restoreBackup(supabase,user?.id,file);
               alert('Restauration réussie: '+res.restored+' enregistrements dans '+res.tables+' tables');
             }catch(err){alert('Erreur restauration: '+err.message)}
@@ -468,14 +733,16 @@ CREATE INDEX idx_ip_whitelist_tenant ON ip_whitelist(tenant_id, active);`}
         </C>
       </C>
     </div>}
+
+    {tab==='secpro'&&<SecProTab supabase={supabase} user={user} C={C}/>}
   </div>;
 }
 
 
-export default function SecurityDashboardWrapped({ s, d, tab }) {
-  const { t, lang, tText } = useLang();
+export default function SecurityDashboardWrapped({ s, d, tab, supabase, user }) {
   const tabMap = { securitedata:'overview', archives:'niveau3', ged:'rgpddocs' };
   const mappedTab = tabMap[tab] || tab || 'overview';
-  return <SecurityDashboard state={s || {}} dispatch={d || (() => {})} defaultTab={mappedTab} />;
+  return <SecurityDashboard s={s} d={d} defaultTab={mappedTab} supabase={supabase} user={user} />;
 }
 
+// force redeploy Thu Mar 12 12:09:41 UTC 2026

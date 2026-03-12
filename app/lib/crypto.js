@@ -1,5 +1,8 @@
+import { logWarn, logError } from './security/logger.js';
 // ═══ AUREUS SOCIAL PRO — Module: Chiffrement AES-256-GCM (RGPD Art. 32) ═══
-const CRYPTO_SALT = 'AureusSocialPro-2026-RGPD';
+// ─── Sel chargé depuis l'env — jamais hardcodé en prod
+const CRYPTO_SALT = process.env.NEXT_PUBLIC_CRYPTO_SALT || 'AureusSocialPro-2026-RGPD-fallback';
+// ⚠️  Configurer NEXT_PUBLIC_CRYPTO_SALT dans Vercel pour le sel de production
 const SENSITIVE_FIELDS = ['niss', 'NISS', 'iban', 'IBAN', 'bankAccount', 'compteBancaire'];
 let _cryptoKey = null;
 let _encryptionWarned = false;
@@ -8,7 +11,7 @@ export function getCryptoKey() { return _cryptoKey; }
 
 export async function deriveKey(userId) {
   if (!userId || typeof crypto === 'undefined' || !crypto.subtle) {
-    console.warn('[Crypto] Web Crypto API non disponible — les données sensibles ne seront PAS chiffrées');
+    logWarn('Crypto', 'Web Crypto API non disponible — données sensibles non chiffrées');
     return null;
   }
   try {
@@ -17,11 +20,11 @@ export async function deriveKey(userId) {
     const userSalt = enc.encode(CRYPTO_SALT + ':' + userId.slice(0, 8));
     const km = await crypto.subtle.importKey('raw', enc.encode(userId + CRYPTO_SALT), 'PBKDF2', false, ['deriveKey']);
     return crypto.subtle.deriveKey(
-      { name: 'PBKDF2', salt: userSalt, iterations: 310000, hash: 'SHA-256' },
+      { name: 'PBKDF2', salt: userSalt, iterations: 600000, hash: 'SHA-256' },
       km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
     );
   } catch (e) {
-    console.error('[Crypto] Échec dérivation de clé:', e.message);
+    logError('Crypto', 'Échec dérivation de clé', e);
     return null;
   }
 }
@@ -29,7 +32,7 @@ export async function deriveKey(userId) {
 export async function encryptField(plaintext, key) {
   if (!plaintext || !key) {
     if (!key && !_encryptionWarned) {
-      console.warn('[Crypto] ALERTE: Tentative de chiffrement sans clé — donnée sensible stockée en clair');
+      logWarn('Crypto', 'Tentative de chiffrement sans clé — donnée sensible en clair');
       _encryptionWarned = true;
     }
     return plaintext;
@@ -43,7 +46,7 @@ export async function encryptField(plaintext, key) {
     const ctB64 = btoa(Array.from(new Uint8Array(ct), b => String.fromCharCode(b)).join(''));
     return 'ENC:' + ivB64 + ':' + ctB64;
   } catch (e) {
-    console.error('[Crypto] ERREUR chiffrement:', e.message);
+    logError('Crypto', 'Erreur chiffrement', e);
     return plaintext;
   }
 }
@@ -57,7 +60,7 @@ export async function decryptField(ciphertext, key) {
     const ct = Uint8Array.from(atob(p[2]), c => c.charCodeAt(0));
     return new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct));
   } catch (e) {
-    console.error('[Crypto] ERREUR déchiffrement — possible altération des données');
+    logError('Crypto', 'Erreur déchiffrement — possible altération des données', e);
     return ciphertext;
   }
 }

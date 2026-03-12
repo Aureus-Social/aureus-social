@@ -152,17 +152,17 @@ function calcCSSS(brutMensuel, situation) {
   const annuel = imposable * 12;
   const isole = !situation || situation === 'isole';
   const baremes = isole ? LOIS_BELGES.csss.isole : LOIS_BELGES.csss.menage2revenus;
-  // Seuils CSSS 100% depuis LOIS_BELGES — aucun fallback hardcodé
-  const s0=baremes[0].max, s1=baremes[1].max, s2=baremes[2]?.max;
-  const t1=baremes[1].taux, t2=baremes[2]?.taux;
-  const base2=baremes[2]?.montant;
-  const plafond=baremes[baremes.length-1].montantFixe;
+  // Seuils CSSS dynamiques depuis LOIS_BELGES
+  const s0=baremes[0].max, s1=baremes[1].max, s2=baremes[2]?.max||60181.95;
+  const t1=baremes[1].taux, t2=baremes[2]?.taux||0.011;
+  const base2=baremes[2]?.montant||9.30;
+  const plafond=baremes[baremes.length-1].montantFixe||51.64;
   if (annuel <= s0) return 0;
   if (annuel <= s1) return Math.round((annuel - s0) * t1 / 12 * 100) / 100;
   if (isole && baremes.length > 4) {
-    const s3=baremes[3]?.min, t3=baremes[3]?.taux;
+    const s3=baremes[3]?.min||37344.02, t3=baremes[3]?.taux||0.013;
     if (annuel <= s3) return Math.round((base2 + (annuel - s1) * t2) / 12 * 100) / 100;
-    if (annuel <= baremes[4]?.min) return Math.round((base2 + (s3 - s1) * t2 + (annuel - s3) * t3) / 12 * 100) / 100;
+    if (annuel <= baremes[4]?.min||60181.95) return Math.round((base2 + (s3 - s1) * t2 + (annuel - s3) * t3) / 12 * 100) / 100;
   } else {
     if (annuel <= s2) return Math.round((base2 + (annuel - s1) * t2) / 12 * 100) / 100;
   }
