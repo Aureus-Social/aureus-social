@@ -2,12 +2,14 @@
 import { useLang } from '../lib/lang-context';
 import { supabase } from '@/app/lib/supabase';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { LOIS_BELGES, LB, RMMMG, TX_ONSS_W, TX_ONSS_E, NET_FACTOR, PV_DOUBLE, PV_SIMPLE, PP_EST, BONUS_MAX, CR_MAX, CR_PAT, CR_TRAV, HEURES_HEBDO } from '@/app/lib/lois-belges';
-import { LEGAL, fmt, DPER, calcPrecompteExact } from '@/app/lib/helpers';
+import { LOIS_BELGES, LB, RMMMG, TX_ONSS_W, TX_ONSS_E, NET_FACTOR, PV_DOUBLE, PV_SIMPLE, PP_EST } from '@/app/lib/lois-belges';
 
+const fmt = n => new Intl.NumberFormat('fr-BE', { style: 'currency', currency: 'EUR' }).format(n || 0);
 const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
-const AUREUS_INFO = { name:'Aureus IA SPRL', vat: 'BE 1028.230.781', version: 'v38', sprint: 'Sprint 38' };
+const AUREUS_INFO = { name: 'Aureus IA SPRL', vat: 'BE 1028.230.781', version: 'v38', sprint: 'Sprint 38' };
+const LEGAL = { WD: 21.67, WHD: 7.6 };
+const DPER = { month: new Date().getMonth()+1, year: new Date().getFullYear(), days: 21.67 };
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
 function PH({title,sub}){return <div style={{marginBottom:16}}><div style={{fontSize:18,fontWeight:800,color:'#c6a34e',letterSpacing:'.3px'}}>{title}</div>{sub&&<div style={{fontSize:11,color:'#9e9b93',marginTop:2}}>{sub}</div>}</div>;}
@@ -25,276 +27,18 @@ function calc(emp, per, co) {
 }
 
 function quickPP(brut) {
-  // Délègue à calcPrecompteExact — 100% depuis LOIS_BELGES, zéro hardcode
-  const res = calcPrecompteExact(brut, { situation: 'isole', enfants: 0 });
-  return res?.ppMensuel ?? 0;
+  const imposable = brut - brut * TX_ONSS_W;
+  if (imposable <= 1110) return 0;
+  if (imposable <= 1560) return Math.round((imposable - 1110) * 0.2668 * 100) / 100;
+  if (imposable <= 2700) return Math.round((120.06 + (imposable - 1560) * 0.4280) * 100) / 100;
+  return Math.round((607.98 + (imposable - 2700) * 0.4816) * 100) / 100;
 }
 
 function quickNet(brut) { return Math.round((brut||0) * NET_FACTOR * 100) / 100; }
 function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function ChangePwd() {
-  const [cur, setCur] = useState('');
-  const [nw, setNw] = useState('');
-  const [nw2, setNw2] = useState('');
-  const [msg, setMsg] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [showCur, setShowCur] = useState(false);
-  const [showNw, setShowNw] = useState(false);
-
-  const handle = async () => {
-    if (!nw || !nw2) return setMsg({ok:false, t:'Remplis tous les champs.'});
-    if (nw !== nw2) return setMsg({ok:false, t:'Les nouveaux mots de passe ne correspondent pas.'});
-    if (nw.length < 8) return setMsg({ok:false, t:'Minimum 8 caractères requis.'});
-    setLoading(true); setMsg(null);
-    try {
-      // 1) Re-authentifier avec l'ancien mot de passe
-      const { data: { user }, error: loginErr } = await supabase.auth.signInWithPassword({
-        email: (await supabase.auth.getUser()).data.user?.email, password: cur
-      });
-      if (loginErr) { setMsg({ok:false, t:'Mot de passe actuel incorrect.'}); setLoading(false); return; }
-      // 2) Mettre à jour
-      const { error } = await supabase.auth.updateUser({ password: nw });
-      if (error) setMsg({ok:false, t: error.message});
-      else { setMsg({ok:true, t:'✅ Mot de passe mis à jour avec succès !'}); setCur(''); setNw(''); setNw2(''); }
-    } catch(e) { setMsg({ok:false, t:'Erreur: ' + e.message}); }
-    setLoading(false);
-  };
-
-  const inp = {width:'100%',padding:'11px 14px',borderRadius:9,border:'1px solid rgba(198,163,78,.15)',background:'rgba(0,0,0,.25)',color:'#e8e6e0',fontSize:13,fontFamily:'inherit',outline:'none',boxSizing:'border-box'};
-
-  return (
-    <div style={{marginBottom:18,padding:20,background:'linear-gradient(135deg,rgba(99,102,241,.06),rgba(99,102,241,.02))',border:'1px solid rgba(99,102,241,.2)',borderRadius:12}}>
-      <div style={{fontSize:14,fontWeight:700,color:'#818cf8',marginBottom:4}}>🔑 Changer le mot de passe</div>
-      <div style={{fontSize:11,color:'#5e5c56',marginBottom:16}}>Minimum 8 caractères</div>
-      {msg && (
-        <div style={{padding:'10px 14px',borderRadius:8,marginBottom:14,fontSize:12,
-          background: msg.ok ? 'rgba(34,197,94,.08)' : 'rgba(239,68,68,.08)',
-          color: msg.ok ? '#22c55e' : '#ef4444',
-          border:`1px solid ${msg.ok ? 'rgba(34,197,94,.2)' : 'rgba(239,68,68,.2)'}`}}>
-          {msg.t}
-        </div>
-      )}
-      <div style={{display:'grid',gap:10}}>
-        <div>
-          <div style={{fontSize:10,fontWeight:700,color:'#5e5c56',marginBottom:5,letterSpacing:.5}}>MOT DE PASSE ACTUEL</div>
-          <div style={{position:'relative'}}>
-            <input type={showCur?'text':'password'} value={cur} onChange={e=>setCur(e.target.value)} placeholder="••••••••" style={inp}/>
-            <button type="button" onClick={()=>setShowCur(v=>!v)} style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:14,color:'#5e5c56'}}>{showCur?'🙈':'👁'}</button>
-          </div>
-        </div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-          <div>
-            <div style={{fontSize:10,fontWeight:700,color:'#5e5c56',marginBottom:5,letterSpacing:.5}}>NOUVEAU MOT DE PASSE</div>
-            <div style={{position:'relative'}}>
-              <input type={showNw?'text':'password'} value={nw} onChange={e=>setNw(e.target.value)} placeholder="••••••••" style={inp}/>
-              <button type="button" onClick={()=>setShowNw(v=>!v)} style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:14,color:'#5e5c56'}}>{showNw?'🙈':'👁'}</button>
-            </div>
-            {nw && (
-              <div style={{marginTop:5,display:'flex',gap:3}}>
-                {[nw.length>=8, /[A-Z]/.test(nw), /[0-9]/.test(nw), /[^a-zA-Z0-9]/.test(nw)].map((ok,i)=>(
-                  <div key={i} style={{flex:1,height:3,borderRadius:2,background:ok?'#22c55e':'rgba(198,163,78,.15)'}}/>
-                ))}
-              </div>
-            )}
-          </div>
-          <div>
-            <div style={{fontSize:10,fontWeight:700,color:'#5e5c56',marginBottom:5,letterSpacing:.5}}>CONFIRMER LE MOT DE PASSE</div>
-            <input type="password" value={nw2} onChange={e=>setNw2(e.target.value)} placeholder="••••••••"
-              style={{...inp, borderColor: nw2 && nw!==nw2 ? 'rgba(239,68,68,.4)' : 'rgba(198,163,78,.15)'}}/>
-            {nw2 && nw===nw2 && <div style={{fontSize:10,color:'#22c55e',marginTop:4}}>✓ Identiques</div>}
-            {nw2 && nw!==nw2 && <div style={{fontSize:10,color:'#ef4444',marginTop:4}}>✗ Ne correspondent pas</div>}
-          </div>
-        </div>
-        <div style={{display:'flex',justifyContent:'flex-end'}}>
-          <button onClick={handle} disabled={loading||!cur||!nw||!nw2||nw!==nw2}
-            style={{padding:'10px 24px',borderRadius:9,border:'none',background:loading||!cur||!nw||!nw2||nw!==nw2?'rgba(99,102,241,.3)':'linear-gradient(135deg,#818cf8,#6366f1)',color:'#fff',fontSize:13,fontWeight:700,cursor:loading||!cur||!nw||!nw2||nw!==nw2?'not-allowed':'pointer',fontFamily:'inherit'}}>
-            {loading ? '...' : '🔑 Mettre à jour'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// MFA SETUP BLOCK — Aureus Social Pro
-// TOTP complet avec QR code, vérification, statut en temps réel
-// Score sécurité : 7/15 → 11/15
-// ═══════════════════════════════════════════════════════════════
-function MfaSetupBlock() {
-  const [step, setStep] = useState('idle'); // idle | loading | qr | verify | active | error
-  const [qrData, setQrData] = useState(null); // { qr_code, secret, factorId }
-  const [code, setCode] = useState('');
-  const [msg, setMsg] = useState(null);
-  const [factors, setFactors] = useState([]);
-  const [checking, setChecking] = useState(true);
-
-  // Vérifier si MFA déjà actif au montage
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data, error } = await supabase.auth.mfa.listFactors();
-        if (!error && data?.totp?.length > 0) {
-          setFactors(data.totp);
-          setStep('active');
-        }
-      } catch(e) {}
-      setChecking(false);
-    })();
-  }, []);
-
-  const handleEnroll = async () => {
-    setStep('loading'); setMsg(null);
-    try {
-      const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp', issuer: 'Aureus Social Pro' });
-      if (error) { setMsg({ ok: false, t: error.message }); setStep('error'); return; }
-      setQrData({ qr_code: data.totp?.qr_code, secret: data.totp?.secret, factorId: data.id });
-      setStep('qr');
-    } catch(e) { setMsg({ ok: false, t: e.message }); setStep('error'); }
-  };
-
-  const handleVerify = async () => {
-    if (!code || code.length !== 6) { setMsg({ ok: false, t: 'Code 6 chiffres requis.' }); return; }
-    setMsg(null);
-    try {
-      const { data: challengeData, error: cErr } = await supabase.auth.mfa.challenge({ factorId: qrData.factorId });
-      if (cErr) { setMsg({ ok: false, t: cErr.message }); return; }
-      const { error: vErr } = await supabase.auth.mfa.verify({ factorId: qrData.factorId, challengeId: challengeData.id, code });
-      if (vErr) { setMsg({ ok: false, t: '❌ Code incorrect. Vérifiez l\'heure de votre appareil.' }); return; }
-      setFactors([{ friendly_name: 'Aureus Social Pro', id: qrData.factorId }]);
-      setStep('active'); setMsg({ ok: true, t: '✅ 2FA activé avec succès !' });
-    } catch(e) { setMsg({ ok: false, t: e.message }); }
-  };
-
-  const handleUnenroll = async (factorId) => {
-    if (!confirm('Désactiver la 2FA ? Votre compte sera moins sécurisé.')) return;
-    try {
-      const { error } = await supabase.auth.mfa.unenroll({ factorId });
-      if (error) { alert('Erreur: ' + error.message); return; }
-      setFactors([]); setStep('idle'); setMsg({ ok: true, t: '2FA désactivé.' });
-    } catch(e) { alert(e.message); }
-  };
-
-  const inp = { padding: '10px 14px', borderRadius: 8, border: '1px solid rgba(198,163,78,.2)', background: 'rgba(0,0,0,.25)', color: '#e8e6e0', fontSize: 14, fontFamily: 'inherit', outline: 'none', letterSpacing: 6, textAlign: 'center', width: 160, boxSizing: 'border-box' };
-  const btnGold = { padding: '10px 22px', borderRadius: 9, border: 'none', background: 'linear-gradient(135deg,#c6a34e,#a07c2a)', color: '#0c0b09', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' };
-  const btnRed = { ...btnGold, background: 'linear-gradient(135deg,#ef4444,#b91c1c)', color: '#fff' };
-  const btnGhost = { ...btnGold, background: 'rgba(198,163,78,.08)', color: '#c6a34e', border: '1px solid rgba(198,163,78,.2)' };
-
-  if (checking) return <div style={{ padding: 16, color: '#888', fontSize: 12 }}>Vérification MFA...</div>;
-
-  return (
-    <div style={{ marginBottom: 18, padding: 20, background: 'linear-gradient(135deg,rgba(198,163,78,.06),rgba(198,163,78,.02))', border: '1px solid rgba(198,163,78,.15)', borderRadius: 12 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#c6a34e' }}>🔐 Authentification à deux facteurs (2FA / MFA)</div>
-          <div style={{ fontSize: 11, color: '#666', marginTop: 3 }}>TOTP — Google Authenticator / Authy / 1Password</div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: step === 'active' ? '#22c55e' : '#ef4444', boxShadow: `0 0 6px ${step === 'active' ? '#22c55e' : '#ef4444'}` }}/>
-          <span style={{ fontSize: 11, fontWeight: 700, color: step === 'active' ? '#22c55e' : '#ef4444' }}>{step === 'active' ? 'ACTIF' : 'INACTIF'}</span>
-        </div>
-      </div>
-
-      {msg && (
-        <div style={{ padding: '10px 14px', borderRadius: 8, marginBottom: 14, fontSize: 12, background: msg.ok ? 'rgba(34,197,94,.08)' : 'rgba(239,68,68,.08)', color: msg.ok ? '#22c55e' : '#ef4444', border: `1px solid ${msg.ok ? 'rgba(34,197,94,.2)' : 'rgba(239,68,68,.2)'}` }}>
-          {msg.t}
-        </div>
-      )}
-
-      {/* IDLE — pas encore activé */}
-      {(step === 'idle' || step === 'error') && (
-        <div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 16 }}>
-            {[
-              { icon: '📱', t: 'Installez', d: 'Google Authenticator\nou Authy sur votre téléphone' },
-              { icon: '📷', t: 'Scannez', d: 'Scannez le QR code\nqui va apparaître' },
-              { icon: '✅', t: 'Vérifiez', d: 'Entrez le code à 6 chiffres\npour confirmer' },
-            ].map((s, i) => (
-              <div key={i} style={{ padding: 12, background: 'rgba(255,255,255,.02)', borderRadius: 8, border: '1px solid rgba(255,255,255,.04)', textAlign: 'center' }}>
-                <div style={{ fontSize: 22, marginBottom: 6 }}>{s.icon}</div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#c6a34e', marginBottom: 4 }}>Étape {i + 1} — {s.t}</div>
-                <div style={{ fontSize: 10, color: '#888', whiteSpace: 'pre-line', lineHeight: 1.5 }}>{s.d}</div>
-              </div>
-            ))}
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <button onClick={handleEnroll} style={btnGold}>🔐 Activer la 2FA</button>
-          </div>
-        </div>
-      )}
-
-      {/* LOADING */}
-      {step === 'loading' && (
-        <div style={{ textAlign: 'center', padding: 20, color: '#888', fontSize: 12 }}>Génération du QR code...</div>
-      )}
-
-      {/* QR CODE — à scanner */}
-      {step === 'qr' && qrData && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#e8e6e0', marginBottom: 12 }}>1. Scannez ce QR code avec votre app</div>
-            {qrData.qr_code && (
-              <img src={qrData.qr_code} alt="QR Code MFA" style={{ width: 180, height: 180, borderRadius: 8, border: '3px solid #c6a34e', background: '#fff', padding: 4 }} />
-            )}
-            <div style={{ marginTop: 10, fontSize: 10, color: '#666' }}>
-              Clé manuelle (si QR ne marche pas):
-              <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#c6a34e', marginTop: 4, wordBreak: 'break-all', padding: '4px 8px', background: 'rgba(198,163,78,.08)', borderRadius: 4 }}>
-                {qrData.secret}
-              </div>
-            </div>
-          </div>
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#e8e6e0', marginBottom: 12 }}>2. Entrez le code à 6 chiffres</div>
-            <input
-              type="text" inputMode="numeric" maxLength={6}
-              value={code} onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
-              placeholder="000000" style={inp}
-              onKeyDown={e => e.key === 'Enter' && handleVerify()}
-            />
-            <div style={{ fontSize: 10, color: '#666', marginTop: 8, marginBottom: 16 }}>Le code se renouvelle toutes les 30 secondes</div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={handleVerify} style={{ ...btnGold, flex: 1 }}>✅ Vérifier & Activer</button>
-              <button onClick={() => { setStep('idle'); setQrData(null); setCode(''); }} style={btnGhost}>Annuler</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ACTIVE — MFA activé */}
-      {step === 'active' && (
-        <div>
-          <div style={{ padding: 14, background: 'rgba(34,197,94,.06)', border: '1px solid rgba(34,197,94,.15)', borderRadius: 8, marginBottom: 14 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#22c55e', marginBottom: 6 }}>✅ 2FA actif — compte sécurisé</div>
-            <div style={{ fontSize: 11, color: '#888' }}>Chaque connexion nécessite votre mot de passe + le code de votre app d'authentification.</div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
-            {[
-              { icon: '🛡', t: 'Protection maximale', d: 'Mot de passe + TOTP requis', ok: true },
-              { icon: '📱', t: 'App configurée', d: factors[0]?.friendly_name || 'Aureus Social Pro', ok: true },
-              { icon: '⏱', t: 'Code 30 secondes', d: 'Rotation automatique', ok: true },
-              { icon: '🔑', t: 'Codes de secours', d: 'Conservez-les en lieu sûr', ok: null },
-            ].map((item, i) => (
-              <div key={i} style={{ padding: 10, background: 'rgba(255,255,255,.02)', borderRadius: 8, border: '1px solid rgba(255,255,255,.04)', display: 'flex', gap: 10, alignItems: 'center' }}>
-                <span style={{ fontSize: 18 }}>{item.icon}</span>
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: item.ok ? '#22c55e' : '#c6a34e' }}>{item.t}</div>
-                  <div style={{ fontSize: 10, color: '#666' }}>{item.d}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            {factors[0] && <button onClick={() => handleUnenroll(factors[0].id)} style={{ ...btnRed, fontSize: 11 }}>Désactiver la 2FA</button>}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 function SettingsPage({s,d}) {
-  const { t, lang, tText } = useLang();
+  const { t, lang } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const [f,setF]=useState({...s.co});
   return <div>
@@ -323,19 +67,18 @@ function SettingsPage({s,d}) {
         </div>
       </div>
       <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
-        <div style={{padding:8,background:'rgba(198,163,78,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#c6a34e'}}>{(s?.emps||[]).length}</div><div style={{fontSize:9,color:'#888'}}>{'Employés'}</div></div>
-        <div style={{padding:8,background:'rgba(59,130,246,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#3b82f6'}}>{(s.pays||[]).length}</div><div style={{fontSize:9,color:'#888'}}>{'Fiches paie'}</div></div>
-        <div style={{padding:8,background:'rgba(168,85,247,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#a855f7'}}>{(s?.clients||[]).length}</div><div style={{fontSize:9,color:'#888'}}>{'Clients'}</div></div>
-        <div style={{padding:8,background:'rgba(34,197,94,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#22c55e'}}>{Math.round(JSON.stringify(s).length/1024)} KB</div><div style={{fontSize:9,color:'#888'}}>{'Taille données'}</div></div>
+        <div style={{padding:8,background:'rgba(198,163,78,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#c6a34e'}}>{(s?.emps||[]).length}</div><div style={{fontSize:9,color:'#888'}}>Employés</div></div>
+        <div style={{padding:8,background:'rgba(59,130,246,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#3b82f6'}}>{(s.pays||[]).length}</div><div style={{fontSize:9,color:'#888'}}>Fiches paie</div></div>
+        <div style={{padding:8,background:'rgba(168,85,247,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#a855f7'}}>{(s?.clients||[]).length}</div><div style={{fontSize:9,color:'#888'}}>Clients</div></div>
+        <div style={{padding:8,background:'rgba(34,197,94,.06)',borderRadius:8,textAlign:'center'}}><div style={{fontSize:16,fontWeight:700,color:'#22c55e'}}>{Math.round(JSON.stringify(s).length/1024)} KB</div><div style={{fontSize:9,color:'#888'}}>Taille données</div></div>
       </div>
     </div>
-    {/* Changer mot de passe */}
-    <ChangePwd/>
-
-    {/* 2FA / MFA TOTP — Composant complet */}
-    <MfaSetupBlock/>
+    {/* 2FA / MFA TOTP */}
+    <div style={{marginBottom:18,padding:16,background:'linear-gradient(135deg,rgba(198,163,78,.06),rgba(198,163,78,.02))',border:'1px solid rgba(198,163,78,.15)',borderRadius:12}}>
+      <TwoFactorSetup/>
+    </div>
     <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
-      <C><ST>{'Identification'}</ST><div style={{display:'grid',gap:9}}>
+      <C><ST>Identification</ST><div style={{display:'grid',gap:9}}>
         <I label="Société" value={f.name} onChange={v=>setF({...f,name:v})}/>
         <I label="TVA" value={f.vat} onChange={v=>setF({...f,vat:v})}/>
         <I label="BCE" value={f.bce} onChange={v=>setF({...f,bce:v})}/>
@@ -345,17 +88,17 @@ function SettingsPage({s,d}) {
         <I label="CP" value={f.cp} onChange={v=>setF({...f,cp:v})} options={Object.entries(LEGAL.CP).map(([k,v])=>({v:k,l:v}))}/>
         <I label="IBAN (compte bancaire)" value={f.bank} onChange={v=>setF({...f,bank:v})}/>
         <I label="BIC (code banque)" value={f.bic} onChange={v=>setF({...f,bic:v})} options={[
-          {v:"GEBABEBB",l:'GEBABEBB — BNP Paribas Fortis'},
-          {v:"BBRUBEBB",l:'BBRUBEBB — ING Belgique'},
-          {v:"KREDBEBB",l:'KREDBEBB — KBC / CBC'},
-          {v:"GKCCBEBB",l:'GKCCBEBB — Belfius'},
-          {v:"ARSPBE22",l:'ARSPBE22 — Argenta'},
-          {v:"NICABEBB",l:'NICABEBB — Crelan'},
-          {v:"TRIOBEBB",l:'TRIOBEBB — Triodos'},
-          {v:"AXABBE22",l:'AXABBE22 — AXA Banque'},
+          {v:"GEBABEBB",l:"GEBABEBB — BNP Paribas Fortis"},
+          {v:"BBRUBEBB",l:"BBRUBEBB — ING Belgique"},
+          {v:"KREDBEBB",l:"KREDBEBB — KBC / CBC"},
+          {v:"GKCCBEBB",l:"GKCCBEBB — Belfius"},
+          {v:"ARSPBE22",l:"ARSPBE22 — Argenta"},
+          {v:"NICABEBB",l:"NICABEBB — Crelan"},
+          {v:"TRIOBEBB",l:"TRIOBEBB — Triodos"},
+          {v:"AXABBE22",l:"AXABBE22 — AXA Banque"},
         ]}/>
       </div></C>
-      <C><ST>{'Contact & Assurances'}</ST><div style={{display:'grid',gap:9}}>
+      <C><ST>Contact & Assurances</ST><div style={{display:'grid',gap:9}}>
         <I label="Contact" value={f.contact} onChange={v=>setF({...f,contact:v})}/>
         <I label="Email" value={f.email} onChange={v=>setF({...f,email:v})}/>
         <I label="Téléphone" value={f.phone} onChange={v=>setF({...f,phone:v})}/>
@@ -371,19 +114,19 @@ function SettingsPage({s,d}) {
       <ST>🔐 Sécurité — Authentification à deux facteurs (2FA)</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
         <div>
-          <div style={{fontSize:12,color:'#e8e6e0',marginBottom:8,fontWeight:600}}>{'Statut 2FA'}</div>
+          <div style={{fontSize:12,color:'#e8e6e0',marginBottom:8,fontWeight:600}}>Statut 2FA</div>
           <div style={{display:'flex',alignItems:'center',gap:10,padding:14,background:'rgba(74,222,128,.04)',borderRadius:10,border:'1px solid rgba(74,222,128,.12)'}}>
             <span style={{fontSize:24}}>🔒</span>
             <div>
               <div style={{fontSize:13,fontWeight:600,color:'#4ade80'}}>2FA disponible via Supabase</div>
-              <div style={{fontSize:10.5,color:'#5e5c56',marginTop:2}}>{'Activez la vérification en deux étapes pour sécuriser votre compte'}</div>
+              <div style={{fontSize:10.5,color:'#5e5c56',marginTop:2}}>Activez la vérification en deux étapes pour sécuriser votre compte</div>
             </div>
           </div>
           <div style={{marginTop:12}}>
             <B v="outline" style={{width:'100%'}} onClick={async()=>{
               try{
                 const{data,error}=await(await import('@/app/lib/supabase')).supabase.auth.mfa.enroll({factorType:'totp'});
-                if(error)return alert('Erreur: '+error.message);
+                if(error){ console.error('[Settings]', error); return alert('Une erreur est survenue. Veuillez reessayer.'); };
                 if(data){
                   const qr=data.totp?.qr_code;
                   const secret=data.totp?.secret;
@@ -394,70 +137,70 @@ function SettingsPage({s,d}) {
           </div>
         </div>
         <div>
-          <div style={{fontSize:12,color:'#e8e6e0',marginBottom:8,fontWeight:600}}>{'Options de sécurité'}</div>
+          <div style={{fontSize:12,color:'#e8e6e0',marginBottom:8,fontWeight:600}}>Options de sécurité</div>
           <div style={{display:'flex',flexDirection:'column',gap:8}}>
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>📧</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{'Email de confirmation'}</div>
-                <div style={{fontSize:9.5,color:'#5e5c56'}}>{tText('Requis à l\'inscription')}</div>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>Email de confirmation</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>Requis à l'inscription</div>
               </div>
-              <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>{'Actif ✓'}</span>
+              <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>Actif ✓</span>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>🔑</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{'Réinitialisation mot de passe'}</div>
-                <div style={{fontSize:9.5,color:'#5e5c56'}}>{'Par email sécurisé'}</div>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>Réinitialisation mot de passe</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>Par email sécurisé</div>
               </div>
-              <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>{'Actif ✓'}</span>
+              <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>Actif ✓</span>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>⏱</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{'Session timeout'}</div>
-                <div style={{fontSize:9.5,color:'#5e5c56'}}>{'Déconnexion après inactivité'}</div>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>Session timeout</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>Déconnexion après inactivité</div>
               </div>
-              <span style={{fontSize:10,color:'#fb923c',fontWeight:600}}>{'1 heure'}</span>
+              <span style={{fontSize:10,color:'#fb923c',fontWeight:600}}>1 heure</span>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>📱</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{'TOTP (Google Authenticator / Authy)'}</div>
-                <div style={{fontSize:9.5,color:'#5e5c56'}}>{'Code à 6 chiffres toutes les 30 secondes'}</div>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>TOTP (Google Authenticator / Authy)</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>Code à 6 chiffres toutes les 30 secondes</div>
               </div>
-              <span style={{fontSize:10,color:'#fb923c',fontWeight:600}}>{'À activer'}</span>
+              <span style={{fontSize:10,color:'#fb923c',fontWeight:600}}>À activer</span>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:10,padding:12,background:'rgba(198,163,78,.03)',borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
               <span>🛡</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11.5,color:'#e8e6e0'}}>{'Audit trail (Boîte noire)'}</div>
-                <div style={{fontSize:9.5,color:'#5e5c56'}}>{'Toute action est tracée dans audit_log'}</div>
+                <div style={{fontSize:11.5,color:'#e8e6e0'}}>Audit trail (Boîte noire)</div>
+                <div style={{fontSize:9.5,color:'#5e5c56'}}>Toute action est tracée dans audit_log</div>
               </div>
-              <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>{'Actif ✓'}</span>
+              <span style={{fontSize:10,color:'#4ade80',fontWeight:600}}>Actif ✓</span>
             </div>
           </div>
         </div>
       </div>
     </C>
     <C style={{marginTop:20}}>
-      <ST>{'Barèmes légaux'}</ST>
+      <ST>Barèmes légaux</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:20,marginTop:10}}>
-        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{'ONSS'}</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
-          <div>Travailleur: <b style={{color:'#e8e6e0'}}>{fmtP(TX_ONSS_W)}</b></div>
+        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>ONSS</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
+          <div>Travailleur: <b style={{color:'#e8e6e0'}}>{fmtP(LEGAL.ONSS_W)}</b></div>
           <div>Employeur (marchand): <b style={{color:'#e8e6e0'}}>25,00%</b></div>
           <div>Employeur (non-march.): <b style={{color:'#e8e6e0'}}>32,40%</b></div>
-          <div>{'Ouvriers: brut × 108%'}</div>
-          <div>Bonus max: <b style={{color:'#e8e6e0'}}>{fmt(BONUS_MAX)}</b></div>
+          <div>Ouvriers: brut × 108%</div>
+          <div>Bonus max: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.BONUS_2026.A_MAX)}</b></div>
         </div></div>
-        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{'Avantages'}</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
-          <div>CR empl. max: <b style={{color:'#e8e6e0'}}>{fmt(CR_PAT)}</b> (2026)</div>
-          <div>CR trav. min: <b style={{color:'#e8e6e0'}}>{fmt(CR_TRAV)}</b></div>
-          <div>CR valeur max: <b style={{color:'#e8e6e0'}}>{fmt(CR_MAX)}</b></div>
-          <div>Éco-chèques: <b style={{color:'#e8e6e0'}}>{fmt(250)}/an</b></div>
+        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>Avantages</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
+          <div>CR empl. max: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.MV.emax)}</b> (2026)</div>
+          <div>CR trav. min: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.MV.wmin)}</b></div>
+          <div>CR valeur max: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.MV.maxTotal)}</b></div>
+          <div>Éco-chèques: <b style={{color:'#e8e6e0'}}>{fmt(LEGAL.ECO)}/an</b></div>
         </div></div>
-        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>{'Régime'}</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
-          <div>Heures/sem: <b style={{color:'#e8e6e0'}}>{HEURES_HEBDO}h</b></div>
+        <div><div style={{fontSize:11.5,fontWeight:600,color:'#e8e6e0',marginBottom:6}}>Régime</div><div style={{fontSize:11.5,color:'#9e9b93',lineHeight:2}}>
+          <div>Heures/sem: <b style={{color:'#e8e6e0'}}>{LEGAL.WH}h</b></div>
           <div>Heures/jour: <b style={{color:'#e8e6e0'}}>{LEGAL.WHD}h</b></div>
           <div>Jours/mois: <b style={{color:'#e8e6e0'}}>{LEGAL.WD}</b></div>
         </div></div>
@@ -571,18 +314,18 @@ function SettingsPage({s,d}) {
 // ═══════════════════════════════════════════════════════════════
 const DRS_DOCS={
   chomage:[
-    {code:'C4',l:'C4 — Certificat de chômage',f:['motif',"brut","regime","preavis"]},
-    {code:'C4-RCC',l:'C4 Prépension (RCC)',f:['motif',"brut","date_rcc"]},
-    {code:'C4-ENS',l:'C4 Enseignement',f:['motif',"etablissement"]},
-    {code:'C3.2-CD',l:'C3.2 Constat du droit',f:['regime',"heures"]},
-    {code:'C3.2-OUV',l:'C3.2 Employeur → Ouvriers',f:['jours',"motif"]},
-    {code:'C3.2-EMP',l:'C3.2 Anti-crise → Employés',f:['jours',"motif"]},
-    {code:'C131A',l:'C131A Employeur',f:['debut',"motif","regime"]},
-    {code:'C131B',l:'C131B',f:['debut',"regime"]},
-    {code:'C131A-E',l:'C131A Enseignement',f:['debut',"etablissement"]},
-    {code:'C131B-E',l:'C131B Enseignement',f:['debut']},
-    {code:'C78-ACT-BXL',l:'C78 Activa.brussels (Actiris)',f:['type_activa',"debut","duree","montant_red"]},
-    {code:'C78-ACT-WAL',l:'C78 Impulsion -12/-25 mois (FOREM)',f:['type_impulsion',"debut","duree","montant_red"]},
+    {code:'C4',l:"C4 — Certificat de chômage",f:['motif',"brut","regime","preavis"]},
+    {code:'C4-RCC',l:"C4 Prépension (RCC)",f:['motif',"brut","date_rcc"]},
+    {code:'C4-ENS',l:"C4 Enseignement",f:['motif',"etablissement"]},
+    {code:'C3.2-CD',l:"C3.2 Constat du droit",f:['regime',"heures"]},
+    {code:'C3.2-OUV',l:"C3.2 Employeur → Ouvriers",f:['jours',"motif"]},
+    {code:'C3.2-EMP',l:"C3.2 Anti-crise → Employés",f:['jours',"motif"]},
+    {code:'C131A',l:"C131A Employeur",f:['debut',"motif","regime"]},
+    {code:'C131B',l:"C131B",f:['debut',"regime"]},
+    {code:'C131A-E',l:"C131A Enseignement",f:['debut',"etablissement"]},
+    {code:'C131B-E',l:"C131B Enseignement",f:['debut']},
+    {code:'C78-ACT-BXL',l:"C78 Activa.brussels (Actiris)",f:['type_activa',"debut","duree","montant_red"]},
+    {code:'C78-ACT-WAL',l:"C78 Impulsion -12/-25 mois (FOREM)",f:['type_impulsion',"debut","duree","montant_red"]},
     {code:'C78-ACT-VL',l:"C78 Werkplekleren / Winwin (VDAB)",f:['type_vl',"debut","duree"]},
     {code:'C78-TRANS',l:"C78 Prime de transition (Bruxelles)",f:['debut',"duree","montant"]},
     {code:'C78-START',l:"C78 Activa Start (<26 ans)",f:['debut',"duree","age"]},
@@ -620,7 +363,7 @@ const DRS_DOCS={
     {code:'C4-P',l:"C4 DRS (papier)",f:['motif']},
     {code:'C4-RCC-P',l:"C4 DRS-RCC (papier)",f:['motif']},
     {code:'ATT-PV',l:"Attestation Pécules de vacances",f:['annee',"simple","double"]},
-    {code:'ATT-TRAV',l:'Attestation de travail',f:['debut',"fin","fonction"]},
+    {code:'ATT-TRAV',l:"Attestation de travail",f:['debut',"fin","fonction"]},
     {code:'ATT-276',l:"Attestation 276 frontaliers",f:['pays',"annee"]},
   ],
 };

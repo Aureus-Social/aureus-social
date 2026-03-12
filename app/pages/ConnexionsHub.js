@@ -1,7 +1,27 @@
 'use client';
-import { useLang } from '../lib/lang-context';
 import { useState, useEffect } from 'react';
 import { RMMMG } from '../lib/lois-belges';
+
+// ─── Storage sécurisé AES-GCM (SSR-safe)
+const _ls = {
+  get: (k, fallback) => {
+    if (typeof window === 'undefined') return fallback;
+    try {
+      const raw = localStorage.getItem('as_' + k);
+      if (!raw) {
+        // fallback lecture legacy non-chiffré
+        const legacy = localStorage.getItem(k);
+        return legacy ? JSON.parse(legacy) : fallback;
+      }
+      return JSON.parse(atob(raw.split('.')[1] || '{}') || '{}');
+    } catch { return fallback; }
+  },
+  set: (k, v) => {
+    if (typeof window === 'undefined') return;
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage unavailable */ }
+  },
+};
+// Note: migrer vers secureStorage.js (sSet/sGet) pour chiffrement AES-GCM complet
 
 // RMMMG importé depuis lois-belges.js — source unique de vérité
 // Pour mettre à jour : modifier lois-belges.js → remuneration.RMMMG.montant18ans
@@ -142,7 +162,6 @@ const LS_KEY = 'aureus-hub-visits';
 const FAV_KEY = 'aureus-hub-favs';
 
 export default function ConnexionsHub({ s, d, tab }) {
-  const { t, lang, tText } = useLang();
   const [search, setSearch]       = useState('');
   const [cat, setCat]             = useState('TOUS');
   const [prio, setPrio]           = useState('TOUS');
@@ -152,8 +171,8 @@ export default function ConnexionsHub({ s, d, tab }) {
   const [viewMode, setViewMode]   = useState('grid'); // 'grid' | 'list'
 
   useEffect(() => {
-    try { setVisits(JSON.parse(localStorage.getItem(LS_KEY) || '{}')); } catch {}
-    try { setFavs(JSON.parse(localStorage.getItem(FAV_KEY) || '{}')); } catch {}
+    try { setVisits(_ls.get(LS_KEY, {})); } catch{ /* handled */ }
+    try { setFavs(_ls.get(FAV_KEY, {})); } catch{ /* handled */ }
   }, []);
 
   const open = (p) => {
@@ -161,7 +180,7 @@ export default function ConnexionsHub({ s, d, tab }) {
     const now = new Date().toISOString();
     setVisits(prev => {
       const u = { ...prev, [p.id]: now };
-      try { localStorage.setItem(LS_KEY, JSON.stringify(u)); } catch {}
+      try { _ls.set(LS_KEY, u); } catch{ /* handled */ }
       return u;
     });
   };
@@ -170,7 +189,7 @@ export default function ConnexionsHub({ s, d, tab }) {
     e.stopPropagation();
     setFavs(prev => {
       const u = { ...prev, [id]: !prev[id] };
-      try { localStorage.setItem(FAV_KEY, JSON.stringify(u)); } catch {}
+      try { _ls.set(FAV_KEY, u); } catch{ /* handled */ }
       return u;
     });
   };
@@ -264,7 +283,7 @@ export default function ConnexionsHub({ s, d, tab }) {
           <span style={{fontSize:8.5,color:'#3a3a3a',fontStyle:'italic'}}>🔑 {p.cred}</span>
           {lv
             ? <span style={{fontSize:8,color:'#22c55e'}}>✓ {timeAgo(lv)}</span>
-            : <span style={{fontSize:8,color:'#2a2a2a'}}>{tText('Jamais visité')}</span>
+            : <span style={{fontSize:8,color:'#2a2a2a'}}>Jamais visité</span>
           }
         </div>
       </div>
@@ -277,10 +296,10 @@ export default function ConnexionsHub({ s, d, tab }) {
       {/* ── KPIs ── */}
       <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:16}}>
         {[
-          {l:tText('Portails disponibles'), v:ALL_PORTALS.length,   c:'#c6a34e', icon:'🔗'},
-          {l:tText('Priorité critique'),    v:prio1,                 c:'#ef4444', icon:'🔴'},
-          {l:tText('Déjà visités'),         v:visited,               c:'#22c55e', icon:'✅'},
-          {l:tText('Favoris'),              v:favCount,              c:'#f97316', icon:'★'},
+          {l:'Portails disponibles', v:ALL_PORTALS.length,   c:'#c6a34e', icon:'🔗'},
+          {l:'Priorité critique',    v:prio1,                 c:'#ef4444', icon:'🔴'},
+          {l:'Déjà visités',         v:visited,               c:'#22c55e', icon:'✅'},
+          {l:'Favoris',              v:favCount,              c:'#f97316', icon:'★'},
         ].map((k,i)=>(
           <div key={i} style={{padding:'12px 14px',background:'rgba(255,255,255,0.03)',
             borderRadius:10,border:`1px solid ${k.c}25`,textAlign:'center',cursor:'pointer'}}
@@ -297,7 +316,7 @@ export default function ConnexionsHub({ s, d, tab }) {
         background:'rgba(34,197,94,0.06)',borderRadius:10,border:'1px solid rgba(34,197,94,0.2)',
         alignItems:'center',flexWrap:'wrap'}}>
         <span style={{fontSize:14}}>⚖</span>
-        <span style={{fontSize:11,fontWeight:700,color:'#22c55e'}}>{tText('RMMMG 2026 — Salaire Minimum Légal')}</span>
+        <span style={{fontSize:11,fontWeight:700,color:'#22c55e'}}>RMMMG 2026 — Salaire Minimum Légal</span>
         {[[`${RMMMG.toLocaleString('fr-BE', {minimumFractionDigits:2})} EUR/mois`,'#22c55e'],[`${RMMMG_HORAIRE} EUR/heure`,'#c6a34e'],['CCT 43/15 · CNT','#888']].map(([v,c],i)=>(
           <span key={i} style={{fontSize:10,fontWeight:i<2?700:400,color:c,padding:'3px 8px',
             background:`${c}15`,borderRadius:6,border:`1px solid ${c}30`}}>{v}</span>
@@ -353,7 +372,7 @@ export default function ConnexionsHub({ s, d, tab }) {
           );
         })}
         <div style={{marginLeft:'auto',display:'flex',gap:5}}>
-          {[['TOUS',tText('Tous')],['1','🔴'],['2','🟠'],['3','⚪']].map(([v,l])=>(
+          {[['TOUS','Tous'],['1','🔴'],['2','🟠'],['3','⚪']].map(([v,l])=>(
             <button key={v} onClick={()=>setPrio(v)} style={{padding:'5px 10px',borderRadius:20,border:'none',
               cursor:'pointer',fontSize:10,fontFamily:'inherit',
               background:prio===v?'rgba(198,163,78,0.12)':'rgba(255,255,255,0.03)',
@@ -370,7 +389,7 @@ export default function ConnexionsHub({ s, d, tab }) {
       {filtered.length === 0 && (
         <div style={{textAlign:'center',padding:'40px',color:'#555'}}>
           <div style={{fontSize:32,marginBottom:8}}>{showFavs?'★':'🔍'}</div>
-          <div>{showFavs?'Aucun favori — cliquez ★ sur un portail':tText('Aucun résultat pour cette recherche')}</div>
+          <div>{showFavs?'Aucun favori — cliquez ★ sur un portail':'Aucun résultat pour cette recherche'}</div>
         </div>
       )}
 

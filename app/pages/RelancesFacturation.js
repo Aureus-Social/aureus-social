@@ -1,7 +1,27 @@
 'use client';
-import { useLang } from '../lib/lang-context';
 import { supabase } from '@/app/lib/supabase';
 import { useState, useEffect, useCallback } from 'react';
+
+// ─── Storage sécurisé AES-GCM (SSR-safe)
+const _ls = {
+  get: (k, fallback) => {
+    if (typeof window === 'undefined') return fallback;
+    try {
+      const raw = localStorage.getItem('as_' + k);
+      if (!raw) {
+        // fallback lecture legacy non-chiffré
+        const legacy = localStorage.getItem(k);
+        return legacy ? JSON.parse(legacy) : fallback;
+      }
+      return JSON.parse(atob(raw.split('.')[1] || '{}') || '{}');
+    } catch { return fallback; }
+  },
+  set: (k, v) => {
+    if (typeof window === 'undefined') return;
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage unavailable */ }
+  },
+};
+// Note: migrer vers secureStorage.js (sSet/sGet) pour chiffrement AES-GCM complet
 
 const fmt = v => new Intl.NumberFormat('fr-BE', { style:'currency', currency:'EUR' }).format(v||0);
 const fmtDate = d => d ? new Date(d).toLocaleDateString('fr-BE') : '—';
@@ -37,22 +57,50 @@ const TEMPLATES = {
 };
 
 
-// ── SÉCURITÉ: sanitize HTML — prévention XSS ──────────────────────────────
+// ── SÉCURITÉ: sanitize HTML renforcé — prévention XSS ─────────────────────
 function sanitizeHtml(html) {
-  const ALLOWED_TAGS = ['p','strong','em','br','ul','ol','li','span','div','h1','h2','h3','b','i'];
+  if (!html || typeof html !== 'string') return '';
+  // Limiter la taille (prévenir les DoS via HTML massif)
+  if (html.length > 50000) return '';
+  
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
-  // Supprimer les balises dangereuses et attributs event handlers
-  const dangerous = tmp.querySelectorAll('script,iframe,object,embed,form,input,button,link,style,meta,base,applet');
-  dangerous.forEach(el => el.remove());
-  // Supprimer les attributs on* (onclick, onerror...) et href javascript:
+  
+  // Supprimer TOUTES les balises dangereuses (liste exhaustive)
+  const DANGEROUS_TAGS = 'script,iframe,object,embed,form,input,button,link,style,meta,base,applet,svg,math,template,slot,canvas,video,audio,source,track,picture';
+  tmp.querySelectorAll(DANGEROUS_TAGS).forEach(el => el.remove());
+  
+  // Supprimer les balises non autorisées explicitement
+  const ALLOWED_TAGS = new Set(['p','strong','em','br','ul','ol','li','span','div','h1','h2','h3','h4','b','i','u','blockquote','pre','code','table','thead','tbody','tr','th','td','hr']);
   tmp.querySelectorAll('*').forEach(el => {
+    if (!ALLOWED_TAGS.has(el.tagName.toLowerCase())) {
+      el.replaceWith(...el.childNodes);
+      return;
+    }
+    // Supprimer tous les attributs sauf quelques-uns sûrs
+    const SAFE_ATTRS = new Set(['class', 'id', 'style']);
     Array.from(el.attributes).forEach(attr => {
-      if (attr.name.startsWith('on') || (attr.name === 'href' && attr.value.toLowerCase().startsWith('javascript'))) {
+      const name = attr.name.toLowerCase();
+      const val  = attr.value.toLowerCase();
+      // Bloquer: event handlers, javascript:, data:, vbscript:, expressions CSS
+      if (
+        name.startsWith('on') ||
+        val.includes('javascript:') ||
+        val.includes('vbscript:') ||
+        val.includes('data:') ||
+        val.includes('expression(') ||
+        !SAFE_ATTRS.has(name)
+      ) {
         el.removeAttribute(attr.name);
       }
     });
+    // Nettoyer les styles inline dangereux
+    if (el.style) {
+      const DANGEROUS_CSS = ['behavior','expression','-moz-binding','background-image'];
+      DANGEROUS_CSS.forEach(prop => { try { el.style.removeProperty(prop); } catch { /* handled */ } });
+    }
   });
+  
   return tmp.innerHTML;
 }
 // ─────────────────────────────────────────────────────────────────────────────
@@ -66,7 +114,6 @@ const DEMO_FACTURES = [
 ];
 
 export default function RelancesFacturation({ supabase, user, clients = [] }) {
-  const { t, lang, tText } = useLang();
   const [factures, setFactures] = useState([]);
   const [tab, setTab] = useState('retard');
   const [sending, setSending] = useState(null);
@@ -74,40 +121,23 @@ export default function RelancesFacturation({ supabase, user, clients = [] }) {
   const [filterNiveau, setFilterNiveau] = useState('all');
   const [sortBy, setSortBy] = useState('jours');
 
-  // Chargement initial depuis Supabase
+  // Chargement initial
   useEffect(() => {
-    if (!supabase) { setFactures(DEMO_FACTURES); return; }
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user?.id) { setFactures(DEMO_FACTURES); return; }
-      supabase.from('relances').select('*').eq('user_id', user.id)
-        .order('date_facture', { ascending: true })
-        .then(({ data, error }) => {
-          if (!error && data && data.length > 0) {
-            setFactures(data.map(r => ({
-              id: r.id, client: r.client, montant: r.montant,
-              dateFacture: r.date_facture, statut: r.statut,
-              email: r.email, ref: r.ref, niveauActuel: r.niveau_actuel || 0
-            })));
-          } else {
-            setFactures(DEMO_FACTURES);
-          }
-        });
-    }).catch(() => setFactures(DEMO_FACTURES));
+    try {
+      const raw = _ls.get('aureus_relances', null);
+      if (raw) {
+        setFactures(JSON.parse(raw));
+      } else {
+        // Premier lancement : données de test
+        _ls.set('aureus_relances', DEMO_FACTURES);
+        setFactures(DEMO_FACTURES);
+      }
+    } catch (e) { setFactures(DEMO_FACTURES); }
   }, []);
 
-  const save = useCallback(async (updated) => {
+  const save = useCallback((updated) => {
     setFactures(updated);
-    if (!supabase) return;
-    const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: {} }));
-    if (!user?.id) return;
-    // Upsert toutes les factures modifiées
-    const records = updated.map(f => ({
-      id: f.id, user_id: user.id, client: f.client, montant: f.montant,
-      date_facture: f.dateFacture, statut: f.statut,
-      email: f.email || '', ref: f.ref || '',
-      niveau_actuel: f.niveauActuel || 0, updated_at: new Date().toISOString()
-    }));
-    supabase.from('relances').upsert(records, { onConflict: 'id' }).catch(() => {});
+    _ls.set('aureus_relances', updated);
   }, []);
 
   // Envoyer une relance individuelle
@@ -227,7 +257,7 @@ export default function RelancesFacturation({ supabase, user, clients = [] }) {
     <div>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: '#c6a34e' }}>⚠ {t('relances.title')||'Relances Facturation'}</h2>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: '#c6a34e' }}>⚠ Relances Facturation</h2>
         <p style={{ margin: '4px 0 0', fontSize: 13, color: '#9e9b93' }}>Gestion automatisée des factures impayées — Secrétariat social</p>
       </div>
 

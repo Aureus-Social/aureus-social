@@ -1,7 +1,5 @@
 'use client';
 import { useLang } from '../lib/lang-context';
-import { supabase } from '@/app/lib/supabase';
-import { getCryptoKey, encryptField, decryptField } from '@/app/lib/crypto';
 import { B, C, CR_PAT, CR_TRAV, CR_MAX, DPER, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, validateNISS } from '@/app/lib/helpers';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
@@ -9,51 +7,13 @@ const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
 const MN_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
-// CP presets — pré-remplissage formulaire employé par commission paritaire
-const CAR_MODELS = {
-  'BMW':        ['Série 1','Série 3','Série 5','X1','X3','X5','iX','i4'],
-  'Mercedes':   ['Classe A','Classe C','Classe E','GLA','GLC','EQA','EQC'],
-  'Audi':       ['A1','A3','A4','A6','Q3','Q5','Q7','e-tron'],
-  'Volkswagen': ['Golf','Polo','Passat','Tiguan','ID.3','ID.4'],
-  'Toyota':     ['Yaris','Corolla','RAV4','Prius','C-HR','bZ4X'],
-  'Peugeot':    ['208','308','508','2008','3008','e-208','e-2008'],
-  'Renault':    ['Clio','Megane','Captur','Austral','Zoe','Megane E-Tech'],
-  'Volvo':      ['XC40','XC60','XC90','S60','V60','C40'],
-  'Tesla':      ['Model 3','Model Y','Model S','Model X'],
-  'Hyundai':    ['i20','i30','Tucson','Kona','Ioniq 5','Ioniq 6'],
-  'Kia':        ['Picanto','Ceed','Sportage','Niro','EV6'],
-  'Ford':       ['Fiesta','Focus','Puma','Kuga','Mustang Mach-E'],
-  'Skoda':      ['Fabia','Octavia','Superb','Karoq','Kodiaq','Enyaq'],
-  'Seat':       ['Ibiza','Leon','Arona','Ateca','Tarraco'],
-  'Opel':       ['Corsa','Astra','Crossland','Mokka','Insignia'],
-  'Citroën':    ['C3','C4','C5 X','Berlingo','e-C4'],
-  'Nissan':     ['Micra','Qashqai','X-Trail','Leaf','Ariya'],
-  'Mazda':      ['2','3','CX-3','CX-5','CX-30','MX-30'],
-};
-
-const CP_PRESETS_FULL = {
-  '200': { fn: 'Employé', statut: 'employe', monthlySalary: 2500, whWeek: 38 },
-  '111': { fn: 'Ouvrier métal', statut: 'ouvrier', monthlySalary: 2200, whWeek: 38 },
-  '118': { fn: 'Employé alimentaire', statut: 'employe', monthlySalary: 2100, whWeek: 38 },
-  '119': { fn: 'Employé commerce', statut: 'employe', monthlySalary: 2050, whWeek: 38 },
-  '121': { fn: 'Agent nettoyage', statut: 'ouvrier', monthlySalary: 2030, whWeek: 38 },
-  '124': { fn: 'Ouvrier construction', statut: 'ouvrier', monthlySalary: 2100, whWeek: 38 },
-  '140': { fn: 'Chauffeur', statut: 'ouvrier', monthlySalary: 2200, whWeek: 38 },
-  '152': { fn: 'Enseignant', statut: 'employe', monthlySalary: 2300, whWeek: 38 },
-  '302': { fn: 'Employé hôtellerie', statut: 'employe', monthlySalary: 2050, whWeek: 38 },
-  '322': { fn: 'Aide titres-services', statut: 'ouvrier', monthlySalary: 2030, whWeek: 32 },
-  '330': { fn: 'Soignant', statut: 'employe', monthlySalary: 2400, whWeek: 38 },
-};
-
-
-
 
 
 
 function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function Employees({s,d}) {
-  const { t, lang, tText } = useLang();
+  const { t, lang } = useLang();
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
   const [form,setF]=useState(null);
   const [ed,setEd]=useState(false);
@@ -166,13 +126,13 @@ function Employees({s,d}) {
           status:'active',
         };
         if(emp.first||emp.last){
-          d({type:'ADD_EMP',d:emp});
+          d({type:'ADD_E',d:emp});
           added++;
         }
       }
       alert(`✅ ${added} travailleur(s) importé(s) depuis ${file.name}`);
     }catch(err){
-      alert('❌ Erreur import: '+err.message);
+      logError && logError('Employees', 'Erreur import', err); alert('❌ Erreur lors de l import. Verifiez le format du fichier.');
     }
     setImporting(false);
     e.target.value='';
@@ -200,7 +160,7 @@ function Employees({s,d}) {
   const roiSavingYear=roiSaving*12;
   const roiPercent=roiData.prixActuel>0?Math.round((1-roiData.prixAureus/roiData.prixActuel)*100):0;
 
-  const save=async()=>{
+  const save=()=>{
     if(!form.first||!form.last)return alert('Nom requis');
     // NISS validation
     if(form.niss){
@@ -214,28 +174,7 @@ function Employees({s,d}) {
       const ic=validateIBAN(form.iban);
       if(ic&&!ic.valid)return alert(ic.msg);
     }
-    // Persistance Supabase
-    try {
-      const sb = supabase;
-      if (!sb) throw new Error('Supabase non initialisé');
-      const { data: { user } } = await sb.auth.getUser();
-      if (user) {
-        const key = getCryptoKey();
-        const toStore = { ...form, user_id: user.id, updated_at: new Date().toISOString() };
-        // Chiffrement RGPD Art.32 — NISS et IBAN avant stockage Supabase
-        if (key) {
-          if (toStore.niss) toStore.niss = await encryptField(toStore.niss, key);
-          if (toStore.iban) toStore.iban = await encryptField(toStore.iban, key);
-        }
-        if (ed) {
-          await sb.from('employees').upsert(toStore, { onConflict: 'id' });
-        } else {
-          const newRec = { ...toStore, id: toStore.id || `emp-${Date.now()}`, created_at: new Date().toISOString() };
-          await sb.from('employees').insert(newRec);
-        }
-      }
-    } catch(e) { console.warn('[Supabase] Save employee:', e.message); }
-    if(ed)d({type:"UPD_EMP",d:form});else d({type:"ADD_EMP",d:form});setF(null);setEd(false);
+    if(ed)d({type:"UPD_E",d:form});else d({type:"ADD_E",d:form});setF(null);setEd(false);
   };
 
   // Filter and search
@@ -266,27 +205,27 @@ function Employees({s,d}) {
   const sortiCount=(s?.emps||[]).filter(e=>e.status==='sorti').length;
   const studentCount=(s?.emps||[]).filter(e=>e.contract==='student').length;
 
-  // Exemple Activa — Jean DUPONT (attestation Activa.brussels AP 350/800/350) — fiche complète
+  // Exemple Activa — Nourdin MOUSSATI (attestation Activa.brussels AP 350/800/350) — fiche complète
   // CDD 3 mois : entrée 2 mars 2026, fin 1er juin 2026 ; fiche de paie pour fin mars 2026
-  const addExempleActiva=()=>{
+  const addExempleActivaNordin=()=>{
     const startDate='2026-03-02';
     const endDate='2026-06-01';
     const exemple={...empty,
-      id:'E-Activa-Demo',
-      first:'Jean',last:'DUPONT',niss:'00.01.01.000.00',birth:'2000-01-01',
+      id:'E-Activa-Nourdin',
+      first:'Nourdin',last:'MOUSSATI',niss:'83.09.30.133.94',birth:'1983-09-30',
       fn:'Assistant administratif',function:'Assistant administratif',dept:'Administration',
       contract:'CDD',regime:'full',whWeek:38,monthlySalary:2800,
       cp:'200',dmfaCode:'495',dimType:'OTH',
       startD:startDate,startDate:startDate,endD:endDate,endDate:endDate,
       addr:'Avenue Princesse Elisabeth 5 Bte 1',zip:'1030',city:'Schaerbeek',
-      email:'demo.activa@example.com',phone:'+32 2 123 45 67',
+      email:'nourdin.moussati@example.com',phone:'+32 2 123 45 67',
       civil:'single',depChildren:0,sexe:'M',statut:'employe',status:'active',
       iban:'BE71 0961 2345 6769',mvT:10,mvW:CR_TRAV,mvE:8.91,expense:0,
     };
-    d({type:'ADD_EMP',d:exemple});
-    d({type:'NAV',page:'payslip',sub:null,selectedEmpIdForPayslip:'E-Activa-Demo'});
-    if(typeof addToast==='function')addToast('Jean DUPONT ajouté. Dans Fiches de Paie : choisir « Activa.brussels AP (350→800→350) » pour l\'allocation.');
-    else alert('Jean DUPONT ajouté. Allez dans Fiches de Paie → sélectionnez-le → Activation ONEM : Activa.brussels AP (350→800→350).');
+    d({type:'ADD_E',d:exemple});
+    d({type:'NAV',page:'payslip',sub:null,selectedEmpIdForPayslip:'E-Activa-Nourdin'});
+    if(typeof addToast==='function')addToast('Nourdin MOUSSATI ajouté. Dans Fiches de Paie : choisir « Activa.brussels AP (350→800→350) » pour l\'allocation.');
+    else alert('Nourdin MOUSSATI ajouté. Allez dans Fiches de Paie → sélectionnez-le → Activation ONEM : Activa.brussels AP (350→800→350).');
   };
 
   return <div>
@@ -297,13 +236,13 @@ function Employees({s,d}) {
       </label>
       <B v="outline" onClick={()=>setShowROI(!showROI)} style={{padding:'8px 14px',fontSize:11}}>💰 ROI</B>
       <B v="outline" onClick={exportCSV} style={{padding:'8px 14px',fontSize:11}}>⬇ CSV</B>
-      <B v="outline" onClick={addExempleActiva} style={{padding:'8px 14px',fontSize:11}}>💼 Exemple Activa</B>
+      <B v="outline" onClick={addExempleActivaNordin} style={{padding:'8px 14px',fontSize:11}}>💼 Exemple Activa Nourdin</B>
       <B onClick={()=>{setF({...empty});setEd(false);}}>+ Nouvel employé</B>
     </div>}/>
     {/* Barre visible Exemple Activa — toujours affichée sous le titre */}
     <div style={{marginBottom:16,padding:'12px 16px',background:'linear-gradient(135deg,rgba(34,197,94,.08),rgba(34,197,94,.03))',border:'1px solid rgba(34,197,94,.2)',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
-      <span style={{fontSize:12,color:'#86efac'}}>💼 Plan Activa (attestation Actiris) — Exemple Jean DUPONT : ajout en 1 clic + redirection Fiches de Paie</span>
-      <button onClick={addExempleActiva} style={{padding:'10px 18px',borderRadius:8,border:'none',background:'#22c55e',color:'#fff',fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap'}}>💼 Créer Jean DUPONT (Activa)</button>
+      <span style={{fontSize:12,color:'#86efac'}}>💼 Plan Activa (attestation Actiris) — Exemple Nourdin MOUSSATI : ajout en 1 clic + redirection Fiches de Paie</span>
+      <button onClick={addExempleActivaNordin} style={{padding:'10px 18px',borderRadius:8,border:'none',background:'#22c55e',color:'#fff',fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap'}}>💼 Créer Nourdin MOUSSATI (Activa)</button>
     </div>
     {/* Search and filters bar */}
     <div style={{display:'flex',gap:10,marginBottom:16,alignItems:'center',flexWrap:'wrap'}}>
@@ -336,15 +275,15 @@ function Employees({s,d}) {
       </div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12}}>
         <div style={{padding:16,borderRadius:10,background:'rgba(74,222,128,.06)',border:'1px solid rgba(74,222,128,.15)',textAlign:'center'}}>
-          <div style={{fontSize:10,color:'#9e9b93',marginBottom:4}}>{'Économie / mois'}</div>
+          <div style={{fontSize:10,color:'#9e9b93',marginBottom:4}}>Économie / mois</div>
           <div style={{fontSize:22,fontWeight:700,color:'#4ade80'}}>{roiSaving.toFixed(0)} €</div>
         </div>
         <div style={{padding:16,borderRadius:10,background:'rgba(198,163,78,.06)',border:'1px solid rgba(198,163,78,.15)',textAlign:'center'}}>
-          <div style={{fontSize:10,color:'#9e9b93',marginBottom:4}}>{'Économie / an'}</div>
+          <div style={{fontSize:10,color:'#9e9b93',marginBottom:4}}>Économie / an</div>
           <div style={{fontSize:22,fontWeight:700,color:'#c6a34e'}}>{roiSavingYear.toFixed(0)} €</div>
         </div>
         <div style={{padding:16,borderRadius:10,background:'rgba(96,165,250,.06)',border:'1px solid rgba(96,165,250,.15)',textAlign:'center'}}>
-          <div style={{fontSize:10,color:'#9e9b93',marginBottom:4}}>{'Réduction'}</div>
+          <div style={{fontSize:10,color:'#9e9b93',marginBottom:4}}>Réduction</div>
           <div style={{fontSize:22,fontWeight:700,color:'#60a5fa'}}>{roiPercent}%</div>
         </div>
       </div>
@@ -354,7 +293,7 @@ function Employees({s,d}) {
     </C>}
     {form&&<C style={{marginBottom:20}}>
       <h2 style={{fontSize:17,fontWeight:600,color:'#e8e6e0',margin:'0 0 16px',fontFamily:"'Cormorant Garamond',serif"}}>{ed?'Modifier':'Nouvel employé'}</h2>
-      <ST>{'Identité'}</ST>
+      <ST>Identité</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
         <I label="Prénom" value={form.first} onChange={v=>setF({...form,first:v})}/>
         <I label="Nom" value={form.last} onChange={v=>setF({...form,last:v})}/>
@@ -364,8 +303,8 @@ function Employees({s,d}) {
           {nissDup&&<div style={{fontSize:10,marginTop:2,color:nissDup.level==='error'?'#f87171':'#fb923c'}}>{nissDup.msg}</div>}
         </div>
         <I label="Naissance" type="date" value={form.birth} onChange={v=>setF({...form,birth:v})}/>
-        <I label="Sexe" value={form.sexe} onChange={v=>setF({...form,sexe:v})} options={[{v:"M",l:'Homme'},{v:"F",l:'Femme'},{v:"X",l:'Non-binaire'}]}/>
-        <I label="Statut" value={form.statut} onChange={v=>setF({...form,statut:v})} options={[{v:"employe",l:'Employé'},{v:"ouvrier",l:'Ouvrier'},{v:"etudiant",l:'Étudiant'},{v:"apprenti",l:'Apprenti'},{v:"dirigeant",l:tText('Dirigeant d\'entreprise')}]}/>
+        <I label="Sexe" value={form.sexe} onChange={v=>setF({...form,sexe:v})} options={[{v:"M",l:"Homme"},{v:"F",l:"Femme"},{v:"X",l:"Non-binaire"}]}/>
+        <I label="Statut" value={form.statut} onChange={v=>setF({...form,statut:v})} options={[{v:"employe",l:"Employé"},{v:"ouvrier",l:"Ouvrier"},{v:"etudiant",l:"Étudiant"},{v:"apprenti",l:"Apprenti"},{v:"dirigeant",l:"Dirigeant d\'entreprise"}]}/>
         <I label="Adresse" value={form.addr} onChange={v=>setF({...form,addr:v})} span={2}/>
         <I label="CP" value={form.zip} onChange={v=>setF({...form,zip:v})}/>
         <I label="Ville" value={form.city} onChange={v=>setF({...form,city:v})}/>
@@ -373,19 +312,19 @@ function Employees({s,d}) {
           <I label="IBAN" value={form.iban} onChange={onIbanChange}/>
           {ibanCheck&&<div style={{fontSize:10,marginTop:2,color:ibanCheck.valid?'#4ade80':'#f87171'}}>{ibanCheck.msg}</div>}
         </div>
-        <I label="Niveau d'études" value={form.niveauEtude} onChange={v=>setF({...form,niveauEtude:v})} options={[{v:"prim",l:'Primaire'},{v:"sec_inf",l:'Secondaire inférieur'},{v:"sec",l:'Secondaire supérieur'},{v:"sup",l:'Supérieur non-universitaire (bachelier)'},{v:"univ",l:'Universitaire (master/doctorat)'}]}/>
+        <I label="Niveau d'études" value={form.niveauEtude} onChange={v=>setF({...form,niveauEtude:v})} options={[{v:"prim",l:"Primaire"},{v:"sec_inf",l:"Secondaire inférieur"},{v:"sec",l:"Secondaire supérieur"},{v:"sup",l:"Supérieur non-universitaire (bachelier)"},{v:"univ",l:"Universitaire (master/doctorat)"}]}/>
       </div>
-      <ST>{'Contrat'}</ST>
+      <ST>Contrat</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
         <I label="Fonction" value={form.fn} onChange={v=>setF({...form,fn:v})}/>
         <I label="Département" value={form.dept} onChange={v=>setF({...form,dept:v})}/>
         <I label="Entrée" type="date" value={form.startD} onChange={v=>setF({...form,startD:v})}/>
         <I label="Contrat" value={form.contract} onChange={v=>setF({...form,contract:v})} options={[
-          {v:"CDI",l:'CDI'},{v:"CDD",l:'CDD'},{v:"trav_det",l:'Travail nettement défini'},{v:"remplacement",l:'Remplacement'},
-          {v:"tpartiel",l:'Temps partiel'},{v:"interim",l:'Intérimaire'},{v:"student",l:'Étudiant (650h)'},
-          {v:"flexi",l:'Flexi-job'},{v:"saisonnier",l:'Saisonnier'},{v:"occas_horeca",l:'Extra Horeca'},
-          {v:"titre_service",l:'Titres-services'},{v:"art60",l:'Art. 60§7 (CPAS)'},{v:"CIP",l:'Convention immersion'},
-          {v:"alternance",l:'Alternance'},{v:"CPE",l:"Premier emploi"},{v:"ETA",l:"Travail adapté"},
+          {v:"CDI",l:"CDI"},{v:"CDD",l:"CDD"},{v:"trav_det",l:"Travail nettement défini"},{v:"remplacement",l:"Remplacement"},
+          {v:"tpartiel",l:"Temps partiel"},{v:"interim",l:"Intérimaire"},{v:"student",l:"Étudiant (650h)"},
+          {v:"flexi",l:"Flexi-job"},{v:"saisonnier",l:"Saisonnier"},{v:"occas_horeca",l:"Extra Horeca"},
+          {v:"titre_service",l:"Titres-services"},{v:"art60",l:"Art. 60§7 (CPAS)"},{v:"CIP",l:"Convention immersion"},
+          {v:"alternance",l:"Alternance"},{v:"CPE",l:"Premier emploi"},{v:"ETA",l:"Travail adapté"},
           {v:"detache",l:"Détaché"},{v:"domestique",l:"Domestique"},{v:"teletravail",l:"Télétravail struct."},
           {v:"domicile",l:"Travail à domicile"},{v:"indep_princ",l:"Indép. principal"},
           {v:"indep_compl",l:"Indép. complémentaire"},{v:"mandataire",l:"Mandataire société"},
@@ -399,9 +338,9 @@ function Employees({s,d}) {
         <I label="Rang engagement" value={form.nrEngagement||0} onChange={v=>setF({...form,nrEngagement:parseInt(v)||0})} options={[{v:0,l:"— Pas de réduction —"},{v:1,l:"1er employé (exo totale)"},{v:2,l:"2è employé"},{v:3,l:"3è employé"},{v:4,l:"4è employé"},{v:5,l:"5è employé"},{v:6,l:"6è employé"}]}/>
         {form.nrEngagement>0&&<I label="Trimestre depuis eng." type="number" value={form.engagementTrimestre||1} onChange={v=>setF({...form,engagementTrimestre:parseInt(v)||1})}/>}
       </div>
-      <ST style={{marginTop:14}}>{'Activation ONEM (comme dans Fiches de Paie)'}</ST>
+      <ST style={{marginTop:14}}>Activation ONEM (comme dans Fiches de Paie)</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:8,padding:12,background:'rgba(34,197,94,.04)',border:'1px solid rgba(34,197,94,.15)',borderRadius:8}}>
-        <I label="Activation ONEM" value={form.allocTravailType||'none'} onChange={v=>setF({...form,allocTravailType:v,allocTravail:v!=='none'?(form.allocTravail||0):0})} options={[{v:"none",l:"— Aucune —"},{v:"activa_bxl",l:'Activa.brussels (€350/m)'},{v:"activa_bxl_ap",l:'Activa.brussels AP (350→800→350)'},{v:"activa_jeune",l:'Activa Jeunes <30 (€350/m)'},{v:"impulsion_wal",l:'Impulsion Wallonie (€500/m)'},{v:"impulsion55",l:'Impulsion 55+ (€500/m)'},{v:"sine",l:'SINE écon. sociale (€500/m)'},{v:"vdab",l:'VDAB (prime directe)'},{v:"art60",l:'Art. 60 §7 (1er emploi)'}]}/>
+        <I label="Activation ONEM" value={form.allocTravailType||'none'} onChange={v=>setF({...form,allocTravailType:v,allocTravail:v!=='none'?(form.allocTravail||0):0})} options={[{v:"none",l:"— Aucune —"},{v:"activa_bxl",l:"Activa.brussels (€350/m)"},{v:"activa_bxl_ap",l:"Activa.brussels AP (350→800→350)"},{v:"activa_jeune",l:"Activa Jeunes <30 (€350/m)"},{v:"impulsion_wal",l:"Impulsion Wallonie (€500/m)"},{v:"impulsion55",l:"Impulsion 55+ (€500/m)"},{v:"sine",l:"SINE écon. sociale (€500/m)"},{v:"vdab",l:"VDAB (prime directe)"},{v:"art60",l:"Art. 60 §7 (1er emploi)"}]}/>
         {form.allocTravailType&&form.allocTravailType!=='none'&&<I label="Montant alloc. ONEM (€)" type="number" value={form.allocTravail||0} onChange={v=>setF({...form,allocTravail:parseFloat(v)||0})}/>}
       </div>
       <div style={{marginTop:6,marginBottom:12,padding:10,background:'rgba(198,163,78,.04)',borderRadius:8,fontSize:10.5,color:'#9e9b93',lineHeight:1.5}}>
@@ -410,7 +349,7 @@ function Employees({s,d}) {
       <ST>Grille horaire (Loi 16/03/1971 + Règlement de travail)</ST>
       <div style={{padding:10,background:"rgba(198,163,78,.03)",borderRadius:8,border:'1px solid rgba(198,163,78,.08)'}}>
         <div style={{display:'flex',gap:6,marginBottom:8,alignItems:'center'}}>
-          <span style={{fontSize:11,color:'#9e9b93',fontWeight:600,width:70}}>{'Fraction:'}</span>
+          <span style={{fontSize:11,color:'#9e9b93',fontWeight:600,width:70}}>Fraction:</span>
           <span style={{fontSize:13,fontWeight:700,color:(form.whWeek||38)>=38?'#4ade80':'#fb923c'}}>{Math.round((form.whWeek||38)/38*100)}%</span>
           <span style={{fontSize:10.5,color:'#5e5c56',marginLeft:6}}>({form.whWeek||38}h / 38h réf.) — {(form.whWeek||38)>=38?'Temps plein':'Temps partiel'}</span>
           <span style={{fontSize:10.5,color:'#5e5c56',marginLeft:'auto'}}>{((form.whWeek||38)/5).toFixed(2)}h/jour · Pause: 30min (si {'>'} 6h)</span>
@@ -421,7 +360,7 @@ function Employees({s,d}) {
           </tr></thead>
           <tbody>
             <tr>
-              <td style={{padding:'4px 6px',fontSize:10,color:'#9e9b93'}}>{'Début'}</td>
+              <td style={{padding:'4px 6px',fontSize:10,color:'#9e9b93'}}>Début</td>
               {['lu',"ma","me","je","ve","sa"].map(d=><td key={d}><input type="time" defaultValue={d==='sa'?'':'09:00'} style={{width:'100%',background:"rgba(198,163,78,.05)",border:'1px solid rgba(198,163,78,.1)',borderRadius:4,padding:'3px 4px',fontSize:10,color:'#e8e6e0',textAlign:'center'}} onChange={e=>setF({...form,[`h_${d}_de`]:e.target.value})}/></td>)}
               <td rowSpan={2} style={{textAlign:'center',verticalAlign:'middle'}}>
                 <div style={{fontSize:16,fontWeight:700,color:'#c6a34e'}}>{form.whWeek||38}h</div>
@@ -429,13 +368,13 @@ function Employees({s,d}) {
               </td>
             </tr>
             <tr>
-              <td style={{padding:'4px 6px',fontSize:10,color:'#9e9b93'}}>{'Fin'}</td>
+              <td style={{padding:'4px 6px',fontSize:10,color:'#9e9b93'}}>Fin</td>
               {['lu',"ma","me","je","ve","sa"].map(d=><td key={d}><input type="time" defaultValue={d==='sa'?'':'17:36'} style={{width:'100%',background:"rgba(198,163,78,.05)",border:'1px solid rgba(198,163,78,.1)',borderRadius:4,padding:'3px 4px',fontSize:10,color:'#e8e6e0',textAlign:'center'}} onChange={e=>setF({...form,[`h_${d}_a`]:e.target.value})}/></td>)}
             </tr>
           </tbody>
         </table>
         <div style={{marginTop:8,fontSize:9.5,color:'#5e5c56',lineHeight:1.5}}>
-          ⏱ <b>{'Temps plein'}</b> = 38h/sem (Art. 19 Loi 16/03/1971). <b>{'Temps partiel'}</b> = min. 1/3 temps plein (≥12h40). Horaire variable possible (Art. 11bis). Dérogation samedi/dimanche = CCT sectorielle ou accord d'entreprise.
+          ⏱ <b>Temps plein</b> = 38h/sem (Art. 19 Loi 16/03/1971). <b>Temps partiel</b> = min. 1/3 temps plein (≥12h40). Horaire variable possible (Art. 11bis). Dérogation samedi/dimanche = CCT sectorielle ou accord d'entreprise.
         </div>
       </div>
       <ST>Rémunération</ST>
@@ -445,7 +384,7 @@ function Employees({s,d}) {
         <I label="CR part trav. (€)" type="number" value={form.mvW} onChange={v=>setF({...form,mvW:v})}/>
         <I label="CR part empl. (€)" type="number" value={form.mvE} onChange={v=>setF({...form,mvE:v})}/>
         <I label="Frais propres (€)" type="number" value={form.expense} onChange={v=>setF({...form,expense:v})}/>
-        <I label="Transport domicile-travail" value={form.commType} onChange={v=>setF({...form,commType:v})} options={[{v:"none",l:'Aucun'},{v:"train",l:"🚆 Train (SNCB)"},{v:"bus",l:"🚌 Bus/Tram/Métro (STIB/TEC/De Lijn)"},{v:"bike",l:"🚲 Vélo"},{v:"car",l:"🚗 Voiture privée"},{v:"carpool",l:"🚗 Covoiturage"},{v:"mixed",l:"🔄 Combiné (train+autre)"},{v:"company_car",l:"🏢 Voiture de société (pas d\'interv.)"}]}/>
+        <I label="Transport domicile-travail" value={form.commType} onChange={v=>setF({...form,commType:v})} options={[{v:"none",l:"Aucun"},{v:"train",l:"🚆 Train (SNCB)"},{v:"bus",l:"🚌 Bus/Tram/Métro (STIB/TEC/De Lijn)"},{v:"bike",l:"🚲 Vélo"},{v:"car",l:"🚗 Voiture privée"},{v:"carpool",l:"🚗 Covoiturage"},{v:"mixed",l:"🔄 Combiné (train+autre)"},{v:"company_car",l:"🏢 Voiture de société (pas d\'interv.)"}]}/>
         {form.commType!=='none'&&form.commType!=='company_car'&&<I label="Distance simple (km)" type="number" value={form.commDist} onChange={v=>setF({...form,commDist:v})}/>}
         {(form.commType==='train'||form.commType==='bus'||form.commType==='mixed')&&<I label="Abonnement mensuel (€)" type="number" value={form.commMonth} onChange={v=>setF({...form,commMonth:v})}/>}
       </div>
@@ -459,7 +398,7 @@ function Employees({s,d}) {
       </div>}
       <ST>Véhicule de société (ATN)</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
-        <I label="Carburant" value={form.carFuel} onChange={v=>setF({...form,carFuel:v})} options={[{v:"none",l:"Pas de véhicule"},{v:"essence",l:'Essence'},{v:"diesel",l:'Diesel'},{v:"lpg",l:"LPG/CNG"},{v:"electrique",l:'Électrique'},{v:"hybride",l:"Hybride PHEV"}]}/>
+        <I label="Carburant" value={form.carFuel} onChange={v=>setF({...form,carFuel:v})} options={[{v:"none",l:"Pas de véhicule"},{v:"essence",l:"Essence"},{v:"diesel",l:"Diesel"},{v:"lpg",l:"LPG/CNG"},{v:"electrique",l:"Électrique"},{v:"hybride",l:"Hybride PHEV"}]}/>
         <I label="CO2 g/km" type="number" value={form.carCO2} onChange={v=>setF({...form,carCO2:v})}/>
         <I label="Valeur catalogue (€)" type="number" value={form.carCatVal} onChange={v=>setF({...form,carCatVal:v})}/>
         <I label="Marque" value={form.carBrand} onChange={v=>setF({...form,carBrand:v})} options={[
@@ -467,20 +406,20 @@ function Employees({s,d}) {
           {v:"Audi",l:"Audi"},{v:"Bentley",l:"Bentley"},{v:"BMW",l:"BMW"},{v:"BYD",l:"BYD"},{v:"Cadillac",l:"Cadillac"},
           {v:"Chevrolet",l:"Chevrolet"},{v:"Chrysler",l:"Chrysler"},{v:"Citroën",l:"Citroën"},{v:"Cupra",l:"Cupra"},{v:"Dacia",l:"Dacia"},
           {v:"Dodge",l:"Dodge"},{v:"DS",l:"DS Automobiles"},{v:"Ferrari",l:"Ferrari"},{v:"Fiat",l:"Fiat"},{v:"Ford",l:"Ford"},
-          {v:"Genesis",l:"Genesis"},{v:"Honda",l:'Honda'},{v:"Hyundai",l:"Hyundai"},{v:"Infiniti",l:"Infiniti"},{v:"Isuzu",l:"Isuzu"},
+          {v:"Genesis",l:"Genesis"},{v:"Honda",l:"Honda"},{v:"Hyundai",l:"Hyundai"},{v:"Infiniti",l:"Infiniti"},{v:"Isuzu",l:"Isuzu"},
           {v:"Jaguar",l:"Jaguar"},{v:"Jeep",l:"Jeep"},{v:"Kia",l:"Kia"},{v:"Lamborghini",l:"Lamborghini"},{v:"Land Rover",l:"Land Rover"},
           {v:"Lexus",l:"Lexus"},{v:"Lotus",l:"Lotus"},{v:"Lynk & Co",l:"Lynk & Co"},{v:"Maserati",l:"Maserati"},{v:"Mazda",l:"Mazda"},
           {v:"McLaren",l:"McLaren"},{v:"Mercedes",l:"Mercedes-Benz"},{v:"MG",l:"MG"},{v:"Mini",l:"Mini"},{v:"Mitsubishi",l:"Mitsubishi"},
           {v:"NIO",l:"NIO"},{v:"Nissan",l:"Nissan"},{v:"Opel",l:"Opel"},{v:"Peugeot",l:"Peugeot"},{v:"Polestar",l:"Polestar"},
           {v:"Porsche",l:"Porsche"},{v:"Renault",l:"Renault"},{v:"Rolls-Royce",l:"Rolls-Royce"},{v:"Seat",l:"Seat"},{v:"Škoda",l:"Škoda"},
-          {v:"Smart",l:"Smart"},{v:"SsangYong",l:"SsangYong"},{v:"Subaru",l:"Subaru"},{v:"Suzuki",l:'Suzuki'},{v:"Tesla",l:"Tesla"},
-          {v:"Toyota",l:"Toyota"},{v:"Volkswagen",l:"Volkswagen"},{v:"Volvo",l:"Volvo"},{v:"XPeng",l:"XPeng"},{v:"Autre",l:'Autre'}
+          {v:"Smart",l:"Smart"},{v:"SsangYong",l:"SsangYong"},{v:"Subaru",l:"Subaru"},{v:"Suzuki",l:"Suzuki"},{v:"Tesla",l:"Tesla"},
+          {v:"Toyota",l:"Toyota"},{v:"Volkswagen",l:"Volkswagen"},{v:"Volvo",l:"Volvo"},{v:"XPeng",l:"XPeng"},{v:"Autre",l:"Autre"}
         ]}/>
         <I label="Modèle" value={form.carModel} onChange={v=>setF({...form,carModel:v})} options={[
           {v:"",l:"— Sélectionner —"},...((CAR_MODELS[form.carBrand]||[]).map(m=>({v:m,l:m}))),{v:"_autre",l:"Autre modèle"}
         ]}/>
       </div>
-      <ST>{'Avantages en nature (ATN)'}</ST>
+      <ST>Avantages en nature (ATN)</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
         <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>📱 GSM/Téléphone (36€/an)</div>
           <div onClick={()=>setF({...form,atnGSM:!form.atnGSM})} style={{padding:'8px 12px',borderRadius:6,cursor:'pointer',fontSize:11,
@@ -533,9 +472,9 @@ function Employees({s,d}) {
         {form.veloSociete&&<I label="Leasing mensuel (€)" type="number" value={form.veloLeasingMois} onChange={v=>setF({...form,veloLeasingMois:v})}/>}
       </div>
       {form.veloSociete&&<div style={{marginTop:8,padding:10,background:"rgba(74,222,128,.04)",borderRadius:8,fontSize:10.5,color:'#4ade80',lineHeight:1.6}}>
-        🚲 <b>{'Vélo de société'}</b> — ATN = 0€ (Art. 38§1er 14°a CIR — exonéré ONSS et IPP depuis 01/01/2024). Leasing vélo déductible 100% pour l'employeur. Cumulable avec l'indemnité vélo 0,27€/km. Le speed pedelec est assimilé à un vélo.
+        🚲 <b>Vélo de société</b> — ATN = 0€ (Art. 38§1er 14°a CIR — exonéré ONSS et IPP depuis 01/01/2024). Leasing vélo déductible 100% pour l'employeur. Cumulable avec l'indemnité vélo 0,27€/km. Le speed pedelec est assimilé à un vélo.
       </div>}
-      <ST>{'Moto de société (ATN)'}</ST>
+      <ST>Moto de société (ATN)</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
         <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>🏍 Moto de société</div>
           <div onClick={()=>setF({...form,motoSociete:!form.motoSociete})} style={{padding:'8px 12px',borderRadius:6,cursor:'pointer',fontSize:11,
@@ -550,7 +489,7 @@ function Employees({s,d}) {
         {form.motoSociete&&<I label="Modèle moto" value={form.motoModel||''} onChange={v=>setF({...form,motoModel:v})}/>}
       </div>
       {form.motoSociete&&<div style={{marginTop:8,padding:10,background:"rgba(251,146,60,.04)",borderRadius:8,fontSize:10.5,color:'#fb923c',lineHeight:1.6}}>
-        🏍 <b>{'Moto de société'}</b> — ATN = valeur catalogue × (6/7) × taux CO2 / 12. Même formule que la voiture (Art. 36 CIR 92). Cotisation CO2 patronale applicable. ATN imposable PP, non soumis ONSS.
+        🏍 <b>Moto de société</b> — ATN = valeur catalogue × (6/7) × taux CO2 / 12. Même formule que la voiture (Art. 36 CIR 92). Cotisation CO2 patronale applicable. ATN imposable PP, non soumis ONSS.
       </div>}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginTop:10}}>
         <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>⛽ Carte carburant / recharge</div>
@@ -569,7 +508,7 @@ function Employees({s,d}) {
         {form.borneRecharge&&<I label="Coût mensuel borne+élec (€)" type="number" value={form.borneRechargeCoût} onChange={v=>setF({...form,borneRechargeCoût:v})}/>}
       </div>
       {form.carteCarburant&&!form.carFuel!=='none'&&<div style={{marginTop:8,padding:10,background:"rgba(251,146,60,.04)",borderRadius:8,fontSize:10.5,color:'#fb923c',lineHeight:1.6}}>
-        ⚠ <b>{'Carte carburant sans voiture de société'}</b> — L'avantage est imposable à 100% (ATN = montant total de la carte). Si voiture de société: inclus dans l'ATN voiture (Art. 36§2 CIR).
+        ⚠ <b>Carte carburant sans voiture de société</b> — L'avantage est imposable à 100% (ATN = montant total de la carte). Si voiture de société: inclus dans l'ATN voiture (Art. 36§2 CIR).
       </div>}
       <ST>Travailleur frontalier (Règl. 883/2004)</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
@@ -582,13 +521,13 @@ function Employees({s,d}) {
         {form.frontalier&&<I label="Pays de résidence" value={form.frontalierPays||''} onChange={v=>setF({...form,frontalierPays:v})} options={[{v:"FR",l:"🇫🇷 France"},{v:"NL",l:"🇳🇱 Pays-Bas"},{v:"DE",l:"🇩🇪 Allemagne"},{v:"LU",l:"🇱🇺 Luxembourg"}]}/>}
       </div>
       {form.frontalier&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginTop:8}}>
-        <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>{'Formulaire A1 (détachement)'}</div>
+        <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>Formulaire A1 (détachement)</div>
           <div onClick={()=>setF({...form,frontalierA1:!form.frontalierA1})} style={{padding:'8px 12px',borderRadius:6,cursor:'pointer',fontSize:11,
             background:form.frontalierA1?'rgba(96,165,250,.12)':'rgba(198,163,78,.04)',color:form.frontalierA1?'#60a5fa':'#5e5c56',border:'1px solid '+(form.frontalierA1?'rgba(96,165,250,.25)':'rgba(198,163,78,.1)'),textAlign:'center'}}>
             {form.frontalierA1?'✅ A1 en cours':"❌ Pas d'A1"}
           </div>
         </div>
-        <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>{'Exonération PP (ancien régime FR)'}</div>
+        <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>Exonération PP (ancien régime FR)</div>
           <div onClick={()=>setF({...form,frontalierExoPP:!form.frontalierExoPP})} style={{padding:'8px 12px',borderRadius:6,cursor:'pointer',fontSize:11,
             background:form.frontalierExoPP?'rgba(239,68,68,.12)':'rgba(198,163,78,.04)',color:form.frontalierExoPP?'#ef4444':'#5e5c56',border:'1px solid '+(form.frontalierExoPP?'rgba(239,68,68,.25)':'rgba(198,163,78,.1)'),textAlign:'center'}}>
             {form.frontalierExoPP?'✅ Exonéré PP (très rare)':'❌ PP retenu en Belgique (normal)'}
@@ -620,7 +559,7 @@ function Employees({s,d}) {
         <I label="Pension mensuelle (€)" type="number" value={form.pensionMontant} onChange={v=>setF({...form,pensionMontant:v})}/>
       </div>}
       {form.pensionné&&<div style={{marginTop:8,padding:10,background:"rgba(251,191,36,.04)",borderRadius:8,fontSize:10.5,color:'#fbbf24',lineHeight:1.7}}>
-        👴 <b>{'Cumul pension-travail'}</b><br/>
+        👴 <b>Cumul pension-travail</b><br/>
         {(form.pensionType==='legal'&&(form.pensionAge||0)>=66)||
          (form.pensionType==='anticipee'&&(form.pensionCarriere||0)>=45)||
          (form.pensionType==='survie'&&(form.pensionAge||0)>=65)
@@ -634,9 +573,9 @@ function Employees({s,d}) {
         • PP: barème normal. La pension est imposée séparément par le SFP.<br/>
         • DmfA: déclaration normale. SIGEDIS/SFP vérifie le cumul automatiquement.
       </div>}
-      <ST>{'Situation familiale'}</ST>
+      <ST>Situation familiale</ST>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
-        <I label="Situation" value={form.civil} onChange={v=>setF({...form,civil:v})} options={[{v:"single",l:'Isolé'},{v:"married_2",l:"Marié (2 revenus)"},{v:"married_1",l:"Marié (1 revenu)"},{v:"cohabit",l:'Cohabitant légal'}]}/>
+        <I label="Situation" value={form.civil} onChange={v=>setF({...form,civil:v})} options={[{v:"single",l:"Isolé"},{v:"married_2",l:"Marié (2 revenus)"},{v:"married_1",l:"Marié (1 revenu)"},{v:"cohabit",l:"Cohabitant légal"}]}/>
         <I label="Enfants à charge" type="number" value={form.depChildren} onChange={v=>setF({...form,depChildren:v})}/>
         <I label="Enfants handicapés" type="number" value={form.handiChildren} onChange={v=>setF({...form,handiChildren:v})}/>
         <I label="Ascendants ≥65 ans à charge" type="number" value={form.depAscendant} onChange={v=>setF({...form,depAscendant:v})}/>
@@ -644,7 +583,7 @@ function Employees({s,d}) {
         <I label="Autres pers. à charge" type="number" value={form.depAutres} onChange={v=>setF({...form,depAutres:v})}/>
       </div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginTop:8}}>
-        <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>{'Conjoint handicapé (Art.132 CIR)'}</div>
+        <div><div style={{fontSize:10.5,color:'#9e9b93',marginBottom:4}}>Conjoint handicapé (Art.132 CIR)</div>
           <div onClick={()=>setF({...form,conjointHandicap:!form.conjointHandicap})} style={{padding:'8px 12px',borderRadius:6,cursor:'pointer',fontSize:11,
             background:form.conjointHandicap?'rgba(248,113,113,.12)':'rgba(198,163,78,.04)',color:form.conjointHandicap?'#f87171':'#5e5c56',border:'1px solid '+(form.conjointHandicap?'rgba(248,113,113,.25)':'rgba(198,163,78,.1)'),textAlign:'center'}}>
             {form.conjointHandicap?'✅ OUI — réduction supplémentaire':'❌ NON'}
@@ -652,7 +591,7 @@ function Employees({s,d}) {
         </div>
       </div>
       <div style={{display:'flex',gap:10,justifyContent:'flex-end',marginTop:20}}>
-        <B v="outline" onClick={()=>{setF(null);setEd(false);}}>{'Annuler'}</B>
+        <B v="outline" onClick={()=>{setF(null);setEd(false);}}>Annuler</B>
         <B onClick={save}>{ed?'Mettre à jour':'Enregistrer'}</B>
       </div>
     </C>}
@@ -675,17 +614,14 @@ function Employees({s,d}) {
             }}>{r.status==='sorti'?'SORTI':r.contract==='student'?'ÉTUDIANT':r.statut==='ouvrier'?'OUVRIER':'EMPLOYÉ'}</span>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,fontSize:11}}>
-            <div><span style={{color:'#5e5c56'}}>{'CP:'}</span> <span style={{color:'#d4d0c8'}}>{r.cp}</span></div>
-            <div><span style={{color:'#5e5c56'}}>{'Contrat:'}</span> <span style={{color:'#d4d0c8'}}>{r.contract}</span></div>
-            <div><span style={{color:'#5e5c56'}}>{'Brut:'}</span> <span style={{color:'#c6a34e',fontWeight:600}}>{fmt(r.monthlySalary)}</span></div>
-            <div><span style={{color:'#5e5c56'}}>{'Net:'}</span> <span style={{color:'#4ade80',fontWeight:600}}>{fmt(p.net)}</span></div>
+            <div><span style={{color:'#5e5c56'}}>CP:</span> <span style={{color:'#d4d0c8'}}>{r.cp}</span></div>
+            <div><span style={{color:'#5e5c56'}}>Contrat:</span> <span style={{color:'#d4d0c8'}}>{r.contract}</span></div>
+            <div><span style={{color:'#5e5c56'}}>Brut:</span> <span style={{color:'#c6a34e',fontWeight:600}}>{fmt(r.monthlySalary)}</span></div>
+            <div><span style={{color:'#5e5c56'}}>Net:</span> <span style={{color:'#4ade80',fontWeight:600}}>{fmt(p.net)}</span></div>
           </div>
           <div style={{marginTop:10,display:'flex',gap:6,justifyContent:'flex-end'}}>
             <B v="ghost" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();setF({...r});setEd(true);}}>✎ Modifier</B>
-            <B v="danger" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();if(confirm('Supprimer ?')){
-  d({type:"DEL_EMP",id:r.id});
-  if(supabase)supabase.from('employees').delete().eq('id',r.id).catch(()=>{});
-}}}>✕</B>
+            <B v="danger" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();if(confirm('Supprimer ?'))d({type:"DEL_E",id:r.id});}}>✕</B>
           </div>
         </C>
       );})}
@@ -693,22 +629,19 @@ function Employees({s,d}) {
     {/* LIST VIEW */}
     {viewMode==='list'&&<C style={{padding:0,overflow:'hidden'}}>
       <Tbl cols={[
-        {k:'n',l:'Employé',r:r=><div style={{display:'flex',alignItems:'center',gap:10}}>
+        {k:'n',l:"Employé",r:r=><div style={{display:'flex',alignItems:'center',gap:10}}>
           <div style={{width:30,height:30,borderRadius:7,background:"rgba(198,163,78,.06)",display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,color:'#c6a34e'}}>{(r.first||'')[0]}{(r.last||'')[0]}</div>
           <div><div style={{fontWeight:500}}>{r.first} {r.last} <span style={{fontSize:8.5,padding:'1px 5px',borderRadius:3,fontWeight:600,background:r.status==='sorti'?'rgba(248,113,113,.12)':r.contract==='student'?'rgba(251,146,60,.12)':r.statut==='ouvrier'?'rgba(251,146,60,.1)':'rgba(96,165,250,.08)',color:r.status==='sorti'?'#f87171':r.contract==='student'?'#fb923c':r.statut==='ouvrier'?'#fb923c':'#60a5fa',marginLeft:4}}>{r.status==='sorti'?'SORTI':r.contract==='student'?'ÉTU':r.statut==='ouvrier'?'OUV':'EMPL'}</span></div><div style={{fontSize:10.5,color:'#5e5c56'}}>{r.niss} · {r.sexe==='F'?'♀':'♂'}</div></div>
         </div>},
-        {k:'f',l:'Fonction',r:r=><div>{r.fn}<div style={{fontSize:10.5,color:'#5e5c56'}}>{r.dept}</div></div>},
-        {k:'c',l:'Contrat',r:r=><span style={{fontSize:12}}>{r.contract} · {r.whWeek}h</span>},
+        {k:'f',l:"Fonction",r:r=><div>{r.fn}<div style={{fontSize:10.5,color:'#5e5c56'}}>{r.dept}</div></div>},
+        {k:'c',l:"Contrat",r:r=><span style={{fontSize:12}}>{r.contract} · {r.whWeek}h</span>},
         {k:'cp',l:"CP",r:r=>r.cp},
-        {k:'g',l:'Brut',a:'right',r:r=><span style={{fontWeight:600}}>{fmt(r.monthlySalary)}</span>},
-        {k:'ne',l:'Net',a:'right',r:r=><span style={{fontWeight:600,color:'#4ade80'}}>{fmt(calc(r,DPER,s.co).net)}</span>},
+        {k:'g',l:"Brut",a:'right',r:r=><span style={{fontWeight:600}}>{fmt(r.monthlySalary)}</span>},
+        {k:'ne',l:"Net",a:'right',r:r=><span style={{fontWeight:600,color:'#4ade80'}}>{fmt(calc(r,DPER,s.co).net)}</span>},
         {k:'co',l:"Coût",a:'right',r:r=><span style={{color:'#a78bfa'}}>{fmt(calc(r,DPER,s.co).costTotal)}</span>},
         {k:'a',l:"",a:'right',r:r=><div style={{display:'flex',gap:5,justifyContent:'flex-end'}}>
           <B v="ghost" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();setF({...r});setEd(true);}}>✎</B>
-          <B v="danger" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();if(confirm('Supprimer ?')){
-  d({type:"DEL_EMP",id:r.id});
-  if(supabase)supabase.from('employees').delete().eq('id',r.id).catch(()=>{});
-}}}>✕</B>
+          <B v="danger" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();if(confirm('Supprimer ?'))d({type:"DEL_E",id:r.id});}}>✕</B>
         </div>},
       ]} data={filtered}/>
     </C>}
