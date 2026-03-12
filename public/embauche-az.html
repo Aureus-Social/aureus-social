@@ -763,8 +763,16 @@ body {
       <div style="width:40px;height:40px;border-radius:10px;background:rgba(201,150,58,0.15);display:flex;align-items:center;justify-content:center;font-size:20px">👤</div>
       <div>
         <div style="font-family:'DM Serif Display',serif;font-size:18px;color:#C9963A">Fiche travailleur</div>
-        <div style="font-size:11px;color:#666;margin-top:2px">Remplis les données → tout se met à jour automatiquement</div>
+        <div style="font-size:11px;color:#666;margin-top:2px">Recherche un travailleur existant ou remplis manuellement</div>
       </div>
+    </div>
+    <!-- SEARCH LIVE -->
+    <div style="position:relative;min-width:280px">
+      <input id="w_search" type="text" placeholder="🔍 Rechercher un travailleur..." 
+        oninput="searchWorkers(this.value)"
+        style="width:100%;background:#0a0908;border:1px solid rgba(201,150,58,0.4);border-radius:6px;color:#F0EBE0;font-family:'DM Mono',monospace;font-size:12px;padding:10px 14px;outline:none;box-sizing:border-box"
+        autocomplete="off">
+      <div id="w_search_results" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#111009;border:1px solid rgba(201,150,58,0.25);border-radius:8px;z-index:999;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.6)"></div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <span id="fiche-status" style="font-family:'DM Mono',monospace;font-size:10px;color:#666;padding:4px 10px;border:1px solid #222;border-radius:4px">⬜ Vide</span>
@@ -4905,6 +4913,96 @@ function dimonaType(contrat) {
   const map = {CDI:'IN',CDD:'IN',STUDENT:'STU',FLEXI:'FLX',INTERM:'INTERM'};
   return map[contrat] || 'IN';
 }
+
+
+// ═══════════════════ SUPABASE LIVE SEARCH ═══════════════════
+const SB_URL = "https://jwjtlpewwdjxdboxtbdf.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3anRscGV3d2RqeGRib3h0YmRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MzE5MDMsImV4cCI6MjA4ODIwNzkwM30.5Z9_ZwsXpEAGEKB4cNaa5RvSZIOrftWghQ3GdLnmblg";
+
+let _searchTimer = null;
+
+async function searchWorkers(query) {
+  const resultsEl = document.getElementById('w_search_results');
+  if (!resultsEl) return;
+  if (!query || query.length < 2) { resultsEl.style.display = 'none'; return; }
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(async () => {
+    resultsEl.style.display = 'block';
+    resultsEl.innerHTML = '<div style="padding:12px 14px;color:#666;font-family:DM Mono,monospace;font-size:11px">⏳ Recherche...</div>';
+    try {
+      const q = encodeURIComponent(query.trim());
+      const url = SB_URL + '/rest/v1/employees?select=id,first,last,niss,birth,startD,endD,contract,monthlySalary,cp,civil,depChildren,email,status&or=(first.ilike.*' + q + '*,last.ilike.*' + q + '*,niss.ilike.*' + q + '*)&limit=8';
+      const resp = await fetch(url, {
+        headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+      });
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const workers = await resp.json();
+      if (!Array.isArray(workers) || !workers.length) {
+        resultsEl.innerHTML = '<div style="padding:12px 14px;color:#555;font-family:DM Mono,monospace;font-size:11px">Aucun résultat</div>';
+        return;
+      }
+      resultsEl.innerHTML = workers.map((w,i) => {
+        const nom = ((w.first||'') + ' ' + (w.last||'')).trim() || '—';
+        const badge = w.status === 'sorti' ? '<span style="color:#E05C3A">🔴 Sorti</span>' : '<span style="color:#4CAF82">🟢 Actif</span>';
+        const sal = w.monthlySalary ? fmt(w.monthlySalary) + ' €' : '—';
+        const wJson = JSON.stringify(w).replace(/'/g,"&#39;");
+        return `<div onclick='selectWorker(${JSON.stringify(JSON.stringify(w))})'
+          style="padding:12px 16px;cursor:pointer;border-bottom:1px solid #1a1a1a"
+          onmouseenter="this.style.background='rgba(201,150,58,0.08)'"
+          onmouseleave="this.style.background='transparent'">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+            <span style="font-family:DM Mono,monospace;font-size:12px;color:#F0EBE0;font-weight:700">${nom}</span>
+            ${badge}
+          </div>
+          <div style="font-family:DM Mono,monospace;font-size:10px;color:#666">
+            NISS: ${w.niss||'—'} &nbsp;·&nbsp; ${w.contract||'—'} &nbsp;·&nbsp; CP ${w.cp||'—'} &nbsp;·&nbsp; ${sal}
+          </div>
+        </div>`;
+      }).join('');
+    } catch(e) {
+      resultsEl.innerHTML = '<div style="padding:12px 14px;color:#E05C3A;font-family:DM Mono,monospace;font-size:11px">❌ ' + e.message + '</div>';
+    }
+  }, 300);
+}
+
+function selectWorker(jsonStr) {
+  const w = JSON.parse(jsonStr);
+  const set = (id, val) => { const el = document.getElementById(id); if(el && val!=null) el.value = val; };
+  set('w_prenom', w.first || '');
+  set('w_nom', w.last || '');
+  set('w_niss', w.niss || '');
+  set('w_ddn', w.birth || '');
+  set('w_entree', w.startD || '');
+  set('w_sortie', w.endD || '');
+  set('w_cp', w.cp || '200');
+  set('w_salaire', w.monthlySalary || '');
+  set('w_email', w.email || '');
+  set('w_enfants', w.depChildren || 0);
+  const contratMap = {CDI:'CDI',CDD:'CDD',student:'STUDENT',flexi:'FLEXI',interim:'INTERM'};
+  const cEl = document.getElementById('w_contrat');
+  if (cEl) cEl.value = contratMap[w.contract] || w.contract || 'CDI';
+  const famMap = {single:'isole',married:'conjoint_actif',single_parent:'monoparental'};
+  const fEl = document.getElementById('w_famille');
+  if (fEl) fEl.value = famMap[w.civil] || 'isole';
+  const nEl = document.getElementById('w_niss');
+  if (nEl) formatNISS(nEl);
+  // Fermer dropdown + afficher nom dans search
+  const rEl = document.getElementById('w_search_results');
+  if (rEl) rEl.style.display = 'none';
+  const sEl = document.getElementById('w_search');
+  if (sEl) sEl.value = ((w.first||'') + ' ' + (w.last||'')).trim();
+  // Flash vert
+  const fiche = document.getElementById('fiche-travailleur');
+  if (fiche) { fiche.style.borderColor='#4CAF82'; setTimeout(()=>fiche.style.borderColor='rgba(201,150,58,0.3)',1500); }
+  updateFiche();
+}
+
+// Fermer dropdown si clic ailleurs
+document.addEventListener('click', e => {
+  const rEl = document.getElementById('w_search_results');
+  const sEl = document.getElementById('w_search');
+  if (rEl && sEl && !sEl.contains(e.target) && !rEl.contains(e.target)) rEl.style.display = 'none';
+});
 
 function updateFiche() {
   getW();
