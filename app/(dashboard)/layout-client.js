@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useReducer, useMemo, useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { MENU, GROUPS, getGroupItems, SEARCH_SUBSECTIONS } from '../lib/menu-config';
+import { MENU, GROUPS, getGroupItems, SEARCH_SUBSECTIONS, SEARCH_DOCUMENTS } from '../lib/menu-config';
 import { I18N } from '../lib/i18n';
 import { LangProvider, useLang } from '../lib/lang-context';
 import { supabase } from '../lib/supabase';
@@ -747,7 +747,12 @@ function DashboardLayoutInner({ user }) {
               s.label.toLowerCase().includes(q) ||
               s.keywords.some(k => k.includes(q) || q.includes(k))
             ).slice(0, 4).map(s => ({ ...s, isSubsection: true }));
-            const results = [...subResults, ...menuResults].slice(0, 8);
+            // Résultats documents téléchargeables (PDF / DOCX)
+            const docResults = (SEARCH_DOCUMENTS || []).filter(d =>
+              d.label.toLowerCase().includes(q) ||
+              d.keywords.some(k => k.includes(q) || q.includes(k))
+            ).slice(0, 4).map(d => ({ ...d, isDoc: true }));
+            const results = [...docResults, ...subResults, ...menuResults].slice(0, 9);
             const groupName = (g) => GROUPS.find(gr => gr.id === `_g${g}`)?.label || '';
             return results.length > 0 ? (
               <div style={{
@@ -758,6 +763,12 @@ function DashboardLayoutInner({ user }) {
                 {results.map((item, idx) => (
                   <div key={idx}
                     onClick={() => {
+                      if (item.isDoc) {
+                        window.open(item.url, '_blank');
+                        setSearchQuery('');
+                        setSearchFocus(false);
+                        return;
+                      }
                       navigateTo(item.id);
                       if (item.isSubsection && item.anchor) {
                         setScrollAnchor(item.anchor);
@@ -765,16 +776,17 @@ function DashboardLayoutInner({ user }) {
                       setSearchQuery('');
                       setSearchFocus(false);
                     }}
-                    style={{ padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid rgba(255,255,255,.03)', background: item.isSubsection ? 'rgba(198,163,78,.03)' : 'transparent' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(198,163,78,.08)'}
-                    onMouseLeave={e => e.currentTarget.style.background = item.isSubsection ? 'rgba(198,163,78,.03)' : 'transparent'}
+                    style={{ padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid rgba(255,255,255,.03)', background: item.isDoc ? 'rgba(198,163,78,.05)' : item.isSubsection ? 'rgba(198,163,78,.03)' : 'transparent' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(198,163,78,.12)'}
+                    onMouseLeave={e => e.currentTarget.style.background = item.isDoc ? 'rgba(198,163,78,.05)' : item.isSubsection ? 'rgba(198,163,78,.03)' : 'transparent'}
                   >
                     <span style={{ fontSize: 13, width: 18, textAlign: 'center' }}>{item.icon}</span>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 11.5, color: '#e8e6e0', fontWeight: 500 }}>{t('menu.' + item.id) || item.label}</div>
-                      <div style={{ fontSize: 9.5, color: item.isSubsection ? '#c6a34e' : '#5e5c56', marginTop: 1 }}>{item.isSubsection ? item.sub : groupName(item.g)}</div>
+                      <div style={{ fontSize: 11.5, color: '#e8e6e0', fontWeight: 500 }}>{item.isDoc ? item.label : (t('menu.' + item.id) || item.label)}</div>
+                      <div style={{ fontSize: 9.5, color: item.isDoc || item.isSubsection ? '#c6a34e' : '#5e5c56', marginTop: 1 }}>{item.isDoc ? item.sub : item.isSubsection ? item.sub : groupName(item.g)}</div>
                     </div>
-                    {item.isSubsection && <span style={{ fontSize: 9, color: '#c6a34e', opacity: 0.7 }}>↗ section</span>}
+                    {item.isDoc && <span style={{ fontSize: 9, color: '#c6a34e', background: 'rgba(198,163,78,.15)', padding: '2px 6px', borderRadius: 3, fontWeight: 700 }}>{item.ext}</span>}
+                    {item.isSubsection && !item.isDoc && <span style={{ fontSize: 9, color: '#c6a34e', opacity: 0.7 }}>↗ section</span>}
                   </div>
                 ))}
               </div>

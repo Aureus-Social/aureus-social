@@ -165,6 +165,43 @@ export const getGroupItems = (gNum) => MENU.filter(m => m.g === gNum && !m.group
 // ═══ INDEX SOUS-SECTIONS — RECHERCHE CONTEXTUELLE ═══
 // Permet de taper "ONSS", "Précompte", "CSSS" etc. dans la barre de recherche
 // et d'atterrir directement sur la bonne section de la fiche de paie
+// ═══ INDEX DOCUMENTS TÉLÉCHARGEABLES ═══════════════════════════════════════
+// Fichiers PDF/DOCX servis depuis /public/documents/
+export const SEARCH_DOCUMENTS = [
+  {
+    icon: '📄',
+    label: 'Règlement de travail — Français',
+    sub: 'Document légal · PDF',
+    keywords: ['reglement','règlement','travail','rt','legal','legaux','loi','1965','greffe','depot','dépôt','fr','francais','français','pdf'],
+    url: '/documents/reglement_travail_FR.pdf',
+    ext: 'PDF',
+  },
+  {
+    icon: '📝',
+    label: 'Règlement de travail — Français',
+    sub: 'Document légal · Word (DOCX)',
+    keywords: ['reglement','règlement','travail','rt','word','docx','modifier','editer','éditer','fr','francais','français'],
+    url: '/documents/reglement_travail_FR.docx',
+    ext: 'DOCX',
+  },
+  {
+    icon: '📄',
+    label: 'Arbeidsreglement — Nederlands',
+    sub: 'Juridisch document · PDF',
+    keywords: ['arbeidsreglement','reglement','travail','nl','nederlands','dutch','pdf','legal','legaux'],
+    url: '/documents/reglement_travail_NL.pdf',
+    ext: 'PDF',
+  },
+  {
+    icon: '📝',
+    label: 'Arbeidsreglement — Nederlands',
+    sub: 'Juridisch document · Word (DOCX)',
+    keywords: ['arbeidsreglement','reglement','travail','nl','nederlands','dutch','word','docx','modifier'],
+    url: '/documents/reglement_travail_NL.docx',
+    ext: 'DOCX',
+  },
+];
+
 export const SEARCH_SUBSECTIONS = [
   {
     id: 'payslip',
