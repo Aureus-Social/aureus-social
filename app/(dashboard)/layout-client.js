@@ -331,6 +331,11 @@ function DashboardLayoutInner({ user }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocus, setSearchFocus] = useState(false);
+  const [activeWorker, setActiveWorker] = useState(null);
+  const [workerSearch, setWorkerSearch] = useState('');
+  const [workerResults, setWorkerResults] = useState([]);
+  const [workerSearchFocus, setWorkerSearchFocus] = useState(false);
+  const [workerTimer, setWorkerTimer] = useState(null);
   const [scrollAnchor, setScrollAnchor] = useState(null);
   const [state, dispatch] = useReducer(reducer, {
     emps: [],
@@ -386,6 +391,41 @@ function DashboardLayoutInner({ user }) {
   },[s._nav]);
 
   const toggleGroup = (gId) => setCollapsed(p => ({ ...p, [gId]: !p[gId] }));
+
+  // ── RECHERCHE TRAVAILLEUR LIVE (Supabase) ──────────────────────────────
+  const SB_URL = 'https://jwjtlpewwdjxdboxtbdf.supabase.co';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3anRscGV3d2RqeGRib3h0YmRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MzE5MDMsImV4cCI6MjA4ODIwNzkwM30.5Z9_ZwsXpEAGEKB4cNaa5RvSZIOrftWghQ3GdLnmblg';
+
+  const searchWorkersLive = useCallback((query) => {
+    if (workerTimer) clearTimeout(workerTimer);
+    if (!query || query.length < 2) { setWorkerResults([]); return; }
+    const t = setTimeout(async () => {
+      try {
+        const q = encodeURIComponent(query.trim());
+        const url = SB_URL + '/rest/v1/employees?select=id,first,last,niss,birth,startD,endD,contract,monthlySalary,cp,civil,depChildren,email,status&or=(first.ilike.*' + q + '*,last.ilike.*' + q + '*,niss.ilike.*' + q + '*)&limit=6';
+        const res = await fetch(url, { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } });
+        const data = await res.json();
+        setWorkerResults(Array.isArray(data) ? data : []);
+      } catch(e) { setWorkerResults([]); }
+    }, 300);
+    setWorkerTimer(t);
+  }, [workerTimer]);
+
+  const selectActiveWorker = (w) => {
+    setActiveWorker(w);
+    setWorkerSearch((w.first || '') + ' ' + (w.last || ''));
+    setWorkerResults([]);
+    setWorkerSearchFocus(false);
+    // Injecter dans window pour que embauche-az et autres pages puissent l'utiliser
+    window.__activeWorker = w;
+  };
+
+  const clearActiveWorker = () => {
+    setActiveWorker(null);
+    setWorkerSearch('');
+    setWorkerResults([]);
+    window.__activeWorker = null;
+  };
   const currentItem = MENU.find(m => m.id === page) || { label: 'Dashboard' };
 
   const handleLogout = async () => {
@@ -740,6 +780,71 @@ function DashboardLayoutInner({ user }) {
               }}>Aucun résultat pour « {searchQuery} »</div>
             )
           })()}
+        </div>
+
+        {/* ── TRAVAILLEUR ACTIF ── */}
+        <div style={{ padding: '8px 12px', borderBottom: '1px solid rgba(198,163,78,.06)' }}>
+          {activeWorker ? (
+            <div style={{ background: 'rgba(76,175,130,.06)', border: '1px solid rgba(76,175,130,.2)', borderRadius: 8, padding: '8px 12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#4CAF82' }}>👤 {activeWorker.first} {activeWorker.last}</div>
+                  <div style={{ fontSize: 9.5, color: '#5e5c56', marginTop: 2 }}>
+                    {activeWorker.niss || '—'} · {activeWorker.contract || '—'} · CP {activeWorker.cp || '—'}
+                  </div>
+                  <div style={{ fontSize: 9.5, color: '#c6a34e', marginTop: 1 }}>
+                    {activeWorker.monthlySalary ? activeWorker.monthlySalary.toLocaleString('fr-BE', {minimumFractionDigits:2}) + ' €/mois' : '—'}
+                  </div>
+                </div>
+                <button onClick={clearActiveWorker} style={{ background: 'transparent', border: 'none', color: '#5e5c56', cursor: 'pointer', fontSize: 14, padding: 4 }}>✕</button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: '#5e5c56' }}>👤</span>
+              <input
+                type="text"
+                placeholder="Travailleur actif..."
+                value={workerSearch}
+                onChange={e => { setWorkerSearch(e.target.value); searchWorkersLive(e.target.value); }}
+                onFocus={() => setWorkerSearchFocus(true)}
+                onBlur={() => setTimeout(() => setWorkerSearchFocus(false), 200)}
+                style={{
+                  width: '100%', boxSizing: 'border-box',
+                  padding: '7px 10px 7px 26px',
+                  background: 'rgba(255,255,255,.03)', border: '1px solid rgba(198,163,78,.15)',
+                  borderRadius: 6, color: '#e8e6e0', fontSize: 11,
+                  fontFamily: 'inherit', outline: 'none',
+                }}
+              />
+              {workerSearchFocus && workerResults.length > 0 && (
+                <div style={{
+                  position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 9999,
+                  background: '#111009', border: '1px solid rgba(198,163,78,.25)', borderRadius: 8,
+                  boxShadow: '0 8px 24px rgba(0,0,0,.7)', overflow: 'hidden'
+                }}>
+                  {workerResults.map((w, i) => (
+                    <div key={i} onClick={() => selectActiveWorker(w)}
+                      style={{ padding: '9px 12px', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,.04)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(198,163,78,.08)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <div style={{ fontSize: 11.5, color: '#e8e6e0', fontWeight: 600 }}>
+                        {w.status === 'sorti' ? '🔴' : '🟢'} {w.first} {w.last}
+                      </div>
+                      <div style={{ fontSize: 9.5, color: '#5e5c56', marginTop: 2 }}>
+                        {w.niss || '—'} · {w.contract || '—'} · CP {w.cp || '—'} · {w.monthlySalary ? w.monthlySalary.toLocaleString('fr-BE',{minimumFractionDigits:2}) + ' €' : '—'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {workerSearchFocus && workerSearch.length >= 2 && workerResults.length === 0 && (
+                <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 9999, background: '#111009', border: '1px solid rgba(198,163,78,.2)', borderRadius: 8, padding: '10px 12px', fontSize: 11, color: '#5e5c56' }}>
+                  Aucun résultat
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Menu */}
