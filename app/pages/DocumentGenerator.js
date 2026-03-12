@@ -956,7 +956,8 @@ function DocumentGenerator({ state, defaultTab, initialCat }) {
       {/* Résultat */}
       {generated && (
         <div style={{
-          padding: 20, background: DARK, borderRadius: 8, border: `1px solid ${BORDER}`,
+          padding: 20, background: '#111620', borderRadius: 12, border: '1px solid rgba(198,163,78,.25)',
+          boxShadow: '0 8px 32px rgba(0,0,0,.6)',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <h3 style={{ color: GOLD, margin: 0, fontSize: 15 }}>
@@ -989,8 +990,8 @@ function DocumentGenerator({ state, defaultTab, initialCat }) {
 }
 
 const btnStyle = {
-  padding: '6px 14px', background: 'transparent', border: `1px solid ${BORDER}`,
-  borderRadius: 6, color: MUTED, cursor: 'pointer', fontSize: 12,
+  padding: '7px 16px', background: 'rgba(255,255,255,.07)', border: '1px solid rgba(255,255,255,.15)',
+  borderRadius: 6, color: '#e8e6e0', cursor: 'pointer', fontSize: 12, fontWeight: 500,
 }
 
 function Field({ label, value, onChange, type, placeholder }) {
