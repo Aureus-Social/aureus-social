@@ -746,6 +746,152 @@ body {
 
 <main class="main">
 
+<!-- ═══════════════════════════════════ FICHE TRAVAILLEUR -->
+<div id="fiche-travailleur" style="
+  background: linear-gradient(135deg, #0f0e0c 0%, #141210 100%);
+  border: 1px solid rgba(201,150,58,0.3);
+  border-radius: 12px;
+  padding: 28px 32px;
+  margin: 0 0 28px 0;
+  position: relative;
+  overflow: hidden;
+">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#C9963A,#e8c06a,#C9963A)"></div>
+  
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:40px;height:40px;border-radius:10px;background:rgba(201,150,58,0.15);display:flex;align-items:center;justify-content:center;font-size:20px">👤</div>
+      <div>
+        <div style="font-family:'DM Serif Display',serif;font-size:18px;color:#C9963A">Fiche travailleur</div>
+        <div style="font-size:11px;color:#666;margin-top:2px">Remplis les données → tout se met à jour automatiquement</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span id="fiche-status" style="font-family:'DM Mono',monospace;font-size:10px;color:#666;padding:4px 10px;border:1px solid #222;border-radius:4px">⬜ Vide</span>
+      <button onclick="resetFiche()" style="font-family:'DM Mono',monospace;font-size:10px;color:#888;background:transparent;border:1px solid #333;border-radius:4px;padding:5px 12px;cursor:pointer">Réinitialiser</button>
+      <button onclick="exportFichePDF()" style="font-family:'DM Mono',monospace;font-size:10px;color:#C9963A;background:rgba(201,150,58,0.1);border:1px solid rgba(201,150,58,0.3);border-radius:4px;padding:5px 12px;cursor:pointer">📄 Exporter fiche</button>
+    </div>
+  </div>
+
+  <!-- Grille champs -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px">
+    
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <label style="font-family:'DM Mono',monospace;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em">Prénom *</label>
+      <input id="w_prenom" type="text" placeholder="ex: Salem" oninput="updateFiche()" style="background:#0a0908;border:1px solid #2a2a2a;border-radius:5px;color:#F0EBE0;font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <label style="font-family:'DM Mono',monospace;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em">Nom *</label>
+      <input id="w_nom" type="text" placeholder="ex: Abdellah" oninput="updateFiche()" style="background:#0a0908;border:1px solid #2a2a2a;border-radius:5px;color:#F0EBE0;font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <label style="font-family:'DM Mono',monospace;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em">N° NISS *</label>
+      <input id="w_niss" type="text" placeholder="ex: 95.01.23-456.78" oninput="formatNISS(this);updateFiche()" maxlength="15" style="background:#0a0908;border:1px solid #2a2a2a;border-radius:5px;color:#F0EBE0;font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
+      <span id="w_niss_status" style="font-size:9px;color:#666;font-family:'DM Mono',monospace"></span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <label style="font-family:'DM Mono',monospace;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em">Date naissance</label>
+      <input id="w_ddn" type="date" oninput="updateFiche()" style="background:#0a0908;border:1px solid #2a2a2a;border-radius:5px;color:#F0EBE0;font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <label style="font-family:'DM Mono',monospace;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em">Type contrat *</label>
+      <select id="w_contrat" onchange="updateFiche()" style="background:#0a0908;border:1px solid #2a2a2a;border-radius:5px;color:#F0EBE0;font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
+        <option value="">— Choisir —</option>
+        <option value="CDI">CDI</option>
+        <option value="CDD">CDD</option>
+        <option value="STUDENT">Étudiant (STU)</option>
+        <option value="FLEXI">Flexi-job (FLX)</option>
+        <option value="INTERM">Intérimaire (INTERM)</option>
+      </select>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <label style="font-family:'DM Mono',monospace;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em">Date entrée *</label>
+      <input id="w_entree" type="date" oninput="updateFiche()" style="background:#0a0908;border:1px solid #2a2a2a;border-radius:5px;color:#F0EBE0;font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
+    </div>
+
+    <div id="w_sortie_group" style="display:flex;flex-direction:column;gap:5px">
+      <label style="font-family:'DM Mono',monospace;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em">Date sortie (CDD)</label>
+      <input id="w_sortie" type="date" oninput="updateFiche()" style="background:#0a0908;border:1px solid #2a2a2a;border-radius:5px;color:#F0EBE0;font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <label style="font-family:'DM Mono',monospace;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em">Commission paritaire *</label>
+      <input id="w_cp" type="text" placeholder="ex: 200" oninput="updateFiche()" style="background:#0a0908;border:1px solid #2a2a2a;border-radius:5px;color:#F0EBE0;font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <label style="font-family:'DM Mono',monospace;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em">Salaire brut mensuel (€) *</label>
+      <input id="w_salaire" type="number" placeholder="ex: 2800" oninput="updateFiche()" min="0" step="50" style="background:#0a0908;border:1px solid #2a2a2a;border-radius:5px;color:#F0EBE0;font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <label style="font-family:'DM Mono',monospace;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em">Email travailleur</label>
+      <input id="w_email" type="email" placeholder="ex: nom@email.com" oninput="updateFiche()" style="background:#0a0908;border:1px solid #2a2a2a;border-radius:5px;color:#F0EBE0;font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <label style="font-family:'DM Mono',monospace;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em">Situation familiale</label>
+      <select id="w_famille" onchange="updateFiche()" style="background:#0a0908;border:1px solid #2a2a2a;border-radius:5px;color:#F0EBE0;font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none">
+        <option value="isole">Isolé(e)</option>
+        <option value="conjoint_actif">Marié(e) / Cohab. — 2 revenus</option>
+        <option value="marie_conjoint_inactif">Marié(e) — conjoint sans revenu</option>
+        <option value="monoparental">Parent isolé</option>
+      </select>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <label style="font-family:'DM Mono',monospace;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em">Enfants à charge</label>
+      <input id="w_enfants" type="number" value="0" min="0" max="10" oninput="updateFiche()" style="background:#0a0908;border:1px solid #2a2a2a;border-radius:5px;color:#F0EBE0;font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none">
+    </div>
+
+  </div>
+
+  <!-- Résumé Dimona + calcul automatique -->
+  <div id="fiche-resume" style="display:none;margin-top:22px;border-top:1px solid #1e1e1e;padding-top:18px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">
+      
+      <!-- Dimona Card -->
+      <div style="background:#0a0908;border:1px solid rgba(201,150,58,0.25);border-radius:8px;padding:14px 16px">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#C9963A;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">📡 Dimona IN à envoyer</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:#F0EBE0;line-height:1.8" id="dimona-preview">—</div>
+        <button onclick="genDimona()" style="margin-top:10px;width:100%;background:rgba(201,150,58,0.15);border:1px solid rgba(201,150,58,0.3);color:#C9963A;font-family:'DM Mono',monospace;font-size:10px;padding:7px;border-radius:4px;cursor:pointer;font-weight:700">
+          Générer la Dimona complète ↓
+        </button>
+      </div>
+
+      <!-- Calcul paie Card -->
+      <div style="background:#0a0908;border:1px solid #1e1e1e;border-radius:8px;padding:14px 16px">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">💶 Calcul paie auto</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:#F0EBE0;line-height:2" id="paie-preview">—</div>
+      </div>
+
+      <!-- Checklist Card -->
+      <div style="background:#0a0908;border:1px solid #1e1e1e;border-radius:8px;padding:14px 16px">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">✅ Checklist avant J1</div>
+        <div id="checklist-preview" style="font-family:'DM Mono',monospace;font-size:11px;line-height:2">—</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- DIMONA MODAL -->
+<div id="dimona-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;overflow-y:auto;padding:40px 20px">
+  <div style="max-width:700px;margin:0 auto;background:#111009;border:1px solid rgba(201,150,58,0.3);border-radius:12px;padding:32px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <div style="font-family:'DM Serif Display',serif;color:#C9963A;font-size:20px">📡 Dimona IN — Formulaire complet</div>
+      <button onclick="closeDimonaModal()" style="background:transparent;border:1px solid #333;color:#888;border-radius:4px;padding:6px 14px;cursor:pointer;font-family:'DM Mono',monospace;font-size:12px">✕ Fermer</button>
+    </div>
+    <div id="dimona-modal-content"></div>
+  </div>
+</div>
+
+
 
 <!-- ═══════════════════════════════════ CALCULATEURS -->
 <section class="phase phase-monthly" id="phase-calculateurs">
@@ -4701,6 +4847,311 @@ async function sendEmail() {
     btn.textContent = '✉ Envoyer via Web3Forms';
   }
 }
+
+// ═══════════════════════════════ FICHE TRAVAILLEUR ═══════════════════════════
+
+// État global travailleur
+const W = {
+  prenom:'', nom:'', niss:'', ddn:'', contrat:'', entree:'', sortie:'',
+  cp:'', salaire:0, email:'', famille:'isole', enfants:0
+};
+
+function getW() {
+  W.prenom  = document.getElementById('w_prenom')?.value.trim() || '';
+  W.nom     = document.getElementById('w_nom')?.value.trim() || '';
+  W.niss    = document.getElementById('w_niss')?.value.trim() || '';
+  W.ddn     = document.getElementById('w_ddn')?.value || '';
+  W.contrat = document.getElementById('w_contrat')?.value || '';
+  W.entree  = document.getElementById('w_entree')?.value || '';
+  W.sortie  = document.getElementById('w_sortie')?.value || '';
+  W.cp      = document.getElementById('w_cp')?.value.trim() || '';
+  W.salaire = parseFloat(document.getElementById('w_salaire')?.value) || 0;
+  W.email   = document.getElementById('w_email')?.value.trim() || '';
+  W.famille = document.getElementById('w_famille')?.value || 'isole';
+  W.enfants = parseInt(document.getElementById('w_enfants')?.value) || 0;
+  return W;
+}
+
+function formatNISS(input) {
+  let v = input.value.replace(/[^0-9]/g,'');
+  if (v.length >= 7) v = v.slice(0,2)+'.'+v.slice(2,4)+'.'+v.slice(4,6)+'-'+v.slice(6,9)+(v.length>9?'.'+v.slice(9,11):'');
+  else if (v.length >= 6) v = v.slice(0,2)+'.'+v.slice(2,4)+'.'+v.slice(4,6);
+  else if (v.length >= 4) v = v.slice(0,2)+'.'+v.slice(2,4)+'.'+v.slice(4);
+  else if (v.length >= 2) v = v.slice(0,2)+'.'+v.slice(2);
+  input.value = v;
+  // Valider NISS
+  const clean = v.replace(/[^0-9]/g,'');
+  const st = document.getElementById('w_niss_status');
+  if (st) {
+    if (clean.length === 11) {
+      st.textContent = '✅ Format NISS valide';
+      st.style.color = '#4CAF82';
+    } else if (clean.length > 0) {
+      st.textContent = '⚠ ' + clean.length + '/11 chiffres';
+      st.style.color = '#e8a020';
+    } else {
+      st.textContent = '';
+    }
+  }
+}
+
+function fmtDateFR(iso) {
+  if (!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  return d+'/'+m+'/'+y;
+}
+
+function dimonaType(contrat) {
+  const map = {CDI:'IN',CDD:'IN',STUDENT:'STU',FLEXI:'FLX',INTERM:'INTERM'};
+  return map[contrat] || 'IN';
+}
+
+function updateFiche() {
+  getW();
+  const filled = W.prenom && W.nom && W.niss && W.contrat && W.entree;
+  const st = document.getElementById('fiche-status');
+  const resume = document.getElementById('fiche-resume');
+
+  if (st) {
+    if (filled) {
+      st.textContent = '✅ ' + W.prenom + ' ' + W.nom;
+      st.style.color = '#4CAF82';
+      st.style.borderColor = '#4CAF8244';
+    } else {
+      st.textContent = '⬜ Incomplet';
+      st.style.color = '#666';
+      st.style.borderColor = '#222';
+    }
+  }
+
+  if (resume) resume.style.display = filled ? 'block' : 'none';
+
+  if (filled) {
+    updateDimonaPreview();
+    updatePaiePreview();
+    updateChecklistPreview();
+    syncCalculateurs();
+    syncEmails();
+  }
+}
+
+function updateDimonaPreview() {
+  const el = document.getElementById('dimona-preview');
+  if (!el) return;
+  const type = dimonaType(W.contrat);
+  el.innerHTML = [
+    '<span style="color:#888">Travailleur :</span> ' + W.prenom + ' ' + W.nom,
+    '<span style="color:#888">NISS :</span> ' + W.niss,
+    '<span style="color:#888">Type Dimona :</span> <span style="color:#C9963A;font-weight:700">' + type + '</span>',
+    '<span style="color:#888">Date entrée :</span> ' + fmtDateFR(W.entree),
+    W.sortie ? '<span style="color:#888">Date sortie :</span> ' + fmtDateFR(W.sortie) : '',
+    '<span style="color:#888">CP :</span> ' + (W.cp || '—'),
+  ].filter(Boolean).join('<br>');
+}
+
+function updatePaiePreview() {
+  const el = document.getElementById('paie-preview');
+  if (!el || !W.salaire) return;
+  const onss = W.salaire * 0.1307;
+  const base = W.salaire - onss;
+  const pp = calcPrecompteMensuel(base, W.famille, W.enfants);
+  const net = Math.max(0, W.salaire - onss - pp.ppNet);
+  el.innerHTML = [
+    '<span style="color:#888">Brut :</span> ' + fmt(W.salaire) + ' €',
+    '<span style="color:#E05C3A">ONSS (13,07%) :</span> − ' + fmt(onss) + ' €',
+    '<span style="color:#E05C3A">Précompte :</span> − ' + fmt(pp.ppNet) + ' €',
+    '<span style="color:#4CAF82;font-weight:700">Net :</span> ' + fmt(net) + ' €',
+  ].join('<br>');
+}
+
+function updateChecklistPreview() {
+  const el = document.getElementById('checklist-preview');
+  if (!el) return;
+  const today = new Date().toISOString().split('T')[0];
+  const dimonaOK = W.entree >= today ? '🟡 À faire avant le ' + fmtDateFR(W.entree) : '🔴 Urgent!';
+  el.innerHTML = [
+    (W.niss.replace(/[^0-9]/g,'').length===11 ? '✅' : '❌') + ' NISS complet',
+    (W.entree ? '✅' : '❌') + ' Date entrée encodée',
+    (W.contrat ? '✅' : '❌') + ' Type contrat défini',
+    (W.cp ? '✅' : '❌') + ' Commission paritaire',
+    (W.salaire>0 ? '✅' : '❌') + ' Salaire encodé',
+    dimonaOK + ' Dimona IN',
+  ].join('<br>');
+}
+
+function syncCalculateurs() {
+  // Sync calculateur brut→net
+  const bruEl = document.getElementById('bn_brut');
+  const sitEl = document.getElementById('bn_situation');
+  const enfEl = document.getElementById('bn_enfants');
+  if (bruEl && W.salaire > 0) { bruEl.value = W.salaire; }
+  if (sitEl && W.famille) { sitEl.value = W.famille; }
+  if (enfEl) { enfEl.value = W.enfants; }
+  if (bruEl) calcBrutNet();
+
+  // Sync calculateur coût employeur
+  const ceEl = document.getElementById('ce_brut');
+  if (ceEl && W.salaire > 0) { ceEl.value = W.salaire; calcCoutEmployeur(); }
+
+  // Sync préavis
+  const paEl = document.getElementById('pa_entree');
+  const paSal = document.getElementById('pa_salaire');
+  if (paEl && W.entree) { paEl.value = W.entree; }
+  if (paSal && W.salaire > 0) { paSal.value = W.salaire; calcPreavis(); }
+
+  // Sync précompte
+  const ppEl = document.getElementById('pp_base');
+  if (ppEl && W.salaire > 0) {
+    ppEl.value = Math.round(W.salaire * (1 - 0.1307));
+    calcPrecompte();
+  }
+}
+
+function syncEmails() {
+  // Pré-remplir les champs email avec les données du travailleur
+  const toEl = document.getElementById('emailTo');
+  const nameEl = document.getElementById('emailWorker');
+  if (toEl && W.email) toEl.value = W.email;
+  if (nameEl && W.prenom) nameEl.value = W.prenom + ' ' + W.nom;
+}
+
+function resetFiche() {
+  ['w_prenom','w_nom','w_niss','w_ddn','w_cp','w_salaire','w_email'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const sel = document.getElementById('w_contrat');
+  if (sel) sel.value = '';
+  const fam = document.getElementById('w_famille');
+  if (fam) fam.value = 'isole';
+  const enf = document.getElementById('w_enfants');
+  if (enf) enf.value = '0';
+  const dt = new Date().toISOString().split('T')[0];
+  ['w_entree','w_sortie'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('fiche-resume').style.display = 'none';
+  document.getElementById('fiche-status').textContent = '⬜ Vide';
+  document.getElementById('fiche-status').style.color = '#666';
+}
+
+function exportFichePDF() {
+  getW();
+  const lines = [
+    'FICHE TRAVAILLEUR — AUREUS SOCIAL PRO',
+    '═'.repeat(40),
+    '',
+    'Nom complet    : ' + W.prenom + ' ' + W.nom,
+    'NISS           : ' + W.niss,
+    'Date naissance : ' + fmtDateFR(W.ddn),
+    'Type contrat   : ' + W.contrat,
+    'Date entrée    : ' + fmtDateFR(W.entree),
+    W.sortie ? 'Date sortie    : ' + fmtDateFR(W.sortie) : '',
+    'CP             : ' + W.cp,
+    'Salaire brut   : ' + fmt(W.salaire) + ' €/mois',
+    'Email          : ' + W.email,
+    'Situation fam. : ' + W.famille,
+    'Enfants        : ' + W.enfants,
+    '',
+    'DIMONA',
+    '─'.repeat(20),
+    'Type Dimona    : ' + dimonaType(W.contrat),
+    'NISS           : ' + W.niss,
+    'Date début     : ' + fmtDateFR(W.entree),
+    W.sortie ? 'Date fin       : ' + fmtDateFR(W.sortie) : 'Date fin       : —',
+    '',
+    'CALCUL PAIE',
+    '─'.repeat(20),
+    'Brut           : ' + fmt(W.salaire) + ' €',
+    'ONSS (13,07%)  : ' + fmt(W.salaire * 0.1307) + ' €',
+    'Net estimé     : ' + fmt(Math.max(0, W.salaire - W.salaire*0.1307)) + ' € (avant précompte)',
+    '',
+    'Généré le ' + new Date().toLocaleDateString('fr-BE') + ' via Aureus Social Pro',
+  ].filter(l => l !== null).join('
+');
+
+  const blob = new Blob([lines], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'fiche-' + (W.nom || 'travailleur') + '.txt';
+  a.click();
+}
+
+function genDimona() {
+  getW();
+  const type = dimonaType(W.contrat);
+  const modal = document.getElementById('dimona-modal');
+  const mc = document.getElementById('dimona-modal-content');
+  if (!modal || !mc) return;
+
+  const urgent = W.entree && new Date(W.entree) <= new Date() ? 
+    '<div style="background:rgba(224,92,58,0.1);border:1px solid rgba(224,92,58,0.3);border-radius:6px;padding:12px 14px;margin-bottom:16px;font-family:DM Mono,monospace;font-size:11px;color:#E05C3A">🔴 Date d'entrée déjà passée ou aujourd'hui — Dimona IN à envoyer IMMÉDIATEMENT via dimona.be</div>' :
+    '<div style="background:rgba(201,150,58,0.08);border:1px solid rgba(201,150,58,0.2);border-radius:6px;padding:12px 14px;margin-bottom:16px;font-family:DM Mono,monospace;font-size:11px;color:#C9963A">⚡ Envoyer cette Dimona AVANT le ' + fmtDateFR(W.entree) + ' (avant le 1er jour de travail)</div>';
+
+  mc.innerHTML = urgent + `
+    <div style="background:#0a0908;border:1px solid #222;border-radius:8px;padding:20px;font-family:'DM Mono',monospace;font-size:12px;line-height:2.2">
+      <div style="color:#C9963A;font-weight:700;margin-bottom:12px">Données à encoder sur dimona.be</div>
+      <table style="width:100%;border-collapse:collapse">
+        <tr><td style="color:#666;padding:4px 0;width:45%">Type de déclaration</td><td style="color:#F0EBE0;font-weight:700">${type}</td></tr>
+        <tr><td style="color:#666;padding:4px 0">NISS travailleur</td><td style="color:#F0EBE0">${W.niss || '⚠ À compléter'}</td></tr>
+        <tr><td style="color:#666;padding:4px 0">Nom</td><td style="color:#F0EBE0">${W.nom || '—'}</td></tr>
+        <tr><td style="color:#666;padding:4px 0">Prénom</td><td style="color:#F0EBE0">${W.prenom || '—'}</td></tr>
+        <tr><td style="color:#666;padding:4px 0">Date début occupation</td><td style="color:#4CAF82;font-weight:700">${fmtDateFR(W.entree)}</td></tr>
+        ${W.sortie ? `<tr><td style="color:#666;padding:4px 0">Date fin occupation</td><td style="color:#F0EBE0">${fmtDateFR(W.sortie)}</td></tr>` : ''}
+        <tr><td style="color:#666;padding:4px 0">N° ONSS employeur</td><td style="color:#F0EBE0">51357716-02</td></tr>
+        <tr><td style="color:#666;padding:4px 0">Commission paritaire</td><td style="color:#F0EBE0">${W.cp || '—'}</td></tr>
+        <tr><td style="color:#666;padding:4px 0">Type de travailleur</td><td style="color:#F0EBE0">${W.contrat || '—'}</td></tr>
+      </table>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+      <a href="https://www.socialsecurity.be/dimona" target="_blank" 
+         style="background:#C9963A;color:#0D0D0E;font-family:DM Mono,monospace;font-size:11px;font-weight:700;padding:10px 20px;border-radius:5px;text-decoration:none;display:inline-block">
+        → Ouvrir dimona.be
+      </a>
+      <button onclick="copyDimona()" style="background:rgba(201,150,58,0.1);border:1px solid rgba(201,150,58,0.3);color:#C9963A;font-family:DM Mono,monospace;font-size:11px;padding:10px 20px;border-radius:5px;cursor:pointer">
+        📋 Copier les données
+      </button>
+    </div>
+  `;
+
+  modal.style.display = 'block';
+}
+
+function copyDimona() {
+  getW();
+  const type = dimonaType(W.contrat);
+  const text = [
+    'DIMONA ' + type,
+    'NISS: ' + W.niss,
+    'Nom: ' + W.nom + ' ' + W.prenom,
+    'Début: ' + fmtDateFR(W.entree),
+    W.sortie ? 'Fin: ' + fmtDateFR(W.sortie) : '',
+    'ONSS employeur: 51357716-02',
+    'CP: ' + W.cp,
+  ].filter(Boolean).join('
+');
+  navigator.clipboard.writeText(text).then(() => alert('✅ Copié!'));
+}
+
+function closeDimonaModal() {
+  const m = document.getElementById('dimona-modal');
+  if (m) m.style.display = 'none';
+}
+
+// Fermer modal sur clic extérieur
+document.addEventListener('click', e => {
+  const modal = document.getElementById('dimona-modal');
+  if (modal && e.target === modal) closeDimonaModal();
+});
+
+// Init fiche avec valeurs par défaut (Salem)
+document.addEventListener('DOMContentLoaded', () => {
+  // Laisser vide pour que l'utilisateur remplisse ses propres données
+  const today = new Date().toISOString().split('T')[0];
+  const entEl = document.getElementById('w_entree');
+  if (entEl && !entEl.value) entEl.value = today;
+});
 
 // ═══════════════════════════════ CALCULATEURS ═══════════════════════════════
 
