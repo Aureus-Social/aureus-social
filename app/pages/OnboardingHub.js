@@ -8,7 +8,7 @@ import{TX_ONSS_E,TX_ONSS_W,RMMMG,CR_MAX,CR_PAT,FORF_BUREAU}from'@/app/lib/helper
 // ═══════════════════════════════════════════════════════════
 // TX_ONSS_E importé depuis helpers → source unique lois-belges
 const C=({children,title:t,sub})=><div style={{background:'rgba(198,163,78,.03)',borderRadius:12,padding:16,border:'1px solid rgba(198,163,78,.08)',marginBottom:14}}>{t&&<div style={{fontSize:13,fontWeight:600,color:'#c6a34e',marginBottom:sub?2:12}}>{t}</div>}{sub&&<div style={{fontSize:10,color:'#888',marginBottom:12}}>{sub}</div>}{children}</div>;
-const inputStyle={width:'100%',padding:'10px 12px',background:TH.bg,border:'1px solid rgba(139,115,60,.15)',borderRadius:8,color:TH.text,fontSize:12,fontFamily:'inherit',boxSizing:'border-box'};
+const inputStyle={width:'100%',padding:'10px 12px',background:'#0a0908',border:'1px solid rgba(139,115,60,.15)',borderRadius:8,color:'#e8e6e0',fontSize:12,fontFamily:'inherit',boxSizing:'border-box'};
 const labelStyle={fontSize:10,color:'#888',display:'block',marginBottom:4,fontWeight:500};
 const fmt=v=>new Intl.NumberFormat('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v||0);
 const Field=({l,children,req})=><div style={{marginBottom:10}}><label style={labelStyle}>{l}{req&&<span style={{color:'#ef4444'}}> *</span>}</label>{children}</div>;
