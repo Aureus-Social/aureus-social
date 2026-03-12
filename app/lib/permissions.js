@@ -67,100 +67,27 @@ export const PERMISSIONS = {
 // admin = null → tout visible sans filtre
 // ══════════════════════════════════════════════════════════════
 export const MENU_BY_ROLE = {
+  admin: null, // null = tout visible
 
-  // ── ADMIN — tout ──────────────────────────────────────────
-  admin: null,
-
-  // ── SECRÉTARIAT SOCIAL ────────────────────────────────────
   secretariat: new Set([
-    // Tableau de bord & navigation
-    'dashboard', 'commandcenter', 'embaucheaz', 'journal', 'notifications', 'smartalerts',
-    'actionsrapides', 'autopilot', 'piloteauto',
-    // RH & Employés
-    'employees', 'dashrh', 'rh', 'team',
-    'onboarding', 'onboardwizard',
-    'contratgen', 'contratsmenu', 'formC4', 'formC131',
-    'gestionabs', 'dashabsent', 'planifconges', 'workflowAbs',
-    'accidentTravail', 'joursPrestes', 'interimaires',
-    'registrepersonnel', 'proceduresrh',
-    'timeline', 'calendrier',
-    // Paie
-    'payslip', 'salaires', 'calcinstant', 'baremescp', 'baremespp',
-    'gestionprimes', 'avantages', 'cloture', 'validation',
-    'simembauche', 'simutp', 'comparateur', 'optifiscale', 'couttotal',
-    'calcmaladie', 'soldetoutcompte', 'vehiculesatn', 'flexijobs',
-    'compteIndividuel', 'coutsannuel', 'regulPP', 'autoindex',
-    'budget', 'echeancier', 'massengine', 'queue',
-    // Déclarations & Compta
-    'declarations', 'onss', 'batchdecl', 'belcotax281',
-    'exportWinbooks', 'exportcompta', 'exportcomptapro', 'exportcoda', 'exportbatch',
-    'importcsv', 'sepa', 'chargessociales', 'chomagetemporaire',
-    'rapports', 'reporting', 'auditfiscale', 'fiscal',
-    'echeancier', 'compteindividuelannuel',
-    // Concertation sociale
-    'ccts', 'seuilssociaux', 'bilansocial', 'compteindividuelannuel',
-    'egalitehf', 'electionsociales', 'formationsec', 'social',
-    'delegations', 'delegationsyndicale', 'plandiversite', 'lanceursalerte',
-    'rapportce',
-    // Mandats & primes patronales
-    'mandatonss', 'belcotaxmandat', 'domiciliation', 'premieremploi',
-    'activabruxelles', 'art60cpas', 'impulsion55', 'monbee', 'connexionshub',
-    // Portails clients & documents
-    'portailclient', 'portalmanager', 'ged', 'archives',
-    'annexeReglement', 'contratgen', 'legal', 'gendocsjur', 'cgvsaas',
-    // Simulateurs
-    'simulateurspro', 'simupension', 'simulicenciement',
-    // Support
-    'support',
+    'dashboard', 'embaucheaz', 'notifications',
+    'employees', 'onboarding', 'contratsmenu', 'gestionabs', 'dashrh', 'portail', 'proceduresrh',
+    'payslip', 'calcinstant', 'gestionprimes', 'cloture', 'baremescp',
+    'declarations', 'exportcompta', 'sepa', 'belcotax281', 'rapports',
+    'mandatonss',
   ]),
 
-  // ── COMMERCIAL ────────────────────────────────────────────
   commercial: new Set([
-    // Tableau de bord
-    'dashboard', 'notifications', 'smartalerts',
-    // Commercial — cœur métier
-    'diagnostic', 'diagnosticv',
-    'checklistclient', 'comparatif',
-    'guidecommercial', 'guidefiduciaire', 'fiduciaire',
-    'landing', 'parserConcurrent', 'repriseclient',
-    'gendocsjur',
-    // Facturation & reporting commercial
-    'facturation', 'rapportsrole', 'reportingpro',
-    // Outils lecture (calculs avant-vente)
-    'baremescp', 'seuilssociaux', 'calcinstant',
-    'simembauche', 'simulateurspro', 'comparateur',
-    'couttotal', 'optifiscale',
-    // Portail clients (vue lite)
-    'portailclient',
-    // Support
-    'support',
+    'dashboard', 'notifications',
+    'diagnostic', 'checklistclient', 'comparatif', 'guidecommercial',
+    'facturation', 'rapports',
+    'calcinstant', 'baremescp',
   ]),
 
-  // ── RH ENTREPRISE ─────────────────────────────────────────
   rh_entreprise: new Set([
-    // Tableau de bord
-    'dashboard', 'dashrh', 'notifications',
-    // Employés & RH — cœur métier
-    'employees', 'rh', 'team',
-    'onboarding', 'onboardwizard',
-    'contratgen', 'contratsmenu', 'formC4', 'formC131',
-    'gestionabs', 'dashabsent', 'planifconges', 'workflowAbs',
-    'accidentTravail', 'joursPrestes', 'registrepersonnel',
-    'proceduresrh', 'timeline', 'calendrier',
-    // Portail employé
-    'portail',
-    // Lecture fiches de paie uniquement
-    'payslip', 'salaires',
-    // Documents
-    'annexeReglement', 'legal', 'gendocsjur',
-    // Concertation sociale (lecture)
-    'ccts', 'seuilssociaux', 'egalitehf', 'electionsociales',
-    'formationsec', 'delegations', 'delegationsyndicale',
-    'plandiversite', 'lanceursalerte', 'rapportce', 'bilansocial',
-    // Avantages (lecture)
-    'gestionprimes', 'avantages', 'calcmaladie',
-    // Support
-    'support',
+    'dashboard', 'notifications',
+    'employees', 'onboarding', 'contratsmenu', 'gestionabs', 'dashrh', 'portail', 'proceduresrh',
+    'payslip', 'gestionprimes', 'baremescp',
   ]),
 };
 

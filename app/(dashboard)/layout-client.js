@@ -2,7 +2,7 @@
 import { logInfo, logWarn } from '../lib/security/logger.js';
 import React, { useState, useReducer, useMemo, useEffect, useCallback, useRef, Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { MENU, GROUPS, getGroupItems, SEARCH_SUBSECTIONS } from '../lib/menu-config';
+import { MENU, GROUPS, getGroupItems, SEARCH_SUBSECTIONS, MENU_REDIRECTS } from '../lib/menu-config';
 import { getRoleFromUser, canAccessPage, getMenuForRole, ROLE_LABELS, ROLE_COLORS } from '../lib/permissions';
 import { I18N } from '../lib/i18n';
 import { LangProvider, useLang } from '../lib/lang-context';
@@ -311,6 +311,12 @@ function DashboardLayoutInner({ user }) {
 
   // ── Rôle utilisateur (filtrage menu + accès pages) ───────
   const userRole = getRoleFromUser(user);
+
+  // ── Navigation avec redirection automatique (doublons → page canonique) ──
+  const navigateTo = (id) => {
+    const target = MENU_REDIRECTS[id] || id;
+    setPage(target);
+  };
   const filteredMenu = getMenuForRole(MENU, userRole);
   const filteredGroupItems = (gNum) => filteredMenu.filter(m => m.g === gNum && !m.group);
 
@@ -442,7 +448,7 @@ function DashboardLayoutInner({ user }) {
     setWorkerResults([]);
     window.__activeWorker = null;
   };
-  const currentItem = MENU.find(m => m.id === page) || { label: 'Dashboard' };
+  const currentItem = MENU.find(m => m.id === (MENU_REDIRECTS[page] || page)) || { label: 'Dashboard' };
 
   const handleLogout = async () => {
     await audit.logout(user?.email);
@@ -477,6 +483,11 @@ function DashboardLayoutInner({ user }) {
   }, [user]);
 
   const renderPage = () => {
+    // ── Redirection doublons → page canonique ───────────────
+    if (MENU_REDIRECTS[page]) {
+      setTimeout(() => setPage(MENU_REDIRECTS[page]), 0);
+      return null;
+    }
     // ── Garde d'accès par rôle ──────────────────────────────
     if (!canAccessPage(userRole, page)) {
       return (
@@ -888,7 +899,7 @@ function DashboardLayoutInner({ user }) {
 
         {/* Menu */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
-          {[1, 2, 3, 4, 5, 6, 7].map(gNum => {
+          {[1, 2, 3, 4, 5, 6].map(gNum => {
             const group = GROUPS.find(g => g.id === `_g${gNum}`);
             const items = filteredGroupItems(gNum) || [];
             if (!items.length) return null;
@@ -903,7 +914,7 @@ function DashboardLayoutInner({ user }) {
                   <span style={{ fontSize: 10, color: '#5e5c56', transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0)', transition: 'transform .15s' }}>▼</span>
                 </div>
                 {!isCollapsed && items.map(item => (
-                  <div key={item.id} onClick={() => item.external ? window.open(item.external, '_blank') : setPage(item.id)}
+                  <div key={item.id} onClick={() => item.external ? window.open(item.external, '_blank') : navigateTo(item.id)}
                     style={{
                       padding: '7px 18px 7px 24px', cursor: 'pointer', fontSize: 11.5, display: 'flex', alignItems: 'center', gap: 8,
                       background: page === item.id ? 'rgba(198,163,78,.08)' : 'transparent',
