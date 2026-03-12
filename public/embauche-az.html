@@ -1052,13 +1052,37 @@ body {
       </div>
       <div>
         <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Statut *</label>
-        <select id="w-statut" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
-          <option value="EMP">👔 Employé</option>
-          <option value="OUV">🔧 Ouvrier</option>
-          <option value="DIR">🏢 Dirigeant d'entreprise</option>
-          <option value="ETU">👨‍🎓 Étudiant</option>
-          <option value="FLEXI">⚡ Flexi-worker</option>
-          <option value="VOLONT">🤝 Volontaire</option>
+        <select id="w-statut" onchange="wizStatutChange()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+          <optgroup label="── SECTEUR PRIVÉ ──">
+            <option value="EMP">👔 Employé</option>
+            <option value="OUV">🔧 Ouvrier</option>
+            <option value="DIR">🏢 Dirigeant d'entreprise (mandataire)</option>
+            <option value="ETU">👨‍🎓 Étudiant jobiste</option>
+            <option value="FLEXI">⚡ Flexi-worker</option>
+            <option value="VOLONT">🤝 Volontaire (indemnités forfaitaires)</option>
+          </optgroup>
+          <optgroup label="── PROFESSIONS LIBÉRALES ──">
+            <option value="MEDECIN">🩺 Médecin / Dentiste / Vétérinaire</option>
+            <option value="AVOCAT">⚖️ Avocat (stagiaire ou associé)</option>
+            <option value="NOTAIRE">📜 Notaire / Huissier</option>
+            <option value="ARCH">📐 Architecte / Ingénieur conseil</option>
+            <option value="COMPTA">📊 Expert-comptable / Réviseur</option>
+            <option value="PHARMA">💊 Pharmacien</option>
+            <option value="PLIB">🎓 Autre profession libérale</option>
+          </optgroup>
+          <optgroup label="── SECTEUR PUBLIC ──">
+            <option value="FONC_STAT">🏛️ Fonctionnaire statutaire (nommé)</option>
+            <option value="FONC_CONT">📋 Agent contractuel secteur public</option>
+            <option value="ENSEIGNANT">📚 Enseignant (nommé / temporaire)</option>
+            <option value="MILITAIRE">🎖️ Militaire / Police</option>
+            <option value="INTERCOMMUNAL">🏙️ Intercommunale / CPAS / Parastataux</option>
+          </optgroup>
+          <optgroup label="── SITUATIONS SPÉCIALES ──">
+            <option value="ARTISTE">🎨 Artiste (avec carte artiste)</option>
+            <option value="SPORTIF">⚽ Sportif rémunéré</option>
+            <option value="DOMESTIQUE">🏠 Travailleur domestique</option>
+            <option value="INDEPENDANT_COMP">💼 Indépendant complémentaire</option>
+          </optgroup>
         </select>
       </div>
       <div>
@@ -1304,6 +1328,102 @@ body {
         ✅ <strong>Cotisation patronale spéciale</strong> : 25% (pas les taux normaux)<br>
         ✅ Pas de droit au chômage, ni aux indemnités maladie via flexi<br>
         ⚠️ Vérifier attestation employeur principal (preuve 4/5)
+      </div>
+    </div>
+
+    <!-- Panel professions libérales -->
+    <div id="w-plib-bloc" style="display:none;background:rgba(167,139,250,.05);border:1px solid rgba(167,139,250,.25);border-radius:8px;padding:16px;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:12px;">🎓 Profession libérale — Règles spécifiques</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Régime ONSS</label>
+          <select id="w-plib-onss" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
+            <option value="salarie">Salarié (assujetti ONSS — contrat de travail)</option>
+            <option value="independant">Indépendant (cotisations sociales INASTI)</option>
+            <option value="mixte">Mixte (salarié + activité libérale)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Ordre professionnel</label>
+          <select id="w-plib-ordre" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
+            <option value="">— Aucun —</option>
+            <option value="barreau">Barreau (avocat)</option>
+            <option value="onm">ONM (médecins)</option>
+            <option value="architectes">Ordre des architectes</option>
+            <option value="iec">IEC (experts-comptables)</option>
+            <option value="irev">IRE (réviseurs)</option>
+            <option value="pharmacie">APB (pharmaciens)</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:11px;line-height:1.9;color:var(--text);">
+        <div style="font-weight:600;color:#a78bfa;margin-bottom:6px;">Points d'attention :</div>
+        <div>⚖️ <strong>Avocat salarié</strong> : possible depuis 2014 — CP 460 — assujetti ONSS sauf barreau spécifique</div>
+        <div>🩺 <strong>Médecin salarié</strong> : CP 330/331/332 (hôpital) ou CP 339 (cabinet privé) — ONSS normal</div>
+        <div>📐 <strong>Architecte / Ingénieur</strong> : souvent indépendant — vérifier assujettissement ONSS</div>
+        <div>📊 <strong>Expert-comptable</strong> : CP 200 si salarié d'un cabinet — ONSS normal</div>
+        <div>⚠️ <strong>Incompatibilités</strong> : certaines professions interdisent le cumul salarié (vérifier statut de l'ordre)</div>
+      </div>
+    </div>
+
+    <!-- Panel fonctionnaire -->
+    <div id="w-fonc-bloc" style="display:none;background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:16px;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:700;color:#3b82f6;margin-bottom:12px;">🏛️ Secteur public — Règles spécifiques</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Type d'administration</label>
+          <select id="w-fonc-admin" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
+            <option value="federal">Administration fédérale (SPF)</option>
+            <option value="region">Région / Communauté</option>
+            <option value="commune">Administration communale / CPAS</option>
+            <option value="enseignement">Enseignement (réseau libre / officiel)</option>
+            <option value="para">Parastataux / Organismes d'intérêt public</option>
+            <option value="police">Police fédérale / locale</option>
+            <option value="armee">Armée / Défense</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:4px;">Mode de recrutement</label>
+          <select id="w-fonc-mode" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
+            <option value="selor">Via SELOR (concours)</option>
+            <option value="contrat">Contrat direct</option>
+            <option value="stage">Stage probatoire → nomination</option>
+            <option value="interim">Interim / Remplacement</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:11px;line-height:1.9;color:var(--text);">
+        <div style="font-weight:600;color:#3b82f6;margin-bottom:6px;">Points d'attention :</div>
+        <div>📋 <strong>Statutaire (nommé)</strong> : pas assujetti ONSS — régime propre de pension — inamovible</div>
+        <div>📋 <strong>Contractuel public</strong> : assujetti ONSS comme secteur privé — CP 319/329 selon secteur</div>
+        <div>🏫 <strong>Enseignant</strong> : DIMONA obligatoire — CP 319.01 (libre) ou officiel selon réseau</div>
+        <div>⚠️ <strong>Cumul</strong> : fonctionnaire nommé + activité privée = autorisation hiérarchique obligatoire</div>
+        <div>📑 <strong>Dimona</strong> : obligatoire même pour fonctionnaires contractuels — type selon régime</div>
+      </div>
+    </div>
+
+    <!-- Panel avocat spécifique -->
+    <div id="w-avocat-bloc" style="display:none;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:16px;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:700;color:#f59e0b;margin-bottom:12px;">⚖️ Avocat — Régime spécifique</div>
+      <div style="font-size:11px;line-height:2;color:var(--text);">
+        <div>📌 <strong>Avocat salarié</strong> : CP 460 — assujetti ONSS depuis loi 03/06/2007</div>
+        <div>📌 <strong>Stagiaire avocat</strong> : convention de stage ≠ contrat travail — pas ONSS si honoraires seulement</div>
+        <div>📌 <strong>DIMONA</strong> : type <strong>DWD</strong> (Dimona Juridique) pour avocats salariés — <em>pas</em> le type normal</div>
+        <div>📌 <strong>Bâtonnier à notifier</strong> : engagement d'un avocat salarié doit être communiqué au barreau</div>
+        <div>📌 <strong>Secret professionnel</strong> : clause obligatoire dans tout contrat avocat</div>
+        <div>📌 <strong>Assurance RC Pro</strong> : couverture obligatoire — vérifier si employeur ou avocat lui-même</div>
+      </div>
+    </div>
+
+    <!-- Panel artiste -->
+    <div id="w-artiste-bloc" style="display:none;background:rgba(236,72,153,.05);border:1px solid rgba(236,72,153,.25);border-radius:8px;padding:16px;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:700;color:#ec4899;margin-bottom:12px;">🎨 Artiste rémunéré — Régime spécifique</div>
+      <div style="font-size:11px;line-height:2;color:var(--text);">
+        <div>📌 <strong>Carte artiste</strong> : obligatoire pour le régime fiscal/social artiste — délivrée par SPF Finances</div>
+        <div>📌 <strong>ONSS artiste</strong> : cotisations réduites si &lt; 30 prestations/an chez même employeur</div>
+        <div>📌 <strong>Dimona</strong> : type <strong>A17</strong> spécifique artistes</div>
+        <div>📌 <strong>PP</strong> : régime fiscal avantageux — déduction frais professionnels 50% forfaitaire</div>
+        <div>📌 <strong>Caisse congés spectacles</strong> : affiliation obligatoire (ONEM)</div>
       </div>
     </div>
 
@@ -2914,6 +3034,29 @@ function calcGlobal() {
     'À déclarer fiche 281.10 : <strong>€' + ((car + gsm + pc) * 12).toFixed(0) + '/an</strong>';
 }
 
+
+// ── Afficher panels selon statut ──
+function wizStatutChange() {
+  var s = document.getElementById('w-statut')?.value || '';
+  var plibBloc = document.getElementById('w-plib-bloc');
+  var foncBloc = document.getElementById('w-fonc-bloc');
+  var avocatBloc = document.getElementById('w-avocat-bloc');
+  var artisteBloc = document.getElementById('w-artiste-bloc');
+  var profLibs = ['MEDECIN','NOTAIRE','ARCH','COMPTA','PHARMA','PLIB'];
+  var foncs = ['FONC_STAT','FONC_CONT','ENSEIGNANT','MILITAIRE','INTERCOMMUNAL'];
+  if(plibBloc) plibBloc.style.display = (profLibs.indexOf(s)>=0||s==='AVOCAT')?'block':'none';
+  if(foncBloc) foncBloc.style.display = (foncs.indexOf(s)>=0)?'block':'none';
+  if(avocatBloc) avocatBloc.style.display = (s==='AVOCAT')?'block':'none';
+  if(artisteBloc) artisteBloc.style.display = (s==='ARTISTE')?'block':'none';
+  // Auto CP selon statut
+  var cpEl = document.getElementById('w-cp');
+  if(!cpEl) return;
+  if(s==='AVOCAT') cpEl.value='autre'; // CP 460
+  else if(s==='FONC_STAT') cpEl.value='000';
+  else if(s==='ENSEIGNANT') cpEl.value='319.01';
+  else if(s==='MEDECIN') cpEl.value='330';
+  else if(s==='ARTISTE') cpEl.value='304';
+}
 
 // ── Auto-detect statut depuis CP ──
 function wizCPChange() {
