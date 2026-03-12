@@ -1382,11 +1382,11 @@ export function CompteIndividuelMod({s,d}){
   </div>;
 }
 
-export function AccountingOutputMod({s,d,supabase,user}){
+export function AccountingOutputMod({s,d,supabase,user,initialFormat}){
   const clients= s?.clients||[];
   const ae=(s?.emps||[]).filter(e=>e.status==='active'||!e.status);
   const [selClient,setSelClient]=useState('all');
-  const [format,setFormat]=useState('winbooks');
+  const [format,setFormat]=useState(initialFormat||'winbooks');
   const [exported,setExported]=useState(null);
   const [tab,setTab]=useState('export');
   const [previewData,setPreviewData]=useState(null);
@@ -2956,8 +2956,11 @@ export function GEDMod({s,d}){
 export default function ModsBatch2Wrapped({s, d, tab}) {
   // Déclarations & exports comptables
   if(tab==='sepa') return <FraisGestionMod s={s} d={d}/>;
-  if(tab==='exportWinbooks' || tab==='exportcompta' || tab==='exportcomptapro' || tab==='exportbatch') return <AccountingOutputMod s={s} d={d}/>;
-  if(tab==='exportcoda') return <AccountingOutputMod s={s} d={d}/>;
+  if(tab==='exportWinbooks') return <AccountingOutputMod s={s} d={d} initialFormat='winbooks'/>;
+  if(tab==='exportcomptapro') return <AccountingOutputMod s={s} d={d} initialFormat='winbooks'/>;
+  if(tab==='exportcompta') return <AccountingOutputMod s={s} d={d} initialFormat='csv_generic'/>;
+  if(tab==='exportcoda') return <AccountingOutputMod s={s} d={d} initialFormat='csv_generic'/>;
+  if(tab==='exportbatch') return <AccountingOutputMod s={s} d={d} initialFormat='winbooks'/>;
   if(tab==='importcsv') return <FichesMod s={s} d={d}/>;
   if(tab==='belcotax281') return <FichesMod s={s} d={d}/>;
   if(tab==='chargessociales') return <PortailEmployeurMod s={s} d={d}/>;
