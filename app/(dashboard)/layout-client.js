@@ -804,7 +804,7 @@ function DashboardLayoutInner({ user }) {
                   <span style={{ fontSize: 10, color: '#5e5c56', transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0)', transition: 'transform .15s' }}>▼</span>
                 </div>
                 {!isCollapsed && items.map(item => (
-                  <div key={item.id} onClick={() => navigateTo(item.id)}
+                  <div key={item.id} onClick={() => item.external ? window.open(item.external, '_blank') : navigateTo(item.id)}
                     style={{
                       padding: '7px 18px 7px 24px', cursor: 'pointer', fontSize: 11.5, display: 'flex', alignItems: 'center', gap: 8,
                       background: page === item.id ? 'rgba(198,163,78,.08)' : 'transparent',
