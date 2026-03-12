@@ -27,24 +27,20 @@ export async function POST(req) {
 
     const token = await getToken();
 
-    // Schema officiel ONSS v1 (compatible v2)
+    // Schema v2 ONSS
     const payload = {
-      employer: {
-        nssoRegistrationNumber: ONSS_NUMBER,
-      },
-      worker: {
-        ssin: niss.replace(/[^0-9]/g, ''),
-      },
+      employer: { nssoRegistrationNumber: ONSS_NUMBER },
+      worker: { ssin: niss.replace(/[^0-9]/g, '') },
       dimonaIn: type === 'IN' ? {
-        startingDate: startDate,
-        dimonaFeatures: {
+        startDate: startDate,
+        features: {
           workerType: workerType,
-          jointCommissionNumber: cp,
+          jointCommitteeNumber: cp,
         },
       } : undefined,
       dimonaOut: type === 'OUT' ? {
         dimonaNumber: body.dimonaNumber,
-        endingDate: endDate,
+        endDate: endDate,
       } : undefined,
     };
     Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
@@ -63,7 +59,6 @@ export async function POST(req) {
     let result;
     try { result = JSON.parse(text); } catch(e) { result = { raw: text }; }
 
-    // 201 = succès Dimona
     if (resp.status === 201) {
       const location = resp.headers.get('Location') || '';
       const declarationId = location.split('/').pop();
