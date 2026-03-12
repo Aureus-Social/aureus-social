@@ -861,6 +861,26 @@ body {
           <input id="w-iban" type="text" placeholder="BE68 XXXX XXXX XXXX" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
         </div>
         <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Sexe</label>
+          <select id="w-sexe" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="M">♂ Masculin</option>
+            <option value="F">♀ Féminin</option>
+            <option value="X">⊕ Neutre / X</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Langue administrative</label>
+          <select id="w-langue" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="FR">🇫🇷 Français</option>
+            <option value="NL">🇳🇱 Nederlands</option>
+            <option value="DE">🇩🇪 Deutsch</option>
+          </select>
+        </div>
+        <div id="w-permis-bloc">
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">N° Permis de travail</label>
+          <input id="w-permis" type="text" placeholder="Hors UE uniquement" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
           <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Adresse domicile</label>
           <input id="w-adresse" type="text" placeholder="Rue, N° — Code postal Ville" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
         </div>
@@ -1220,6 +1240,60 @@ body {
             <option value="clause">Clause dans contrat</option>
           </select>
         </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Barème CCT appliqué</label>
+          <input id="w-bareme" type="text" placeholder="ex: Barème B2 CCT CP200" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Indemnité déplacement</label>
+          <select id="w-deplacement" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="non">Aucune</option>
+            <option value="sncb">🚆 SNCB (100% remboursé)</option>
+            <option value="stib">🚇 STIB/SRWT/De Lijn</option>
+            <option value="voiture">🚗 Voiture personnelle (0,4264€/km)</option>
+            <option value="velo">🚲 Vélo (0,35€/km — exonéré)</option>
+            <option value="forfait">💶 Forfait fixe mensuel</option>
+            <option value="mixte">Mixte transport</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Distance domicile-travail (km)</label>
+          <input id="w-km" type="number" placeholder="25" min="0" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Prime variable / Bonus</label>
+          <select id="w-bonus" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="non">Aucune</option>
+            <option value="objectifs">Sur objectifs individuels</option>
+            <option value="entreprise">Sur résultats entreprise</option>
+            <option value="mixte">Mixte individuel + entreprise</option>
+            <option value="commission">Commissions sur vente</option>
+            <option value="13e">13e mois garanti</option>
+            <option value="cct90">CCT 90 — bonus non récurrent</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Clause non-concurrence</label>
+          <select id="w-nonconc" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="non">Non applicable</option>
+            <option value="6mois">6 mois (salaire &lt; 38.500€/an)</option>
+            <option value="12mois">12 mois (salaire 38.500-77.000€/an)</option>
+            <option value="24mois">24 mois max (salaire &gt; 77.000€/an)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Clauses spéciales</label>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" id="w-clause-conf" style="accent-color:var(--gold);"> Confidentialité / Secret professionnel</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" id="w-clause-exclu" style="accent-color:var(--gold);"> Exclusivité (travail autorisé uniquement)</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" id="w-clause-invt" style="accent-color:var(--gold);"> Cession inventions / propriété intellectuelle</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" id="w-clause-teletravail-max" style="accent-color:var(--gold);"> Plafond télétravail contractuel</label>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Matricule ONSS employeur</label>
+          <input id="w-onss-mat" type="text" placeholder="ex: 51357716-02" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
       </div>
 
       <!-- Panels conditionnels contrat -->
@@ -1298,6 +1372,11 @@ body {
         <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-warrant" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">📊 Warrants</div><div style="font-size:10px;color:var(--muted);">Fiscalement avantageux</div></div></label>
         <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-transport" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🚇 Abonnement transport</div><div style="font-size:10px;color:var(--muted);">STIB/SNCB — exonéré PP</div></div></label>
         <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-cafeteria" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">☕ Plan cafétéria</div><div style="font-size:10px;color:var(--muted);">Choix avantages flexibles</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-velo" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🚲 Indemnité vélo</div><div style="font-size:10px;color:var(--muted);">0,35€/km — 100% exonéré PP+ONSS</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-primecash" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">💵 Prime de repas cash</div><div style="font-size:10px;color:var(--muted);">Alternative aux chèques-repas</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-double-pec" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🎁 Double pécule vacances</div><div style="font-size:10px;color:var(--muted);">Secteur public + certaines CP</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-stock" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">📈 Stock options / ESOP</div><div style="font-size:10px;color:var(--muted);">Loi Monkerheyken — régime fiscal spécial</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-outplacement" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🚀 Outplacement</div><div style="font-size:10px;color:var(--muted);">Obligatoire +45 ans / licenciement</div></div></label>
       </div>
       <div id="w-voiture-bloc" style="display:none;margin-top:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;">
         <div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:8px;">🚗 Voiture — Calcul ATN</div>
@@ -1325,6 +1404,35 @@ body {
         <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-saisie" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">⚖️ Saisie sur salaire</div><div style="font-size:10px;color:var(--muted);">Tiers saisi / délégation</div></div></label>
         <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-maternite" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🤱 Congé maternité</div><div style="font-size:10px;color:var(--muted);">15 sem. / 20j naissance</div></div></label>
         <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-syndicat" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🔵 Délégué syndical</div><div style="font-size:10px;color:var(--muted);">Protection licenciement</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-naissance" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">👶 Congé de naissance</div><div style="font-size:10px;color:var(--muted);">10j père/coparent — 82% INAMI</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-frontalier" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🌍 Travailleur frontalier</div><div style="font-size:10px;color:var(--muted);">France / Pays-Bas / Luxembourg</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-chomeconom" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">📋 Chômage économique</div><div style="font-size:10px;color:var(--muted);">Notification C3.2A — ONEM</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-outplac-sit" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🔄 Procédure outplacement</div><div style="font-size:10px;color:var(--muted);">+45 ans ou licenciement en cours</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-protection" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🛡️ Travailleur protégé</div><div style="font-size:10px;color:var(--muted);">Grossesse / mandat / CPPT</div></div></label>
+      </div>
+    </div>
+
+    <!-- ══ BLOC 5 : DOCUMENTS À GÉNÉRER ══ -->
+    <div style="margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+        <div style="width:28px;height:28px;border-radius:8px;background:rgba(201,150,58,.2);display:flex;align-items:center;justify-content:center;font-size:13px;">📄</div>
+        <div style="font-size:14px;font-weight:700;color:var(--gold);">5 — Documents à préparer</div>
+        <div style="flex:1;height:1px;background:rgba(201,150,58,.15);"></div>
+        <div style="font-size:10px;color:var(--muted);">Cochez les documents à inclure dans le dossier généré</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="d-contrat" checked style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">📋 Contrat de travail</div><div style="font-size:10px;color:var(--muted);">CDI/CDD selon type sélectionné</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="d-dimona" checked style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">📡 Déclaration Dimona IN</div><div style="font-size:10px;color:var(--muted);">À transmettre AVANT 1er jour</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="d-rgpd" checked style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🔒 Annexe RGPD Art.13</div><div style="font-size:10px;color:var(--muted);">Info traitement données travailleur</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="d-reglement" checked style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">📖 Règlement de travail</div><div style="font-size:10px;color:var(--muted);">Remise obligatoire à l'embauche</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="d-fiche-paie" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">💶 Modèle fiche de paie</div><div style="font-size:10px;color:var(--muted);">Simulation brut→net 2026</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="d-c4" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">📄 Pré-C4 préparé</div><div style="font-size:10px;color:var(--muted);">Template attestation chômage</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="d-onboarding" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🎯 Checklist onboarding</div><div style="font-size:10px;color:var(--muted);">J-7 à J+30 — tâches employeur</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="d-visite-med" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🩺 Convocation visite médicale</div><div style="font-size:10px;color:var(--muted);">Embauche / poste de sécurité</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="d-pension" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🛡️ Affiliation assurance groupe</div><div style="font-size:10px;color:var(--muted);">EIP / PLCI / pension complémentaire</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="d-atn" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🚗 Fiche ATN voiture</div><div style="font-size:10px;color:var(--muted);">281.10 — déclaration fiscale</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="d-nonconc-doc" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🔐 Clause non-concurrence</div><div style="font-size:10px;color:var(--muted);">Annexe contrat — si applicable</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="d-activa" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">💰 Demande Activa.brussels</div><div style="font-size:10px;color:var(--muted);">À introduire dans les 30j</div></div></label>
       </div>
     </div>
 
