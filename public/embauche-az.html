@@ -1176,7 +1176,12 @@ body {
       </div>
       <div>
         <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Salaire brut mensuel (€)</label>
-        <input id="w-brut" type="number" placeholder="2800" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        <input id="w-brut" type="number" placeholder="2800" oninput="wizCheckSalaire()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        <div id="w-salaire-min" style="margin-top:6px;padding:8px 10px;border-radius:6px;background:rgba(201,150,58,.08);border:1px solid rgba(201,150,58,.15);font-size:11px;display:none;">
+          <div id="w-salaire-min-label" style="color:var(--gold);font-weight:600;"></div>
+          <div id="w-salaire-min-note" style="color:var(--muted);margin-top:3px;line-height:1.5;"></div>
+          <div id="w-salaire-min-alert" style="margin-top:5px;display:none;"></div>
+        </div>
       </div>
       <div>
         <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Régime de travail</label>
@@ -1558,6 +1563,93 @@ body {
 </section>
 
 <script>
+
+// ══════════════════════════════════════════════════════
+// SALAIRES MINIMUMS BELGES 2026 PAR COMMISSION PARITAIRE
+// Sources: CCT sectorielle, SPF Emploi, ONSS 2026
+// ══════════════════════════════════════════════════════
+var CP_MIN = {
+  // ── RMMMG NATIONAL (fallback) ──
+  "DEFAULT": { min: 2070.48, label: "RMMMG national 2026", note: "Salaire minimum interprofessionnel garanti — applicable à toutes les CP sans barème propre" },
+
+  // ── EMPLOYÉS ──
+  "200": { min: 2070.48, label: "CP 200 — Employés", note: "RMMMG + ancienneté. Échelons: 0 an=2070€, 1an=2133€, 2ans=2196€, 5ans=2262€, 10ans=2333€, 15ans=2420€" },
+  "201": { min: 2100.00, label: "CP 201 — Commerce alimentaire détail", note: "Min mensuel brut catégorie 1. Catégorie 2: 2200€, Cat 3: 2350€" },
+  "202": { min: 2150.00, label: "CP 202 — Alimentaire (employés)", note: "Barème selon niveau: N1=2150€, N2=2280€, N3=2450€, N4=2700€" },
+  "207": { min: 2250.00, label: "CP 207 — Chimique (employés)", note: "Catégorie I: 2250€, Cat II: 2400€, Cat III: 2600€, Cat IV: 2900€" },
+  "209": { min: 2200.00, label: "CP 209 — Construction (employés)", note: "Niveau A: 2200€, Niveau B: 2400€, Niveau C: 2700€, Niveau D: 3100€" },
+  "211": { min: 2150.00, label: "CP 211 — Transport & logistique", note: "Chauffeur: 2150€/m. Dispatcher: 2300€, Cadre: 2800€+" },
+  "218": { min: 2180.00, label: "CP 218 — Industrie alimentaire", note: "Catégorie A: 2180€, Cat B: 2320€, Cat C: 2500€, Cat D: 2750€" },
+  "219": { min: 2200.00, label: "CP 219 — Commerce international", note: "Grade 1: 2200€, Grade 2: 2450€, Grade 3: 2750€, Grade 4: 3100€" },
+  "220": { min: 2300.00, label: "CP 220 — Diamantaire", note: "Minimum sectoriel élevé — convention annuelle. Min 2300€/m brut" },
+  "223": { min: 2350.00, label: "CP 223 — Assurances", note: "Classe I: 2350€, Classe II: 2600€, Classe III: 2900€, Classe IV: 3300€+" },
+  "226": { min: 2070.48, label: "CP 226 — Intérimaires", note: "Barème de la CP utilisatrice applicable — minimum RMMMG garanti" },
+  "302": { min: 2100.00, label: "CP 302 — Hôtellerie & restauration", note: "Catégorie 1: 2100€, Cat 2: 2250€, Cat 3: 2450€. Avantages en nature déductibles" },
+  "309": { min: 2150.00, label: "CP 309 — Gardiennage", note: "Agent: 2150€, Chef d'équipe: 2350€, Superviseur: 2600€" },
+  "310": { min: 2800.00, label: "CP 310 — Banques", note: "Barème très élevé. Niveau A: 2800€, Niveau B: 3200€, Niveau C: 3700€, Niveau D: 4300€+" },
+  "313": { min: 2200.00, label: "CP 313 — Pharmacies", note: "Assistant en pharmacie: 2200€. Pharmacien salarié: min 3200€+" },
+  "317": { min: 2100.00, label: "CP 317 — Commerce alimentaire", note: "Catégorie A: 2100€, Cat B: 2220€, Cat C: 2380€" },
+  "318": { min: 2070.48, label: "CP 318 — Coiffure & soins beauté", note: "RMMMG + commissions. Système mixte fixe + % chiffre d'affaires" },
+  "320": { min: 2200.00, label: "CP 320 — Transport routier (emp.)", note: "Dispatcher: 2200€, Gestionnaire transport: 2500€, Responsable: 2900€" },
+  "322": { min: 2600.00, label: "CP 322 — Transport aérien", note: "Personnel sol: 2600€. Technicien: 3000€+. Conventions collectives très favorables" },
+  "324": { min: 2150.00, label: "CP 324 — Agences de voyage", note: "Agent: 2150€, Senior: 2400€, Responsable: 2700€" },
+  "326": { min: 2070.48, label: "CP 326 — Commerce de détail", note: "Catégorie 1: 2070€, Cat 2: 2150€, Cat 3: 2300€, Cat 4: 2500€" },
+  "327": { min: 2070.48, label: "CP 327 — Travail adapté", note: "RMMMG. Subventions spécifiques selon Région pour travailleurs handicapés" },
+  "329": { min: 2150.00, label: "CP 329 — Grandes surfaces alimentaires", note: "Catégorie 1: 2150€, Cat 2: 2300€, Cat 3: 2500€, Cadre: 2900€+" },
+  "330": { min: 2200.00, label: "CP 330 — Soins de santé", note: "Aide-soignant: 2200€, Infirmier A1: 2600€, Infirmier A2: 2900€, Médecin salarié: 4500€+" },
+  "331": { min: 2200.00, label: "CP 331 — Soins santé Flandre", note: "Barème similaire CP 330 + indexations flamandes. Infirmier: 2600€" },
+  "332": { min: 2200.00, label: "CP 332 — Soins santé Wal-Bxl", note: "Barème similaire CP 330 + indexations Wal-Bxl. Infirmier: 2600€" },
+  "333": { min: 2070.48, label: "CP 333 — Commerce détail indépendant", note: "RMMMG. Catégorie 1: 2070€, Cat 2: 2180€, Cat 3: 2320€" },
+  "335": { min: 2070.48, label: "CP 335 — Travail intérimaire", note: "CP utilisatrice applicable. Minimum: RMMMG garanti" },
+  "336": { min: 12.00, label: "CP 336 — Titres-services", note: "Taux horaire: 12,00€/h brut (2026). Temps partiel généralement — calcul mensuel selon heures" },
+  "337": { min: 2100.00, label: "CP 337 — PME (employés)", note: "Catégorie 1: 2100€, Cat 2: 2280€, Cat 3: 2500€" },
+  "338": { min: 2100.00, label: "CP 338 — Nettoyage (emp.)", note: "Catégorie 1: 2100€, Cat 2: 2280€. Souvent temps partiel" },
+  "340": { min: 2200.00, label: "CP 340 — Construction commerce", note: "Similaire CP 200 + indemnités sectorielles bâtiment" },
+
+  // ── OUVRIERS ──
+  "100": { min: 2070.48, label: "CP 100 — Ouvriers (général)", note: "RMMMG. Souvent taux horaire: min 12,13€/h (2026)" },
+  "105": { min: 13.50, label: "CP 105 — Véhicules neufs / Garages", note: "Taux horaire min: 13,50€/h. Mécano qualifié: 15€/h+. Mensuel temps plein: ~2300€" },
+  "106": { min: 13.20, label: "CP 106 — Carburants", note: "Taux horaire: 13,20€/h. Mensuel ~2250€. Primes de nuit/weekend incluses" },
+  "107": { min: 12.50, label: "CP 107 — Hôtellerie (ouv.)", note: "Taux horaire: 12,50€/h + avantages en nature. Mensuel ~2100€" },
+  "108": { min: 12.20, label: "CP 108 — Nettoyage (ouv.)", note: "Taux horaire: 12,20€/h. Souvent temps partiel. Mensuel temps plein ~2080€" },
+  "112": { min: 13.50, label: "CP 112 — Garages", note: "Mécanicien: 13,50€/h. Technicien auto: 15€/h+. Mensuel ~2300-2600€" },
+  "115": { min: 12.13, label: "CP 115 — Confection & textile", note: "Taux horaire min: 12,13€/h. Mensuel ~2070€" },
+  "118": { min: 13.00, label: "CP 118 — Alimentation (ouv.)", note: "Taux horaire: 13,00€/h. Mensuel ~2220€. Primes shift/nuit en sus" },
+  "119": { min: 13.20, label: "CP 119 — Boulangerie", note: "Taux horaire: 13,20€/h. Mensuel ~2250€. Majoration nuit 50%" },
+  "121": { min: 12.13, label: "CP 121 — Nettoyage à sec", note: "Taux horaire min: 12,13€/h. Mensuel ~2070€" },
+  "124": { min: 18.50, label: "CP 124 — Bâtiment & TP", note: "⭐ Un des plus élevés! Ouvrier qualifié: 18,50€/h. Mensuel ~3100€+. + Indemnités déplacement, intempéries" },
+  "125": { min: 14.50, label: "CP 125 — Bois (ouv.)", note: "Taux horaire: 14,50€/h. Charpentier qualifié: 16€/h. Mensuel ~2480€" },
+  "126": { min: 14.00, label: "CP 126 — Ameublement", note: "Taux horaire: 14,00€/h. Ébéniste qualifié: 15,50€/h. Mensuel ~2390€" },
+  "128": { min: 16.50, label: "CP 128 — Métal (ouv.)", note: "Soudeur qualifié: 16,50€/h. Technicien: 18€/h. Mensuel ~2800-3100€" },
+  "130": { min: 15.00, label: "CP 130 — Imprimeries", note: "Taux horaire: 15,00€/h. Prépresse/PAO: 16€/h+. Mensuel ~2560€" },
+  "132": { min: 12.13, label: "CP 132 — Agriculture", note: "Taux horaire min: 12,13€/h. Saisonnier ou annuel. Mensuel ~2070€" },
+  "133": { min: 12.30, label: "CP 133 — Horticulture", note: "Taux horaire: 12,30€/h. Mensuel ~2100€. Nombreux CDD saisonniers" },
+  "136": { min: 15.50, label: "CP 136 — Chimique (ouv.)", note: "Opérateur: 15,50€/h. Technicien process: 18€/h. Mensuel ~2650-3100€" },
+  "140": { min: 14.80, label: "CP 140 — Transport routier (ouv.)", note: "Chauffeur C: 14,80€/h. Chauffeur CE: 15,50€/h. Mensuel ~2530-2650€ + per diem" },
+  "142": { min: 12.30, label: "CP 142 — Jardiniers & paysagistes", note: "Taux horaire: 12,30€/h. Mensuel ~2100€. Souvent saisonnier" },
+  "143": { min: 12.13, label: "CP 143 — Garde d'enfants", note: "Taux horaire min: 12,13€/h. Mensuel ~2070€. Souvent temps partiel" },
+  "144": { min: 12.13, label: "CP 144 — Chèques-repas (ouv.)", note: "Taux horaire: 12,13€/h. Mensuel ~2070€" },
+  "149": { min: 17.00, label: "CP 149 — Électricité (ouv.)", note: "Électricien qualifié: 17,00€/h. Chef d'équipe: 19€/h. Mensuel ~2900-3250€" },
+  "150": { min: 2070.48, label: "CP 150 — Travail adapté (ouv.)", note: "RMMMG. Subventions régionales selon profil travailleur handicapé" },
+
+  // ── SECTEUR PUBLIC ──
+  "319": { min: 2400.00, label: "CP 319 — Éducation", note: "Enseignant primaire: ~2400€. Secondaire: ~2700€. Supérieur: ~3200€+. Barème indice pivot" },
+  "319.01": { min: 2400.00, label: "CP 319.01 — Enseignement libre", note: "Barème similaire au réseau officiel. DIMONA obligatoire. Ancienneté baremique" },
+  "000": { min: 0, label: "Dirigeant — Pas de minimum légal", note: "Pas de RMMMG applicable. Rémunération fixée par l'AG. Attention: minimum pour cotisations sociales INASTI si indépendant" },
+
+  // ── PROFESSIONS LIBÉRALES ──
+  "MEDECIN": { min: 4500.00, label: "Médecin salarié", note: "Min conventionnel ~4500€/m. Spécialiste: 6000€+. Basé sur convention INAMI et CP 330" },
+  "AVOCAT": { min: 2070.48, label: "Avocat salarié (CP 460)", note: "Pas de barème sectoriel fixe. Min RMMMG garanti. En pratique: avocat junior 2500-3000€, senior 4000€+" },
+  "ARCH": { min: 2500.00, label: "Architecte salarié", note: "Bureau d'archi: min ~2500€. Chargé de projet: 3000€+. CP 200 si salarié" },
+  "COMPTA": { min: 2500.00, label: "Expert-comptable salarié", note: "CP 200. Junior: 2500€, Senior: 3500€+. Réviseur: 4000€+" },
+
+  // ── SPÉCIAUX ──
+  "ETU": { min: 12.13, label: "Étudiant jobiste", note: "Minimum horaire: 12,13€/h (RMMMG horaire 2026). Cotisation solidarité 5,42% au lieu de 13,07%" },
+  "FLEXI": { min: 11.54, label: "Flexi-job", note: "Minimum horaire flexi 2026: 11,54€/h. Exonéré PP travailleur. Cotisation patronale spéciale 25%" },
+  "ARTISTE": { min: 12.13, label: "Artiste rémunéré", note: "Min horaire RMMMG. Déduction frais professionnels 50% forfaitaire. Régime fiscal avantageux" },
+  "SPORTIF": { min: 3000.00, label: "Sportif rémunéré", note: "CP 223/226. Min pratique ~3000€ pour sportif professionnel. Régime fiscal spécifique art. 119 CIR" },
+};
+
 var wizStep = 1;
 
 function wizGo(n) {
@@ -3059,6 +3151,52 @@ function wizStatutChange() {
 }
 
 // ── Auto-detect statut depuis CP ──
+function wizGetMinForCP(cp, statut) {
+  if (CP_MIN[cp]) return CP_MIN[cp];
+  if (statut && CP_MIN[statut]) return CP_MIN[statut];
+  return CP_MIN["DEFAULT"];
+}
+
+function wizShowMin() {
+  var cp = document.getElementById('w-cp')?.value || 'DEFAULT';
+  var statut = document.getElementById('w-statut')?.value || '';
+  var info = wizGetMinForCP(cp, statut);
+  var bloc = document.getElementById('w-salaire-min');
+  if (!bloc) return;
+  bloc.style.display = 'block';
+  var isHourly = info.min < 100;
+  var minLabel = isHourly ? info.min.toFixed(2)+'€/heure' : info.min.toFixed(2)+'€/mois brut';
+  document.getElementById('w-salaire-min-label').textContent = '📊 Minimum 2026 — '+info.label+' : '+minLabel;
+  document.getElementById('w-salaire-min-note').textContent = info.note;
+  wizCheckSalaire();
+}
+
+function wizCheckSalaire() {
+  var cp = document.getElementById('w-cp')?.value || 'DEFAULT';
+  var statut = document.getElementById('w-statut')?.value || '';
+  var brut = parseFloat(document.getElementById('w-brut')?.value) || 0;
+  var info = wizGetMinForCP(cp, statut);
+  var alertEl = document.getElementById('w-salaire-min-alert');
+  var bloc = document.getElementById('w-salaire-min');
+  if (!alertEl || !bloc) return;
+  bloc.style.display = 'block';
+  var isHourly = info.min < 100;
+  var minLabel = isHourly ? info.min.toFixed(2)+'€/heure' : info.min.toFixed(2)+'€/mois brut';
+  document.getElementById('w-salaire-min-label').textContent = '📊 Minimum 2026 — '+info.label+' : '+minLabel;
+  document.getElementById('w-salaire-min-note').textContent = info.note;
+  if (brut > 0 && !isHourly) {
+    if (brut < info.min) {
+      alertEl.style.display = 'block';
+      alertEl.innerHTML = '<span style="color:var(--urgent);font-weight:700;">⚠️ SALAIRE INSUFFISANT ! '+brut.toFixed(0)+'€ < minimum légal '+info.min.toFixed(2)+'€ — Risque infraction droit social !</span>';
+    } else {
+      alertEl.style.display = 'block';
+      alertEl.innerHTML = '<span style="color:#4ade80;">✅ Conforme — '+brut.toFixed(0)+'€ ≥ minimum '+(info.min).toFixed(0)+'€ (+'+((brut-info.min)/info.min*100).toFixed(1)+'% au-dessus du min)</span>';
+    }
+  } else {
+    alertEl.style.display = 'none';
+  }
+}
+
 function wizCPChange() {
   var cp = parseInt(document.getElementById('w-cp')?.value) || 0;
   var statutEl = document.getElementById('w-statut');
@@ -3066,6 +3204,7 @@ function wizCPChange() {
   // CP 100-199 = ouvriers, 200+ = employés
   if (cp >= 100 && cp < 200) statutEl.value = 'OUV';
   else if (cp >= 200) statutEl.value = 'EMP';
+  wizShowMin();
 }
 
 // ── Wizard Dossier → Dimona IN ──
