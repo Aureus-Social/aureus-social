@@ -1037,7 +1037,11 @@ body {
         </div>
         <div>
           <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Fonction / Poste *</label>
-          <input id="w-fonction" type="text" placeholder="Développeur, Comptable..." list="w-fonction-list" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+          <input id="w-fonction" type="text" placeholder="Développeur, Comptable..." list="w-fonction-list" oninput="wizShowMinFonction()" onchange="wizShowMinFonction()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+          <div id="w-fonction-min" style="display:none;margin-top:6px;padding:8px 10px;border-radius:6px;background:rgba(201,150,58,.08);border:1px solid rgba(201,150,58,.2);font-size:11px;">
+            <div id="w-fonction-min-label" style="color:var(--gold);font-weight:700;"></div>
+            <div id="w-fonction-min-detail" style="color:var(--muted);margin-top:2px;line-height:1.5;"></div>
+          </div>
           <datalist id="w-fonction-list">
             <optgroup label="Direction">
             <option value="Directeur général (CEO)">
@@ -1164,7 +1168,7 @@ body {
         </div>
         <div>
           <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Salaire brut mensuel (€) *</label>
-          <input id="w-brut" type="number" placeholder="2800" oninput="wizCheckSalaire()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+          <input id="w-brut" type="number" placeholder="2800" oninput="wizCheckSalaire();wizShowMinFonction()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
           <div id="w-salaire-min" style="margin-top:5px;padding:7px 10px;border-radius:6px;background:rgba(201,150,58,.08);border:1px solid rgba(201,150,58,.15);font-size:10px;display:none;">
             <div id="w-salaire-min-label" style="color:var(--gold);font-weight:600;"></div>
             <div id="w-salaire-min-note" style="color:var(--muted);margin-top:2px;line-height:1.4;"></div>
@@ -3067,6 +3071,167 @@ function wizStatutChange() {
 }
 
 // ── Auto-detect statut depuis CP ──
+
+// ══════════════════════════════════════════════════════
+// SALAIRES MINIMUMS PAR FONCTION (marché belge 2026)
+// ══════════════════════════════════════════════════════
+var FONCTION_MIN = {
+  // Direction
+  "directeur général": { min: 6000, max: 15000, note: "CEO PME belge — variable selon CA société" },
+  "directeur financier": { min: 5500, max: 12000, note: "CFO — selon taille entreprise" },
+  "directeur commercial": { min: 4500, max: 10000, note: "Fixe + variable sur CA" },
+  "directeur des opérations": { min: 5000, max: 11000, note: "COO — PME à grande entreprise" },
+  "directeur rh": { min: 4500, max: 9000, note: "Selon taille RH gérée" },
+  "directeur technique": { min: 5000, max: 12000, note: "CTO — secteur tech belge" },
+  "manager": { min: 3500, max: 7000, note: "Middle management — selon secteur" },
+  "chef de projet": { min: 3200, max: 6500, note: "PM certifié (PMP/Prince2) valorisé" },
+  "gérant": { min: 2500, max: 0, note: "Pas de minimum légal — fixé par AG" },
+
+  // Administration
+  "secrétaire": { min: 2100, max: 3200, note: "CP 200 — Barème selon ancienneté" },
+  "secrétaire de direction": { min: 2500, max: 4000, note: "Assistante confirmée avec langues" },
+  "assistant administratif": { min: 2100, max: 3000, note: "CP 200 — niveau débutant" },
+  "office manager": { min: 2800, max: 4500, note: "Bruxelles — bilingue FR/NL valorisé" },
+  "réceptionniste": { min: 2070, max: 2800, note: "Min RMMMG — CP 302 ou 200" },
+  "gestionnaire rh": { min: 2800, max: 4500, note: "HR Generalist — marché belge 2026" },
+  "comptable": { min: 2800, max: 4500, note: "CP 200 — Comptable standalone PME" },
+  "comptable senior": { min: 3500, max: 5500, note: "5+ ans expérience — consolidation" },
+  "contrôleur de gestion": { min: 3500, max: 6000, note: "Reporting, budget, forecast" },
+  "assistant comptable": { min: 2200, max: 3000, note: "Junior — aide à la comptabilité" },
+  "juriste d'entreprise": { min: 3500, max: 6500, note: "Selon spécialité (M&A, social, IP)" },
+  "paralégal": { min: 2500, max: 3800, note: "Support juridique — cabinet ou entreprise" },
+
+  // IT & Tech
+  "développeur web": { min: 3200, max: 5500, note: "Bruxelles 2026 — pénurie de profils" },
+  "développeur frontend": { min: 3200, max: 5500, note: "React/Vue/Angular — marché tendu" },
+  "développeur backend": { min: 3400, max: 6000, note: "Node/Python/Java — profil recherché" },
+  "développeur fullstack": { min: 3500, max: 6500, note: "Profil très demandé en Belgique" },
+  "développeur mobile": { min: 3500, max: 6500, note: "iOS/Android — Flutter valorisé" },
+  "devops": { min: 4000, max: 7500, note: "Cloud AWS/Azure/GCP — très recherché" },
+  "data scientist": { min: 3800, max: 7000, note: "ML/AI — pénurie forte en 2026" },
+  "data analyst": { min: 3000, max: 5000, note: "SQL, Power BI, Python" },
+  "ingénieur logiciel": { min: 3500, max: 7000, note: "Senior Software Engineer" },
+  "architecte solutions": { min: 5000, max: 9000, note: "Cloud architect — très senior" },
+  "consultant it": { min: 3500, max: 7000, note: "Selon spécialité et années d'expérience" },
+  "administrateur système": { min: 3000, max: 5000, note: "Sysadmin Linux/Windows" },
+  "analyste cybersécurité": { min: 4000, max: 7500, note: "Secteur en forte croissance BE" },
+  "ux/ui designer": { min: 3000, max: 5500, note: "Figma, UX research — Bruxelles" },
+  "product manager": { min: 4000, max: 7000, note: "PM tech — expérience agile requise" },
+  "scrum master": { min: 3500, max: 6000, note: "Certification valorisée" },
+  "support technique": { min: 2400, max: 3500, note: "Helpdesk N1/N2 — bilingue+" },
+
+  // Commercial & Marketing
+  "commercial": { min: 2500, max: 5000, note: "Fixe + commissions sur ventes" },
+  "account manager": { min: 3000, max: 6000, note: "B2B — fixe + variable CA géré" },
+  "business developer": { min: 3200, max: 6500, note: "New biz — part variable élevée" },
+  "chargé de marketing": { min: 2800, max: 4500, note: "Marketing opérationnel — digital" },
+  "responsable marketing digital": { min: 3500, max: 6000, note: "SEO/SEA/Social — ROI-driven" },
+  "community manager": { min: 2300, max: 3800, note: "Réseaux sociaux — souvent junior" },
+  "chargé de communication": { min: 2600, max: 4000, note: "Comm interne/externe — Bruxelles" },
+  "traffic manager": { min: 3000, max: 5000, note: "Google Ads, Meta Ads — certifications" },
+
+  // Santé
+  "médecin généraliste": { min: 4500, max: 8000, note: "Salarié CP 330 — INAMI conventionné" },
+  "médecin spécialiste": { min: 6000, max: 15000, note: "Selon spécialité — cardio, onco..." },
+  "infirmier": { min: 2600, max: 3800, note: "CP 330/331/332 — pénurie en Belgique" },
+  "aide-soignant": { min: 2200, max: 3000, note: "CP 330 — barème ancienneté" },
+  "kinésithérapeute": { min: 2800, max: 4500, note: "Salarié ou indépendant complémentaire" },
+  "pharmacien": { min: 3200, max: 5500, note: "CP 313 — officinal ou industrie" },
+  "psychologue": { min: 2800, max: 4500, note: "Clinique ou RH — reconnu INAMI" },
+  "assistant social": { min: 2400, max: 3500, note: "CP 332 — secteur non-marchand" },
+  "aide à domicile": { min: 2070, max: 2800, note: "Titres-services CP 336 — 12€/h min" },
+
+  // Enseignement
+  "instituteur primaire": { min: 2400, max: 3500, note: "CP 319 — barème ancienneté + titre" },
+  "professeur secondaire": { min: 2700, max: 4200, note: "Selon réseau et ancienneté" },
+  "professeur universitaire": { min: 3500, max: 6000, note: "Chargé de cours / Professeur" },
+  "formateur": { min: 2800, max: 5000, note: "Formation continue — selon secteur" },
+
+  // Bâtiment
+  "électricien": { min: 2900, max: 4500, note: "CP 149 — 17€/h qualifié 2026" },
+  "plombier": { min: 2700, max: 4200, note: "CP 124/110 — chauffagiste valorisé" },
+  "menuisier": { min: 2500, max: 3800, note: "CP 125 — bois, menuiserie fine" },
+  "soudeur": { min: 2800, max: 4500, note: "CP 128 — selon certifications TIG/MIG" },
+  "maçon": { min: 2900, max: 4000, note: "CP 124 — bâtiment 18,50€/h min" },
+  "technicien de maintenance": { min: 2800, max: 4500, note: "Multitechnique — électro-mécanique" },
+  "ingénieur civil": { min: 3800, max: 7000, note: "BE diplôme ingénieur — rare" },
+  "architecte": { min: 3000, max: 6000, note: "Salarié bureau — souvent indépendant" },
+  "conducteur de travaux": { min: 3200, max: 5500, note: "CP 124 — expérience chantier" },
+
+  // Transport
+  "chauffeur poids lourds": { min: 2530, max: 3500, note: "CP 140 CE — 15,50€/h + per diem" },
+  "chauffeur livreur": { min: 2200, max: 3000, note: "CP 140 C — 14,80€/h" },
+  "magasinier": { min: 2150, max: 2900, note: "CP 140 — préparateur de commandes" },
+  "cariste": { min: 2200, max: 3000, note: "CACES obligatoire — logistique" },
+  "dispatcher logistique": { min: 2500, max: 3800, note: "Planification transport — bilingue" },
+
+  // Restauration
+  "cuisinier": { min: 2200, max: 3500, note: "CP 302 — selon établissement" },
+  "chef de cuisine": { min: 3000, max: 6000, note: "CP 302 — étoilé = premium" },
+  "serveur": { min: 2100, max: 2800, note: "CP 302 + pourboires" },
+  "barman": { min: 2100, max: 3200, note: "CP 302 — cocktail bar valorisé" },
+
+  // Commerce
+  "vendeur": { min: 2070, max: 3200, note: "CP 201/326 — selon secteur" },
+  "caissier": { min: 2070, max: 2600, note: "RMMMG — CP 201/329" },
+  "chef de rayon": { min: 2400, max: 3500, note: "CP 201/329 — responsabilité stock" },
+  "responsable de magasin": { min: 2800, max: 5000, note: "Selon enseigne et CA magasin" },
+
+  // Finance
+  "conseiller financier": { min: 3000, max: 6000, note: "CP 310 ou assurances — variable" },
+  "analyste financier": { min: 3500, max: 6500, note: "CFA valorisé — banque/corporate" },
+  "courtier en assurances": { min: 2800, max: 5000, note: "Fixe + commissions portefeuille" },
+  "actuaire": { min: 4500, max: 8000, note: "Profil rare — assurance/retraite" },
+
+  // Professions libérales
+  "avocat": { min: 2500, max: 8000, note: "CP 460 — junior 2500€, senior 5000€+" },
+  "notaire": { min: 3500, max: 7000, note: "Collaborateur notarial — Belgique" },
+  "expert-comptable": { min: 3500, max: 7000, note: "IEC — cabinet ou entreprise" },
+  "réviseur d'entreprises": { min: 4000, max: 9000, note: "IRE — audit légal" },
+  "consultant indépendant": { min: 3500, max: 8000, note: "Tarif jour 500-1200€/j selon domaine" },
+};
+
+function wizShowMinFonction() {
+  var val = (document.getElementById('w-fonction')?.value || '').toLowerCase().trim();
+  var bloc = document.getElementById('w-fonction-min');
+  var label = document.getElementById('w-fonction-min-label');
+  var detail = document.getElementById('w-fonction-min-detail');
+  if (!bloc || !val || val.length < 3) { if(bloc) bloc.style.display='none'; return; }
+
+  // Cherche correspondance partielle
+  var found = null;
+  var bestKey = '';
+  for (var key in FONCTION_MIN) {
+    if (val.includes(key) || key.includes(val)) {
+      if (!found || key.length > bestKey.length) { found = FONCTION_MIN[key]; bestKey = key; }
+    }
+  }
+
+  if (!found) { bloc.style.display='none'; return; }
+
+  bloc.style.display = 'block';
+  var brut = parseFloat(document.getElementById('w-brut')?.value) || 0;
+
+  if (found.max > 0) {
+    label.innerHTML = '💼 Marché belge 2026 — <strong style="color:var(--gold);">' + found.min.toLocaleString('fr-BE') + ' € – ' + found.max.toLocaleString('fr-BE') + ' €/mois brut</strong>';
+  } else {
+    label.innerHTML = '💼 Marché belge 2026 — <strong style="color:var(--gold);">~' + found.min.toLocaleString('fr-BE') + ' €/mois brut (min)</strong>';
+  }
+  detail.textContent = found.note;
+
+  // Vérifier si le salaire saisi est dans la fourchette
+  if (brut > 0) {
+    var alertDiv = document.getElementById('w-fonction-min');
+    if (brut < found.min) {
+      detail.innerHTML = found.note + '<br><span style="color:#f59e0b;font-weight:600;">⚠️ Salaire saisi (' + brut.toLocaleString('fr-BE') + '€) en dessous du marché — risque de perdre le candidat</span>';
+    } else if (found.max > 0 && brut > found.max) {
+      detail.innerHTML = found.note + '<br><span style="color:#60a5fa;">ℹ️ Salaire saisi au-dessus du marché — positionnement premium</span>';
+    } else {
+      detail.innerHTML = found.note + '<br><span style="color:#4ade80;">✅ Salaire dans la fourchette marché</span>';
+    }
+  }
+}
+
 function wizGetMinForCP(cp, statut) {
   if (CP_MIN[cp]) return CP_MIN[cp];
   if (statut && CP_MIN[statut]) return CP_MIN[statut];
