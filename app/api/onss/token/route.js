@@ -2,7 +2,7 @@ import { SignJWT, importPKCS8 } from 'jose';
 export const dynamic = 'force-dynamic';
 
 const CLIENT_ID = 'self_service_chaman_305534_fnlh9vng4v';
-const TOKEN_URL = 'https://services.socialsecurity.be/REST/oauth/v3/token';
+const TOKEN_URL = 'https://services.socialsecurity.be/REST/oauth/v5/token';
 
 function getPrivateKey() {
   const raw = process.env.ONSS_PRIVATE_KEY || '';
@@ -16,7 +16,7 @@ export async function POST() {
   try {
     const pemKey = getPrivateKey();
     if (!pemKey || !pemKey.includes('BEGIN')) {
-      return Response.json({ error: 'ONSS_PRIVATE_KEY invalide ou absente', raw_length: (process.env.ONSS_PRIVATE_KEY||'').length }, { status: 500 });
+      return Response.json({ error: 'ONSS_PRIVATE_KEY invalide', raw_length: (process.env.ONSS_PRIVATE_KEY||'').length }, { status: 500 });
     }
     const privateKey = await importPKCS8(pemKey, 'RS256');
     const now = Math.floor(Date.now() / 1000);
