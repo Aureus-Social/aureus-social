@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { challengeMFA, listMFAFactors } from '../lib/security/mfa';
 
 const TESTIMONIALS_ALL = [
   {name:"Thomas V.",role:"Gérant — agence web, Bruxelles",text:"J'avais peur de la paperasse ONSS. En 2 jours, Aureus m'a guidé de l'immatriculation jusqu'à la première fiche de paie. Zéro stress.",stars:5,lang:"fr"},
@@ -164,6 +165,9 @@ export default function LoginPage({ onLogin }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState('password');
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [mfaCode, setMfaCode] = useState('');
+  const [pendingUser, setPendingUser] = useState(null);
   const [dark, setDark] = useState(true);
   const [lang, setLang] = useState('fr');
   const [slide, setSlide] = useState(0);
@@ -190,6 +194,16 @@ export default function LoginPage({ onLogin }) {
     try { localStorage.setItem('aureus_lang', l); } catch(e) {}
   };
 
+  const handleMfaVerify = async () => {
+    if (!mfaCode || mfaCode.length !== 6) { setError('Code MFA requis (6 chiffres)'); return; }
+    setLoading(true); setError('');
+    try {
+      await challengeMFA(supabase, mfaCode);
+      onLogin(pendingUser);
+    } catch (err) { setError(err.message || 'Code MFA invalide'); }
+    setLoading(false);
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault(); setError(''); setLoading(true);
     if (!supabase) { onLogin({ email: email || 'demo@aureus-ia.com', role: 'admin' }); setLoading(false); return; }
@@ -201,7 +215,16 @@ export default function LoginPage({ onLogin }) {
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        if (data?.user) onLogin(data.user);
+        if (data?.user) {
+          // Vérifier si MFA est configuré pour cet utilisateur
+          const factors = await listMFAFactors(supabase);
+          if (factors && factors.length > 0) {
+            setPendingUser(data.user);
+            setMfaRequired(true);
+          } else {
+            onLogin(data.user);
+          }
+        }
       }
     } catch (err) { setError(err.message || 'Erreur de connexion'); }
     setLoading(false);
@@ -220,6 +243,37 @@ export default function LoginPage({ onLogin }) {
   const border  = dark ? 'rgba(198,163,78,.15)' : 'rgba(14,13,10,.15)';
   const inputBg = dark ? 'rgba(0,0,0,.35)' : '#ffffff';
   const cardBg  = dark ? 'rgba(255,255,255,.03)' : 'rgba(0,0,0,.04)';
+
+  // ── Écran MFA si 2FA configuré ──
+  if (mfaRequired) {
+    return (
+      <div style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',background:'#0c0b09',fontFamily:"'Inter',system-ui,sans-serif"}}>
+        <div style={{width:360,padding:32,background:'rgba(255,255,255,.03)',border:'1px solid rgba(198,163,78,.15)',borderRadius:16}}>
+          <div style={{textAlign:'center',marginBottom:24}}>
+            <div style={{fontSize:36,marginBottom:8}}>🔐</div>
+            <div style={{fontSize:18,fontWeight:700,color:'#e8e6e0'}}>Vérification 2FA</div>
+            <div style={{fontSize:11,color:'#5e5c56',marginTop:4}}>Code TOTP depuis votre application (Google Authenticator, Authy)</div>
+          </div>
+          <input
+            type="text" maxLength={6} value={mfaCode}
+            onChange={e => setMfaCode(e.target.value.replace(/\D/g,''))}
+            placeholder="000000"
+            onKeyDown={e => e.key === 'Enter' && handleMfaVerify()}
+            style={{width:'100%',padding:'12px 16px',background:'rgba(0,0,0,.35)',border:'1px solid rgba(198,163,78,.2)',borderRadius:8,color:'#e8e6e0',fontSize:22,fontFamily:'monospace',letterSpacing:8,textAlign:'center',boxSizing:'border-box',marginBottom:12}}
+          />
+          {error && <div style={{color:'#ef4444',fontSize:11,marginBottom:8,textAlign:'center'}}>{error}</div>}
+          <button onClick={handleMfaVerify} disabled={loading || mfaCode.length !== 6}
+            style={{width:'100%',padding:'12px',borderRadius:8,border:'none',background:'rgba(198,163,78,.15)',color:'#c6a34e',fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>
+            {loading ? '⏳ Vérification…' : '✓ Valider'}
+          </button>
+          <button onClick={() => { setMfaRequired(false); setPendingUser(null); setMfaCode(''); }}
+            style={{width:'100%',padding:'8px',borderRadius:8,border:'none',background:'transparent',color:'#5e5c56',fontSize:11,cursor:'pointer',fontFamily:'inherit',marginTop:8}}>
+            ← Retour à la connexion
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display:'flex', minHeight:'100vh', background:bg, fontFamily:"'Inter',system-ui,sans-serif", position:'relative' }}>

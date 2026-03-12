@@ -51,11 +51,40 @@ export function middleware(request) {
     }
   }
 
+  // ═══ JWT PRESENCE CHECK — routes protégées (vérification complète dans getAuthUser) ═══
+  // Middleware vérifie la présence du token — la validation cryptographique se fait dans getAuthUser()
+  const PROTECTED_API = [
+    '/api/employees', '/api/payroll', '/api/declarations', '/api/export',
+    '/api/restore', '/api/rgpd', '/api/documents', '/api/onss',
+    '/api/sepa', '/api/stats', '/api/permissions', '/api/backup',
+    '/api/monitoring', '/api/anomaly', '/api/audit',
+  ];
+  const isProtectedApi = PROTECTED_API.some(p => pathname.startsWith(p));
+  if (isProtectedApi && request.method !== 'OPTIONS') {
+    const authHeader = request.headers.get('authorization') || '';
+    if (!authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Non autorisé — JWT manquant', code: 'NO_JWT' }, { status: 401 });
+    }
+    // Vérification longueur minimale token JWT (header.payload.signature = 3 parties)
+    const parts = authHeader.slice(7).split('.');
+    if (parts.length !== 3 || parts.some(p => p.length < 4)) {
+      return NextResponse.json({ error: 'Token JWT malformé', code: 'INVALID_JWT' }, { status: 401 });
+    }
+  }
+
   // ═══ RATE LIMITING RENFORCÉ — endpoints sensibles ═══
   const AUTH_RATE_LIMIT = 10; // 10 req/min pour login/reset (anti brute-force)
   if (pathname === '/api/auth' || pathname.startsWith('/api/auth/')) {
     if (!checkRateLimit('auth:' + ip, AUTH_RATE_LIMIT)) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: { 'Retry-After': '120' } });
+    }
+  }
+
+  // Rate limit strict sur endpoints critiques (5 req/min)
+  const STRICT_RATE_PATHS = ['/api/restore', '/api/backup', '/api/sepa', '/api/onss'];
+  if (STRICT_RATE_PATHS.some(p => pathname.startsWith(p))) {
+    if (!checkRateLimit('strict:' + ip, 5)) {
+      return NextResponse.json({ error: 'Too many requests', code: 'RATE_LIMIT' }, { status: 429, headers: { 'Retry-After': '60' } });
     }
   }
 

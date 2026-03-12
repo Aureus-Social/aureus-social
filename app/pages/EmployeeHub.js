@@ -201,7 +201,7 @@ td{padding:4px;border:1px solid #ddd;font-size:8.5px}
       html+=`<tr>
         <td style="text-align:center;font-weight:bold">${String(i+1).padStart(3,'0')}</td>
         <td style="font-weight:bold">${e.last||e.ln||'—'}</td><td>${e.first||e.fn||'—'}</td>
-        <td style="font-family:monospace">${e.niss||e.NISS||'—'}</td>
+        <td style="font-family:monospace">${e.niss||e.NISS ? (e.niss||e.NISS).slice(0,6)+'*****' : '—'}</td>
         <td style="text-align:center">${e.sexe||e.gender||'—'}</td>
         <td>${e.nationality||'Belge'}</td><td>${e.birthDate||'—'}</td>
         <td style="font-size:7.5px">${e.address||'—'}</td>
@@ -247,7 +247,7 @@ td{padding:4px;border:1px solid #ddd;font-size:8.5px}
           <span style={{color:'#888',fontWeight:600}}>{String(i+1).padStart(3,'0')}</span>
           <span style={{color:'#e8e6e0',fontWeight:600}}>{e.last||e.ln||'—'}</span>
           <span style={{color:'#e8e6e0'}}>{e.first||e.fn||'—'}</span>
-          <span style={{fontFamily:'monospace',fontSize:10,color:e.niss||e.NISS?'#e8e6e0':'#ef4444'}}>{e.niss||e.NISS||'⚠️ MANQUANT'}</span>
+          <span style={{fontFamily:'monospace',fontSize:10,color:e.niss||e.NISS?'#e8e6e0':'#ef4444'}}>{e.niss||e.NISS ? (e.niss||e.NISS).slice(0,6)+'*****' : '⚠️ MANQUANT'}</span>
           <Badge text={e.contractType||tText('CDI')} color={(e.contractType||tText('CDI'))===tText('CDI')?'#4ade80':'#eab308'}/>
           <span style={{fontSize:10,color:'#888'}}>{e.startDate||e.start||'—'}</span>
           <span style={{fontSize:10,color:'#888'}}>{e.function||e.titre||'—'}</span>
@@ -319,7 +319,7 @@ export function PortailEmployeV2({s,d}){
       <button key={t.v} onClick={()=>setTab(t.v)} style={{padding:'8px 14px',borderRadius:8,border:'none',cursor:'pointer',fontSize:11,fontWeight:tab===t.v?600:400,fontFamily:'inherit',background:tab===t.v?'rgba(198,163,78,.15)':'rgba(255,255,255,.03)',color:tab===t.v?'#c6a34e':'#9e9b93'}}>{t.l}</button>)}</div>
 
     {tab==='accueil'&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
-      <C title="Informations personnelles"><Row l="Nom" v={name}/><Row l="NISS" v={emp.niss||'—'}/><Row l="Email" v={emp.email||'—'}/><Row l="Adresse" v={emp.address||'—'}/><Row l="IBAN" v={emp.iban||'—'}/></C>
+      <C title="Informations personnelles"><Row l="Nom" v={name}/><Row l="NISS" v={emp.niss ? emp.niss.replace(/[\d]/g,(c,i)=>i<6?c:'*') : '—'}/><Row l="Email" v={emp.email||'—'}/><Row l="Adresse" v={emp.address||'—'}/><Row l="IBAN" v={emp.iban ? emp.iban.replace(/\s/g,'').slice(0,4)+' **** **** '+emp.iban.replace(/\s/g,'').slice(-4) : '—'}/></C>
       <C title="Contrat"><Row l="Type" v={emp.contractType||tText('CDI')}/><Row l="Debut" v={emp.startDate||emp.start||'—'}/><Row l="Regime" v={(emp.regime||100)+'%'}/><Row l="Fonction" v={emp.function||'—'}/><Row l="Brut mensuel" v={fmt(brut)+' €'}/></C>
     </div>}
 
