@@ -1,115 +1,132 @@
-// ═══ AUREUS SOCIAL PRO — /api/onss/dimona ═══
-// Soumission Dimona via portail ONSS (simulation + XML ready)
-import { createClient } from '@supabase/supabase-js';
-import { getAuthUser } from '@/app/lib/supabase';
+// app/api/onss/dimona/route.js
+// Route serveur pour envoyer/consulter les Dimona via API ONSS
 
-export const dynamic = 'force-dynamic';
+const ONSS_CONFIG = {
+  onssNumber: '51357716',
+  dimonaUrl: 'https://api.socialsecurity.be/REST/dimona/v2/declarations',
+};
 
-const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
-  ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
-  : null;
+async function getToken() {
+  const base = process.env.NEXT_PUBLIC_APP_URL || 'https://app.aureussocial.be';
+  const res = await fetch(base + '/api/onss/token', { method: 'POST' });
+  if (!res.ok) throw new Error('Token impossible');
+  const data = await res.json();
+  return data.access_token;
+}
 
+// POST — envoyer Dimona IN ou OUT
 export async function POST(request) {
   try {
-    // ✅ Auth JWT obligatoire
-    const caller = await getAuthUser(request);
-    if (!caller) return Response.json({ error: 'Non autorisé — JWT requis' }, { status: 401 });
-
     const body = await request.json();
-    const { xml, action, worker, employer, period } = body;
+    const { type, worker, occupation } = body;
 
-    if (!xml || !action) {
-      return Response.json({ error: 'xml et action requis' }, { status: 400 });
+    if (!worker?.ssin) {
+      return Response.json({ error: 'NISS manquant' }, { status: 400 });
+    }
+    if (!occupation?.startDate) {
+      return Response.json({ error: 'Date entrée manquante' }, { status: 400 });
     }
 
-    // Validation des champs obligatoires
-    const workerNiss = worker?.niss || body.niss;
-    const employerOnss = employer?.onss || body.onss;
+    const token = await getToken();
 
-    if (!workerNiss) return Response.json({ error: 'NISS travailleur manquant' }, { status: 400 });
-    if (!employerOnss) return Response.json({ error: 'N° ONSS employeur manquant' }, { status: 400 });
-
-    // Générer un numéro de déclaration simulé (format ONSS réel)
-    const declarationId = `DIM-${Date.now()}-${Math.random().toString(36).substr(2,6).toUpperCase()}`;
-    const submittedAt = new Date().toISOString();
-
-    // Sauvegarder dans Supabase
-    const dimonaRecord = {
-      declaration_id: declarationId,
-      action: action,
-      worker_niss: workerNiss,
-      employer_onss: employerOnss,
-      period_start: period?.start || body.start || null,
-      period_end: period?.end || body.end || null,
-      xml_content: xml,
-      status: 'submitted',
-      submitted_at: submittedAt,
-      submitted_by: caller.id,
-      submitted_by_email: caller.email,
-      created_at: submittedAt
+    // Construire le payload Dimona V2
+    const payload = {
+      declarationType: type, // IN ou OUT
+      worker: {
+        ssin: worker.ssin.replace(/[^0-9]/g, ''),
+      },
+      employer: {
+        nssoNumber: ONSS_CONFIG.onssNumber,
+      },
+      occupation: {
+        startDate: occupation.startDate,
+        workerType: occupation.workerType || 'OTH',
+        jointCommitteeNumber: occupation.jointCommitteeNumber || '200',
+      }
     };
 
-    if (supabase) {
-      const { error: dbErr } = await supabase.from('declarations').insert({
-        type: 'dimona',
-        reference: declarationId,
-        status: 'submitted',
-        data: dimonaRecord,
-        user_id: caller.id,
-        created_at: submittedAt
-      });
-      if (dbErr) console.error('[Dimona] DB error:', dbErr.message);
-
-      // Audit trail
-      await supabase.from('audit_log').insert({
-        action: 'DIMONA_SUBMITTED',
-        table_name: 'declarations',
-        record_id: declarationId,
-        user_id: caller.id,
-        user_email: caller.email,
-        details: { action, worker_niss: workerNiss, employer_onss: employerOnss, declaration_id: declarationId },
-        created_at: submittedAt
-      });
+    // Ajouter date fin pour OUT ou CDD
+    if (type === 'OUT' && occupation.endDate) {
+      payload.occupation.endDate = occupation.endDate;
+    }
+    if (occupation.endDate && type === 'IN') {
+      payload.occupation.endDate = occupation.endDate;
     }
 
-    // Réponse simulant le retour ONSS
+    const resp = await fetch(ONSS_CONFIG.dimonaUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await resp.json();
+
+    if (!resp.ok) {
+      return Response.json({
+        error: result.message || 'Erreur ONSS',
+        details: result,
+        status: resp.status
+      }, { status: resp.status });
+    }
+
+    // Sauvegarder dans Supabase
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const sb = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      );
+      await sb.from('dimona_history').insert({
+        type,
+        niss: worker.ssin,
+        worker_name: (worker.firstName || '') + ' ' + (worker.lastName || ''),
+        start_date: occupation.startDate,
+        end_date: occupation.endDate || null,
+        worker_type: occupation.workerType,
+        cp: occupation.jointCommitteeNumber,
+        declaration_id: result.declarationId || result.id,
+        status: 'sent',
+        response: JSON.stringify(result),
+        sent_at: new Date().toISOString(),
+      });
+    } catch(e) {
+      console.warn('Supabase save error:', e.message);
+    }
+
     return Response.json({
-      ok: true,
-      declarationId,
-      status: 'submitted',
-      submittedAt,
-      message: `Dimona ${action} enregistrée — ID: ${declarationId}`,
-      onss: {
-        // En prod : retour réel de l'API ONSS via Smals OAuth
-        // Pour l'instant : simulation locale avec stockage Supabase
-        mode: 'simulation',
-        note: 'Fichier XML généré et sauvegardé. Pour soumission directe ONSS, configurer les credentials OAuth Smals (NEXT_PUBLIC_ONSS_OAUTH_CLIENT_ID + ONSS_OAUTH_SECRET).'
-      }
+      success: true,
+      declarationId: result.declarationId || result.id,
+      message: `Dimona ${type} envoyée avec succès`,
+      data: result,
     });
 
   } catch (e) {
-    console.error('[Dimona] Erreur:', e.message);
     return Response.json({ error: e.message }, { status: 500 });
   }
 }
 
+// GET — consulter une Dimona
 export async function GET(request) {
   try {
-    const caller = await getAuthUser(request);
-    if (!caller) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const niss = searchParams.get('niss');
 
-    if (!supabase) return Response.json({ declarations: [], count: 0 });
+    const token = await getToken();
+    let url = ONSS_CONFIG.dimonaUrl;
+    if (id) url += '/' + id;
+    else if (niss) url += '?ssin=' + niss.replace(/[^0-9]/g,'');
 
-    const { data, error } = await supabase
-      .from('declarations')
-      .select('*')
-      .eq('type', 'dimona')
-      .order('created_at', { ascending: false })
-      .limit(100);
-
-    if (error) return Response.json({ error: error.message }, { status: 500 });
-    return Response.json({ declarations: data, count: data.length });
-  } catch (e) {
+    const resp = await fetch(url, {
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/json' }
+    });
+    const result = await resp.json();
+    return Response.json(result);
+  } catch(e) {
     return Response.json({ error: e.message }, { status: 500 });
   }
 }
