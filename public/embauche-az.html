@@ -3232,6 +3232,147 @@ function wizShowMinFonction() {
   }
 }
 
+// ══════════════════════════════════════════════════════
+// SALAIRES MINIMUMS PAR FONCTION (marché belge 2026)
+// ══════════════════════════════════════════════════════
+var FONCTION_SAL = {
+  // Direction
+  "Directeur général (CEO)":          { min: 5000,  max: 12000, note: "Très variable selon taille entreprise" },
+  "Directeur financier (CFO)":        { min: 4500,  max: 9000,  note: "Séniorité + secteur déterminants" },
+  "Directeur commercial":             { min: 4000,  max: 8000,  note: "Souvent + commissions variables" },
+  "Directeur des opérations (COO)":   { min: 4500,  max: 9000,  note: "" },
+  "Directeur RH":                     { min: 4000,  max: 7500,  note: "" },
+  "Directeur technique (CTO)":        { min: 5000,  max: 10000, note: "Tech sector — très demandé" },
+  "Manager / Responsable d'équipe":   { min: 3200,  max: 6000,  note: "Selon taille équipe et secteur" },
+  "Chef de projet":                   { min: 3000,  max: 5500,  note: "CP 200 — niveau 3-4" },
+  "Gérant":                           { min: 2500,  max: 8000,  note: "Rémunération AG — pas de minimum légal" },
+  // Administration
+  "Secrétaire":                       { min: 2070,  max: 2800,  note: "CP 200 niveau 1-2" },
+  "Secrétaire de direction":          { min: 2400,  max: 3500,  note: "CP 200 niveau 2-3" },
+  "Assistant(e) administratif(ve)":   { min: 2070,  max: 2900,  note: "CP 200 niveau 1-2" },
+  "Office manager":                   { min: 2500,  max: 3800,  note: "CP 200 niveau 2-3" },
+  "Réceptionniste":                   { min: 2070,  max: 2600,  note: "CP 200 / CP 302 selon secteur" },
+  "Gestionnaire RH":                  { min: 2800,  max: 4200,  note: "CP 200 niveau 3" },
+  "Comptable":                        { min: 2800,  max: 4000,  note: "CP 200 niveau 2-3" },
+  "Comptable senior":                 { min: 3500,  max: 5500,  note: "CP 200 niveau 3-4" },
+  "Contrôleur de gestion":            { min: 3500,  max: 6000,  note: "CP 200 niveau 4" },
+  "Assistant(e) comptable":           { min: 2200,  max: 3000,  note: "CP 200 niveau 1-2" },
+  "Juriste d'entreprise":             { min: 3500,  max: 6500,  note: "CP 200 niveau 3-5" },
+  "Paralégal":                        { min: 2500,  max: 3800,  note: "CP 200 niveau 2" },
+  // IT & Tech
+  "Développeur web":                  { min: 2900,  max: 5000,  note: "Junior 2.900€ — Senior 5.000€+" },
+  "Développeur frontend":             { min: 2900,  max: 5000,  note: "React/Vue très demandés" },
+  "Développeur backend":              { min: 3000,  max: 5500,  note: "Node/Java/Python" },
+  "Développeur fullstack":            { min: 3200,  max: 5500,  note: "Profil le plus recherché" },
+  "Développeur mobile (iOS/Android)": { min: 3200,  max: 5800,  note: "Swift/Kotlin/Flutter" },
+  "DevOps / SRE":                     { min: 3500,  max: 6500,  note: "AWS/GCP/Kubernetes très valorisés" },
+  "Data scientist":                   { min: 3500,  max: 6500,  note: "Python + ML — forte demande" },
+  "Data analyst":                     { min: 2900,  max: 5000,  note: "SQL + BI tools" },
+  "Ingénieur logiciel":               { min: 3200,  max: 6000,  note: "CP 200 niveau 3-4" },
+  "Architecte solutions":             { min: 5000,  max: 8500,  note: "Senior — 8-15 ans expérience" },
+  "Consultant IT":                    { min: 3500,  max: 7000,  note: "Taux jour: 600-900€/j en freelance" },
+  "Administrateur système / réseau":  { min: 2800,  max: 4500,  note: "Selon certifications (Azure, AWS)" },
+  "Analyste cybersécurité":           { min: 3500,  max: 6500,  note: "CISSP/CEH très valorisés" },
+  "UX/UI Designer":                   { min: 2800,  max: 5000,  note: "Portfolio déterminant" },
+  "Product manager":                  { min: 3500,  max: 6500,  note: "Expérience Agile/Scrum requise" },
+  "Scrum master":                     { min: 3200,  max: 5500,  note: "Certification PSM/CSM appréciée" },
+  "Support technique / Helpdesk":     { min: 2200,  max: 3200,  note: "CP 200 niveau 1-2" },
+  // Commercial
+  "Commercial / Représentant":        { min: 2400,  max: 4500,  note: "Fixe + commissions — variable important" },
+  "Account manager":                  { min: 3000,  max: 5500,  note: "Fixe + variable selon CA" },
+  "Business developer":               { min: 3000,  max: 5500,  note: "Souvent fixe + bonus acquisition" },
+  "Chargé(e) de marketing":           { min: 2500,  max: 4000,  note: "CP 200 niveau 2-3" },
+  "Responsable marketing digital":    { min: 3200,  max: 5500,  note: "SEO/SEA/CRM — forte demande" },
+  "Community manager":                { min: 2200,  max: 3500,  note: "CP 200 niveau 1-2" },
+  "Chargé(e) de communication":       { min: 2400,  max: 3800,  note: "CP 200 niveau 2" },
+  "Attaché(e) de presse":             { min: 2500,  max: 4000,  note: "CP 200 niveau 2-3" },
+  "Responsable e-commerce":           { min: 3000,  max: 5000,  note: "Analytics + CRO valorisés" },
+  "Traffic manager":                  { min: 2800,  max: 4500,  note: "Google Ads / Meta Ads" },
+  // Santé
+  "Médecin généraliste":              { min: 4500,  max: 8000,  note: "CP 330 — convention INAMI" },
+  "Médecin spécialiste":              { min: 6000,  max: 15000, note: "Selon spécialité et convention" },
+  "Infirmier(ère)":                   { min: 2600,  max: 3800,  note: "CP 330/331/332 — bachelier A1" },
+  "Aide-soignant(e)":                 { min: 2200,  max: 2800,  note: "CP 330 — certificat qualifiant" },
+  "Kinésithérapeute":                 { min: 2800,  max: 4500,  note: "CP 330 ou indépendant" },
+  "Pharmacien(ne)":                   { min: 3200,  max: 5500,  note: "CP 313 — diplôme master requis" },
+  "Psychologue":                      { min: 2800,  max: 4500,  note: "CP 330 — visa INAMI recommandé" },
+  "Assistant(e) social(e)":           { min: 2400,  max: 3500,  note: "CP 319/330 selon secteur" },
+  "Éducateur(trice) spécialisé(e)":   { min: 2300,  max: 3200,  note: "CP 319 — bachelier requis" },
+  "Aide à domicile":                  { min: 2100,  max: 2600,  note: "CP 336 titres-services ou CP 318" },
+  // Enseignement
+  "Instituteur(trice) primaire":      { min: 2400,  max: 3500,  note: "CP 319 — barème ancienneté" },
+  "Professeur secondaire":            { min: 2700,  max: 4200,  note: "CP 319 — selon agrégation" },
+  "Professeur universitaire":         { min: 3500,  max: 7000,  note: "Barème académique UCLouvain/ULB/KUL" },
+  "Formateur(trice)":                 { min: 2500,  max: 4000,  note: "Selon secteur et séniorité" },
+  "Chargé(e) de cours":               { min: 2800,  max: 4500,  note: "Selon institution" },
+  // Bâtiment
+  "Électricien(ne)":                  { min: 2800,  max: 4200,  note: "CP 149 — qualification AREI appréciée" },
+  "Plombier":                         { min: 2700,  max: 4000,  note: "CP 124 — fort déficit en Belgique" },
+  "Menuisier(ère)":                   { min: 2500,  max: 3800,  note: "CP 125 — qualifié valorisé" },
+  "Soudeur(euse)":                    { min: 2600,  max: 4000,  note: "CP 128 — certifications EN/ISO valorisées" },
+  "Maçon":                            { min: 2600,  max: 3800,  note: "CP 124 — barème ouvrier qualifié" },
+  "Technicien de maintenance":        { min: 2700,  max: 4200,  note: "Industrie — CP 128 ou 209" },
+  "Ingénieur civil":                  { min: 3500,  max: 6500,  note: "CP 200/209 — master ingénieur" },
+  "Architecte":                       { min: 2500,  max: 5500,  note: "CP 200 ou indépendant INASTI" },
+  "Conducteur de travaux":            { min: 3200,  max: 5500,  note: "CP 124/209 — expérience terrain" },
+  // Transport
+  "Chauffeur poids lourds (CE)":      { min: 2500,  max: 3500,  note: "CP 140 — permis CE + carte conducteur" },
+  "Chauffeur livreur":                { min: 2200,  max: 2900,  note: "CP 140 — permis B/C" },
+  "Magasinier / Préparateur de commandes": { min: 2100, max: 2800, note: "CP 226/140 selon secteur" },
+  "Cariste":                          { min: 2200,  max: 3000,  note: "Certificat cariste requis" },
+  "Dispatcher logistique":            { min: 2500,  max: 3800,  note: "CP 140/200 selon statut" },
+  "Responsable entrepôt":             { min: 3000,  max: 4800,  note: "CP 140/200 — gestion équipe" },
+  // Restauration
+  "Cuisinier(ère)":                   { min: 2200,  max: 3500,  note: "CP 302 — selon établissement" },
+  "Chef de cuisine":                  { min: 3000,  max: 6000,  note: "CP 302 — selon étoiles / prestige" },
+  "Serveur(euse)":                    { min: 2100,  max: 2800,  note: "CP 302 — pourboires en sus" },
+  "Barman / Barmaid":                 { min: 2100,  max: 2900,  note: "CP 302 — cocktails valorisés" },
+  "Réceptionniste hôtel":             { min: 2200,  max: 3200,  note: "CP 302 — langues valorisées" },
+  "Femme / Valet de chambre":         { min: 2100,  max: 2500,  note: "CP 302 — souvent temps partiel" },
+  // Commerce
+  "Vendeur(euse)":                    { min: 2070,  max: 2800,  note: "CP 201/202/326 + commissions" },
+  "Caissier(ère)":                    { min: 2070,  max: 2500,  note: "CP 201/329 — souvent temps partiel" },
+  "Chef de rayon":                    { min: 2500,  max: 3800,  note: "CP 201/329 — responsabilité stock" },
+  "Responsable de magasin":           { min: 3000,  max: 5000,  note: "CP 201/326 selon enseigne" },
+  // Finance
+  "Conseiller(ère) financier(ère)":   { min: 2800,  max: 5000,  note: "CP 310 banques ou CP 223 assurances" },
+  "Analyste financier":               { min: 3500,  max: 6500,  note: "CFA valorisé — secteur banque/PE" },
+  "Gestionnaire de portefeuille":     { min: 4000,  max: 8000,  note: "FSMA requis — Luxembourg très actif" },
+  "Courtier en assurances":           { min: 2800,  max: 5000,  note: "CP 223 + agrément FSMA obligatoire" },
+  "Conseiller(ère) en assurances":    { min: 2500,  max: 4000,  note: "CP 223 — formation LAB obligatoire" },
+  "Actuaire":                         { min: 4500,  max: 8000,  note: "IA Belgium — très rare = très bien payé" },
+  // Professions libérales
+  "Avocat(e)":                        { min: 2500,  max: 6000,  note: "CP 460 — junior barreau: 2.500€, associé: 6.000€+" },
+  "Notaire":                          { min: 3500,  max: 7000,  note: "CP 216 — candidat notaire: 3.500€" },
+  "Expert-comptable":                 { min: 3200,  max: 6500,  note: "IEC — junior: 3.200€, senior: 6.500€+" },
+  "Réviseur d'entreprises":           { min: 4000,  max: 8000,  note: "IRE — Big4: 4.000-8.000€" },
+  "Huissier de justice":              { min: 3000,  max: 5500,  note: "Candidat huissier — fonction réglementée" },
+  "Architecte indépendant":           { min: 2500,  max: 6000,  note: "Taux jour freelance: 500-900€/j" },
+  "Consultant indépendant":           { min: 3000,  max: 8000,  note: "Selon expertise — taux jour très variable" },
+};
+
+function wizFonctionChange() {
+  var val = document.getElementById('w-fonction')?.value || '';
+  var bloc = document.getElementById('w-fonction-min');
+  var label = document.getElementById('w-fonction-min-label');
+  var range = document.getElementById('w-fonction-min-range');
+  if (!bloc) return;
+  var info = FONCTION_SAL[val];
+  if (info) {
+    bloc.style.display = 'block';
+    label.textContent = '💼 Fourchette marché 2026 : ' + info.min.toLocaleString('fr-BE') + ' € — ' + info.max.toLocaleString('fr-BE') + ' € brut/mois';
+    range.textContent = info.note || '';
+    // Aussi mettre à jour le champ brut si vide
+    var brutEl = document.getElementById('w-brut');
+    if (brutEl && !brutEl.value) {
+      brutEl.value = info.min;
+      wizCheckSalaire();
+    }
+  } else {
+    bloc.style.display = 'none';
+  }
+}
+
 function wizGetMinForCP(cp, statut) {
   if (CP_MIN[cp]) return CP_MIN[cp];
   if (statut && CP_MIN[statut]) return CP_MIN[statut];
