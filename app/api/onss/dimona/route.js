@@ -29,16 +29,26 @@ export async function POST(req) {
 
     const token = await getToken();
     const payload = {
-      declarationType: type,
-      worker: { ssin: niss.replace(/[^0-9]/g, '') },
-      employer: { nssoNumber: ONSS_NUMBER },
-      occupation: {
-        startDate,
-        workerType,
-        jointCommitteeNumber: cp,
-      }
+      dimonaIn: type === 'IN' ? {
+        worker: { ssin: niss.replace(/[^0-9]/g, '') },
+        employer: { nssoNumber: ONSS_NUMBER },
+        occupation: {
+          startDate,
+          workerType,
+          jointCommitteeNumber: cp,
+        }
+      } : undefined,
+      dimonaOut: type === 'OUT' ? {
+        worker: { ssin: niss.replace(/[^0-9]/g, '') },
+        employer: { nssoNumber: ONSS_NUMBER },
+        occupation: {
+          endDate,
+          workerType,
+        }
+      } : undefined,
     };
-    if (endDate) payload.occupation.endDate = endDate;
+    // Nettoyer les undefined
+    Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
 
     const resp = await fetch(DIMONA_URL, {
       method: 'POST',
