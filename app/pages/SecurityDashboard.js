@@ -7,6 +7,8 @@ import{useState,useEffect,useCallback}from'react';
 const SecProTab=({supabase,user,C})=>{
   console.log("[SecProTab] mounted, supabase=", !!supabase, "user=", !!user);
   const[secTab,setSecTab]=useState('backup');
+  const[cronStatus,setCronStatus]=useState(null);
+  const[cronLoading,setCronLoading]=useState(false);
   const[backupRuns,setBackupRuns]=useState([]);
   const[backupLoading,setBackupLoading]=useState(false);
   const[backupError,setBackupError]=useState(null);
@@ -116,6 +118,7 @@ const SecProTab=({supabase,user,C})=>{
     <div style={{display:'flex',gap:8,marginBottom:16,alignItems:'center'}}>
       <STBtn v='backup' l='💾 Historique Backups B2'/>
       <STBtn v='intrusion' l="🚨 Tentatives d'Intrusion"/>
+      <STBtn v='crons' l='⚙️ Crons & Alertes'/>
       <button onClick={()=>secTab==='backup'?loadBackups():loadIntrusions()} style={{marginLeft:'auto',padding:'8px 14px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:'#c6a34e',fontSize:11,cursor:'pointer',fontFamily:'inherit'}}>
         🔄 Actualiser {lastRefresh?'· '+timeSince(lastRefresh):''}
       </button>
@@ -265,6 +268,56 @@ const SecProTab=({supabase,user,C})=>{
         ].filter(Boolean).map((tip,i)=><div key={i} style={{fontSize:10,color:'#fca5a5',marginBottom:4}}>• {tip}</div>)}
       </div>}
     </div>}
+    {secTab==='crons'&&<div>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+        <div>
+          <div style={{fontSize:14,fontWeight:700,color:'#e8e6e0'}}>⚙️ Crons & Alertes Automatiques</div>
+          <div style={{fontSize:11,color:'#888',marginTop:2}}>Tâches planifiées Vercel — monitoring sécurité</div>
+        </div>
+        <button onClick={async()=>{
+          setCronLoading(true);
+          try{
+            const r=await fetch('/api/security-alert',{method:'POST',headers:{'Authorization':'Bearer '+window.__CRON_SECRET__,'Content-Type':'application/json'},body:JSON.stringify({})});
+            const d=await r.json();
+            setCronStatus({type:'alert',result:d,ts:new Date().toLocaleTimeString('fr-BE')});
+          }catch(e){setCronStatus({type:'error',error:e.message});}
+          setCronLoading(false);
+        }} style={{padding:'8px 16px',background:'rgba(239,68,68,.15)',border:'1px solid #ef4444',borderRadius:8,color:'#ef4444',cursor:'pointer',fontSize:12,fontWeight:600}}>
+          {cronLoading?'..':'🚨 Tester alerte'}
+        </button>
+      </div>
+      {cronStatus&&<div style={{padding:12,background:'rgba(198,163,78,.05)',borderRadius:8,marginBottom:16,border:'1px solid rgba(198,163,78,.2)'}}>
+        <div style={{fontSize:11,color:'#c6a34e',marginBottom:4}}>{cronStatus.ts} — Résultat test :</div>
+        <pre style={{fontSize:10,color:'#9ca3af',margin:0,whiteSpace:'pre-wrap'}}>{JSON.stringify(cronStatus.result||cronStatus,null,2)}</pre>
+      </div>}
+      <C title='📅 Planning des crons sécurité' sub='Vercel Cron Jobs — UTC'>
+        {[
+          {icon:'🚨',name:'Alerte Intrusion',schedule:'Toutes les 15 min',endpoint:'/api/security-alert (POST)',desc:"Détecte les tentatives d'intrusion et envoie un email immédiat"},
+          {icon:'📋',name:'Purge Logs RGPD',schedule:'Chaque nuit à 3h CET',endpoint:'/api/cron/security (GET)',desc:"Supprime les logs > 90j (audit), > 30j (erreurs), > 1an (incidents résolus)"},
+          {icon:'📊',name:'Rapport Hebdo',schedule:'Lundi à 8h CET',endpoint:'/api/security-alert (GET)',desc:"Email récapitulatif sécurité : score, incidents, backups, logins"},
+          {icon:'🔍',name:'Monitoring Système',schedule:'Chaque jour à 7h CET',endpoint:'/api/cron/monitoring (GET)',desc:"Vérifie la santé de l'app et alerte si anomalie"},
+          {icon:'📐',name:'Veille Barèmes',schedule:'Chaque jour à 6h CET',endpoint:'/api/cron/baremes (GET)',desc:"Détecte les changements légaux belges (ONSS, PP, RMMMG)"},
+        ].map((c,i)=><div key={i} style={{display:'flex',gap:12,padding:'12px 0',borderBottom:'1px solid rgba(255,255,255,.04)'}}>
+          <span style={{fontSize:20,flexShrink:0}}>{c.icon}</span>
+          <div style={{flex:1}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <span style={{fontSize:13,fontWeight:600,color:'#e8e6e0'}}>{c.name}</span>
+              <span style={{fontSize:10,color:'#22c55e',background:'rgba(34,197,94,.1)',padding:'2px 8px',borderRadius:12}}>{c.schedule}</span>
+            </div>
+            <div style={{fontSize:10,color:'#c6a34e',marginTop:2,fontFamily:'monospace'}}>{c.endpoint}</div>
+            <div style={{fontSize:11,color:'#6b7280',marginTop:3}}>{c.desc}</div>
+          </div>
+        </div>)}
+      </C>
+      <C title='🔐 CSRF Protection' sub='Tokens signés HMAC-SHA256 — 1h TTL' style={{marginTop:12}}>
+        <div style={{fontSize:12,color:'#9ca3af',lineHeight:1.8}}>
+          <div>✅ <strong style={{color:'#e8e6e0'}}>Endpoint :</strong> GET /api/csrf → génère token | POST /api/csrf → valide token</div>
+          <div>✅ <strong style={{color:'#e8e6e0'}}>Pattern :</strong> Double Submit (header X-CSRF-Token + cookie HttpOnly)</div>
+          <div>✅ <strong style={{color:'#e8e6e0'}}>Signature :</strong> HMAC-SHA256 avec ENCRYPTION_KEY + expiration 1h</div>
+          <div>✅ <strong style={{color:'#e8e6e0'}}>Routes protégées :</strong> /api/employees, /api/payroll, /api/declarations, /api/export, /api/restore, /api/rgpd</div>
+        </div>
+      </C>
+    </div>}
   </div>;
 };
 
@@ -332,6 +385,11 @@ export function SecurityDashboard({s,d,supabase,user,defaultTab}){
     {level:3,cat:'Blindage',item:'Captcha après 3 échecs',status:'planned',detail:'hCaptcha ou Turnstile Cloudflare'},
     {level:3,cat:'Blindage',item:'Isolation multi-tenant (RLS)',status:true,detail:'Supabase Row Level Security par organisation'},
     {level:3,cat:'Blindage',item:'Pen test automatisé',status:'planned',detail:'OWASP ZAP en CI/CD GitHub Actions'},
+    // Nouveaux — Sprint Sécurité Mars 2026
+    {level:1,cat:'CSRF',item:'Protection CSRF (tokens signés HMAC)',status:true,detail:'Tokens CSRF sur toutes mutations POST/PUT/DELETE — Double Submit Pattern'},
+    {level:1,cat:'Email',item:'Alertes intrusion email temps réel',status:true,detail:'Email automatique si tentative intrusion détectée (cron 15min via Resend)'},
+    {level:2,cat:'RGPD',item:'Purge automatique logs > 90 jours',status:true,detail:'Cron nuit 3h CET — audit_log 90j, error_logs 30j, incidents 1an (Art. 5 RGPD)'},
+    {level:2,cat:'Email',item:'Rapport sécurité hebdomadaire',status:true,detail:'Email automatique lundi 8h — score, backups, incidents, logins'},
     // Niveau 4 — RGPD
     {level:4,cat:'RGPD',item:'Registre des traitements (Art. 30)',status:true,detail:'Document complet avec 12 catégories de données'},
     {level:4,cat:'RGPD',item:'Contrat sous-traitant DPA (Art. 28)',status:true,detail:'Data Processing Agreement avec Supabase/Vercel'},

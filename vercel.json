@@ -15,6 +15,18 @@
     {
       "path": "/api/cron/monitoring",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/security-alert",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/security",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/security-alert",
+      "schedule": "0 7 * * 1"
     }
   ]
 }

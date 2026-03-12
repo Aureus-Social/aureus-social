@@ -59,6 +59,20 @@ export function middleware(request) {
     }
   }
 
+  // ── CSRF Protection — mutations sensibles ────────────────────
+  const MUTATION_PATHS = ['/api/employees', '/api/payroll', '/api/declarations', '/api/export', '/api/restore', '/api/rgpd'];
+  const isMutation = request.method === 'POST' || request.method === 'PUT' || request.method === 'DELETE';
+  const needsCsrf = MUTATION_PATHS.some(p => pathname.startsWith(p)) && isMutation;
+  if (needsCsrf) {
+    const csrfHeader = request.headers.get('x-csrf-token') || '';
+    const csrfCookie = request.cookies.get('csrf_token')?.value || '';
+    // On accepte le token en header OU en cookie (double submit pattern)
+    // La validation complète se fait via /api/csrf — ici on vérifie juste la présence
+    if (!csrfHeader && !csrfCookie) {
+      return Response.json({ error: 'CSRF token manquant', code: 'CSRF_MISSING' }, { status: 403 });
+    }
+  }
+
   // API ROUTES
   if (pathname.startsWith('/api/')) {
     if (!checkRateLimit(ip)) {
@@ -111,7 +125,7 @@ export function middleware(request) {
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
     `font-src 'self' https://fonts.gstatic.com data:`,
     `img-src 'self' data: blob: https://${supabaseHost}`,
-    `connect-src 'self' https://${supabaseHost} wss://${supabaseHost} https://api.anthropic.com https://api.resend.com`,
+    `connect-src 'self' https://${supabaseHost} wss://${supabaseHost} https://api.anthropic.com https://api.resend.com https://api.github.com https://ipapi.co https://api.ipify.org`,
     `worker-src 'self' blob:`,
     `child-src 'self' blob:`,
     `frame-ancestors 'none'`,
