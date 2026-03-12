@@ -4,13 +4,28 @@ export const dynamic = 'force-dynamic';
 const CLIENT_ID = 'self_service_chaman_305534_fnlh9vng4v';
 const TOKEN_URL = 'https://api.socialsecurity.be/REST/oauth/v3/token';
 
+function getPrivateKey() {
+  const raw = process.env.ONSS_PRIVATE_KEY || '';
+  // Si la clé est en base64 (pas de saut de ligne, pas de BEGIN)
+  if (!raw.includes('BEGIN') && raw.length > 100) {
+    return Buffer.from(raw, 'base64').toString('utf-8');
+  }
+  // Sinon reconstruire les sauts de ligne si perdus
+  if (raw.includes('BEGIN PRIVATE KEY') && !raw.includes('\n')) {
+    return raw.replace('-----BEGIN PRIVATE KEY-----', '-----BEGIN PRIVATE KEY-----\n')
+              .replace('-----END PRIVATE KEY-----', '\n-----END PRIVATE KEY-----')
+              .replace(/(.{64})/g, '$1\n');
+  }
+  return raw;
+}
+
 export async function POST() {
   try {
-    const PRIVATE_KEY_PEM = process.env.ONSS_PRIVATE_KEY;
-    if (!PRIVATE_KEY_PEM) {
-      return Response.json({ error: 'ONSS_PRIVATE_KEY non configuree' }, { status: 500 });
+    const pemKey = getPrivateKey();
+    if (!pemKey || !pemKey.includes('BEGIN')) {
+      return Response.json({ error: 'ONSS_PRIVATE_KEY invalide ou absente', raw_length: (process.env.ONSS_PRIVATE_KEY||'').length }, { status: 500 });
     }
-    const privateKey = await importPKCS8(PRIVATE_KEY_PEM, 'RS256');
+    const privateKey = await importPKCS8(pemKey, 'RS256');
     const now = Math.floor(Date.now() / 1000);
     const jwt = await new SignJWT({})
       .setProtectedHeader({ alg: 'RS256' })
