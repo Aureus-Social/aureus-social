@@ -135,7 +135,7 @@ export function middleware(request) {
   // ALL ROUTES — Security Headers
   const response = NextResponse.next();
   response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
-  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -157,7 +157,7 @@ export function middleware(request) {
     `connect-src 'self' https://${supabaseHost} wss://${supabaseHost} https://api.anthropic.com https://api.resend.com https://api.github.com https://ipapi.co https://api.ipify.org`,
     `worker-src 'self' blob:`,
     `child-src 'self' blob:`,
-    `frame-ancestors 'none'`,
+    `frame-ancestors 'self' https://app.aureussocial.be https://www.aureussocial.be`,
     `form-action 'self'`,
     `base-uri 'self'`,
     `upgrade-insecure-requests`,
