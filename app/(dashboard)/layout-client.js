@@ -714,6 +714,13 @@ function DashboardLayoutInner({ user }) {
               { id:'connexionshub', label:'ONSS / Mahis', sub:'Hub Connexions H24', icon:'🏛', tab:'onss', keywords:['onss','mahis','connexion','portail'] },
               { id:'connexionshub', label:'CSAM / eHealth', sub:'Hub Connexions H24', icon:'🏥', tab:'csam', keywords:['csam','ehealth','gap','designation'] },
               { id:'connexionshub', label:'Belcotax Online', sub:'Hub Connexions H24', icon:'📄', tab:'belcotax', keywords:['belcotax','fiscal','fisc','online'] },
+              // Security Pro — onglets internes
+              { id:'securitedata', label:'Security Pro — Backups B2', sub:'Sécurité des Données', icon:'💾', tab:'secpro', keywords:['security pro','b2','backblaze','backup','historique','runs'] },
+              { id:'securitedata', label:'Security Pro — Tentatives Intrusion', sub:'Sécurité des Données', icon:'🚨', tab:'secpro', keywords:['intrusion','tentative','brute force','geoip','attaque','suspect'] },
+              { id:'securitedata', label:'Crons & Alertes automatiques', sub:'Sécurité des Données', icon:'⚙️', tab:'secpro', keywords:['crons','alertes','automatique','planifie','15min','hebdo','purge','rgpd','email securite','rapport'] },
+              { id:'securitedata', label:'Purge logs RGPD automatique', sub:'Sécurité des Données', icon:'🗑️', tab:'secpro', keywords:['purge','logs','rgpd','90 jours','retention','article 5','suppression automatique'] },
+              { id:'securitedata', label:'Rapport sécurité hebdomadaire', sub:'Sécurité des Données', icon:'📊', tab:'secpro', keywords:['rapport','hebdo','securite','email','lundi','score','incidents'] },
+              { id:'securitedata', label:'CSRF Protection', sub:'Sécurité des Données', icon:'🔐', tab:'secpro', keywords:['csrf','token','protection','hmac','cross site','forgery'] },
               // Reporting Pro
               { id:'reportingpro', label:'Rapports par rôle', sub:'Reporting Pro', icon:'📈', tab:'roles', keywords:['rapports','role','reporting'] },
               { id:'reportingpro', label:'Export analytique', sub:'Reporting Pro', icon:'📊', tab:'export', keywords:['export','analytique','reporting'] },
