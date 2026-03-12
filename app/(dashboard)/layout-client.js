@@ -62,6 +62,7 @@ const FloatingLegalAgentComp = dynamic(() => import('../pages/FloatingLegalAgent
 
 const AbsencesContratsV3Pg = dynamic(() => import('../pages/AbsencesContratsV3'), { ssr: false, loading: Loading });
 const CommissionsModulePg = dynamic(() => import('../pages/CommissionsModule'), { ssr: false, loading: Loading });
+const CommercialHubPage = dynamic(() => import('../pages/CommercialHub'), { ssr: false, loading: Loading });
 const DocumentGeneratorPg = dynamic(() => import('../pages/DocumentGenerator'), { ssr: false, loading: Loading });
 const EmployeePlanningPg = dynamic(() => import('../pages/EmployeePlanning'), { ssr: false, loading: Loading });
 const NotificationCenterPg = dynamic(() => import('../pages/NotificationCenter'), { ssr: false, loading: Loading });
@@ -617,10 +618,10 @@ function DashboardLayoutInner({ user }) {
       case 'plandiversite': return <LoisPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'social': return <LoisPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       // COMMERCIAL
-      case 'checklistclient': return <CommissionsModulePgW s={s} d={d} tab={page} />;
-      case 'comparatif': return <CommissionsModulePgW s={s} d={d} tab={page} />;
+      case 'checklistclient': return <CommercialHubPage s={s} d={d} tab={page} />;
+      case 'comparatif': return <CommercialHubPage s={s} d={d} tab={page} />;
       case 'fiduciaire': return <CommissionsModulePgW s={s} d={d} tab={page} />;
-      case 'guidecommercial': return <CommissionsModulePgW s={s} d={d} tab={page} />;
+      case 'guidecommercial': return <CommercialHubPage s={s} d={d} tab={page} />;
       case 'guidefiduciaire': return <CommissionsModulePgW s={s} d={d} tab={page} />;
       case 'landing': return <CommissionsModulePgW s={s} d={d} tab={page} />;
       case 'legal': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
