@@ -1,4 +1,5 @@
-import { SignJWT, importPKCS8 } from 'jose';
+import { SignJWT } from 'jose';
+import { createPrivateKey } from 'crypto';
 export const dynamic = 'force-dynamic';
 
 const CLIENT_ID = 'self_service_chaman_305534_fnlh9vng4v';
@@ -21,11 +22,12 @@ export async function GET() {
   results.push({ test: 'Cle brute presente', ok: raw.length > 0, detail: raw.length + ' chars, base64=' + isBase64 });
 
   const pem = getPrivateKey();
-  results.push({ test: 'Cle PEM reconstituee', ok: pem.includes('BEGIN PRIVATE KEY'), detail: pem.substring(0,60) + '...' });
+  const pemOk = pem.includes('RSA PRIVATE KEY') || pem.includes('PRIVATE KEY');
+  results.push({ test: 'Cle PEM reconstituee', ok: pemOk, detail: pem.substring(0,60) + '...' });
 
   let token = null;
   try {
-    const privateKey = await importPKCS8(pem, 'RS256');
+    const privateKey = createPrivateKey(pem);
     const now = Math.floor(Date.now() / 1000);
     const jwt = await new SignJWT({})
       .setProtectedHeader({ alg: 'RS256', kid: CERT_SERIAL })
@@ -36,7 +38,7 @@ export async function GET() {
     const params = new URLSearchParams({
       grant_type: 'client_credentials',
       client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-      client_assertion: jwt, scope: 'dimona'
+      client_assertion: jwt,
     });
     const resp = await fetch(TOKEN_URL, {
       method: 'POST',
