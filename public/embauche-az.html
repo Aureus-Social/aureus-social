@@ -1087,7 +1087,10 @@ body {
     </div>
     <div style="grid-column:1/-1;display:flex;justify-content:space-between;margin-top:4px;">
       <button onclick="wizGo(1)" style="padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;">← Retour</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+      <button onclick="wizLaunchDimona()" style="padding:10px 18px;border-radius:8px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.08);color:#4ade80;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;" title="Pré-remplit et lance la Dimona IN avec les données saisies">📡 Dimona IN maintenant</button>
       <button onclick="wizGo(3)" style="padding:10px 24px;border-radius:8px;border:none;background:var(--gold);color:#060810;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">Suivant → Avantages</button>
+    </div>
     </div>
   </div>
 
@@ -1431,7 +1434,13 @@ function wizGenerate() {
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">'
     +'<div><div style="font-size:20px;font-weight:800;color:var(--gold);">Dossier : '+prenom+' '+nom+'</div>'
     +'<div style="font-size:12px;color:var(--muted);">'+(['CDI','CDD','ETU','FLEXI','REMP','INT'][['CDI','CDD','ETU','FLEXI','REMP','INT'].indexOf(contrat)]||contrat)+' · CP '+cp+' · Entrée '+debut+' · '+(brut?'Brut €'+brut+'/m':'Salaire non renseigné')+'</div></div>'
+    +'<div style="display:flex;gap:8px;">'
+    +'<button onclick="wizOpenDimona()" style="padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(135deg,#C9963A,#A07D3E);color:#060810;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📡 Faire la Dimona IN</button>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;">'
+    +'<button onclick="wizLaunchDimona()" style="padding:8px 18px;border-radius:8px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#4ade80;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📡 Lancer Dimona IN</button>'
     +'<button onclick="window.print()" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:11px;cursor:pointer;font-family:inherit;">🖨️ Imprimer</button>'
+    +'</div>'
+    +'</div>'
     +'</div>'
     + paySection
     + primesHtml
@@ -2646,10 +2655,56 @@ function calcGlobal() {
     'À déclarer fiche 281.10 : <strong>€' + ((car + gsm + pc) * 12).toFixed(0) + '/an</strong>';
 }
 
+
+// ── Wizard Dossier → Dimona IN ──
+function wizOpenDimona() {
+  // Transférer données du wizard vers l'objet W utilisé par genDimona()
+  W.prenom  = document.getElementById('w-prenom')?.value.trim() || '';
+  W.nom     = document.getElementById('w-nom')?.value.trim() || '';
+  W.niss    = document.getElementById('w-niss')?.value.trim() || '';
+  W.ddn     = document.getElementById('w-dob')?.value || '';
+  W.contrat = document.getElementById('w-contrat')?.value || 'CDI';
+  W.entree  = document.getElementById('w-debut')?.value || '';
+  W.sortie  = document.getElementById('w-fin')?.value || '';
+  W.cp      = document.getElementById('w-cp')?.value.trim() || '200';
+  W.salaire = parseFloat(document.getElementById('w-brut')?.value) || 0;
+  W.famille = document.getElementById('w-sitfam')?.value || 'isole';
+  W.enfants = parseInt(document.getElementById('w-enfants')?.value) || 0;
+  W.regime  = document.getElementById('w-regime')?.value || '100';
+  W.statut  = document.getElementById('w-statut')?.value || 'EMP';
+  // Ouvrir la modal Dimona
+  genDimona();
+}
+
 // Init calculateurs au chargement
 window.addEventListener('DOMContentLoaded', function() {
   setTimeout(function(){ calcATNCar(); calcATNLog(); calcGlobal(); }, 100);
 });
+
+// ── Lancer Dimona depuis le wizard ──
+function wizLaunchDimona() {
+  // Copier les valeurs du wizard vers les champs Dimona existants
+  var map = {
+    'w_prenom': document.getElementById('w-prenom')?.value || '',
+    'w_nom':    document.getElementById('w-nom')?.value || '',
+    'w_niss':   document.getElementById('w-niss')?.value || '',
+    'w_ddn':    document.getElementById('w-dob')?.value || '',
+    'w_contrat':document.getElementById('w-contrat')?.value || 'CDI',
+    'w_entree': document.getElementById('w-debut')?.value || '',
+    'w_sortie': document.getElementById('w-fin')?.value || '',
+    'w_cp':     document.getElementById('w-cp')?.value || '200',
+  };
+  Object.keys(map).forEach(function(id) {
+    var el = document.getElementById(id);
+    if(el) el.value = map[id];
+  });
+  // Ouvrir la modal Dimona
+  if(typeof genDimona === 'function') {
+    genDimona();
+  } else {
+    alert('Module Dimona non trouvé — vérifiez que la page est complètement chargée.');
+  }
+}
 </script>
 
 <!-- ═══════════════════ FIN DE CONTRAT AVANCÉE -->
