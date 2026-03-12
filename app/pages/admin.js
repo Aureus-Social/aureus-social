@@ -1,4 +1,5 @@
 'use client';
+import { authFetch } from '../lib/auth-fetch';
 import { useLang } from '../lib/lang-context';
 import { supabase } from '@/app/lib/supabase';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -494,7 +495,7 @@ function BackupRestorePanel({s}) {
         <button onClick={async()=>{
           const email = prompt('Email de réception ?', 'info@aureus-ia.com');
           if(!email) return;
-          const res = await fetch('/api/backup', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'both', email, userRole:'admin'}) });
+          const res = await authFetch('/api/backup', { method:'POST', body: JSON.stringify({action:'both', email, userRole:'admin'}) });
           const blob = await res.blob();
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -505,7 +506,7 @@ function BackupRestorePanel({s}) {
           💾 Backup Admin Complet
         </button>
         <button onClick={async()=>{
-          const res = await fetch('/api/backup', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'silent', userRole:'admin'}) });
+          const res = await authFetch('/api/backup', { method:'POST', body: JSON.stringify({action:'silent', userRole:'admin'}) });
           const data = await res.headers.get('X-Backup-Records');
           alert('✅ Backup silencieux — ' + data + ' enregistrements sauvegardés');
         }} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'rgba(96,165,250,.15)',color:'#60a5fa',fontSize:12,cursor:'pointer',fontWeight:600}}>

@@ -113,15 +113,16 @@ function reducer(state, action) {
     if (sensitiveActions.includes(action.type)) {
       const labels = { ADD_EMP:'CREATE_EMPLOYEE', UPD_EMP:'UPDATE_EMPLOYEE', DEL_EMP:'DELETE_EMPLOYEE', ADD_P:'GENERATE_PAYSLIP', ADD_DIM:'SUBMIT_DIMONA' };
       const emp = action.d || (action.type === 'DEL_EMP' ? state.emps?.find(e => e.id === action.id) : null);
-      fetch('/api/audit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: labels[action.type],
-          table_name: action.type.includes('EMP') ? 'employees' : action.type === 'ADD_P' ? 'fiches_paie' : 'dimona',
-          record_id: emp?.id || null,
-          details: emp ? { name: (emp.first||emp.fn||'')+ ' ' +(emp.last||emp.ln||''), action_type: action.type } : null
-        })
+      import('../lib/auth-fetch').then(({ authFetch }) => {
+        authFetch('/api/audit', {
+          method: 'POST',
+          body: JSON.stringify({
+            action: labels[action.type],
+            table_name: action.type.includes('EMP') ? 'employees' : action.type === 'ADD_P' ? 'fiches_paie' : 'dimona',
+            record_id: emp?.id || null,
+            details: emp ? { name: (emp.first||emp.fn||'')+ ' ' +(emp.last||emp.ln||''), action_type: action.type } : null
+          })
+        });
       }).catch(() => { /* fire-and-forget */ });
     }
   }

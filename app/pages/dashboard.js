@@ -1,4 +1,5 @@
 'use client';
+import { authFetch } from '../lib/auth-fetch';
 
 import { useLang } from '../lib/lang-context';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -136,7 +137,7 @@ function Dashboard({s,d,th}) {
           const btn = document.getElementById('backup-btn');
           if(btn){btn.textContent='⏳ En cours...';btn.disabled=true;}
           try {
-            const res = await fetch('/api/backup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'both',email,userEmail:s?.user?.email||'',userRole:s?.user?.user_metadata?.role||''})});
+            const res = await authFetch('/api/backup', { method:'POST',body:JSON.stringify({action:'both',email,userEmail:s?.user?.email||'',userRole:s?.user?.user_metadata?.role||''})});
             if(!res.ok) throw new Error('Erreur serveur');
             const blob = await res.blob();
             const emailSent = res.headers.get('X-Backup-Email-Sent');
