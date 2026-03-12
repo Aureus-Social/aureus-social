@@ -3,6 +3,7 @@ export const MENU = [
   { id: '_g1', label: 'TABLEAU DE BORD', icon: '◫', group: true },
   { id: 'commandcenter', label: 'Command Center', icon: '🎯', g: 1 },
   { id: 'dashboard', label: 'Dashboard Principal', icon: '◫', g: 1 },
+  { id: 'embaucheaz', label: 'Embauche A→Z', icon: '📋', g: 1, external: '/embauche-az.html' },
   { id: 'journal', label: 'Journal Activite', icon: '📋', g: 1 },
   { id: 'notifications', label: 'Notifications', icon: '🔔', g: 1 },
   { id: 'smartalerts', label: 'Smart Alerts', icon: '🔔', g: 1 },
