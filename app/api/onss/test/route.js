@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 const CLIENT_ID = 'self_service_chaman_305534_fnlh9vng4v';
 const TOKEN_URL = 'https://services.socialsecurity.be/REST/oauth/v5/token';
 const DIMONA_URL = 'https://services.socialsecurity.be/REST/dimona/v2/declarations';
+const CERT_SERIAL = '111034742307725981523417471549021221440785823051';
 
 function getPrivateKey() {
   const raw = process.env.ONSS_PRIVATE_KEY || '';
@@ -27,7 +28,7 @@ export async function GET() {
     const privateKey = await importPKCS8(pem, 'RS256');
     const now = Math.floor(Date.now() / 1000);
     const jwt = await new SignJWT({})
-      .setProtectedHeader({ alg: 'RS256' })
+      .setProtectedHeader({ alg: 'RS256', kid: CERT_SERIAL })
       .setIssuer(CLIENT_ID).setSubject(CLIENT_ID).setAudience(TOKEN_URL)
       .setIssuedAt(now).setExpirationTime(now + 300)
       .setJti(Date.now() + '-test')
