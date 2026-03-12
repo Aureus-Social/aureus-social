@@ -762,148 +762,6 @@ body {
 
 <main class="main">
 
-<!-- ═══════════════════════════════════ FICHE TRAVAILLEUR -->
-<div id="fiche-travailleur" style="
-  background: linear-gradient(135deg, #0f0e0c 0%, #141210 100%);
-  border: 1px solid rgba(201,150,58,0.3);
-  border-radius: 12px;
-  padding: 28px 32px;
-  margin: 0 0 28px 0;
-  position: relative;
-  overflow: hidden;
-">
-  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#C9963A,#e8c06a,#C9963A)"></div>
-  
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
-    <div style="display:flex;align-items:center;gap:12px">
-      <div style="width:40px;height:40px;border-radius:10px;background:rgba(201,150,58,0.15);display:flex;align-items:center;justify-content:center;font-size:20px">👤</div>
-      <div>
-        <div style="font-family:'DM Serif Display',serif;font-size:18px;color:#C9963A">Fiche travailleur</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">Recherche un travailleur existant ou remplis manuellement</div>
-      </div>
-    </div>
-    <!-- SEARCH LIVE -->
-    <div style="position:relative;min-width:280px">
-      <input id="w_search" type="text" placeholder="🔍 Rechercher un travailleur..." 
-        oninput="searchWorkers(this.value)"
-        style="width:100%;background:var(--bg);border:1px solid rgba(201,150,58,0.4);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:10px 14px;outline:none;box-sizing:border-box"
-        autocomplete="off">
-      <div id="w_search_results" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg2);border:1px solid rgba(201,150,58,0.25);border-radius:8px;z-index:999;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.6)"></div>
-    </div>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <span id="fiche-status" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);padding:4px 10px;border:1px solid #222;border-radius:4px">⬜ Vide</span>
-      <button onclick="resetFiche()" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);background:transparent;border:1px solid #333;border-radius:4px;padding:5px 12px;cursor:pointer">Réinitialiser</button>
-      <button onclick="exportFichePDF()" style="font-family:'DM Mono',monospace;font-size:10px;color:#C9963A;background:rgba(201,150,58,0.1);border:1px solid rgba(201,150,58,0.3);border-radius:4px;padding:5px 12px;cursor:pointer">📄 Exporter fiche</button>
-    </div>
-  </div>
-
-  <!-- Grille champs -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px">
-    
-    <div style="display:flex;flex-direction:column;gap:5px">
-      <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Prénom *</label>
-      <input id="w_prenom" type="text" placeholder="ex: Salem" oninput="updateFiche()" style="background:var(--bg);border:1px solid #2a2a2a;border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:5px">
-      <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Nom *</label>
-      <input id="w_nom" type="text" placeholder="ex: Abdellah" oninput="updateFiche()" style="background:var(--bg);border:1px solid #2a2a2a;border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:5px">
-      <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">N° NISS *</label>
-      <input id="w_niss" type="text" placeholder="ex: 95.01.23-456.78" oninput="formatNISS(this);updateFiche()" maxlength="15" style="background:var(--bg);border:1px solid #2a2a2a;border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
-      <span id="w_niss_status" style="font-size:9px;color:var(--muted);font-family:'DM Mono',monospace"></span>
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:5px">
-      <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Date naissance</label>
-      <input id="w_ddn" type="date" oninput="updateFiche()" style="background:var(--bg);border:1px solid #2a2a2a;border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:5px">
-      <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Type contrat *</label>
-      <select id="w_contrat" onchange="updateFiche()" style="background:var(--bg);border:1px solid #2a2a2a;border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
-        <option value="">— Choisir —</option>
-        <option value="CDI">CDI</option>
-        <option value="CDD">CDD</option>
-        <option value="STUDENT">Étudiant (STU)</option>
-        <option value="FLEXI">Flexi-job (FLX)</option>
-        <option value="INTERM">Intérimaire (INTERM)</option>
-      </select>
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:5px">
-      <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Date entrée *</label>
-      <input id="w_entree" type="date" oninput="updateFiche()" style="background:var(--bg);border:1px solid #2a2a2a;border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
-    </div>
-
-    <div id="w_sortie_group" style="display:flex;flex-direction:column;gap:5px">
-      <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Date sortie (CDD)</label>
-      <input id="w_sortie" type="date" oninput="updateFiche()" style="background:var(--bg);border:1px solid #2a2a2a;border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:5px">
-      <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Commission paritaire *</label>
-      <input id="w_cp" type="text" placeholder="ex: 200" oninput="updateFiche()" style="background:var(--bg);border:1px solid #2a2a2a;border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:5px">
-      <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Salaire brut mensuel (€) *</label>
-      <input id="w_salaire" type="number" placeholder="ex: 2800" oninput="updateFiche()" min="0" step="50" style="background:var(--bg);border:1px solid #2a2a2a;border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:5px">
-      <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Email travailleur</label>
-      <input id="w_email" type="email" placeholder="ex: nom@email.com" oninput="updateFiche()" style="background:var(--bg);border:1px solid #2a2a2a;border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='#C9963A'" onblur="this.style.borderColor='#2a2a2a'">
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:5px">
-      <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Situation familiale</label>
-      <select id="w_famille" onchange="updateFiche()" style="background:var(--bg);border:1px solid #2a2a2a;border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none">
-        <option value="isole">Isolé(e)</option>
-        <option value="conjoint_actif">Marié(e) / Cohab. — 2 revenus</option>
-        <option value="marie_conjoint_inactif">Marié(e) — conjoint sans revenu</option>
-        <option value="monoparental">Parent isolé</option>
-      </select>
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:5px">
-      <label style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Enfants à charge</label>
-      <input id="w_enfants" type="number" value="0" min="0" max="10" oninput="updateFiche()" style="background:var(--bg);border:1px solid #2a2a2a;border-radius:5px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;outline:none">
-    </div>
-
-  </div>
-
-  <!-- Résumé Dimona + calcul automatique -->
-  <div id="fiche-resume" style="display:none;margin-top:22px;border-top:1px solid #1e1e1e;padding-top:18px">
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">
-      
-      <!-- Dimona Card -->
-      <div style="background:var(--bg);border:1px solid rgba(201,150,58,0.25);border-radius:8px;padding:14px 16px">
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#C9963A;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">📡 Dimona IN à envoyer</div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text);line-height:1.8" id="dimona-preview">—</div>
-        <button onclick="genDimona()" style="margin-top:10px;width:100%;background:rgba(201,150,58,0.15);border:1px solid rgba(201,150,58,0.3);color:#C9963A;font-family:'DM Mono',monospace;font-size:10px;padding:7px;border-radius:4px;cursor:pointer;font-weight:700">
-          Générer la Dimona complète ↓
-        </button>
-      </div>
-
-      <!-- Calcul paie Card -->
-      <div style="background:var(--bg);border:1px solid #1e1e1e;border-radius:8px;padding:14px 16px">
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">💶 Calcul paie auto</div>
-        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text);line-height:2" id="paie-preview">—</div>
-      </div>
-
-      <!-- Checklist Card -->
-      <div style="background:var(--bg);border:1px solid #1e1e1e;border-radius:8px;padding:14px 16px">
-        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">✅ Checklist avant J1</div>
-        <div id="checklist-preview" style="font-family:'DM Mono',monospace;font-size:11px;line-height:2">—</div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
 <!-- DIMONA MODAL -->
 <div id="dimona-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;overflow-y:auto;padding:40px 20px">
   <div style="max-width:700px;margin:0 auto;background:var(--bg2);border:1px solid rgba(201,150,58,0.3);border-radius:12px;padding:32px">
@@ -914,6 +772,8 @@ body {
     <div id="dimona-modal-content"></div>
   </div>
 </div>
+
+
 
 
 
@@ -966,6 +826,14 @@ body {
 
   <!-- STEP 1 : Identité -->
   <div id="wiz-s1" class="wiz-panel" style="padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
+    <div style="grid-column:1/-1;margin-bottom:4px;">
+      <div style="position:relative;">
+        <input id="wiz-search" type="text" placeholder="🔍 Rechercher un travailleur existant (Supabase)..." oninput="wizSearchWorkers(this.value)"
+          style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(201,150,58,.4);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        <div id="wiz-search-results" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:8px;z-index:100;max-height:200px;overflow-y:auto;"></div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px;">Ou remplis manuellement ci-dessous pour un nouveau travailleur</div>
+    </div>
     <div>
       <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:5px;">Prénom *</label>
       <input id="w-prenom" type="text" placeholder="Mohamed" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
@@ -3205,6 +3073,52 @@ function wizCPChange() {
   if (cp >= 100 && cp < 200) statutEl.value = 'OUV';
   else if (cp >= 200) statutEl.value = 'EMP';
   wizShowMin();
+}
+
+// ── Recherche travailleur dans wizard ──
+async function wizSearchWorkers(q) {
+  var res = document.getElementById('wiz-search-results');
+  if(!res) return;
+  if(!q || q.length < 2) { res.style.display='none'; return; }
+  // Réutiliser la même logique que searchWorkers existant
+  try {
+    var url = '/api/employees?search='+encodeURIComponent(q)+'&limit=8';
+    var r = await fetch(url, {headers:{'Authorization':'Bearer '+window._auToken||''}});
+    if(!r.ok) throw new Error();
+    var data = await r.json();
+    var emps = data.employees || data || [];
+    if(!emps.length) { res.innerHTML='<div style="padding:12px;font-size:12px;color:var(--muted);">Aucun résultat</div>'; res.style.display='block'; return; }
+    res.innerHTML = emps.map(function(e){
+      return '<div onclick="wizFillFromEmployee('+JSON.stringify(e).replace(/"/g,'&quot;')+')" style="padding:10px 14px;cursor:pointer;font-size:12px;color:var(--text);border-bottom:1px solid var(--border);" onmouseover="this.style.background='rgba(201,150,58,.1)'" onmouseout="this.style.background='transparent'">'
+        +'<strong>'+e.first+' '+e.last+'</strong> <span style="color:var(--muted);">· NISS: '+e.niss+'</span> <span style="color:var(--gold);">· CP '+e.cp+'</span>'
+        +'</div>';
+    }).join('');
+    res.style.display='block';
+  } catch(err) {
+    res.innerHTML='<div style="padding:12px;font-size:11px;color:var(--muted);">Connexion Supabase requise</div>';
+    res.style.display='block';
+  }
+}
+
+function wizFillFromEmployee(e) {
+  // Pré-remplir étape 1
+  if(document.getElementById('w-prenom')) document.getElementById('w-prenom').value = e.first||'';
+  if(document.getElementById('w-nom')) document.getElementById('w-nom').value = e.last||'';
+  if(document.getElementById('w-niss')) document.getElementById('w-niss').value = e.niss||'';
+  if(document.getElementById('w-dob')) document.getElementById('w-dob').value = e.dob||'';
+  // Pré-remplir étape 2
+  if(document.getElementById('w-brut')) document.getElementById('w-brut').value = e.monthlySalary||e.gross||'';
+  if(document.getElementById('w-cp')) { document.getElementById('w-cp').value = e.cp||'200'; wizCPChange(); }
+  if(document.getElementById('w-contrat')) document.getElementById('w-contrat').value = e.contractType||'CDI';
+  if(document.getElementById('w-debut')) document.getElementById('w-debut').value = e.startDate||'';
+  if(document.getElementById('w-fin')) document.getElementById('w-fin').value = e.endDate||'';
+  if(document.getElementById('w-statut')) document.getElementById('w-statut').value = e.statut||'EMP';
+  // Fermer dropdown
+  var res = document.getElementById('wiz-search-results');
+  if(res) res.style.display='none';
+  if(document.getElementById('wiz-search')) document.getElementById('wiz-search').value = (e.first||'')+' '+(e.last||'');
+  // Passer à l'étape 2 auto
+  setTimeout(function(){ wizGo(2); }, 200);
 }
 
 // ── Wizard Dossier → Dimona IN ──
