@@ -26,7 +26,7 @@ export function LangProvider({ children, initialLang = 'fr' }) {
   };
 
   return (
-    <LangContext.Provider value={{ lang, setLang, t }}>
+    <LangContext.Provider value={{ lang, setLang, t, tText: t }}>
       {children}
     </LangContext.Provider>
   );
