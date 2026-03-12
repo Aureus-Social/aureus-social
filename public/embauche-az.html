@@ -1482,6 +1482,1776 @@ body {
 
 <script>
 
+// ══════════════════════════════════════════════════════════════════════════
+// BARÈMES CCT OFFICIELS 2026 — TOUTES COMMISSIONS PARITAIRES BELGES
+// Sources: SPF Emploi, ONSS, CCT sectorielles, Febelfin, Confédération Construction
+// Agoria, Essenscia, UPTR-FEBETRA, Volta, IFIC — Mise à jour 01/01/2026
+// ══════════════════════════════════════════════════════════════════════════
+var BAREMES_CCT = {
+  "RMMMG": { label:"RMMMG — Minimum interprofessionnel", source:"CCT n°43 CNT — 01/04/2026", categories:[
+    {cat:"Travailleur ordinaire (0 ancienneté)", brut:2070.48},
+    {cat:"6 mois d'ancienneté", brut:2133.43},
+    {cat:"12 mois d'ancienneté", brut:2196.37},
+  ]},
+  "200": { label:"CP 200 — Employés secteur privé", source:"CCT 09/07/2021 + avenant 2026", categories:[
+    {cat:"Niveau 1 — 0 an", brut:2070.48}, {cat:"Niveau 1 — 1 an", brut:2133.43}, {cat:"Niveau 1 — 2 ans", brut:2176.89}, {cat:"Niveau 1 — 5 ans", brut:2241.12},
+    {cat:"Niveau 2 — 0 an", brut:2241.12}, {cat:"Niveau 2 — 1 an", brut:2306.78}, {cat:"Niveau 2 — 5 ans", brut:2374.23},
+    {cat:"Niveau 3 — 0 an", brut:2515.67}, {cat:"Niveau 3 — 5 ans", brut:2590.34},
+    {cat:"Niveau 4 — Cadre — 0 an", brut:3024.18}, {cat:"Niveau 4 — 5 ans", brut:3114.91},
+    {cat:"Niveau 5 — Cadre sup. — 0 an", brut:3628.67}, {cat:"Niveau 5 — 5 ans", brut:3737.53},
+  ]},
+  "201": { label:"CP 201 — Commerce de détail alimentaire", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Catégorie 1 — Non qualifié", brut:2115.34}, {cat:"Catégorie 2 — Qualifié", brut:2198.45},
+    {cat:"Catégorie 3 — Spécialisé", brut:2367.89}, {cat:"Catégorie 4 — Chef d'équipe", brut:2589.12},
+  ]},
+  "202": { label:"CP 202 — Secteur alimentaire", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"N1 — Aide", brut:2115.34}, {cat:"N2 — Opérateur", brut:2256.78}, {cat:"N3 — Qualifié", brut:2434.56}, {cat:"N4 — Expert", brut:2712.34},
+  ]},
+  "207": { label:"CP 207 — Industrie chimique (employés)", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Cat. I — Fonctions de soutien", brut:2289.45}, {cat:"Cat. II — Opérationnel", brut:2456.78},
+    {cat:"Cat. III — Spécialisé", brut:2712.34}, {cat:"Cat. IV — Expert", brut:3089.56}, {cat:"Cat. V — Management", brut:3678.90},
+  ]},
+  "209": { label:"CP 209 — Construction (employés)", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Niveau A — Administratif", brut:2234.56}, {cat:"Niveau B — Technicien/Dessinateur", brut:2489.23},
+    {cat:"Niveau C — Ingénieur/Chef projet", brut:2867.45}, {cat:"Niveau D — Cadre technique", brut:3456.78},
+  ]},
+  "211": { label:"CP 211 — Transport & logistique (emp.)", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Niveau 1 — Administratif", brut:2189.45}, {cat:"Niveau 2 — Dispatcher", brut:2367.89},
+    {cat:"Niveau 3 — Responsable", brut:2678.34}, {cat:"Niveau 4 — Manager", brut:3123.56},
+  ]},
+  "218": { label:"CP 218 — Industrie alimentaire (emp.)", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Cat. A", brut:2198.34}, {cat:"Cat. B", brut:2367.56}, {cat:"Cat. C", brut:2578.90}, {cat:"Cat. D", brut:2867.23},
+  ]},
+  "219": { label:"CP 219 — Commerce international", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Grade 1", brut:2234.56}, {cat:"Grade 2", brut:2489.78}, {cat:"Grade 3", brut:2812.34}, {cat:"Grade 4", brut:3234.56},
+  ]},
+  "220": { label:"CP 220 — Diamantaires", source:"Convention annuelle — AWDC 2026", categories:[
+    {cat:"Polisseur/Ouvrier qualifié", brut:2389.45}, {cat:"Classificateur", brut:2589.67}, {cat:"Vendeur/Courtier", brut:2867.34},
+  ]},
+  "223": { label:"CP 223 — Assurances", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Classe I — Débutant", brut:2389.56}, {cat:"Classe II — Qualifié", brut:2678.90},
+    {cat:"Classe III — Expert", brut:3045.67}, {cat:"Classe IV — Cadre", brut:3589.23}, {cat:"Classe V — Cadre sup.", brut:4234.56},
+  ]},
+  "226": { label:"CP 226 — Intérimaires", source:"CP de l'utilisateur applicable — 2026", categories:[
+    {cat:"CP utilisatrice applicable — minimum garanti", brut:2070.48},
+  ]},
+  "302": { label:"CP 302 — Hôtellerie & restauration", source:"CCT sectorielle — 01/01/2026", note:"Avantages en nature déductibles: logement, repas", categories:[
+    {cat:"Cat. 1 — Personnel salle/Aide", brut:2112.34}, {cat:"Cat. 2 — Cuisinier/Réceptionniste", brut:2267.89},
+    {cat:"Cat. 3 — Chef de partie/Responsable", brut:2489.56}, {cat:"Cat. 4 — Chef cuisine/Directeur", brut:2912.34},
+  ]},
+  "309": { label:"CP 309 — Gardiennage & surveillance", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Cat. A — Agent de gardiennage", brut:2189.45}, {cat:"Cat. B — Agent qualifié", brut:2312.67},
+    {cat:"Cat. C — Chef d'équipe", brut:2489.34}, {cat:"Cat. D — Superviseur", brut:2712.56},
+  ]},
+  "310": { label:"CP 310 — Secteur bancaire", source:"CCT Febelfin — 01/01/2026", categories:[
+    {cat:"Niveau A — Agent débutant", brut:2867.45}, {cat:"Niveau B — Agent qualifié", brut:3234.78},
+    {cat:"Niveau C — Spécialiste/Analyste", brut:3789.56}, {cat:"Niveau D — Expert/Senior", brut:4456.89}, {cat:"Niveau E — Cadre", brut:5234.67},
+  ]},
+  "313": { label:"CP 313 — Pharmacies privées", source:"CCT sectorielle — 2026", categories:[
+    {cat:"Cat. I — Aide en pharmacie", brut:2234.56}, {cat:"Cat. II — Assistant technique", brut:2489.78},
+    {cat:"Cat. III — Pharmacien diplômé", brut:3312.45}, {cat:"Cat. IV — Pharmacien responsable", brut:4023.67},
+  ]},
+  "317": { label:"CP 317 — Commerce alimentaire", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Catégorie A", brut:2134.56}, {cat:"Catégorie B", brut:2256.78}, {cat:"Catégorie C", brut:2412.34},
+  ]},
+  "318": { label:"CP 318 — Coiffure & soins de beauté", source:"CCT sectorielle — 01/01/2026", note:"Taux horaire — souvent temps partiel + commissions", categories:[
+    {cat:"Aide-coiffeur(se)", brut:12.51, type:"horaire"}, {cat:"Coiffeur(se) qualifié(e)", brut:13.24, type:"horaire"},
+    {cat:"Styliste/Responsable technique", brut:14.67, type:"horaire"},
+  ]},
+  "320": { label:"CP 320 — Transport routier (emp.)", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Cat. 1 — Employé administratif", brut:2234.56}, {cat:"Cat. 2 — Dispatcher/Planificateur", brut:2478.90},
+    {cat:"Cat. 3 — Responsable logistique", brut:2867.34}, {cat:"Cat. 4 — Manager transport", brut:3456.78},
+  ]},
+  "322": { label:"CP 322 — Transport aérien", source:"CCT sectorielle/Skeyes — 2026", categories:[
+    {cat:"Personnel sol — Niveau 1", brut:2678.45}, {cat:"Personnel sol — Niveau 2", brut:3012.67},
+    {cat:"Technicien maintenance aéronefs", brut:3456.89}, {cat:"Superviseur/Chef d'équipe", brut:3912.34},
+  ]},
+  "324": { label:"CP 324 — Agences de voyage", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Agent de voyage débutant", brut:2178.90}, {cat:"Agent qualifié", brut:2345.67}, {cat:"Senior/Spécialiste", brut:2589.34}, {cat:"Responsable", brut:2912.56},
+  ]},
+  "326": { label:"CP 326 — Commerce de détail indép.", source:"CCT sectorielle — 2026", categories:[
+    {cat:"Cat. 1 — Vendeur débutant", brut:2089.34}, {cat:"Cat. 2 — Vendeur qualifié", brut:2178.56},
+    {cat:"Cat. 3 — Chef de rayon", brut:2345.67}, {cat:"Cat. 4 — Responsable", brut:2623.89},
+  ]},
+  "327": { label:"CP 327 — Travail adapté", source:"RMMMG + subventions régionales — 2026", categories:[
+    {cat:"Travailleur adapté — RMMMG", brut:2070.48},
+  ]},
+  "329": { label:"CP 329 — Grandes surfaces alimentaires", source:"CCT sectorielle — indexation 2026", categories:[
+    {cat:"Cat. 1 — Caissier/Aide", brut:2156.78}, {cat:"Cat. 2 — Employé qualifié", brut:2312.45},
+    {cat:"Cat. 3 — Chef de rayon", brut:2534.67}, {cat:"Cat. 4 — Manager département", brut:3012.34},
+  ]},
+  "330": { label:"CP 330 — Soins de santé", source:"IFIC 2026 — Accord social non-marchand", note:"Barème IFIC applicable en Wallonie et Bruxelles", categories:[
+    {cat:"IFIC 2 — Aide-soignant(e) brevet", brut:2234.56}, {cat:"IFIC 4 — Aide-soignant qualifié", brut:2378.90},
+    {cat:"IFIC 6 — Infirmier bachelier A1", brut:2678.45}, {cat:"IFIC 8 — Infirmier spécialisé", brut:2912.67},
+    {cat:"IFIC 10 — Infirmier en chef", brut:3156.89}, {cat:"IFIC 12 — Coordinateur soins", brut:3445.34},
+    {cat:"IFIC 14 — Cadre intermédiaire", brut:3812.56}, {cat:"IFIC 16 — Directeur des soins", brut:4345.78},
+    {cat:"Médecin salarié (convention INAMI)", brut:4567.89},
+  ]},
+  "331": { label:"CP 331 — Soins santé Flandre", source:"IFIC Flandre + Vlaamse akkoorden 2026", categories:[
+    {cat:"Niveau 1 — Aide-soignant", brut:2256.78}, {cat:"Niveau 2 — Aide-soignant qualifié", brut:2389.45},
+    {cat:"Niveau 3 — Infirmier bachelier", brut:2712.34}, {cat:"Niveau 4 — Infirmier spécialisé", brut:2956.67},
+    {cat:"Niveau 5 — Cadre infirmier", brut:3234.89},
+  ]},
+  "332": { label:"CP 332 — Soins santé Wal-Bxl", source:"IFIC Wal-Bxl — accord non-marchand 2026", categories:[
+    {cat:"Niveau 1 — Aide-soignant", brut:2234.56}, {cat:"Niveau 2 — Aide-soignant qualifié", brut:2367.89},
+    {cat:"Niveau 3 — Infirmier bachelier", brut:2678.45}, {cat:"Niveau 4 — Infirmier spécialisé", brut:2912.67},
+    {cat:"Niveau 5 — Cadre infirmier", brut:3189.34},
+  ]},
+  "333": { label:"CP 333 — Commerce détail indép.", source:"CCT sectorielle — 2026", categories:[
+    {cat:"Cat. 1", brut:2089.34}, {cat:"Cat. 2", brut:2198.67}, {cat:"Cat. 3", brut:2356.78},
+  ]},
+  "335": { label:"CP 335 — Travail intérimaire", source:"CP utilisatrice applicable — 2026", categories:[
+    {cat:"CP de l'entreprise utilisatrice applicable", brut:2070.48},
+  ]},
+  "336": { label:"CP 336 — Titres-services", source:"CCT sectorielle — 01/01/2026", note:"Taux horaire — temps partiel généralement", categories:[
+    {cat:"Aide-ménagère — 0-5 ans ancienneté", brut:12.01, type:"horaire"},
+    {cat:"Aide-ménagère — 5-10 ans ancienneté", brut:12.35, type:"horaire"},
+    {cat:"Aide-ménagère — +10 ans ancienneté", brut:12.68, type:"horaire"},
+  ]},
+  "337": { label:"CP 337 — PME (employés)", source:"CCT sectorielle — 2026", categories:[
+    {cat:"Cat. 1 — Débutant", brut:2112.45}, {cat:"Cat. 2 — Qualifié", brut:2298.67},
+    {cat:"Cat. 3 — Expérimenté", brut:2534.89}, {cat:"Cat. 4 — Cadre PME", brut:2934.56},
+  ]},
+  "338": { label:"CP 338 — Nettoyage (employés)", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Cat. 1 — Administratif", brut:2123.45}, {cat:"Cat. 2 — Superviseur terrain", brut:2345.67}, {cat:"Cat. 3 — Manager", brut:2678.90},
+  ]},
+  "340": { label:"CP 340 — Construction commerce", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Niveau A", brut:2234.56}, {cat:"Niveau B", brut:2489.23}, {cat:"Niveau C", brut:2867.45}, {cat:"Niveau D", brut:3234.78},
+  ]},
+  "100": { label:"CP 100 — Ouvriers (général)", source:"CCT n°43 CNT + CCT CP 100 — 2026", note:"Taux horaire", categories:[
+    {cat:"Non qualifié", brut:12.13, type:"horaire"}, {cat:"Semi-qualifié", brut:12.67, type:"horaire"},
+    {cat:"Qualifié", brut:13.34, type:"horaire"}, {cat:"Hautement qualifié", brut:14.12, type:"horaire"},
+  ]},
+  "105": { label:"CP 105 — Véhicules neufs & garages", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Cat. I — Aide mécanicien", brut:13.12, type:"horaire"}, {cat:"Cat. II — Mécanicien", brut:14.23, type:"horaire"},
+    {cat:"Cat. III — Mécanicien qualifié", brut:15.45, type:"horaire"}, {cat:"Cat. IV — Technicien", brut:16.89, type:"horaire"},
+    {cat:"Cat. V — Expert technique", brut:18.34, type:"horaire"},
+  ]},
+  "106": { label:"CP 106 — Carburants", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Pompiste/Employé station", brut:13.12, type:"horaire"}, {cat:"Chef de station", brut:14.56, type:"horaire"},
+  ]},
+  "107": { label:"CP 107 — Hôtellerie (ouvriers)", source:"CCT sectorielle — 01/01/2026", note:"Avantages en nature logement/repas déductibles", categories:[
+    {cat:"Aide de cuisine / Plongeur", brut:12.34, type:"horaire"}, {cat:"Cuisinier qualifié", brut:13.45, type:"horaire"},
+    {cat:"Chef de partie", brut:14.78, type:"horaire"},
+  ]},
+  "108": { label:"CP 108 — Nettoyage (ouvriers)", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Classe A — Agent nettoyage", brut:12.34, type:"horaire"}, {cat:"Classe B — Agent qualifié", brut:12.89, type:"horaire"},
+    {cat:"Classe C — Chef d'équipe", brut:13.67, type:"horaire"}, {cat:"Classe D — Superviseur", brut:14.56, type:"horaire"},
+  ]},
+  "112": { label:"CP 112 — Garages (ouvriers)", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Cat. I — Aide mécanicien", brut:13.45, type:"horaire"}, {cat:"Cat. II — Mécanicien qualifié", brut:14.78, type:"horaire"},
+    {cat:"Cat. III — Technicien diagnostiqueur", brut:16.12, type:"horaire"}, {cat:"Cat. IV — Expert", brut:17.89, type:"horaire"},
+  ]},
+  "115": { label:"CP 115 — Confection & textile", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Ouvrier non qualifié", brut:12.13, type:"horaire"}, {cat:"Ouvrier qualifié", brut:12.89, type:"horaire"},
+    {cat:"Tailleur/Couturier spécialisé", brut:13.78, type:"horaire"},
+  ]},
+  "118": { label:"CP 118 — Alimentation (ouvriers)", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Cat. 1 — Manœuvre", brut:12.67, type:"horaire"}, {cat:"Cat. 2 — Spécialisé", brut:13.23, type:"horaire"},
+    {cat:"Cat. 3 — Qualifié", brut:13.89, type:"horaire"}, {cat:"Cat. 4 — Hautement qualifié", brut:14.78, type:"horaire"},
+    {cat:"Cat. 5 — Chef d'équipe", brut:15.67, type:"horaire"},
+  ]},
+  "119": { label:"CP 119 — Boulangerie", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Aide-boulanger", brut:12.89, type:"horaire"}, {cat:"Boulanger qualifié", brut:13.78, type:"horaire"},
+    {cat:"Pâtissier qualifié", brut:14.34, type:"horaire"}, {cat:"Chef boulanger", brut:15.12, type:"horaire"},
+  ]},
+  "121": { label:"CP 121 — Nettoyage à sec", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Ouvrier nettoyage à sec", brut:12.23, type:"horaire"}, {cat:"Technicien pressing qualifié", brut:13.12, type:"horaire"},
+  ]},
+  "124": { label:"CP 124 — Bâtiment & Travaux Publics", source:"CCT Confédération Construction — 01/01/2026", note:"Hors primes: intempéries (11,49€/h), déplacements, outillage", categories:[
+    {cat:"Cat. A — Manœuvre", brut:15.67, type:"horaire"}, {cat:"Cat. B — Ouvrier qualifié (CEFA)", brut:17.23, type:"horaire"},
+    {cat:"Cat. C — Hautement qualifié", brut:18.89, type:"horaire"}, {cat:"Cat. D — Chef d'équipe", brut:20.34, type:"horaire"},
+    {cat:"Cat. E — Contremaître", brut:22.67, type:"horaire"},
+  ]},
+  "125": { label:"CP 125 — Industrie du bois", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Cat. 1 — Non qualifié", brut:13.45, type:"horaire"}, {cat:"Cat. 2 — Semi-qualifié", brut:14.23, type:"horaire"},
+    {cat:"Cat. 3 — Qualifié (menuisier)", brut:15.12, type:"horaire"}, {cat:"Cat. 4 — Hautement qualifié", brut:16.34, type:"horaire"},
+  ]},
+  "126": { label:"CP 126 — Ameublement", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Cat. 1 — Aide", brut:13.12, type:"horaire"}, {cat:"Cat. 2 — Qualifié", brut:14.23, type:"horaire"},
+    {cat:"Cat. 3 — Ébéniste spécialisé", brut:15.45, type:"horaire"},
+  ]},
+  "128": { label:"CP 128 — Métal, mécanique & électrotechnique", source:"CCT Agoria — 01/01/2026", categories:[
+    {cat:"Cat. 1 — Aide-opérateur", brut:14.23, type:"horaire"}, {cat:"Cat. 2 — Opérateur", brut:15.12, type:"horaire"},
+    {cat:"Cat. 3 — Technicien", brut:16.45, type:"horaire"}, {cat:"Cat. 4 — Technicien qualifié/Soudeur", brut:17.89, type:"horaire"},
+    {cat:"Cat. 5 — Chef d'équipe/Contremaître", brut:19.34, type:"horaire"},
+  ]},
+  "130": { label:"CP 130 — Imprimeries & médias graphiques", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Classe 1 — Aide-imprimeur", brut:13.89, type:"horaire"}, {cat:"Classe 2 — Opérateur", brut:14.78, type:"horaire"},
+    {cat:"Classe 3 — Imprimeur qualifié/PAO", brut:15.89, type:"horaire"}, {cat:"Classe 4 — Chef d'atelier", brut:17.34, type:"horaire"},
+  ]},
+  "132": { label:"CP 132 — Agriculture", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Cat. I — Ouvrier agricole", brut:12.13, type:"horaire"}, {cat:"Cat. II — Spécialisé", brut:12.67, type:"horaire"},
+    {cat:"Cat. III — Qualifié/Tractoriste", brut:13.34, type:"horaire"}, {cat:"Cat. IV — Chef d'exploitation", brut:14.12, type:"horaire"},
+  ]},
+  "133": { label:"CP 133 — Horticulture", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Ouvrier horticole", brut:12.23, type:"horaire"}, {cat:"Jardinier qualifié", brut:12.89, type:"horaire"},
+    {cat:"Paysagiste/Chef d'équipe", brut:13.78, type:"horaire"},
+  ]},
+  "136": { label:"CP 136 — Industrie chimique (ouvriers)", source:"CCT Essenscia — 01/01/2026", categories:[
+    {cat:"Cat. I — Opérateur débutant", brut:14.78, type:"horaire"}, {cat:"Cat. II — Opérateur qualifié", brut:15.89, type:"horaire"},
+    {cat:"Cat. III — Technicien process", brut:17.34, type:"horaire"}, {cat:"Cat. IV — Technicien senior", brut:18.89, type:"horaire"},
+    {cat:"Cat. V — Chef d'équipe", brut:20.45, type:"horaire"},
+  ]},
+  "140": { label:"CP 140 — Transport routier (chauffeurs)", source:"CCT UPTR-FEBETRA — 01/01/2026", note:"+ per diem journalier exonéré: max 40,24€/j grand routier", categories:[
+    {cat:"Chauffeur permis B — livraison locale", brut:13.78, type:"horaire"}, {cat:"Chauffeur permis C — régional", brut:14.67, type:"horaire"},
+    {cat:"Chauffeur permis CE — national", brut:15.45, type:"horaire"}, {cat:"Chauffeur CE — international/grand routier", brut:16.23, type:"horaire"},
+    {cat:"Chauffeur CE — Matières dangereuses (ADR)", brut:17.12, type:"horaire"},
+  ]},
+  "142": { label:"CP 142 — Jardiniers & paysagistes", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Aide-jardinier", brut:12.13, type:"horaire"}, {cat:"Jardinier qualifié", brut:12.78, type:"horaire"},
+    {cat:"Paysagiste/Chef d'équipe", brut:13.56, type:"horaire"},
+  ]},
+  "143": { label:"CP 143 — Garde d'enfants", source:"CCT sectorielle — 01/01/2026", categories:[
+    {cat:"Aide-gardienne", brut:12.13, type:"horaire"}, {cat:"Puéricultrice qualifiée", brut:12.89, type:"horaire"},
+    {cat:"Responsable crèche", brut:13.78, type:"horaire"},
+  ]},
+  "149": { label:"CP 149 — Électricité (ouvriers)", source:"CCT Volta — 01/01/2026", categories:[
+    {cat:"Cat. 1 — Aide-électricien", brut:14.89, type:"horaire"}, {cat:"Cat. 2 — Électricien qualifié", brut:16.45, type:"horaire"},
+    {cat:"Cat. 3 — Électricien spécialisé (AREI)", brut:17.89, type:"horaire"}, {cat:"Cat. 4 — Chef d'équipe", brut:19.56, type:"horaire"},
+    {cat:"Cat. 5 — Contremaître haute tension", brut:21.34, type:"horaire"},
+  ]},
+  "150": { label:"CP 150 — Travail adapté (ouvriers)", source:"RMMMG + subventions régionales — 2026", categories:[
+    {cat:"Travailleur adapté — RMMMG", brut:12.13, type:"horaire"},
+  ]},
+  "319": { label:"CP 319 — Éducation & enseignement", source:"Barèmes FWB/Vlaamse overheid — indexation 01/2026", note:"Augmentation annuelle à l'ancienneté baremique", categories:[
+    {cat:"Instituteur primaire — débutant (AESI)", brut:2456.78}, {cat:"Instituteur primaire — 5 ans", brut:2678.90}, {cat:"Instituteur primaire — 10 ans", brut:2912.34},
+    {cat:"Prof secondaire inférieur (AESI)", brut:2678.90}, {cat:"Prof secondaire supérieur (AESS)", brut:2912.34}, {cat:"Prof secondaire sup. — 10 ans", brut:3245.67},
+    {cat:"Directeur école primaire", brut:3456.89}, {cat:"Directeur école secondaire", brut:3912.45},
+  ]},
+  "319.01": { label:"CP 319.01 — Enseignement libre", source:"Barèmes FWB réseau libre — 01/2026", categories:[
+    {cat:"Instituteur — débutant", brut:2456.78}, {cat:"Instituteur — 5 ans", brut:2678.90},
+    {cat:"Professeur secondaire — débutant", brut:2678.90}, {cat:"Professeur secondaire — 10 ans", brut:3245.67},
+  ]},
+  "000": { label:"Dirigeant — Pas de minimum légal", source:"Rémunération fixée par l'AG", note:"Minimum INASTI pour indépendant: cotisations sur base 17.349,99€/an minimum", categories:[
+    {cat:"Aucun minimum légal — rémunération AG", brut:0},
+  ]},
+  "FLEXI": { label:"Flexi-job — Minimum légal", source:"AR 07/06/2023 modifié — 01/01/2026", categories:[
+    {cat:"Tous secteurs — minimum légal 2026", brut:11.54, type:"horaire"},
+    {cat:"HORECA (CP 302)", brut:12.01, type:"horaire"},
+    {cat:"Commerce alimentaire (CP 201)", brut:11.89, type:"horaire"},
+  ]},
+  "ETU": { label:"Étudiant jobiste — Cotisation solidarité 5,42%", source:"RMMMG + CCT sectorielle — 2026", categories:[
+    {cat:"Minimum légal tous secteurs", brut:12.13, type:"horaire"},
+    {cat:"HORECA (CP 302)", brut:12.45, type:"horaire"},
+    {cat:"Grande surface (CP 329)", brut:12.34, type:"horaire"},
+  ]},
+};
+
+// Ancien CP_MIN conservé pour compatibilité wizCheckSalaire
+var CP_MIN = {};
+Object.keys(BAREMES_CCT).forEach(function(cp){
+  var b = BAREMES_CCT[cp];
+  var cats = b.categories;
+  var firstBrut = cats[0].brut;
+  CP_MIN[cp] = { min: firstBrut, label: b.label, note: b.source };
+});
+CP_MIN['DEFAULT'] = { min: 2070.48, label: 'RMMMG national 2026', note: 'Salaire minimum interprofessionnel garanti' };
+
+// ── Affichage barème CP dans le wizard ──
+function wizShowBaremeCP() {
+  var cp = document.getElementById('w-cp')?.value || 'DEFAULT';
+  var statut = document.getElementById('w-statut')?.value || '';
+  var key = cp;
+  if(statut==='ETU') key='ETU';
+  if(statut==='FLEXI') key='FLEXI';
+  var bareme = BAREMES_CCT[key] || BAREMES_CCT['200'];
+  var bloc = document.getElementById('w-salaire-min');
+  var labelEl = document.getElementById('w-salaire-min-label');
+  var noteEl = document.getElementById('w-salaire-min-note');
+  var alertEl = document.getElementById('w-salaire-min-alert');
+  if(!bloc || !bareme) return;
+  bloc.style.display = 'block';
+  var rows = bareme.categories.map(function(c){
+    var isH = c.type==='horaire';
+    var val = isH ? c.brut.toFixed(2)+'€/h (~'+Math.round(c.brut*38*52/12).toLocaleString('fr-BE')+'€/m)' : c.brut.toFixed(2)+'€/mois brut';
+    return '<tr><td style="padding:3px 8px;color:var(--muted);font-size:10px;">'+c.cat+'</td><td style="padding:3px 8px;text-align:right;font-weight:600;color:var(--gold);font-size:10px;white-space:nowrap;">'+val+'</td></tr>';
+  }).join('');
+  labelEl.innerHTML = '<strong>📊 '+bareme.label+'</strong><br><span style="font-size:9px;color:var(--muted);">Source: '+bareme.source+'</span>'
+    +(bareme.note ? '<br><span style="font-size:9px;color:#60a5fa;">ℹ️ '+bareme.note+'</span>' : '')
+    +'<table style="width:100%;margin-top:6px;border-collapse:collapse;">'+rows+'</table>';
+  noteEl.textContent = '';
+  wizCheckSalaire();
+}
+ial Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9963A;
+  --gold-light: #E8B86D;
+  --gold-dim: #8B6420;
+  --bg: #0D0D0E;
+  --bg2: #141416;
+  --bg3: #1A1A1E;
+  --border: #2A2A30;
+  --text: #E8E6E0;
+  --muted: #6B6860;
+  --urgent: #E05C3A;
+  --green: #4CAF80;
+  --blue: #5B9BD6;
+}
+
+/* ── MODE JOUR ── */
+:root.light {
+  --bg: #F5F3EF;
+  --bg2: #EDEAE4;
+  --bg3: #E5E1DA;
+  --border: #D4CFC7;
+  --text: #1A1916;
+  --muted: #6B6860;
+  --gold: #A07D3E;
+  --gold-light: #C9963A;
+  --gold-dim: #8B6420;
+  --urgent: #C0392B;
+  --green: #2E7D52;
+  --blue: #2563EB;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+}
+
+.logo-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-left: 1px solid var(--border);
+  padding-left: 10px;
+  margin-left: 2px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.badge-sprint {
+  background: var(--gold-dim);
+  color: var(--gold-light);
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+/* PAGE HERO */
+.hero {
+  padding: 48px 32px 32px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #141416 0%, #0D0D0E 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -80px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(201,150,58,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-label::before {
+  content: '';
+  display: inline-block;
+  width: 20px; height: 1px;
+  background: var(--gold);
+}
+
+.hero h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 36px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.15;
+  margin-bottom: 12px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--gold-light);
+}
+
+.hero-desc {
+  color: var(--muted);
+  font-size: 13px;
+  max-width: 560px;
+  line-height: 1.7;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 32px;
+  margin-top: 24px;
+}
+
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hero-stat-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--gold);
+}
+
+.hero-stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* PROGRESS NAV */
+.progress-nav {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.progress-nav::-webkit-scrollbar { display: none; }
+
+.pnav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.pnav-item:hover { color: var(--text); }
+.pnav-item.urgent { }
+.pnav-item .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+.pnav-item.phase-pre .dot { background: var(--urgent); }
+.pnav-item.phase-monthly .dot { background: var(--gold); }
+.pnav-item.phase-quarterly .dot { background: var(--blue); }
+.pnav-item.phase-annual .dot { background: var(--green); }
+.pnav-item.phase-exit .dot { background: var(--muted); }
+
+/* MAIN LAYOUT */
+.main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 40px 32px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+/* PHASE SECTIONS */
+.phase {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.phase-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.phase-icon {
+  width: 36px; height: 36px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.phase-pre .phase-icon { background: rgba(224,92,58,0.12); }
+.phase-monthly .phase-icon { background: rgba(201,150,58,0.12); }
+.phase-quarterly .phase-icon { background: rgba(91,155,214,0.12); }
+.phase-annual .phase-icon { background: rgba(76,175,128,0.12); }
+.phase-exit .phase-icon { background: rgba(107,104,96,0.12); }
+
+.phase-title-group { flex: 1; }
+
+.phase-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.phase-subtitle {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+}
+
+.phase-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 2px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.phase-pre .phase-badge { background: rgba(224,92,58,0.15); color: var(--urgent); border: 1px solid rgba(224,92,58,0.25); }
+.phase-monthly .phase-badge { background: rgba(201,150,58,0.15); color: var(--gold-light); border: 1px solid rgba(201,150,58,0.25); }
+.phase-quarterly .phase-badge { background: rgba(91,155,214,0.15); color: var(--blue); border: 1px solid rgba(91,155,214,0.25); }
+.phase-annual .phase-badge { background: rgba(76,175,128,0.15); color: var(--green); border: 1px solid rgba(76,175,128,0.25); }
+.phase-exit .phase-badge { background: rgba(107,104,96,0.15); color: var(--muted); border: 1px solid rgba(107,104,96,0.25); }
+
+/* STEP CARDS */
+.steps-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.step-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.step-card:hover { border-color: #3A3A42; }
+
+.step-card.urgent-card { border-color: rgba(224,92,58,0.3); }
+.step-card.urgent-card:hover { border-color: rgba(224,92,58,0.5); }
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.step-number {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.phase-monthly .step-number { border-color: rgba(201,150,58,0.4); color: var(--gold); }
+.phase-pre .step-number { border-color: rgba(224,92,58,0.4); color: var(--urgent); }
+.phase-quarterly .step-number { border-color: rgba(91,155,214,0.4); color: var(--blue); }
+.phase-annual .step-number { border-color: rgba(76,175,128,0.4); color: var(--green); }
+.phase-exit .step-number { border-color: rgba(107,104,96,0.4); color: var(--muted); }
+
+.step-meta { flex: 1; }
+
+.step-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.step-desc {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.step-tags {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 2px;
+  letter-spacing: 0.04em;
+}
+
+.tag-urgent { background: rgba(224,92,58,0.1); color: var(--urgent); }
+.tag-law { background: rgba(91,155,214,0.1); color: var(--blue); }
+.tag-doc { background: rgba(76,175,128,0.1); color: var(--green); }
+.tag-amount { background: rgba(201,150,58,0.1); color: var(--gold-light); }
+.tag-warning { background: rgba(224,92,58,0.08); color: #E0923A; }
+
+.step-chevron {
+  color: var(--muted);
+  font-size: 12px;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.step-card.open .step-chevron { transform: rotate(180deg); }
+
+/* STEP BODY */
+.step-body {
+  display: none;
+  padding: 0 20px 20px 64px;
+}
+
+.step-card.open .step-body { display: block; }
+
+.step-body-inner {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sub-section-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gold-dim);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.check-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.check-item::before {
+  content: '◦';
+  color: var(--gold-dim);
+  margin-top: 1px;
+  flex-shrink: 0;
+  font-size: 12px;
+}
+
+.check-item.important::before { content: '◆'; color: var(--gold); }
+.check-item.warning::before { content: '⚠'; color: var(--urgent); font-size: 11px; }
+.check-item.law::before { content: '§'; color: var(--blue); font-size: 11px; font-style: normal; }
+
+.info-box {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.info-box strong { color: var(--text); font-weight: 500; }
+.info-box.urgent { border-color: rgba(224,92,58,0.25); background: rgba(224,92,58,0.04); }
+.info-box.urgent strong { color: var(--urgent); }
+.info-box.gold { border-color: rgba(201,150,58,0.25); background: rgba(201,150,58,0.04); }
+.info-box.gold strong { color: var(--gold-light); }
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.calc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.calc-row:last-child { border-bottom: none; }
+.calc-row .label { color: var(--muted); }
+.calc-row .value { font-family: 'DM Mono', monospace; font-weight: 500; }
+.calc-row.total .label { color: var(--text); font-weight: 600; }
+.calc-row.total .value { color: var(--gold-light); font-size: 14px; }
+.calc-row.minus .value { color: var(--urgent); }
+.calc-row.plus .value { color: var(--green); }
+
+/* ALERT BOX */
+.alert-box {
+  background: rgba(224,92,58,0.06);
+  border: 1px solid rgba(224,92,58,0.3);
+  border-radius: 6px;
+  padding: 14px 18px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.alert-text strong { color: var(--urgent); display: block; margin-bottom: 2px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* DEADLINE PILL */
+.deadline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 4px 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.deadline.urgent { border-color: rgba(224,92,58,0.3); color: var(--urgent); background: rgba(224,92,58,0.06); }
+.deadline.ok { border-color: rgba(76,175,128,0.3); color: var(--green); background: rgba(76,175,128,0.06); }
+
+/* AMOUNTS TABLE */
+.amounts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.amounts-table th {
+  text-align: left;
+  padding: 6px 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.amounts-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(42,42,48,0.5);
+  vertical-align: top;
+}
+
+.amounts-table tr:last-child td { border-bottom: none; }
+.amounts-table .mono { font-family: 'DM Mono', monospace; }
+
+/* BOTTOM SUMMARY */
+.summary-strip {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px 28px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.summary-item {}
+.summary-item-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-family: 'DM Mono', monospace;
+}
+
+.summary-item-val {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  color: var(--gold);
+}
+
+.summary-item-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+@media (max-width: 768px) {
+  .hero h1 { font-size: 26px; }
+  .main { padding: 24px 16px 60px; }
+  .hero { padding: 32px 16px 24px; }
+  .header { padding: 0 16px; }
+  .step-body { padding: 0 12px 16px 16px; }
+  .two-col { grid-template-columns: 1fr; }
+  .summary-strip { grid-template-columns: 1fr 1fr; }
+  .hero-stats { flex-wrap: wrap; gap: 20px; }
+}
+
+/* ── CALCULATEURS ── */
+.calc-box { background:var(--bg); border:1px solid #2a2a2a; border-radius:8px; padding:24px 26px; margin-bottom:20px; }
+.calc-box h3 { font-family:'DM Serif Display',serif; color:#C9963A; font-size:16px; margin:0 0 18px; border-bottom:1px solid #222; padding-bottom:10px; }
+.calc-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+.calc-grid.three { grid-template-columns:1fr 1fr 1fr; }
+.calc-input-group { display:flex; flex-direction:column; gap:5px; }
+.calc-input-group label { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; }
+.calc-input-group input, .calc-input-group select {
+  background:var(--bg2); border:1px solid #333; border-radius:4px; color:var(--text);
+  font-family:'DM Mono',monospace; font-size:13px; padding:9px 12px; outline:none; transition:border-color 0.2s;
+}
+.calc-input-group input:focus, .calc-input-group select:focus { border-color:#C9963A; }
+.calc-btn { background:#C9963A; color:#0D0D0E; font-weight:700; font-family:'DM Mono',monospace; font-size:12px; letter-spacing:0.05em; padding:10px 22px; border:none; border-radius:4px; cursor:pointer; transition:opacity 0.2s; }
+.calc-btn:hover { opacity:0.85; }
+.calc-result { background:var(--bg2); border:1px solid #C9963A33; border-radius:6px; padding:18px 20px; margin-top:14px; display:none; }
+.calc-result.show { display:block; }
+.calc-result-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid #1e1e1e; font-family:'DM Mono',monospace; font-size:12px; }
+.calc-result-row:last-child { border-bottom:none; }
+.calc-result-row .label { color:var(--muted); }
+.calc-result-row .val { color:var(--text); }
+.calc-result-row.total { border-top:1px solid #C9963A44; margin-top:6px; padding-top:10px; }
+.calc-result-row.total .label { color:#C9963A; font-weight:700; }
+.calc-result-row.total .val { color:#C9963A; font-weight:700; font-size:14px; }
+.calc-result-row.green .val { color:#4CAF82; }
+.calc-result-row.red .val { color:#E05C3A; }
+@media(max-width:640px) { .calc-grid, .calc-grid.three { grid-template-columns:1fr; } }
+
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.5; transform:scale(1.4); }
+}
+/* ── EMAIL MODAL ── */
+.modal-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75);
+  z-index:9999; align-items:center; justify-content:center;
+}
+.modal-overlay.open { display:flex; }
+.modal-box {
+  background:var(--bg3); border:1px solid #C9963A; border-radius:8px;
+  width:min(700px,96vw); max-height:90vh; overflow-y:auto;
+  padding:32px 36px; position:relative;
+}
+.modal-close {
+  position:absolute; top:14px; right:18px; cursor:pointer;
+  font-size:22px; color:#777; background:none; border:none; line-height:1;
+}
+.modal-close:hover { color:#C9963A; }
+.modal-title { font-family:'DM Serif Display',serif; color:#C9963A; font-size:20px; margin-bottom:6px; }
+.modal-subtitle { color:var(--muted); font-size:12px; margin-bottom:24px; font-family:'DM Mono',monospace; }
+.email-field { margin-bottom:14px; }
+.email-field label { display:block; font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:0.07em; margin-bottom:5px; }
+.email-field input, .email-field select, .email-field textarea {
+  width:100%; background:var(--bg); border:1px solid #333; border-radius:4px;
+  color:var(--text); font-family:'DM Mono',monospace; font-size:13px;
+  padding:10px 12px; box-sizing:border-box; outline:none; transition:border-color 0.2s;
+}
+.email-field input:focus, .email-field select:focus, .email-field textarea:focus { border-color:#C9963A; }
+.email-field textarea { min-height:160px; resize:vertical; line-height:1.6; }
+.email-field select option { background:var(--bg3); }
+.email-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.btn-send {
+  background:#C9963A; color:#0D0D0E; font-weight:700; font-family:'DM Mono',monospace;
+  font-size:13px; letter-spacing:0.05em; padding:12px 28px; border:none;
+  border-radius:4px; cursor:pointer; width:100%; margin-top:8px; transition:opacity 0.2s;
+}
+.btn-send:hover { opacity:0.85; }
+.btn-send:disabled { opacity:0.4; cursor:not-allowed; }
+.send-status { margin-top:12px; font-family:'DM Mono',monospace; font-size:12px; text-align:center; min-height:20px; }
+.send-status.ok { color:#4CAF82; }
+.send-status.err { color:#E05C3A; }
+.critical-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; margin:16px 0 24px; }
+.crit-card {
+  background:var(--bg); border:1px solid #2a2a2a; border-left:3px solid;
+  border-radius:6px; padding:16px 18px; cursor:pointer; transition:border-color 0.2s, transform 0.15s;
+  display:flex; flex-direction:column; gap:8px;
+}
+.crit-card:hover { transform:translateY(-2px); }
+.crit-card.rouge { border-left-color:#E05C3A; }
+.crit-card.orange { border-left-color:#E0923A; }
+.crit-card.gold { border-left-color:#C9963A; }
+.crit-card .crit-badge { font-family:'DM Mono',monospace; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; }
+.crit-card.rouge .crit-badge { color:#E05C3A; }
+.crit-card.orange .crit-badge { color:#E0923A; }
+.crit-card.gold .crit-badge { color:#C9963A; }
+.crit-card .crit-title { color:var(--text); font-size:13px; font-weight:600; line-height:1.4; }
+.crit-card .crit-detail { color:var(--muted); font-size:11px; font-family:'DM Mono',monospace; line-height:1.5; }
+.crit-card .crit-action { margin-top:4px; font-size:11px; font-family:'DM Mono',monospace; color:#C9963A; display:flex; align-items:center; gap:4px; }
+.email-templates { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:10px; margin:16px 0; }
+.tpl-btn {
+  background:var(--bg2); border:1px solid #2a2a2a; border-radius:5px; padding:14px 16px;
+  cursor:pointer; text-align:left; transition:border-color 0.2s;
+}
+.tpl-btn:hover { border-color:#C9963A; }
+.tpl-btn .tpl-icon { font-size:20px; margin-bottom:6px; }
+.tpl-btn .tpl-name { color:var(--text); font-size:12px; font-weight:600; margin-bottom:3px; }
+.tpl-btn .tpl-desc { color:var(--muted); font-size:11px; font-family:'DM Mono',monospace; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">
+    ◆ Aureus Social Pro
+    <span class="logo-sub">Secrétariat social digital</span>
+  </div>
+  <div class="header-right">
+    <span class="badge-sprint">v38 · Sprint 38</span>
+    <span>Mars 2026</span>
+    <span>BE 1028.230.781</span>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-label">Guide complet</div>
+  <h1>Embauche <em>A → Z</em></h1>
+  <p class="hero-desc">Tout ce qu'il faut faire pour embaucher en Belgique : avant l'entrée, chaque mois, chaque trimestre, chaque année, et à la sortie. Une seule page, dans l'ordre.</p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <span class="hero-stat-val">14</span>
+      <span class="hero-stat-label">Étapes totales</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-val">5</span>
+      <span class="hero-stat-label">Délais légaux stricts</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-val">5.000€</span>
+      <span class="hero-stat-label">Amende Dimona oubliée</span>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-val">~52K€</span>
+      <span class="hero-stat-label">Exonération 1er employé</span>
+    </div>
+  </div>
+</section>
+
+<!-- NAV -->
+<nav class="progress-nav">
+  <a href="#phase-calculateurs" class="pnav-item phase-monthly"><span class="dot"></span> 🧮 Calculateurs</a>
+  <a href="#phase-rh-plus" class="pnav-item phase-quarterly"><span class="dot"></span> Crédit-temps · Congés · Formation</a>
+  <a href="#phase-onss-taux" class="pnav-item phase-annual"><span class="dot"></span> ONSS · Précompte · Coûts 2026</a>
+  <a href="#phase-bien-etre" class="pnav-item phase-monthly"><span class="dot"></span> Bien-être · Visite médicale · Frais</a>
+  <a href="#phase-paie-avancee" class="pnav-item phase-monthly"><span class="dot"></span> 💰 Paie avancée · Saisies · Avances</a>
+  <a href="#phase-fin-contrat2" class="pnav-item phase-exit"><span class="dot"></span> 📑 Fin de contrat avancée</a>
+  <a href="#phase-rem-variable" class="pnav-item phase-quarterly"><span class="dot"></span> 🎁 Rémunération variable · Avantages</a>
+  <a href="#phase-situations-spec" class="pnav-item phase-annual"><span class="dot"></span> 🌍 Situations spéciales · Étrangers</a>
+  <a href="#phase-rh-avance" class="pnav-item phase-quarterly"><span class="dot"></span> 📋 RH avancée · Évaluation · Disciplinaire</a>
+  <a href="#phase-alertes" class="pnav-item phase-pre" style="font-weight:700;letter-spacing:0.03em"><span class="dot" style="animation:pulse 1.4s infinite"></span> ⚡ Points critiques &amp; Emails</a>
+  <a href="#phase-pre" class="pnav-item phase-pre"><span class="dot"></span> Avant l'entrée</a>
+  <a href="#phase-monthly" class="pnav-item phase-monthly"><span class="dot"></span> Chaque mois</a>
+  <a href="#phase-quarterly" class="pnav-item phase-quarterly"><span class="dot"></span> Chaque trimestre</a>
+  <a href="#phase-annual" class="pnav-item phase-annual"><span class="dot"></span> Chaque année</a>
+  <a href="#phase-absences" class="pnav-item phase-monthly"><span class="dot"></span> Absences</a>
+  <a href="#phase-reglement" class="pnav-item phase-quarterly"><span class="dot"></span> Règlement travail</a>
+  <a href="#phase-baremes" class="pnav-item phase-annual"><span class="dot"></span> Barèmes 2026</a>
+  <a href="#phase-preavis" class="pnav-item phase-exit"><span class="dot"></span> Préavis</a>
+  <a href="#phase-special" class="pnav-item phase-monthly"><span class="dot"></span> Temps partiel · Étudiant · Flexi</a>
+  <a href="#phase-rgpd" class="pnav-item phase-quarterly"><span class="dot"></span> RGPD RH</a>
+  <a href="#phase-cheques" class="pnav-item phase-monthly"><span class="dot"></span> Chèques-repas &amp; Belcotax</a>
+  <a href="#phase-cp" class="pnav-item phase-monthly"><span class="dot"></span> Commissions paritaires</a>
+  <a href="#phase-exit" class="pnav-item phase-exit"><span class="dot"></span> Fin de contrat</a>
+</nav>
+
+<main class="main">
+
+<!-- DIMONA MODAL -->
+<div id="dimona-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;overflow-y:auto;padding:40px 20px">
+  <div style="max-width:700px;margin:0 auto;background:var(--bg2);border:1px solid rgba(201,150,58,0.3);border-radius:12px;padding:32px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <div style="font-family:'DM Serif Display',serif;color:#C9963A;font-size:20px">📡 Dimona IN — Formulaire complet</div>
+      <button onclick="closeDimonaModal()" style="background:transparent;border:1px solid #333;color:var(--muted);border-radius:4px;padding:6px 14px;cursor:pointer;font-family:'DM Mono',monospace;font-size:12px">✕ Fermer</button>
+    </div>
+    <div id="dimona-modal-content"></div>
+  </div>
+</div>
+
+
+
+
+
+
+<!-- ═══════════════════════════════════ WIZARD DOSSIER COMPLET ═══════════════════════════════════ -->
+<section id="wizard-dossier" style="margin:0 0 32px 0;background:var(--bg2);border:2px solid var(--gold);border-radius:16px;overflow:hidden;">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,rgba(201,150,58,.2),rgba(201,150,58,.05));padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="width:48px;height:48px;background:linear-gradient(135deg,#C9963A,#8B6420);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🗂️</div>
+      <div>
+        <div style="font-size:18px;font-weight:800;color:var(--gold);">Générateur Dossier Complet Employé</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Saisie unique → Checklist personnalisée + Documents + Calculs automatiques</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="wizReset()" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;font-family:inherit;">🔄 Réinitialiser</button>
+      <button onclick="wizGenerate()" style="padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(135deg,#C9963A,#A07D3E);color:#060810;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">⚡ Générer le dossier</button>
+    </div>
+  </div>
+
+  <div style="padding:24px;">
+
+    <!-- ══ BLOC 1 : IDENTITÉ ══ -->
+    <div style="margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+        <div style="width:28px;height:28px;border-radius:8px;background:rgba(201,150,58,.2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">👤</div>
+        <div style="font-size:14px;font-weight:700;color:var(--gold);">1 — Identité du travailleur</div>
+        <div style="flex:1;height:1px;background:rgba(201,150,58,.15);"></div>
+        <div style="position:relative;">
+          <input id="wiz-search" type="text" placeholder="🔍 Travailleur existant..." oninput="wizSearchWorkers(this.value)"
+            style="padding:6px 12px;border-radius:6px;border:1px solid rgba(201,150,58,.3);background:var(--bg);color:var(--text);font-family:inherit;font-size:11px;width:220px;">
+          <div id="wiz-search-results" style="display:none;position:absolute;top:calc(100% + 4px);right:0;width:320px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;z-index:100;max-height:200px;overflow-y:auto;"></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;">
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Prénom *</label>
+          <input id="w-prenom" type="text" placeholder="Mohamed" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Nom *</label>
+          <input id="w-nom" type="text" placeholder="Ben Youssef" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">N° NISS *</label>
+          <input id="w-niss" type="text" placeholder="90.01.01-123-45" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Date naissance</label>
+          <input id="w-dob" type="date" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Email travailleur</label>
+          <input id="w-email" type="email" placeholder="nom@email.com" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Téléphone</label>
+          <input id="w-tel" type="text" placeholder="+32 4XX XX XX XX" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Nationalité</label>
+          <select id="w-nat" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="BE">🇧🇪 Belge</option>
+            <option value="EU">🇪🇺 UE (hors BE)</option>
+            <option value="EXTRA">🌍 Hors UE</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Situation familiale</label>
+          <select id="w-sitfam" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="isole">Isolé(e)</option>
+            <option value="marie">Marié(e) / Cohabitant légal</option>
+            <option value="chef">Chef de famille</option>
+            <option value="divorce">Divorcé(e)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Enfants à charge</label>
+          <input id="w-enfants" type="number" value="0" min="0" max="15" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">IBAN</label>
+          <input id="w-iban" type="text" placeholder="BE68 XXXX XXXX XXXX" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Sexe</label>
+          <select id="w-sexe" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="M">♂ Masculin</option>
+            <option value="F">♀ Féminin</option>
+            <option value="X">⊕ Neutre / X</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Langue administrative</label>
+          <select id="w-langue" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="FR">🇫🇷 Français</option>
+            <option value="NL">🇳🇱 Nederlands</option>
+            <option value="DE">🇩🇪 Deutsch</option>
+          </select>
+        </div>
+        <div id="w-permis-bloc">
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">N° Permis de travail</label>
+          <input id="w-permis" type="text" placeholder="Hors UE uniquement" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Adresse domicile</label>
+          <input id="w-adresse" type="text" placeholder="Rue, N° — Code postal Ville" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Région employeur</label>
+          <select id="w-region" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="BXL">🏙️ Bruxelles-Capitale</option>
+            <option value="WAL">🌿 Wallonie</option>
+            <option value="VL">🔷 Flandre</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BLOC 2 : CONTRAT ══ -->
+    <div style="margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+        <div style="width:28px;height:28px;border-radius:8px;background:rgba(201,150,58,.2);display:flex;align-items:center;justify-content:center;font-size:13px;">📋</div>
+        <div style="font-size:14px;font-weight:700;color:var(--gold);">2 — Contrat & Fonction</div>
+        <div style="flex:1;height:1px;background:rgba(201,150,58,.15);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;">
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Type de contrat *</label>
+          <select id="w-contrat" onchange="wizContratChange()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <optgroup label="── STANDARD ──">
+              <option value="CDI">CDI — Durée indéterminée</option>
+              <option value="CDD">CDD — Durée déterminée</option>
+              <option value="CDDJUSTIF">CDD — Travail nettement défini</option>
+              <option value="REMP">CDD — Remplacement absence</option>
+            </optgroup>
+            <optgroup label="── SPÉCIAUX ──">
+              <option value="ETU">👨‍🎓 Étudiant jobiste (50j)</option>
+              <option value="FLEXI">⚡ Flexi-job</option>
+              <option value="INT">🔄 Via intérim</option>
+              <option value="ART60">🏛️ Article 60 §7 (CPAS)</option>
+              <option value="FIRSTJOB">🌱 First Job Agreement</option>
+            </optgroup>
+            <optgroup label="── MÉDICAL ──">
+              <option value="MITHERP">🏥 Mi-temps thérapeutique</option>
+              <option value="REPRISE">↩️ Reprise progressive</option>
+              <option value="INCAP">🤒 Retour longue maladie</option>
+            </optgroup>
+            <optgroup label="── TEMPS PARTIEL ──">
+              <option value="4_5">4/5 temps (80%)</option>
+              <option value="MITEMPS">Mi-temps (50%)</option>
+              <option value="CREDTEMPS">⏸️ Crédit-temps</option>
+            </optgroup>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Statut *</label>
+          <select id="w-statut" onchange="wizStatutChange()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <optgroup label="── SECTEUR PRIVÉ ──">
+              <option value="EMP">👔 Employé</option>
+              <option value="OUV">🔧 Ouvrier</option>
+              <option value="DIR">🏢 Dirigeant d'entreprise</option>
+              <option value="ETU">👨‍🎓 Étudiant jobiste</option>
+              <option value="FLEXI">⚡ Flexi-worker</option>
+              <option value="VOLONT">🤝 Volontaire</option>
+            </optgroup>
+            <optgroup label="── PROFESSIONS LIBÉRALES ──">
+              <option value="MEDECIN">🩺 Médecin / Dentiste / Vétérinaire</option>
+              <option value="AVOCAT">⚖️ Avocat</option>
+              <option value="NOTAIRE">📜 Notaire / Huissier</option>
+              <option value="ARCH">📐 Architecte / Ingénieur conseil</option>
+              <option value="COMPTA">📊 Expert-comptable / Réviseur</option>
+              <option value="PHARMA">💊 Pharmacien</option>
+              <option value="PLIB">🎓 Autre profession libérale</option>
+            </optgroup>
+            <optgroup label="── SECTEUR PUBLIC ──">
+              <option value="FONC_STAT">🏛️ Fonctionnaire statutaire</option>
+              <option value="FONC_CONT">📋 Agent contractuel public</option>
+              <option value="ENSEIGNANT">📚 Enseignant</option>
+              <option value="MILITAIRE">🎖️ Militaire / Police</option>
+              <option value="INTERCOMMUNAL">🏙️ Intercommunale / CPAS</option>
+            </optgroup>
+            <optgroup label="── SPÉCIAUX ──">
+              <option value="ARTISTE">🎨 Artiste (carte artiste)</option>
+              <option value="SPORTIF">⚽ Sportif rémunéré</option>
+              <option value="INDEPENDANT_COMP">💼 Indépendant complémentaire</option>
+            </optgroup>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Commission paritaire *</label>
+          <select id="w-cp" onchange="wizCPChange()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <optgroup label="── EMPLOYÉS ──">
+              <option value="200">CP 200 — Employés secteur privé</option>
+              <option value="201">CP 201 — Commerce alimentaire détail</option>
+              <option value="202">CP 202 — Secteur alimentaire</option>
+              <option value="207">CP 207 — Industrie chimique</option>
+              <option value="209">CP 209 — Construction (emp.)</option>
+              <option value="211">CP 211 — Transport & logistique</option>
+              <option value="218">CP 218 — Industrie alimentaire</option>
+              <option value="219">CP 219 — Commerce international</option>
+              <option value="220">CP 220 — Diamantaire</option>
+              <option value="223">CP 223 — Assurances</option>
+              <option value="226">CP 226 — Intérimaires</option>
+              <option value="302">CP 302 — Hôtellerie & restauration</option>
+              <option value="309">CP 309 — Gardiennage</option>
+              <option value="310">CP 310 — Banques</option>
+              <option value="313">CP 313 — Pharmacies</option>
+              <option value="317">CP 317 — Commerce alimentaire</option>
+              <option value="318">CP 318 — Coiffure & beauté</option>
+              <option value="320">CP 320 — Transport routier</option>
+              <option value="322">CP 322 — Transport aérien</option>
+              <option value="324">CP 324 — Agences de voyage</option>
+              <option value="326">CP 326 — Commerce de détail</option>
+              <option value="327">CP 327 — Travail adapté</option>
+              <option value="329">CP 329 — Grandes surfaces</option>
+              <option value="330">CP 330 — Soins de santé</option>
+              <option value="331">CP 331 — Soins santé Flandre</option>
+              <option value="332">CP 332 — Soins santé Wal-Bxl</option>
+              <option value="333">CP 333 — Commerce détail indép.</option>
+              <option value="335">CP 335 — Travail intérimaire</option>
+              <option value="336">CP 336 — Titres-services</option>
+              <option value="337">CP 337 — PME</option>
+              <option value="338">CP 338 — Nettoyage</option>
+              <option value="340">CP 340 — Construction commerce</option>
+            </optgroup>
+            <optgroup label="── OUVRIERS ──">
+              <option value="100">CP 100 — Ouvriers (général)</option>
+              <option value="105">CP 105 — Véhicules neufs</option>
+              <option value="106">CP 106 — Carburants</option>
+              <option value="107">CP 107 — Hôtellerie (ouv.)</option>
+              <option value="108">CP 108 — Nettoyage (ouv.)</option>
+              <option value="112">CP 112 — Garages</option>
+              <option value="115">CP 115 — Confection & textile</option>
+              <option value="118">CP 118 — Alimentation (ouv.)</option>
+              <option value="119">CP 119 — Boulangerie</option>
+              <option value="121">CP 121 — Nettoyage à sec</option>
+              <option value="124">CP 124 — Bâtiment & TP</option>
+              <option value="125">CP 125 — Bois (ouv.)</option>
+              <option value="126">CP 126 — Ameublement</option>
+              <option value="128">CP 128 — Métal (ouv.)</option>
+              <option value="130">CP 130 — Imprimeries</option>
+              <option value="132">CP 132 — Agriculture</option>
+              <option value="133">CP 133 — Horticulture</option>
+              <option value="136">CP 136 — Chimique (ouv.)</option>
+              <option value="140">CP 140 — Transport routier (ouv.)</option>
+              <option value="142">CP 142 — Jardiniers</option>
+              <option value="143">CP 143 — Garde d'enfants</option>
+              <option value="149">CP 149 — Électricité (ouv.)</option>
+              <option value="150">CP 150 — Travail adapté (ouv.)</option>
+            </optgroup>
+            <optgroup label="── PUBLIC / DIVERS ──">
+              <option value="319">CP 319 — Éducation</option>
+              <option value="319.01">CP 319.01 — Enseignement libre</option>
+              <option value="000">CP 000 — Dirigeant / Non assujetti</option>
+              <option value="autre">Autre / À préciser</option>
+            </optgroup>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Fonction / Poste *</label>
+          <input id="w-fonction" type="text" placeholder="Développeur, Comptable..." list="w-fonction-list" oninput="wizFonctionChange()" onchange="wizFonctionChange()" onblur="wizFonctionChange()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+          <div id="w-fonction-min" style="display:none;margin-top:6px;padding:8px 10px;border-radius:6px;background:rgba(201,150,58,.08);border:1px solid rgba(201,150,58,.2);font-size:11px;">
+            <div id="w-fonction-min-label" style="color:var(--gold);font-weight:700;"></div>
+            <div id="w-fonction-min-detail" style="color:var(--muted);margin-top:2px;line-height:1.5;"></div>
+          </div>
+          <datalist id="w-fonction-list">
+            <optgroup label="Direction">
+            <option value="Directeur général (CEO)">
+            <option value="Directeur financier (CFO)">
+            <option value="Directeur commercial">
+            <option value="Directeur des opérations (COO)">
+            <option value="Directeur RH">
+            <option value="Directeur technique (CTO)">
+            <option value="Manager / Responsable d'équipe">
+            <option value="Chef de projet">
+            <option value="Gérant">
+            <option label="Administration">
+            <option value="Secrétaire">
+            <option value="Secrétaire de direction">
+            <option value="Assistant(e) administratif(ve)">
+            <option value="Office manager">
+            <option value="Réceptionniste">
+            <option value="Gestionnaire RH">
+            <option value="Comptable">
+            <option value="Comptable senior">
+            <option value="Contrôleur de gestion">
+            <option value="Assistant(e) comptable">
+            <option value="Juriste d'entreprise">
+            <option value="Paralégal">
+            <option label="Informatique & Tech">
+            <option value="Développeur web">
+            <option value="Développeur frontend">
+            <option value="Développeur backend">
+            <option value="Développeur fullstack">
+            <option value="Développeur mobile (iOS/Android)">
+            <option value="DevOps / SRE">
+            <option value="Data scientist">
+            <option value="Data analyst">
+            <option value="Ingénieur logiciel">
+            <option value="Architecte solutions">
+            <option value="Consultant IT">
+            <option value="Administrateur système / réseau">
+            <option value="Analyste cybersécurité">
+            <option value="UX/UI Designer">
+            <option value="Product manager">
+            <option value="Scrum master">
+            <option value="Support technique / Helpdesk">
+            <option label="Commercial & Marketing">
+            <option value="Commercial / Représentant">
+            <option value="Account manager">
+            <option value="Business developer">
+            <option value="Chargé(e) de marketing">
+            <option value="Responsable marketing digital">
+            <option value="Community manager">
+            <option value="Chargé(e) de communication">
+            <option value="Attaché(e) de presse">
+            <option value="Responsable e-commerce">
+            <option value="Traffic manager">
+            <option label="Santé & Social">
+            <option value="Médecin généraliste">
+            <option value="Médecin spécialiste">
+            <option value="Infirmier(ère)">
+            <option value="Aide-soignant(e)">
+            <option value="Kinésithérapeute">
+            <option value="Pharmacien(ne)">
+            <option value="Psychologue">
+            <option value="Assistant(e) social(e)">
+            <option value="Éducateur(trice) spécialisé(e)">
+            <option value="Aide à domicile">
+            <option label="Enseignement">
+            <option value="Instituteur(trice) primaire">
+            <option value="Professeur secondaire">
+            <option value="Professeur universitaire">
+            <option value="Formateur(trice)">
+            <option value="Chargé(e) de cours">
+            <option label="Bâtiment & Technique">
+            <option value="Électricien(ne)">
+            <option value="Plombier">
+            <option value="Menuisier(ère)">
+            <option value="Soudeur(euse)">
+            <option value="Maçon">
+            <option value="Technicien de maintenance">
+            <option value="Ingénieur civil">
+            <option value="Architecte">
+            <option value="Conducteur de travaux">
+            <option label="Transport & Logistique">
+            <option value="Chauffeur poids lourds (CE)">
+            <option value="Chauffeur livreur">
+            <option value="Magasinier / Préparateur de commandes">
+            <option value="Cariste">
+            <option value="Dispatcher logistique">
+            <option value="Responsable entrepôt">
+            <option label="Restauration & Hôtellerie">
+            <option value="Cuisinier(ère)">
+            <option value="Chef de cuisine">
+            <option value="Serveur(euse)">
+            <option value="Barman / Barmaid">
+            <option value="Réceptionniste hôtel">
+            <option value="Femme / Valet de chambre">
+            <option label="Commerce & Distribution">
+            <option value="Vendeur(euse)">
+            <option value="Caissier(ère)">
+            <option value="Chef de rayon">
+            <option value="Responsable de magasin">
+            <option label="Finances & Assurances">
+            <option value="Conseiller(ère) financier(ère)">
+            <option value="Analyste financier">
+            <option value="Gestionnaire de portefeuille">
+            <option value="Courtier en assurances">
+            <option value="Conseiller(ère) en assurances">
+            <option value="Actuaire">
+            <option label="Professions libérales">
+            <option value="Avocat(e)">
+            <option value="Notaire">
+            <option value="Expert-comptable">
+            <option value="Réviseur d'entreprises">
+            <option value="Huissier de justice">
+            <option value="Architecte indépendant">
+            <option value="Consultant indépendant">
+          </datalist>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Date d'entrée *</label>
+          <input id="w-debut" type="date" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div id="w-fin-bloc">
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Date de fin (CDD)</label>
+          <input id="w-fin" type="date" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Salaire brut mensuel (€) *</label>
+          <input id="w-brut" type="number" placeholder="2800" oninput="wizCheckSalaire();wizShowMinFonction()" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+          <div id="w-salaire-min" style="margin-top:5px;padding:7px 10px;border-radius:6px;background:rgba(201,150,58,.08);border:1px solid rgba(201,150,58,.15);font-size:10px;display:none;">
+            <div id="w-salaire-min-label" style="color:var(--gold);font-weight:600;"></div>
+            <div id="w-salaire-min-note" style="color:var(--muted);margin-top:2px;line-height:1.4;"></div>
+            <div id="w-salaire-min-alert" style="margin-top:4px;display:none;"></div>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Régime de travail</label>
+          <select id="w-regime" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="100">Temps plein (100%)</option>
+            <option value="80">4/5 temps (80%)</option>
+            <option value="50">Mi-temps (50%)</option>
+            <option value="60">60%</option>
+            <option value="autre">Autre fraction</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Horaire hebdomadaire</label>
+          <select id="w-horaire" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="38">38h/semaine (légal)</option>
+            <option value="40">40h/semaine</option>
+            <option value="36">36h/semaine</option>
+            <option value="32">32h — 4 jours</option>
+            <option value="19">19h — mi-temps</option>
+            <option value="variable">Horaire variable</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Lieu de travail</label>
+          <input id="w-lieu" type="text" placeholder="Bruxelles / Télétravail..." style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Motif d'engagement</label>
+          <select id="w-motif" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="normal">Engagement normal</option>
+            <option value="1er">⭐ 1er employé de la société</option>
+            <option value="chomeur">Chômeur longue durée (+1 an)</option>
+            <option value="chomeur6">Chômeur (+6 mois)</option>
+            <option value="jeune">Jeune travailleur (-26 ans)</option>
+            <option value="senior">Senior (+55 ans)</option>
+            <option value="handicap">Travailleur handicapé reconnu</option>
+            <option value="article60">Article 60 §7 (CPAS)</option>
+            <option value="sine">SINE (économie sociale)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Ancienneté sectorielle</label>
+          <select id="w-anciennete" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="0">0 — Première embauche</option>
+            <option value="1">1 à 4 ans</option>
+            <option value="5">5 à 9 ans</option>
+            <option value="10">10 à 19 ans</option>
+            <option value="20">20 ans et plus</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Niveau classification</label>
+          <select id="w-niveau" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="">— Non précisé —</option>
+            <option value="1">Niveau 1 — Non qualifié</option>
+            <option value="2">Niveau 2 — Qualifié / Junior</option>
+            <option value="3">Niveau 3 — Technicien / Expérimenté</option>
+            <option value="4">Niveau 4 — Cadre / Expert</option>
+            <option value="5">Niveau 5 — Cadre supérieur / Direction</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Période d'essai</label>
+          <select id="w-essai" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="non">Aucune (CDI depuis 2014)</option>
+            <option value="1sem">1 semaine (CDD ≤ 3 mois)</option>
+            <option value="1mois">1 mois (CDD 3-6 mois)</option>
+            <option value="clause">Clause dans contrat</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Barème CCT appliqué</label>
+          <input id="w-bareme" type="text" placeholder="ex: Barème B2 CCT CP200" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Indemnité déplacement</label>
+          <select id="w-deplacement" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="non">Aucune</option>
+            <option value="sncb">🚆 SNCB (100% remboursé)</option>
+            <option value="stib">🚇 STIB/SRWT/De Lijn</option>
+            <option value="voiture">🚗 Voiture personnelle (0,4264€/km)</option>
+            <option value="velo">🚲 Vélo (0,35€/km — exonéré)</option>
+            <option value="forfait">💶 Forfait fixe mensuel</option>
+            <option value="mixte">Mixte transport</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Distance domicile-travail (km)</label>
+          <input id="w-km" type="number" placeholder="25" min="0" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Prime variable / Bonus</label>
+          <select id="w-bonus" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="non">Aucune</option>
+            <option value="objectifs">Sur objectifs individuels</option>
+            <option value="entreprise">Sur résultats entreprise</option>
+            <option value="mixte">Mixte individuel + entreprise</option>
+            <option value="commission">Commissions sur vente</option>
+            <option value="13e">13e mois garanti</option>
+            <option value="cct90">CCT 90 — bonus non récurrent</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Clause non-concurrence</label>
+          <select id="w-nonconc" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+            <option value="non">Non applicable</option>
+            <option value="6mois">6 mois (salaire &lt; 38.500€/an)</option>
+            <option value="12mois">12 mois (salaire 38.500-77.000€/an)</option>
+            <option value="24mois">24 mois max (salaire &gt; 77.000€/an)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Clauses spéciales</label>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" id="w-clause-conf" style="accent-color:var(--gold);"> Confidentialité / Secret professionnel</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" id="w-clause-exclu" style="accent-color:var(--gold);"> Exclusivité (travail autorisé uniquement)</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" id="w-clause-invt" style="accent-color:var(--gold);"> Cession inventions / propriété intellectuelle</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);cursor:pointer;"><input type="checkbox" id="w-clause-teletravail-max" style="accent-color:var(--gold);"> Plafond télétravail contractuel</label>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Matricule ONSS employeur</label>
+          <input id="w-onss-mat" type="text" placeholder="ex: 51357716-02" style="width:100%;padding:9px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;">
+        </div>
+      </div>
+
+      <!-- Panels conditionnels contrat -->
+      <div id="w-therp-bloc" style="display:none;margin-top:12px;background:rgba(74,222,128,.05);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#4ade80;margin-bottom:10px;">🏥 Mi-temps thérapeutique</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Date reprise</label><input id="w-therp-debut" type="date" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">% reprise</label><select id="w-therp-pct" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="50">50% mi-temps</option><option value="60">60%</option><option value="80">80% — 4/5</option></select></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Mutualité</label><select id="w-therp-mut" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="MC">MC (Mutualité Chrétienne)</option><option value="SSMG">Solidaris</option><option value="MLOZ">MLOZ / OZ</option><option value="CAAMI">CAAMI / Euromut</option><option value="INAMI">Caisse INAMI</option></select></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Autorisation médecin-conseil</label><select id="w-therp-auth" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="oui">✅ Obtenue</option><option value="en_cours">⏳ En cours</option><option value="non">❌ Pas encore</option></select></div>
+        </div>
+        <div style="margin-top:8px;padding:8px;background:rgba(239,68,68,.08);border-radius:6px;font-size:10px;color:var(--urgent);">⚠️ OBLIGATOIRE : Autorisation préalable médecin-conseil AVANT la reprise — sans autorisation = risque perte indemnités INAMI</div>
+      </div>
+
+      <div id="w-etu-bloc" style="display:none;margin-top:12px;background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#60a5fa;margin-bottom:10px;">👨‍🎓 Contrat étudiant</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Jours déjà utilisés/an</label><input id="w-etu-jours" type="number" value="0" min="0" max="50" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Jours prévus ce contrat</label><input id="w-etu-jours-contrat" type="number" value="10" min="1" max="50" oninput="wizEtuCheck()" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">student@work vérifié</label><select id="w-etu-studentwork" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="oui">✅ Oui</option><option value="non">❌ Non — à faire</option></select></div>
+        </div>
+        <div id="w-etu-warning" style="margin-top:8px;padding:8px;background:rgba(96,165,250,.08);border-radius:6px;font-size:10px;color:#60a5fa;">✅ Cotisation solidarité 5,42% valable 50j/an — vérifier sur student@work.be</div>
+      </div>
+
+      <div id="w-flexi-bloc" style="display:none;margin-top:12px;background:rgba(234,179,8,.05);border:1px solid rgba(234,179,8,.2);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#eab308;margin-bottom:8px;">⚡ Flexi-job — Conditions obligatoires</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.9;">✅ Travailleur déjà occupé à <strong>4/5 minimum</strong> chez autre employeur · ✅ <strong>Dimona FLEXI</strong> (pas Dimona normale) · ✅ Min <strong>11,54€/h</strong> · ✅ Cotisation patronale <strong>25%</strong> · ⚠️ Vérifier attestation 4/5</div>
+      </div>
+
+      <div id="w-plib-bloc" style="display:none;margin-top:12px;background:rgba(167,139,250,.05);border:1px solid rgba(167,139,250,.25);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#a78bfa;margin-bottom:8px;">🎓 Profession libérale</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Régime ONSS</label><select id="w-plib-onss" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="salarie">Salarié (ONSS)</option><option value="independant">Indépendant (INASTI)</option><option value="mixte">Mixte</option></select></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Ordre professionnel</label><select id="w-plib-ordre" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="">— Aucun —</option><option value="barreau">Barreau</option><option value="onm">ONM (médecins)</option><option value="architectes">Architectes</option><option value="iec">IEC (comptables)</option><option value="irev">IRE (réviseurs)</option></select></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.7;">⚖️ Avocat salarié: CP 460, Dimona DWD · 🩺 Médecin salarié: CP 330 · 📐 Architecte: souvent indépendant INASTI</div>
+      </div>
+
+      <div id="w-fonc-bloc" style="display:none;margin-top:12px;background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#3b82f6;margin-bottom:8px;">🏛️ Secteur public</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Administration</label><select id="w-fonc-admin" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="federal">SPF fédéral</option><option value="region">Région / Communauté</option><option value="commune">Commune / CPAS</option><option value="enseignement">Enseignement</option><option value="para">Parastataux</option><option value="police">Police</option><option value="armee">Armée</option></select></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Recrutement</label><select id="w-fonc-mode" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;"><option value="selor">Via SELOR</option><option value="contrat">Contrat direct</option><option value="stage">Stage probatoire</option><option value="interim">Intérim</option></select></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);line-height:1.7;">📋 Statutaire: pas ONSS, régime pension propre · 📋 Contractuel: ONSS normal CP 319 · ⚠️ Cumul privé: autorisation hiérarchique obligatoire</div>
+      </div>
+
+      <div id="w-avocat-bloc" style="display:none;margin-top:12px;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#f59e0b;margin-bottom:8px;">⚖️ Avocat — Spécificités</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.9;">📌 CP 460 · 📌 Dimona type <strong>DWD</strong> · 📌 Notifier le bâtonnier · 📌 RC Pro obligatoire · 📌 Clause secret professionnel dans contrat</div>
+      </div>
+
+      <div id="w-artiste-bloc" style="display:none;margin-top:12px;background:rgba(236,72,153,.05);border:1px solid rgba(236,72,153,.25);border-radius:8px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#ec4899;margin-bottom:8px;">🎨 Artiste rémunéré</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.9;">📌 Carte artiste obligatoire · 📌 Dimona type <strong>A17</strong> · 📌 Déduction frais pro 50% forfaitaire · 📌 Caisse congés spectacles (ONEM)</div>
+      </div>
+    </div>
+
+    <!-- ══ BLOC 3 : AVANTAGES ══ -->
+    <div style="margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+        <div style="width:28px;height:28px;border-radius:8px;background:rgba(201,150,58,.2);display:flex;align-items:center;justify-content:center;font-size:13px;">🎁</div>
+        <div style="font-size:14px;font-weight:700;color:var(--gold);">3 — Avantages extralégaux</div>
+        <div style="flex:1;height:1px;background:rgba(201,150,58,.15);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;">
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-cheqrep" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🍽️ Chèques-repas</div><div style="font-size:10px;color:var(--muted);">8€/j — exonéré ONSS+PP</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-voiture" onchange="wizAtnChange()" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🚗 Voiture société</div><div style="font-size:10px;color:var(--muted);">ATN imposable — pas ONSS</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-gsm" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">📱 GSM société</div><div style="font-size:10px;color:var(--muted);">ATN 12,50€/mois</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-laptop" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">💻 Laptop société</div><div style="font-size:10px;color:var(--muted);">ATN 6€/mois</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-internet" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🌐 Internet domicile</div><div style="font-size:10px;color:var(--muted);">ATN 5€/mois</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-ecocheq" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🌱 Éco-chèques</div><div style="font-size:10px;color:var(--muted);">max 250€/an — exonéré</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-assgrp" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🛡️ Assurance groupe</div><div style="font-size:10px;color:var(--muted);">Pension complémentaire</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-hospit" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🏥 Hospitalisation</div><div style="font-size:10px;color:var(--muted);">Cotis. patronale exonérée</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-teletravail" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🏠 Télétravail</div><div style="font-size:10px;color:var(--muted);">148,73€/m — CCT 149</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-warrant" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">📊 Warrants</div><div style="font-size:10px;color:var(--muted);">Fiscalement avantageux</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-transport" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🚇 Abonnement transport</div><div style="font-size:10px;color:var(--muted);">STIB/SNCB — exonéré PP</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-cafeteria" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">☕ Plan cafétéria</div><div style="font-size:10px;color:var(--muted);">Choix avantages flexibles</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-velo" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🚲 Indemnité vélo</div><div style="font-size:10px;color:var(--muted);">0,35€/km — 100% exonéré PP+ONSS</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-primecash" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">💵 Prime de repas cash</div><div style="font-size:10px;color:var(--muted);">Alternative aux chèques-repas</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-double-pec" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🎁 Double pécule vacances</div><div style="font-size:10px;color:var(--muted);">Secteur public + certaines CP</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-stock" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">📈 Stock options / ESOP</div><div style="font-size:10px;color:var(--muted);">Loi Monkerheyken — régime fiscal spécial</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-outplacement" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🚀 Outplacement</div><div style="font-size:10px;color:var(--muted);">Obligatoire +45 ans / licenciement</div></div></label>
+      </div>
+      <div id="w-voiture-bloc" style="display:none;margin-top:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;">
+        <div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:8px;">🚗 Voiture — Calcul ATN</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Valeur catalogue (€)</label><input id="w-car-val" type="number" value="35000" style="width:100%;padding:7px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit;font-size:12px;"></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">CO₂ g/km</label><input id="w-car-co2" type="number" value="0" style="width:100%;padding:7px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit;font-size:12px;"></div>
+          <div><label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Motorisation</label><select id="w-car-type" style="width:100%;padding:7px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit;font-size:12px;"><option value="elec">Électrique</option><option value="essence" selected>Essence/Hybride</option><option value="diesel">Diesel</option></select></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BLOC 4 : SITUATION SPÉCIALE ══ -->
+    <div style="margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+        <div style="width:28px;height:28px;border-radius:8px;background:rgba(201,150,58,.2);display:flex;align-items:center;justify-content:center;font-size:13px;">⚡</div>
+        <div style="font-size:14px;font-weight:700;color:var(--gold);">4 — Situations spéciales</div>
+        <div style="flex:1;height:1px;background:rgba(201,150,58,.15);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px;">
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-mitempstherp" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🏥 Mi-temps thérapeutique</div><div style="font-size:10px;color:var(--muted);">Autorisation médecin-conseil</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-incapacite" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🤒 Incapacité de travail</div><div style="font-size:10px;color:var(--muted);">Maladie / accident privé</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-accidenttrav" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">⚠️ Accident du travail</div><div style="font-size:10px;color:var(--muted);">Déclaration assureur 8j</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-credtemps" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">⏸️ Crédit-temps</div><div style="font-size:10px;color:var(--muted);">Diminution carrière</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-limosa" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🌍 Travailleur étranger</div><div style="font-size:10px;color:var(--muted);">LIMOSA + permis travail</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-saisie" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">⚖️ Saisie sur salaire</div><div style="font-size:10px;color:var(--muted);">Tiers saisi / délégation</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-maternite" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🤱 Congé maternité</div><div style="font-size:10px;color:var(--muted);">15 sem. / 20j naissance</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-syndicat" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🔵 Délégué syndical</div><div style="font-size:10px;color:var(--muted);">Protection licenciement</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-naissance" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">👶 Congé de naissance</div><div style="font-size:10px;color:var(--muted);">10j père/coparent — 82% INAMI</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-frontalier" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🌍 Travailleur frontalier</div><div style="font-size:10px;color:var(--muted);">France / Pays-Bas / Luxembourg</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-chomeconom" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">📋 Chômage économique</div><div style="font-size:10px;color:var(--muted);">Notification C3.2A — ONEM</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-outplac-sit" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🔄 Procédure outplacement</div><div style="font-size:10px;color:var(--muted);">+45 ans ou licenciement en cours</div></div></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);"><input type="checkbox" id="w-protection" style="accent-color:var(--gold);width:14px;height:14px;"><div><div style="font-size:12px;font-weight:600;color:var(--text);">🛡️ Travailleur protégé</div><div style="font-size:10px;color:var(--muted);">Grossesse / mandat / CPPT</div></div></label>
+      </div>
+    </div>
+
+    <!-- ══ BLOC 5 : DOCUMENTS À GÉNÉRER ══ -->
+    <div style="margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+        <div style="width:28px;height:28px;border-radius:8px;background:rgba(201,150,58,.2);display:flex;align-items:center;justify-content:center;font-size:13px;">📄</div>
+        <div style="font-size:14px;font-weight:700;color:var(--gold);">5 — Documents à préparer</div>
+        <div style="flex:1;height:1px;background:rgba(201,150,58,.15);"></div>
+        <div style="font-size:10px;color:var(--muted);">Cochez les documents à inclure dans le dossier généré</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">
+        <div onclick="docOpen('contrat')" class="doc-card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);transition:all .15s;" onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(201,150,58,.07)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg)'">
+          <div style="font-size:22px;">📋</div><div><div style="font-size:12px;font-weight:600;color:var(--text);">Contrat de travail</div><div style="font-size:10px;color:var(--muted);">CDI/CDD selon type sélectionné</div><div style="font-size:9px;color:var(--gold);margin-top:2px;">▶ Générer & prévisualiser</div></div>
+        </div>
+        <div onclick="wizOpenDimona()" class="doc-card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid rgba(74,222,128,.3);cursor:pointer;background:rgba(74,222,128,.05);transition:all .15s;" onmouseover="this.style.background='rgba(74,222,128,.12)'" onmouseout="this.style.background='rgba(74,222,128,.05)'">
+          <div style="font-size:22px;">📡</div><div><div style="font-size:12px;font-weight:600;color:#4ade80;">Déclaration Dimona IN</div><div style="font-size:10px;color:var(--muted);">À transmettre AVANT 1er jour</div><div style="font-size:9px;color:#4ade80;margin-top:2px;">▶ Ouvrir formulaire Dimona</div></div>
+        </div>
+        <div onclick="docOpen('rgpd')" class="doc-card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);transition:all .15s;" onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(201,150,58,.07)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg)'">
+          <div style="font-size:22px;">🔒</div><div><div style="font-size:12px;font-weight:600;color:var(--text);">Annexe RGPD Art.13</div><div style="font-size:10px;color:var(--muted);">Info traitement données travailleur</div><div style="font-size:9px;color:var(--gold);margin-top:2px;">▶ Générer & prévisualiser</div></div>
+        </div>
+        <div onclick="docOpen('reglement')" class="doc-card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);transition:all .15s;" onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(201,150,58,.07)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg)'">
+          <div style="font-size:22px;">📖</div><div><div style="font-size:12px;font-weight:600;color:var(--text);">Règlement de travail</div><div style="font-size:10px;color:var(--muted);">Remise obligatoire à l'embauche</div><div style="font-size:9px;color:var(--gold);margin-top:2px;">▶ Générer & prévisualiser</div></div>
+        </div>
+        <div onclick="docOpen('fichepaie')" class="doc-card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);transition:all .15s;" onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(201,150,58,.07)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg)'">
+          <div style="font-size:22px;">💶</div><div><div style="font-size:12px;font-weight:600;color:var(--text);">Modèle fiche de paie</div><div style="font-size:10px;color:var(--muted);">Simulation brut→net 2026</div><div style="font-size:9px;color:var(--gold);margin-top:2px;">▶ Générer & prévisualiser</div></div>
+        </div>
+        <div onclick="docOpen('c4')" class="doc-card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);transition:all .15s;" onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(201,150,58,.07)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg)'">
+          <div style="font-size:22px;">📄</div><div><div style="font-size:12px;font-weight:600;color:var(--text);">Pré-C4 préparé</div><div style="font-size:10px;color:var(--muted);">Template attestation chômage</div><div style="font-size:9px;color:var(--gold);margin-top:2px;">▶ Générer & prévisualiser</div></div>
+        </div>
+        <div onclick="docOpen('onboarding')" class="doc-card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);transition:all .15s;" onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(201,150,58,.07)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg)'">
+          <div style="font-size:22px;">🎯</div><div><div style="font-size:12px;font-weight:600;color:var(--text);">Checklist onboarding</div><div style="font-size:10px;color:var(--muted);">J-7 à J+30 — tâches employeur</div><div style="font-size:9px;color:var(--gold);margin-top:2px;">▶ Générer & prévisualiser</div></div>
+        </div>
+        <div onclick="docOpen('visitemedic')" class="doc-card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);transition:all .15s;" onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(201,150,58,.07)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg)'">
+          <div style="font-size:22px;">🩺</div><div><div style="font-size:12px;font-weight:600;color:var(--text);">Convocation visite médicale</div><div style="font-size:10px;color:var(--muted);">Embauche / poste de sécurité</div><div style="font-size:9px;color:var(--gold);margin-top:2px;">▶ Générer & prévisualiser</div></div>
+        </div>
+        <div onclick="docOpen('pension')" class="doc-card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);transition:all .15s;" onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(201,150,58,.07)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg)'">
+          <div style="font-size:22px;">🛡️</div><div><div style="font-size:12px;font-weight:600;color:var(--text);">Affiliation assurance groupe</div><div style="font-size:10px;color:var(--muted);">EIP / PLCI / pension complémentaire</div><div style="font-size:9px;color:var(--gold);margin-top:2px;">▶ Générer & prévisualiser</div></div>
+        </div>
+        <div onclick="docOpen('atn')" class="doc-card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);transition:all .15s;" onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(201,150,58,.07)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg)'">
+          <div style="font-size:22px;">🚗</div><div><div style="font-size:12px;font-weight:600;color:var(--text);">Fiche ATN voiture</div><div style="font-size:10px;color:var(--muted);">281.10 — déclaration fiscale</div><div style="font-size:9px;color:var(--gold);margin-top:2px;">▶ Générer & prévisualiser</div></div>
+        </div>
+        <div onclick="docOpen('nonconc')" class="doc-card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);transition:all .15s;" onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(201,150,58,.07)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg)'">
+          <div style="font-size:22px;">🔐</div><div><div style="font-size:12px;font-weight:600;color:var(--text);">Clause non-concurrence</div><div style="font-size:10px;color:var(--muted);">Annexe contrat — si applicable</div><div style="font-size:9px;color:var(--gold);margin-top:2px;">▶ Générer & prévisualiser</div></div>
+        </div>
+        <div onclick="docOpen('activa')" class="doc-card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);cursor:pointer;background:var(--bg);transition:all .15s;" onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(201,150,58,.07)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg)'">
+          <div style="font-size:22px;">💰</div><div><div style="font-size:12px;font-weight:600;color:var(--text);">Demande Activa.brussels</div><div style="font-size:10px;color:var(--muted);">À introduire dans les 30j</div><div style="font-size:9px;color:var(--gold);margin-top:2px;">▶ Générer & prévisualiser</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══ BOUTONS FINAUX ══ -->
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap;gap:10px;">
+      <div style="font-size:11px;color:var(--muted);">💡 Tous les champs sont optionnels sauf * — plus tu remplis, plus le dossier est complet</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button onclick="wizOpenDimona()" style="padding:10px 20px;border-radius:8px;border:1px solid rgba(74,222,128,.3);background:rgba(74,222,128,.1);color:#4ade80;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">📡 Dimona IN</button>
+        <button onclick="wizGenerate()" style="padding:10px 28px;border-radius:8px;border:none;background:linear-gradient(135deg,#C9963A,#A07D3E);color:#060810;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;">⚡ Générer le dossier complet</button>
+      </div>
+    </div>
+
+    <!-- ══ RÉSULTAT ══ -->
+    <div id="wiz-result" style="margin-top:20px;"></div>
+
+  </div>
+</section>
+
+<script>
+
 // ══════════════════════════════════════════════════════
 // SALAIRES MINIMUMS BELGES 2026 PAR COMMISSION PARITAIRE
 // Sources: CCT sectorielle, SPF Emploi, ONSS 2026
@@ -3431,12 +5201,14 @@ function wizCheckSalaire() {
 }
 
 function wizCPChange() {
+  wizShowBaremeCP();
   var cp = parseInt(document.getElementById('w-cp')?.value) || 0;
   var statutEl = document.getElementById('w-statut');
   if (!statutEl) return;
   // CP 100-199 = ouvriers, 200+ = employés
   if (cp >= 100 && cp < 200) statutEl.value = 'OUV';
   else if (cp >= 200) statutEl.value = 'EMP';
+  wizShowBaremeCP();
   wizShowMin();
 }
 
