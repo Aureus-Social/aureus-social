@@ -1788,6 +1788,12 @@ var FONCTION_MIN = {
 };
 
 // wizFonctionChange() remplace wizShowMinFonction
+function wizShowMinFonction() {
+  var val = (document.getElementById('w-fonction')?.value || '').toLowerCase().trim();
+  var bloc = document.getElementById('w-fonction-min');
+  var label = document.getElementById('w-fonction-min-label');
+  var detail = document.getElementById('w-fonction-min-detail');
+  if (!bloc || !val) { if(bloc) bloc.style.display='none'; return; }
 
   // Cherche correspondance partielle
   var found = null;
@@ -1821,6 +1827,7 @@ var FONCTION_MIN = {
       detail.innerHTML = found.note + '<br><span style="color:#4ade80;">✅ Salaire dans la fourchette marché</span>';
     }
   }
+}
 
 // ══════════════════════════════════════════════════════
 // SALAIRES MINIMUMS PAR FONCTION (marché belge 2026)
