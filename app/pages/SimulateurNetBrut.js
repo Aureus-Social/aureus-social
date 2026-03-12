@@ -1,7 +1,7 @@
 "use client";
 import { useLang } from '../lib/lang-context';
 import React, { useState, useMemo } from 'react';
-import { TX_ONSS_W, TX_ONSS_E, TX_OUV108, RMMMG, BONUS_SEUIL2, IPP_TRANCHES_2026, IPP_FRAIS_PRO_PCT, IPP_FRAIS_PRO_MAX, IPP_TAXE_COMMUNALE, IPP_QUOTITE_BASE, IPP_REDUC_ENFANTS, ONSS_E_SECTEURS, PRIMES_SECTORIELLES, BAREMES_CP_MIN } from '@/app/lib/helpers';
+import { TX_ONSS_W, TX_ONSS_E, TX_OUV108, RMMMG, BONUS_SEUIL2, IPP_TRANCHES_2026, IPP_FRAIS_PRO_PCT, IPP_FRAIS_PRO_MAX, IPP_TAXE_COMMUNALE, IPP_QUOTITE_BASE, IPP_REDUC_ENFANTS, ONSS_E_SECTEURS, PRIMES_SECTORIELLES, BAREMES_CP_MIN, CP_DATA } from '@/app/lib/helpers';
 
 // ═══════════════════════════════════════════════════════════
 // CP DATABASE — barèmes minimums + spécificités sectorielles
