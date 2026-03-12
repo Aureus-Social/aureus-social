@@ -7,7 +7,7 @@ export const MENU = [
   // ── ACCUEIL ──────────────────────────────────────────────────
   { id: '_g1', label: 'ACCUEIL', icon: '◫', group: true },
   { id: 'dashboard',   label: 'Dashboard',      icon: '◫', g: 1 },
-  { id: 'embaucheaz',  label: 'Embauche A→Z',   icon: '🚀', g: 1, external: '/embauche-az.html' },
+  { id: 'embaucheaz',  label: 'Embauche A→Z',   icon: '🚀', g: 1 },
   { id: 'notifications', label: 'Notifications', icon: '🔔', g: 1 },
 
   // ── EMPLOYÉS ─────────────────────────────────────────────────
