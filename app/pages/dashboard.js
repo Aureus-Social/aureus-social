@@ -1,11 +1,5 @@
 'use client';
 
-  // Theme colors — mode jour/nuit
-  const TH = th || {
-    text: '#e8e6e0', text2: '#9e9b93', text3: '#5e5c56',
-    bg: '#0a0908', bg2: '#111009', surface: 'rgba(255,255,255,.03)',
-    border: 'rgba(198,163,78,.08)',
-  };
 import { useLang } from '../lib/lang-context';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { B, C, DPER, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, generatePayslipPDF, getAlertes, quickNet, quickPP, generateSEPAXML, generateDmfAXML } from '@/app/lib/helpers';
@@ -22,7 +16,8 @@ const MN = MN_FR;
 
 function escapeHtml(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function Dashboard({s,d}) {
+function Dashboard({s,d,th}) {
+  const TH = th || { text:'#e8e6e0', text2:'#9e9b93', text3:'#5e5c56', bg:'#0a0908', bg2:'#111009', surface:'rgba(255,255,255,.03)', border:'rgba(198,163,78,.08)' };
   const { t, lang, tText } = useLang();
   const [fluxOpen, setFluxOpen] = useState(true);
   s=s||{emps:[],clients:[],co:{name:"",vat:""},payrollHistory:[],dimonaHistory:[]};
