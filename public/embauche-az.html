@@ -1034,6 +1034,13 @@ body {
               <option value="autre">Autre / À préciser</option>
             </optgroup>
           </select>
+          <!-- BAREME CCT — affiché sous le select CP -->
+          <div id="w-bareme-cct" style="display:none;margin-top:8px;padding:10px 12px;border-radius:8px;background:linear-gradient(135deg,rgba(201,150,58,.1),rgba(201,150,58,.03));border:1px solid rgba(201,150,58,.3);">
+            <div id="w-bareme-titre" style="color:var(--gold);font-weight:700;font-size:11px;margin-bottom:4px;"></div>
+            <div id="w-bareme-source" style="color:var(--muted);font-size:9px;margin-bottom:6px;"></div>
+            <div id="w-bareme-note" style="color:#60a5fa;font-size:9px;margin-bottom:6px;display:none;"></div>
+            <table id="w-bareme-table" style="width:100%;border-collapse:collapse;"></table>
+          </div>
         </div>
         <div>
           <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Fonction / Poste *</label>
@@ -2212,28 +2219,42 @@ CP_MIN['DEFAULT'] = { min: 2070.48, label: 'RMMMG national 2026', note: 'Salaire
 
 // ── Affichage barème CP dans le wizard ──
 function wizShowBaremeCP() {
-  var cp = document.getElementById('w-cp')?.value || 'DEFAULT';
+  var cp = document.getElementById('w-cp')?.value || '';
   var statut = document.getElementById('w-statut')?.value || '';
   var key = cp;
   if(statut==='ETU') key='ETU';
   if(statut==='FLEXI') key='FLEXI';
   var bareme = BAREMES_CCT[key];
-  if (!bareme) { bareme = BAREMES_CCT[key.split('.')[0]] || BAREMES_CCT['RMMMG']; }
-  var bloc = document.getElementById('w-salaire-min');
-  var labelEl = document.getElementById('w-salaire-min-label');
-  var noteEl = document.getElementById('w-salaire-min-note');
-  if(!bloc || !labelEl) return;
-  if(!bareme) { bloc.style.display='none'; return; }
+  if (!bareme && key.indexOf('.')>0) bareme = BAREMES_CCT[key.split('.')[0]];
+  if (!bareme) bareme = BAREMES_CCT['RMMMG'];
+
+  // Nouveaux éléments dédiés sous le select CP
+  var bloc   = document.getElementById('w-bareme-cct');
+  var titre  = document.getElementById('w-bareme-titre');
+  var source = document.getElementById('w-bareme-source');
+  var note   = document.getElementById('w-bareme-note');
+  var table  = document.getElementById('w-bareme-table');
+
+  if (!bloc || !titre) { wizCheckSalaire(); return; }
+  if (!cp || !bareme) { bloc.style.display='none'; wizCheckSalaire(); return; }
+
   bloc.style.display = 'block';
-  var rows = bareme.categories.map(function(c){
+  titre.textContent  = '📊 ' + bareme.label;
+  source.textContent = 'Source : ' + bareme.source;
+  if (bareme.note) { note.textContent = 'ℹ️ ' + bareme.note; note.style.display='block'; }
+  else { note.style.display='none'; }
+
+  table.innerHTML = bareme.categories.map(function(c){
     var isH = c.type==='horaire';
-    var val = isH ? c.brut.toFixed(2)+'€/h (~'+Math.round(c.brut*38*52/12).toLocaleString('fr-BE')+'€/m)' : c.brut.toFixed(2)+'€/mois brut';
-    return '<tr><td style="padding:3px 8px;color:var(--muted);font-size:10px;">'+c.cat+'</td><td style="padding:3px 8px;text-align:right;font-weight:600;color:var(--gold);font-size:10px;white-space:nowrap;">'+val+'</td></tr>';
+    var val = isH
+      ? c.brut.toFixed(2)+'€/h  (~'+Math.round(c.brut*38*52/12).toLocaleString('fr-BE')+'€/mois)'
+      : c.brut.toLocaleString('fr-BE',{minimumFractionDigits:2,maximumFractionDigits:2})+'€ brut/mois';
+    return '<tr>'
+      +'<td style="padding:4px 8px;color:var(--muted);font-size:10px;border-bottom:1px solid rgba(201,150,58,.08);">'+c.cat+'</td>'
+      +'<td style="padding:4px 8px;text-align:right;font-weight:700;color:var(--gold);font-size:11px;white-space:nowrap;border-bottom:1px solid rgba(201,150,58,.08);">'+val+'</td>'
+      +'</tr>';
   }).join('');
-  labelEl.innerHTML = '<strong>📊 '+bareme.label+'</strong><br><span style="font-size:9px;color:var(--muted);">Source: '+bareme.source+'</span>'
-    +(bareme.note ? '<br><span style="font-size:9px;color:#60a5fa;">ℹ️ '+bareme.note+'</span>' : '')
-    +'<table style="width:100%;margin-top:6px;border-collapse:collapse;">'+rows+'</table>';
-  if(noteEl) noteEl.textContent = '';
+
   wizCheckSalaire();
 }
 ial Pro</title>
@@ -3267,6 +3288,13 @@ body {
               <option value="autre">Autre / À préciser</option>
             </optgroup>
           </select>
+          <!-- BAREME CCT — affiché sous le select CP -->
+          <div id="w-bareme-cct" style="display:none;margin-top:8px;padding:10px 12px;border-radius:8px;background:linear-gradient(135deg,rgba(201,150,58,.1),rgba(201,150,58,.03));border:1px solid rgba(201,150,58,.3);">
+            <div id="w-bareme-titre" style="color:var(--gold);font-weight:700;font-size:11px;margin-bottom:4px;"></div>
+            <div id="w-bareme-source" style="color:var(--muted);font-size:9px;margin-bottom:6px;"></div>
+            <div id="w-bareme-note" style="color:#60a5fa;font-size:9px;margin-bottom:6px;display:none;"></div>
+            <table id="w-bareme-table" style="width:100%;border-collapse:collapse;"></table>
+          </div>
         </div>
         <div>
           <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Fonction / Poste *</label>
