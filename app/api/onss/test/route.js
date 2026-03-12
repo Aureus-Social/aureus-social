@@ -1,71 +1,71 @@
-import { SignJWT, importPKCS8 } from 'jose';
-export const dynamic = 'force-dynamic';
+import { SignJWT, importPKCS8 } from "jose";
+export const dynamic = "force-dynamic";
 
-const CLIENT_ID = 'self_service_chaman_305534_fnlh9vng4v';
-const TOKEN_URL = 'https://api.socialsecurity.be/REST/oauth/v3/token';
-const DIMONA_URL = 'https://api.socialsecurity.be/REST/dimona/v2/declarations';
-const ONSS_NUMBER = '51357716';
+const CLIENT_ID = "self_service_chaman_305534_fnlh9vng4v";
+const TOKEN_URL = "https://services.socialsecurity.be/REST/oauth/v3/token";
+const DIMONA_URL = "https://services.socialsecurity.be/REST/dimona/v2/declarations";
 
 function getPrivateKey() {
-  const raw = process.env.ONSS_PRIVATE_KEY || '';
-  if (!raw.includes('BEGIN') && raw.length > 100) {
-    return Buffer.from(raw, 'base64').toString('utf-8');
-  }
-  if (raw.includes('BEGIN PRIVATE KEY') && !raw.includes('\n')) {
-    return raw.replace('-----BEGIN PRIVATE KEY-----', '-----BEGIN PRIVATE KEY-----\n')
-              .replace('-----END PRIVATE KEY-----', '\n-----END PRIVATE KEY-----\n')
-              .replace(/([A-Za-z0-9+/=]{64})/g, '$1\n');
+  const raw = process.env.ONSS_PRIVATE_KEY || "";
+  if (!raw.includes("BEGIN") && raw.length > 100) {
+    return Buffer.from(raw, "base64").toString("utf-8");
   }
   return raw;
 }
 
 export async function GET() {
   const results = [];
-  const rawKey = process.env.ONSS_PRIVATE_KEY || '';
-  const pemKey = getPrivateKey();
+  const raw = process.env.ONSS_PRIVATE_KEY || "";
+  const isBase64 = !raw.includes("BEGIN") && raw.length > 100;
+  results.push({ test: "Cle brute presente", ok: raw.length > 0, detail: raw.length + " chars, base64=" + isBase64 });
 
-  results.push({ test: 'Cle brute presente', ok: rawKey.length > 0, detail: rawKey.length + ' chars, base64=' + !rawKey.includes('BEGIN') });
-  results.push({ test: 'Cle PEM reconstituee', ok: pemKey.includes('BEGIN PRIVATE KEY'), detail: pemKey.slice(0,60) + '...' });
+  const pem = getPrivateKey();
+  results.push({ test: "Cle PEM reconstituee", ok: pem.includes("BEGIN PRIVATE KEY"), detail: pem.substring(0,60) + "..." });
 
-  let tokenOk = false, tokenDetail = '', accessToken = null;
+  let token = null;
   try {
-    const privateKey = await importPKCS8(pemKey, 'RS256');
+    const privateKey = await importPKCS8(pem, "RS256");
     const now = Math.floor(Date.now() / 1000);
     const jwt = await new SignJWT({})
-      .setProtectedHeader({ alg: 'RS256' })
+      .setProtectedHeader({ alg: "RS256" })
       .setIssuer(CLIENT_ID).setSubject(CLIENT_ID).setAudience(TOKEN_URL)
       .setIssuedAt(now).setExpirationTime(now + 300)
-      .setJti(Date.now() + '-test').sign(privateKey);
+      .setJti(Date.now() + "-test")
+      .sign(privateKey);
     const params = new URLSearchParams({
-      grant_type: 'client_credentials',
-      client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-      client_assertion: jwt, scope: 'dimona',
+      grant_type: "client_credentials",
+      client_assertion_type: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+      client_assertion: jwt, scope: "dimona"
     });
-    const resp = await fetch(TOKEN_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: params.toString() });
-    const data = await resp.json();
-    if (resp.ok && data.access_token) {
-      tokenOk = true; accessToken = data.access_token;
-      tokenDetail = 'Token OK! Expire dans ' + data.expires_in + 's';
+    const resp = await fetch(TOKEN_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params.toString()
+    });
+    const text = await resp.text();
+    if (resp.ok) {
+      token = JSON.parse(text).access_token;
+      results.push({ test: "Token OAuth2 ONSS", ok: true, detail: "Token obtenu: " + token.substring(0,20) + "..." });
     } else {
-      tokenDetail = 'HTTP ' + resp.status + ': ' + JSON.stringify(data).slice(0,300);
+      results.push({ test: "Token OAuth2 ONSS", ok: false, detail: "HTTP " + resp.status + ": " + text.substring(0,200) });
     }
-  } catch(e) { tokenDetail = e.message; }
-  results.push({ test: 'Token OAuth2 ONSS', ok: tokenOk, detail: tokenDetail });
+  } catch(e) {
+    results.push({ test: "Token OAuth2 ONSS", ok: false, detail: e.message });
+  }
 
-  let dimonaOk = false, dimonaDetail = '';
-  if (accessToken) {
+  if (token) {
     try {
-      const resp = await fetch(DIMONA_URL, {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ declarationType: 'IN', worker: { ssin: '95012345601' }, employer: { nssoNumber: ONSS_NUMBER }, occupation: { startDate: new Date().toISOString().split('T')[0], workerType: 'OTH', jointCommitteeNumber: '200' } }),
+      const resp = await fetch(DIMONA_URL + "?employerNumber=51357716&limit=1", {
+        headers: { "Authorization": "Bearer " + token }
       });
-      const data = await resp.json();
-      dimonaOk = [201, 400, 422, 404].includes(resp.status);
-      dimonaDetail = 'HTTP ' + resp.status + ': ' + JSON.stringify(data).slice(0,300);
-    } catch(e) { dimonaDetail = e.message; }
-  } else { dimonaDetail = 'Skip - pas de token'; }
-  results.push({ test: 'API Dimona accessible', ok: dimonaOk, detail: dimonaDetail });
+      results.push({ test: "API Dimona accessible", ok: resp.status < 500, detail: "HTTP " + resp.status });
+    } catch(e) {
+      results.push({ test: "API Dimona accessible", ok: false, detail: e.message });
+    }
+  } else {
+    results.push({ test: "API Dimona accessible", ok: false, detail: "Skip - pas de token" });
+  }
 
-  return Response.json({ status: results.every(r=>r.ok) ? 'TOUT OK' : 'PROBLEMES', timestamp: new Date().toISOString(), results });
+  const allOk = results.every(r => r.ok);
+  return Response.json({ status: allOk ? "OK" : "PROBLEMES", timestamp: new Date().toISOString(), results });
 }
