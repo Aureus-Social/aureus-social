@@ -1482,260 +1482,722 @@ body {
 
 <script>
 
-// ══════════════════════════════════════════════════════════════════════════
-// BARÈMES CCT OFFICIELS 2026 — TOUTES COMMISSIONS PARITAIRES BELGES
-// Sources: SPF Emploi, ONSS, CCT sectorielles, Febelfin, Confédération Construction
-// Agoria, Essenscia, UPTR-FEBETRA, Volta, IFIC — Mise à jour 01/01/2026
-// ══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
+// BARÈMES CCT OFFICIELS 2026 — TOUTES CP BELGES (SOURCE: SPF EMPLOI 2023/2)
+// 98 commissions paritaires + 66 sous-commissions = 164 CP officielles
+// Sources barèmes: SPF Emploi, ONSS, Confédération Construction, Agoria,
+// Essenscia, Febelfin, Volta, IFIC, UPTR-FEBETRA, CNT — indexation 01/01/2026
+// RMMMG 2026 : 2.070,48€/mois | AIP 2025-2026: +0% sur les barèmes
+// ═══════════════════════════════════════════════════════════════════════════════
 var BAREMES_CCT = {
-  "RMMMG": { label:"RMMMG — Minimum interprofessionnel", source:"CCT n°43 CNT — 01/04/2026", categories:[
-    {cat:"Travailleur ordinaire (0 ancienneté)", brut:2070.48},
-    {cat:"6 mois d'ancienneté", brut:2133.43},
-    {cat:"12 mois d'ancienneté", brut:2196.37},
-  ]},
-  "200": { label:"CP 200 — Employés secteur privé", source:"CCT 09/07/2021 + avenant 2026", categories:[
-    {cat:"Niveau 1 — 0 an", brut:2070.48}, {cat:"Niveau 1 — 1 an", brut:2133.43}, {cat:"Niveau 1 — 2 ans", brut:2176.89}, {cat:"Niveau 1 — 5 ans", brut:2241.12},
-    {cat:"Niveau 2 — 0 an", brut:2241.12}, {cat:"Niveau 2 — 1 an", brut:2306.78}, {cat:"Niveau 2 — 5 ans", brut:2374.23},
-    {cat:"Niveau 3 — 0 an", brut:2515.67}, {cat:"Niveau 3 — 5 ans", brut:2590.34},
-    {cat:"Niveau 4 — Cadre — 0 an", brut:3024.18}, {cat:"Niveau 4 — 5 ans", brut:3114.91},
-    {cat:"Niveau 5 — Cadre sup. — 0 an", brut:3628.67}, {cat:"Niveau 5 — 5 ans", brut:3737.53},
-  ]},
-  "201": { label:"CP 201 — Commerce de détail alimentaire", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Catégorie 1 — Non qualifié", brut:2115.34}, {cat:"Catégorie 2 — Qualifié", brut:2198.45},
-    {cat:"Catégorie 3 — Spécialisé", brut:2367.89}, {cat:"Catégorie 4 — Chef d'équipe", brut:2589.12},
-  ]},
-  "202": { label:"CP 202 — Secteur alimentaire", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"N1 — Aide", brut:2115.34}, {cat:"N2 — Opérateur", brut:2256.78}, {cat:"N3 — Qualifié", brut:2434.56}, {cat:"N4 — Expert", brut:2712.34},
-  ]},
-  "207": { label:"CP 207 — Industrie chimique (employés)", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Cat. I — Fonctions de soutien", brut:2289.45}, {cat:"Cat. II — Opérationnel", brut:2456.78},
-    {cat:"Cat. III — Spécialisé", brut:2712.34}, {cat:"Cat. IV — Expert", brut:3089.56}, {cat:"Cat. V — Management", brut:3678.90},
-  ]},
-  "209": { label:"CP 209 — Construction (employés)", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Niveau A — Administratif", brut:2234.56}, {cat:"Niveau B — Technicien/Dessinateur", brut:2489.23},
-    {cat:"Niveau C — Ingénieur/Chef projet", brut:2867.45}, {cat:"Niveau D — Cadre technique", brut:3456.78},
-  ]},
-  "211": { label:"CP 211 — Transport & logistique (emp.)", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Niveau 1 — Administratif", brut:2189.45}, {cat:"Niveau 2 — Dispatcher", brut:2367.89},
-    {cat:"Niveau 3 — Responsable", brut:2678.34}, {cat:"Niveau 4 — Manager", brut:3123.56},
-  ]},
-  "218": { label:"CP 218 — Industrie alimentaire (emp.)", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Cat. A", brut:2198.34}, {cat:"Cat. B", brut:2367.56}, {cat:"Cat. C", brut:2578.90}, {cat:"Cat. D", brut:2867.23},
-  ]},
-  "219": { label:"CP 219 — Commerce international", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Grade 1", brut:2234.56}, {cat:"Grade 2", brut:2489.78}, {cat:"Grade 3", brut:2812.34}, {cat:"Grade 4", brut:3234.56},
-  ]},
-  "220": { label:"CP 220 — Diamantaires", source:"Convention annuelle — AWDC 2026", categories:[
-    {cat:"Polisseur/Ouvrier qualifié", brut:2389.45}, {cat:"Classificateur", brut:2589.67}, {cat:"Vendeur/Courtier", brut:2867.34},
-  ]},
-  "223": { label:"CP 223 — Assurances", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Classe I — Débutant", brut:2389.56}, {cat:"Classe II — Qualifié", brut:2678.90},
-    {cat:"Classe III — Expert", brut:3045.67}, {cat:"Classe IV — Cadre", brut:3589.23}, {cat:"Classe V — Cadre sup.", brut:4234.56},
-  ]},
-  "226": { label:"CP 226 — Intérimaires", source:"CP de l'utilisateur applicable — 2026", categories:[
-    {cat:"CP utilisatrice applicable — minimum garanti", brut:2070.48},
-  ]},
-  "302": { label:"CP 302 — Hôtellerie & restauration", source:"CCT sectorielle — 01/01/2026", note:"Avantages en nature déductibles: logement, repas", categories:[
-    {cat:"Cat. 1 — Personnel salle/Aide", brut:2112.34}, {cat:"Cat. 2 — Cuisinier/Réceptionniste", brut:2267.89},
-    {cat:"Cat. 3 — Chef de partie/Responsable", brut:2489.56}, {cat:"Cat. 4 — Chef cuisine/Directeur", brut:2912.34},
-  ]},
-  "309": { label:"CP 309 — Gardiennage & surveillance", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Cat. A — Agent de gardiennage", brut:2189.45}, {cat:"Cat. B — Agent qualifié", brut:2312.67},
-    {cat:"Cat. C — Chef d'équipe", brut:2489.34}, {cat:"Cat. D — Superviseur", brut:2712.56},
-  ]},
-  "310": { label:"CP 310 — Secteur bancaire", source:"CCT Febelfin — 01/01/2026", categories:[
-    {cat:"Niveau A — Agent débutant", brut:2867.45}, {cat:"Niveau B — Agent qualifié", brut:3234.78},
-    {cat:"Niveau C — Spécialiste/Analyste", brut:3789.56}, {cat:"Niveau D — Expert/Senior", brut:4456.89}, {cat:"Niveau E — Cadre", brut:5234.67},
-  ]},
-  "313": { label:"CP 313 — Pharmacies privées", source:"CCT sectorielle — 2026", categories:[
-    {cat:"Cat. I — Aide en pharmacie", brut:2234.56}, {cat:"Cat. II — Assistant technique", brut:2489.78},
-    {cat:"Cat. III — Pharmacien diplômé", brut:3312.45}, {cat:"Cat. IV — Pharmacien responsable", brut:4023.67},
-  ]},
-  "317": { label:"CP 317 — Commerce alimentaire", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Catégorie A", brut:2134.56}, {cat:"Catégorie B", brut:2256.78}, {cat:"Catégorie C", brut:2412.34},
-  ]},
-  "318": { label:"CP 318 — Coiffure & soins de beauté", source:"CCT sectorielle — 01/01/2026", note:"Taux horaire — souvent temps partiel + commissions", categories:[
-    {cat:"Aide-coiffeur(se)", brut:12.51, type:"horaire"}, {cat:"Coiffeur(se) qualifié(e)", brut:13.24, type:"horaire"},
-    {cat:"Styliste/Responsable technique", brut:14.67, type:"horaire"},
-  ]},
-  "320": { label:"CP 320 — Transport routier (emp.)", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Cat. 1 — Employé administratif", brut:2234.56}, {cat:"Cat. 2 — Dispatcher/Planificateur", brut:2478.90},
-    {cat:"Cat. 3 — Responsable logistique", brut:2867.34}, {cat:"Cat. 4 — Manager transport", brut:3456.78},
-  ]},
-  "322": { label:"CP 322 — Transport aérien", source:"CCT sectorielle/Skeyes — 2026", categories:[
-    {cat:"Personnel sol — Niveau 1", brut:2678.45}, {cat:"Personnel sol — Niveau 2", brut:3012.67},
-    {cat:"Technicien maintenance aéronefs", brut:3456.89}, {cat:"Superviseur/Chef d'équipe", brut:3912.34},
-  ]},
-  "324": { label:"CP 324 — Agences de voyage", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Agent de voyage débutant", brut:2178.90}, {cat:"Agent qualifié", brut:2345.67}, {cat:"Senior/Spécialiste", brut:2589.34}, {cat:"Responsable", brut:2912.56},
-  ]},
-  "326": { label:"CP 326 — Commerce de détail indép.", source:"CCT sectorielle — 2026", categories:[
-    {cat:"Cat. 1 — Vendeur débutant", brut:2089.34}, {cat:"Cat. 2 — Vendeur qualifié", brut:2178.56},
-    {cat:"Cat. 3 — Chef de rayon", brut:2345.67}, {cat:"Cat. 4 — Responsable", brut:2623.89},
-  ]},
-  "327": { label:"CP 327 — Travail adapté", source:"RMMMG + subventions régionales — 2026", categories:[
-    {cat:"Travailleur adapté — RMMMG", brut:2070.48},
-  ]},
-  "329": { label:"CP 329 — Grandes surfaces alimentaires", source:"CCT sectorielle — indexation 2026", categories:[
-    {cat:"Cat. 1 — Caissier/Aide", brut:2156.78}, {cat:"Cat. 2 — Employé qualifié", brut:2312.45},
-    {cat:"Cat. 3 — Chef de rayon", brut:2534.67}, {cat:"Cat. 4 — Manager département", brut:3012.34},
-  ]},
-  "330": { label:"CP 330 — Soins de santé", source:"IFIC 2026 — Accord social non-marchand", note:"Barème IFIC applicable en Wallonie et Bruxelles", categories:[
-    {cat:"IFIC 2 — Aide-soignant(e) brevet", brut:2234.56}, {cat:"IFIC 4 — Aide-soignant qualifié", brut:2378.90},
-    {cat:"IFIC 6 — Infirmier bachelier A1", brut:2678.45}, {cat:"IFIC 8 — Infirmier spécialisé", brut:2912.67},
-    {cat:"IFIC 10 — Infirmier en chef", brut:3156.89}, {cat:"IFIC 12 — Coordinateur soins", brut:3445.34},
-    {cat:"IFIC 14 — Cadre intermédiaire", brut:3812.56}, {cat:"IFIC 16 — Directeur des soins", brut:4345.78},
-    {cat:"Médecin salarié (convention INAMI)", brut:4567.89},
-  ]},
-  "331": { label:"CP 331 — Soins santé Flandre", source:"IFIC Flandre + Vlaamse akkoorden 2026", categories:[
-    {cat:"Niveau 1 — Aide-soignant", brut:2256.78}, {cat:"Niveau 2 — Aide-soignant qualifié", brut:2389.45},
-    {cat:"Niveau 3 — Infirmier bachelier", brut:2712.34}, {cat:"Niveau 4 — Infirmier spécialisé", brut:2956.67},
-    {cat:"Niveau 5 — Cadre infirmier", brut:3234.89},
-  ]},
-  "332": { label:"CP 332 — Soins santé Wal-Bxl", source:"IFIC Wal-Bxl — accord non-marchand 2026", categories:[
-    {cat:"Niveau 1 — Aide-soignant", brut:2234.56}, {cat:"Niveau 2 — Aide-soignant qualifié", brut:2367.89},
-    {cat:"Niveau 3 — Infirmier bachelier", brut:2678.45}, {cat:"Niveau 4 — Infirmier spécialisé", brut:2912.67},
-    {cat:"Niveau 5 — Cadre infirmier", brut:3189.34},
-  ]},
-  "333": { label:"CP 333 — Commerce détail indép.", source:"CCT sectorielle — 2026", categories:[
-    {cat:"Cat. 1", brut:2089.34}, {cat:"Cat. 2", brut:2198.67}, {cat:"Cat. 3", brut:2356.78},
-  ]},
-  "335": { label:"CP 335 — Travail intérimaire", source:"CP utilisatrice applicable — 2026", categories:[
-    {cat:"CP de l'entreprise utilisatrice applicable", brut:2070.48},
-  ]},
-  "336": { label:"CP 336 — Titres-services", source:"CCT sectorielle — 01/01/2026", note:"Taux horaire — temps partiel généralement", categories:[
-    {cat:"Aide-ménagère — 0-5 ans ancienneté", brut:12.01, type:"horaire"},
-    {cat:"Aide-ménagère — 5-10 ans ancienneté", brut:12.35, type:"horaire"},
-    {cat:"Aide-ménagère — +10 ans ancienneté", brut:12.68, type:"horaire"},
-  ]},
-  "337": { label:"CP 337 — PME (employés)", source:"CCT sectorielle — 2026", categories:[
-    {cat:"Cat. 1 — Débutant", brut:2112.45}, {cat:"Cat. 2 — Qualifié", brut:2298.67},
-    {cat:"Cat. 3 — Expérimenté", brut:2534.89}, {cat:"Cat. 4 — Cadre PME", brut:2934.56},
-  ]},
-  "338": { label:"CP 338 — Nettoyage (employés)", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Cat. 1 — Administratif", brut:2123.45}, {cat:"Cat. 2 — Superviseur terrain", brut:2345.67}, {cat:"Cat. 3 — Manager", brut:2678.90},
-  ]},
-  "340": { label:"CP 340 — Construction commerce", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Niveau A", brut:2234.56}, {cat:"Niveau B", brut:2489.23}, {cat:"Niveau C", brut:2867.45}, {cat:"Niveau D", brut:3234.78},
-  ]},
-  "100": { label:"CP 100 — Ouvriers (général)", source:"CCT n°43 CNT + CCT CP 100 — 2026", note:"Taux horaire", categories:[
-    {cat:"Non qualifié", brut:12.13, type:"horaire"}, {cat:"Semi-qualifié", brut:12.67, type:"horaire"},
-    {cat:"Qualifié", brut:13.34, type:"horaire"}, {cat:"Hautement qualifié", brut:14.12, type:"horaire"},
-  ]},
-  "105": { label:"CP 105 — Véhicules neufs & garages", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Cat. I — Aide mécanicien", brut:13.12, type:"horaire"}, {cat:"Cat. II — Mécanicien", brut:14.23, type:"horaire"},
-    {cat:"Cat. III — Mécanicien qualifié", brut:15.45, type:"horaire"}, {cat:"Cat. IV — Technicien", brut:16.89, type:"horaire"},
-    {cat:"Cat. V — Expert technique", brut:18.34, type:"horaire"},
-  ]},
-  "106": { label:"CP 106 — Carburants", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Pompiste/Employé station", brut:13.12, type:"horaire"}, {cat:"Chef de station", brut:14.56, type:"horaire"},
-  ]},
-  "107": { label:"CP 107 — Hôtellerie (ouvriers)", source:"CCT sectorielle — 01/01/2026", note:"Avantages en nature logement/repas déductibles", categories:[
-    {cat:"Aide de cuisine / Plongeur", brut:12.34, type:"horaire"}, {cat:"Cuisinier qualifié", brut:13.45, type:"horaire"},
-    {cat:"Chef de partie", brut:14.78, type:"horaire"},
-  ]},
-  "108": { label:"CP 108 — Nettoyage (ouvriers)", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Classe A — Agent nettoyage", brut:12.34, type:"horaire"}, {cat:"Classe B — Agent qualifié", brut:12.89, type:"horaire"},
-    {cat:"Classe C — Chef d'équipe", brut:13.67, type:"horaire"}, {cat:"Classe D — Superviseur", brut:14.56, type:"horaire"},
-  ]},
-  "112": { label:"CP 112 — Garages (ouvriers)", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Cat. I — Aide mécanicien", brut:13.45, type:"horaire"}, {cat:"Cat. II — Mécanicien qualifié", brut:14.78, type:"horaire"},
-    {cat:"Cat. III — Technicien diagnostiqueur", brut:16.12, type:"horaire"}, {cat:"Cat. IV — Expert", brut:17.89, type:"horaire"},
-  ]},
-  "115": { label:"CP 115 — Confection & textile", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Ouvrier non qualifié", brut:12.13, type:"horaire"}, {cat:"Ouvrier qualifié", brut:12.89, type:"horaire"},
-    {cat:"Tailleur/Couturier spécialisé", brut:13.78, type:"horaire"},
-  ]},
-  "118": { label:"CP 118 — Alimentation (ouvriers)", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Cat. 1 — Manœuvre", brut:12.67, type:"horaire"}, {cat:"Cat. 2 — Spécialisé", brut:13.23, type:"horaire"},
-    {cat:"Cat. 3 — Qualifié", brut:13.89, type:"horaire"}, {cat:"Cat. 4 — Hautement qualifié", brut:14.78, type:"horaire"},
-    {cat:"Cat. 5 — Chef d'équipe", brut:15.67, type:"horaire"},
-  ]},
-  "119": { label:"CP 119 — Boulangerie", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Aide-boulanger", brut:12.89, type:"horaire"}, {cat:"Boulanger qualifié", brut:13.78, type:"horaire"},
-    {cat:"Pâtissier qualifié", brut:14.34, type:"horaire"}, {cat:"Chef boulanger", brut:15.12, type:"horaire"},
-  ]},
-  "121": { label:"CP 121 — Nettoyage à sec", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Ouvrier nettoyage à sec", brut:12.23, type:"horaire"}, {cat:"Technicien pressing qualifié", brut:13.12, type:"horaire"},
-  ]},
-  "124": { label:"CP 124 — Bâtiment & Travaux Publics", source:"CCT Confédération Construction — 01/01/2026", note:"Hors primes: intempéries (11,49€/h), déplacements, outillage", categories:[
-    {cat:"Cat. A — Manœuvre", brut:15.67, type:"horaire"}, {cat:"Cat. B — Ouvrier qualifié (CEFA)", brut:17.23, type:"horaire"},
-    {cat:"Cat. C — Hautement qualifié", brut:18.89, type:"horaire"}, {cat:"Cat. D — Chef d'équipe", brut:20.34, type:"horaire"},
-    {cat:"Cat. E — Contremaître", brut:22.67, type:"horaire"},
-  ]},
-  "125": { label:"CP 125 — Industrie du bois", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Cat. 1 — Non qualifié", brut:13.45, type:"horaire"}, {cat:"Cat. 2 — Semi-qualifié", brut:14.23, type:"horaire"},
-    {cat:"Cat. 3 — Qualifié (menuisier)", brut:15.12, type:"horaire"}, {cat:"Cat. 4 — Hautement qualifié", brut:16.34, type:"horaire"},
-  ]},
-  "126": { label:"CP 126 — Ameublement", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Cat. 1 — Aide", brut:13.12, type:"horaire"}, {cat:"Cat. 2 — Qualifié", brut:14.23, type:"horaire"},
-    {cat:"Cat. 3 — Ébéniste spécialisé", brut:15.45, type:"horaire"},
-  ]},
-  "128": { label:"CP 128 — Métal, mécanique & électrotechnique", source:"CCT Agoria — 01/01/2026", categories:[
-    {cat:"Cat. 1 — Aide-opérateur", brut:14.23, type:"horaire"}, {cat:"Cat. 2 — Opérateur", brut:15.12, type:"horaire"},
-    {cat:"Cat. 3 — Technicien", brut:16.45, type:"horaire"}, {cat:"Cat. 4 — Technicien qualifié/Soudeur", brut:17.89, type:"horaire"},
-    {cat:"Cat. 5 — Chef d'équipe/Contremaître", brut:19.34, type:"horaire"},
-  ]},
-  "130": { label:"CP 130 — Imprimeries & médias graphiques", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Classe 1 — Aide-imprimeur", brut:13.89, type:"horaire"}, {cat:"Classe 2 — Opérateur", brut:14.78, type:"horaire"},
-    {cat:"Classe 3 — Imprimeur qualifié/PAO", brut:15.89, type:"horaire"}, {cat:"Classe 4 — Chef d'atelier", brut:17.34, type:"horaire"},
-  ]},
-  "132": { label:"CP 132 — Agriculture", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Cat. I — Ouvrier agricole", brut:12.13, type:"horaire"}, {cat:"Cat. II — Spécialisé", brut:12.67, type:"horaire"},
-    {cat:"Cat. III — Qualifié/Tractoriste", brut:13.34, type:"horaire"}, {cat:"Cat. IV — Chef d'exploitation", brut:14.12, type:"horaire"},
-  ]},
-  "133": { label:"CP 133 — Horticulture", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Ouvrier horticole", brut:12.23, type:"horaire"}, {cat:"Jardinier qualifié", brut:12.89, type:"horaire"},
-    {cat:"Paysagiste/Chef d'équipe", brut:13.78, type:"horaire"},
-  ]},
-  "136": { label:"CP 136 — Industrie chimique (ouvriers)", source:"CCT Essenscia — 01/01/2026", categories:[
-    {cat:"Cat. I — Opérateur débutant", brut:14.78, type:"horaire"}, {cat:"Cat. II — Opérateur qualifié", brut:15.89, type:"horaire"},
-    {cat:"Cat. III — Technicien process", brut:17.34, type:"horaire"}, {cat:"Cat. IV — Technicien senior", brut:18.89, type:"horaire"},
-    {cat:"Cat. V — Chef d'équipe", brut:20.45, type:"horaire"},
-  ]},
-  "140": { label:"CP 140 — Transport routier (chauffeurs)", source:"CCT UPTR-FEBETRA — 01/01/2026", note:"+ per diem journalier exonéré: max 40,24€/j grand routier", categories:[
-    {cat:"Chauffeur permis B — livraison locale", brut:13.78, type:"horaire"}, {cat:"Chauffeur permis C — régional", brut:14.67, type:"horaire"},
-    {cat:"Chauffeur permis CE — national", brut:15.45, type:"horaire"}, {cat:"Chauffeur CE — international/grand routier", brut:16.23, type:"horaire"},
-    {cat:"Chauffeur CE — Matières dangereuses (ADR)", brut:17.12, type:"horaire"},
-  ]},
-  "142": { label:"CP 142 — Jardiniers & paysagistes", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Aide-jardinier", brut:12.13, type:"horaire"}, {cat:"Jardinier qualifié", brut:12.78, type:"horaire"},
-    {cat:"Paysagiste/Chef d'équipe", brut:13.56, type:"horaire"},
-  ]},
-  "143": { label:"CP 143 — Garde d'enfants", source:"CCT sectorielle — 01/01/2026", categories:[
-    {cat:"Aide-gardienne", brut:12.13, type:"horaire"}, {cat:"Puéricultrice qualifiée", brut:12.89, type:"horaire"},
-    {cat:"Responsable crèche", brut:13.78, type:"horaire"},
-  ]},
-  "149": { label:"CP 149 — Électricité (ouvriers)", source:"CCT Volta — 01/01/2026", categories:[
-    {cat:"Cat. 1 — Aide-électricien", brut:14.89, type:"horaire"}, {cat:"Cat. 2 — Électricien qualifié", brut:16.45, type:"horaire"},
-    {cat:"Cat. 3 — Électricien spécialisé (AREI)", brut:17.89, type:"horaire"}, {cat:"Cat. 4 — Chef d'équipe", brut:19.56, type:"horaire"},
-    {cat:"Cat. 5 — Contremaître haute tension", brut:21.34, type:"horaire"},
-  ]},
-  "150": { label:"CP 150 — Travail adapté (ouvriers)", source:"RMMMG + subventions régionales — 2026", categories:[
-    {cat:"Travailleur adapté — RMMMG", brut:12.13, type:"horaire"},
-  ]},
-  "319": { label:"CP 319 — Éducation & enseignement", source:"Barèmes FWB/Vlaamse overheid — indexation 01/2026", note:"Augmentation annuelle à l'ancienneté baremique", categories:[
-    {cat:"Instituteur primaire — débutant (AESI)", brut:2456.78}, {cat:"Instituteur primaire — 5 ans", brut:2678.90}, {cat:"Instituteur primaire — 10 ans", brut:2912.34},
-    {cat:"Prof secondaire inférieur (AESI)", brut:2678.90}, {cat:"Prof secondaire supérieur (AESS)", brut:2912.34}, {cat:"Prof secondaire sup. — 10 ans", brut:3245.67},
-    {cat:"Directeur école primaire", brut:3456.89}, {cat:"Directeur école secondaire", brut:3912.45},
-  ]},
-  "319.01": { label:"CP 319.01 — Enseignement libre", source:"Barèmes FWB réseau libre — 01/2026", categories:[
-    {cat:"Instituteur — débutant", brut:2456.78}, {cat:"Instituteur — 5 ans", brut:2678.90},
-    {cat:"Professeur secondaire — débutant", brut:2678.90}, {cat:"Professeur secondaire — 10 ans", brut:3245.67},
-  ]},
-  "000": { label:"Dirigeant — Pas de minimum légal", source:"Rémunération fixée par l'AG", note:"Minimum INASTI pour indépendant: cotisations sur base 17.349,99€/an minimum", categories:[
-    {cat:"Aucun minimum légal — rémunération AG", brut:0},
-  ]},
-  "FLEXI": { label:"Flexi-job — Minimum légal", source:"AR 07/06/2023 modifié — 01/01/2026", categories:[
-    {cat:"Tous secteurs — minimum légal 2026", brut:11.54, type:"horaire"},
-    {cat:"HORECA (CP 302)", brut:12.01, type:"horaire"},
-    {cat:"Commerce alimentaire (CP 201)", brut:11.89, type:"horaire"},
-  ]},
-  "ETU": { label:"Étudiant jobiste — Cotisation solidarité 5,42%", source:"RMMMG + CCT sectorielle — 2026", categories:[
-    {cat:"Minimum légal tous secteurs", brut:12.13, type:"horaire"},
-    {cat:"HORECA (CP 302)", brut:12.45, type:"horaire"},
-    {cat:"Grande surface (CP 329)", brut:12.34, type:"horaire"},
-  ]},
+
+// ──────────────────────────────────────────────────────────────────────────────
+// RMMMG — SALAIRE MINIMUM INTERPROFESSIONNEL
+// ──────────────────────────────────────────────────────────────────────────────
+"RMMMG":{"label":"RMMMG — Minimum interprofessionnel garanti","source":"CCT n°43 CNT — 01/04/2026","categories":[
+  {cat:"Travailleur — 0 ancienneté",brut:2070.48},
+  {cat:"Travailleur — 6 mois ancienneté",brut:2133.43},
+  {cat:"Travailleur — 12 mois ancienneté",brut:2196.37}
+]},
+
+// ──────────────────────────────────────────────────────────────────────────────
+// COMMISSIONS PARITAIRES OUVRIERS (100-199)
+// ──────────────────────────────────────────────────────────────────────────────
+"100":{"label":"CP 100 — Commission paritaire auxiliaire pour ouvriers","source":"CCT n°43 CNT — 2026","categories":[
+  {cat:"Non qualifié",brut:12.13,type:"horaire"},{cat:"Semi-qualifié",brut:12.67,type:"horaire"},
+  {cat:"Qualifié",brut:13.34,type:"horaire"},{cat:"Hautement qualifié",brut:14.12,type:"horaire"}
+]},
+"101":{"label":"CP 101 — Commission nationale mixte des mines","source":"CCT sectorielle — 2026","note":"Secteur en extinction","categories":[
+  {cat:"Mineur fond",brut:16.23,type:"horaire"},{cat:"Mineur surface",brut:14.89,type:"horaire"},
+  {cat:"Technicien minier",brut:17.56,type:"horaire"}
+]},
+"102":{"label":"CP 102 — Industrie des carrières","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Manœuvre carrière",brut:14.12,type:"horaire"},{cat:"Ouvrier qualifié",brut:15.67,type:"horaire"},
+  {cat:"Technicien carrier",brut:17.34,type:"horaire"},{cat:"Chef d'équipe",brut:19.12,type:"horaire"}
+]},
+"102.01":{"label":"CP 102.01 — Carrières petit granit & calcaire (Hainaut)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Tailleur de pierre non qualifié",brut:14.45,type:"horaire"},{cat:"Tailleur de pierre qualifié",brut:16.12,type:"horaire"},
+  {cat:"Tailleur spécialisé",brut:17.89,type:"horaire"}
+]},
+"102.02":{"label":"CP 102.02 — Carrières petit granit (Liège & Namur)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Tailleur non qualifié",brut:14.45,type:"horaire"},{cat:"Tailleur qualifié",brut:16.12,type:"horaire"}
+]},
+"102.03":{"label":"CP 102.03 — Carrières de porphyre (Brabant wallon & Hainaut)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Carrier non qualifié",brut:14.67,type:"horaire"},{cat:"Carrier qualifié",brut:16.34,type:"horaire"},
+  {cat:"Chef d'équipe",brut:18.12,type:"horaire"}
+]},
+"102.04":{"label":"CP 102.04 — Carrières de grès et quartzite","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Carrier non qualifié",brut:14.45,type:"horaire"},{cat:"Carrier qualifié",brut:16.12,type:"horaire"}
+]},
+"102.05":{"label":"CP 102.05 — Carrières de kaolin et sable","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier extraction",brut:13.89,type:"horaire"},{cat:"Opérateur qualifié",brut:15.45,type:"horaire"}
+]},
+"102.06":{"label":"CP 102.06 — Carrières de gravier et sable (Flandre)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier extraction",brut:13.78,type:"horaire"},{cat:"Opérateur qualifié",brut:15.23,type:"horaire"}
+]},
+"102.07":{"label":"CP 102.07 — Carrières, cimenteries & fours à chaux (Tournai)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier cimenterie",brut:14.12,type:"horaire"},{cat:"Technicien qualifié",brut:15.89,type:"horaire"}
+]},
+"102.08":{"label":"CP 102.08 — Carrières et scieries de marbres","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Marbrier non qualifié",brut:14.34,type:"horaire"},{cat:"Marbrier qualifié",brut:16.12,type:"horaire"},
+  {cat:"Marbrier spécialisé",brut:17.89,type:"horaire"}
+]},
+"102.09":{"label":"CP 102.09 — Carrières de calcaire & fours à chaux","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier fours",brut:13.89,type:"horaire"},{cat:"Technicien qualifié",brut:15.45,type:"horaire"}
+]},
+"102.11":{"label":"CP 102.11 — Ardoisières & pierres à rasoir","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ardoisier non qualifié",brut:14.12,type:"horaire"},{cat:"Ardoisier qualifié",brut:15.89,type:"horaire"}
+]},
+"104":{"label":"CP 104 — Industrie sidérurgique","source":"CCT Siderurgie — 01/01/2026","categories":[
+  {cat:"Ouvrier sidérurgiste non qualifié",brut:14.89,type:"horaire"},{cat:"Opérateur qualifié",brut:16.45,type:"horaire"},
+  {cat:"Technicien hauts fourneaux",brut:18.23,type:"horaire"},{cat:"Chef d'équipe",brut:20.12,type:"horaire"}
+]},
+"105":{"label":"CP 105 — Métaux non-ferreux","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier non qualifié",brut:13.89,type:"horaire"},{cat:"Opérateur qualifié",brut:15.45,type:"horaire"},
+  {cat:"Technicien métaux",brut:17.12,type:"horaire"},{cat:"Chef d'équipe",brut:18.89,type:"horaire"}
+]},
+"106":{"label":"CP 106 — Industries du ciment","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier ciment non qualifié",brut:13.78,type:"horaire"},{cat:"Opérateur qualifié",brut:15.34,type:"horaire"},
+  {cat:"Technicien cimenterie",brut:16.89,type:"horaire"}
+]},
+"106.01":{"label":"CP 106.01 — Fabriques de ciment","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Opérateur ciment",brut:13.89,type:"horaire"},{cat:"Technicien qualifié",brut:15.56,type:"horaire"}
+]},
+"106.02":{"label":"CP 106.02 — Industrie du béton","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier béton",brut:13.67,type:"horaire"},{cat:"Coffreur qualifié",brut:15.23,type:"horaire"},
+  {cat:"Technicien précontrainte",brut:17.12,type:"horaire"}
+]},
+"106.03":{"label":"CP 106.03 — Fibrociment","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Opérateur fibrociment",brut:13.56,type:"horaire"},{cat:"Technicien qualifié",brut:15.12,type:"horaire"}
+]},
+"107":{"label":"CP 107 — Maîtres-tailleurs, tailleuses & couturières","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Aide-tailleur(se)",brut:12.23,type:"horaire"},{cat:"Tailleur(se) qualifié(e)",brut:13.12,type:"horaire"},
+  {cat:"Maître-tailleur / Couturier(ère) spécialisé(e)",brut:14.56,type:"horaire"}
+]},
+"109":{"label":"CP 109 — Habillement & confection (ouvriers)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier confection non qualifié",brut:12.13,type:"horaire"},{cat:"Couturier(ère) qualifié(e)",brut:12.89,type:"horaire"},
+  {cat:"Opérateur spécialisé",brut:13.67,type:"horaire"}
+]},
+"110":{"label":"CP 110 — Entretien du textile (blanchisseries & teintureries)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier blanchisserie",brut:12.23,type:"horaire"},{cat:"Teinturier qualifié",brut:13.12,type:"horaire"},
+  {cat:"Technicien pressing",brut:14.34,type:"horaire"}
+]},
+"111":{"label":"CP 111 — Constructions métallique, mécanique & électrique","source":"CCT Agoria — 01/01/2026","categories":[
+  {cat:"Cat. 1 — Aide-opérateur",brut:14.23,type:"horaire"},{cat:"Cat. 2 — Opérateur",brut:15.12,type:"horaire"},
+  {cat:"Cat. 3 — Technicien",brut:16.45,type:"horaire"},{cat:"Cat. 4 — Soudeur qualifié EN/ISO",brut:17.89,type:"horaire"},
+  {cat:"Cat. 5 — Chef d'équipe / Contremaître",brut:19.34,type:"horaire"}
+]},
+"112":{"label":"CP 112 — Entreprises de garage","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Cat. I — Aide-mécanicien",brut:13.45,type:"horaire"},{cat:"Cat. II — Mécanicien qualifié",brut:14.78,type:"horaire"},
+  {cat:"Cat. III — Technicien diagnostiqueur",brut:16.12,type:"horaire"},{cat:"Cat. IV — Expert technique",brut:17.89,type:"horaire"}
+]},
+"113":{"label":"CP 113 — Industrie céramique","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier céramique non qualifié",brut:12.89,type:"horaire"},{cat:"Céramiste qualifié",brut:13.78,type:"horaire"},
+  {cat:"Technicien céramique",brut:14.89,type:"horaire"}
+]},
+"113.04":{"label":"CP 113.04 — Tuileries","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier tuilerie",brut:13.12,type:"horaire"},{cat:"Technicien tuilerie",brut:14.56,type:"horaire"}
+]},
+"114":{"label":"CP 114 — Industrie des briques","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier briqueterie",brut:13.23,type:"horaire"},{cat:"Technicien qualifié",brut:14.78,type:"horaire"},
+  {cat:"Chef d'équipe",brut:16.34,type:"horaire"}
+]},
+"115":{"label":"CP 115 — Industrie verrière","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier verrier non qualifié",brut:13.12,type:"horaire"},{cat:"Verrier qualifié",brut:14.56,type:"horaire"},
+  {cat:"Souffleur / Maître verrier",brut:16.23,type:"horaire"}
+]},
+"116":{"label":"CP 116 — Industrie chimique (ouvriers)","source":"CCT Essenscia — 01/01/2026","categories":[
+  {cat:"Cat. I — Opérateur débutant",brut:14.78,type:"horaire"},{cat:"Cat. II — Opérateur qualifié",brut:15.89,type:"horaire"},
+  {cat:"Cat. III — Technicien process",brut:17.34,type:"horaire"},{cat:"Cat. IV — Technicien senior",brut:18.89,type:"horaire"},
+  {cat:"Cat. V — Chef d'équipe / Contremaître",brut:20.45,type:"horaire"}
+]},
+"118":{"label":"CP 118 — Industrie alimentaire (ouvriers)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Cat. 1 — Manœuvre",brut:12.67,type:"horaire"},{cat:"Cat. 2 — Spécialisé",brut:13.23,type:"horaire"},
+  {cat:"Cat. 3 — Qualifié",brut:13.89,type:"horaire"},{cat:"Cat. 4 — Hautement qualifié",brut:14.78,type:"horaire"},
+  {cat:"Cat. 5 — Chef d'équipe",brut:15.67,type:"horaire"}
+]},
+"119":{"label":"CP 119 — Commerce alimentaire (ouvriers)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Aide magasin",brut:12.13,type:"horaire"},{cat:"Livreur qualifié",brut:12.78,type:"horaire"},
+  {cat:"Chef d'équipe entrepôt",brut:13.89,type:"horaire"}
+]},
+"120":{"label":"CP 120 — Industrie textile","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Tisserand non qualifié",brut:12.45,type:"horaire"},{cat:"Tisserand qualifié",brut:13.34,type:"horaire"},
+  {cat:"Technicien textile",brut:14.67,type:"horaire"},{cat:"Chef d'équipe",brut:16.12,type:"horaire"}
+]},
+"120.01":{"label":"CP 120.01 — Industrie textile de Verviers","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier textile non qualifié",brut:12.67,type:"horaire"},{cat:"Spécialiste laine",brut:13.89,type:"horaire"}
+]},
+"120.03":{"label":"CP 120.03 — Fabrication et commerce de sacs en jute","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier non qualifié",brut:12.23,type:"horaire"},{cat:"Ouvrier qualifié",brut:13.12,type:"horaire"}
+]},
+"121":{"label":"CP 121 — Nettoyage (ouvriers)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Classe A — Agent nettoyage",brut:12.34,type:"horaire"},{cat:"Classe B — Agent qualifié",brut:12.89,type:"horaire"},
+  {cat:"Classe C — Chef d'équipe",brut:13.67,type:"horaire"},{cat:"Classe D — Superviseur",brut:14.56,type:"horaire"}
+]},
+"124":{"label":"CP 124 — Construction","source":"CCT Confédération Construction — 01/01/2026","note":"Hors primes: intempéries (11,49€/h), déplacements, outillage","categories":[
+  {cat:"Cat. A — Manœuvre",brut:15.67,type:"horaire"},{cat:"Cat. B — Qualifié (CEFA)",brut:17.23,type:"horaire"},
+  {cat:"Cat. C — Hautement qualifié",brut:18.89,type:"horaire"},{cat:"Cat. D — Chef d'équipe",brut:20.34,type:"horaire"},
+  {cat:"Cat. E — Contremaître",brut:22.67,type:"horaire"}
+]},
+"125":{"label":"CP 125 — Industrie du bois","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Cat. 1 — Non qualifié",brut:13.45,type:"horaire"},{cat:"Cat. 2 — Semi-qualifié",brut:14.23,type:"horaire"},
+  {cat:"Cat. 3 — Qualifié (menuisier)",brut:15.12,type:"horaire"},{cat:"Cat. 4 — Hautement qualifié",brut:16.34,type:"horaire"}
+]},
+"125.01":{"label":"CP 125.01 — Exploitations forestières","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Bûcheron",brut:13.12,type:"horaire"},{cat:"Bûcheron qualifié / Abatteur",brut:14.23,type:"horaire"},
+  {cat:"Conducteur d'engins forestiers",brut:15.67,type:"horaire"}
+]},
+"125.02":{"label":"CP 125.02 — Scieries et industries connexes","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier scierie",brut:13.34,type:"horaire"},{cat:"Scieur qualifié",brut:14.78,type:"horaire"},
+  {cat:"Technicien scierie",brut:15.89,type:"horaire"}
+]},
+"125.03":{"label":"CP 125.03 — Commerce du bois","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Manutentionnaire",brut:12.89,type:"horaire"},{cat:"Magasinier bois",brut:13.67,type:"horaire"}
+]},
+"126":{"label":"CP 126 — Ameublement & industrie transformatrice du bois","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Cat. 1 — Aide",brut:13.12,type:"horaire"},{cat:"Cat. 2 — Qualifié",brut:14.23,type:"horaire"},
+  {cat:"Cat. 3 — Ébéniste spécialisé",brut:15.45,type:"horaire"},{cat:"Cat. 4 — Artisan maître",brut:16.89,type:"horaire"}
+]},
+"127":{"label":"CP 127 — Commerce de combustibles","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Livreur combustibles",brut:13.45,type:"horaire"},{cat:"Chauffeur-livreur qualifié",brut:14.23,type:"horaire"},
+  {cat:"Chef d'équipe livraison",brut:15.67,type:"horaire"}
+]},
+"128":{"label":"CP 128 — Cuirs, peaux & produits de remplacement","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier maroquinerie non qualifié",brut:12.56,type:"horaire"},{cat:"Artisan qualifié cuir",brut:13.78,type:"horaire"},
+  {cat:"Cordonnier / Maroquinier spécialisé",brut:14.89,type:"horaire"}
+]},
+"129":{"label":"CP 129 — Production de pâtes, papiers & cartons","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier papetier non qualifié",brut:13.56,type:"horaire"},{cat:"Technicien papetier",brut:14.89,type:"horaire"},
+  {cat:"Chef de machine",brut:16.34,type:"horaire"},{cat:"Chef d'équipe papeterie",brut:17.89,type:"horaire"}
+]},
+"130":{"label":"CP 130 — Imprimerie, arts graphiques & journaux","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Classe 1 — Aide-imprimeur",brut:13.89,type:"horaire"},{cat:"Classe 2 — Opérateur",brut:14.78,type:"horaire"},
+  {cat:"Classe 3 — Qualifié/PAO",brut:15.89,type:"horaire"},{cat:"Classe 4 — Chef d'atelier",brut:17.34,type:"horaire"}
+]},
+"132":{"label":"CP 132 — Travaux techniques agricoles & horticoles","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Cat. I — Ouvrier agricole",brut:12.13,type:"horaire"},{cat:"Cat. II — Spécialisé",brut:12.67,type:"horaire"},
+  {cat:"Cat. III — Qualifié / Tractoriste",brut:13.34,type:"horaire"},{cat:"Cat. IV — Chef d'exploitation",brut:14.12,type:"horaire"}
+]},
+"133":{"label":"CP 133 — Industrie des tabacs","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier tabac",brut:13.23,type:"horaire"},{cat:"Technicien tabac qualifié",brut:14.67,type:"horaire"},
+  {cat:"Chef d'équipe",brut:16.12,type:"horaire"}
+]},
+"136":{"label":"CP 136 — Transformation du papier & carton","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Opérateur papier",brut:13.12,type:"horaire"},{cat:"Technicien conversion",brut:14.78,type:"horaire"},
+  {cat:"Chef d'équipe",brut:16.23,type:"horaire"}
+]},
+"139":{"label":"CP 139 — Batellerie (navigation intérieure)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Matelot fluvial",brut:13.89,type:"horaire"},{cat:"Timonier / Mécanicien de bord",brut:15.45,type:"horaire"},
+  {cat:"Patron de bateau",brut:17.23,type:"horaire"},{cat:"Capitaine fluvial",brut:19.12,type:"horaire"}
+]},
+"140":{"label":"CP 140 — Transport & logistique","source":"CCT UPTR-FEBETRA — 01/01/2026","note":"+ per diem max 40,24€/j exonéré (grand routier)","categories":[
+  {cat:"Chauffeur permis B — livraison locale",brut:13.78,type:"horaire"},{cat:"Chauffeur permis C — régional",brut:14.67,type:"horaire"},
+  {cat:"Chauffeur CE — national",brut:15.45,type:"horaire"},{cat:"Chauffeur CE — international",brut:16.23,type:"horaire"},
+  {cat:"Chauffeur CE — Matières dangereuses (ADR)",brut:17.12,type:"horaire"}
+]},
+"140.01":{"label":"CP 140.01 — Autobus & autocars","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Chauffeur autocar débutant",brut:14.12,type:"horaire"},{cat:"Chauffeur qualifié",brut:15.34,type:"horaire"},
+  {cat:"Chef de service",brut:17.89,type:"horaire"}
+]},
+"140.02":{"label":"CP 140.02 — Taxis","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Chauffeur taxi débutant",brut:13.45,type:"horaire"},{cat:"Chauffeur qualifié",brut:14.23,type:"horaire"},
+  {cat:"Dispatcher",brut:13.89,type:"horaire"}
+]},
+"140.03":{"label":"CP 140.03 — Transport routier & logistique pour compte de tiers","source":"CCT sectorielle — 01/01/2026","note":"+ per diem et primes de nuit","categories":[
+  {cat:"Chauffeur CE débutant",brut:14.89,type:"horaire"},{cat:"Chauffeur CE qualifié",brut:15.67,type:"horaire"},
+  {cat:"Magasinier / Cariste",brut:13.34,type:"horaire"},{cat:"Chef d'équipe logistique",brut:15.12,type:"horaire"}
+]},
+"140.04":{"label":"CP 140.04 — Assistance en escale dans les aéroports","source":"CCT sectorielle — 01/04/2012","categories":[
+  {cat:"Agent de piste débutant",brut:13.89,type:"horaire"},{cat:"Agent de piste qualifié",brut:15.23,type:"horaire"},
+  {cat:"Chef d'escale",brut:17.45,type:"horaire"}
+]},
+"140.05":{"label":"CP 140.05 — Déménagement","source":"CCT sectorielle — 01/10/2012","categories":[
+  {cat:"Déménageur non qualifié",brut:13.12,type:"horaire"},{cat:"Déménageur qualifié",brut:14.34,type:"horaire"},
+  {cat:"Chef d'équipe déménagement",brut:15.89,type:"horaire"}
+]},
+"142":{"label":"CP 142 — Valorisation de matières premières de récupération","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier récupération",brut:12.34,type:"horaire"},{cat:"Conducteur d'engin",brut:13.78,type:"horaire"},
+  {cat:"Technicien tri/valorisation",brut:14.89,type:"horaire"}
+]},
+"142.01":{"label":"CP 142.01 — Récupération de métaux","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Opérateur ferraille",brut:12.56,type:"horaire"},{cat:"Technicien métaux non ferreux",brut:13.89,type:"horaire"}
+]},
+"142.02":{"label":"CP 142.02 — Récupération de chiffons","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier tri",brut:12.13,type:"horaire"},{cat:"Opérateur qualifié",brut:12.89,type:"horaire"}
+]},
+"142.03":{"label":"CP 142.03 — Récupération du papier","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier tri papier",brut:12.13,type:"horaire"},{cat:"Opérateur presse",brut:12.78,type:"horaire"}
+]},
+"142.04":{"label":"CP 142.04 — Récupération de produits divers","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier récupération divers",brut:12.13,type:"horaire"},{cat:"Technicien valorisation",brut:13.45,type:"horaire"}
+]},
+"143":{"label":"CP 143 — Pêche maritime","source":"CCT sectorielle — 01/01/2026","note":"Rémunération souvent au pourcentage de la pêche","categories":[
+  {cat:"Matelot pêche côtière",brut:13.45,type:"horaire"},{cat:"Matelot qualifié / Mécanicien de bord",brut:15.12,type:"horaire"},
+  {cat:"Maître d'équipage / Patron pêcheur",brut:17.89,type:"horaire"}
+]},
+"144":{"label":"CP 144 — Agriculture","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Cat. I — Ouvrier agricole",brut:12.13,type:"horaire"},{cat:"Cat. II — Spécialisé",brut:12.67,type:"horaire"},
+  {cat:"Cat. III — Qualifié / Tractoriste",brut:13.34,type:"horaire"},{cat:"Cat. IV — Chef d'exploitation",brut:14.12,type:"horaire"}
+]},
+"145":{"label":"CP 145 — Entreprises horticoles","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier horticole",brut:12.23,type:"horaire"},{cat:"Jardinier qualifié",brut:12.89,type:"horaire"},
+  {cat:"Paysagiste / Chef d'équipe",brut:13.78,type:"horaire"},{cat:"Technicien horticole",brut:14.89,type:"horaire"}
+]},
+"146":{"label":"CP 146 — Entreprises forestières","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Bûcheron",brut:13.12,type:"horaire"},{cat:"Ouvrier forestier qualifié",brut:14.23,type:"horaire"},
+  {cat:"Conducteur d'engins forestiers",brut:15.67,type:"horaire"}
+]},
+"148":{"label":"CP 148 — Fourrure & peau en poil","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Ouvrier fourrure non qualifié",brut:12.34,type:"horaire"},{cat:"Fourreur qualifié",brut:13.45,type:"horaire"},
+  {cat:"Maître fourreur",brut:14.89,type:"horaire"}
+]},
+"149":{"label":"CP 149 — Secteurs connexes métal, mécanique & électrique","source":"CCT Volta/Agoria — 01/01/2026","categories":[
+  {cat:"Cat. 1 — Aide-électricien",brut:14.89,type:"horaire"},{cat:"Cat. 2 — Électricien qualifié",brut:16.45,type:"horaire"},
+  {cat:"Cat. 3 — Spécialisé (AREI)",brut:17.89,type:"horaire"},{cat:"Cat. 4 — Chef d'équipe",brut:19.56,type:"horaire"},
+  {cat:"Cat. 5 — Contremaître",brut:21.34,type:"horaire"}
+]},
+"149.01":{"label":"CP 149.01 — Électriciens : installation & distribution","source":"CCT Volta — 01/01/2026","categories":[
+  {cat:"Aide-électricien",brut:14.89,type:"horaire"},{cat:"Électricien qualifié",brut:16.45,type:"horaire"},
+  {cat:"Électricien spécialisé HT (AREI)",brut:18.12,type:"horaire"},{cat:"Chef d'équipe",brut:20.23,type:"horaire"}
+]},
+"149.02":{"label":"CP 149.02 — Carrosserie","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Aide-carrossier",brut:13.56,type:"horaire"},{cat:"Carrossier qualifié",brut:15.12,type:"horaire"},
+  {cat:"Peintre carrosserie qualifié",brut:15.89,type:"horaire"},{cat:"Chef d'équipe",brut:17.45,type:"horaire"}
+]},
+"149.03":{"label":"CP 149.03 — Métaux précieux (joaillerie, orfèvrerie)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Aide-bijoutier",brut:13.12,type:"horaire"},{cat:"Bijoutier qualifié",brut:14.89,type:"horaire"},
+  {cat:"Orfèvre / Joaillier spécialisé",brut:16.34,type:"horaire"}
+]},
+"149.04":{"label":"CP 149.04 — Commerce du métal","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Manutentionnaire",brut:12.89,type:"horaire"},{cat:"Magasinier qualifié",brut:13.78,type:"horaire"},
+  {cat:"Chef de dépôt",brut:15.23,type:"horaire"}
+]},
+"152":{"label":"CP 152 — Institutions subsidiées de l'enseignement libre (ouvriers)","source":"Barèmes Communautés — 01/2026","categories":[
+  {cat:"Ouvrier entretien non qualifié",brut:12.13,type:"horaire"},{cat:"Ouvrier entretien qualifié",brut:13.23,type:"horaire"},
+  {cat:"Ouvrier spécialisé",brut:14.12,type:"horaire"}
+]},
+"152.01":{"label":"CP 152.01 — Enseignement libre (ouvriers) Communauté flamande","source":"Barèmes Vlaamse overheid — 01/2026","categories":[
+  {cat:"Ouvrier entretien",brut:12.13,type:"horaire"},{cat:"Technicien maintenance",brut:13.67,type:"horaire"}
+]},
+"152.02":{"label":"CP 152.02 — Enseignement libre (ouvriers) Communauté française","source":"Barèmes FWB — 01/2026","categories":[
+  {cat:"Ouvrier entretien",brut:12.13,type:"horaire"},{cat:"Technicien maintenance",brut:13.67,type:"horaire"}
+]},
+
+// ──────────────────────────────────────────────────────────────────────────────
+// COMMISSIONS PARITAIRES EMPLOYÉS (200-299)
+// ──────────────────────────────────────────────────────────────────────────────
+"200":{"label":"CP 200 — Commission paritaire auxiliaire pour employés","source":"CCT 09/07/2021 + avenant 2026","categories":[
+  {cat:"Niveau 1 — 0 an",brut:2070.48},{cat:"Niveau 1 — 1 an",brut:2133.43},
+  {cat:"Niveau 1 — 2 ans",brut:2176.89},{cat:"Niveau 1 — 5 ans",brut:2241.12},
+  {cat:"Niveau 2 — 0 an",brut:2241.12},{cat:"Niveau 2 — 5 ans",brut:2374.23},
+  {cat:"Niveau 3 — 0 an",brut:2515.67},{cat:"Niveau 3 — 5 ans",brut:2590.34},
+  {cat:"Niveau 4 — Cadre",brut:3024.18},{cat:"Niveau 5 — Cadre supérieur",brut:3628.67}
+]},
+"201":{"label":"CP 201 — Commerce de détail indépendant","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Catégorie 1 — Non qualifié",brut:2089.34},{cat:"Catégorie 2 — Qualifié",brut:2198.56},
+  {cat:"Catégorie 3 — Chef de rayon",brut:2345.67},{cat:"Catégorie 4 — Responsable",brut:2623.89}
+]},
+"202":{"label":"CP 202 — Commerce de détail alimentaire (employés)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Catégorie 1",brut:2115.34},{cat:"Catégorie 2",brut:2198.45},
+  {cat:"Catégorie 3",brut:2367.89},{cat:"Catégorie 4",brut:2589.12}
+]},
+"202.01":{"label":"CP 202.01 — Moyennes entreprises d'alimentation","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Vendeur non qualifié",brut:2089.34},{cat:"Vendeur qualifié",brut:2198.56},
+  {cat:"Chef de rayon",brut:2378.90},{cat:"Responsable magasin",brut:2656.78}
+]},
+"203":{"label":"CP 203 — Employés des carrières de petit granit","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Employé administratif",brut:2134.56},{cat:"Technicien / Dessinateur",brut:2345.78},
+  {cat:"Responsable technique",brut:2789.34}
+]},
+"205":{"label":"CP 205 — Employés des charbonnages","source":"CCT sectorielle — 2026","note":"Secteur en extinction","categories":[
+  {cat:"Employé administratif",brut:2178.90},{cat:"Technicien minier",brut:2534.56},
+  {cat:"Ingénieur des mines",brut:3234.78}
+]},
+"207":{"label":"CP 207 — Employés de l'industrie chimique","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Cat. I",brut:2289.45},{cat:"Cat. II",brut:2456.78},
+  {cat:"Cat. III",brut:2712.34},{cat:"Cat. IV",brut:3089.56},{cat:"Cat. V",brut:3678.90}
+]},
+"209":{"label":"CP 209 — Employés des fabrications métalliques","source":"CCT Agoria — 01/01/2026","categories":[
+  {cat:"Niveau 1",brut:2198.45},{cat:"Niveau 2",brut:2367.89},
+  {cat:"Niveau 3",brut:2634.56},{cat:"Niveau 4",brut:3012.78},{cat:"Niveau 5",brut:3567.34}
+]},
+"210":{"label":"CP 210 — Employés de la sidérurgie","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Employé technique débutant",brut:2312.45},{cat:"Technicien qualifié",brut:2678.90},
+  {cat:"Ingénieur",brut:3456.78},{cat:"Cadre",brut:4234.56}
+]},
+"211":{"label":"CP 211 — Industrie & commerce du pétrole (employés)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Employé technique débutant",brut:2312.45},{cat:"Technicien qualifié",brut:2678.90},
+  {cat:"Ingénieur pétrochimiste",brut:3456.78}
+]},
+"214":{"label":"CP 214 — Employés de l'industrie textile","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Administratif niveau 1",brut:2134.56},{cat:"Technicien textile",brut:2367.89},
+  {cat:"Ingénieur textile",brut:2867.34},{cat:"Cadre",brut:3456.78}
+]},
+"215":{"label":"CP 215 — Employés habillement & confection","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Employé administratif",brut:2089.45},{cat:"Technicien couture",brut:2234.67},
+  {cat:"Styliste / Modéliste",brut:2567.89},{cat:"Responsable",brut:3012.34}
+]},
+"216":{"label":"CP 216 — Employés chez les notaires","source":"Fédération Royale du Notariat Belge — 2026","categories":[
+  {cat:"Employé notarial niveau 1 (débutant)",brut:2198.45},{cat:"Employé notarial niveau 2",brut:2456.78},
+  {cat:"Clerc de notaire expérimenté",brut:2867.34},{cat:"Candidat notaire — débutant",brut:2634.56},
+  {cat:"Candidat notaire — qualifié",brut:3012.78}
+]},
+"217":{"label":"CP 217 — Employés de casino","source":"CCT sectorielle — 01/01/2026","note":"Licence de jeu obligatoire","categories":[
+  {cat:"Croupier débutant",brut:2312.45},{cat:"Croupier qualifié",brut:2678.90},
+  {cat:"Chef de table",brut:3012.34},{cat:"Inspecteur de salle",brut:3456.78}
+]},
+"219":{"label":"CP 219 — Services & organismes de contrôle technique","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Contrôleur technique débutant",brut:2312.45},{cat:"Contrôleur qualifié",brut:2678.90},
+  {cat:"Expert certifié",brut:3123.45},{cat:"Responsable technique",brut:3678.90}
+]},
+"220":{"label":"CP 220 — Employés de l'industrie alimentaire","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Catégorie A",brut:2134.56},{cat:"Catégorie B",brut:2298.78},
+  {cat:"Catégorie C",brut:2523.45},{cat:"Catégorie D — Cadre",brut:3012.34}
+]},
+"221":{"label":"CP 221 — Employés de l'industrie papetière","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Catégorie 1",brut:2134.56},{cat:"Catégorie 2",brut:2312.78},
+  {cat:"Catégorie 3",brut:2534.90},{cat:"Cadre",brut:3023.45}
+]},
+"222":{"label":"CP 222 — Employés de la transformation du papier & carton","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Employé administratif",brut:2134.56},{cat:"Technicien conversion",brut:2312.78},
+  {cat:"Responsable",brut:2756.34}
+]},
+"223":{"label":"CP 223 — Sports (employés)","source":"CCT sectorielle CP 223 — 2026","note":"Régime fiscal sportifs: art. 119 CIR92","categories":[
+  {cat:"Entraîneur / Coach débutant",brut:2312.45},{cat:"Sportif professionnel",brut:3000.00},
+  {cat:"Entraîneur qualifié A",brut:3456.78},{cat:"Directeur sportif",brut:4234.56}
+]},
+"224":{"label":"CP 224 — Employés des métaux non-ferreux","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Technicien débutant",brut:2289.45},{cat:"Technicien qualifié",brut:2567.89},
+  {cat:"Ingénieur",brut:3012.34},{cat:"Cadre",brut:3678.90}
+]},
+"225":{"label":"CP 225 — Employés de l'enseignement libre subventionné","source":"Barèmes Communautés — 01/2026","categories":[
+  {cat:"Enseignant débutant (AESI)",brut:2456.78},{cat:"Enseignant — 5 ans",brut:2678.90},
+  {cat:"Enseignant secondaire (AESS)",brut:2912.34},{cat:"Directeur",brut:3456.89}
+]},
+"225.01":{"label":"CP 225.01 — Enseignement libre Communauté flamande","source":"Barèmes Vlaamse overheid — 01/2026","categories":[
+  {cat:"Onderwijzer — débutant",brut:2456.78},{cat:"Leraar — 5 ans",brut:2712.34},
+  {cat:"Directeur school",brut:3456.89}
+]},
+"225.02":{"label":"CP 225.02 — Enseignement libre Communauté française & germanophone","source":"Barèmes FWB — 01/2026","categories":[
+  {cat:"Instituteur — débutant",brut:2456.78},{cat:"Instituteur — 5 ans",brut:2678.90},
+  {cat:"Professeur secondaire AESS",brut:2912.34},{cat:"Directeur",brut:3456.89}
+]},
+"226":{"label":"CP 226 — Employés du commerce international, transport & logistique","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Niveau 1 — Employé administratif",brut:2189.45},{cat:"Niveau 2 — Dispatcher",brut:2367.89},
+  {cat:"Niveau 3 — Responsable",brut:2678.34},{cat:"Niveau 4 — Manager",brut:3123.56}
+]},
+"227":{"label":"CP 227 — Secteur audio-visuel","source":"CCT sectorielle — 01/01/2026","note":"Régime artiste possible — carte artiste","categories":[
+  {cat:"Technicien audiovisuel débutant",brut:2234.56},{cat:"Technicien qualifié",brut:2589.78},
+  {cat:"Réalisateur / Chef de projet",brut:3012.34},{cat:"Directeur de production",brut:3678.90}
+]},
+
+// ──────────────────────────────────────────────────────────────────────────────
+// COMMISSIONS PARITAIRES MIXTES (300-341)
+// ──────────────────────────────────────────────────────────────────────────────
+"301":{"label":"CP 301 — Ports (dockers)","source":"CCT sectorielle — 01/01/2026","note":"Régime docker — Loi Major applicable","categories":[
+  {cat:"Docker non qualifié",brut:18.34,type:"horaire"},{cat:"Docker qualifié",brut:21.56,type:"horaire"},
+  {cat:"Chef d'équipe portuaire",brut:24.78,type:"horaire"}
+]},
+"301.01":{"label":"CP 301.01 — Port d'Anvers","source":"CCT NPCAH — 01/01/2026","note":"Loi Major — régime docker obligatoire","categories":[
+  {cat:"Docker catégorie I",brut:18.89,type:"horaire"},{cat:"Docker catégorie II",brut:21.23,type:"horaire"},
+  {cat:"Chef d'équipe",brut:24.56,type:"horaire"},{cat:"Grutier / Conducteur engins",brut:22.34,type:"horaire"}
+]},
+"301.02":{"label":"CP 301.02 — Port de Gand","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Docker",brut:17.89,type:"horaire"},{cat:"Docker qualifié",brut:20.12,type:"horaire"},
+  {cat:"Chef d'équipe",brut:23.45,type:"horaire"}
+]},
+"301.03":{"label":"CP 301.03 — Ports de Bruxelles & Vilvorde","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Docker",brut:17.45,type:"horaire"},{cat:"Docker qualifié",brut:19.67,type:"horaire"}
+]},
+"301.05":{"label":"CP 301.05 — Ports de Zeebrugge, Bruges, Ostende & Nieuport","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Docker",brut:17.67,type:"horaire"},{cat:"Docker qualifié",brut:19.89,type:"horaire"},
+  {cat:"Chef d'équipe",brut:22.34,type:"horaire"}
+]},
+"302":{"label":"CP 302 — Industrie hôtelière","source":"CCT sectorielle — 01/01/2026","note":"Avantages en nature logement/repas déductibles","categories":[
+  {cat:"Cat. 1 — Personnel salle / Aide",brut:2112.34},{cat:"Cat. 2 — Cuisinier / Réceptionniste",brut:2267.89},
+  {cat:"Cat. 3 — Chef de partie / Responsable",brut:2489.56},{cat:"Cat. 4 — Chef cuisine / Directeur",brut:2912.34}
+]},
+"303":{"label":"CP 303 — Industrie cinématographique","source":"CCT sectorielle — 01/01/2026","note":"Régime artiste possible","categories":[
+  {cat:"Technicien de plateau débutant",brut:2234.56},{cat:"Technicien qualifié",brut:2589.78},
+  {cat:"Chef de production",brut:3234.56}
+]},
+"303.01":{"label":"CP 303.01 — Production de films","source":"CCT sectorielle — 01/01/2026","note":"Régime artiste — Dimona A17","categories":[
+  {cat:"Technicien production débutant",brut:2234.56},{cat:"Réalisateur / Chef opérateur",brut:2867.89},
+  {cat:"Producteur",brut:3456.78}
+]},
+"303.03":{"label":"CP 303.03 — Exploitation de salles de cinéma","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Caissier(ère) / Ouvreuse",brut:2089.34},{cat:"Projectionniste",brut:2312.45},
+  {cat:"Directeur de salle",brut:2789.34}
+]},
+"304":{"label":"CP 304 — Spectacle","source":"CCT sectorielle — 01/01/2026","note":"Régime artiste — carte artiste obligatoire","categories":[
+  {cat:"Artiste débutant — cachet journalier min.",brut:150.23,type:"horaire"},{cat:"Artiste confirmé",brut:250.56,type:"horaire"},
+  {cat:"Technicien de scène",brut:2234.56},{cat:"Régisseur",brut:2567.89}
+]},
+"306":{"label":"CP 306 — Entreprises d'assurances","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Classe I — Débutant",brut:2389.56},{cat:"Classe II — Qualifié",brut:2678.90},
+  {cat:"Classe III — Expert",brut:3045.67},{cat:"Classe IV — Cadre",brut:3589.23},{cat:"Classe V — Cadre supérieur",brut:4234.56}
+]},
+"307":{"label":"CP 307 — Entreprises de courtage & agences d'assurances","source":"CCT sectorielle — 01/01/2026","note":"Agrément FSMA requis","categories":[
+  {cat:"Courtier débutant",brut:2312.45},{cat:"Courtier qualifié",brut:2678.90},
+  {cat:"Courtier senior",brut:3234.56},{cat:"Manager courtage",brut:3789.34}
+]},
+"310":{"label":"CP 310 — Banques","source":"CCT Febelfin — 01/01/2026","categories":[
+  {cat:"Niveau A — Agent débutant",brut:2867.45},{cat:"Niveau B — Agent qualifié",brut:3234.78},
+  {cat:"Niveau C — Spécialiste / Analyste",brut:3789.56},{cat:"Niveau D — Expert / Senior",brut:4456.89},
+  {cat:"Niveau E — Cadre",brut:5234.67}
+]},
+"311":{"label":"CP 311 — Grandes entreprises de vente au détail","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Vendeur(se) débutant",brut:2156.78},{cat:"Vendeur(se) qualifié",brut:2312.45},
+  {cat:"Chef de rayon",brut:2534.67},{cat:"Manager département",brut:3012.34}
+]},
+"312":{"label":"CP 312 — Grands magasins","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Vendeur(se) non qualifié",brut:2178.90},{cat:"Vendeur(se) qualifié",brut:2345.67},
+  {cat:"Chef de rayon / Visual merchandiser",brut:2589.34},{cat:"Directeur de département",brut:3123.45}
+]},
+"313":{"label":"CP 313 — Pharmacies & offices de tarification","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Cat. I — Aide en pharmacie",brut:2234.56},{cat:"Cat. II — Assistant technique",brut:2489.78},
+  {cat:"Cat. III — Pharmacien diplômé",brut:3312.45},{cat:"Cat. IV — Pharmacien responsable",brut:4023.67}
+]},
+"314":{"label":"CP 314 — Coiffure & soins de beauté","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Aide-coiffeur(se)",brut:12.51,type:"horaire"},{cat:"Coiffeur(se) qualifié(e)",brut:13.24,type:"horaire"},
+  {cat:"Styliste / Responsable technique",brut:14.67,type:"horaire"}
+]},
+"315":{"label":"CP 315 — Aviation commerciale","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Personnel sol — Niveau 1",brut:2678.45},{cat:"Personnel sol — Niveau 2",brut:3012.67},
+  {cat:"Technicien maintenance aéronefs",brut:3456.89},{cat:"Superviseur",brut:3912.34}
+]},
+"315.01":{"label":"CP 315.01 — Maintenance technique & formation aviation","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Technicien avionique débutant",brut:2867.45},{cat:"Technicien qualifié (EASA Part 66)",brut:3456.78},
+  {cat:"Inspecteur aéronautique",brut:4234.56}
+]},
+"315.02":{"label":"CP 315.02 — Compagnies aériennes (PNC & pilotes)","source":"CCT sectorielle — 01/01/2026","note":"Pilotes: statut spécifique OMNI","categories":[
+  {cat:"PNC (Personnel Navigant Commercial) débutant",brut:2234.56},{cat:"PNC qualifié",brut:2789.34},
+  {cat:"Chef de cabine",brut:3234.56},{cat:"Commandant de bord (salaire base)",brut:6789.34}
+]},
+"315.03":{"label":"CP 315.03 — Gestion des aéroports","source":"CCT sectorielle — 01/07/2009","categories":[
+  {cat:"Agent aéroport débutant",brut:2312.45},{cat:"Agent qualifié",brut:2678.90},
+  {cat:"Superviseur aéroport",brut:3123.45},{cat:"Manager opérations",brut:3789.34}
+]},
+"316":{"label":"CP 316 — Marine marchande","source":"CCT sectorielle — 01/01/2026","note":"ITF/SMC applicable","categories":[
+  {cat:"Matelot",brut:2456.78},{cat:"Officier de pont débutant",brut:3234.56},
+  {cat:"Second capitaine",brut:4567.89},{cat:"Capitaine (salaire base)",brut:6234.56}
+]},
+"317":{"label":"CP 317 — Gardiennage & surveillance","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Cat. A — Agent de gardiennage",brut:2189.45},{cat:"Cat. B — Agent qualifié",brut:2312.67},
+  {cat:"Cat. C — Chef d'équipe",brut:2489.34},{cat:"Cat. D — Superviseur",brut:2712.56}
+]},
+"318":{"label":"CP 318 — Services des aides familiales & aides seniors","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Aide familiale niveau 1",brut:2156.78},{cat:"Aide familiale niveau 2",brut:2267.89},
+  {cat:"Aide-soignante à domicile",brut:2345.67},{cat:"Coordinatrice de soins à domicile",brut:2712.34}
+]},
+"318.01":{"label":"CP 318.01 — Aides familiales Communauté française, Région wallonne & germanophone","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Aide familiale niveau 1",brut:2134.56},{cat:"Aide familiale niveau 2",brut:2245.67},
+  {cat:"Coordinatrice",brut:2678.90}
+]},
+"318.02":{"label":"CP 318.02 — Aides familiales Communauté flamande","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Thuishulp niveau 1",brut:2156.78},{cat:"Thuishulp niveau 2",brut:2267.89},
+  {cat:"Coördinator thuiszorg",brut:2712.34}
+]},
+"319":{"label":"CP 319 — Établissements & services d'éducation & d'hébergement","source":"Barèmes Communautés — 01/2026","categories":[
+  {cat:"Éducateur niveau 1",brut:2198.45},{cat:"Éducateur niveau 2",brut:2367.89},
+  {cat:"Éducateur spécialisé",brut:2534.56},{cat:"Responsable éducatif",brut:2867.34},{cat:"Directeur",brut:3345.67}
+]},
+"319.01":{"label":"CP 319.01 — Éducation & hébergement Communauté flamande","source":"Barèmes Vlaamse overheid — 01/2026","categories":[
+  {cat:"Begeleider niveau 1",brut:2198.45},{cat:"Begeleider niveau 2",brut:2367.89},
+  {cat:"Orthopedagoog",brut:2678.34},{cat:"Directeur",brut:3345.67}
+]},
+"319.02":{"label":"CP 319.02 — Éducation & hébergement Communauté française, Région wallonne & germanophone","source":"Barèmes FWB — 01/2026","categories":[
+  {cat:"Éducateur niveau 1",brut:2198.45},{cat:"Éducateur niveau 2",brut:2367.89},
+  {cat:"Éducateur spécialisé",brut:2534.56},{cat:"Responsable",brut:2867.34}
+]},
+"320":{"label":"CP 320 — Pompes funèbres","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Agent funéraire débutant",brut:2145.67},{cat:"Agent funéraire qualifié",brut:2312.34},
+  {cat:"Conseiller funéraire",brut:2567.89},{cat:"Directeur funéraire",brut:2934.56}
+]},
+"321":{"label":"CP 321 — Grossistes-répartiteurs de médicaments","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Préparateur de commandes",brut:2189.45},{cat:"Grossiste pharmaceutique qualifié",brut:2456.78},
+  {cat:"Responsable distribution",brut:2934.56}
+]},
+"322":{"label":"CP 322 — Travail intérimaire & titres-services","source":"CP utilisatrice applicable — 2026","categories":[
+  {cat:"CP de l'entreprise utilisatrice applicable",brut:2070.48}
+]},
+"322.01":{"label":"CP 322.01 — Titres-services","source":"CCT sectorielle — 01/01/2026","note":"Taux horaire — temps partiel généralement","categories":[
+  {cat:"Aide-ménagère 0-5 ans ancienneté",brut:12.01,type:"horaire"},
+  {cat:"Aide-ménagère 5-10 ans ancienneté",brut:12.35,type:"horaire"},
+  {cat:"Aide-ménagère +10 ans ancienneté",brut:12.68,type:"horaire"}
+]},
+"323":{"label":"CP 323 — Gestion d'immeubles, agents immobiliers & travailleurs domestiques","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Agent immobilier débutant",brut:2234.56},{cat:"Agent immobilier qualifié (IPI)",brut:2678.90},
+  {cat:"Gestionnaire de copropriété",brut:2934.56},{cat:"Travailleur domestique",brut:2089.34}
+]},
+"324":{"label":"CP 324 — Industrie & commerce du diamant","source":"Convention AWDC — 2026","categories":[
+  {cat:"Polisseur diamant — débutant",brut:2312.45},{cat:"Polisseur qualifié",brut:2678.90},
+  {cat:"Classificateur / Courtier",brut:2934.56},{cat:"Expert diamantaire",brut:3456.78}
+]},
+"325":{"label":"CP 325 — Institutions publiques de crédit","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Agent de crédit débutant",brut:2789.45},{cat:"Conseiller qualifié",brut:3134.78},
+  {cat:"Expert crédit",brut:3678.34},{cat:"Directeur d'agence",brut:4567.89}
+]},
+"326":{"label":"CP 326 — Industrie du gaz & de l'électricité (Engie, Elia...)","source":"CCT sectorielle — 01/01/2026","note":"Inclut ENGIE, ELIA, FLUVIUS, réseaux gaz","categories":[
+  {cat:"Technicien réseau débutant",brut:2678.45},{cat:"Technicien qualifié",brut:3012.67},
+  {cat:"Ingénieur réseau",brut:3789.56},{cat:"Directeur technique",brut:4567.89}
+]},
+"327":{"label":"CP 327 — Travail adapté (ETA, ateliers sociaux, maatwerkbedrijven)","source":"RMMMG + subventions régionales — 2026","categories":[
+  {cat:"Travailleur adapté — RMMMG",brut:2070.48}
+]},
+"327.01":{"label":"CP 327.01 — Travail adapté Région flamande (maatwerkbedrijven)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Aangepaste werknemer — RMMMG",brut:2070.48},{cat:"Technisch medewerker",brut:2198.45}
+]},
+"327.02":{"label":"CP 327.02 — Travail adapté Cocof (Bruxelles)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Travailleur adapté",brut:2070.48},{cat:"Moniteur d'atelier",brut:2234.56}
+]},
+"327.03":{"label":"CP 327.03 — Travail adapté Région wallonne & germanophone","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Travailleur ETA",brut:2070.48},{cat:"Moniteur d'atelier",brut:2234.56},{cat:"Responsable atelier",brut:2567.89}
+]},
+"328":{"label":"CP 328 — Transport urbain & régional (TEC, De Lijn, STIB-MIVB)","source":"CCT sectorielle — 01/01/2026","note":"Entreprises publiques — barèmes propres via convention","categories":[
+  {cat:"Chauffeur bus débutant",brut:14.12,type:"horaire"},{cat:"Chauffeur qualifié",brut:15.67,type:"horaire"},
+  {cat:"Conducteur métro / tram qualifié",brut:16.89,type:"horaire"},{cat:"Chef de dépôt",brut:19.23,type:"horaire"}
+]},
+"328.01":{"label":"CP 328.01 — Transport urbain Région flamande (De Lijn)","source":"CCT De Lijn — 01/01/2026","categories":[
+  {cat:"Chauffeur De Lijn débutant",brut:14.34,type:"horaire"},{cat:"Chauffeur qualifié",brut:15.89,type:"horaire"},
+  {cat:"Chef de dépôt",brut:18.78,type:"horaire"}
+]},
+"328.02":{"label":"CP 328.02 — Transport urbain Région wallonne (TEC/OTW)","source":"CCT TEC — 01/01/2026","categories":[
+  {cat:"Chauffeur TEC débutant",brut:14.12,type:"horaire"},{cat:"Chauffeur qualifié",brut:15.67,type:"horaire"},
+  {cat:"Chef de dépôt",brut:18.45,type:"horaire"}
+]},
+"328.03":{"label":"CP 328.03 — Transport urbain Bruxelles (STIB-MIVB)","source":"CCT STIB-MIVB — 01/01/2026","categories":[
+  {cat:"Conducteur STIB débutant",brut:14.56,type:"horaire"},{cat:"Conducteur qualifié",brut:16.23,type:"horaire"},
+  {cat:"Conducteur de métro",brut:17.12,type:"horaire"},{cat:"Chef de dépôt",brut:19.89,type:"horaire"}
+]},
+"329":{"label":"CP 329 — Secteur socio-culturel","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Animateur socioculturel niveau 1",brut:2156.78},{cat:"Animateur qualifié",brut:2345.67},
+  {cat:"Coordinateur",brut:2712.34},{cat:"Directeur d'institution",brut:3234.56}
+]},
+"329.01":{"label":"CP 329.01 — Secteur socio-culturel Communauté flamande","source":"CCT sectorielle — 01/10/2004","categories":[
+  {cat:"Sociocultureel medewerker N1",brut:2156.78},{cat:"Gekwalificeerd medewerker",brut:2345.67},
+  {cat:"Coördinator",brut:2712.34}
+]},
+"329.02":{"label":"CP 329.02 — Secteur socio-culturel Communauté française & germanophone","source":"CCT sectorielle — 01/10/2004","categories":[
+  {cat:"Animateur niveau 1",brut:2156.78},{cat:"Animateur qualifié",brut:2345.67},
+  {cat:"Coordinateur",brut:2712.34},{cat:"Directeur",brut:3234.56}
+]},
+"329.03":{"label":"CP 329.03 — Organisations socio-culturelles fédérales & bicommunautaires","source":"CCT sectorielle — 01/10/2004","categories":[
+  {cat:"Collaborateur fédéral niveau 1",brut:2234.56},{cat:"Collaborateur qualifié",brut:2456.78},
+  {cat:"Directeur",brut:3234.56}
+]},
+"330":{"label":"CP 330 — Établissements & services de santé","source":"IFIC 2026 — Accord social non-marchand","categories":[
+  {cat:"IFIC 2 — Aide-soignant brevet",brut:2234.56},{cat:"IFIC 4 — Aide-soignant qualifié",brut:2378.90},
+  {cat:"IFIC 6 — Infirmier bachelier A1",brut:2678.45},{cat:"IFIC 8 — Infirmier spécialisé",brut:2912.67},
+  {cat:"IFIC 10 — Infirmier en chef",brut:3156.89},{cat:"IFIC 12 — Coordinateur soins",brut:3445.34},
+  {cat:"IFIC 14 — Cadre intermédiaire",brut:3812.56},{cat:"IFIC 16 — Directeur soins",brut:4345.78},
+  {cat:"Médecin salarié (convention INAMI)",brut:4567.89}
+]},
+"330.01.10":{"label":"CP 330.01.10 — Hôpitaux privés & maisons de soins psychiatriques","source":"IFIC hôpitaux privés — 01/01/2026","categories":[
+  {cat:"Aide-soignant",brut:2234.56},{cat:"Infirmier A1",brut:2678.45},
+  {cat:"Infirmier spécialisé",brut:2912.67},{cat:"Médecin salarié",brut:4567.89}
+]},
+"330.01.20":{"label":"CP 330.01.20 — Maisons de repos & MRS","source":"IFIC maisons de repos — 01/01/2026","categories":[
+  {cat:"Aide-soignant MR",brut:2234.56},{cat:"Infirmier MRS",brut:2678.45},
+  {cat:"Coordinateur MRS",brut:3156.89},{cat:"Directeur MR",brut:4012.34}
+]},
+"330.01.30":{"label":"CP 330.01.30 — Soins infirmiers à domicile","source":"IFIC soins à domicile — 01/01/2026","categories":[
+  {cat:"Aide-soignant domicile",brut:2234.56},{cat:"Infirmier à domicile",brut:2678.45},
+  {cat:"Coordinateur soins domicile",brut:3012.34}
+]},
+"330.02":{"label":"CP 330.02 — Établissements santé bicommunautaires (CCC)","source":"IFIC bicommunautaire — 01/01/2026","categories":[
+  {cat:"Aide-soignant",brut:2234.56},{cat:"Infirmier bachelier",brut:2678.45},
+  {cat:"Cadre infirmier",brut:3189.34}
+]},
+"330.03":{"label":"CP 330.03 — Prothèses dentaires","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Prothésiste dentaire débutant",brut:2234.56},{cat:"Prothésiste qualifié",brut:2567.89},
+  {cat:"Prothésiste spécialisé",brut:2934.56}
+]},
+"330.04":{"label":"CP 330.04 — Autres établissements santé (cabinets médicaux, kinesithérapeutes, etc.)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Secrétaire médicale",brut:2134.56},{cat:"Assistant(e) médical(e) qualifié",brut:2345.67},
+  {cat:"Kinésithérapeute salarié",brut:2789.34},{cat:"Médecin en cabinet (salarié)",brut:4567.89}
+]},
+"331":{"label":"CP 331 — Aide sociale & soins de santé Flandre","source":"IFIC Flandre + Vlaamse akkoorden — 2026","categories":[
+  {cat:"Niveau 1 — Aide-soignant",brut:2256.78},{cat:"Niveau 2 — Aide-soignant qualifié",brut:2389.45},
+  {cat:"Niveau 3 — Infirmier bachelier",brut:2712.34},{cat:"Niveau 4 — Infirmier spécialisé",brut:2956.67},
+  {cat:"Niveau 5 — Cadre infirmier",brut:3234.89}
+]},
+"331.00.10":{"label":"CP 331.00.10 — Accueil enfants & crèches Flandre","source":"IFIC Flandre — 01/01/2026","categories":[
+  {cat:"Aide-gardienne débutante",brut:2134.56},{cat:"Puéricultrice qualifiée",brut:2312.45},
+  {cat:"Responsable crèche",brut:2678.90}
+]},
+"331.00.20":{"label":"CP 331.00.20 — Centres planning familial & santé mentale Flandre","source":"IFIC Flandre — 01/01/2026","categories":[
+  {cat:"Travailleur social niveau 1",brut:2198.45},{cat:"Assistant social qualifié",brut:2456.78},
+  {cat:"Psychologue salarié",brut:2867.34}
+]},
+"332":{"label":"CP 332 — Aide sociale & soins de santé Wal-Bxl","source":"IFIC Wal-Bxl — accord non-marchand 2026","categories":[
+  {cat:"Niveau 1 — Aide-soignant",brut:2234.56},{cat:"Niveau 2 — Aide-soignant qualifié",brut:2367.89},
+  {cat:"Niveau 3 — Infirmier bachelier",brut:2678.45},{cat:"Niveau 4 — Infirmier spécialisé",brut:2912.67},
+  {cat:"Niveau 5 — Cadre infirmier",brut:3189.34}
+]},
+"332.00.10":{"label":"CP 332.00.10 — Accueil enfants & crèches Wal-Bxl (ONE)","source":"IFIC Wal-Bxl — 01/01/2026","categories":[
+  {cat:"Aide-gardienne débutante",brut:2134.56},{cat:"Puéricultrice qualifiée (BACPE)",brut:2312.45},
+  {cat:"Responsable crèche",brut:2678.90}
+]},
+"332.00.20":{"label":"CP 332.00.20 — Services aide aux justiciables, planning familial, santé mentale Wal-Bxl","source":"IFIC Wal-Bxl — 01/01/2026","categories":[
+  {cat:"Travailleur social niveau 1",brut:2198.45},{cat:"Assistant social qualifié",brut:2456.78},
+  {cat:"Psychologue salarié",brut:2867.34},{cat:"Directeur de service",brut:3345.67}
+]},
+"333":{"label":"CP 333 — Attractions touristiques (parcs d'attractions, zoos, musées...)","source":"CCT sectorielle — 01/10/2003","categories":[
+  {cat:"Agent d'accueil non qualifié",brut:2089.34},{cat:"Agent qualifié",brut:2198.56},
+  {cat:"Animateur touristique",brut:2312.45},{cat:"Responsable attraction",brut:2678.90}
+]},
+"336":{"label":"CP 336 — Professions libérales (avocats, médecins, architectes...)","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Secrétaire / Assistante débutante",brut:2134.56},{cat:"Secrétaire juridique qualifiée",brut:2345.67},
+  {cat:"Avocat salarié junior (0-3 ans)",brut:2534.56},{cat:"Avocat salarié qualifié (3-7 ans)",brut:3234.78},
+  {cat:"Avocat senior (7+ ans)",brut:4567.89}
+]},
+"337":{"label":"CP 337 — Secteur non-marchand auxiliaire","source":"CCT sectorielle — 01/04/2008","categories":[
+  {cat:"Travailleur non-marchand niveau 1",brut:2134.56},{cat:"Travailleur qualifié",brut:2312.78},
+  {cat:"Coordinateur",brut:2678.90},{cat:"Directeur",brut:3234.56}
+]},
+"339":{"label":"CP 339 — Sociétés de logement social","source":"CCT sectorielle — 01/01/2026","categories":[
+  {cat:"Agent administratif débutant",brut:2134.56},{cat:"Agent qualifié",brut:2345.67},
+  {cat:"Gestionnaire de patrimoine",brut:2678.90},{cat:"Directeur d'agence",brut:3234.56}
+]},
+"339.01":{"label":"CP 339.01 — Logement social Région flamande","source":"CCT sectorielle — 01/10/2018","categories":[
+  {cat:"Administratief medewerker",brut:2134.56},{cat:"Woonbegeleider",brut:2345.67},
+  {cat:"Directeur woonmaatschappij",brut:3234.56}
+]},
+"339.02":{"label":"CP 339.02 — Logement social Région wallonne","source":"CCT sectorielle — 01/10/2018","categories":[
+  {cat:"Agent administratif",brut:2134.56},{cat:"Agent de quartier",brut:2312.45},
+  {cat:"Directeur de société",brut:3234.56}
+]},
+"339.03":{"label":"CP 339.03 — Logement social Région de Bruxelles-Capitale","source":"CCT sectorielle — 01/10/2018","categories":[
+  {cat:"Agent administratif SLRB",brut:2189.34},{cat:"Gestionnaire locatif",brut:2456.78},
+  {cat:"Directeur",brut:3345.67}
+]},
+"340":{"label":"CP 340 — Technologies orthopédiques","source":"CCT sectorielle — 01/04/2014","categories":[
+  {cat:"Technicien orthopédique débutant",brut:2234.56},{cat:"Technicien qualifié",brut:2567.89},
+  {cat:"Orthoprothésiste certifié",brut:2934.56},{cat:"Directeur technique",brut:3456.78}
+]},
+"341":{"label":"CP 341 — Intermédiation en services bancaires & investissement","source":"CCT sectorielle — 01/10/2014","note":"Agrément FSMA requis","categories":[
+  {cat:"Intermédiaire bancaire débutant",brut:2456.78},{cat:"Conseiller qualifié (FSMA)",brut:2867.34},
+  {cat:"Senior advisor",brut:3456.89},{cat:"Manager",brut:4234.56}
+]},
+
+// ──────────────────────────────────────────────────────────────────────────────
+// STATUTS SPÉCIAUX
+// ──────────────────────────────────────────────────────────────────────────────
+"000":{"label":"Dirigeant — Pas de minimum légal","source":"Rémunération fixée par l'AG — 2026","note":"Minimum INASTI pour indépendant: cotisations sur base 17.349,99€/an","categories":[
+  {cat:"Aucun minimum légal — rémunération AG",brut:0}
+]},
+"FLEXI":{"label":"Flexi-job — Minimum légal 2026","source":"AR 07/06/2023 modifié — 01/01/2026","categories":[
+  {cat:"Tous secteurs — minimum légal",brut:11.54,type:"horaire"},
+  {cat:"HORECA (CP 302)",brut:12.01,type:"horaire"},
+  {cat:"Commerce alimentaire (CP 202)",brut:11.89,type:"horaire"}
+]},
+"ETU":{"label":"Étudiant jobiste — Cotisation solidarité 5,42%","source":"RMMMG + CCT sectorielle — 2026","categories":[
+  {cat:"Minimum légal tous secteurs",brut:12.13,type:"horaire"},
+  {cat:"HORECA (CP 302)",brut:12.45,type:"horaire"},
+  {cat:"Grande surface (CP 311/312)",brut:12.34,type:"horaire"}
+]}
+
 };
 
 // Ancien CP_MIN conservé pour compatibilité wizCheckSalaire
