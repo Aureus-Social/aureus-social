@@ -2222,6 +2222,7 @@ CP_MIN['DEFAULT'] = { min: 2070.48, label: 'RMMMG national 2026', note: 'Salaire
 // ── Affichage barème CP dans le wizard ──
 function wizShowBaremeCP() {
   var cp = document.getElementById('w-cp')?.value || '';
+  console.log('[AUREUS] wizShowBaremeCP: cp='+cp+', bloc=', document.getElementById('w-bareme-cct'));
   var statut = document.getElementById('w-statut')?.value || '';
   var key = cp;
   if(statut==='ETU') key='ETU';
@@ -5690,6 +5691,7 @@ function wizCheckSalaire() {
 }
 
 function wizCPChange() {
+  console.log('[AUREUS] wizCPChange appelé, CP=', document.getElementById('w-cp')?.value);
   wizShowBaremeCP();
   var cp = parseInt(document.getElementById('w-cp')?.value) || 0;
   var statutEl = document.getElementById('w-statut');
