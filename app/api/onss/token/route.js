@@ -1,11 +1,10 @@
-import { SignJWT, importPKCS8 } from 'jose';
+import { SignJWT } from 'jose';
+import { createPrivateKey } from 'crypto';
 export const dynamic = 'force-dynamic';
 
 const CLIENT_ID = 'self_service_chaman_305534_fnlh9vng4v';
 const TOKEN_URL = 'https://services.socialsecurity.be/REST/oauth/v5/token';
-// Numero de serie du certificat en decimal et hex
-const CERT_SERIAL_DEC = '111034742307725981523417471549021221440785823051';
-const CERT_SERIAL_HEX = '1372F854D1C0F9F232ECE347581A5BC6C27D354B';
+const CERT_SERIAL = '111034742307725981523417471549021221440785823051';
 
 function getPrivateKey() {
   const raw = process.env.ONSS_PRIVATE_KEY || '';
@@ -21,10 +20,11 @@ export async function POST() {
     if (!pemKey || !pemKey.includes('BEGIN')) {
       return Response.json({ error: 'ONSS_PRIVATE_KEY invalide', raw_length: (process.env.ONSS_PRIVATE_KEY||'').length }, { status: 500 });
     }
-    const privateKey = await importPKCS8(pemKey, 'RS256');
+    // createPrivateKey accepte RSA et PKCS8
+    const privateKey = createPrivateKey(pemKey);
     const now = Math.floor(Date.now() / 1000);
     const jwt = await new SignJWT({})
-      .setProtectedHeader({ alg: 'RS256', kid: CERT_SERIAL_DEC })
+      .setProtectedHeader({ alg: 'RS256', kid: CERT_SERIAL })
       .setIssuer(CLIENT_ID)
       .setSubject(CLIENT_ID)
       .setAudience(TOKEN_URL)
@@ -36,7 +36,6 @@ export async function POST() {
       grant_type: 'client_credentials',
       client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
       client_assertion: jwt,
-      scope: 'dimona',
     });
     const resp = await fetch(TOKEN_URL, {
       method: 'POST',
