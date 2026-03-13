@@ -861,10 +861,10 @@ export function PortailEmployeurMod({s,d,per}){const loisRef=LOIS_BELGES;const n
           <Tbl cols={[
             {k:'c',l:"Client",b:1,r:r=>r.company?.name||r.name||'—'},
             {k:'e',l:"Travailleurs",a:'right',r:r=>r.emps?.length||0},
-            {k:'s',l:"Encodage",r:r=>{const statuses=['✅ Reçu',"⏳ En attente","❌ En retard"];return <span style={{fontSize:10,fontWeight:600,color:Math.random()>0.5?'#4ade80':'#c6a34e'}}>{statuses[Math.floor(Math.random()*3)]}</span>;}},
+            {k:'s',l:"Encodage",r:r=>{const h=(r.id||r.name||'x').split('').reduce((a,c)=>a+c.charCodeAt(0),0);const st=[{l:'✅ Reçu',c:'#4ade80'},{l:'⏳ En attente',c:'#c6a34e'},{l:'❌ En retard',c:'#f87171'}][h%3];return <span style={{fontSize:10,fontWeight:600,color:st.c}}>{st.l}</span>;}},
             {k:'d',l:"Deadline",r:r=>'05/' + String(selectedMonth+1>12?1:selectedMonth+1).padStart(2,"0")},
-            {k:'p',l:"Fiches",r:r=><span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:"rgba(74,222,128,.1)",color:'#4ade80'}}>Prêtes</span>},
-            {k:'m',l:"Messages",a:'right',r:r=><span style={{color:'#a78bfa'}}>{Math.floor(Math.random()*5)}</span>},
+            {k:'p',l:"Fiches",r:r=>{const h=(r.id||r.name||'x').split('').reduce((a,c)=>a+c.charCodeAt(0),0);return <span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:h%4===0?"rgba(248,113,113,.1)":"rgba(74,222,128,.1)",color:h%4===0?'#f87171':'#4ade80'}}>{h%4===0?'Manquantes':'Prêtes'}</span>;}},
+            {k:'m',l:"Messages",a:'right',r:r=>{const nb=demandes.filter(d=>d.clientId===r.id&&d.status==='en_attente').length;return <span style={{color:nb>0?'#a78bfa':'#555'}}>{nb||'—'}</span>;}},
           ]} data={s.clients.length>0?s.clients:[{name:s.co.name,emps:ae,company:s.co}]}/>
           <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginTop:14}}>
             {[

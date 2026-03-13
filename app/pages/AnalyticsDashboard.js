@@ -106,7 +106,8 @@ function AnalyticsDashboard({ state, defaultTab }) {
   const { t, lang, tText } = useLang();
   const [period, setPeriod] = useState('12m')
   const [activeTab, setActiveTab] = useState(defaultTab || 'analytics')
-  const employees = state?.employees || []
+  const employees = state?.emps || state?.employees || []
+  const payslips = state?.pays || state?.payrollHistory || []
   const company = state?.co || state?.company || {}
 
   // ── Calculer les KPIs ──

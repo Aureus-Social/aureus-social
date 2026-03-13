@@ -126,7 +126,7 @@ function Employees({s,d}) {
           status:'active',
         };
         if(emp.first||emp.last){
-          d({type:'ADD_E',d:emp});
+          d({type:'ADD_EMP',d:emp});
           added++;
         }
       }
@@ -174,7 +174,7 @@ function Employees({s,d}) {
       const ic=validateIBAN(form.iban);
       if(ic&&!ic.valid)return alert(ic.msg);
     }
-    if(ed)d({type:"UPD_E",d:form});else d({type:"ADD_E",d:form});setF(null);setEd(false);
+    if(ed)d({type:'UPD_EMP',d:form});else d({type:'ADD_EMP',d:form});setF(null);setEd(false);
   };
 
   // Filter and search
@@ -222,7 +222,7 @@ function Employees({s,d}) {
       civil:'single',depChildren:0,sexe:'M',statut:'employe',status:'active',
       iban:'BE71 0961 2345 6769',mvT:10,mvW:CR_TRAV,mvE:8.91,expense:0,
     };
-    d({type:'ADD_E',d:exemple});
+    d({type:'ADD_EMP',d:exemple});
     d({type:'NAV',page:'payslip',sub:null,selectedEmpIdForPayslip:'E-Activa-Nourdin'});
     if(typeof addToast==='function')addToast('Nourdin MOUSSATI ajouté. Dans Fiches de Paie : choisir « Activa.brussels AP (350→800→350) » pour l\'allocation.');
     else alert('Nourdin MOUSSATI ajouté. Allez dans Fiches de Paie → sélectionnez-le → Activation ONEM : Activa.brussels AP (350→800→350).');
@@ -621,7 +621,7 @@ function Employees({s,d}) {
           </div>
           <div style={{marginTop:10,display:'flex',gap:6,justifyContent:'flex-end'}}>
             <B v="ghost" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();setF({...r});setEd(true);}}>✎ Modifier</B>
-            <B v="danger" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();if(confirm('Supprimer ?'))d({type:"DEL_E",id:r.id});}}>✕</B>
+            <B v="danger" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();if(confirm('Supprimer ?'))d({type:'DEL_EMP',id:r.id});}}>✕</B>
           </div>
         </C>
       );})}
@@ -641,7 +641,7 @@ function Employees({s,d}) {
         {k:'co',l:"Coût",a:'right',r:r=><span style={{color:'#a78bfa'}}>{fmt(calc(r,DPER,s.co).costTotal)}</span>},
         {k:'a',l:"",a:'right',r:r=><div style={{display:'flex',gap:5,justifyContent:'flex-end'}}>
           <B v="ghost" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();setF({...r});setEd(true);}}>✎</B>
-          <B v="danger" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();if(confirm('Supprimer ?'))d({type:"DEL_E",id:r.id});}}>✕</B>
+          <B v="danger" style={{padding:'4px 8px',fontSize:10}} onClick={e=>{e.stopPropagation();if(confirm('Supprimer ?'))d({type:'DEL_EMP',id:r.id});}}>✕</B>
         </div>},
       ]} data={filtered}/>
     </C>}

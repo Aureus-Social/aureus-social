@@ -109,20 +109,31 @@ const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 function reducer(state, action) {
   // Audit trail serveur — actions sensibles tracées automatiquement
   if (typeof window !== 'undefined') {
-    const sensitiveActions = ['ADD_EMP','UPD_EMP','DEL_EMP','ADD_P','ADD_DIM'];
+    const sensitiveActions = ['ADD_EMP','UPD_EMP','DEL_EMP','ADD_PAY','ADD_DIM'];
     if (sensitiveActions.includes(action.type)) {
-      const labels = { ADD_EMP:'CREATE_EMPLOYEE', UPD_EMP:'UPDATE_EMPLOYEE', DEL_EMP:'DELETE_EMPLOYEE', ADD_P:'GENERATE_PAYSLIP', ADD_DIM:'SUBMIT_DIMONA' };
-      const emp = action.d || (action.type === 'DEL_EMP' ? state.emps?.find(e => e.id === action.id) : null);
+      const labels = { ADD_EMP:'CREATE_EMPLOYEE', UPD_EMP:'UPDATE_EMPLOYEE', DEL_EMP:'DELETE_EMPLOYEE', ADD_PAY:'GENERATE_PAYSLIP', ADD_DIM:'SUBMIT_DIMONA' };
+      const rec = action.d || (action.type === 'DEL_EMP' ? state.emps?.find(e => e.id === action.id) : null);
       import('../lib/auth-fetch').then(({ authFetch }) => {
+        // Audit trail
         authFetch('/api/audit', {
           method: 'POST',
           body: JSON.stringify({
             action: labels[action.type],
-            table_name: action.type.includes('EMP') ? 'employees' : action.type === 'ADD_P' ? 'fiches_paie' : 'dimona',
-            record_id: emp?.id || null,
-            details: emp ? { name: (emp.first||emp.fn||'')+ ' ' +(emp.last||emp.ln||''), action_type: action.type } : null
+            table_name: action.type.includes('EMP') ? 'employees' : action.type === 'ADD_PAY' ? 'fiches_paie' : 'dimona',
+            record_id: rec?.id || null,
+            details: rec ? { name: (rec.first||rec.fn||'')+ ' ' +(rec.last||rec.ln||''), action_type: action.type } : null
           })
-        });
+        }).catch(() => {});
+        // Persistance Supabase
+        if (action.type === 'ADD_EMP' && rec) {
+          authFetch('/api/employees', { method: 'POST', body: JSON.stringify(rec) }).catch(() => {});
+        } else if (action.type === 'UPD_EMP' && rec) {
+          authFetch('/api/employees', { method: 'PUT', body: JSON.stringify(rec) }).catch(() => {});
+        } else if (action.type === 'DEL_EMP') {
+          authFetch('/api/employees?id=' + action.id, { method: 'DELETE' }).catch(() => {});
+        } else if (action.type === 'ADD_PAY' && rec) {
+          authFetch('/api/payroll', { method: 'POST', body: JSON.stringify(rec) }).catch(() => {});
+        }
       }).catch(() => { /* fire-and-forget */ });
     }
   }
@@ -136,6 +147,8 @@ function reducer(state, action) {
     case 'ADD_PAY': return { ...state, pays: [...(state.pays||[]), action.d] };
     case 'DEL_PAYS_BATCH': return { ...state, pays: (state.pays||[]).filter(p => !(action.ids||[]).includes(p.id)) };
     case 'SET_DIMS': return { ...state, dims: action.data };
+    case 'ADD_DIM': return { ...state, dims: [...(state.dims||[]), action.d] };
+    case 'SET_DMFAS': return { ...state, dmfas: action.data };
     case 'ADD_EMP': return { ...state, emps: [...(state.emps||[]), action.d] };
     case 'UPD_EMP': return { ...state, emps: (state.emps||[]).map(e => e.id === action.d.id ? { ...e, ...action.d } : e) };
     case 'DEL_EMP': return { ...state, emps: (state.emps||[]).filter(e => e.id !== action.id) };
@@ -370,6 +383,7 @@ function DashboardLayoutInner({ user }) {
     clients: [],
     pays: [],
     dims: [],
+    dmfas: [],
     payrollHistory: [],
     dimonaHistory: [],
     co: { name: 'Aureus IA SPRL', vat: 'BE 1028.230.781' }

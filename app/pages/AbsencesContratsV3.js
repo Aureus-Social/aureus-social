@@ -138,7 +138,15 @@ export function PlanningCongesV3({s, defaultTab}){
         <div>{tText('Employé')}</div><div>{tText('Légaux')}</div><div>{tText('Extra-lég.')}</div><div>{tText('Pris')}</div><div>{tText('Solde')}</div><div>{tText('Statut')}</div>
       </div>
       {emps.slice(0,20).map((e,i)=>{
-        const legal=20;const extra=Math.floor(Math.random()*5);const pris=Math.floor(Math.random()*15);const solde=legal+extra-pris;
+        const legal=20;
+        // Jours pris: compter les absences 'conge' de cet employé dans l'état
+        const empKey=(e.first||e.fn||'E')+'_'+(e.last||e.ln||i);
+        const pris=Object.values(conges[empKey]||{}).filter(v=>v==='conge').length;
+        // Extra-légaux selon ancienneté (CCT sectorielle)
+        const startD=new Date(e.startDate||e.start||Date.now());
+        const ancYears=Math.max(0,(new Date()-startD)/(365.25*24*3600*1000));
+        const extra=ancYears>=10?3:ancYears>=5?2:ancYears>=2?1:0;
+        const solde=legal+extra-pris;
         return <div key={i} style={{display:'grid',gridTemplateColumns:'180px repeat(5,1fr)',gap:4,padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,.03)',fontSize:11}}>
           <div style={{color:'#e8e6e0'}}>{(e.first||e.fn||'')+' '+(e.last||e.ln||'')}</div>
           <div style={{fontFamily:'monospace'}}>{legal}j</div>

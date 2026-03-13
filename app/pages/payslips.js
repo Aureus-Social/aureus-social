@@ -84,7 +84,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
       try{
         const r=calc(emp,per,s.co);
         const fiche={eid:emp.id,ename:`${emp.first||emp.fn||emp.prenom||''} ${emp.last||emp.ln||emp.nom||''}`.trim()||'Sans nom',period:`${MN[per.month-1]} ${per.year}`,month:per.month,year:per.year,...r,at:new Date().toISOString(),batch:true};
-        d({type:"ADD_P",d:fiche});
+        d({type:"ADD_PAY",d:fiche});
         fichesToPersist.push(fiche);
         results.push({emp,r,ok:true});
       }catch(e){
@@ -107,7 +107,7 @@ function Payslips({s,d,scrollAnchor,onAnchorHandled}) {
     const r=calc(emp,per,s.co);
     setRes(r);
     const fiche={eid:emp.id,ename:`${emp.first||emp.fn||emp.prenom||''} ${emp.last||emp.ln||emp.nom||''}`.trim()||'Sans nom',period:`${MN[per.month-1]} ${per.year}`,month:per.month,year:per.year,...r,at:new Date().toISOString()};
-    d({type:"ADD_P",d:fiche});
+    d({type:"ADD_PAY",d:fiche});
     // Persistance Supabase
     const { data:{user} } = await supabase.auth.getUser().catch(()=>({data:{}}));
     if(user?.id) persistFiche(fiche, user.id).catch(()=>{});
