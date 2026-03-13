@@ -263,9 +263,12 @@ export default function DeclarationsONSS({ s }) {
     if (dimonaErrors.length) return;
     setLoading(l => ({ ...l, dimona: true }));
     const xml = genDimonaXML ? genDimonaXML({
-      action: df.action, wtype: df.wtype, start: df.start, end: df.end,
-      hours: df.planHrs, first: emp.first, last: emp.last, niss: emp.niss,
-      birth: emp.birth, cp: emp.cp, onss: co.onss, vat: co.vat,
+      emp: { first: emp.first, last: emp.last, niss: emp.niss, birth: emp.birth },
+      action: df.action,
+      wtype: df.wtype,
+      startDate: df.start,
+      endDate: df.end || undefined,
+      employer: { vat: co.vat, onss: co.onss },
     }) : `<!-- Dimona ${df.action} ${emp.niss} ${df.start} -->`;
 
     const payload = {
