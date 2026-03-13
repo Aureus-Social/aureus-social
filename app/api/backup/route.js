@@ -1,3 +1,4 @@
+import { getAuthUser } from '@/app/lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
@@ -46,6 +47,9 @@ async function encryptServerSide(userId, data) {
 }
 
 export async function POST(request) {
+  const u = await getAuthUser(req);
+  if (!u) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+
   try {
     const { action, userId, userEmail, userRole } = await request.json();
 

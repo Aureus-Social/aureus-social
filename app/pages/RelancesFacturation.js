@@ -1,6 +1,7 @@
 'use client';
 import { supabase } from '@/app/lib/supabase';
 import { useState, useEffect, useCallback } from 'react';
+import { authFetch } from '@/app/lib/auth-fetch';
 
 // ─── Storage sécurisé AES-GCM (SSR-safe)
 const _ls = {
@@ -152,7 +153,7 @@ export default function RelancesFacturation({ supabase, user, clients = [] }) {
     // Tentative envoi email via API Resend
     let emailSent = false;
     try {
-      const res = await fetch('/api/send-email', {
+      const res = await authFetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ to: facture.email, subject: template.subject, html: template.html })

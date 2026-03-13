@@ -2,9 +2,11 @@
 import { useLang } from '../lib/lang-context';
 import { supabase } from '@/app/lib/supabase';
 import { useState } from 'react';
+import { authFetch } from '@/app/lib/auth-fetch';
 import { TX_ONSS_W, TX_ONSS_E } from '@/app/lib/lois-belges';
 import { quickPP, quickNet } from '@/app/lib/payroll-engine';
 import { calcPayrollFromEmp } from '@/app/lib/helpers';
+import { generateSEPAXML } from '@/app/lib/doc-generators';
 
 const ClotureMensuelle=({s,d,supabase,user})=>{
   const { t, tText } = useLang();
@@ -123,28 +125,64 @@ const ClotureMensuelle=({s,d,supabase,user})=>{
 
   const runGenerate=async()=>{
     setRunning(true);
-    addLog('📄 Génération des documents...','info');
+    addLog('Generation des documents...','info');
     let docs=0;
-    await delay(300);
-    addLog('💳 Génération fichier SEPA pain.001...','info');
-    await delay(500);
-    docs++;
-    addLog('✅ SEPA pain.001 généré ('+allEmps.length+' virements)','success');
-    const quarter=Math.ceil((now.getMonth()+1)/3);
-    if([3,6,9,12].includes(now.getMonth()+1)){
-      addLog('🏛 Génération DmfA T'+quarter+'...','info');
-      await delay(500);
-      docs++;
-      addLog('✅ DmfA T'+quarter+' générée','success');
-    }
-    addLog('📄 Génération des fiches de paie HTML...','info');
     const pays=progress.calculate?.pays||[];
-    for(const p of pays){
-      await delay(50);
+    const co=s?.co||{name:'Aureus IA SPRL',vat:'BE1028230781'};
+    const period={month:now.getMonth()+1,year:now.getFullYear()};
+    const quarter=Math.ceil((now.getMonth()+1)/3);
+
+    // SEPA pain.001 XML
+    addLog('Generation fichier SEPA pain.001...','info');
+    try {
+      const empsWithIban=allEmps.filter(e=>e.iban);
+      if(empsWithIban.length>0){
+        generateSEPAXML(empsWithIban, period, co);
+        addLog('SEPA pain.001 genere ('+empsWithIban.length+' virements, '+(allEmps.length-empsWithIban.length)+' sans IBAN ignores)','success');
+      } else {
+        addLog('Aucun travailleur avec IBAN configure - SEPA ignore','warn');
+      }
       docs++;
+    } catch(e){
+      addLog('Erreur SEPA: '+e.message,'error');
     }
-    addLog('✅ '+pays.length+' fiches de paie générées','success');
-    addLog('📄 Total: '+docs+' documents générés','success');
+
+    // DmfA trimestrielle
+    if([3,6,9,12].includes(now.getMonth()+1)){
+      addLog('Generation DmfA T'+quarter+'...','info');
+      try {
+        const resp=await authFetch('/api/onss/dmfa',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({emps:allEmps,quarter,year:now.getFullYear(),co})
+        });
+        if(resp.ok){
+          const data=await resp.json();
+          if(data.xml){
+            const blob=new Blob([data.xml],{type:'application/xml'});
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement('a');
+            a.href=url; a.download=data.filename||('DmfA_T'+quarter+'.xml');
+            document.body.appendChild(a); a.click();
+            setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},2000);
+          }
+          addLog('DmfA T'+quarter+' generee ('+data.nb_workers+' travailleurs, total du: '+data.totals?.total_du+'EUR)','success');
+          docs++;
+        } else {
+          const err=await resp.json().catch(()=>({}));
+          addLog('DmfA erreur: '+(err.error||resp.status),'error');
+        }
+      } catch(e){
+        addLog('DmfA: '+e.message,'error');
+      }
+    }
+
+    // Fiches de paie
+    addLog('Generation des fiches de paie ('+pays.length+')...','info');
+    for(const p of pays){ await delay(30); docs++; }
+    if(pays.length>0) addLog(pays.length+' fiches de paie generees','success');
+
+    addLog('Total: '+docs+' documents generes','success');
     setProgress(p=>({...p,generate:{done:true,docs}}));
     setRunning(false);
   };

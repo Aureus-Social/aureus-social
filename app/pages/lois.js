@@ -2,6 +2,7 @@
 import { useLang } from '../lib/lang-context';
 import { C, CR_PAT, LB, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, f0, f2, fmt, quickPP, safeLS } from '@/app/lib/helpers';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { authFetch } from '@/app/lib/auth-fetch';
 
 const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
@@ -29,7 +30,7 @@ const handleJsonImport=async(file)=>{
     const text=await file.text();
     const json=(()=>{try{return JSON.parse(text)}catch(e){return null}})();
     setImportState(p=>({...p,step:'validating',data:json}));
-    const resp=await fetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'validate',payload:json})});
+    const resp=await authFetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'validate',payload:json})});
     const result=await resp.json();
     setImportState(p=>({...p,step:'validated',validation:result}));
   }catch(e){setImportState({step:'error',data:null,validation:{valid:false,errors:[e.message]},uploading:false,history:[]});}
@@ -38,7 +39,7 @@ const handleUploadToSupabase=async()=>{
   if(!importState.data||!importState.validation?.valid)return;
   setImportState(p=>({...p,uploading:true}));
   try{
-    const resp=await fetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'upload',payload:importState.data,source:'json_upload'})});
+    const resp=await authFetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'upload',payload:importState.data,source:'json_upload'})});
     const result=await resp.json();
     if(result.status==='pending'){
       setImportState(p=>({...p,step:'uploaded',uploading:false,uploadId:result.id}));
@@ -51,8 +52,8 @@ const handleUploadToSupabase=async()=>{
 };
 const handleApproveAndApply=async(id)=>{
   try{
-    await fetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'approve',id})});
-    const resp=await fetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'apply',id})});
+    await authFetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'approve',id})});
+    const resp=await authFetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'apply',id})});
     const result=await resp.json();
     if(result.validated){
       applyUpdate(result.validated);
@@ -62,7 +63,7 @@ const handleApproveAndApply=async(id)=>{
 };
 const loadSupabaseHistory=async()=>{
   try{
-    const resp=await fetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list'})});
+    const resp=await authFetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list'})});
     const result=await resp.json();
     setImportState(p=>({...p,history:result.updates||[]}));
   }catch(e){}
@@ -70,7 +71,7 @@ const loadSupabaseHistory=async()=>{
 const handleRollback=async(id)=>{
   if(!confirm('Annuler cet update et revenir aux valeurs par defaut?'))return;
   try{
-    await fetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'rollback',id})});
+    await authFetch('/api/lois-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'rollback',id})});
     setCustomLois({});
     safeLS.remove('aureus_lois_custom');
     loadSupabaseHistory();
@@ -149,7 +150,7 @@ const doCheck=async()=>{
   setChecking(true);
   const now=new Date().toISOString();
   try{
-    const resp=await fetch('/api/veille-juridique?manual=true');
+    const resp=await authFetch('/api/veille-juridique?manual=true');
     const data=await resp.json();
     const entry={
       date:now,

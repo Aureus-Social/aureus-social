@@ -1,6 +1,7 @@
 'use client';
 import { useLang } from '../lib/lang-context';
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { authFetch } from '@/app/lib/auth-fetch';
 
 // ═══ CATÉGORIES DE PARAMÈTRES ÉDITABLES ═══
 const PARAM_GROUPS = [
@@ -139,7 +140,7 @@ export default function AdminBaremes({ loisBelges, loisTimeline, loisCurrent, on
 
   // Load custom timeline entries
   useEffect(() => {
-    fetch('/api/baremes').then(r => r.json()).then(d => {
+    authFetch('/api/baremes').then(r => r.json()).then(d => {
       if (d.entries) setCustomEntries(d.entries);
     }).catch(() => {});
   }, []);
@@ -195,7 +196,7 @@ export default function AdminBaremes({ loisBelges, loisTimeline, loisCurrent, on
 
     setSaving(true);
     try {
-      const res = await fetch('/api/baremes', {
+      const res = await authFetch('/api/baremes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

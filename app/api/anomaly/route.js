@@ -1,3 +1,4 @@
+import { getAuthUser } from '@/app/lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
@@ -14,6 +15,9 @@ const THRESHOLDS = {
 };
 
 export async function GET(request) {
+  const u = await getAuthUser(req);
+  if (!u) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+
   if (!supabase) return Response.json({ error: 'Supabase non configuré' }, { status: 500 });
 
   try {

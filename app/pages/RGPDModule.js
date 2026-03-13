@@ -126,8 +126,8 @@ export default function RGPDModule({ state, s, d, t, lang }) {
   const loadData = useCallback(async () => {
     try {
       const [statsRes, reqRes] = await Promise.all([
-        fetch('/api/rgpd?action=dashboard').catch(() => null),
-        fetch('/api/rgpd?action=requests').catch(() => null),
+        authFetch('/api/rgpd?action=dashboard').catch(() => null),
+        authFetch('/api/rgpd?action=requests').catch(() => null),
       ])
       if (statsRes?.ok) setDashStats(await statsRes.json())
       if (reqRes?.ok) setRequests(await reqRes.json())
@@ -143,7 +143,7 @@ export default function RGPDModule({ state, s, d, t, lang }) {
     }
     setLoading(true)
     try {
-      const res = await fetch('/api/rgpd', {
+      const res = await authFetch('/api/rgpd', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: selDroit, employee_id: selEmp, requester_email: reqEmail, details: reqDetails }),
@@ -181,7 +181,7 @@ export default function RGPDModule({ state, s, d, t, lang }) {
     if (!vNature || !vDonnees || !vMesures) return notify('Remplissez tous les champs obligatoires (*)', true)
     setLoading(true)
     try {
-      const res = await fetch('/api/rgpd', {
+      const res = await authFetch('/api/rgpd', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'notification-violation', nature: vNature, donnees_concernees: vDonnees, nb_personnes: vNbPersonnes, mesures: vMesures, date_decouverte: vDate }),
@@ -204,7 +204,7 @@ export default function RGPDModule({ state, s, d, t, lang }) {
     if (!confirm('Lancer la purge des données expirées ? Cette action est irréversible.')) return
     setLoading(true)
     try {
-      const res = await fetch('/api/rgpd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'purge-retention' }) })
+      const res = await authFetch('/api/rgpd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'purge-retention' }) })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       const total = (data.purge_results || []).reduce((a, r) => a + (r.rows_deleted || 0), 0)
@@ -218,7 +218,7 @@ export default function RGPDModule({ state, s, d, t, lang }) {
   const exportRegistre = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/rgpd?action=registre-art30')
+      const res = await authFetch('/api/rgpd?action=registre-art30')
       const data = await res.json()
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)

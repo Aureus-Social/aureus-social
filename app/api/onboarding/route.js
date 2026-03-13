@@ -4,6 +4,7 @@
 // 2. Envoie email de bienvenue au client (Resend)
 // 3. Envoie notification à info@aureus-ia.com
 
+import { getAuthUser } from '@/app/lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
@@ -26,6 +27,9 @@ async function sendEmail(to, subject, html) {
 }
 
 export async function POST(request) {
+  const u = await getAuthUser(req);
+  if (!u) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+
   if (!supabase) {
     console.warn('[Onboarding] Supabase non configuré — skip');
     return Response.json({ is_new: false, onboarded: true, skipped: true }, { status: 200 });

@@ -27,6 +27,10 @@
     {
       "path": "/api/security-alert",
       "schedule": "0 7 * * 1"
+    },
+    {
+      "path": "/api/cron/legal-watch",
+      "schedule": "15 5 * * *"
     }
   ]
 }

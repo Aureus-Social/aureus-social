@@ -1,3 +1,4 @@
+import { getAuthUser } from '@/app/lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,9 @@ async function getToken() {
 }
 
 export async function POST(req) {
+  const u = await getAuthUser(req);
+  if (!u) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+
   try {
     const body = await req.json();
     const niss = body.niss || body.worker?.ssin;

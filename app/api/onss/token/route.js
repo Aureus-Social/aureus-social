@@ -1,3 +1,4 @@
+import { getAuthUser } from '@/app/lib/supabase';
 import { SignJWT } from 'jose';
 import { createPrivateKey } from 'crypto';
 export const dynamic = 'force-dynamic';

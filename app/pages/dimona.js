@@ -2,6 +2,7 @@
 import { useLang } from '../lib/lang-context';
 import { B, C, CR_PAT, I, LB, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, f0, f2, genDimonaXML, submitToONSS } from '@/app/lib/helpers';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { authFetch } from '@/app/lib/auth-fetch';
 
 const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
@@ -49,12 +50,12 @@ function DimonaPage({s,d}) {
   const [submitting,setSubmitting]=useState(false);
 
   // Check ONSS connection on mount
-  useEffect(()=>{fetch('/api/onss/status').then(r=>r.json()).then(setOnssStatus).catch(()=>setOnssStatus({readiness:{oauthToken:false}}));},[]);
+  useEffect(()=>{authFetch('/api/onss/status').then(r=>r.json()).then(setOnssStatus).catch(()=>setOnssStatus({readiness:{oauthToken:false}}));},[]);
 
   const submitToONSS=async(declaration)=>{
     setSubmitting(true);
     try{
-      const resp=await fetch('/api/onss/dimona',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(declaration)});
+      const resp=await authFetch('/api/onss/dimona',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(declaration)});
       const result=await resp.json();
       setSubmitting(false);
       return result;
@@ -133,7 +134,7 @@ function DimonaPage({s,d}) {
         </div>
       </div>
       <div style={{display:"flex",gap:6}}>
-        <button onClick={()=>fetch('/api/onss/status?test=true').then(r=>r.json()).then(r=>{setOnssStatus(r);alert(r.readiness?.oauthToken?'✅ Token OAuth OK — Dimona prêt':'❌ Token échoué: '+(r.configuration?.oauthError||'Vérifiez les env vars'))})} style={{padding:"6px 14px",borderRadius:8,border:"none",background:"rgba(96,165,250,.15)",color:"#60a5fa",fontSize:10,cursor:"pointer",fontWeight:600}}>{'Tester connexion'}</button>
+        <button onClick={()=>authFetch('/api/onss/status?test=true').then(r=>r.json()).then(r=>{setOnssStatus(r);alert(r.readiness?.oauthToken?'✅ Token OAuth OK — Dimona prêt':'❌ Token échoué: '+(r.configuration?.oauthError||'Vérifiez les env vars'))})} style={{padding:"6px 14px",borderRadius:8,border:"none",background:"rgba(96,165,250,.15)",color:"#60a5fa",fontSize:10,cursor:"pointer",fontWeight:600}}>{'Tester connexion'}</button>
         <span style={{fontSize:9,padding:"4px 10px",borderRadius:6,background:"rgba(198,163,78,.08)",color:"#c6a34e",display:"flex",alignItems:"center"}}>{submitting?"⏳ Envoi en cours...":"REST v2 / OAuth2 JWT"}</span>
       </div>
     </div>
