@@ -226,24 +226,61 @@ export default function PortailEmploye({s, d}) {
                 ))}
               </div>
             </div>
-            <div style={{display:'flex',flexDirection:'column',gap:8}}>
-              {[
-                {icon:'📝',name:'Contrat de travail CDI',date:'01/03/2026',type:'contrat',size:'124 KB'},
-                {icon:'💰',name:'Fiche de paie Mars 2026',date:'31/03/2026',type:'paie',size:'45 KB'},
-                {icon:'📋',name:'Règlement de travail',date:'01/01/2026',type:'admin',size:'280 KB'},
-                {icon:'🆔',name:'Annexe RGPD (Art. 13)',date:'01/03/2026',type:'admin',size:'68 KB'},
-              ].filter(doc=>docFilter==='all'||doc.type===docFilter).map((doc,i)=>(
-                <div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',background:'rgba(255,255,255,.02)',border:'1px solid rgba(139,115,60,.08)',borderRadius:9}}>
-                  <span style={{fontSize:18}}>{doc.icon}</span>
-                  <div style={{flex:1}}>
-                    <div style={{fontSize:12,fontWeight:500,color:'#e8e6e0'}}>{doc.name}</div>
-                    <div style={{fontSize:9,color:'#5e5c56',marginTop:2}}>{doc.date} · {doc.size}</div>
-                  </div>
-                  <Badge c={doc.type==='contrat'?BLUE:doc.type==='paie'?GREEN:GOLD}>{doc.type}</Badge>
-                  <button style={{padding:'5px 10px',borderRadius:6,border:'1px solid rgba(198,163,78,.15)',background:'transparent',color:GOLD,fontSize:9,cursor:'pointer',fontWeight:600}}>📥</button>
+            {(() => {
+              // Documents réels : fiches de paie depuis s.pays + docs fixes RH
+              const MN = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+              const payslipDocs = myFiches.map(f => {
+                const d = new Date(f.at||f.created_at||0);
+                const period = f.period || `${MN[d.getMonth()]} ${d.getFullYear()}`;
+                return {
+                  icon:'💰', name:`Fiche de paie — ${period}`, date: d.toLocaleDateString('fr-BE'),
+                  type:'paie', empId: f.empId||f.employee_id,
+                  onDownload: () => {
+                    const csv = `Période;Brut;ONSS;PP;Net\n${period};${f.gross||0};${f.onssNet||0};${f.pp||0};${f.net||0}`;
+                    const blob = new Blob(['\uFEFF'+csv],{type:'text/csv'});
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a'); a.href=url; a.download=`fiche_${period.replace(' ','_')}.csv`; a.click();
+                    URL.revokeObjectURL(url);
+                  }
+                };
+              });
+              const adminDocs = [
+                {icon:'📝', name:'Contrat de travail', date: emp?.startDate||emp?.startD||'—', type:'contrat'},
+                {icon:'📋', name:'Règlement de travail', date:'01/01/2026', type:'admin'},
+                {icon:'🆔', name:'Annexe RGPD Art.13', date: emp?.startDate||emp?.startD||'—', type:'admin'},
+                ...(emp?.chequesRepas ? [{icon:'🍽️', name:'Convention chèques-repas', date:'01/01/2026', type:'admin'}] : []),
+                ...(emp?.voiture ? [{icon:'🚗', name:'Avenant voiture de société + ATN', date: emp?.startDate||'—', type:'contrat'}] : []),
+                ...(emp?.nonConc ? [{icon:'🔒', name:'Clause de non-concurrence', date: emp?.startDate||'—', type:'contrat'}] : []),
+              ];
+              const allDocs = [...payslipDocs, ...adminDocs].filter(doc=>docFilter==='all'||doc.type===docFilter);
+              if (allDocs.length === 0) return (
+                <div style={{padding:30,textAlign:'center',color:'#5e5c56',border:'1px dashed rgba(198,163,78,.1)',borderRadius:10}}>
+                  Aucun document disponible
+                  {docFilter !== 'all' && <div style={{fontSize:10,marginTop:6}}>Changer le filtre pour voir tous les documents</div>}
                 </div>
-              ))}
-            </div>
+              );
+              return (
+                <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                  {allDocs.map((doc,i)=>(
+                    <div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',background:'rgba(255,255,255,.02)',border:'1px solid rgba(139,115,60,.08)',borderRadius:9}}>
+                      <span style={{fontSize:18}}>{doc.icon}</span>
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:12,fontWeight:500,color:'#e8e6e0'}}>{doc.name}</div>
+                        <div style={{fontSize:9,color:'#5e5c56',marginTop:2}}>{doc.date}</div>
+                      </div>
+                      <Badge c={doc.type==='contrat'?BLUE:doc.type==='paie'?GREEN:GOLD}>{doc.type}</Badge>
+                      {doc.onDownload
+                        ? <button onClick={doc.onDownload} style={{padding:'5px 10px',borderRadius:6,border:'1px solid rgba(198,163,78,.15)',background:'transparent',color:GOLD,fontSize:9,cursor:'pointer',fontWeight:600}}>📥 CSV</button>
+                        : <button onClick={()=>window.open(`mailto:info@aureus-ia.com?subject=Document ${doc.name}&body=Bonjour,%0A%0AJe demande le document suivant : ${doc.name}%0A%0ACordialement`)} style={{padding:'5px 10px',borderRadius:6,border:'1px solid rgba(96,165,250,.2)',background:'transparent',color:BLUE,fontSize:9,cursor:'pointer',fontWeight:600}}>📧 Demander</button>
+                      }
+                    </div>
+                  ))}
+                  <div style={{padding:'10px 12px',background:'rgba(96,165,250,.04)',borderRadius:8,border:'1px solid rgba(96,165,250,.1)',fontSize:10,color:'#5e5c56',marginTop:4}}>
+                    💡 Pour télécharger un document officiel, contactez votre gestionnaire de paie à <a href="mailto:info@aureus-ia.com" style={{color:GOLD}}>info@aureus-ia.com</a>
+                  </div>
+                </div>
+              );
+            })()}
           </C>
         </div>
       );

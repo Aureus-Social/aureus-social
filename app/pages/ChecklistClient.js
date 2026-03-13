@@ -1,6 +1,7 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLang } from '../lib/lang-context';
+import { authFetch } from '@/app/lib/auth-fetch';
 
 // ═══════════════════════════════════════════════════════════════
 // CHECKLIST CLIENT — Aureus Social Pro
@@ -119,25 +120,63 @@ export default function ChecklistClient({ s, d }) {
   const [clientName, setClientName] = useState('');
   const [showNotes, setShowNotes] = useState({});
   const [filter, setFilter] = useState('all'); // all | required | missing
+  const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
 
-  // Charger depuis localStorage si possible
+  // Clé unique basée sur le client actif
+  const clientKey = `checklist_${(s?.activeClient || 'default')}`;
+
+  // Charger depuis Supabase via /api/backup (app_state)
   useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem('checklist_state');
-      if (saved) {
-        const { checked: c, notes: n, clientName: cn } = JSON.parse(saved);
-        if (c) setChecked(c);
-        if (n) setNotes(n);
-        if (cn) setClientName(cn);
+    const load = async () => {
+      try {
+        const res = await authFetch(`/api/backup?key=${encodeURIComponent(clientKey)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.value) {
+            const { checked: c, notes: n, clientName: cn } = data.value;
+            if (c) setChecked(c);
+            if (n) setNotes(n);
+            if (cn) setClientName(cn);
+          }
+        }
+      } catch (e) {
+        // Fallback sessionStorage
+        try {
+          const saved = sessionStorage.getItem(clientKey);
+          if (saved) {
+            const { checked: c, notes: n, clientName: cn } = JSON.parse(saved);
+            if (c) setChecked(c);
+            if (n) setNotes(n);
+            if (cn) setClientName(cn);
+          }
+        } catch {}
       }
-    } catch (e) {}
-  }, []);
+    };
+    load();
+  }, [clientKey]);
 
-  const save = (newChecked, newNotes, newClient) => {
+  const save = useCallback(async (newChecked, newNotes, newClient) => {
+    // Toujours sauvegarder en sessionStorage pour l'instant
     try {
-      sessionStorage.setItem('checklist_state', JSON.stringify({ checked: newChecked, notes: newNotes, clientName: newClient }));
-    } catch (e) {}
-  };
+      sessionStorage.setItem(clientKey, JSON.stringify({ checked: newChecked, notes: newNotes, clientName: newClient }));
+    } catch {}
+    // Sauvegarder dans Supabase via authFetch (debounced)
+    setSaving(true);
+    try {
+      await authFetch('/api/backup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: clientKey,
+          value: { checked: newChecked, notes: newNotes, clientName: newClient, updatedAt: new Date().toISOString() }
+        })
+      });
+      setLastSaved(new Date());
+    } catch {} finally {
+      setSaving(false);
+    }
+  }, [clientKey]);
 
   const toggle = (id) => {
     const next = { ...checked, [id]: !checked[id] };
@@ -174,7 +213,8 @@ export default function ChecklistClient({ s, d }) {
   const reset = () => {
     if (!confirm('Réinitialiser toute la checklist ?')) return;
     setChecked({}); setNotes({}); setClientName('');
-    sessionStorage.removeItem('checklist_state');
+    sessionStorage.removeItem(clientKey);
+    save({}, {}, '');
   };
 
   return (
@@ -185,7 +225,9 @@ export default function ChecklistClient({ s, d }) {
           <h2 style={{ fontSize:22, fontWeight:700, color:GOLD, margin:'0 0 4px' }}>✅ Checklist Onboarding Client</h2>
           <p style={{ fontSize:12, color:GRAY, margin:0 }}>{TOTAL_ALL} points de contrôle — {TOTAL_REQUIRED} obligatoires</p>
         </div>
-        <div style={{ display:'flex', gap:8 }}>
+        <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+          {saving && <span style={{fontSize:10,color:GOLD}}>⏳ Sauvegarde...</span>}
+          {!saving && lastSaved && <span style={{fontSize:10,color:'#22c55e'}}>✅ Sauvegardé {lastSaved.toLocaleTimeString('fr-BE')}</span>}
           <button onClick={exportPDF} style={{ padding:'8px 16px', borderRadius:8, border:'none', background:GOLD, color:'#0c0b09', fontSize:12, fontWeight:700, cursor:'pointer' }}>📄 Exporter</button>
           <button onClick={reset} style={{ padding:'8px 16px', borderRadius:8, border:'1px solid rgba(255,255,255,.1)', background:'transparent', color:'#888', fontSize:12, cursor:'pointer' }}>🔄 Reset</button>
         </div>

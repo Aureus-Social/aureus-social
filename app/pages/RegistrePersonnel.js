@@ -67,6 +67,82 @@ export default function RegistrePersonnel({s, d}) {
     URL.revokeObjectURL(url);
   };
 
+  const exportPDF_AR1980 = () => {
+    const today = new Date().toLocaleDateString('fr-BE');
+    const coName = s.co?.name || 'AUREUS IA SPRL';
+    const coVAT  = s.co?.vat  || 'BE 1028.230.781';
+    const coAddr = s.co?.address || 'Place Marcel Broodthaers 8, 1060 Saint-Gilles';
+    const coONSS = s.co?.onss || '51357716-02';
+    const rows = filtered.map((e, i) => `
+      <tr style="border-bottom:1px solid #ddd">
+        <td style="padding:5px 7px;text-align:center">${i+1}</td>
+        <td style="padding:5px 7px;font-weight:700">${(e.last||'').toUpperCase()}</td>
+        <td style="padding:5px 7px">${e.first||e.fn||''}</td>
+        <td style="padding:5px 7px;font-family:monospace;font-size:10px">${e.niss||'⚠️ manquant'}</td>
+        <td style="padding:5px 7px">${e.statut||'EMP'}</td>
+        <td style="padding:5px 7px">${e.contractType||'CDI'}</td>
+        <td style="padding:5px 7px">${e.regime||100}%</td>
+        <td style="padding:5px 7px">${e.cp||'200'}</td>
+        <td style="padding:5px 7px">${e.startDate||e.startD||'—'}</td>
+        <td style="padding:5px 7px;color:${e.status==='sorti'?'#dc2626':'#16a34a'}">${e.endDate||e.endD||'En cours'}</td>
+        <td style="padding:5px 7px;font-size:10px;color:#666">${e.email||'—'}</td>
+      </tr>`).join('');
+    const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8">
+<title>Registre Personnel — ${coName}</title>
+<style>
+  @page{size:A3 landscape;margin:12mm}
+  body{font-family:Arial,sans-serif;font-size:12px;color:#1a1a1a}
+  table{width:100%;border-collapse:collapse}
+  thead tr{background:#1a1916;color:#fff}
+  thead th{padding:7px 8px;text-align:left;font-size:11px}
+  tbody tr:nth-child(even){background:#f9f9f9}
+  .hdr{display:flex;justify-content:space-between;padding-bottom:12px;border-bottom:3px solid #C9963A;margin-bottom:14px}
+  .stats{display:flex;gap:14px;margin-bottom:14px}
+  .stat{padding:7px 14px;background:#f5f3ef;border-left:3px solid #C9963A;border-radius:4px}
+  .stat b{display:block;font-size:16px;color:#C9963A}
+  .stat span{font-size:9px;color:#666;text-transform:uppercase}
+  .foot{margin-top:14px;padding-top:8px;border-top:1px solid #ddd;font-size:9px;color:#666;display:flex;justify-content:space-between}
+</style></head>
+<body>
+<div class="hdr">
+  <div>
+    <h1 style="margin:0 0 2px;font-size:18px">REGISTRE DU PERSONNEL</h1>
+    <div style="color:#666;font-size:11px">Art. 8 loi 08/04/1965 — AR 08/08/1980 — Accessible à l'Inspection Sociale</div>
+    <div style="margin-top:6px"><strong>${coName}</strong> · BCE/TVA : ${coVAT}</div>
+    <div style="font-size:11px;color:#666">${coAddr} · Matricule ONSS : ${coONSS}</div>
+  </div>
+  <div style="text-align:right">
+    <div style="font-size:11px;color:#666">Imprimé le ${today}</div>
+    <div style="font-size:11px;color:#666">${filtered.length} travailleur(s)</div>
+  </div>
+</div>
+<div class="stats">
+  <div class="stat"><b>${stats.actifs}</b><span>Actifs</span></div>
+  <div class="stat"><b>${stats.sortis}</b><span>Sortis</span></div>
+  <div class="stat"><b>${stats.cdi}</b><span>CDI</span></div>
+  <div class="stat"><b>${stats.cdd}</b><span>CDD</span></div>
+  <div class="stat"><b>${stats.sansNISS || 0}</b><span>Sans NISS ⚠</span></div>
+</div>
+<table>
+<thead><tr>
+  <th>N°</th><th>NOM</th><th>Prénom</th><th>NISS</th><th>Statut</th>
+  <th>Contrat</th><th>Régime</th><th>CP</th><th>Date entrée</th><th>Date sortie</th><th>Email</th>
+</tr></thead>
+<tbody>${rows}</tbody>
+</table>
+<div class="foot">
+  <div>Tenu conformément à l'AR 08/08/1980 — Conservation 5 ans après départ (RGPD Art. 5.1.e)</div>
+  <div>${coName} — ${today}</div>
+</div>
+<script>window.onload=()=>window.print()</script>
+</body></html>`;
+    const blob = new Blob([html],{type:'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    window.open(url,'_blank');
+    setTimeout(()=>URL.revokeObjectURL(url),10000);
+  };
+
   const SortBtn = ({field, label}) => (
     <button onClick={()=>setSortField(field)}
       style={{padding:'3px 8px',borderRadius:5,border:'none',background:sortField===field?`${GOLD}20`:'transparent',color:sortField===field?GOLD:'#5e5c56',fontSize:10,cursor:'pointer',fontWeight:sortField===field?700:400}}>
@@ -84,6 +160,7 @@ export default function RegistrePersonnel({s, d}) {
         </div>
         <div style={{display:'flex',gap:8}}>
           <button onClick={exportCSV} style={{padding:'9px 16px',borderRadius:8,border:'1px solid rgba(198,163,78,.2)',background:'rgba(198,163,78,.08)',color:GOLD,fontSize:11,cursor:'pointer',fontWeight:600}}>📥 Export CSV</button>
+          <button onClick={exportPDF_AR1980} style={{padding:'9px 16px',borderRadius:8,border:'1px solid rgba(239,68,68,.2)',background:'rgba(239,68,68,.08)',color:'#ef4444',fontSize:11,cursor:'pointer',fontWeight:600}}>🖨️ Imprimer PDF (AR 1980)</button>
           <button onClick={()=>d&&d({type:'NAV',page:'employees'})} style={{padding:'9px 16px',borderRadius:8,border:'1px solid rgba(34,197,94,.2)',background:'rgba(34,197,94,.08)',color:GREEN,fontSize:11,cursor:'pointer',fontWeight:600}}>+ Ajouter</button>
         </div>
       </div>

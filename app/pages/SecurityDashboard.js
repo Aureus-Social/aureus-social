@@ -1,5 +1,6 @@
 'use client';
 import{useState,useEffect,useCallback}from'react';
+import{authFetch}from'@/app/lib/auth-fetch';
 
 // ═══════════════════════════════════════════════════════════════
 // SECURITY PRO — Backup History B2 + Intrusion Monitor
@@ -277,7 +278,7 @@ const SecProTab=({supabase,user,C})=>{
         <button onClick={async()=>{
           setCronLoading(true);
           try{
-            const r=await fetch('/api/security-alert',{method:'POST',headers:{'Authorization':'Bearer '+window.__CRON_SECRET__,'Content-Type':'application/json'},body:JSON.stringify({})});
+            const r=await authFetch('/api/security-alert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});
             const d=await r.json();
             setCronStatus({type:'alert',result:d,ts:new Date().toLocaleTimeString('fr-BE')});
           }catch(e){setCronStatus({type:'error',error:e.message});}

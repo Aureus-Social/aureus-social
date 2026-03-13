@@ -39,6 +39,9 @@ const SmartOpsCenterPage = dynamic(() => import('../pages/SmartOpsCenter'), { ss
 const TransversalCPPage = dynamic(() => import('../pages/TransversalCP'), { ssr: false, loading: () => <Loading /> });
 const LoisPage = dynamic(() => import('../pages/lois'), { ssr: false, loading: () => <Loading /> });
 const SettingsPage = dynamic(() => import('../pages/settings'), { ssr: false, loading: () => <Loading /> });
+const DiagnosticCommercialPage = dynamic(() => import('../pages/DiagnosticCommercial'), { ssr: false, loading: () => <Loading /> });
+const ChecklistClientPage = dynamic(() => import('../pages/ChecklistClient'), { ssr: false, loading: () => <Loading /> });
+const CommercialHubPage = dynamic(() => import('../pages/CommercialHub'), { ssr: false, loading: () => <Loading /> });
 
 // Router
 export function routePage(page, state, dispatch) {
@@ -96,6 +99,17 @@ export function routePage(page, state, dispatch) {
     case 'lois': return <LoisPage s={state} d={dispatch} />;
     case 'settings': return <SettingsPage s={state} d={dispatch} />;
     case 'team': return <SettingsPage s={state} d={dispatch} />;
+    // P0 — routes menu manquantes
+    case 'portail': return <PortalSystemPage s={state} d={dispatch} />;
+    case 'exportcompta': return <ModsBatch2Page s={state} d={dispatch} />;
+    case 'sepa': return <ModsBatch2Page s={state} d={dispatch} />;
+    case 'belcotax281': return <ModsBatch2Page s={state} d={dispatch} />;
+    case 'rapports': return <AnalyticsDashboardPage s={state} d={dispatch} />;
+    case 'diagnostic': return <DiagnosticCommercialPage s={state} d={dispatch} />;
+    case 'checklistclient': return <ChecklistClientPage s={state} d={dispatch} />;
+    case 'comparatif': return <CommercialHubPage s={state} d={dispatch} />;
+    case 'backup': return <adminPage s={state} d={dispatch} />;
+    case 'audittrail': return <AuditSecuriteCodePage s={state} d={dispatch} />;
     default: return null;
   }
 }
