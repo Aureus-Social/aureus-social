@@ -87,7 +87,7 @@ function generateLegalDeadlines(year = 2026) {
 function generateNotifications(state, now) {
   const notifications = []
   const year = now.getFullYear()
-  const employees = state?.employees || []
+  const employees = state?.emps || state?.employees || []
   const company = state?.co || state?.company || {}
 
   // 1. Échéances légales

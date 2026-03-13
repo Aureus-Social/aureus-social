@@ -762,7 +762,7 @@ function DocumentGenerator({ state, defaultTab, initialCat }) {
   const [generated, setGenerated] = useState(null)
   const [filterCat, setFilterCat] = useState(initialCat || 'all')
 
-  const employees = state?.employees || []
+  const employees = state?.emps || state?.employees || []
   const company = state?.co || state?.company || {}
 
   const filteredTypes = useMemo(() => {

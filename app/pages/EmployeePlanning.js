@@ -213,7 +213,7 @@ function EmployeePlanning({ state, dispatch, defaultTab, initialView }) {
   })
   const [filterDept, setFilterDept] = useState('all')
 
-  const employees = state?.employees || []
+  const employees = state?.emps || state?.employees || []
   const activeEmployees = employees.filter(e => !e.endDate && !e.inactive)
   const joursFeries = useMemo(() => getJoursFeries(year), [year])
   const days = getDaysInMonth(year, month)

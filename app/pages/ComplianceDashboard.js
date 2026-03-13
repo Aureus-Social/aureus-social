@@ -26,7 +26,7 @@ const FRAMEWORKS = {
 // ── Checklist de conformité ──
 function generateChecklist(state) {
   const company = state?.co || state?.company || {}
-  const employees = state?.employees || []
+  const employees = state?.emps || state?.employees || []
   const hasEmployees = employees.length > 0
   const hasSensitiveData = employees.some(e => e.niss || e.iban)
 

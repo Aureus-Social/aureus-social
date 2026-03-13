@@ -134,11 +134,16 @@ function reducer(state, action) {
         } else if (action.type === 'ADD_PAY' && rec) {
           authFetch('/api/payroll', { method: 'POST', body: JSON.stringify(rec) }).catch(() => {});
         }
+        // Persistance paramètres société
+        if ((action.type === 'UPD_CO' || action.type === 'SET_COMPANY') && action.d) {
+          authFetch('/api/backup', { method: 'POST', body: JSON.stringify({ action: 'save_co', co: action.d || action.data }) }).catch(() => {});
+        }
       }).catch(() => { /* fire-and-forget */ });
     }
   }
 
   switch (action.type) {
+    case 'SET_USER': return { ...state, user: action.data };
     case 'SET_COMPANY': return { ...state, co: { ...state.co, ...action.data } };
     case 'UPD_CO': return { ...state, co: { ...state.co, ...action.d } };
     case 'MODAL': return { ...state, _modal: action.m };
@@ -390,6 +395,7 @@ function DashboardLayoutInner({ user }) {
     pays: [],
     dims: [],
     dmfas: [],
+    user: null,
     payrollHistory: [],
     dimonaHistory: [],
     co: { name: 'Aureus IA SPRL', vat: 'BE 1028.230.781' }
@@ -446,6 +452,7 @@ function DashboardLayoutInner({ user }) {
   // ── CHARGEMENT INITIAL DES DONNÉES (Supabase) ───────────────────────────
   useEffect(() => {
     if (!user) return;
+    dispatch({ type: 'SET_USER', data: user });
     import('../lib/auth-fetch').then(({ authFetch }) => {
       authFetch('/api/employees').then(res => {
         if (res.ok) res.json().then(j => {
