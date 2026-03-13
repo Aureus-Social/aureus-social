@@ -99,6 +99,35 @@ export const TAUX_WARRANTS        = 0;     // Warrants: pas de cotis. ONSS ni PP
 // Budget mobilité (loi 17/03/2019)
 export const TX_BUDGET_MOB = 0.38 + 0.025; // Cotis. mobilité: ONSS-like 38% + 2.5% spéciale
 
+// Étudiant jobiste (Loi 3/7/1978 Titre VII)
+export const PLANCHER_ETUDIANT_SOL = 548.48; // Plancher solidarité (seuil 2026 au-delà duquel ONSS normal)
+
+// ONSS employeur par secteur (taux approximatifs 2026 — varie selon CP)
+export const ONSS_E_SECTEURS = {
+  marchand:      0.2500, // secteur marchand (env. 25%)
+  nonMarchand:   0.3240, // secteur non-marchand (env. 32,4%)
+  construction:  0.2780, // construction + fonds sécurité
+  horeca:        0.2500, // horeca (taux standard)
+  agriculture:   0.2300, // agriculture/horticulture (réduit)
+  healthcare:    0.2650, // santé (hôpitaux)
+};
+
+// Primes sectorielles moyennes (montants indicatifs — vérifier CCT sectorielle)
+export const PRIMES_SECTORIELLES = {
+  '200': { finAnnee: 1.0, ecoMax: 250 },            // CP 200 — employés
+  '118': { finAnnee: 1.0, ecoMax: 250, prime2x8: 0.10, prime3x8: 0.15, nuit: 0.25 }, // alimentaire
+  '119': { finAnnee: 1.0, ecoMax: 250 },            // commerce alimentaire
+  '121': { finAnnee: 1.0, ecoMax: 250 },            // nettoyage
+  '124': { finAnnee: 1.0, ecoMax: 250, nuit: 0.35, intemperies: true }, // construction
+  '140': { finAnnee: 1.0, ecoMax: 250, nuit: 0.30 }, // transport
+  '152': { finAnnee: 1.0, ecoMax: 250 },            // onderwijs/enseignement
+  '200': { finAnnee: 1.0, ecoMax: 250 },
+  '302': { finAnnee: 0.0, ecoMax: 250, nuit: 0.40, dimanche: 1.0 }, // horeca
+  '322': { finAnnee: 1.0, ecoMax: 250 },            // intérim
+  '330': { finAnnee: 1.0, ecoMax: 250 },            // santé
+  '_default': { finAnnee: 1.0, ecoMax: 250 },
+};
+
 // ══════════════════════════════════════════════════════════════
 // FONCTIONS MANQUANTES — payroll-engine wrappers
 // ══════════════════════════════════════════════════════════════
