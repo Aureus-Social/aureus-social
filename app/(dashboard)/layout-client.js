@@ -139,6 +139,13 @@ function reducer(state, action) {
   }
 
   switch (action.type) {
+    case 'SET_COMPANY': return { ...state, co: { ...state.co, ...action.data } };
+    case 'UPD_CO': return { ...state, co: { ...state.co, ...action.d } };
+    case 'MODAL': return { ...state, _modal: action.m };
+    case 'DEL_P': return { ...state, pays: (state.pays||[]).filter(p => p.id !== action.id) };
+    case 'ADD_CLIENT': return { ...state, clients: [...(state.clients||[]), action.d] };
+    case 'UPD_CLIENT': return { ...state, clients: (state.clients||[]).map(c => c.id === action.d.id ? { ...c, ...action.d } : c) };
+    case 'DEL_CLIENT': return { ...state, clients: (state.clients||[]).filter(c => c.id !== action.id) };
     case 'NAV': return { ...state, _nav: action.page, _navSub: action.sub };
     case 'CLEAR_NAV': return { ...state, _nav: null, _navSub: null };
     case 'SET_CLIENTS': return { ...state, clients: action.data };
@@ -152,8 +159,7 @@ function reducer(state, action) {
     case 'ADD_EMP': return { ...state, emps: [...(state.emps||[]), action.d] };
     case 'UPD_EMP': return { ...state, emps: (state.emps||[]).map(e => e.id === action.d.id ? { ...e, ...action.d } : e) };
     case 'DEL_EMP': return { ...state, emps: (state.emps||[]).filter(e => e.id !== action.id) };
-    case 'ADD_P': return { ...state, payrollHistory: [...(state.payrollHistory||[]), action.d] };
-    case 'ADD_DIM': return { ...state, dimonaHistory: [...(state.dimonaHistory||[]), action.d] };
+    case 'ADD_P': return { ...state, payrollHistory: [...(state.payrollHistory||[]), action.d] }; // legacy
     default: return state;
   }
 }
@@ -1039,6 +1045,18 @@ function DashboardLayoutInner({ user }) {
           <ErrorBoundary pageKey={page} label={currentItem?.label}>{renderPage()}</ErrorBoundary>
         </div>
       </div>
+      {/* ── MODAL GLOBAL ─────────────────────────────────── */}
+      {s._modal && (
+        <div onClick={()=>dispatch({type:'MODAL',m:null})}
+          style={{position:'fixed',inset:0,background:'rgba(0,0,0,.7)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
+          <div onClick={e=>e.stopPropagation()}
+            style={{background:'#111009',borderRadius:14,border:'1px solid rgba(198,163,78,.15)',padding:24,maxWidth:s._modal.w||700,width:'100%',maxHeight:'85vh',overflowY:'auto',position:'relative'}}>
+            <button onClick={()=>dispatch({type:'MODAL',m:null})}
+              style={{position:'absolute',top:14,right:14,background:'transparent',border:'none',color:'#9e9b93',fontSize:18,cursor:'pointer',lineHeight:1}}>✕</button>
+            {s._modal.c}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
