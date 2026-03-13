@@ -224,7 +224,7 @@ function DashboardHome({ state, onNavigate }) {
     { icon: '◈', label: 'Masse salariale brute', value: fmtE(masse), sub: `Moy: ${fmtE(avgGross)}/emp`, color: '#c6a34e', page: 'salaires' },
     { icon: '▤', label: 'Net total estimé', value: fmtE(net), sub: `${ae.length ? Math.round(net/masse*100) : 0}% du brut`, color: '#4ade80', page: 'payslip' },
     { icon: '◆', label: 'Coût employeur total', value: fmtE(cout), sub: `Ratio: ${ae.length ? Math.round(cout/masse*100) : 0}% du brut`, color: '#a78bfa', page: 'analytics' },
-    { icon: '📄', label: 'Fiches de paie', value: (s.payrollHistory||[]).length, sub: `Ce mois: ${(s.payrollHistory||[]).filter(p=>{ const d=new Date(p.at||0); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).length}`, color: '#fb923c', page: 'payslip' },
+    { icon: '📄', label: 'Fiches de paie', value: (s.pays||s.payrollHistory||[]).length, sub: `Ce mois: ${(s.pays||s.payrollHistory||[]).filter(p=>{ const d=new Date(p.at||p.created_at||0); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).length}`, color: '#fb923c', page: 'payslip' },
     { icon: '⬆', label: 'Dimona', value: (s.dimonaHistory||[]).length, sub: `IN/OUT déclarés`, color: '#60a5fa', page: 'declarations' },
   ];
 

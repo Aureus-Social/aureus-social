@@ -2946,6 +2946,7 @@ function docSendEmail() {
   var subject = document.getElementById('email-subject').value.trim();
   var msgBody = document.getElementById('email-body').value.trim();
   var docHtml = document.getElementById('doc-modal-body').innerHTML;
+  var sendBtn = document.querySelector('#email-modal button[onclick="docSendEmail()"]');
 
   if (!to) { alert('Veuillez saisir une adresse email destinataire.'); return; }
 
@@ -2957,27 +2958,52 @@ function docSendEmail() {
     '<div style="text-align:center;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #C9963A;">' +
     '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:2px;">AUREUS IA SPRL — BCE BE 1028.230.781</div>' +
     '</div>' +
-    (msgBody ? '<div style="background:#f5f3ef;padding:16px;border-radius:8px;margin-bottom:24px;font-size:13px;white-space:pre-line;">' + msgBody + '</div><hr>' : '') +
+    (msgBody ? '<div style="background:#f5f3ef;padding:16px;border-radius:8px;margin-bottom:24px;font-size:13px;white-space:pre-line;">' + msgBody.replace(/\n/g,'<br>') + '</div><hr>' : '') +
     docHtml +
     '<div style="margin-top:40px;padding-top:16px;border-top:2px solid #C9963A;font-size:11px;color:#888;">Document généré par Aureus Social Pro — aureussocial.be</div>' +
     '</body></html>';
 
-  // Ouvrir document dans nouvelle fenêtre (imprimable → PDF)
+  // Ouvrir aperçu dans nouvelle fenêtre
   var win = window.open('', '_blank', 'width=900,height=700');
   if (win) { win.document.write(fullHtml); win.document.close(); }
 
-  // Ouvrir client email
-  var ccParam = cc ? '&cc=' + encodeURIComponent(cc) : '';
-  var mailtoBody = msgBody + '\n\n[Document disponible en pièce jointe — voir fenêtre ouverte pour version imprimable/PDF]';
-  var mailto = 'mailto:' + encodeURIComponent(to) +
-    '?subject=' + encodeURIComponent(subject) +
-    ccParam + '&body=' + encodeURIComponent(mailtoBody);
-  setTimeout(function(){ window.location.href = mailto; }, 400);
+  // Envoi réel via /api/send-email (Resend)
+  if (sendBtn) { sendBtn.textContent = '⏳ Envoi...'; sendBtn.disabled = true; }
 
-  document.getElementById('email-modal').style.display = 'none';
-  setTimeout(function(){
-    alert('✅ Document ouvert dans une nouvelle fenêtre (imprimez en PDF pour la pièce jointe).\n📧 Client email ouvert → ' + to);
-  }, 900);
+  fetch('/api/send-email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({
+      to: to,
+      subject: subject,
+      html: fullHtml,
+      from: 'Aureus Social Pro <info@aureus-ia.com>',
+      replyTo: document.getElementById('email-from').value.trim() || 'info@aureus-ia.com'
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    document.getElementById('email-modal').style.display = 'none';
+    if (data.ok || data.id) {
+      alert('✅ Email envoyé avec succès à ' + to + '\n\nL\'aperçu du document a été ouvert dans une nouvelle fenêtre (imprimable en PDF).');
+    } else {
+      // Fallback mailto si API non configurée
+      var ccParam = cc ? '&cc=' + encodeURIComponent(cc) : '';
+      window.location.href = 'mailto:' + encodeURIComponent(to) + '?subject=' + encodeURIComponent(subject) + ccParam;
+      alert('📧 Service email non configuré — votre client email a été ouvert.\nDocument disponible dans la fenêtre ouverte.');
+    }
+  })
+  .catch(function(){
+    // Fallback mailto
+    var ccParam = cc ? '&cc=' + encodeURIComponent(cc) : '';
+    window.location.href = 'mailto:' + encodeURIComponent(to) + '?subject=' + encodeURIComponent(subject) + ccParam;
+    document.getElementById('email-modal').style.display = 'none';
+    alert('📧 Client email ouvert (fallback) → ' + to);
+  })
+  .finally(function(){
+    if (sendBtn) { sendBtn.textContent = '📧 Envoyer'; sendBtn.disabled = false; }
+  });
 }
 
 function docPrint() {
