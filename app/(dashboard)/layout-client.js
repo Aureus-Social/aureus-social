@@ -132,6 +132,10 @@ function reducer(state, action) {
     case 'CLEAR_NAV': return { ...state, _nav: null, _navSub: null };
     case 'SET_CLIENTS': return { ...state, clients: action.data };
     case 'SET_EMPS': return { ...state, emps: action.data };
+    case 'SET_PAYS': return { ...state, pays: action.data };
+    case 'ADD_PAY': return { ...state, pays: [...(state.pays||[]), action.d] };
+    case 'DEL_PAYS_BATCH': return { ...state, pays: (state.pays||[]).filter(p => !(action.ids||[]).includes(p.id)) };
+    case 'SET_DIMS': return { ...state, dims: action.data };
     case 'ADD_EMP': return { ...state, emps: [...(state.emps||[]), action.d] };
     case 'UPD_EMP': return { ...state, emps: (state.emps||[]).map(e => e.id === action.d.id ? { ...e, ...action.d } : e) };
     case 'DEL_EMP': return { ...state, emps: (state.emps||[]).filter(e => e.id !== action.id) };
@@ -364,6 +368,8 @@ function DashboardLayoutInner({ user }) {
   const [state, dispatch] = useReducer(reducer, {
     emps: [],
     clients: [],
+    pays: [],
+    dims: [],
     payrollHistory: [],
     dimonaHistory: [],
     co: { name: 'Aureus IA SPRL', vat: 'BE 1028.230.781' }
@@ -417,9 +423,38 @@ function DashboardLayoutInner({ user }) {
 
   const toggleGroup = (gId) => setCollapsed(p => ({ ...p, [gId]: !p[gId] }));
 
+  // ── CHARGEMENT INITIAL DES DONNÉES (Supabase) ───────────────────────────
+  useEffect(() => {
+    if (!user) return;
+    import('../lib/auth-fetch').then(({ authFetch }) => {
+      authFetch('/api/employees').then(res => {
+        if (res.ok) res.json().then(j => {
+          if (j.data && Array.isArray(j.data)) dispatch({ type: 'SET_EMPS', data: j.data });
+        });
+      }).catch(() => {});
+      authFetch('/api/clients').then(res => {
+        if (res.ok) res.json().then(j => {
+          if (j.data && Array.isArray(j.data)) dispatch({ type: 'SET_CLIENTS', data: j.data });
+        });
+      }).catch(() => {});
+      // Charger les fiches de paie (100 dernières)
+      authFetch('/api/payroll?limit=100').then(res => {
+        if (res.ok) res.json().then(j => {
+          if (j.data && Array.isArray(j.data)) dispatch({ type: 'SET_PAYS', data: j.data });
+        });
+      }).catch(() => {});
+      // Charger les déclarations Dimona
+      authFetch('/api/declarations?type=dimona&limit=50').then(res => {
+        if (res.ok) res.json().then(j => {
+          if (j.data && Array.isArray(j.data)) dispatch({ type: 'SET_DIMS', data: j.data });
+        });
+      }).catch(() => {});
+    });
+  }, [user]);
+
   // ── RECHERCHE TRAVAILLEUR LIVE (Supabase) ──────────────────────────────
-  const SB_URL = 'https://jwjtlpewwdjxdboxtbdf.supabase.co';
-  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3anRscGV3d2RqeGRib3h0YmRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MzE5MDMsImV4cCI6MjA4ODIwNzkwM30.5Z9_ZwsXpEAGEKB4cNaa5RvSZIOrftWghQ3GdLnmblg';
+  const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://qcunxnadjxggizdksvay.supabase.co';
+  const SB_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
   const searchWorkersLive = useCallback((query) => {
     if (workerTimer) clearTimeout(workerTimer);
