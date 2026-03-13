@@ -2169,309 +2169,707 @@ function docGetData() {
 function docOpen(type) {
   var d = docGetData();
   var today = new Date().toLocaleDateString('fr-BE');
+  var todayISO = new Date().toISOString().slice(0,10);
   var modal = document.getElementById('doc-modal');
   var title = document.getElementById('doc-modal-title');
   var body = document.getElementById('doc-modal-body');
-  var contratLabel = {CDI:'CDI — Durée indéterminée',CDD:'CDD — Durée déterminée',ETU:'Contrat étudiant',FLEXI:'Flexi-job',MITHERP:'Mi-temps thérapeutique'}[d.contrat] || d.contrat;
-  var statutLabel = {EMP:'Employé(e)',OUV:'Ouvrier/Ouvrière',DIR:'Dirigeant(e)'}[d.statut] || d.statut;
+  var contratLabel = {CDI:'CDI — Contrat à durée indéterminée',CDD:'CDD — Contrat à durée déterminée',ETU:'Contrat étudiant',FLEXI:'Flexi-job',MITHERP:'Mi-temps thérapeutique'}[d.contrat] || d.contrat;
+  var statutLabel = {EMP:'Employé(e)',OUV:'Ouvrier/Ouvrière',DIR:'Dirigeant(e) d\'entreprise'}[d.statut] || d.statut;
   var netEst = d.brut ? Math.round(parseFloat(d.brut)*(1-0.1307)*(1-0.265)) : 0;
+
+  // ── PP réel barèmes 2026 SPF Finances ──
+  function calcPP(brut, situFam, enfants) {
+    if (!brut || brut <= 0) return 0;
+    var sf = situFam || 'isole';
+    var enf = parseInt(enfants) || 0;
+    var annuel = brut * 12;
+    var pp = 0;
+    if (annuel <= 15200) { pp = annuel * 0.25; }
+    else if (annuel <= 26830) { pp = 3800 + (annuel - 15200) * 0.40; }
+    else if (annuel <= 46440) { pp = 8452 + (annuel - 26830) * 0.45; }
+    else { pp = 17276 + (annuel - 46440) * 0.50; }
+    // Quotité exemptée
+    var qe = 9270;
+    var ppQE = qe <= 15200 ? qe * 0.25 : qe <= 26830 ? 3800 + (qe-15200)*0.40 : 8452;
+    pp = Math.max(0, pp - ppQE);
+    // Personnes à charge
+    var redEnf = [0,0,0,0,0,0][Math.min(enf,5)] || 0; // simplifié
+    if (sf === 'isole') pp -= 1300;
+    if (sf === 'marie_seul') pp -= 4460;
+    pp = Math.max(0, pp);
+    return Math.round(pp / 12 * 100) / 100;
+  }
+
+  // ── Bonus emploi 2026 ──
+  function calcBonusEmploi(brut) {
+    var seuil1 = 2068.42;
+    var seuil2 = 2968.70;
+    if (brut <= seuil1) return Math.round(brut * 0.3304 * 100) / 100;
+    if (brut <= seuil2) return Math.round(Math.max(0, (2968.70 - brut) / 900.28 * brut * 0.1960) * 100) / 100;
+    return 0;
+  }
+
+  var S = '<div style="font-family:Georgia,serif;color:#1a1916;max-width:720px;margin:0 auto;font-size:13px;line-height:1.7;">';
+  var E = '</div>';
+  var HR = '<hr style="border:none;border-top:1px solid #ddd;margin:18px 0;">';
+  var HR2 = '<hr style="border:none;border-top:2px solid #C9963A;margin:18px 0;">';
+  function H1(t) { return '<h1 style="font-size:20px;color:#C9963A;text-align:center;margin:12px 0 4px;">' + t + '</h1>'; }
+  function H2(t) { return '<h2 style="font-size:15px;color:#C9963A;margin:16px 0 8px;border-left:3px solid #C9963A;padding-left:8px;">' + t + '</h2>'; }
+  function H3(t) { return '<h3 style="font-size:13px;color:#555;margin:14px 0 6px;">' + t + '</h3>'; }
+  function ART(n, titre, texte) { return '<p><strong>Article ' + n + ' — ' + titre + '</strong></p><p style="margin-left:16px;">' + texte + '</p>'; }
+  function WARN(t) { return '<div style="background:#fff3cd;border-left:4px solid #ffc107;padding:10px 12px;border-radius:4px;margin:10px 0;font-size:12px;color:#856404;">⚠️ ' + t + '</div>'; }
+  function OK(t) { return '<div style="background:#e8f5e9;border-left:4px solid #4caf50;padding:10px 12px;border-radius:4px;margin:10px 0;font-size:12px;color:#1b5e20;">✅ ' + t + '</div>'; }
+  function INFO(t) { return '<div style="background:#e3f2fd;border-left:4px solid #2196f3;padding:10px 12px;border-radius:4px;margin:10px 0;font-size:12px;color:#0d47a1;">ℹ️ ' + t + '</div>'; }
+  function HEADER() {
+    return '<div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #C9963A;">' +
+      '<div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;">AUREUS IA SPRL — BCE 1028.230.781</div>' +
+      '<div style="font-size:11px;color:#888;">Place Marcel Broodthaers 8, 1060 Saint-Gilles — info@aureus-ia.com</div>' +
+      '</div>';
+  }
+  function SIGS(extra) {
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:32px;">' +
+      '<div><p style="font-size:12px;color:#888;">Fait à Bruxelles, le ' + today + '</p>' +
+      '<p><strong>L\'Employeur :</strong></p>' +
+      '<div style="margin-top:36px;border-top:1px solid #999;padding-top:6px;font-size:12px;">Nourdin MOUSSATI<br>Gérant — AUREUS IA SPRL</div>' +
+      (extra||'') + '</div>' +
+      '<div><p style="font-size:12px;color:#888;">Lu et approuvé<br>Signature précédée de la mention :</p>' +
+      '<p style="font-style:italic;font-size:12px;">« Lu et approuvé, bon pour accord »</p>' +
+      '<div style="margin-top:24px;border-top:1px solid #999;padding-top:6px;font-size:12px;">' + d.prenom + ' ' + d.nom + '</div></div></div>';
+  }
 
   var docs = {
 
+    // ══════════════════════════════════════════════════
+    // 1. CONTRAT DE TRAVAIL — VERSION COMPLÈTE
+    // ══════════════════════════════════════════════════
     contrat: {
-      title: '📋 Contrat de travail — '+contratLabel,
-      html: `<div style="max-width:680px;margin:0 auto;font-family:Georgia,serif;color:#1a1916;">
-        <div style="text-align:center;margin-bottom:30px;">
-          <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:2px;">AUREUS IA SPRL — BCE 1028.230.781</div>
-          <div style="font-size:11px;color:#666;">Place Marcel Broodthaers 8, 1060 Saint-Gilles</div>
-          <h1 style="font-size:22px;margin:16px 0 4px;color:#C9963A;">CONTRAT DE TRAVAIL</h1>
-          <div style="font-size:14px;color:#555;">${contratLabel}</div>
-        </div>
-        <p><strong>ENTRE LES SOUSSIGNÉS :</strong></p>
-        <p><strong>L'EMPLOYEUR :</strong> AUREUS IA SPRL, société de droit belge, BCE 1028.230.781, dont le siège social est établi à Place Marcel Broodthaers 8, 1060 Saint-Gilles, représentée par son gérant, Monsieur Moussati Nourdin, ci-après dénommé « l'Employeur ».</p>
-        <p><strong>ET LE TRAVAILLEUR :</strong> ${d.prenom} ${d.nom}, né(e) le ${d.dob}, domicilié(e) ${d.adresse}, NISS : ${d.niss}, ci-après dénommé(e) « le/la Travailleur(euse) ».</p>
-        <hr style="border:1px solid #ddd;margin:20px 0;">
-        <p><strong>IL EST CONVENU CE QUI SUIT :</strong></p>
-        <p><strong>Art. 1 — Engagement :</strong> L'Employeur engage le/la Travailleur(euse) en qualité de <strong>${d.fonction}</strong> (${statutLabel}), sous la Commission Paritaire n° <strong>${d.cp}</strong>.</p>
-        <p><strong>Art. 2 — Durée :</strong> Le présent contrat prend cours le <strong>${d.debut}</strong>${d.fin ? ' et prend fin le <strong>'+d.fin+'</strong>' : ' pour une durée indéterminée'}.</p>
-        <p><strong>Art. 3 — Lieu de travail :</strong> Le lieu de travail principal est fixé à <strong>${d.lieu||'Bruxelles'}</strong>. Le télétravail pourra être organisé conformément à la législation applicable (CCT n°149).</p>
-        <p><strong>Art. 4 — Rémunération :</strong> Le salaire brut mensuel est fixé à <strong>${d.brut} €</strong> pour un régime de travail de <strong>${d.regime}%</strong> (${d.horaire}h/semaine). Estimation net : ~${netEst} €/mois.</p>
-        <p><strong>Art. 5 — Horaire :</strong> ${d.horaire}h par semaine, conformément au règlement de travail en vigueur dans l\'entreprise.</p>
-        ${d.deplacement !== 'non' ? '<p><strong>Art. 6 — Déplacements :</strong> L\'Employeur prend en charge les frais de déplacement domicile-travail conformément aux dispositions légales et sectorielles applicables.</p>' : ''}
-        <p><strong>Art. ${d.deplacement!=='non'?'7':'6'} — Convention collective :</strong> Le présent contrat est soumis à la loi du 3 juillet 1978 relative aux contrats de travail et aux conventions collectives applicables à la CP ${d.cp}.</p>
-        ${d.nonconc !== 'non' ? '<p><strong>Art. Clause de non-concurrence :</strong> Une clause de non-concurrence d\'une durée de '+d.nonconc+' est annexée au présent contrat (Art. 65 loi 3/07/1978).</p>' : ''}
-        <hr style="border:1px solid #ddd;margin:24px 0;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:30px;">
-          <div>
-            <p style="font-size:12px;color:#666;">Fait à Bruxelles, le ${today}</p>
-            <p style="font-size:12px;"><strong>Pour l'Employeur :</strong></p>
-            <div style="margin-top:40px;border-top:1px solid #999;padding-top:8px;font-size:12px;">Nourdin Moussati — Gérant</div>
-          </div>
-          <div>
-            <p style="font-size:12px;color:#666;">Lu et approuvé — Signature précédée de la mention</p>
-            <p style="font-size:12px;font-style:italic;">"Lu et approuvé, bon pour accord"</p>
-            <div style="margin-top:40px;border-top:1px solid #999;padding-top:8px;font-size:12px;">${d.prenom} ${d.nom}</div>
-          </div>
-        </div>
-      </div>`
+      title: '📋 Contrat de travail — ' + contratLabel,
+      html: S + HEADER() +
+        H1('CONTRAT DE TRAVAIL') +
+        '<div style="text-align:center;font-size:13px;color:#555;margin-bottom:20px;">' + contratLabel + '</div>' +
+        '<p><strong>ENTRE LES SOUSSIGNÉS :</strong></p>' +
+        '<p><strong>L\'EMPLOYEUR :</strong> AUREUS IA SPRL, société à responsabilité limitée de droit belge, inscrite à la BCE sous le numéro BE 1028.230.781, dont le siège social est établi à Place Marcel Broodthaers 8, 1060 Saint-Gilles (Bruxelles), représentée aux fins des présentes par Monsieur Nourdin MOUSSATI, agissant en qualité de Gérant, dûment autorisé à cet effet, ci-après dénommée « <strong>l\'Employeur</strong> ».</p>' +
+        '<p><strong>ET LE TRAVAILLEUR :</strong> Monsieur / Madame <strong>' + d.prenom + ' ' + d.nom + '</strong>, né(e) le <strong>' + d.dob + '</strong>, domicilié(e) à <strong>' + (d.adresse||'[adresse à compléter]') + '</strong>, numéro de registre national (NISS) : <strong>' + (d.niss||'[NISS]') + '</strong>, ci-après dénommé(e) « <strong>le/la Travailleur(euse)</strong> ».</p>' +
+        HR2 +
+        '<p><strong>IL EST CONVENU ET ARRÊTÉ CE QUI SUIT :</strong></p>' +
+        ART(1, 'Objet et engagement',
+          'L\'Employeur engage le/la Travailleur(euse) en qualité de <strong>' + (d.fonction||'[fonction]') + '</strong>, avec le statut de <strong>' + statutLabel + '</strong>, sous la Commission Paritaire n° <strong>' + (d.cp||'[CP]') + '</strong>. Le/la Travailleur(euse) accepte cet engagement aux conditions ci-après définies.') +
+        ART(2, 'Nature et durée du contrat',
+          d.contrat === 'CDI'
+            ? 'Le présent contrat est conclu pour une <strong>durée indéterminée</strong>. Il prend cours le <strong>' + d.debut + '</strong>. Conformément à l\'article 37 de la loi du 3 juillet 1978 relative aux contrats de travail, sa résiliation est soumise au respect d\'un délai de préavis ou au paiement d\'une indemnité compensatoire de préavis.'
+            : 'Le présent contrat est conclu pour une <strong>durée déterminée</strong>. Il prend cours le <strong>' + d.debut + '</strong> et expire le <strong>' + (d.fin||'[date de fin]') + '</strong>. Motif de recours au CDD : ' + (d.motifcdd||'[motif à préciser]') + ' (art. 10 L. 3/07/1978). Le présent contrat ne pourra être renouvelé que dans les conditions strictement prévues à l\'article 10bis.') +
+        ART(3, 'Période d\'essai',
+          '<strong>Il n\'existe pas de période d\'essai</strong> pour les contrats de travail belges. La période d\'essai a été supprimée par la loi du 26 décembre 2013 pour tous les contrats prenant cours à partir du 1er janvier 2014 (art. 67 L. 3/07/1978 abrogé).') +
+        ART(4, 'Lieu de travail',
+          'Le lieu de travail principal est fixé à <strong>' + (d.lieu||'Place Marcel Broodthaers 8, 1060 Saint-Gilles, Bruxelles') + '</strong>. L\'Employeur se réserve le droit de modifier temporairement ou définitivement le lieu de travail dans des circonstances raisonnables, moyennant un préavis raisonnable. Le télétravail structurel est possible selon accord individuel distinct, conformément à la CCT n°149 du 26 janvier 2021 et à la loi du 3 octobre 2022.') +
+        ART(5, 'Temps de travail et horaires',
+          'Le/la Travailleur(euse) est engagé(e) à temps ' + (d.regime == 100 ? '<strong>plein</strong>' : '<strong>partiel</strong> à <strong>' + d.regime + '%</strong> d\'un temps plein') + ', soit <strong>' + d.horaire + ' heures</strong> par semaine. Les horaires de travail sont définis dans le règlement de travail et les plannings communiqués par l\'Employeur. Toute prestation dépassant la durée du travail convenue constitue des heures supplémentaires soumises aux dispositions de la loi du 16 mars 1971.') +
+        ART(6, 'Rémunération',
+          'Le salaire brut mensuel est fixé à <strong>' + d.brut + ' €</strong> pour un régime de travail de ' + d.regime + '% (CP ' + (d.cp||'[CP]') + '). Ce montant respecte le barème sectoriel applicable et le RMMMG 2026 (art. 3bis L. 12/04/1965). La rémunération est payable le dernier jour ouvrable de chaque mois par virement SEPA sur le compte bancaire communiqué par le/la Travailleur(euse). Les fiches de paie détaillées sont remises mensuellement au format électronique.') +
+        ART(7, 'Avantages complémentaires',
+          'Outre la rémunération mentionnée à l\'article 6, le/la Travailleur(euse) bénéficie des avantages suivants, selon les conditions de la politique RH en vigueur :' +
+          '<ul style="margin:8px 0;"><li>Chèques-repas (si CCT ou accord interne applicable)</li><li>Intervention dans les frais de transport domicile-travail selon les dispositions légales et sectorielles</li><li>Indemnité de télétravail forfaitaire exonérée (max 148,73 €/mois en 2026)</li><li>Autres avantages selon politique RH en vigueur, communiqués par écrit</li></ul>') +
+        ART(8, 'Préavis — Résiliation',
+          'En cas de résiliation du présent contrat, les délais de préavis sont déterminés conformément aux articles 37 à 40 de la loi du 3 juillet 1978 tels que modifiés par la loi du 26 décembre 2013 (loi sur le statut unique). Le délai de préavis applicable est calculé sur la base de l\'ancienneté acquise. Toute résiliation pour motif grave (art. 35) peut intervenir sans délai de préavis ni indemnité.') +
+        ART(9, 'Vacances annuelles',
+          'Le/la Travailleur(euse) a droit aux vacances annuelles conformément aux lois coordonnées du 28 juin 1971 et aux CCT sectorielles applicables à la CP ' + (d.cp||'[CP]') + '. Le droit aux vacances est de 20 jours ouvrables pour un travail à temps plein sur une année complète de référence.') +
+        ART(10, 'Jours fériés',
+          'Le/la Travailleur(euse) a droit aux 10 jours fériés légaux prévus par la loi du 4 janvier 1974. En cas de travail effectif un jour férié, le/la Travailleur(euse) bénéficie des majorations salariales prévues par la loi et les CCT applicables.') +
+        ART(11, 'Incapacité de travail',
+          'En cas d\'incapacité de travail, le/la Travailleur(euse) est tenu(e) d\'informer l\'Employeur avant 9h00 le premier jour d\'absence et de produire un certificat médical. Les règles relatives au salaire garanti sont fixées aux articles 52 à 56 de la loi du 3 juillet 1978 (employés) ou aux articles 56 à 58 (ouvriers).') +
+        ART(12, 'Confidentialité',
+          'Le/la Travailleur(euse) s\'engage, pendant et après la durée du contrat, à ne pas divulguer à des tiers les informations confidentielles de l\'Employeur ou de ses clients, notamment les données techniques, commerciales, financières, les codes sources, algorithmes et bases de données. Cette obligation survit à la cessation du contrat pour une durée de 5 ans.') +
+        ART(13, 'Propriété intellectuelle',
+          'Toutes les créations, inventions, développements logiciels, bases de données et œuvres de l\'esprit réalisés par le/la Travailleur(euse) dans le cadre de ses fonctions ou avec les moyens de l\'Employeur sont la propriété exclusive de l\'Employeur dès leur création (art. 3 CDE, art. 8 loi 30/06/1994 sur les droits d\'auteur, art. 5/1 loi 28/03/1984 sur les brevets).') +
+        ART(14, 'Protection des données (RGPD)',
+          'Le/la Travailleur(euse) prend connaissance de la politique de protection des données de l\'Employeur et s\'engage à traiter les données personnelles auxquelles il/elle a accès dans le cadre de ses fonctions conformément au Règlement (UE) 2016/679 (RGPD), à la loi belge du 30 juillet 2018 et aux procédures internes. Toute violation de données doit être signalée immédiatement.') +
+        ART(15, 'Exclusivité et obligations professionnelles',
+          'Le/la Travailleur(euse) s\'engage à consacrer toute son activité professionnelle à l\'Employeur et à ne pas exercer, sans autorisation écrite préalable, d\'activité professionnelle concurrente ou susceptible de nuire aux intérêts de l\'Employeur pendant la durée du contrat (art. 17 L. 3/07/1978).') +
+        ART(16, 'Règlement de travail',
+          'Le/la Travailleur(euse) déclare avoir reçu, pris connaissance et accepter le règlement de travail d\'AUREUS IA SPRL, établi conformément à la loi du 8 avril 1965. Ce règlement fait partie intégrante du présent contrat.') +
+        ART(17, 'Bien-être au travail',
+          'L\'Employeur s\'engage à respecter les dispositions du Code du bien-être au travail (AR 28/05/2003 et suivants). Le/la Travailleur(euse) est informé(e) de l\'existence du Service Interne ou Externe de Prévention et Protection au Travail (SEPP) et des procédures en matière de harcèlement moral et sexuel (loi du 4 août 1996).') +
+        (d.nonconc && d.nonconc !== 'non' ?
+          ART(18, 'Clause de non-concurrence',
+            'Conformément à l\'article 65 de la loi du 3 juillet 1978, une clause de non-concurrence d\'une durée de <strong>' + d.nonconc + '</strong> est annexée au présent contrat. Cette clause est applicable après la fin du contrat, dans les conditions de l\'annexe jointe. L\'indemnité compensatoire correspondante sera versée conformément à l\'article 65 §3.') : '') +
+        ART(d.nonconc && d.nonconc !== 'non' ? 19 : 18, 'Loi applicable et juridiction',
+          'Le présent contrat est soumis au droit belge, notamment à la loi du 3 juillet 1978 relative aux contrats de travail. Tout litige sera soumis à la compétence exclusive du Tribunal du travail de Bruxelles.') +
+        HR2 +
+        '<p><strong>Les parties déclarent avoir pris connaissance de l\'intégralité des présentes et les accepter sans réserve. Fait en double exemplaire, chaque partie reconnaissant avoir reçu son exemplaire original.</strong></p>' +
+        SIGS() + E
     },
 
+    // ══════════════════════════════════════════════════
+    // 2. RGPD Art.13
+    // ══════════════════════════════════════════════════
     rgpd: {
       title: '🔒 Annexe RGPD Art.13 — Information du travailleur',
-      html: `<div style="font-family:Georgia,serif;color:#1a1916;">
-        <h2 style="color:#C9963A;font-size:18px;">INFORMATION SUR LE TRAITEMENT DES DONNÉES PERSONNELLES</h2>
-        <p style="font-size:12px;color:#666;">Conformément à l'art. 13 du Règlement (UE) 2016/679 (RGPD) — Remis à : <strong>${d.prenom} ${d.nom}</strong> le ${today}</p>
-        <h3 style="font-size:14px;">1. Responsable du traitement</h3>
-        <p>AUREUS IA SPRL — BCE 1028.230.781 — Place Marcel Broodthaers 8, 1060 Saint-Gilles — info@aureus-ia.com</p>
-        <h3 style="font-size:14px;">2. Données traitées</h3>
-        <p>Données d'identification (nom, prénom, NISS, adresse, IBAN), données contractuelles (contrat, salaire, CP ${d.cp}), données relatives aux présences, aux prestations et à la paie.</p>
-        <h3 style="font-size:14px;">3. Finalités et bases légales</h3>
-        <p>• <strong>Exécution du contrat</strong> (Art. 6.1.b RGPD) : gestion de la paie, déclarations ONSS/Dimona/Belcotax<br>• <strong>Obligation légale</strong> (Art. 6.1.c RGPD) : DMFA, fiches fiscales 281.10, ONSS<br>• <strong>Intérêt légitime</strong> (Art. 6.1.f RGPD) : gestion RH interne</p>
-        <h3 style="font-size:14px;">4. Destinataires</h3>
-        <p>ONSS, SPF Finances, Medex/mutualité, prestataires de paie sous contrat Art. 28 RGPD, Supabase (infrastructure — serveur Frankfurt, UE).</p>
-        <h3 style="font-size:14px;">5. Conservation</h3>
-        <p>Données de paie : 7 ans (Code des sociétés). Données RH : durée du contrat + 5 ans. Données ONSS : 5 ans.</p>
-        <h3 style="font-size:14px;">6. Droits du travailleur</h3>
-        <p>Accès, rectification, effacement (Art. 17), portabilité, opposition — sur demande écrite à info@aureus-ia.com. Réclamation possible auprès de l'Autorité de Protection des Données (APD) : www.autoriteprotectiondonnees.be</p>
-        <hr style="margin:20px 0;">
-        <p>Reçu et pris connaissance le ${today} — Signature : _____________________________ ${d.prenom} ${d.nom}</p>
-      </div>`
+      html: S + HEADER() +
+        H1('INFORMATION SUR LE TRAITEMENT DES DONNÉES PERSONNELLES') +
+        '<p style="font-size:12px;color:#888;text-align:center;">Conformément à l\'article 13 du Règlement (UE) 2016/679 (RGPD) et à la loi belge du 30 juillet 2018<br>Remis à : <strong>' + d.prenom + ' ' + d.nom + '</strong> — le ' + today + '</p>' +
+        HR +
+        H2('1. Responsable du traitement') +
+        '<p><strong>AUREUS IA SPRL</strong> — BCE BE 1028.230.781<br>Place Marcel Broodthaers 8, 1060 Saint-Gilles (Bruxelles)<br>Représentée par : Nourdin MOUSSATI, Gérant<br>Email : info@aureus-ia.com</p>' +
+        INFO('AUREUS IA SPRL n\'a pas désigné de DPO formellement, la structure étant une PME sans traitement à grande échelle de données sensibles (art. 37 RGPD). Pour toute question relative à la protection des données : info@aureus-ia.com') +
+        H2('2. Catégories de données traitées') +
+        '<p><strong>Données d\'identification :</strong> nom, prénom, date et lieu de naissance, nationalité, NISS (numéro de registre national), numéro de carte d\'identité, adresse domicile.</p>' +
+        '<p><strong>Données contractuelles :</strong> contrat de travail, fonction, Commission Paritaire (CP ' + (d.cp||'[CP]') + '), salaire brut/net, heures de travail, avantages en nature.</p>' +
+        '<p><strong>Données financières :</strong> IBAN/BIC pour paiement des salaires, retenues fiscales et ONSS.</p>' +
+        '<p><strong>Données de santé (catégorie spéciale — art. 9 RGPD) :</strong> certificats médicaux, résultats visite médicale d\'embauche, attestations d\'invalidité — traités uniquement sur base d\'une obligation légale stricte.</p>' +
+        '<p><strong>Données de présence :</strong> entrées/sorties, absences justifiées et injustifiées, heures supplémentaires.</p>' +
+        H2('3. Finalités et bases légales') +
+        '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+        '<tr style="background:#f5f3ef;"><th style="padding:6px 8px;text-align:left;">Finalité</th><th style="padding:6px 8px;text-align:left;">Base légale RGPD</th><th style="padding:6px 8px;text-align:left;">Cadre légal belge</th></tr>' +
+        '<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">Gestion de la paie et déclarations ONSS</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">Art. 6.1.c — Obligation légale</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">LSS 27/06/1969, AR Dimona 05/11/2002</td></tr>' +
+        '<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">Exécution du contrat de travail</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">Art. 6.1.b — Exécution contractuelle</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">L. 3/07/1978 relative aux contrats de travail</td></tr>' +
+        '<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">Déclarations fiscales (Belcotax/281.10)</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">Art. 6.1.c — Obligation légale</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">CIR/92, AR Belcotax-on-web</td></tr>' +
+        '<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">Gestion RH interne (absences, évaluations)</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">Art. 6.1.f — Intérêt légitime</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">L. 8/04/1965 règlement de travail</td></tr>' +
+        '<tr><td style="padding:5px 8px;">Santé (certificats, visite médicale)</td><td style="padding:5px 8px;">Art. 9.2.b — Droit du travail</td><td style="padding:5px 8px;">L. 4/08/1996 bien-être, Code du travail</td></tr>' +
+        '</table>' +
+        H2('4. Destinataires des données') +
+        '<p>Les données personnelles peuvent être communiquées aux catégories de destinataires suivantes, dans la stricte mesure nécessaire à chaque finalité :</p>' +
+        '<ul><li><strong>ONSS / DMFA :</strong> déclarations trimestrielles DmfA — obligation légale</li><li><strong>SPF Finances :</strong> fiches fiscales 281.10, Belcotax-on-web — obligation légale</li><li><strong>SIGEDIS :</strong> déclaration des droits à la pension — obligation légale</li><li><strong>Médecin du travail / SEPP :</strong> données de santé pour suivi santé au travail</li><li><strong>Mutualité du travailleur :</strong> attestations de salaire en cas d\'incapacité</li><li><strong>Supabase (Supabase Inc.) :</strong> infrastructure technique hébergée sur serveurs Frankfurt, UE — contrat Art. 28 RGPD signé</li><li><strong>Vercel Inc. :</strong> hébergement applicatif — clauses de sous-traitance Art. 28</li></ul>' +
+        H2('5. Transferts hors UE') +
+        '<p>Les données sont hébergées sur des serveurs situés dans l\'Union Européenne (Frankfurt, DE). Vercel Inc. (USA) peut accéder aux données dans le cadre du support technique — des clauses contractuelles types (CCT) approuvées par la Commission européenne encadrent ce transfert.</p>' +
+        H2('6. Durées de conservation') +
+        '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+        '<tr style="background:#f5f3ef;"><th style="padding:5px 8px;text-align:left;">Catégorie</th><th style="padding:5px 8px;text-align:left;">Durée</th><th style="padding:5px 8px;text-align:left;">Base légale</th></tr>' +
+        '<tr><td style="padding:4px 8px;border-bottom:1px solid #eee;">Données de paie et fiches fiscales</td><td style="padding:4px 8px;border-bottom:1px solid #eee;">7 ans</td><td style="padding:4px 8px;border-bottom:1px solid #eee;">Code des sociétés et des associations</td></tr>' +
+        '<tr><td style="padding:4px 8px;border-bottom:1px solid #eee;">Documents ONSS (DmfA, Dimona)</td><td style="padding:4px 8px;border-bottom:1px solid #eee;">5 ans</td><td style="padding:4px 8px;border-bottom:1px solid #eee;">Prescription ONSS — art. 42 LSS</td></tr>' +
+        '<tr><td style="padding:4px 8px;border-bottom:1px solid #eee;">Contrat de travail et avenants</td><td style="padding:4px 8px;border-bottom:1px solid #eee;">Durée + 5 ans</td><td style="padding:4px 8px;border-bottom:1px solid #eee;">Prescription droit du travail</td></tr>' +
+        '<tr><td style="padding:4px 8px;">Données de santé</td><td style="padding:4px 8px;">Durée + 30 ans</td><td style="padding:4px 8px;">AR 28/05/2003 dossier santé</td></tr>' +
+        '</table>' +
+        H2('7. Droits du travailleur') +
+        '<p>Conformément au RGPD, le/la Travailleur(euse) dispose des droits suivants :</p>' +
+        '<ul><li><strong>Droit d\'accès</strong> (art. 15) : obtenir une copie des données traitées</li><li><strong>Droit de rectification</strong> (art. 16) : corriger les données inexactes</li><li><strong>Droit à l\'effacement</strong> (art. 17) : dans les limites des obligations légales de conservation</li><li><strong>Droit à la limitation du traitement</strong> (art. 18)</li><li><strong>Droit à la portabilité</strong> (art. 20) : pour les données traitées sur base du consentement ou du contrat</li><li><strong>Droit d\'opposition</strong> (art. 21) : pour les traitements fondés sur l\'intérêt légitime</li></ul>' +
+        '<p>Ces droits s\'exercent par écrit à : <strong>info@aureus-ia.com</strong> ou par courrier à Place Marcel Broodthaers 8, 1060 Saint-Gilles. L\'Employeur dispose de <strong>30 jours</strong> pour répondre (art. 12 RGPD).</p>' +
+        INFO('En cas de réclamation non résolue, le/la Travailleur(euse) peut introduire une plainte auprès de l\'Autorité de Protection des Données (APD) : www.autoriteprotectiondonnees.be — Rue de la Presse 35, 1000 Bruxelles — contact@apd-gba.be') +
+        HR +
+        '<p><strong>Accusé de réception :</strong></p>' +
+        '<p>Je soussigné(e) <strong>' + d.prenom + ' ' + d.nom + '</strong> déclare avoir reçu et pris connaissance de la présente notice d\'information sur le traitement de mes données personnelles conformément à l\'article 13 du RGPD, le ' + today + '.</p>' +
+        '<div style="margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:30px;">' +
+        '<div><div style="margin-top:40px;border-top:1px solid #999;padding-top:6px;font-size:12px;">Nourdin MOUSSATI — AUREUS IA SPRL</div></div>' +
+        '<div><div style="margin-top:40px;border-top:1px solid #999;padding-top:6px;font-size:12px;">' + d.prenom + ' ' + d.nom + '</div></div>' +
+        '</div>' + E
     },
 
+    // ══════════════════════════════════════════════════
+    // 3. RÈGLEMENT DE TRAVAIL — LOI 8/04/1965
+    // ══════════════════════════════════════════════════
     reglement: {
-      title: '📖 Règlement de travail — Remise obligatoire',
-      html: `<div style="font-family:Georgia,serif;color:#1a1916;">
-        <h2 style="color:#C9963A;font-size:18px;">RÈGLEMENT DE TRAVAIL — AUREUS IA SPRL</h2>
-        <p style="font-size:12px;color:#666;">Loi du 8 avril 1965 — Remis à ${d.prenom} ${d.nom} le ${today}</p>
-        <h3 style="font-size:14px;">Art. 1 — Horaires de travail</h3>
-        <p>Horaire de référence : ${d.horaire}h/semaine — Régime : ${d.regime}% — Les horaires spécifiques sont communiqués via le planning hebdomadaire.</p>
-        <h3 style="font-size:14px;">Art. 2 — Rémunération</h3>
-        <p>La rémunération est versée le dernier jour ouvrable du mois par virement sur le compte IBAN communiqué par le travailleur. Fiches de paie transmises par voie électronique.</p>
-        <h3 style="font-size:14px;">Art. 3 — Congés annuels</h3>
-        <p>Droit aux congés conformément à la loi du 28/06/1971 et aux CCT sectorielles CP ${d.cp}. Demande de congé via le système de gestion RH interne.</p>
-        <h3 style="font-size:14px;">Art. 4 — Absences et maladies</h3>
-        <p>Toute absence doit être signalée avant 9h le jour même. Certificat médical requis dès le 1er jour (art. 31 loi 3/07/1978).</p>
-        <h3 style="font-size:14px;">Art. 5 — Télétravail</h3>
-        <p>Autorisé selon accord individuel — CCT n°149 applicable — Indemnité télétravail : 148,73€/mois maximum exonéré.</p>
-        <h3 style="font-size:14px;">Art. 6 — Confidentialité et données</h3>
-        <p>Le travailleur s'engage à respecter la confidentialité des informations de l'entreprise et des clients. Usage des systèmes informatiques limité aux activités professionnelles.</p>
-        <h3 style="font-size:14px;">Art. 7 — Sanctions disciplinaires</h3>
-        <p>Avertissement écrit → Blâme → Suspension temporaire → Licenciement pour motif grave (art. 35 loi 3/07/1978).</p>
-        <hr style="margin:20px 0;">
-        <p>Reçu le ${today} — Signature : _____________________________ ${d.prenom} ${d.nom}</p>
-      </div>`
+      title: '📖 Règlement de travail — AUREUS IA SPRL',
+      html: S + HEADER() +
+        H1('RÈGLEMENT DE TRAVAIL') +
+        '<p style="text-align:center;font-size:12px;color:#888;">AUREUS IA SPRL — BCE BE 1028.230.781<br>Établi conformément à la loi du 8 avril 1965 instituant les règlements de travail<br>Remis à ' + d.prenom + ' ' + d.nom + ' le ' + today + '</p>' +
+        WARN('Le présent règlement de travail est remis obligatoirement à chaque travailleur lors de son engagement. Le travailleur est présumé en avoir pris connaissance (art. 15 L. 8/04/1965).') + HR +
+        H2('TITRE I — IDENTIFICATION DE L\'ENTREPRISE') +
+        ART(1, 'Employeur',
+          'AUREUS IA SPRL — Société à responsabilité limitée de droit belge<br>BCE : BE 1028.230.781 — N° ONSS employeur : [matricule ONSS]<br>Siège social : Place Marcel Broodthaers 8, 1060 Saint-Gilles (Bruxelles)<br>Activité : Développement logiciel, SaaS RH, outils d\'analyse financière (NACE 62.010, 62.020, 63.110)<br>Représentant légal : Nourdin MOUSSATI, Gérant') +
+        ART(2, 'Commission paritaire',
+          'L\'entreprise relève de la Commission Paritaire n° ' + (d.cp||'[CP — à préciser selon activité principale]') + '. En cas de doute sur la CP applicable, la CP 200 (employés) ou CP 111 (construction) sera déterminée selon la nature réelle de l\'activité.') +
+        HR +
+        H2('TITRE II — DURÉE ET ORGANISATION DU TRAVAIL') +
+        ART(3, 'Durée hebdomadaire du travail',
+          'La durée normale du travail est fixée à <strong>' + (d.horaire||38) + ' heures par semaine</strong> conformément à la loi du 16 mars 1971. La durée normale de travail ne peut excéder 8 heures par jour et 40 heures par semaine (art. 19 L. 16/03/1971), sauf dérogations conventionnelles ou légales.') +
+        ART(4, 'Horaires de travail',
+          'Les horaires normaux de travail sont les suivants :<br>' +
+          '<table style="margin:8px 0;width:100%;font-size:12px;border-collapse:collapse;">' +
+          '<tr style="background:#f5f3ef;"><th style="padding:5px 8px;text-align:left;">Jour</th><th style="padding:5px 8px;text-align:left;">Début</th><th style="padding:5px 8px;text-align:left;">Fin</th><th style="padding:5px 8px;text-align:left;">Pause</th></tr>' +
+          '<tr><td style="padding:4px 8px;border-bottom:1px solid #eee;">Lundi au vendredi</td><td style="padding:4px 8px;border-bottom:1px solid #eee;">09h00</td><td style="padding:4px 8px;border-bottom:1px solid #eee;">17h36</td><td style="padding:4px 8px;border-bottom:1px solid #eee;">30 min (midi)</td></tr>' +
+          '<tr><td style="padding:4px 8px;">Samedi, Dimanche</td><td colspan="3" style="padding:4px 8px;">Repos — sauf accord exprès</td></tr>' +
+          '</table>' +
+          'Des horaires variables ou flexibles peuvent être organisés par accord individuel ou par CCT, conformément à l\'article 20bis de la loi du 16 mars 1971. Toute modification permanente des horaires fait l\'objet d\'une modification du règlement de travail (art. 12 L. 8/04/1965).') +
+        ART(5, 'Heures supplémentaires',
+          'Les prestations dépassant les horaires normaux constituent des heures supplémentaires. Elles ne peuvent être effectuées qu\'avec l\'accord de l\'Employeur. Elles donnent droit aux sursalaires légaux (art. 29 L. 16/03/1971) : 50% de majoration en semaine et samedi, 100% le dimanche et les jours fériés. Quota maximal : 143 heures supplémentaires volontaires par an (art. 25bis L. 16/03/1971).') +
+        ART(6, 'Temps de repos et pauses',
+          'Tout travailleur effectuant plus de 6 heures de travail consécutives a droit à une pause d\'au moins 15 minutes (art. 3 CCT n°103). Le repos journalier minimum est de 11 heures consécutives. Le repos hebdomadaire est de 35 heures consécutives incluant le dimanche.') +
+        ART(7, 'Télétravail',
+          'Le télétravail structurel est organisé conformément à la CCT n°149 du 26 janvier 2021 et à la loi du 3 octobre 2022. Un accord individuel de télétravail distinct précise les modalités. L\'indemnité de bureau est fixée au maximum légal exonéré (148,73 €/mois en 2026, indexé annuellement).') +
+        HR +
+        H2('TITRE III — RÉMUNÉRATION ET AVANTAGES') +
+        ART(8, 'Paiement des rémunérations',
+          'Les rémunérations sont payées le dernier jour ouvrable de chaque mois par virement bancaire SEPA sur le compte communiqué par le travailleur. Le travailleur reçoit une fiche de paie détaillée conforme à l\'AR du 28 octobre 1967 et à l\'AR du 23 octobre 1978.') +
+        ART(9, 'Chèques-repas',
+          'Des chèques-repas sont accordés conformément à la CCT n°90 et à l\'AR du 12 octobre 2010, si applicable à la CP. Valeur faciale : selon accord ou CCT sectorielle. Part patronale : max 6,91 € (2026). Part travailleur : min 1,09 €. Conditions : journée complète de travail ou télétravailde.') +
+        ART(10, 'Frais professionnels',
+          'L\'Employeur rembourse les frais professionnels réels sur présentation de justificatifs, ou par forfaits exonérés conformément aux instructions ONSS : bureau à domicile (max 148,73 €/mois), GSM professionnel (max 30 €/mois), internet (max 20 €/mois). Toute dépense supérieure nécessite un accord préalable.') +
+        HR +
+        H2('TITRE IV — CONGÉS ET ABSENCES') +
+        ART(11, 'Vacances annuelles',
+          'Le droit aux vacances annuelles est de 20 jours ouvrables pour un temps plein sur une année de référence complète (lois coordonnées 28/06/1971). Les vacances sont planifiées en accord avec l\'Employeur, avec priorité aux besoins de l\'activité. Le pécule de vacances est calculé conformément aux barèmes légaux.') +
+        ART(12, 'Jours fériés légaux',
+          'Les 10 jours fériés légaux sont : 1er janvier, lundi de Pâques, 1er mai, Ascension, lundi de Pentecôte, 21 juillet, 15 août, 1er novembre, 11 novembre, 25 décembre. Le travailleur bénéficie d\'un jour de remplacement si un jour férié tombe un dimanche ou un jour habituel d\'inactivité.') +
+        ART(13, 'Absences justifiées — Petits chômages',
+          'Le travailleur a droit à des congés de circonstance (art. 6 L. 3/07/1978 et CCT n°45) pour : mariage (2j), naissance (10j pour le parent co-habitant), décès (3j conjoint/enfant), décès parents/beaux-parents (3j), mariage enfant/frère/sœur (1j), etc. — selon CCT sectorielle applicable.') +
+        ART(14, 'Incapacité de travail — Maladie',
+          'En cas d\'incapacité pour raison médicale, le travailleur est tenu d\'informer l\'Employeur avant 9h00 et de produire un certificat médical dans les 2 jours ouvrables (ou le délai prévu par CCT). L\'Employeur peut faire appel à un médecin-contrôleur agréé (art. 31bis L. 3/07/1978).') +
+        HR +
+        H2('TITRE V — HYGIÈNE, SÉCURITÉ ET BIEN-ÊTRE') +
+        ART(15, 'Obligations en matière de sécurité',
+          'Le travailleur est tenu de respecter les instructions données par l\'Employeur et le Service de Prévention et Protection au Travail (SEPP) concernant la sécurité au travail (art. 6 L. 4/08/1996). Il doit signaler immédiatement tout accident ou incident.') +
+        ART(16, 'Harcèlement moral et sexuel',
+          'Conformément à la loi du 4 août 1996 (art. 32bis à 32quaterdecies), tout comportement constitutif de harcèlement moral ou sexuel est strictement interdit. Le/la Travailleur(euse) peut s\'adresser à la personne de confiance désignée ou directement à l\'Employeur. Une procédure de plainte interne est disponible sur demande.') +
+        ART(17, 'Alcool et drogues',
+          'Il est interdit de se présenter au travail sous l\'influence de l\'alcool ou de substances psychotropes. Tout travailleur se trouvant en état d\'ivresse peut être renvoyé chez lui sans solde pour la journée, sans préjudice des sanctions disciplinaires prévues à l\'article 19.') +
+        ART(18, 'Utilisation des outils informatiques',
+          'Les équipements informatiques, logiciels, accès réseau et boîtes email fournis par l\'Employeur sont réservés à l\'usage professionnel. Une utilisation personnelle limitée et raisonnable est tolérée. L\'Employeur se réserve le droit de surveiller l\'utilisation des systèmes dans le respect de la CCT n°81 et de la loi du 13 juin 2005 sur les communications électroniques.') +
+        HR +
+        H2('TITRE VI — SANCTIONS DISCIPLINAIRES') +
+        ART(19, 'Échelle des sanctions',
+          'En cas de manquement aux obligations professionnelles ou aux dispositions du présent règlement, les sanctions suivantes peuvent être appliquées dans l\'ordre :<br>' +
+          '<ol style="font-size:12px;margin:8px 0;"><li>Avertissement verbal, suivi d\'un avertissement écrit versé au dossier</li><li>Blâme (réprimande formelle écrite)</li><li>Suspension sans rémunération (durée maximale selon CCT ou loi)</li><li>Licenciement ordinaire avec préavis</li><li>Licenciement pour motif grave (art. 35 L. 3/07/1978) — sans préavis ni indemnité</li></ol>' +
+          'Les fautes graves pouvant justifier un licenciement immédiat incluent notamment : vol, fraude, divulgation de secrets commerciaux, absences injustifiées répétées, comportements violents, harcèlement.') +
+        ART(20, 'Procédure disciplinaire',
+          'Avant toute sanction (sauf avertissement verbal), le travailleur est entendu par l\'Employeur. Il peut se faire assister par un représentant syndical ou une personne de confiance. La décision est notifiée par écrit avec mention des motifs.') +
+        HR +
+        H2('TITRE VII — DISPOSITIONS FINALES') +
+        ART(21, 'Modification du règlement de travail',
+          'Toute modification du présent règlement de travail est soumise à la procédure prévue par la loi du 8 avril 1965 : consultation des travailleurs, dépôt au SPF Emploi, Travail et Concertation Sociale, et affichage en entreprise. Les modifications entrent en vigueur 8 jours après affichage (art. 12 L. 8/04/1965).') +
+        ART(22, 'Clauses complémentaires',
+          'Les matières non réglées par le présent règlement sont régies par la loi du 3 juillet 1978, les CCT applicables à la CP ' + (d.cp||'[CP]') + ', et les dispositions légales en vigueur. En cas de contradiction entre une disposition du présent règlement et la loi ou une CCT, la disposition la plus favorable au travailleur prévaut.') +
+        HR +
+        '<p><strong>Accusé de réception :</strong> Je soussigné(e) ' + d.prenom + ' ' + d.nom + ' déclare avoir reçu un exemplaire du règlement de travail d\'AUREUS IA SPRL et en avoir pris connaissance, le ' + today + '.</p>' +
+        SIGS() + E
     },
 
+    // ══════════════════════════════════════════════════
+    // 4. FICHE DE PAIE — SIMULATION RÉELLE 2026
+    // ══════════════════════════════════════════════════
     fichepaie: {
-      title: '💶 Simulation fiche de paie — '+d.prenom+' '+d.nom,
+      title: '💶 Simulation fiche de paie — ' + d.prenom + ' ' + d.nom,
       html: (function(){
-        var brut = parseFloat(d.brut)||0;
-        var onssW = Math.round(brut*0.1307*100)/100;
-        var base = brut - onssW;
-        var pp = Math.round(base*0.265*100)/100;
-        var net = Math.round((base-pp)*100)/100;
-        var onssP = Math.round(brut*0.2700*100)/100;
-        var coutTotal = Math.round((brut+onssP)*100)/100;
-        return `<div style="font-family:'Courier New',monospace;color:#1a1916;max-width:580px;margin:0 auto;">
-          <div style="text-align:center;border-bottom:2px solid #C9963A;padding-bottom:12px;margin-bottom:16px;">
-            <div style="font-size:11px;color:#666;">AUREUS IA SPRL — BCE 1028.230.781</div>
-            <div style="font-size:16px;font-weight:bold;color:#C9963A;margin:6px 0;">FICHE DE PAIE — SIMULATION 2026</div>
-          </div>
-          <table style="width:100%;font-size:12px;border-collapse:collapse;">
-            <tr><td style="padding:4px 0;color:#666;">Travailleur</td><td style="text-align:right;font-weight:bold;">${d.prenom} ${d.nom}</td></tr>
-            <tr><td style="padding:4px 0;color:#666;">NISS</td><td style="text-align:right;">${d.niss}</td></tr>
-            <tr><td style="padding:4px 0;color:#666;">Fonction</td><td style="text-align:right;">${d.fonction}</td></tr>
-            <tr><td style="padding:4px 0;color:#666;">CP / Statut</td><td style="text-align:right;">CP ${d.cp} — ${d.statut}</td></tr>
-            <tr><td style="padding:4px 0;color:#666;">Période</td><td style="text-align:right;">Mars 2026</td></tr>
-          </table>
-          <hr style="border:1px solid #ddd;margin:12px 0;">
-          <table style="width:100%;font-size:12px;border-collapse:collapse;">
-            <tr style="background:#f5f3ef;"><td style="padding:6px 8px;font-weight:bold;" colspan="2">RÉMUNÉRATION BRUTE</td></tr>
-            <tr><td style="padding:5px 8px;">Salaire brut mensuel</td><td style="text-align:right;padding:5px 8px;">${brut.toFixed(2)} €</td></tr>
-            <tr style="background:#fff8f0;"><td style="padding:6px 8px;color:#C9963A;">COTISATIONS PERSONNELLES ONSS (-13,07%)</td><td style="text-align:right;padding:6px 8px;color:#ef4444;">- ${onssW.toFixed(2)} €</td></tr>
-            <tr><td style="padding:5px 8px;color:#666;">Base imposable</td><td style="text-align:right;padding:5px 8px;">${base.toFixed(2)} €</td></tr>
-            <tr style="background:#fff8f0;"><td style="padding:6px 8px;color:#C9963A;">PRÉCOMPTE PROFESSIONNEL (estimé ~26,5%)</td><td style="text-align:right;padding:6px 8px;color:#ef4444;">- ${pp.toFixed(2)} €</td></tr>
-            <tr style="background:#e8f5e9;font-weight:bold;font-size:14px;"><td style="padding:8px;">NET À PAYER</td><td style="text-align:right;padding:8px;color:#16a34a;">${net.toFixed(2)} €</td></tr>
-          </table>
-          <hr style="border:1px solid #ddd;margin:12px 0;">
-          <table style="width:100%;font-size:11px;border-collapse:collapse;color:#666;">
-            <tr><td style="padding:3px 0;">Cotisations patronales ONSS (~27%)</td><td style="text-align:right;">+ ${onssP.toFixed(2)} €</td></tr>
-            <tr style="font-weight:bold;color:#1a1916;"><td style="padding:3px 0;">Coût total employeur</td><td style="text-align:right;">${coutTotal.toFixed(2)} €</td></tr>
-          </table>
-          <p style="font-size:10px;color:#999;margin-top:12px;font-style:italic;">⚠️ Simulation indicative — PP calculé sur taux moyen estimé. Le montant exact dépend de la situation familiale, des déductions et des barèmes PP 2026 SPF Finances.</p>
-        </div>`;
+        var brut = parseFloat(d.brut) || 0;
+        var statut = d.statut || 'EMP';
+        var isOuv = statut === 'OUV';
+        var baseOnss = isOuv ? Math.round(brut * 1.08 * 100) / 100 : brut;
+        var onssW = Math.round(baseOnss * 0.1307 * 100) / 100;
+        var bonusEmploi = calcBonusEmploi(brut);
+        var baseImp = brut - onssW + bonusEmploi;
+        var pp = calcPP(brut, d.sitfam || d.famille, d.enfants);
+        var csss = brut > 4000 ? Math.round((brut - 4000) * 0.02 * 100) / 100 : 0; // CSSS simplifiée
+        var net = Math.round((baseImp - pp - csss) * 100) / 100;
+        var onssP = Math.round(brut * 0.2700 * 100) / 100;
+        var coutTotal = Math.round((brut + onssP) * 100) / 100;
+        var ratio = brut > 0 ? Math.round(net / coutTotal * 100) : 0;
+        return S +
+          '<div style="font-family:\'Courier New\',monospace;max-width:600px;margin:0 auto;">' +
+          '<div style="text-align:center;border-bottom:3px solid #C9963A;padding-bottom:14px;margin-bottom:18px;">' +
+          '<div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;">AUREUS IA SPRL — BCE BE 1028.230.781</div>' +
+          '<div style="font-size:16px;font-weight:bold;color:#C9963A;margin:6px 0;">BULLETIN DE PAIE — SIMULATION 2026</div>' +
+          '<div style="font-size:10px;color:#888;">Document informatif — non contractuel</div>' +
+          '</div>' +
+          '<table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:14px;">' +
+          '<tr><td style="padding:3px 0;color:#666;width:50%;">Travailleur(euse)</td><td style="text-align:right;font-weight:bold;">' + d.prenom + ' ' + d.nom + '</td></tr>' +
+          '<tr><td style="padding:3px 0;color:#666;">NISS</td><td style="text-align:right;">' + (d.niss||'[NISS]') + '</td></tr>' +
+          '<tr><td style="padding:3px 0;color:#666;">Fonction</td><td style="text-align:right;">' + (d.fonction||'[Fonction]') + '</td></tr>' +
+          '<tr><td style="padding:3px 0;color:#666;">Statut / CP</td><td style="text-align:right;">' + statutLabel + ' — CP ' + (d.cp||'[CP]') + '</td></tr>' +
+          '<tr><td style="padding:3px 0;color:#666;">Régime de travail</td><td style="text-align:right;">' + (d.regime||100) + '% — ' + (d.horaire||38) + 'h/sem</td></tr>' +
+          '<tr><td style="padding:3px 0;color:#666;">Période</td><td style="text-align:right;">Mars 2026</td></tr>' +
+          '</table>' +
+          '<hr style="border:1px solid #ddd;margin:12px 0;">' +
+          '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+          '<tr style="background:#f5f3ef;"><td style="padding:7px 8px;font-weight:bold;font-size:13px;" colspan="2">RÉMUNÉRATION</td></tr>' +
+          '<tr><td style="padding:5px 8px;">Salaire brut mensuel</td><td style="text-align:right;padding:5px 8px;font-weight:bold;">' + brut.toFixed(2) + ' €</td></tr>' +
+          (isOuv ? '<tr><td style="padding:3px 8px;font-size:11px;color:#888;">⤷ Base ONSS ouvrier (x 1.08 — AR 28/11/1969)</td><td style="text-align:right;padding:3px 8px;font-size:11px;color:#888;">' + baseOnss.toFixed(2) + ' €</td></tr>' : '') +
+          '<tr style="background:#fff0f0;"><td style="padding:6px 8px;color:#c62828;">ONSS personnel ' + (isOuv?'13,07% sur base 108%':'13,07%') + '</td><td style="text-align:right;padding:6px 8px;color:#c62828;font-weight:bold;">- ' + onssW.toFixed(2) + ' €</td></tr>' +
+          (bonusEmploi > 0 ? '<tr style="background:#e8f5e9;"><td style="padding:4px 8px;color:#2e7d32;font-size:12px;">Bonus emploi (art. 289ter CIR/92)</td><td style="text-align:right;padding:4px 8px;color:#2e7d32;font-weight:bold;">+ ' + bonusEmploi.toFixed(2) + ' €</td></tr>' : '') +
+          '<tr><td style="padding:5px 8px;color:#888;">Base imposable</td><td style="text-align:right;padding:5px 8px;">' + baseImp.toFixed(2) + ' €</td></tr>' +
+          '<tr style="background:#fff0f0;"><td style="padding:6px 8px;color:#c62828;">Précompte professionnel (barèmes SPF 2026)</td><td style="text-align:right;padding:6px 8px;color:#c62828;font-weight:bold;">- ' + pp.toFixed(2) + ' €</td></tr>' +
+          (csss > 0 ? '<tr style="background:#fff0f0;"><td style="padding:4px 8px;color:#c62828;font-size:11px;">CSSS (cotisation spéciale sécurité sociale)</td><td style="text-align:right;padding:4px 8px;color:#c62828;font-size:11px;">- ' + csss.toFixed(2) + ' €</td></tr>' : '') +
+          '<tr style="background:#e8f5e9;border-top:2px solid #4caf50;"><td style="padding:9px 8px;font-weight:bold;font-size:15px;color:#1b5e20;">NET À PAYER</td><td style="text-align:right;padding:9px 8px;font-weight:bold;font-size:15px;color:#1b5e20;">' + net.toFixed(2) + ' €</td></tr>' +
+          '</table>' +
+          '<hr style="border:1px solid #ddd;margin:14px 0;">' +
+          '<table style="width:100%;font-size:11px;border-collapse:collapse;color:#666;">' +
+          '<tr style="background:#f5f3ef;"><td style="padding:6px 8px;font-weight:bold;" colspan="2">COÛT EMPLOYEUR</td></tr>' +
+          '<tr><td style="padding:4px 8px;">Salaire brut</td><td style="text-align:right;padding:4px 8px;">' + brut.toFixed(2) + ' €</td></tr>' +
+          '<tr><td style="padding:4px 8px;">Cotisations ONSS patronales (~27%)</td><td style="text-align:right;padding:4px 8px;color:#c62828;">+ ' + onssP.toFixed(2) + ' €</td></tr>' +
+          '<tr style="font-weight:bold;color:#1a1916;border-top:2px solid #ddd;"><td style="padding:6px 8px;">Coût total employeur</td><td style="text-align:right;padding:6px 8px;">' + coutTotal.toFixed(2) + ' €</td></tr>' +
+          '</table>' +
+          '<div style="margin-top:14px;padding:10px 12px;background:#f5f3ef;border-radius:6px;font-size:11px;">' +
+          '<strong>Ratio net/coût :</strong> ' + net.toFixed(2) + ' / ' + coutTotal.toFixed(2) + ' = <strong>' + ratio + '%</strong>' +
+          '<div style="height:6px;background:#ddd;border-radius:3px;margin-top:6px;overflow:hidden;"><div style="height:100%;width:' + ratio + '%;background:linear-gradient(90deg,#C9963A,#4caf50);border-radius:3px;"></div></div>' +
+          '</div>' +
+          (bonusEmploi > 0 ? OK('Bonus emploi appliqué : ' + bonusEmploi.toFixed(2) + ' €/mois — Réduction ONSS travailleur sur bas salaires (art. 289ter CIR/92)') : '') +
+          WARN('Simulation indicative — PP calculé sur barèmes 2026 SPF Finances (taux marginal estimé). Le montant exact dépend de la situation familiale complète, des avantages en nature, des charges réelles et de l\'exercice fiscal. Consultez un secrétariat social pour un calcul certifié.') +
+          '</div>' + E;
       })()
     },
 
+    // ══════════════════════════════════════════════════
+    // 5. CHECKLIST ONBOARDING
+    // ══════════════════════════════════════════════════
     onboarding: {
-      title: '🎯 Checklist onboarding — '+d.prenom+' '+d.nom,
-      html: `<div style="font-family:sans-serif;color:#1a1916;">
-        <h2 style="color:#C9963A;">CHECKLIST ONBOARDING — ${d.prenom} ${d.nom}</h2>
-        <p style="font-size:12px;color:#666;">Entrée en service : ${d.debut} — Fonction : ${d.fonction}</p>
-        <h3 style="font-size:13px;color:#555;margin-top:16px;">📅 AVANT J-7</h3>
-        <div style="font-size:12px;line-height:2;">
-          ☐ Dimona IN soumise (AVANT le 1er jour — obligation légale)<br>
-          ☐ Contrat de travail signé en 2 exemplaires<br>
-          ☐ Annexe RGPD remise et signée<br>
-          ☐ Règlement de travail remis<br>
-          ☐ Visite médicale d'embauche planifiée<br>
-          ☐ Badge / accès informatique préparés<br>
-          ☐ Compte email créé : [prenom]@aureus-ia.com
-        </div>
-        <h3 style="font-size:13px;color:#555;margin-top:16px;">📅 JOUR J — 1ER JOUR</h3>
-        <div style="font-size:12px;line-height:2;">
-          ☐ Accueil et présentation de l'équipe<br>
-          ☐ Remise des outils (PC, badge, clés)<br>
-          ☐ Visite des locaux — consignes sécurité<br>
-          ☐ Présentation du règlement de travail<br>
-          ☐ Collecte documents : copie carte d'identité, IBAN, fiche fiscale<br>
-          ☐ Affiliation mutualité (si pas encore)<br>
-          ☐ Inscription caisse de vacances secteur (si applicable CP ${d.cp})
-        </div>
-        <h3 style="font-size:13px;color:#555;margin-top:16px;">📅 J+7 À J+30</h3>
-        <div style="font-size:12px;line-height:2;">
-          ☐ 1ère fiche de paie vérifiée et transmise<br>
-          ☐ Activa.brussels introduit (si éligible — délai 30j max!)<br>
-          ☐ Formation sécurité & bien-être au travail<br>
-          ☐ Point d'intégration avec responsable (J+14)<br>
-          ☐ Accès aux systèmes internes opérationnels<br>
-          ☐ Fiche fiscale 281.10 préparée (si ATN voiture)
-        </div>
-        <h3 style="font-size:13px;color:#555;margin-top:16px;">📅 APRÈS 3 MOIS</h3>
-        <div style="font-size:12px;line-height:2;">
-          ☐ Évaluation de période d'intégration<br>
-          ☐ DMFA trimestrielle soumise (ONSS)<br>
-          ☐ Vérification barèmes et indexations CP ${d.cp}
-        </div>
-      </div>`
+      title: '🎯 Checklist onboarding — ' + d.prenom + ' ' + d.nom,
+      html: S + HEADER() +
+        H1('CHECKLIST ONBOARDING') +
+        '<p style="text-align:center;font-size:12px;color:#888;">Travailleur : <strong>' + d.prenom + ' ' + d.nom + '</strong> — Fonction : <strong>' + (d.fonction||'[Fonction]') + '</strong><br>Entrée en service : <strong>' + d.debut + '</strong> — CP : ' + (d.cp||'[CP]') + '</p>' +
+        HR +
+        H2('📅 J-14 à J-7 — AVANT L\'ENTRÉE EN SERVICE') +
+        '<div style="font-size:12px;line-height:2.2;">' +
+        '☐ <strong>[LÉGAL — OBLIGATOIRE]</strong> Dimona IN soumise avant le 1er jour (AR 05/11/2002 — amende 400-4.000€)<br>' +
+        '☐ Contrat de travail signé en 2 exemplaires originaux<br>' +
+        '☐ Annexe RGPD Art.13 remise et signée<br>' +
+        '☐ Règlement de travail remis (loi 8/04/1965 — présomption de connaissance)<br>' +
+        '☐ Visite médicale d\'embauche planifiée (obligatoire : postes de sécurité, nuit, < 18 ans)<br>' +
+        '☐ Badge / accès informatique créés<br>' +
+        '☐ Compte email professionnel créé<br>' +
+        '☐ Matériel de travail préparé (PC, outils, véhicule si applicable)<br>' +
+        '☐ Affiliation assurance accidents du travail vérifiée (obligatoire dès le 1er travailleur — Fedris)<br>' +
+        '☐ SEPP (Service Externe de Prévention) notifié si nécessaire<br>' +
+        (d.cp ? '☐ Caisse de vacances sectorielle identifiée (CP ' + d.cp + ')<br>' : '') +
+        '</div>' +
+        H2('📅 JOUR J — 1ER JOUR DE TRAVAIL') +
+        '<div style="font-size:12px;line-height:2.2;">' +
+        '☐ Accueil par le responsable direct — présentation de l\'équipe<br>' +
+        '☐ Remise et explication du règlement de travail<br>' +
+        '☐ Visite des locaux — consignes sécurité et évacuation<br>' +
+        '☐ Remise des outils (PC, badge, clés, carte carburant si applicable)<br>' +
+        '☐ Collecte documents obligatoires :<br>' +
+        '&nbsp;&nbsp;&nbsp;&nbsp;• Copie carte d\'identité (recto-verso)<br>' +
+        '&nbsp;&nbsp;&nbsp;&nbsp;• IBAN/BIC pour paiement salaire<br>' +
+        '&nbsp;&nbsp;&nbsp;&nbsp;• Fiche fiscale 281.10 ou attestation situation de famille<br>' +
+        '&nbsp;&nbsp;&nbsp;&nbsp;• Attestation Dimona si demandeur d\'emploi (Activa)<br>' +
+        '&nbsp;&nbsp;&nbsp;&nbsp;• Attestation pécule de sortie (employeur précédent, si applicable)<br>' +
+        '☐ Signature accusé de réception règlement de travail<br>' +
+        '☐ Signature contrat et annexe RGPD<br>' +
+        '☐ Affiliation mutualité (si pas encore affilié)<br>' +
+        '</div>' +
+        H2('📅 J+1 à J+7') +
+        '<div style="font-size:12px;line-height:2.2;">' +
+        '☐ Formation sécurité et bien-être au travail (art. 9 L. 4/08/1996)<br>' +
+        '☐ Présentation des outils et systèmes internes<br>' +
+        '☐ Encodage du travailleur dans le système de paie<br>' +
+        '☐ Demande Activa.brussels introduite si éligible — <strong>délai max 30 jours !</strong><br>' +
+        '☐ Affiliations complémentaires (assurance groupe, pension si applicable)<br>' +
+        '</div>' +
+        H2('📅 J+14 à J+30') +
+        '<div style="font-size:12px;line-height:2.2;">' +
+        '☐ Point d\'intégration avec le responsable (évaluation informelle)<br>' +
+        '☐ 1ère fiche de paie vérifiée et transmise (dernier jour ouvrable du mois)<br>' +
+        '☐ Accès aux systèmes internes confirmés et opérationnels<br>' +
+        '☐ Fiche ATN 281.10 préparée si véhicule de société attribué<br>' +
+        '☐ Vérification barème sectoriel CP ' + (d.cp||'[CP]') + '<br>' +
+        '☐ Confirmation affiliation caisse de vacances (ouvriers)<br>' +
+        '</div>' +
+        H2('📅 APRÈS 3 MOIS') +
+        '<div style="font-size:12px;line-height:2.2;">' +
+        '☐ Évaluation de période d\'intégration (entretien formel)<br>' +
+        '☐ DMFA trimestrielle soumise à l\'ONSS (avant le 31e jour suivant le trimestre)<br>' +
+        '☐ Vérification indexations et augmentations sectorielles (CP ' + (d.cp||'[CP]') + ')<br>' +
+        '☐ Encodage des absences et prestations dans le système<br>' +
+        '☐ Bilan Activa.brussels reçu et confirmé par Actiris<br>' +
+        '</div>' +
+        HR +
+        INFO('Délai critique Activa.brussels : la demande doit être introduite dans les 30 jours suivant l\'entrée en service. Passé ce délai, le droit à la prime est définitivement perdu (économie potentielle : jusqu\'à 13.800€ sur 36 mois).') +
+        '<p style="font-size:11px;color:#888;margin-top:16px;">Checklist établie par AUREUS IA SPRL — ' + today + '</p>' + E
     },
 
+    // ══════════════════════════════════════════════════
+    // 6. CONVOCATION VISITE MÉDICALE
+    // ══════════════════════════════════════════════════
     visitemedic: {
-      title: '🩺 Convocation visite médicale',
-      html: `<div style="font-family:Georgia,serif;color:#1a1916;">
-        <h2 style="color:#C9963A;">CONVOCATION — VISITE MÉDICALE D'EMBAUCHE</h2>
-        <p><strong>À :</strong> ${d.prenom} ${d.nom}</p>
-        <p><strong>Date d'engagement :</strong> ${d.debut} — Fonction : ${d.fonction}</p>
-        <p>Conformément à l'article 28 du Code du bien-être au travail (AR 28/05/2003), vous êtes convoqué(e) pour une visite médicale d'embauche auprès du Service Externe de Prévention et Protection au Travail (SEPPT).</p>
-        <p><strong>Service de prévention :</strong> CESI / Mensura / Idewe (à compléter)<br>
-        <strong>Date :</strong> À convenir — <strong>Lieu :</strong> À compléter</p>
-        <p><strong>Documents à apporter :</strong> Carte d'identité, carnet de vaccination, documents médicaux antérieurs si poste exposé.</p>
-        <p style="font-size:12px;color:#666;">Cette visite est obligatoire pour les postes de sécurité, les travailleurs de nuit, les jeunes travailleurs et certains secteurs réglementés.</p>
-        <hr style="margin:20px 0;">
-        <p>Fait à Bruxelles, le ${today} — AUREUS IA SPRL</p>
-      </div>`
+      title: '🩺 Convocation visite médicale d\'embauche',
+      html: S + HEADER() +
+        H1('CONVOCATION — VISITE MÉDICALE D\'EMBAUCHE') +
+        '<p style="text-align:right;font-size:12px;color:#888;">Bruxelles, le ' + today + '</p>' +
+        '<p><strong>À :</strong> ' + d.prenom + ' ' + d.nom + '<br>' +
+        (d.adresse ? '<strong>Adresse :</strong> ' + d.adresse + '<br>' : '') +
+        '<strong>Objet :</strong> Convocation pour visite médicale d\'embauche obligatoire</p>' +
+        HR +
+        '<p>Madame, Monsieur,</p>' +
+        '<p>Dans le cadre de votre engagement en qualité de <strong>' + (d.fonction||'[Fonction]') + '</strong> au sein d\'AUREUS IA SPRL à compter du <strong>' + d.debut + '</strong>, nous vous prions de bien vouloir vous présenter à une visite médicale d\'embauche auprès de notre Service Externe de Prévention et Protection au Travail (SEPP).</p>' +
+        H2('Informations pratiques') +
+        '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+        '<tr><td style="padding:6px 8px;color:#888;width:40%;">Service de prévention</td><td style="padding:6px 8px;font-weight:bold;">[CESI / Mensura / IDEWE — à désigner]</td></tr>' +
+        '<tr style="background:#f5f3ef;"><td style="padding:6px 8px;color:#888;">Date et heure</td><td style="padding:6px 8px;font-weight:bold;">[À planifier — contacter le SEPP]</td></tr>' +
+        '<tr><td style="padding:6px 8px;color:#888;">Lieu</td><td style="padding:6px 8px;">[Adresse du SEPP — à compléter]</td></tr>' +
+        '<tr style="background:#f5f3ef;"><td style="padding:6px 8px;color:#888;">Contact SEPP</td><td style="padding:6px 8px;">[Numéro et email du SEPP]</td></tr>' +
+        '</table>' +
+        H2('Documents à apporter') +
+        '<div style="font-size:12px;line-height:2;">' +
+        '☐ Carte d\'identité<br>' +
+        '☐ Carnet de vaccination (si disponible)<br>' +
+        '☐ Documents médicaux antérieurs pertinents (maladies professionnelles reconnues, restrictions)<br>' +
+        '☐ Lunettes ou lentilles si applicable<br>' +
+        '</div>' +
+        H2('Base légale') +
+        '<p style="font-size:12px;">La visite médicale d\'embauche est organisée conformément à :</p>' +
+        '<ul style="font-size:12px;"><li><strong>AR 28 mai 2003</strong> relatif à la surveillance de la santé des travailleurs (Code du bien-être au travail, Livre I, Titre 4)</li><li><strong>Article 27</strong> : visite préalable à l\'embauche — obligatoire pour certains postes</li><li><strong>Postes visés obligatoirement</strong> : postes de sécurité, postes de vigilance, travailleurs de nuit, jeunes travailleurs, agents PEB, certaines fonctions SEPP</li></ul>' +
+        WARN('Si votre poste est classifié comme « poste de sécurité » ou « poste de vigilance », vous ne pouvez pas commencer à occuper votre fonction avant d\'avoir obtenu l\'aptitude médicale. En cas de doute sur la classification de votre poste, contactez votre responsable.') +
+        HR +
+        '<p>Nous restons à votre disposition pour toute question.</p>' +
+        '<p>Cordialement,</p>' +
+        '<p><strong>AUREUS IA SPRL</strong><br>Nourdin MOUSSATI — Gérant<br>info@aureus-ia.com</p>' + E
     },
 
+    // ══════════════════════════════════════════════════
+    // 7. PRÉ-C4
+    // ══════════════════════════════════════════════════
     c4: {
       title: '📄 Pré-C4 — Template attestation chômage',
-      html: `<div style="font-family:Georgia,serif;color:#1a1916;">
-        <h2 style="color:#C9963A;">ATTESTATION C4 — TEMPLATE (à compléter lors de la fin de contrat)</h2>
-        <p style="background:#fff3cd;padding:10px;border-radius:6px;font-size:12px;color:#856404;">⚠️ Ce document est un template préparatoire. Le C4 officiel doit être soumis via SIGEDIS ou votre secrétariat social.</p>
-        <p><strong>Travailleur :</strong> ${d.prenom} ${d.nom} — NISS : ${d.niss}</p>
-        <p><strong>Employeur :</strong> AUREUS IA SPRL — ONSS : ${d.onssmat||'[MATRICULE]'}</p>
-        <p><strong>Type de contrat :</strong> ${d.contrat} — CP : ${d.cp}</p>
-        <p><strong>Date de début :</strong> ${d.debut} — <strong>Date de fin :</strong> [À COMPLÉTER]</p>
-        <p><strong>Motif de fin de contrat :</strong> [ ] Licenciement [ ] Démission [ ] Fin CDD [ ] Force majeure [ ] Rupture d'un commun accord</p>
-        <p><strong>Préavis :</strong> [ ] Presté du ___ au ___ [ ] Indemnité compensatoire de : ___ semaines</p>
-        <p><strong>Dernier salaire brut mensuel :</strong> ${d.brut} €</p>
-        <hr style="margin:16px 0;">
-        <p style="font-size:12px;">À transmettre au travailleur dans les <strong>8 jours</strong> suivant la fin du contrat (art. 59 loi 3/07/1978).</p>
-      </div>`
+      html: S + HEADER() +
+        H1('C4 — ATTESTATION CHÔMAGE') +
+        '<div style="text-align:center;font-size:12px;color:#888;margin-bottom:20px;">' +
+        'Template préparatoire — À compléter et déposer via SIGEDIS lors de la fin du contrat<br>' +
+        'Délai légal : 8 jours ouvrables après la fin du contrat (art. 59 L. 3/07/1978)' +
+        '</div>' +
+        WARN('Ce document est un template préparatoire. Le C4 officiel doit être transmis via le portail SIGEDIS ou via votre secrétariat social. Le travailleur doit obligatoirement le recevoir dans les 8 jours de la fin du contrat.') +
+        HR +
+        H2('SECTION A — IDENTIFICATION DES PARTIES') +
+        '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+        '<tr style="background:#f5f3ef;"><th style="padding:6px 8px;text-align:left;" colspan="2">L\'EMPLOYEUR</th></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;width:40%;">Dénomination</td><td style="padding:5px 8px;">AUREUS IA SPRL</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">N° BCE</td><td style="padding:5px 8px;">BE 1028.230.781</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">N° ONSS</td><td style="padding:5px 8px;">' + (d.onssmat||'[Matricule ONSS]') + '</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Adresse</td><td style="padding:5px 8px;">Place Marcel Broodthaers 8, 1060 Saint-Gilles</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Commission Paritaire</td><td style="padding:5px 8px;">CP ' + (d.cp||'[CP]') + '</td></tr>' +
+        '</table>' +
+        '<div style="height:10px;"></div>' +
+        '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+        '<tr style="background:#f5f3ef;"><th style="padding:6px 8px;text-align:left;" colspan="2">LE TRAVAILLEUR</th></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;width:40%;">Nom et prénom</td><td style="padding:5px 8px;font-weight:bold;">' + d.prenom + ' ' + d.nom + '</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">NISS</td><td style="padding:5px 8px;">' + (d.niss||'[NISS]') + '</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Adresse</td><td style="padding:5px 8px;">' + (d.adresse||'[adresse]') + '</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Statut</td><td style="padding:5px 8px;">' + statutLabel + '</td></tr>' +
+        '</table>' +
+        HR +
+        H2('SECTION B — CONTRAT DE TRAVAIL') +
+        '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+        '<tr><td style="padding:5px 8px;color:#888;width:40%;">Type de contrat</td><td style="padding:5px 8px;">' + contratLabel + '</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Date d\'entrée en service</td><td style="padding:5px 8px;">' + d.debut + '</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Date de fin</td><td style="padding:5px 8px;">[À COMPLÉTER]</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Régime de travail</td><td style="padding:5px 8px;">' + (d.regime||100) + '% — ' + (d.horaire||38) + 'h/sem</td></tr>' +
+        '</table>' +
+        HR +
+        H2('SECTION C — FIN DU CONTRAT') +
+        '<p style="font-size:12px;">Motif de la fin du contrat :</p>' +
+        '<div style="font-size:12px;line-height:2.2;">' +
+        '☐ <strong>Licenciement</strong> (par l\'employeur)<br>' +
+        '☐ <strong>Démission</strong> (par le travailleur)<br>' +
+        '☐ <strong>Fin de contrat CDD</strong> — expiration du terme<br>' +
+        '☐ <strong>Rupture d\'un commun accord</strong> (art. 4 L. 3/07/1978)<br>' +
+        '☐ <strong>Force majeure</strong> (art. 32 L. 3/07/1978)<br>' +
+        '☐ <strong>Licenciement pour motif grave</strong> (art. 35 L. 3/07/1978)<br>' +
+        '☐ <strong>Pension de retraite</strong><br>' +
+        '</div>' +
+        H2('SECTION D — PRÉAVIS ET INDEMNITÉS') +
+        '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+        '<tr><td style="padding:5px 8px;color:#888;width:50%;">Préavis presté</td><td style="padding:5px 8px;">☐ Du [date] au [date]</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Indemnité compensatoire préavis</td><td style="padding:5px 8px;">☐ [Nombre] semaines</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Montant indemnité de préavis</td><td style="padding:5px 8px;">[montant €]</td></tr>' +
+        '</table>' +
+        H2('SECTION E — RÉMUNÉRATION DE RÉFÉRENCE') +
+        '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+        '<tr><td style="padding:5px 8px;color:#888;width:50%;">Dernier salaire brut mensuel</td><td style="padding:5px 8px;font-weight:bold;">' + (d.brut||'[montant]') + ' €</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Avantages en nature (ATN)</td><td style="padding:5px 8px;">[montant € / mois] (si applicable)</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Chèques-repas (valeur employeur)</td><td style="padding:5px 8px;">[montant €] (si applicable)</td></tr>' +
+        '</table>' +
+        INFO('Conformément à l\'article 59 de la loi du 3 juillet 1978 et à l\'AR du 25 novembre 1991 relatif à l\'octroi des allocations de chômage, l\'employeur est tenu de remettre le C4 au travailleur dans les 8 jours ouvrables suivant la fin du contrat. Le défaut de remise dans les délais peut entraîner des sanctions de l\'ONEM.') +
+        HR +
+        '<p style="font-size:11px;">Fait à Bruxelles le [DATE FIN CONTRAT] — AUREUS IA SPRL — Nourdin MOUSSATI, Gérant</p>' + E
     },
 
+    // ══════════════════════════════════════════════════
+    // 8. CLAUSE NON-CONCURRENCE
+    // ══════════════════════════════════════════════════
     nonconc: {
-      title: '🔐 Clause de non-concurrence',
-      html: `<div style="font-family:Georgia,serif;color:#1a1916;">
-        <h2 style="color:#C9963A;">CLAUSE DE NON-CONCURRENCE — ANNEXE AU CONTRAT</h2>
-        <p>Entre AUREUS IA SPRL et ${d.prenom} ${d.nom} — Conformément à l'art. 65 de la loi du 3/07/1978.</p>
-        ${d.nonconc==='non'?'<p style="background:#fff3cd;padding:10px;border-radius:6px;font-size:12px;color:#856404;">⚠️ Aucune clause sélectionnée dans le formulaire. Sélectionner une durée dans le champ "Clause non-concurrence" du bloc 2.</p>':
-        `<p><strong>Durée :</strong> ${d.nonconc} à compter de la fin du contrat.</p>
-        <p><strong>Territoire :</strong> Belgique (à adapter selon le cas).</p>
-        <p><strong>Activités concernées :</strong> Toute activité concurrente à l'activité principale de l'employeur dans le secteur du SaaS RH / secrétariat social digital.</p>
-        <p><strong>Indemnité :</strong> L'employeur versera, en contrepartie, une indemnité égale à la moitié de la rémunération brute couvrant la période de non-concurrence.</p>
-        <p><strong>Conditions de validité (art. 65 §1) :</strong></p>
-        <ul style="font-size:12px;"><li>Salaire annuel brut &gt; 38.500€ ✓</li><li>Activité similaire ou concurrente</li><li>Nature de la fonction permettant un préjudice réel</li></ul>
-        <hr style="margin:16px 0;">
-        <p>Signé à Bruxelles le ${today}<br>L'Employeur : _______________  &nbsp;&nbsp;&nbsp; Le/La Travailleur(euse) : _______________</p>`}
-      </div>`
+      title: '🔐 Clause de non-concurrence — Annexe contrat',
+      html: S + HEADER() +
+        H1('CLAUSE DE NON-CONCURRENCE') +
+        '<p style="text-align:center;font-size:12px;color:#888;">Annexe au contrat de travail — Art. 65 de la loi du 3 juillet 1978</p>' +
+        HR +
+        (d.nonconc === 'non'
+          ? WARN('Aucune clause de non-concurrence sélectionnée dans le formulaire. Pour utiliser ce document, sélectionnez une durée dans le champ "Clause non-concurrence" du bloc 2.')
+          : '<p><strong>ENTRE LES SOUSSIGNÉS :</strong></p>' +
+            '<p><strong>L\'Employeur :</strong> AUREUS IA SPRL — BCE BE 1028.230.781 — représentée par Nourdin MOUSSATI</p>' +
+            '<p><strong>Le/La Travailleur(euse) :</strong> ' + d.prenom + ' ' + d.nom + ' — NISS : ' + (d.niss||'[NISS]') + '</p>' +
+            '<p>Dans le cadre du contrat de travail conclu le <strong>' + today + '</strong></p>' +
+            HR +
+            H2('STIPULATIONS CONVENUES') +
+            ART(1, 'Objet et durée',
+              'Le/la Travailleur(euse) s\'engage, après la cessation du contrat de travail pour quelque raison que ce soit, à ne pas exercer d\'activités similaires à celles exercées chez l\'Employeur, susceptibles de causer un préjudice réel à ce dernier, pendant une durée de <strong>' + d.nonconc + '</strong> à compter du dernier jour du contrat de travail.') +
+            ART(2, 'Territoire',
+              'La présente clause s\'applique sur le territoire de la <strong>Belgique</strong>. Elle peut être étendue à un territoire plus large si la nature des fonctions et l\'activité de l\'Employeur le justifient (à préciser par avenant).') +
+            ART(3, 'Activités visées',
+              'Sont visées toutes les activités directement concurrentes à l\'activité principale d\'AUREUS IA SPRL, à savoir :<br><ul style="font-size:12px;"><li>Développement et commercialisation de logiciels SaaS de gestion des ressources humaines et de la paie</li><li>Services de secrétariat social digital ou de gestion de la paie externalisée</li><li>Outils d\'analyse financière et de trading basés sur l\'intelligence artificielle</li><li>Toute activité consistant à fournir des services similaires à la clientèle d\'AUREUS IA SPRL</li></ul>') +
+            ART(4, 'Indemnité compensatoire',
+              'En contrepartie du respect de la présente clause, l\'Employeur versera au/à la Travailleur(euse), <strong>dans les 15 jours suivant la fin du contrat</strong>, une indemnité compensatoire égale à la moitié de la rémunération brute correspondant à la durée de la clause (art. 65 §3 L. 3/07/1978).') +
+            '<p><strong>Montant indicatif :</strong> ' + (d.brut ? Math.round(parseFloat(d.brut) * 0.5 * 100) / 100 : '[À calculer]') + ' € × durée de la clause (mois) = à calculer</p>' +
+            ART(5, 'Renonciation de l\'Employeur',
+              'L\'Employeur peut renoncer expressément au bénéfice de la présente clause dans les 15 jours suivant la fin du contrat (art. 65 §4 L. 3/07/1978). En cas de renonciation, aucune indemnité n\'est due. Passé ce délai sans renonciation, la clause devient définitivement applicable.') +
+            ART(6, 'Nullité partielle',
+              'La présente clause est nulle de plein droit si la rémunération annuelle brute du/de la Travailleur(euse) n\'excède pas 43.335 € (seuil 2026 — indexé annuellement). En cas de nullité partielle, les autres dispositions du contrat restent intégralement en vigueur.') +
+            ART(7, 'Violation',
+              'En cas de violation de la présente clause par le/la Travailleur(euse), celui-ci/celle-ci sera tenu(e) de restituer l\'indemnité compensatoire versée et de payer en outre une indemnité forfaitaire égale à ladite indemnité compensatoire (art. 65 §5 L. 3/07/1978). L\'Employeur se réserve le droit de demander réparation d\'un préjudice supérieur.') +
+            HR +
+            SIGS()
+        ) + E
     },
 
+    // ══════════════════════════════════════════════════
+    // 9. FICHE ATN VOITURE
+    // ══════════════════════════════════════════════════
     atn: {
-      title: '🚗 Fiche ATN voiture — 281.10',
-      html: `<div style="font-family:Georgia,serif;color:#1a1916;">
-        <h2 style="color:#C9963A;">AVANTAGE DE TOUTE NATURE — VOITURE DE SOCIÉTÉ</h2>
-        <p>Fiche à joindre à la déclaration fiscale 281.10 — Exercice 2026</p>
-        <p><strong>Bénéficiaire :</strong> ${d.prenom} ${d.nom} — NISS : ${d.niss}</p>
-        <p><strong>Employeur :</strong> AUREUS IA SPRL — BCE 1028.230.781</p>
-        <hr style="margin:12px 0;">
-        <p>Valeur catalogue (TVAC) : ____________ €<br>
-        CO₂ g/km : ____________<br>
-        Type : [ ] Essence [ ] Diesel [ ] Électrique [ ] Hybride</p>
-        <p><strong>Formule ATN 2026 :</strong><br>
-        ATN = Valeur catalogue × % CO₂ × 6/7<br>
-        Taux CO₂ Essence : 5,5% + (CO₂ - 111) × 0,1% (min 4%, max 18%)<br>
-        Électrique : taux plancher 4% appliqué</p>
-        <p><strong>ATN mensuel estimé :</strong> ____________ € (à calculer via l'outil ATN ci-dessus)</p>
-        <p><strong>Impact fiscal :</strong> ATN soumis au PP — pas soumis ONSS travailleur<br>
-        <strong>Cotisation CO₂ patronale :</strong> À calculer selon motorisation</p>
-        <hr style="margin:12px 0;">
-        <p style="font-size:11px;color:#666;">Minimum ATN annuel 2026 : 1.510 € — Source : AR 22/05/2001 modifié</p>
-      </div>`
+      title: '🚗 Fiche ATN voiture de société — 281.10',
+      html: S + HEADER() +
+        H1('AVANTAGE DE TOUTE NATURE — VOITURE DE SOCIÉTÉ') +
+        '<p style="text-align:center;font-size:12px;color:#888;">Fiche à joindre à la déclaration fiscale 281.10 — Exercice d\'imposition 2027 (revenus 2026)<br>Conforme à l\'article 36 CIR/92 et à l\'AR 30 juillet 2008</p>' +
+        HR +
+        H2('Identification') +
+        '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+        '<tr><td style="padding:5px 8px;color:#888;width:40%;">Bénéficiaire</td><td style="padding:5px 8px;font-weight:bold;">' + d.prenom + ' ' + d.nom + ' — NISS : ' + (d.niss||'[NISS]') + '</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Employeur</td><td style="padding:5px 8px;">AUREUS IA SPRL — BCE BE 1028.230.781</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Exercice</td><td style="padding:5px 8px;">2026 (EI 2027)</td></tr>' +
+        '</table>' +
+        HR +
+        H2('Données du véhicule') +
+        '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+        '<tr style="background:#f5f3ef;"><th style="padding:6px 8px;text-align:left;">Champ</th><th style="padding:6px 8px;text-align:left;">Valeur</th></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Marque / Modèle</td><td style="padding:5px 8px;">[À compléter]</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Valeur catalogue TVAC (prix neuf)</td><td style="padding:5px 8px;">____________ €</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Émissions CO₂ (g/km)</td><td style="padding:5px 8px;">____________ g/km</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Type de motorisation</td><td style="padding:5px 8px;">☐ Essence &nbsp; ☐ Diesel &nbsp; ☐ Électrique &nbsp; ☐ Hybride PHEV &nbsp; ☐ Hybride HEV</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Date de 1ère immatriculation</td><td style="padding:5px 8px;">____________</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Âge du véhicule (années)</td><td style="padding:5px 8px;">____________ ans</td></tr>' +
+        '</table>' +
+        HR +
+        H2('Calcul ATN 2026 — Formule officielle Art. 36 CIR/92') +
+        '<div style="background:#f5f3ef;padding:14px;border-radius:6px;font-family:monospace;font-size:12px;line-height:2;">' +
+        '<strong>FORMULE :</strong> ATN annuel = Valeur catalogue × % CO₂ × 6/7 × Coefficient vétusté<br><br>' +
+        '<strong>% CO₂ (Essence/GPL/LPG) :</strong><br>' +
+        '• Référence 2026 = 111 g/km (essence)<br>' +
+        '• % = 5,5% + (CO₂ - 111) × 0,1% | Min : 4% | Max : 18%<br><br>' +
+        '<strong>% CO₂ (Diesel) :</strong><br>' +
+        '• Référence 2026 = 91 g/km<br>' +
+        '• % = 5,5% + (CO₂ - 91) × 0,1% | Min : 4% | Max : 18%<br><br>' +
+        '<strong>% CO₂ (Électrique pur) :</strong> taux plancher 4%<br>' +
+        '<strong>% CO₂ (PHEV) :</strong> Calculé sur CO₂ WLTP réel<br><br>' +
+        '<strong>Coefficient vétusté :</strong> 1 - (âge × 6%) | Minimum : 0,70 (après 5 ans)<br><br>' +
+        '<strong>Minimum ATN 2026 :</strong> <strong style="color:#C9963A;">1.600 € / an</strong> (source : AR 22/05/2001 modifié)<br>' +
+        '</div>' +
+        H2('ATN — Calcul pour ce véhicule') +
+        '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+        '<tr><td style="padding:5px 8px;color:#888;">Valeur catalogue TVAC</td><td style="padding:5px 8px;">____________ €</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">% CO₂ applicable</td><td style="padding:5px 8px;">____________ %</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Facteur 6/7</td><td style="padding:5px 8px;">× 6/7</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">Coefficient vétusté</td><td style="padding:5px 8px;">____________</td></tr>' +
+        '<tr style="background:#f5f3ef;font-weight:bold;"><td style="padding:7px 8px;">ATN ANNUEL</td><td style="padding:7px 8px;color:#C9963A;">____________ € / an</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">ATN MENSUEL</td><td style="padding:5px 8px;color:#C9963A;">____________ € / mois</td></tr>' +
+        '</table>' +
+        H2('Impact fiscal et social') +
+        '<div style="font-size:12px;line-height:1.8;">' +
+        '📌 <strong>Pour le travailleur :</strong><br>' +
+        '• L\'ATN est ajouté à la rémunération imposable → précompte professionnel calculé dessus<br>' +
+        '• L\'ATN n\'est PAS soumis aux cotisations ONSS personnelles du travailleur (art. 19 AR/LSS)<br>' +
+        '• L\'ATN figure sur la fiche 281.10 dans la rubrique « Avantages de toute nature »<br><br>' +
+        '📌 <strong>Pour l\'employeur :</strong><br>' +
+        '• Cotisation CO₂ mensuelle patronale (à calculer selon motorisation)<br>' +
+        '• Non soumis aux cotisations ONSS patronales ordinaires<br>' +
+        '• Déductibilité du coût de la voiture : limitée à 40-100% selon CO₂ et date d\'acquisition<br>' +
+        '</div>' +
+        WARN('Depuis le 1er juillet 2023, la déductibilité des véhicules à combustion interne est plafonnée et évolue progressivement vers 0% d\'ici 2028 (tax shift mobilité). Privilégiez les véhicules électriques pour une déductibilité à 100% (2026).') +
+        HR +
+        '<p style="font-size:11px;color:#888;">Source : SPF Finances — art. 36 CIR/92 — AR 22/05/2001 — Circulaire 2022/C/95 du 4/10/2022</p>' + E
     },
 
+    // ══════════════════════════════════════════════════
+    // 10. ACTIVA.BRUSSELS — GUIDE COMPLET
+    // ══════════════════════════════════════════════════
     activa: {
-      title: '💰 Guide Activa.brussels — Démarches',
-      html: `<div style="font-family:sans-serif;color:#1a1916;">
-        <h2 style="color:#C9963A;">ACTIVA.BRUSSELS — GUIDE PRATIQUE 2026</h2>
-        <p><strong>Travailleur concerné :</strong> ${d.prenom} ${d.nom} — Entrée : ${d.debut}</p>
-        <div style="background:#e8f5e9;padding:12px;border-radius:8px;margin:12px 0;">
-          <strong>⚡ DÉLAI CRITIQUE : La demande Activa doit être introduite dans les 30 jours suivant l'entrée en service !</strong>
-        </div>
-        <h3 style="font-size:14px;">Montants 2026 (Bruxelles)</h3>
-        <table style="width:100%;font-size:12px;border-collapse:collapse;">
-          <tr style="background:#f5f5f5;"><th style="padding:6px;text-align:left;">Période</th><th style="padding:6px;text-align:right;">Réduction mensuelle</th></tr>
-          <tr><td style="padding:5px;">Mois 1-12</td><td style="text-align:right;padding:5px;color:#16a34a;font-weight:bold;">350 €/mois</td></tr>
-          <tr><td style="padding:5px;">Mois 13-24</td><td style="text-align:right;padding:5px;color:#16a34a;font-weight:bold;">800 €/mois</td></tr>
-          <tr><td style="padding:5px;">Mois 25-36</td><td style="text-align:right;padding:5px;color:#16a34a;font-weight:bold;">350 €/mois</td></tr>
-          <tr style="font-weight:bold;background:#e8f5e9;"><td style="padding:6px;">TOTAL sur 36 mois</td><td style="text-align:right;padding:6px;color:#16a34a;">13.800 €</td></tr>
-        </table>
-        <h3 style="font-size:14px;margin-top:16px;">Démarches</h3>
-        <div style="font-size:12px;line-height:2;">
-          1. Vérifier éligibilité sur <strong>actiris.brussels</strong> (chômeur inscrit + domicile Bruxelles)<br>
-          2. Remplir formulaire Activa sur portail Actiris<br>
-          3. Joindre : contrat de travail + Dimona IN + pièce d'identité travailleur<br>
-          4. Soumettre <strong>avant le ${new Date(new Date(d.debut).getTime()+30*24*3600*1000).toLocaleDateString('fr-BE')}</strong> (30j après entrée ${d.debut})<br>
-          5. La réduction est imputée sur les cotisations ONSS patronales mensuelles
-        </div>
-        <h3 style="font-size:14px;margin-top:16px;">Conditions d'éligibilité</h3>
-        <div style="font-size:12px;line-height:1.8;">
-          ✓ Travailleur domicilié en Région bruxelloise<br>
-          ✓ Inscrit comme demandeur d'emploi Actiris depuis ≥ 6 mois<br>
-          ✓ Contrat CDI ou CDD ≥ 6 mois — temps plein ou 4/5<br>
-          ✓ Employeur établi en Région bruxelloise
-        </div>
-      </div>`
+      title: '💰 Guide Activa.brussels — Démarches 2026',
+      html: S + HEADER() +
+        H1('ACTIVA.BRUSSELS — GUIDE PRATIQUE 2026') +
+        '<p style="text-align:center;font-size:12px;color:#888;">Aide à l\'emploi régionale bruxelloise — Ordonnance 23/06/2017 + AGRBC 14/09/2017<br>Travailleur concerné : <strong>' + d.prenom + ' ' + d.nom + '</strong> — Entrée : <strong>' + d.debut + '</strong></p>' +
+        OK('DÉLAI CRITIQUE : La demande Activa doit être introduite dans les <strong>30 jours</strong> suivant l\'entrée en service. Passé ce délai, le droit est définitivement perdu. Date limite : <strong>' + (function(){ var dt = new Date(d.debut); dt.setDate(dt.getDate()+30); return isNaN(dt)?'[entrée + 30 jours]':dt.toLocaleDateString('fr-BE'); })() + '</strong>') +
+        HR +
+        H2('Montants 2026 — Activa.brussels') +
+        '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+        '<tr style="background:#e8f5e9;"><th style="padding:7px 8px;text-align:left;">Période</th><th style="padding:7px 8px;text-align:right;">Réduction ONSS mensuelle</th><th style="padding:7px 8px;text-align:right;">Total période</th></tr>' +
+        '<tr><td style="padding:6px 8px;border-bottom:1px solid #eee;">Mois 1 à 12 (1ère année)</td><td style="text-align:right;padding:6px 8px;border-bottom:1px solid #eee;font-weight:bold;color:#2e7d32;">350 €/mois</td><td style="text-align:right;padding:6px 8px;border-bottom:1px solid #eee;color:#2e7d32;">4.200 €</td></tr>' +
+        '<tr><td style="padding:6px 8px;border-bottom:1px solid #eee;">Mois 13 à 24 (2ème année)</td><td style="text-align:right;padding:6px 8px;border-bottom:1px solid #eee;font-weight:bold;color:#2e7d32;">800 €/mois</td><td style="text-align:right;padding:6px 8px;border-bottom:1px solid #eee;color:#2e7d32;">9.600 €</td></tr>' +
+        '<tr><td style="padding:6px 8px;border-bottom:2px solid #4caf50;">Mois 25 à 36 (3ème année)</td><td style="text-align:right;padding:6px 8px;border-bottom:2px solid #4caf50;font-weight:bold;color:#2e7d32;">350 €/mois</td><td style="text-align:right;padding:6px 8px;border-bottom:2px solid #4caf50;color:#2e7d32;">4.200 €</td></tr>' +
+        '<tr style="background:#e8f5e9;font-weight:bold;font-size:13px;"><td style="padding:8px;">TOTAL sur 36 mois</td><td style="text-align:right;padding:8px;color:#1b5e20;">350+800+350 €/mois</td><td style="text-align:right;padding:8px;color:#1b5e20;">13.800 €</td></tr>' +
+        '</table>' +
+        '<div style="margin-top:10px;padding:10px;background:#e8f5e9;border-radius:6px;font-size:12px;color:#1b5e20;">' +
+        '<strong>💡 Cumul avec l\'exonération 1er employé :</strong> Si ' + d.prenom + ' ' + d.nom + ' est votre 1er travailleur, vous cumulez :<br>' +
+        '• Exonération totale ONSS patronal (1er employé — illimitée dans le temps) ~ 9.600 €/an<br>' +
+        '• + Activa.brussels 350/800/350 €/mois<br>' +
+        '= Économie maximale totale sur 36 mois : <strong>~42.600 €</strong>' +
+        '</div>' +
+        HR +
+        H2('Conditions d\'éligibilité') +
+        '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+        '<tr style="background:#f5f3ef;"><th style="padding:6px 8px;text-align:left;">Critère</th><th style="padding:6px 8px;text-align:left;">Détail</th></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;border-bottom:1px solid #eee;">✅ Domicile travailleur</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">Région de Bruxelles-Capitale (19 communes)</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;border-bottom:1px solid #eee;">✅ Inscription Actiris</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">≥ 6 mois comme demandeur d\'emploi (inoccupé)</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;border-bottom:1px solid #eee;">✅ Siège employeur</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">Région bruxelloise (lieu d\'exploitation)</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;border-bottom:1px solid #eee;">✅ Type de contrat</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">CDI ou CDD ≥ 6 mois — temps plein ou ≥ 4/5</td></tr>' +
+        '<tr><td style="padding:5px 8px;color:#888;">⚠️ Attention</td><td style="padding:5px 8px;">Le domicile du travailleur détermine la Région — pas le lieu de travail</td></tr>' +
+        '</table>' +
+        H2('Démarches pas à pas') +
+        '<div style="font-size:12px;line-height:2.2;">' +
+        '<strong>Étape 1 —</strong> Vérifier l\'éligibilité du travailleur sur <strong>actiris.brussels</strong> (rubrique Employeurs → Aides à l\'emploi)<br>' +
+        '<strong>Étape 2 —</strong> Rassembler les documents requis :<br>' +
+        '&nbsp;&nbsp;&nbsp;&nbsp;• Attestation ONEM C109 (ou Actiris) — preuve de chômage ≥ 6 mois<br>' +
+        '&nbsp;&nbsp;&nbsp;&nbsp;• Contrat de travail signé<br>' +
+        '&nbsp;&nbsp;&nbsp;&nbsp;• Preuve Dimona IN<br>' +
+        '&nbsp;&nbsp;&nbsp;&nbsp;• Pièce d\'identité du travailleur<br>' +
+        '<strong>Étape 3 —</strong> Remplir le formulaire de demande sur le portail Actiris (www.actiris.brussels → Employeurs → Activa.brussels)<br>' +
+        '<strong>Étape 4 —</strong> Soumettre <strong>avant le ' + (function(){ var dt = new Date(d.debut); dt.setDate(dt.getDate()+30); return isNaN(dt)?'[J+30]':dt.toLocaleDateString('fr-BE'); })() + '</strong><br>' +
+        '<strong>Étape 5 —</strong> La réduction Activa est déduite automatiquement des cotisations ONSS patronales mensuelles (DmfA)<br>' +
+        '<strong>Étape 6 —</strong> Mentionner l\'attestation Activa N° dans la DmfA trimestrielle (rubrique réductions groupe-cible)<br>' +
+        '</div>' +
+        H2('Attestation Activa existante — AUREUS IA SPRL') +
+        OK('Attestation Activa.brussels N° 829605 déjà active pour AUREUS IA SPRL. Utiliser ce numéro pour toute correspondance avec Actiris. Deadline MonBEE : 01/06/2026.') +
+        HR +
+        '<p style="font-size:11px;color:#888;">Sources : Ordonnance bruxelloise 23/06/2017 — AGRBC 14/09/2017 — Actiris.brussels<br>Document établi le ' + today + ' — AUREUS IA SPRL</p>' + E
     },
 
+    // ══════════════════════════════════════════════════
+    // 11. ASSURANCE GROUPE / EIP
+    // ══════════════════════════════════════════════════
     pension: {
-      title: '🛡️ Affiliation assurance groupe / EIP',
-      html: `<div style="font-family:sans-serif;color:#1a1916;">
-        <h2 style="color:#C9963A;">AFFILIATION PENSION COMPLÉMENTAIRE — GUIDE 2026</h2>
-        <p><strong>Bénéficiaire :</strong> ${d.prenom} ${d.nom} — Fonction : ${d.fonction}</p>
-        <h3 style="font-size:14px;">Options disponibles</h3>
-        <div style="font-size:12px;line-height:1.9;">
-          <strong>🏢 Assurance groupe (AG) :</strong> Pour les employés. Cotisation patronale déductible à 100% — pas ONSS — exonérée PP si règle des 80%.<br>
-          <strong>💼 EIP (Engagement Individuel de Pension) :</strong> Pour les dirigeants. Idéal si rémunération régulière. Prime annuelle max selon règle des 80%.<br>
-          <strong>🔷 PLCI :</strong> Pour indépendants — déductible à 30% des revenus professionnels nets.
-        </div>
-        <h3 style="font-size:14px;margin-top:14px;">Règle des 80% (EIP/AG)</h3>
-        <p style="font-size:12px;">La pension totale (légale + complémentaire) ne peut dépasser 80% de la dernière rémunération annuelle brute normale.<br>
-        Estimation capacité EIP : (${d.brut} × 12) × 80% - pension légale estimée = ____________ €/an</p>
-        <h3 style="font-size:14px;margin-top:14px;">Compagnies recommandées</h3>
-        <p style="font-size:12px;">AG Insurance · Allianz · Ethias · Vivium · AXA Belgium — Contacter votre courtier pour devis personnalisé.</p>
-        <hr style="margin:14px 0;">
-        <p style="font-size:11px;color:#666;">Document informatif — Non contraignant — Pour un conseil personnalisé, consulter un courtier ou conseiller fiscal agréé.</p>
-      </div>`
+      title: '🛡️ Affiliation pension complémentaire — EIP / Assurance groupe',
+      html: S + HEADER() +
+        H1('PENSION COMPLÉMENTAIRE — GUIDE 2026') +
+        '<p style="text-align:center;font-size:12px;color:#888;">2ème pilier de pension — EIP / Assurance groupe / PLCI<br>Bénéficiaire : <strong>' + d.prenom + ' ' + d.nom + '</strong> — Fonction : ' + (d.fonction||'[Fonction]') + '</p>' +
+        HR +
+        H2('1. Choisir le bon véhicule') +
+        '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+        '<tr style="background:#f5f3ef;"><th style="padding:6px 8px;text-align:left;">Véhicule</th><th style="padding:6px 8px;text-align:left;">Pour qui</th><th style="padding:6px 8px;text-align:left;">Déductibilité</th><th style="padding:6px 8px;text-align:left;">Avantage clé</th></tr>' +
+        '<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;font-weight:bold;color:#C9963A;">Assurance groupe (AG)</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">Employés salariés</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">100% (sous règle 80%)</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">Cotisation patronale — pas ONSS</td></tr>' +
+        '<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;font-weight:bold;color:#C9963A;">EIP</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">Dirigeants (rémunération régulière)</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">100% (sous règle 80%)</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">Prime annuelle élevée possible</td></tr>' +
+        '<tr><td style="padding:5px 8px;font-weight:bold;color:#C9963A;">PLCI</td><td style="padding:5px 8px;">Indépendants complémentaires</td><td style="padding:5px 8px;">30% revenus nets</td><td style="padding:5px 8px;">Simple, flexible</td></tr>' +
+        '</table>' +
+        H2('2. La règle des 80% — Principe fondamental') +
+        '<p style="font-size:12px;">La pension complémentaire versée par l\'entreprise est fiscalement déductible à 100%, à condition que la somme de la pension légale et de la pension complémentaire ne dépasse pas <strong>80% de la dernière rémunération annuelle brute normale</strong> (art. 59 CIR/92).</p>' +
+        '<div style="background:#f5f3ef;padding:12px;border-radius:6px;font-size:12px;">' +
+        '<strong>Calcul capacité EIP/AG pour ' + (d.prenom||'ce travailleur') + ' :</strong><br>' +
+        'Rémunération annuelle brute : <strong>' + (d.brut ? (parseFloat(d.brut)*12).toFixed(2) : '[brut × 12]') + ' €</strong><br>' +
+        '80% de la rémunération : <strong>' + (d.brut ? Math.round(parseFloat(d.brut)*12*0.80).toFixed(2) : '[à calculer]') + ' €</strong><br>' +
+        'Moins pension légale estimée (environ 15.000 €/an) : <strong>' + (d.brut ? Math.max(0, Math.round(parseFloat(d.brut)*12*0.80) - 15000).toFixed(2) : '[à calculer]') + ' €/an de marge</strong><br>' +
+        '= Prime EIP/AG annuelle maximale déductible : <strong>' + (d.brut ? Math.max(0, Math.round(parseFloat(d.brut)*12*0.80) - 15000).toFixed(2) : '[calculer avec courtier]') + ' €/an</strong>' +
+        '</div>' +
+        H2('3. Fiscalité et cotisations sociales') +
+        '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+        '<tr style="background:#f5f3ef;"><th style="padding:6px 8px;text-align:left;">Aspect</th><th style="padding:6px 8px;text-align:left;">Assurance groupe</th><th style="padding:6px 8px;text-align:left;">EIP</th></tr>' +
+        '<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">Cotisations ONSS</td><td style="padding:5px 8px;border-bottom:1px solid #eee;color:#2e7d32;">✅ Non soumis (sous règle 80%)</td><td style="padding:5px 8px;border-bottom:1px solid #eee;color:#2e7d32;">✅ Non soumis</td></tr>' +
+        '<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">Précompte professionnel</td><td style="padding:5px 8px;border-bottom:1px solid #eee;color:#2e7d32;">✅ Exonéré sur cotisation patronale</td><td style="padding:5px 8px;border-bottom:1px solid #eee;color:#2e7d32;">✅ Exonéré</td></tr>' +
+        '<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">Déductibilité employeur</td><td style="padding:5px 8px;border-bottom:1px solid #eee;color:#2e7d32;">✅ 100% si règle 80% respectée</td><td style="padding:5px 8px;border-bottom:1px solid #eee;color:#2e7d32;">✅ 100% si règle 80% respectée</td></tr>' +
+        '<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">Taxe sur prime (FSMA)</td><td style="padding:5px 8px;border-bottom:1px solid #eee;color:#c62828;">⚠️ 4,4% sur prime patronale</td><td style="padding:5px 8px;border-bottom:1px solid #eee;color:#c62828;">⚠️ 4,4% sur prime</td></tr>' +
+        '<tr><td style="padding:5px 8px;">Taxation à la liquidation</td><td style="padding:5px 8px;">10% taxe + INAMI + cotis. solidarité</td><td style="padding:5px 8px;">10% taxe + INAMI + cotis. solidarité</td></tr>' +
+        '</table>' +
+        H2('4. Compagnies recommandées') +
+        '<div style="font-size:12px;line-height:1.9;">' +
+        '<strong>AG Insurance :</strong> leader marché belge — gamme complète — www.aginsurance.be<br>' +
+        '<strong>Allianz Belgium :</strong> produits modulables dirigeants et employés<br>' +
+        '<strong>Ethias :</strong> tarifs compétitifs PME<br>' +
+        '<strong>Vivium :</strong> filiale P&V — spécialiste indépendants<br>' +
+        '<strong>AXA Belgium :</strong> solutions complètes 2ème pilier<br>' +
+        '</div>' +
+        INFO('Pour un calcul précis de la règle des 80% et un devis personnalisé, consultez votre courtier ou un conseiller fiscal agréé IEC/ITAA. Ce document est informatif et ne constitue pas un conseil fiscal.') +
+        HR +
+        '<p style="font-size:11px;color:#888;">Sources : Loi du 28/04/2003 relative aux pensions complémentaires (LPC) — Art. 59 CIR/92 — Instructions FSMA 2026<br>Établi le ' + today + ' — AUREUS IA SPRL</p>' + E
     }
   };
 
@@ -2482,6 +2880,7 @@ function docOpen(type) {
   modal.style.display = 'block';
   document.body.style.overflow = 'hidden';
 }
+
 
 function docPrint() {
   var body = document.getElementById('doc-modal-body').innerHTML;
