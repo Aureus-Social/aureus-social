@@ -61,7 +61,7 @@ const AUREUS = {
   csamRef2: '22A00LCY0ENXZ',
   peppolId: '0208:1028230781',
   actirisN: '829605',
-  iban: 'BE___ ____ ____ ____', // À compléter
+  iban: '',
   bic: 'GEBABEBB',
 };
 

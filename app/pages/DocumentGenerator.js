@@ -715,7 +715,7 @@ Fait à ${company.city || '___'}, le ${dateStr}.
 `
 
     default:
-      return `Document de type ${type} — génération non implémentée.`
+      return `${type}\n\nCe type de document est en cours d'intégration.\n\nContactez votre secrétariat social ou utilisez le modèle Word disponible dans vos ressources.\n\nDonnées : ${data.name||'—'} — ${data.company?.name||'—'} — ${dateStr}`
   }
 }
 
