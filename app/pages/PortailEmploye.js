@@ -7,6 +7,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { C, fmt, f2 } from '@/app/lib/helpers';
 import { supabase } from '@/app/lib/supabase';
+import { authFetch } from '@/app/lib/auth-fetch';
 
 const GOLD='#c6a34e',GREEN='#22c55e',BLUE='#60a5fa',RED='#ef4444',PURPLE='#a78bfa';
 
@@ -31,15 +32,16 @@ export default function PortailEmploye({s, d}) {
   const [docFilter, setDocFilter] = useState('all');
   const [authEmail, setAuthEmail] = useState(null);
   const [linkedEmp, setLinkedEmp] = useState(null);
+  const [portalData, setPortalData] = useState(null); // données réelles Supabase
+  const [portalLoading, setPortalLoading] = useState(false);
 
-  // ── Liaison auth Supabase → employé par email ──
+  // ── Liaison auth Supabase → employé par email + chargement données réelles ──
   useEffect(() => {
     (async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user?.email) {
           setAuthEmail(user.email);
-          // Chercher l'employé avec cet email
           const found = (s.emps || []).find(e =>
             (e.email || '').toLowerCase() === user.email.toLowerCase()
           );
@@ -47,13 +49,30 @@ export default function PortailEmploye({s, d}) {
             setLinkedEmp(found);
             setSelectedEmpId(found.id);
           }
+          // Charger les vraies données depuis Supabase via l'API portail
+          setPortalLoading(true);
+          try {
+            const res = await authFetch('/api/employe/portal');
+            if (res.ok) {
+              const data = await res.json();
+              if (data.emp) {
+                setPortalData(data);
+                // Si fiches réelles disponibles, les utiliser en priorité
+              }
+            }
+          } catch {}
+          setPortalLoading(false);
         }
       } catch(e) {}
     })();
   }, [s.emps]);
 
   const emp = useMemo(() => (s.emps||[]).find(e=>e.id===selectedEmpId)||(s.emps||[])[0], [selectedEmpId, s.emps]);
-  const myFiches = useMemo(() => (s.pays||[]).filter(p=>p.empId===emp?.id||p.employee_id===emp?.id).sort((a,b)=>new Date(b.at||b.created_at||0)-new Date(a.at||a.created_at||0)), [emp, s.pays]);
+  const myFiches = useMemo(() => {
+    // Priorité aux données réelles Supabase, fallback sur state local
+    const srcFiches = portalData?.fiches?.length ? portalData.fiches : (s.pays||[]);
+    return srcFiches.filter(p=>p.empId===emp?.id||p.employee_id===emp?.id||(portalData?.fiches?.length&&true)).sort((a,b)=>new Date(b.at||b.created_at||0)-new Date(a.at||a.created_at||0));
+  }, [emp, s.pays, portalData]);
   const myDimonas = useMemo(() => (s.dims||[]).filter(d=>d.niss===emp?.niss), [emp, s.dims]);
 
   const totalBrut = myFiches.reduce((a,p)=>a+(p.gross||p.brut||0),0);

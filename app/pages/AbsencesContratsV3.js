@@ -209,8 +209,39 @@ export function BilanSocialV3({s}){
   ];
 
   return <div style={{padding:24}}>
-    <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>📈 Bilan Social BNB</h2>
-    <p style={{fontSize:12,color:'#888',margin:'0 0 20px'}}>{tText('Calcul automatique des indicateurs — Format Banque Nationale de Belgique')}</p>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:4}}>
+      <div>
+        <h2 style={{fontSize:22,fontWeight:700,color:'#c6a34e',margin:'0 0 4px'}}>📈 Bilan Social BNB</h2>
+        <p style={{fontSize:12,color:'#888',margin:0}}>{tText('Calcul automatique des indicateurs — Format Banque Nationale de Belgique')}</p>
+      </div>
+      <button onClick={()=>{
+        const co=s?.co||{name:'Aureus IA SPRL',vat:'BE1028230781'};
+        const annee=new Date().getFullYear();
+        const rows=sections.flatMap(sec=>[
+          `<tr style="background:#1a1a2e"><td colspan="3" style="padding:8px 10px;font-weight:700;color:#c6a34e;font-size:12px">${sec.num}. ${sec.titre} — ${sec.rubrique}</td></tr>`,
+          ...sec.items.map(it=>`<tr><td style="padding:6px 10px;font-size:11px;color:#ccc">${it.code}</td><td style="padding:6px 10px;font-size:11px;color:#e8e6e0">${it.label}</td><td style="padding:6px 10px;font-size:11px;color:#c6a34e;font-weight:600;text-align:right">${it.value} ${it.unit}</td></tr>`)
+        ]).join('');
+        const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Bilan Social BNB ${annee}</title><style>
+          body{font-family:Arial,sans-serif;background:#fff;color:#222;padding:24px}
+          h1{font-size:20px;color:#1a1a2e;border-bottom:3px solid #c6a34e;padding-bottom:8px}
+          .meta{font-size:11px;color:#666;margin:4px 0}
+          table{width:100%;border-collapse:collapse;margin-top:20px}
+          tr{border-bottom:1px solid #e5e7eb}
+          th{background:#1a1a2e;color:#c6a34e;padding:8px 10px;font-size:11px;text-align:left}
+          @media print{body{padding:8px}}
+        </style></head><body>
+        <h1>Bilan Social — ${co.name} — ${annee}</h1>
+        <div class="meta">N° entreprise: ${co.vat||'—'} | Généré le ${new Date().toLocaleDateString('fr-BE')} | Format BNB (AR 04/08/1996)</div>
+        <table><thead><tr><th>Code</th><th>Libellé</th><th style="text-align:right">Valeur</th></tr></thead><tbody>${rows}</tbody></table>
+        <p style="font-size:10px;color:#999;margin-top:24px">* Données calculées automatiquement depuis les données RH enregistrées. À vérifier avec votre comptable avant dépôt BNB.</p>
+        </body></html>`;
+        const w=window.open('','_blank');
+        if(w){w.document.write(html);w.document.close();setTimeout(()=>w.print(),400);}
+      }} style={{padding:'8px 16px',borderRadius:8,border:'none',background:'rgba(198,163,78,.12)',color:'#c6a34e',fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap',marginTop:4}}>
+        🖨️ Exporter PDF (BNB)
+      </button>
+    </div>
+    <div style={{marginBottom:20}}/>
 
     <div style={{display:'grid',gridTemplateColumns:'repeat(6,1fr)',gap:10,marginBottom:18}}>
       {[{l:tText('Effectif'),v:n,c:'#3b82f6'},{l:tText('CDI/CDD'),v:cdi+'/'+cdd,c:'#22c55e'},{l:tText('H/F'),v:hommes+'/'+femmes,c:'#a855f7'},{l:tText('Âge moyen'),v:avgAge.toFixed(1)+' ans',c:'#fb923c'},{l:tText('Ancienneté moy.'),v:avgAnc.toFixed(1)+' ans',c:'#c6a34e'},{l:tText('Masse salariale/an'),v:fmt(masseBrut*12)+' €',c:'#f87171'}].map((k,i)=><div key={i} style={{padding:'10px 12px',background:'rgba(198,163,78,.04)',borderRadius:10,border:'1px solid rgba(198,163,78,.08)'}}><div style={{fontSize:8,color:'#5e5c56',textTransform:'uppercase'}}>{k.l}</div><div style={{fontSize:14,fontWeight:700,color:k.c,marginTop:3}}>{k.v}</div></div>)}

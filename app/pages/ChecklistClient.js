@@ -130,7 +130,7 @@ export default function ChecklistClient({ s, d }) {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await authFetch(`/api/backup?key=${encodeURIComponent(clientKey)}`);
+        const res = await authFetch(`/api/app-state?key=${encodeURIComponent(clientKey)}`);
         if (res.ok) {
           const data = await res.json();
           if (data?.value) {
@@ -164,7 +164,7 @@ export default function ChecklistClient({ s, d }) {
     // Sauvegarder dans Supabase via authFetch (debounced)
     setSaving(true);
     try {
-      await authFetch('/api/backup', {
+      await authFetch('/api/app-state', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
