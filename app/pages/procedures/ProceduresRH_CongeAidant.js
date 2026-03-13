@@ -1,15 +1,209 @@
 'use client';
 import { useState, useMemo } from 'react';
-const PROC_CAI={id:'conge_aidant',icon:'🧑‍🤝‍🧑',categorie:'conges',titre:"Congé d'aidant proche",resume:"5 jours ouvrables/an pour fournir des soins à un membre du ménage ou de la famille souffrant d'un problème médical grave. Introduit par directive UE 2019/1158. En vigueur en Belgique depuis 2023. Pas de rémunération obligatoire légalement, mais certaines CCT prévoient une indemnité. Protection contre le licenciement.",baseLegale:[{ref:"Directive UE 2019/1158 du 20 juin 2019",desc:"Équilibre vie professionnelle/vie privée — aidants proches"},{ref:"Loi du 6 décembre 2018 (transposition belge)",desc:"Congé d'aidant proche — transposition directive UE"},{ref:"Art. 30ter loi 3/07/1978",desc:"Droit au congé aidant dans le droit du travail belge"},{ref:"CCT sectorielle applicable",desc:"Certaines CCT prévoient une rémunération pendant ce congé"}],
-etapes:[
-{n:1,phase:'conditions',titre:"Conditions et bénéficiaires",detail:`═══ QUI PEUT EN BÉNÉFICIER ? ═══\n• Tout travailleur salarié\n• Pas de condition d'ancienneté\n• Pour fournir des soins personnels ou un soutien important\n\n═══ POUR QUEL PROCHE ? ═══\n• Membre du MÉNAGE (cohabitant)\n• Ou membre de la famille jusqu'au 2ème degré :\n  - Conjoint / cohabitant légal\n  - Parents (père, mère)\n  - Enfants\n  - Frères, sœurs\n  - Beaux-parents\n  - Petits-enfants\n  - Grands-parents\n\n═══ CONDITION MÉDICALE REQUISE ═══\n• Le proche doit souffrir d'un problème médical grave\n• Nécessitant des soins personnels ou un soutien important\n• Certificat médical à fournir sur demande de l'employeur`,delai:"Prévenir l'employeur le plus tôt possible",formulaire:"Certificat médical du proche si demandé",ou:"Employeur",obligatoire:true,duree_estimee:'30 min'},
-{n:2,phase:'duree',titre:"Durée et modalités de prise",detail:`═══ DURÉE ═══\n• 5 jours ouvrables par année civile\n• Par travailleur (pas par proche aidé)\n• Peuvent être fractionnés : par journée ou par demi-journée\n• Peuvent être pris de manière non consécutive\n\n═══ RÉMUNÉRATION ═══\n• Légalement : PAS de rémunération obligatoire\n• MAIS : vérifier la CCT sectorielle (CP ${d?.cp||'de l\\'entreprise'})\n• Certaines CCT prévoient un maintien du salaire\n• Certains employeurs accordent par politique interne\n• Alternativement : peut être imputé sur les jours de congé ordinaires\n\n═══ NOTIFICATION ═══\n• Informer l'employeur dans un délai raisonnable\n• Urgence : notification immédiate + justificatif a posteriori\n• Pas de délai légal minimal fixé`,delai:"Notification raisonnable — 2j minimum conseillé",formulaire:"Aucun formulaire officiel",ou:"Service RH",obligatoire:true,duree_estimee:'30 min'},
-{n:3,phase:'protection',titre:"Protection et droits",detail:`═══ PROTECTION CONTRE LE LICENCIEMENT ═══\n• Protection contre les représailles liées à la demande du congé\n• L'employeur ne peut pas sanctionner ni licencier pour ce motif\n• En cas de litige : charge de la preuve partagée\n\n═══ DROITS MAINTENUS ═══\n• Ancienneté maintenue pendant le congé\n• Droits à la sécurité sociale conservés\n• Pas d'impact sur le calcul du préavis\n\n═══ CUMUL AVEC D'AUTRES DROITS ═══\n• Distinct du crédit-temps aidant (plus long mais conditions strictes)\n• Distinct du congé palliatif\n• Distinct des absences pour raisons impérieuses (CCT n°45)\n• Les 5 jours s'ajoutent aux autres droits à congé`,delai:"Protection permanente si motif licenciement lié au congé",formulaire:null,ou:"Tribunal du travail si litige",obligatoire:true,duree_estimee:'30 min'},
-],
-alertes:[{niveau:'important',texte:"5 jours/an sans rémunération légale obligatoire. Vérifier la CCT sectorielle — certaines prévoient le maintien du salaire."},{niveau:'attention',texte:"Distinct du crédit-temps aidant (jusqu'à 6 mois) qui est plus long mais avec conditions et procédure ONEM plus strictes."},{niveau:'attention',texte:"Peut être pris par demi-journées ou journées entières, consécutives ou non, dans l'année civile."}],
-simulation:{titre:"Impact RH — Congé aidant 5 jours/an",lignes:[{label:"Coût si CCT prévoit maintien salaire (ex: 3.000€/mois)",montant:"~690 €/an",type:'neutre'},{label:"Coût si pas de maintien salaire (légal)",montant:"0 € employeur",type:'vert_bold'},{label:'',montant:'',type:'separateur'},{label:"Planification RH : 5j/an maximum par travailleur",montant:"Impact limité",type:'vert_bold'}]},
-faq:[{q:"L'employeur peut-il refuser le congé d'aidant proche ?",r:"L'employeur ne peut pas refuser le droit fondamental au congé. Il peut toutefois demander un justificatif médical. En cas d'urgence, le travailleur peut partir et justifier a posteriori."},{q:"Le congé d'aidant est-il rémunéré ?",r:"Légalement, non. La loi n'impose pas de rémunération. Mais la CCT sectorielle ou la politique RH de l'entreprise peut prévoir le maintien du salaire. Vérifier la CCT applicable."},{q:"Combien de proches peut-on aider avec ces 5 jours ?",r:"Les 5 jours sont par travailleur, pas par proche. Que vous aidiez un ou plusieurs proches, vous disposez de 5 jours par an en tout."},{q:"Quelle différence avec le crédit-temps aidant ?",r:"Le congé aidant (5 j/an) est court et simple. Le crédit-temps aidant permet de réduire ses prestations pendant max 6 mois mais nécessite une reconnaissance officielle du proche aidé et une procédure ONEM."}],
-formulaires:[{nom:"SPF Emploi — Congé aidant proche",url:"https://emploi.belgique.be/fr/themes/conges",type:'en_ligne'},{nom:"Reconnaissance proche aidant (crédit-temps)",url:"https://www.onem.be",type:'en_ligne'}]};
-export default function ProcedureCongeAidant(){const P=PROC_CAI;const[eo,sEo]=useState(null);const[ev,sEv]=useState({});const[ong,sO]=useState('etapes');const tg=n=>sEo(eo===n?null:n);const tV=n=>sEv(p=>({...p,[n]:!p[n]}));const pr=useMemo(()=>{const t=P.etapes.filter(e=>e.obligatoire).length,f=P.etapes.filter(e=>e.obligatoire&&ev[e.n]).length;return{t,f,p:t?Math.round(f/t*100):0}},[ev]);const og=[{id:'etapes',l:'Étapes',i:'📋'},{id:'simulation',l:'Coûts',i:'🧮'},{id:'alertes',l:'Alertes',i:'⚠️'},{id:'faq',l:'FAQ',i:'❓'},{id:'legal',l:'Base légale',i:'⚖️'}];const s={pg:{fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',maxWidth:960,margin:'0 auto',padding:24,background:'#0a0e1a',color:'#e2e8f0',minHeight:'100vh'},ti:{fontSize:28,fontWeight:800,color:'#f8fafc',margin:0},rs:{fontSize:15,color:'#94a3b8',marginTop:12,lineHeight:1.6},pb:{background:'#1e293b',borderRadius:12,padding:16,marginBottom:24},pt:{height:8,background:'#334155',borderRadius:4,overflow:'hidden'},pf:p=>({height:'100%',width:`${p}%`,background:p===100?'#22c55e':'#3b82f6',borderRadius:4,transition:'width .5s'}),ts:{display:'flex',gap:4,marginBottom:20,flexWrap:'wrap'},tb:a=>({padding:'8px 16px',borderRadius:8,border:'none',cursor:'pointer',fontSize:13,fontWeight:a?700:500,background:a?'#3b82f6':'#1e293b',color:a?'#fff':'#94a3b8'}),st2:{fontSize:18,fontWeight:700,color:'#f8fafc',marginBottom:16},cd:{background:'#111827',border:'1px solid #1e293b',borderRadius:12,padding:16,marginBottom:8},ac:n=>({background:n==='critique'?'#dc262610':n==='important'?'#f9731620':'#3b82f610',border:`1px solid ${n==='critique'?'#dc262640':n==='important'?'#f9731640':'#3b82f630'}`,borderRadius:12,padding:16,marginBottom:8}),an:n=>({fontSize:11,fontWeight:700,textTransform:'uppercase',letterSpacing:1,color:n==='critique'?'#ef4444':n==='important'?'#f97316':'#3b82f6',marginBottom:6}),ec:(o,v)=>({background:v?'#22c55e08':'#111827',border:`1px solid ${v?'#22c55e30':o?'#3b82f650':'#1e293b'}`,borderRadius:12,marginBottom:8,borderLeft:`4px solid ${v?'#22c55e':'#3b82f6'}`}),eh:{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',cursor:'pointer',userSelect:'none'},en:v=>({width:32,height:32,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:700,background:v?'#22c55e':'#3b82f620',color:v?'#fff':'#3b82f6',flexShrink:0}),et:{flex:1,fontSize:14,fontWeight:600,color:'#f1f5f9'},eb:o=>({fontSize:11,padding:'2px 8px',borderRadius:10,background:o?'#ef444420':'#64748b20',color:o?'#f87171':'#64748b',fontWeight:600}),ed:{fontSize:13,color:'#cbd5e1',lineHeight:1.7,whiteSpace:'pre-line'},em:{display:'flex',flexWrap:'wrap',gap:8,marginTop:12},mi:c=>({fontSize:12,padding:'4px 10px',borderRadius:6,background:`${c}15`,color:c}),cb:ch=>({width:20,height:20,borderRadius:4,border:`2px solid ${ch?'#22c55e':'#475569'}`,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',flexShrink:0,background:ch?'#22c55e':'transparent'}),sr:t=>({display:'flex',justifyContent:'space-between',padding:t==='separateur'?0:'10px 0',borderBottom:t==='separateur'?'1px solid #1e293b':'none',marginBottom:t==='separateur'?8:0}),sl:t=>({fontSize:14,color:t?.includes('vert')?'#4ade80':'#cbd5e1',fontWeight:t==='vert_bold'?700:400}),sm:t=>({fontSize:t==='vert_bold'?18:14,fontWeight:t?.includes('vert')?700:400,color:t?.includes('vert')?'#4ade80':'#f1f5f9',fontFamily:'monospace'})};
-return(<div style={s.pg}><div style={{marginBottom:32}}><h1 style={s.ti}>{P.icon} {P.titre}</h1><p style={s.rs}>{P.resume}</p></div><div style={s.pb}><div style={{fontSize:13,color:'#94a3b8',marginBottom:8,display:'flex',justifyContent:'space-between'}}><span>Progression : {pr.f}/{pr.t}</span><span style={{fontWeight:700,color:pr.p===100?'#22c55e':'#3b82f6'}}>{pr.p}%</span></div><div style={s.pt}><div style={s.pf(pr.p)}/></div></div><div style={s.ts}>{og.map(o=><button key={o.id} style={s.tb(ong===o.id)} onClick={()=>sO(o.id)}>{o.i} {o.l}</button>)}</div>{ong==='etapes'&&<div>{P.etapes.map(e=>{const o=eo===e.n,v=ev[e.n];return<div key={e.n} style={s.ec(o,v)}><div style={s.eh} onClick={()=>tg(e.n)}><div style={s.cb(v)} onClick={x=>{x.stopPropagation();tV(e.n)}}>{v&&<span style={{color:'#fff',fontSize:14}}>✓</span>}</div><div style={s.en(v)}>{e.n}</div><span style={s.et}>{e.titre}</span><span style={s.eb(e.obligatoire)}>{e.obligatoire?'Obligatoire':'Info'}</span><span style={{color:'#64748b',fontSize:18,transform:o?'rotate(180deg)':'',transition:'transform .2s'}}>▾</span></div>{o&&<div style={{padding:'0 16px 16px 60px'}}><div style={s.ed}>{e.detail}</div><div style={s.em}>{e.delai&&<span style={s.mi('#f59e0b')}>⏰ {e.delai}</span>}{e.duree_estimee&&<span style={s.mi('#8b5cf6')}>⏱️ {e.duree_estimee}</span>}{e.formulaire&&<span style={s.mi('#3b82f6')}>📄 {e.formulaire}</span>}{e.ou&&<span style={s.mi('#64748b')}>📍 {e.ou}</span>}</div></div>}</div>})}</div>}{ong==='simulation'&&<div><h2 style={s.st2}>🧮 {P.simulation.titre}</h2><div style={s.cd}>{P.simulation.lignes.map((r,i)=>r.type==='separateur'?<div key={i} style={s.sr('separateur')}/>:<div key={i} style={s.sr(r.type)}><span style={s.sl(r.type)}>{r.label}</span><span style={s.sm(r.type)}>{r.montant}</span></div>)}</div></div>}{ong==='alertes'&&<div><h2 style={s.st2}>⚠️ Alertes</h2>{P.alertes.map((a,i)=><div key={i} style={s.ac(a.niveau)}><div style={s.an(a.niveau)}>{a.niveau}</div><div style={{fontSize:13,color:'#e2e8f0',lineHeight:1.6}}>{a.texte}</div></div>)}</div>}{ong==='faq'&&<div><h2 style={s.st2}>❓ FAQ</h2>{P.faq.map((f,i)=><div key={i} style={s.cd}><div style={{fontSize:14,fontWeight:600,color:'#f1f5f9',marginBottom:8}}>Q : {f.q}</div><div style={{fontSize:13,color:'#94a3b8',lineHeight:1.6}}>R : {f.r}</div></div>)}</div>}{ong==='legal'&&<div><h2 style={s.st2}>⚖️ Base légale</h2>{P.baseLegale.map((l,i)=><div key={i} style={s.cd}><div style={{fontSize:14,fontWeight:600,color:'#818cf8',marginBottom:4}}>{l.ref}</div><div style={{fontSize:13,color:'#94a3b8'}}>{l.desc}</div></div>)}{P.formulaires&&<div style={{marginTop:16}}><h3 style={{fontSize:14,fontWeight:700,color:'#94a3b8',marginBottom:8}}>📎 Formulaires officiels</h3>{P.formulaires.map((f,i)=><a key={i} href={f.url} target="_blank" rel="noopener noreferrer" style={{display:'block',padding:'10px 14px',background:'#111827',borderRadius:8,marginBottom:6,color:'#60a5fa',fontSize:13,textDecoration:'none'}}>🔗 {f.nom}</a>)}</div>}</div>}</div>);}
-export {PROC_CAI};
+const PROC_CAID = {
+  id: 'conge_aidant', icon: '🧑‍🤝‍🧑', categorie: 'conges',
+  titre: "Congé d'aidant proche",
+  resume: "5 jours ouvrables par an pour soins personnels à un membre du ménage ou de la famille souffrant d'un problème médical grave. Transposé en droit belge en 2023 (Directive UE 2019/1158). Pas de rémunération légale automatique — vérifier CCT. Protection contre le licenciement.",
+  baseLegale: [
+    { ref: "Art. 30 §5 L. 03/07/1978", desc: "Congé d'aidant proche — 5 jours/an, conditions" },
+    { ref: "Directive UE 2019/1158", desc: "Équilibre vie pro/vie privée — transposée 2023" },
+    { ref: "Loi 07/04/2023", desc: "Transposition en droit belge — en vigueur depuis 10/11/2022" },
+  ],
+  etapes: [
+    { n: 1, titre: "Conditions d'accès et bénéficiaires des soins", obligatoire: true, duree_estimee: '30 min',
+      detail: `═══ QUI PEUT BÉNÉFICIER DES SOINS ? ═══
+• Membre du ménage (domicile commun)
+• Famille 1er degré : parents, enfants
+• Depuis 2023 : frères/sœurs, grands-parents, petits-enfants
+• Conjoint/cohabitant légal
+
+═══ CONDITION MÉDICALE ═══
+• Maladie grave nécessitant soins quotidiens ou complexes
+• Handicap reconnu nécessitant aide permanente ou fréquente
+• Âge avancé avec perte d'autonomie
+
+═══ DROIT ═══
+• 5 jours ouvrables par ANNÉE CIVILE (1er jan → 31 déc)
+• Fractionnable par jour ou demi-journée
+• Ne peut être refusé par l'employeur — droit absolu
+
+═══ RÉMUNÉRATION ═══
+• La loi ne prévoit PAS le maintien automatique du salaire
+• Vérifier la CCT sectorielle applicable`,
+      delai: '5 jours max par année civile (1er jan - 31 déc)' },
+    { n: 2, titre: "Notification et justificatifs", obligatoire: true, duree_estimee: '30 min',
+      detail: `═══ NOTIFICATION ═══
+• Le plus tôt possible — idéalement la veille
+• En cas d'urgence : le jour même
+• Oral + confirmation écrite recommandée
+
+═══ JUSTIFICATIFS ═══
+• Attestation médicale précisant la nécessité de soins personnels
+• L'employeur peut demander un justificatif
+• Pas d'obligation de fournir le diagnostic (RGPD)
+
+═══ FORMAT ═══
+Email ou lettre : "Congé d'aidant proche — art. 30 §5 L. 03/07/1978"`,
+      ou: 'Employeur' },
+    { n: 3, titre: "Protection contre le licenciement", obligatoire: true, duree_estimee: '15 min',
+      detail: `═══ PROTECTION ═══
+• Interdiction de licencier ou de modifier unilatéralement les conditions de travail
+• Pendant le congé ET les 2 semaines suivantes
+• Protection contre toute représaille
+
+═══ SANCTION ═══
+• Indemnité = 2 semaines de salaire minimum
+• Sans préjudice de l'indemnité de préavis
+• Tribunal du travail compétent
+
+═══ RAPPEL ═══
+• Ce droit ne peut pas être limité par le règlement de travail
+• L'employeur NE PEUT PAS conditionner le congé à un remplacement préalable`,
+    },
+  ],
+  alertes: [
+    { niveau: 'important', texte: "5 jours seulement par AN — période de référence = ANNÉE CIVILE (1er janvier au 31 décembre), pas l'anniversaire d'entrée en service. Vérifier le solde avant d'accorder." },
+    { niveau: 'attention', texte: "Rémunération non automatique légalement — vérifier la CCT sectorielle. Si silencieuse, le travailleur peut être non payé. Clarifier dans le règlement de travail." },
+    { niveau: 'attention', texte: "Distinct du congé pour assistance médicale (art. 30bis) qui couvre jusqu'à 10 jours pour accompagner un proche en soins palliatifs ou en fin de vie." },
+  ],
+  simulation: {
+    titre: "Impact salarial — 5 jours aidant proche (brut 3.000 €/mois)",
+    lignes: [
+      { label: 'Si CCT prévoit maintien salaire', montant: '~693 €', type: 'neutre' },
+      { label: 'ONSS patronal maintenu', montant: '~187 €', type: 'neutre' },
+      { label: 'Si pas de maintien (loi seule)', montant: '0 € coût direct', type: 'neutre' },
+      { label: '', montant: '', type: 'separateur' },
+      { label: 'Coût max employeur (avec CCT)', montant: '~880 €', type: 'vert_bold' },
+    ],
+  },
+  faq: [
+    { q: "Les 5 jours peuvent-ils être pris en demi-journées ?", r: "Oui — depuis 2023, le congé peut être pris par demi-journées (= 10 demi-journées/an). Accord avec l'employeur recommandé mais pas obligatoire légalement." },
+    { q: "L'employeur peut-il reporter ce congé ?", r: "Non — l'employeur ne peut pas reporter ni refuser. C'est un droit absolu. Seule exception : contestation de la justification médicale via le médecin conseil de la mutuelle." },
+    { q: "Ce congé se cumule-t-il avec le petit chômage ?", r: "Ce sont deux régimes distincts couvrant des situations différentes. Ils ne se cumulent pas pour le même événement mais peuvent s'appliquer à des situations distinctes." },
+  ],
+  formulaires: [
+    { nom: "SPF Emploi — Congé aidant proche", url: "https://emploi.belgique.be/fr/themes/droit-du-travail/contrats-de-travail/interruption-du-contrat-de-travail/conge-pour-raisons-imperieuses", type: 'info' },
+  ],
+};
+export default function ProcedureCongeAidant() {
+  const P = PROC_CAID;
+  const [eo, sEo] = useState(null);
+  const [ev, sEv] = useState({});
+  const [ong, sO] = useState('etapes');
+  const tg = n => sEo(eo === n ? null : n);
+  const tV = n => sEv(p => ({ ...p, [n]: !p[n] }));
+  const pr = useMemo(() => {
+    const t = P.etapes.filter(e => e.obligatoire).length;
+    const f = P.etapes.filter(e => e.obligatoire && ev[e.n]).length;
+    return { t, f, p: t ? Math.round(f / t * 100) : 0 };
+  }, [ev]);
+  const og = [
+    { id: 'etapes', l: 'Étapes', i: '📋' },
+    { id: 'simulation', l: 'Coûts', i: '🧮' },
+    { id: 'alertes', l: 'Alertes', i: '⚠️' },
+    { id: 'faq', l: 'FAQ', i: '❓' },
+    { id: 'legal', l: 'Base légale', i: '⚖️' },
+  ];
+  const s = {
+    pg: { fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif', maxWidth: 960, margin: '0 auto', padding: 24, background: '#0a0e1a', color: '#e2e8f0', minHeight: '100vh' },
+    ti: { fontSize: 28, fontWeight: 800, color: '#f8fafc', margin: 0 },
+    rs: { fontSize: 15, color: '#94a3b8', marginTop: 12, lineHeight: 1.6 },
+    pb: { background: '#1e293b', borderRadius: 12, padding: 16, marginBottom: 24 },
+    pt: { height: 8, background: '#334155', borderRadius: 4, overflow: 'hidden' },
+    pf: p => ({ height: '100%', width: `${p}%`, background: p === 100 ? '#22c55e' : '#3b82f6', borderRadius: 4, transition: 'width .5s' }),
+    ts: { display: 'flex', gap: 4, marginBottom: 20, flexWrap: 'wrap' },
+    tb: a => ({ padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: a ? 700 : 500, background: a ? '#3b82f6' : '#1e293b', color: a ? '#fff' : '#94a3b8' }),
+    st2: { fontSize: 18, fontWeight: 700, color: '#f8fafc', marginBottom: 16 },
+    cd: { background: '#111827', border: '1px solid #1e293b', borderRadius: 12, padding: 16, marginBottom: 8 },
+    ac: n => ({ background: n === 'critique' ? '#dc262610' : n === 'important' ? '#f9731620' : '#3b82f610', border: `1px solid ${n === 'critique' ? '#dc262640' : n === 'important' ? '#f9731640' : '#3b82f630'}`, borderRadius: 12, padding: 16, marginBottom: 8 }),
+    an: n => ({ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: n === 'critique' ? '#ef4444' : n === 'important' ? '#f97316' : '#3b82f6', marginBottom: 6 }),
+    ec: (o, v) => ({ background: v ? '#22c55e08' : '#111827', border: `1px solid ${v ? '#22c55e30' : o ? '#3b82f650' : '#1e293b'}`, borderRadius: 12, marginBottom: 8, borderLeft: `4px solid ${v ? '#22c55e' : '#3b82f6'}` }),
+    eh: { display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', cursor: 'pointer', userSelect: 'none' },
+    en: v => ({ width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, background: v ? '#22c55e' : '#3b82f620', color: v ? '#fff' : '#3b82f6', flexShrink: 0 }),
+    et: { flex: 1, fontSize: 14, fontWeight: 600, color: '#f1f5f9' },
+    eb: o => ({ fontSize: 11, padding: '2px 8px', borderRadius: 10, background: o ? '#ef444420' : '#64748b20', color: o ? '#f87171' : '#64748b', fontWeight: 600 }),
+    ed: { fontSize: 13, color: '#cbd5e1', lineHeight: 1.7, whiteSpace: 'pre-line' },
+    em: { display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 },
+    mi: c => ({ fontSize: 12, padding: '4px 10px', borderRadius: 6, background: `${c}15`, color: c }),
+    cb: ch => ({ width: 20, height: 20, borderRadius: 4, border: `2px solid ${ch ? '#22c55e' : '#475569'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, background: ch ? '#22c55e' : 'transparent' }),
+    sr: t => ({ display: 'flex', justifyContent: 'space-between', padding: t === 'separateur' ? 0 : '10px 0', borderBottom: t === 'separateur' ? '1px solid #1e293b' : 'none', marginBottom: t === 'separateur' ? 8 : 0 }),
+    sl: t => ({ fontSize: 14, color: t?.includes('vert') ? '#4ade80' : '#cbd5e1', fontWeight: t === 'vert_bold' ? 700 : 400 }),
+    sm: t => ({ fontSize: t === 'vert_bold' ? 18 : 14, fontWeight: t?.includes('vert') ? 700 : 400, color: t?.includes('vert') ? '#4ade80' : '#f1f5f9', fontFamily: 'monospace' }),
+  };
+  return (
+    <div style={s.pg}>
+      <div style={{ marginBottom: 32 }}>
+        <h1 style={s.ti}>{P.icon} {P.titre}</h1>
+        <p style={s.rs}>{P.resume}</p>
+      </div>
+      <div style={s.pb}>
+        <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
+          <span>Progression : {pr.f}/{pr.t}</span>
+          <span style={{ fontWeight: 700, color: pr.p === 100 ? '#22c55e' : '#3b82f6' }}>{pr.p}%</span>
+        </div>
+        <div style={s.pt}><div style={s.pf(pr.p)} /></div>
+      </div>
+      <div style={s.ts}>
+        {og.map(o => <button key={o.id} style={s.tb(ong === o.id)} onClick={() => sO(o.id)}>{o.i} {o.l}</button>)}
+      </div>
+      {ong === 'etapes' && <div>{P.etapes.map(e => {
+        const o = eo === e.n, v = ev[e.n];
+        return <div key={e.n} style={s.ec(o, v)}>
+          <div style={s.eh} onClick={() => tg(e.n)}>
+            <div style={s.cb(v)} onClick={x => { x.stopPropagation(); tV(e.n); }}>{v && <span style={{ color: '#fff', fontSize: 14 }}>✓</span>}</div>
+            <div style={s.en(v)}>{e.n}</div>
+            <span style={s.et}>{e.titre}</span>
+            <span style={s.eb(e.obligatoire)}>{e.obligatoire ? 'Obligatoire' : 'Info'}</span>
+            <span style={{ color: '#64748b', fontSize: 18, transform: o ? 'rotate(180deg)' : '', transition: 'transform .2s' }}>▾</span>
+          </div>
+          {o && <div style={{ padding: '0 16px 16px 60px' }}>
+            <div style={s.ed}>{e.detail}</div>
+            <div style={s.em}>
+              {e.delai && <span style={s.mi('#f59e0b')}>⏰ {e.delai}</span>}
+              {e.duree_estimee && <span style={s.mi('#8b5cf6')}>⏱️ {e.duree_estimee}</span>}
+              {e.formulaire && <span style={s.mi('#3b82f6')}>📄 {e.formulaire}</span>}
+              {e.ou && <span style={s.mi('#64748b')}>📍 {e.ou}</span>}
+            </div>
+          </div>}
+        </div>;
+      })}</div>}
+      {ong === 'simulation' && <div>
+        <h2 style={s.st2}>🧮 {P.simulation.titre}</h2>
+        <div style={s.cd}>
+          {P.simulation.lignes.map((r, i) => r.type === 'separateur'
+            ? <div key={i} style={s.sr('separateur')} />
+            : <div key={i} style={s.sr(r.type)}>
+              <span style={s.sl(r.type)}>{r.label}</span>
+              <span style={s.sm(r.type)}>{r.montant}</span>
+            </div>)}
+        </div>
+      </div>}
+      {ong === 'alertes' && <div>
+        <h2 style={s.st2}>⚠️ Alertes</h2>
+        {P.alertes.map((a, i) => <div key={i} style={s.ac(a.niveau)}>
+          <div style={s.an(a.niveau)}>{a.niveau}</div>
+          <div style={{ fontSize: 13, color: '#e2e8f0', lineHeight: 1.6 }}>{a.texte}</div>
+        </div>)}
+      </div>}
+      {ong === 'faq' && <div>
+        <h2 style={s.st2}>❓ FAQ</h2>
+        {P.faq.map((f, i) => <div key={i} style={s.cd}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#f1f5f9', marginBottom: 8 }}>Q : {f.q}</div>
+          <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.6 }}>R : {f.r}</div>
+        </div>)}
+      </div>}
+      {ong === 'legal' && <div>
+        <h2 style={s.st2}>⚖️ Base légale</h2>
+        {P.baseLegale.map((l, i) => <div key={i} style={s.cd}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#818cf8', marginBottom: 4 }}>{l.ref}</div>
+          <div style={{ fontSize: 13, color: '#94a3b8' }}>{l.desc}</div>
+        </div>)}
+        {P.formulaires && <div style={{ marginTop: 16 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8', marginBottom: 8 }}>📎 Formulaires officiels</h3>
+          {P.formulaires.map((f, i) => <a key={i} href={f.url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', padding: '10px 14px', background: '#111827', borderRadius: 8, marginBottom: 6, color: '#60a5fa', fontSize: 13, textDecoration: 'none' }}>🔗 {f.nom}</a>)}
+        </div>}
+      </div>}
+    </div>
+  );
+}
+export { PROC_CAID };
