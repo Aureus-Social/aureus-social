@@ -2882,6 +2882,104 @@ function docOpen(type) {
 }
 
 
+// ── Mode édition inline ──
+var _docEditMode = false;
+function docToggleEdit(force) {
+  var body = document.getElementById('doc-modal-body');
+  var bar = document.getElementById('doc-edit-bar');
+  var btn = document.getElementById('doc-edit-btn');
+  _docEditMode = (force === undefined) ? !_docEditMode : force;
+  if (_docEditMode) {
+    body.contentEditable = 'true';
+    body.style.outline = '2px dashed rgba(201,150,58,.5)';
+    body.style.cursor = 'text';
+    bar.style.display = 'flex';
+    btn.textContent = '🔒 Verrouiller';
+    btn.style.background = 'rgba(34,197,94,.1)';
+    btn.style.borderColor = 'rgba(34,197,94,.4)';
+    btn.style.color = '#22c55e';
+    body.focus();
+  } else {
+    body.contentEditable = 'false';
+    body.style.outline = '';
+    body.style.cursor = '';
+    bar.style.display = 'none';
+    btn.textContent = '✏️ Modifier';
+    btn.style.background = 'rgba(201,150,58,.1)';
+    btn.style.borderColor = 'rgba(201,150,58,.4)';
+    btn.style.color = '#C9963A';
+  }
+}
+
+function docExecCmd(cmd) {
+  document.getElementById('doc-modal-body').focus();
+  document.execCommand(cmd, false, null);
+}
+
+function docInsertField() {
+  var field = prompt('Nom du champ à insérer (ex: Adresse, Fonction, Date) :');
+  if (!field) return;
+  document.getElementById('doc-modal-body').focus();
+  document.execCommand('insertHTML', false, '<span style="background:#fff3cd;padding:1px 6px;border-radius:4px;color:#856404;font-weight:600;">[' + field.toUpperCase() + ']</span>');
+}
+
+// ── Modal email ──
+function docEmail() {
+  var title = document.getElementById('doc-modal-title').textContent;
+  var d = typeof docGetData === 'function' ? docGetData() : {};
+  document.getElementById('email-to').value = d.email || '';
+  document.getElementById('email-subject').value = 'AUREUS IA SPRL — ' + title;
+  document.getElementById('email-body').value =
+    'Madame, Monsieur,\n\n' +
+    'Veuillez trouver ci-joint le document : ' + title + '.\n\n' +
+    'Ce document est transmis dans le cadre de votre dossier d\'embauche.\n' +
+    'N\'hésitez pas à nous contacter pour toute question.\n\n' +
+    'Cordialement,\n' +
+    'AUREUS IA SPRL — Nourdin MOUSSATI, Gérant\n' +
+    'info@aureus-ia.com';
+  document.getElementById('email-modal').style.display = 'block';
+}
+
+function docSendEmail() {
+  var to = document.getElementById('email-to').value.trim();
+  var cc = document.getElementById('email-cc').value.trim();
+  var subject = document.getElementById('email-subject').value.trim();
+  var msgBody = document.getElementById('email-body').value.trim();
+  var docHtml = document.getElementById('doc-modal-body').innerHTML;
+
+  if (!to) { alert('Veuillez saisir une adresse email destinataire.'); return; }
+
+  var fullHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+    '<style>body{font-family:Georgia,serif;padding:40px;color:#1a1916;max-width:800px;margin:0 auto;}' +
+    'h1,h2,h3{color:#C9963A;}table{border-collapse:collapse;width:100%;}td,th{padding:5px 8px;}' +
+    'hr{border:none;border-top:1px solid #ddd;margin:16px 0;}' +
+    '</style></head><body>' +
+    '<div style="text-align:center;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #C9963A;">' +
+    '<div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:2px;">AUREUS IA SPRL — BCE BE 1028.230.781</div>' +
+    '</div>' +
+    (msgBody ? '<div style="background:#f5f3ef;padding:16px;border-radius:8px;margin-bottom:24px;font-size:13px;white-space:pre-line;">' + msgBody + '</div><hr>' : '') +
+    docHtml +
+    '<div style="margin-top:40px;padding-top:16px;border-top:2px solid #C9963A;font-size:11px;color:#888;">Document généré par Aureus Social Pro — aureussocial.be</div>' +
+    '</body></html>';
+
+  // Ouvrir document dans nouvelle fenêtre (imprimable → PDF)
+  var win = window.open('', '_blank', 'width=900,height=700');
+  if (win) { win.document.write(fullHtml); win.document.close(); }
+
+  // Ouvrir client email
+  var ccParam = cc ? '&cc=' + encodeURIComponent(cc) : '';
+  var mailtoBody = msgBody + '\n\n[Document disponible en pièce jointe — voir fenêtre ouverte pour version imprimable/PDF]';
+  var mailto = 'mailto:' + encodeURIComponent(to) +
+    '?subject=' + encodeURIComponent(subject) +
+    ccParam + '&body=' + encodeURIComponent(mailtoBody);
+  setTimeout(function(){ window.location.href = mailto; }, 400);
+
+  document.getElementById('email-modal').style.display = 'none';
+  setTimeout(function(){
+    alert('✅ Document ouvert dans une nouvelle fenêtre (imprimez en PDF pour la pièce jointe).\n📧 Client email ouvert → ' + to);
+  }, 900);
+}
+
 function docPrint() {
   var body = document.getElementById('doc-modal-body').innerHTML;
   var w = window.open('','_blank','width=800,height=600');
@@ -7958,13 +8056,66 @@ renderCP(CP_DATA, '');
   <div style="max-width:780px;margin:40px auto;background:#111009;border:1px solid rgba(201,150,58,.4);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.6);">
     <div style="background:linear-gradient(135deg,rgba(201,150,58,.18),rgba(201,150,58,.03));padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,150,58,.2);flex-wrap:wrap;gap:8px;">
       <div id="doc-modal-title" style="font-size:15px;font-weight:700;color:#C9963A;"></div>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="doc-edit-btn" onclick="docToggleEdit()" style="padding:6px 14px;border-radius:6px;border:1px solid rgba(201,150,58,.4);background:rgba(201,150,58,.1);color:#C9963A;font-size:11px;cursor:pointer;font-family:inherit;">✏️ Modifier</button>
+        <button onclick="docEmail()" style="padding:6px 14px;border-radius:6px;border:1px solid rgba(96,165,250,.4);background:rgba(96,165,250,.1);color:#60a5fa;font-size:11px;cursor:pointer;font-family:inherit;">📧 Envoyer par email</button>
         <button onclick="docPrint()" style="padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#ccc;font-size:11px;cursor:pointer;font-family:inherit;">🖨️ Imprimer</button>
         <button onclick="docCopy()" style="padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#ccc;font-size:11px;cursor:pointer;font-family:inherit;">📋 Copier</button>
         <button onclick="document.getElementById('doc-modal').style.display='none';document.body.style.overflow='';" style="padding:6px 14px;border-radius:6px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.12);color:#ef4444;font-size:11px;cursor:pointer;font-family:inherit;">✕ Fermer</button>
       </div>
     </div>
-    <div id="doc-modal-body" style="padding:28px;font-family:sans-serif;font-size:13px;color:#1a1916;line-height:1.7;background:#ffffff;border-radius:0 0 16px 16px;"></div>
+    <!-- Barre d'édition (cachée par défaut) -->
+    <div id="doc-edit-bar" style="display:none;padding:8px 20px;background:rgba(201,150,58,.08);border-bottom:1px solid rgba(201,150,58,.2);display:none;gap:6px;align-items:center;flex-wrap:wrap;">
+      <span style="font-size:11px;color:#C9963A;font-weight:600;">✏️ Mode édition actif — cliquez dans le document pour modifier</span>
+      <div style="margin-left:auto;display:flex;gap:6px;">
+        <button onclick="docExecCmd('bold')" title="Gras" style="padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#ccc;font-size:12px;cursor:pointer;font-weight:bold;">B</button>
+        <button onclick="docExecCmd('italic')" title="Italique" style="padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#ccc;font-size:12px;cursor:pointer;font-style:italic;">I</button>
+        <button onclick="docExecCmd('underline')" title="Souligné" style="padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#ccc;font-size:12px;cursor:pointer;text-decoration:underline;">U</button>
+        <button onclick="docInsertField()" title="Insérer champ" style="padding:4px 10px;border-radius:4px;border:1px solid rgba(201,150,58,.3);background:rgba(201,150,58,.1);color:#C9963A;font-size:11px;cursor:pointer;">+ Champ</button>
+        <button onclick="docToggleEdit(false)" style="padding:4px 10px;border-radius:4px;border:1px solid rgba(34,197,94,.3);background:rgba(34,197,94,.1);color:#22c55e;font-size:11px;cursor:pointer;font-family:inherit;">✅ Terminer</button>
+      </div>
+    </div>
+    <div id="doc-modal-body" style="padding:28px;font-family:sans-serif;font-size:13px;color:#1a1916;line-height:1.7;background:#ffffff;border-radius:0 0 16px 16px;" spellcheck="false"></div>
+  </div>
+</div>
+
+<!-- Modal Email -->
+<div id="email-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100000;overflow-y:auto;padding:20px;" onclick="if(event.target===this){this.style.display='none';}">
+  <div style="max-width:520px;margin:80px auto;background:#111009;border:1px solid rgba(96,165,250,.3);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.6);">
+    <div style="background:linear-gradient(135deg,rgba(96,165,250,.15),rgba(96,165,250,.03));padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(96,165,250,.2);">
+      <div style="font-size:15px;font-weight:700;color:#60a5fa;">📧 Envoyer le document par email</div>
+      <button onclick="document.getElementById('email-modal').style.display='none';" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.1);color:#ef4444;font-size:11px;cursor:pointer;font-family:inherit;">✕</button>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <label style="font-size:11px;color:#9e9b93;display:block;margin-bottom:4px;">De (expéditeur)</label>
+        <input id="email-from" type="email" value="info@aureus-ia.com" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8e6e0;font-size:12px;font-family:inherit;box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:#9e9b93;display:block;margin-bottom:4px;">À (destinataire) *</label>
+        <input id="email-to" type="email" placeholder="email@exemple.com" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8e6e0;font-size:12px;font-family:inherit;box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:#9e9b93;display:block;margin-bottom:4px;">CC (optionnel)</label>
+        <input id="email-cc" type="email" placeholder="copie@exemple.com" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8e6e0;font-size:12px;font-family:inherit;box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:#9e9b93;display:block;margin-bottom:4px;">Objet</label>
+        <input id="email-subject" type="text" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8e6e0;font-size:12px;font-family:inherit;box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:11px;color:#9e9b93;display:block;margin-bottom:4px;">Message d'accompagnement</label>
+        <textarea id="email-body" rows="5" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8e6e0;font-size:12px;font-family:inherit;box-sizing:border-box;resize:vertical;"></textarea>
+      </div>
+      <div style="background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.15);border-radius:8px;padding:10px 12px;font-size:11px;color:#9e9b93;">
+        📎 Le document sera joint en pièce jointe HTML imprimable.<br>
+        L'envoi utilise votre client email par défaut (mailto).
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button onclick="document.getElementById('email-modal').style.display='none';" style="padding:8px 18px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#9e9b93;font-size:12px;cursor:pointer;font-family:inherit;">Annuler</button>
+        <button onclick="docSendEmail()" style="padding:8px 22px;border-radius:8px;border:none;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">📧 Envoyer</button>
+      </div>
+    </div>
   </div>
 </div>
 
