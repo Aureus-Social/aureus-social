@@ -40,6 +40,7 @@ const DashboardPage = dynamic(() => import('../pages/dashboard'), { ssr: false, 
 const EmployeesPage = dynamic(() => import('../pages/employees'), { ssr: false, loading: Loading });
 const PayslipsPage = dynamic(() => import('../pages/payslips'), { ssr: false, loading: Loading });
 const DimonaPageComp = dynamic(() => import('../pages/dimona'), { ssr: false, loading: Loading });
+const DeclarationsONSSPg = dynamic(() => import('../pages/DeclarationsONSS'), { ssr: false, loading: Loading });
 const AdminPage = dynamic(() => import('../pages/admin'), { ssr: false, loading: Loading });
 const RolesPermissionsPage = dynamic(() => import('../pages/RolesPermissions'), { ssr: false, loading: Loading });
 const SettingsPageComp = dynamic(() => import('../pages/settings'), { ssr: false, loading: Loading });
@@ -70,6 +71,7 @@ const PayrollGroupPg = dynamic(() => import('../pages/PayrollGroup'), { ssr: fal
 const PortalSystemPg = dynamic(() => import('../pages/PortalSystem'), { ssr: false, loading: Loading });
 const TransversalCPPg = dynamic(() => import('../pages/TransversalCP'), { ssr: false, loading: Loading });
 const ModsBatch2Pg = dynamic(() => import('../pages/ModsBatch2'), { ssr: false, loading: Loading });
+const ConnecteursComptaPg = dynamic(() => import('../pages/ConnecteursCompta'), { ssr: false, loading: Loading });
 const PayrollHubPg = dynamic(() => import('../pages/PayrollHub'), { ssr: false, loading: Loading });
 const ProceduresRHHubPg = dynamic(() => import('../pages/procedures/ProceduresRHHub'), { ssr: false, loading: Loading });
 
@@ -573,7 +575,7 @@ function DashboardLayoutInner({ user }) {
       case 'dashboard': return <DashboardPage s={s} d={d} t={t} lang={lang} th={TH} onNavigate={setPage} />;
       case 'employees': return <EmployeesPage s={s} d={d} t={t} lang={lang} th={TH} />;
       case 'payslip': return <PayslipsPage s={s} d={d} t={t} lang={lang} th={TH} scrollAnchor={scrollAnchor} onAnchorHandled={()=>setScrollAnchor(null)} />;
-      case 'declarations': case 'onss': return <DimonaPageComp s={s} d={d} t={t} lang={lang} th={TH} />;
+      case 'declarations': case 'onss': return <DeclarationsONSSPg s={s} d={d} />;
       case 'admin': return <AdminPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'backup': return <AdminPage s={s} d={d} t={t} lang={lang} th={TH} tab='backup' />;
       case 'permissions': return <RolesPermissionsPage s={s} d={d} t={t} lang={lang} th={TH} />;
@@ -661,6 +663,7 @@ function DashboardLayoutInner({ user }) {
       case 'exportbatch': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'exportcoda': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'exportcompta': return <ModsBatch2Pg s={s} d={d} tab={page} />;
+      case 'connecteurscompta': return <ConnecteursComptaPg s={s} />;
       case 'exportcomptapro': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'fiscal': return <TransversalCPPg s={s} d={d} tab={page} />;
       case 'importcsv': return <ModsBatch2Pg s={s} d={d} tab={page} />;
