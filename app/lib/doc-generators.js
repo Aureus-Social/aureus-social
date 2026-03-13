@@ -59,44 +59,235 @@ export function previewHTML(html, title) {
   document.body.appendChild(overlay);
 }
 
-/** Ouvre le document et lance l'impression (Enregistrer au format PDF). */
+/** Ouvre le document avec barre d'actions complète : Verrouiller, Envoyer par email, Imprimer, Copier, Fermer */
 export function openForPDF(html, title) {
   if (!html || typeof html !== 'string') { alert('Document indisponible.'); return; }
-  try {
-    const win = window.open('', '_blank', 'noopener,noreferrer,width=900,height=700,scrollbars=yes');
-    if (win && !win.closed) {
-      win.document.write(html);
-      win.document.close();
-      win.document.title = title || 'Aureus Social Pro';
-      win.focus();
-      setTimeout(() => { try { win.print(); } catch(e) { /* print unavailable */ } }, 600);
-      return;
-    }
-  } catch(e) { /* handled */ }
+
+  // ── State ──
+  let locked = false;
+  let editMode = false;
+
+  // ── Overlay principal ──
   const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:2147483647;display:flex;flex-direction:column;align-items:center;padding:20px;font-family:system-ui,sans-serif';
-  const titre = document.createElement('div');
-  titre.textContent = 'Document prêt — Cliquez « Télécharger PDF » puis dans la fenêtre choisissez « Enregistrer au format PDF »';
-  titre.style.cssText = 'color:#c6a34e;font-weight:700;font-size:14px;margin-bottom:12px;text-align:center;max-width:600px';
-  overlay.appendChild(titre);
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.88);z-index:2147483647;display:flex;flex-direction:column;align-items:center;padding:16px;font-family:system-ui,sans-serif';
+
+  // ── Barre titre ──
+  const titleBar = document.createElement('div');
+  titleBar.style.cssText = 'width:100%;max-width:900px;display:flex;align-items:center;gap:10px;margin-bottom:10px';
+  const titleIcon = document.createElement('span');
+  titleIcon.textContent = '📄';
+  titleIcon.style.cssText = 'font-size:18px';
+  const titleText = document.createElement('span');
+  titleText.textContent = title || 'Document';
+  titleText.style.cssText = 'font-size:14px;font-weight:700;color:#c6a34e;flex:1';
+  titleBar.appendChild(titleIcon);
+  titleBar.appendChild(titleText);
+  overlay.appendChild(titleBar);
+
+  // ── Barre boutons ──
   const bar = document.createElement('div');
-  bar.style.cssText = 'display:flex;gap:8px;margin-bottom:12px';
-  const iframe = document.createElement('iframe');
-  iframe.style.cssText = 'flex:1;width:100%;max-width:900px;border:2px solid rgba(198,163,78,.4);border-radius:10px;background:#fff';
-  iframe.srcdoc = html;
-  [
-    { text: '📄 Télécharger PDF', bg: '#c6a34e', color: '#060810', fn: () => { try { if (iframe.contentWindow) iframe.contentWindow.print(); else alert('Chargement... Réessayez dans 2 secondes.'); } catch(e) { alert('Utilisez Ctrl+P (ou Cmd+P) puis « Enregistrer au format PDF »'); } } },
-    { text: '✕ Fermer', bg: '#ef4444', color: '#fff', fn: () => { try { document.body.removeChild(overlay); } catch(e) { /* DOM cleanup */ } } }
-  ].forEach(b => {
+  bar.style.cssText = 'width:100%;max-width:900px;display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;background:#111009;border:1px solid rgba(198,163,78,.2);border-radius:10px;padding:10px 14px';
+
+  // Bouton helper
+  function makeBtn(text, bg, color, border, fn) {
     const btn = document.createElement('button');
-    btn.textContent = b.text;
-    btn.style.cssText = 'padding:10px 20px;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;background:' + b.bg + ';color:' + b.color;
-    btn.onclick = b.fn;
-    bar.appendChild(btn);
+    btn.innerHTML = text;
+    btn.style.cssText = `padding:7px 14px;border:${border||'none'};border-radius:6px;font-weight:700;cursor:pointer;font-size:12px;background:${bg};color:${color};transition:opacity .15s;white-space:nowrap`;
+    btn.onmouseenter = () => btn.style.opacity = '.8';
+    btn.onmouseleave = () => btn.style.opacity = '1';
+    btn.onclick = fn;
+    return btn;
+  }
+
+  // 1. Verrouiller / Déverrouiller
+  const btnLock = makeBtn('🔒 Verrouiller', '#c6a34e', '#060810', 'none', () => {
+    locked = !locked;
+    btnLock.innerHTML = locked ? '🔓 Déverrouiller' : '🔒 Verrouiller';
+    btnLock.style.background = locked ? '#2e7d32' : '#c6a34e';
+    btnLock.style.color = locked ? '#fff' : '#060810';
+    editBar.style.display = locked ? 'none' : 'flex';
+    if (locked) {
+      editMode = false;
+      iframe.contentDocument && (iframe.contentDocument.body.contentEditable = 'false');
+      editHint.style.display = 'none';
+    }
   });
+
+  // 2. Envoyer par email
+  const btnEmail = makeBtn('📧 Envoyer par email', '#1565c0', '#fff', 'none', () => {
+    const docHTML = iframe.srcdoc || html;
+    showEmailModal(docHTML, title, overlay);
+  });
+
+  // 3. Imprimer / PDF
+  const btnPrint = makeBtn('🖨 Imprimer', '#374151', '#e8e6e0', '1px solid rgba(255,255,255,.1)', () => {
+    try { iframe.contentWindow.print(); } catch(e) { alert('Ctrl+P pour enregistrer en PDF'); }
+  });
+
+  // 4. Copier
+  const btnCopy = makeBtn('📋 Copier', '#374151', '#e8e6e0', '1px solid rgba(255,255,255,.1)', () => {
+    try {
+      const text = iframe.contentDocument?.body?.innerText || '';
+      navigator.clipboard.writeText(text).then(() => {
+        btnCopy.innerHTML = '✅ Copié';
+        setTimeout(() => { btnCopy.innerHTML = '📋 Copier'; }, 2000);
+      });
+    } catch(e) { alert('Copie non disponible'); }
+  });
+
+  // 5. Fermer
+  const btnClose = makeBtn('✕ Fermer', '#c62828', '#fff', 'none', () => {
+    try { document.body.removeChild(overlay); } catch(e) {}
+  });
+
+  [btnLock, btnEmail, btnPrint, btnCopy, btnClose].forEach(b => bar.appendChild(b));
   overlay.appendChild(bar);
+
+  // ── Barre édition ──
+  const editBar = document.createElement('div');
+  editBar.style.cssText = 'width:100%;max-width:900px;display:flex;align-items:center;gap:8px;margin-bottom:8px;background:#1a1a0e;border:1px solid rgba(198,163,78,.15);border-radius:8px;padding:7px 14px';
+  const editHint = document.createElement('span');
+  editHint.textContent = '✏️ Mode édition actif — cliquez dans le document pour modifier';
+  editHint.style.cssText = 'font-size:11px;color:#c6a34e;flex:1;display:none';
+
+  function makeFmtBtn(label, cmd) {
+    const b = document.createElement('button');
+    b.textContent = label;
+    b.style.cssText = 'padding:4px 10px;border:1px solid rgba(198,163,78,.3);border-radius:4px;background:none;color:#e8e6e0;cursor:pointer;font-size:13px;font-weight:700';
+    b.onclick = () => { try { iframe.contentDocument.execCommand(cmd, false, null); } catch(e) {} };
+    return b;
+  }
+  const btnField = makeBtn('+ Champ', 'rgba(198,163,78,.15)', '#c6a34e', '1px solid rgba(198,163,78,.3)', () => {
+    try {
+      const field = prompt('Nom du champ :', 'Champ');
+      if (field) iframe.contentDocument.execCommand('insertText', false, `[${field}]`);
+    } catch(e) {}
+  });
+  const btnDone = makeBtn('✅ Terminer', '#2e7d32', '#fff', 'none', () => {
+    editMode = false;
+    try { iframe.contentDocument.body.contentEditable = 'false'; } catch(e) {}
+    editHint.style.display = 'none';
+    btnEditToggle.innerHTML = '✏️ Modifier';
+    btnEditToggle.style.background = 'rgba(198,163,78,.15)';
+  });
+  const btnEditToggle = makeBtn('✏️ Modifier', 'rgba(198,163,78,.15)', '#c6a34e', '1px solid rgba(198,163,78,.3)', () => {
+    editMode = !editMode;
+    try { iframe.contentDocument.body.contentEditable = editMode ? 'true' : 'false'; } catch(e) {}
+    editHint.style.display = editMode ? 'inline' : 'none';
+    btnEditToggle.innerHTML = editMode ? '🔒 Verrouiller édition' : '✏️ Modifier';
+  });
+
+  [btnEditToggle, makeFmtBtn('B','bold'), makeFmtBtn('I','italic'), makeFmtBtn('U','underline'), btnField, editHint, btnDone].forEach(b => editBar.appendChild(b));
+  overlay.appendChild(editBar);
+
+  // ── iframe ──
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'flex:1;width:100%;max-width:900px;border:2px solid rgba(198,163,78,.3);border-radius:10px;background:#fff';
+  iframe.srcdoc = html;
   overlay.appendChild(iframe);
   document.body.appendChild(overlay);
+}
+
+// ── Modal envoi email (DOM vanilla, sans React) ──────────────────
+function showEmailModal(htmlContent, docTitle, parentOverlay) {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2147483648;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif';
+
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#111009;border:1px solid rgba(198,163,78,.25);border-radius:12px;padding:28px;width:420px;max-width:90vw';
+
+  const G = '#c6a34e', DK = '#060810', TX = '#e8e6e0', MT = '#5e5c56';
+
+  box.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div>
+        <div style="font-size:15px;font-weight:700;color:${TX}">📧 Envoyer par email</div>
+        <div style="font-size:11px;color:${G};margin-top:2px">${docTitle || 'Document'}</div>
+      </div>
+      <button id="__closeEmail" style="background:none;border:none;color:${MT};cursor:pointer;font-size:18px">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="display:block;font-size:11px;color:${MT};margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Email destinataire *</label>
+        <input id="__emailTo" type="email" placeholder="travailleur@exemple.be" style="width:100%;background:#0d1117;border:1px solid rgba(198,163,78,.25);border-radius:6px;padding:8px 12px;color:${TX};font-size:13px;outline:none;box-sizing:border-box">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;color:${MT};margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Nom du destinataire</label>
+        <input id="__emailName" type="text" placeholder="Jean Dupont" style="width:100%;background:#0d1117;border:1px solid rgba(198,163,78,.25);border-radius:6px;padding:8px 12px;color:${TX};font-size:13px;outline:none;box-sizing:border-box">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;color:${MT};margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Message (optionnel)</label>
+        <textarea id="__emailMsg" rows="3" placeholder="Bonjour, veuillez trouver ci-joint..." style="width:100%;background:#0d1117;border:1px solid rgba(198,163,78,.25);border-radius:6px;padding:8px 12px;color:${TX};font-size:13px;outline:none;box-sizing:border-box;resize:vertical;line-height:1.5"></textarea>
+      </div>
+      <div id="__emailError" style="display:none;background:rgba(198,40,40,.1);border:1px solid rgba(198,40,40,.3);border-radius:6px;padding:8px 12px;font-size:12px;color:#ef9a9a"></div>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button id="__cancelEmail" style="flex:1;background:none;border:1px solid rgba(198,163,78,.2);border-radius:6px;padding:10px;color:${MT};cursor:pointer;font-size:13px">Annuler</button>
+        <button id="__sendEmail" style="flex:2;background:${G};color:${DK};border:none;border-radius:6px;padding:10px;font-weight:700;cursor:pointer;font-size:13px">📧 Envoyer</button>
+      </div>
+    </div>
+  `;
+
+  modal.appendChild(box);
+  document.body.appendChild(modal);
+
+  const close = () => { try { document.body.removeChild(modal); } catch(e) {} };
+  box.querySelector('#__closeEmail').onclick = close;
+  box.querySelector('#__cancelEmail').onclick = close;
+
+  box.querySelector('#__sendEmail').onclick = async () => {
+    const to = box.querySelector('#__emailTo').value.trim();
+    const recipientName = box.querySelector('#__emailName').value.trim();
+    const message = box.querySelector('#__emailMsg').value.trim();
+    const errDiv = box.querySelector('#__emailError');
+    const sendBtn = box.querySelector('#__sendEmail');
+
+    if (!to) { errDiv.style.display='block'; errDiv.textContent='Email requis'; return; }
+
+    sendBtn.innerHTML = '⏳ Envoi...';
+    sendBtn.style.background = 'rgba(198,163,78,.4)';
+    sendBtn.disabled = true;
+    errDiv.style.display = 'none';
+
+    try {
+      // Récupère le token Supabase depuis le localStorage
+      let token = null;
+      try {
+        const sbKey = Object.keys(localStorage).find(k => k.includes('supabase') && k.includes('auth'));
+        if (sbKey) {
+          const parsed = JSON.parse(localStorage.getItem(sbKey));
+          token = parsed?.access_token || parsed?.session?.access_token;
+        }
+      } catch(_) {}
+
+      const res = await fetch('/api/send-document', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ to, recipientName, message, docTitle: docTitle || 'Document', docType: 'Document Aureus Social Pro', htmlContent }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur envoi');
+
+      // Succès
+      box.innerHTML = `
+        <div style="text-align:center;padding:24px 0">
+          <div style="font-size:44px;margin-bottom:14px">✅</div>
+          <div style="font-size:15px;color:#e8e6e0;font-weight:700">Email envoyé avec succès</div>
+          <div style="font-size:12px;color:#5e5c56;margin-top:8px">→ ${to}</div>
+          <button onclick="this.closest('div[style*=fixed]').remove()" style="margin-top:22px;background:#c6a34e;color:#060810;border:none;border-radius:6px;padding:10px 28px;font-weight:700;cursor:pointer;font-size:13px">Fermer</button>
+        </div>
+      `;
+    } catch(err) {
+      errDiv.style.display = 'block';
+      errDiv.textContent = '⚠ ' + err.message;
+      sendBtn.innerHTML = '📧 Envoyer';
+      sendBtn.style.background = G;
+      sendBtn.disabled = false;
+    }
+  };
 }
 
 // ═══ SIMULATION PDF ═══
