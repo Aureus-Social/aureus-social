@@ -652,7 +652,10 @@ function DashboardLayoutInner({ user }) {
       case 'support': return <NotificationCenterPgW s={s} d={d} tab={page} />;
       case 'team': return <EmployeeHubPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'testsuite': return <AuditCodePage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
-      case 'embaucheaz': return <OnboardingPage s={s} d={d} t={t} lang={lang} th={TH} />;
+      case 'embaucheaz': {
+        if (typeof window !== 'undefined') window.open('/embauche-az.html', '_blank');
+        return <PlaceholderPage id={page} label={currentItem?.label || 'Embauche A→Z'} />;
+      }
       default: return <PlaceholderPage id={page} label={currentItem.label} />;
     }
   };
