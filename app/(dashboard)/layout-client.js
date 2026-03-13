@@ -71,6 +71,7 @@ const PayrollGroupPg = dynamic(() => import('../pages/PayrollGroup'), { ssr: fal
 const PortalSystemPg = dynamic(() => import('../pages/PortalSystem'), { ssr: false, loading: Loading });
 const TransversalCPPg = dynamic(() => import('../pages/TransversalCP'), { ssr: false, loading: Loading });
 const ModsBatch2Pg = dynamic(() => import('../pages/ModsBatch2'), { ssr: false, loading: Loading });
+const ExportCODAPg = dynamic(() => import('../pages/ExportCODA'), { ssr: false, loading: Loading });
 const ConnecteursComptaPg = dynamic(() => import('../pages/ConnecteursCompta'), { ssr: false, loading: Loading });
 const PayrollHubPg = dynamic(() => import('../pages/PayrollHub'), { ssr: false, loading: Loading });
 const ProceduresRHHubPg = dynamic(() => import('../pages/procedures/ProceduresRHHub'), { ssr: false, loading: Loading });
@@ -661,7 +662,7 @@ function DashboardLayoutInner({ user }) {
       case 'chomagetemporaire': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'exportWinbooks': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'exportbatch': return <ModsBatch2Pg s={s} d={d} tab={page} />;
-      case 'exportcoda': return <ModsBatch2Pg s={s} d={d} tab={page} />;
+      case 'exportcoda': return <ExportCODAPg s={s} />;
       case 'exportcompta': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'connecteurscompta': return <ConnecteursComptaPg s={s} />;
       case 'exportcomptapro': return <ModsBatch2Pg s={s} d={d} tab={page} />;
