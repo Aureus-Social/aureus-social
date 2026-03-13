@@ -1,5 +1,6 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import { authFetch } from '@/app/lib/auth-fetch';
 import { LOIS_BELGES, RMMMG, f2 } from '@/app/lib/helpers';
 
 // ─── Styles ───────────────────────────────────────────────────
@@ -424,6 +425,32 @@ export default function DiagnosticCommercial({ s, d, th }) {
                 navigator.clipboard?.writeText(txt);
               }} style={{ ...S.btn(false), padding: '10px 24px', fontSize: 13 }}>
                 📋 Copier résumé
+              </button>
+              <button onClick={async () => {
+                try {
+                  const payload = {
+                    entreprise: form.entreprise || 'Prospect',
+                    concurrent: conc.label,
+                    n_emps: calcul.n,
+                    cout_actuel: calcul.coutConcAnnuel,
+                    cout_aureus: calcul.coutAureusAnnuel,
+                    economie_annuelle: calcul.economieAnnuelle,
+                    score_conformite: score,
+                    risques: auditRisques.map(p => p.label),
+                    form_data: form,
+                    created_at: new Date().toISOString(),
+                    type: 'diagnostic_commercial',
+                  };
+                  const res = await authFetch('/api/backup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: `diag_${Date.now()}`, data: payload, table: 'app_state' }),
+                  });
+                  if (res.ok) alert('✅ Diagnostic sauvegardé dans votre CRM Aureus');
+                  else alert('⚠️ Sauvegarde échouée — copiez le résumé manuellement');
+                } catch (e) { alert('⚠️ Erreur réseau — ' + e.message); }
+              }} style={{ ...S.btn(true, '#3b82f6'), padding: '10px 24px', fontSize: 13 }}>
+                💾 Sauvegarder en CRM
               </button>
             </div>
           </div>

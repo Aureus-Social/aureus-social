@@ -14,7 +14,7 @@ const THRESHOLDS = {
   MAX_DELETES_PER_HOUR: 20,     // Plus de 20 suppressions/heure = suspect
 };
 
-export async function GET(request) {
+export async function GET(req) {
   const u = await getAuthUser(req);
   if (!u) return Response.json({ error: 'Non autorisé' }, { status: 401 });
 

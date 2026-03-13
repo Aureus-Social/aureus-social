@@ -7,7 +7,8 @@ import { useLang } from '../lib/lang-context';
 //  Masse salariale, répartition ONSS/PP, absences, coûts
 // ═══════════════════════════════════════════════════════
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { authFetch } from '@/app/lib/auth-fetch'
 import dynamic from 'next/dynamic'
 import { TX_ONSS_W, TX_ONSS_E, RMMMG, PP_EST } from '@/app/lib/helpers'
 
@@ -109,6 +110,17 @@ function AnalyticsDashboard({ state, defaultTab }) {
   const employees = state?.emps || state?.employees || []
   const payslips = state?.pays || state?.payrollHistory || []
   const company = state?.co || state?.company || {}
+
+  // ── Chargement stats réelles depuis Supabase ──
+  const [realStats, setRealStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(false);
+  useEffect(() => {
+    setStatsLoading(true);
+    authFetch('/api/stats').then(r => r.ok ? r.json() : null).then(data => {
+      if (data?.ok) setRealStats(data);
+      setStatsLoading(false);
+    }).catch(() => setStatsLoading(false));
+  }, []);
 
   // ── Calculer les KPIs ──
   const kpis = useMemo(() => {
