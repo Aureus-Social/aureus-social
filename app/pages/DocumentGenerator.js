@@ -138,8 +138,10 @@ function buildContractHTML(type, data) {
   const coBce = escapeHtml(company.bce || 'N/A')
   const coOnss = escapeHtml(company.onss || 'N/A')
   const coCity = escapeHtml(company.city || 'Bruxelles')
+  const coZip = escapeHtml(company.zip || '')
   const cp = escapeHtml(data.cp || company.cp || '200')
   const workerName = escapeHtml(data.name || '___')
+  const workerFirst = workerName.split(' ')[0] || workerName
   const workerAddr = escapeHtml(data.address || '___')
   const workerNiss = escapeHtml(data.niss || '___')
   const workerBirth = escapeHtml(data.birthDate || '___')
@@ -149,538 +151,856 @@ function buildContractHTML(type, data) {
   const salary = escapeHtml(String(data.salary || '___'))
   const hours = escapeHtml(String(data.hoursPerWeek || '38'))
   const regime = parseFloat(data.regime || 100)
-  const regimeStr = regime < 100 ? `temps partiel (${regime}%)` : 'temps plein'
+  const regimePct = regime < 100 ? `${regime}%` : '100%'
+  const regimeLabel = regime < 100 ? `temps partiel à ${regime}%` : 'temps plein'
   const workplace = escapeHtml(data.workplace || company.address || coAddr)
+  const signatory = escapeHtml(company.signatoryName || 'le/la Gérant(e)')
+  const signatoryTitle = escapeHtml(company.signatoryTitle || 'Gérant(e)')
+  const motifCDD = escapeHtml(data.reason || data.motifcdd || '[motif du recours au CDD à préciser conformément à l\'article 10 de la loi du 3 juillet 1978]')
+  const nonConc = data.nonCompete && data.nonCompete !== 'non'
   const mealV = data.mealVouchers ? escapeHtml(String(data.mealVouchers)) : null
+  const schedule = escapeHtml(data.schedule || 'selon les plannings communiqués par l\'Employeur avec un préavis raisonnable')
   const logoUrl = company.logoUrl || company.logo || ''
-
-  // Calcul préavis pour affichage dans le contrat
-  const noticeWeeksEmp = calculateNotice(data.startDate, true)
-  const noticeWeeksTrav = calculateNotice(data.startDate, false)
+  const noticeEmp = calculateNotice(data.startDate, true)
+  const noticeTrav = calculateNotice(data.startDate, false)
 
   const CSS = `
-    @page { margin: 20mm; size: A4; }
+    @page {
+      margin: 25mm 20mm 20mm 25mm;
+      size: A4;
+      @bottom-center {
+        content: "— " counter(page) " —";
+        font-size: 9pt;
+        color: #888;
+        font-family: Georgia, serif;
+      }
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Georgia, 'Times New Roman', serif; font-size: 11.5px; line-height: 1.65; color: #1a1a1a; padding: 24px; max-width: 210mm; margin: 0 auto; }
-    .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 3px solid #c6a34e; }
-    .header-left { flex: 1; }
-    .company-name { font-size: 16px; font-weight: 700; color: #c6a34e; margin-bottom: 4px; }
-    .company-info { font-size: 10px; color: #555; line-height: 1.6; }
-    .doc-title-block { text-align: center; margin: 24px 0 20px; }
-    .doc-title { font-size: 17px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #1a1a1a; }
-    .doc-subtitle { font-size: 10px; color: #666; font-style: italic; margin-top: 4px; }
-    .parties-block { background: #f9f7f3; border: 1px solid #ddd; border-radius: 6px; padding: 16px 20px; margin: 20px 0; }
-    .parties-block p { margin-bottom: 8px; }
-    .parties-block p:last-child { margin-bottom: 0; }
-    .entre { font-weight: 700; margin-bottom: 12px; }
-    .convenu { font-weight: 700; margin: 20px 0 12px; border-top: 1px solid #ddd; padding-top: 16px; }
-    .article { margin: 0 0 16px 0; }
-    .article-title { font-weight: 700; font-size: 11.5px; color: #1a1a1a; margin-bottom: 6px; border-left: 3px solid #c6a34e; padding-left: 8px; }
-    .article-body { padding-left: 11px; font-size: 11px; line-height: 1.7; }
-    .article-body ul { margin: 6px 0 6px 18px; }
-    .article-body li { margin-bottom: 3px; }
-    .highlight-box { background: #fff8e7; border: 1px solid #f0d080; border-radius: 4px; padding: 8px 12px; margin: 8px 0; font-size: 10.5px; }
-    .warn-box { background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 8px 12px; margin: 8px 0; font-size: 10.5px; color: #856404; }
-    .signatures { margin-top: 32px; padding-top: 20px; border-top: 2px solid #c6a34e; }
-    .sig-intro { margin-bottom: 20px; font-size: 11px; }
-    .sig-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    .sig-table td { width: 50%; vertical-align: top; padding: 12px 16px; }
-    .sig-name { font-weight: 700; margin-bottom: 4px; }
-    .sig-title { font-size: 10px; color: #555; margin-bottom: 40px; }
-    .sig-line { border-top: 1px solid #333; padding-top: 4px; font-size: 10px; color: #555; }
-    .exemplaire { font-size: 10px; color: #666; margin-top: 12px; font-style: italic; text-align: center; }
-    .legal-footer { margin-top: 28px; padding-top: 14px; border-top: 1px solid #ccc; font-size: 9px; color: #888; }
-    .legal-footer strong { color: #555; }
-    hr.section { border: none; border-top: 1px solid #ddd; margin: 20px 0; }
-    .mention-legale { font-size: 9.5px; color: #666; font-style: italic; margin-top: 4px; }
-    @media print { .no-print { display: none !important; } }
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 11pt;
+      line-height: 1.75;
+      color: #1a1a1a;
+      padding: 24px 32px;
+      max-width: 210mm;
+      margin: 0 auto;
+      counter-reset: page;
+    }
+    /* En-tête institutionnel */
+    .header-band {
+      background: #0d1117;
+      color: #c6a34e;
+      padding: 14px 24px;
+      margin: -24px -32px 0 -32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-band-left { display: flex; align-items: center; gap: 16px; }
+    .header-logo { max-height: 44px; max-width: 120px; object-fit: contain; }
+    .header-company-name { font-size: 14pt; font-weight: 700; letter-spacing: 0.5px; }
+    .header-company-sub { font-size: 8pt; color: #a89060; margin-top: 2px; font-weight: 400; }
+    .header-ref { text-align: right; font-size: 8pt; color: #a89060; line-height: 1.5; }
+    /* Séparateur doré */
+    .gold-rule { height: 3px; background: linear-gradient(90deg, #c6a34e, #e8c97a, #c6a34e); margin: 0 -32px 28px -32px; }
+    .gold-rule-thin { height: 1px; background: #c6a34e; margin: 20px 0; opacity: 0.4; }
+    /* Titre du document */
+    .doc-title-block {
+      text-align: center;
+      margin: 28px 0 24px;
+      padding: 20px;
+      border: 2px solid #c6a34e;
+      border-radius: 2px;
+    }
+    .doc-title {
+      font-size: 16pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #0d1117;
+    }
+    .doc-subtitle {
+      font-size: 9pt;
+      color: #666;
+      font-style: italic;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+    .doc-ref {
+      font-size: 8.5pt;
+      color: #999;
+      margin-top: 8px;
+    }
+    /* Bloc parties */
+    .parties-section {
+      margin: 24px 0;
+      padding: 0;
+    }
+    .parties-intro {
+      font-size: 10.5pt;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+    .partie-block {
+      margin-bottom: 18px;
+      padding: 14px 18px;
+      background: #f9f8f5;
+      border-left: 4px solid #c6a34e;
+      border-radius: 0 4px 4px 0;
+    }
+    .partie-block p { margin-bottom: 4px; line-height: 1.65; font-size: 10.5pt; }
+    .partie-label {
+      font-size: 9pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #c6a34e;
+      margin-bottom: 8px;
+    }
+    .convenu-intro {
+      font-weight: 700;
+      font-size: 11pt;
+      text-align: center;
+      margin: 28px 0 24px;
+      padding: 12px;
+      background: #f5f3ee;
+      border-top: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+      letter-spacing: 0.5px;
+    }
+    /* Articles */
+    .article {
+      margin-bottom: 24px;
+      page-break-inside: avoid;
+    }
+    .article-header {
+      font-size: 11pt;
+      font-weight: 700;
+      color: #0d1117;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #e8c97a;
+      letter-spacing: 0.3px;
+    }
+    .article-header span {
+      color: #c6a34e;
+      margin-right: 6px;
+    }
+    .article-body {
+      font-size: 10.5pt;
+      line-height: 1.8;
+      text-align: justify;
+      hyphens: auto;
+      color: #1a1a1a;
+    }
+    .article-body p { margin-bottom: 10px; }
+    .article-body p:last-child { margin-bottom: 0; }
+    .article-body .sub-clause {
+      margin: 8px 0 8px 20px;
+      padding-left: 12px;
+      border-left: 2px solid #ddd;
+      font-size: 10pt;
+      color: #333;
+    }
+    /* Encadrés */
+    .encadre-info {
+      background: #fefdf8;
+      border: 1px solid #e8c97a;
+      border-radius: 3px;
+      padding: 12px 16px;
+      margin: 12px 0;
+      font-size: 9.5pt;
+      color: #5a4a1a;
+      line-height: 1.6;
+    }
+    .encadre-warn {
+      background: #fff8f0;
+      border: 1px solid #f0c060;
+      border-left: 4px solid #f0a000;
+      border-radius: 0 3px 3px 0;
+      padding: 10px 14px;
+      margin: 12px 0;
+      font-size: 9.5pt;
+      color: #5a3a00;
+      line-height: 1.6;
+    }
+    .mention-ref {
+      font-size: 8.5pt;
+      color: #888;
+      font-style: italic;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+    /* Saut de page */
+    .page-break { page-break-before: always; }
+    /* Signatures */
+    .signatures-section {
+      margin-top: 36px;
+      padding-top: 24px;
+      border-top: 2px solid #c6a34e;
+      page-break-inside: avoid;
+    }
+    .signatures-intro {
+      font-size: 10.5pt;
+      text-align: justify;
+      margin-bottom: 20px;
+      line-height: 1.7;
+    }
+    .signatures-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-top: 12px;
+    }
+    .sig-box { }
+    .sig-label { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #c6a34e; margin-bottom: 6px; }
+    .sig-name { font-size: 11pt; font-weight: 700; color: #0d1117; margin-bottom: 2px; }
+    .sig-title { font-size: 9pt; color: #666; margin-bottom: 4px; }
+    .sig-mention { font-size: 8pt; color: #888; font-style: italic; margin-bottom: 36px; }
+    .sig-line { border-top: 1px solid #333; padding-top: 4px; font-size: 8pt; color: #888; }
+    .sig-exemplaire {
+      margin-top: 20px;
+      font-size: 9pt;
+      color: #666;
+      font-style: italic;
+      text-align: center;
+      padding: 8px;
+      border: 1px dashed #ccc;
+    }
+    /* Footer légal */
+    .legal-footer {
+      margin-top: 32px;
+      padding: 16px 20px;
+      background: #f5f3ee;
+      border-top: 1px solid #ddd;
+      font-size: 8pt;
+      color: #777;
+      line-height: 1.6;
+    }
+    .legal-footer-title { font-weight: 700; color: #555; margin-bottom: 6px; font-size: 8.5pt; }
+    .legal-footer-refs { margin-bottom: 6px; }
+    .legal-footer-gen { color: #aaa; font-style: italic; }
+    /* Barre d'impression */
+    .print-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #0d1117;
+      color: #c6a34e;
+      padding: 8px 20px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 9999;
+      font-family: -apple-system, sans-serif;
+    }
+    .print-btn {
+      padding: 6px 18px;
+      background: #c6a34e;
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    @media print {
+      .print-bar { display: none !important; }
+      body { padding-top: 0 !important; }
+      .header-band { margin-top: 0; }
+    }
+    body { padding-top: 52px; }
   `
 
-  const printBar = `<div class="no-print" style="margin-bottom:16px;padding:10px 14px;background:#1a1a2e;border-radius:6px;font-size:11px;color:#c6a34e;display:flex;align-items:center;gap:12px;">
-    <span>📄 <strong>Aureus Social Pro</strong> — Document prêt à imprimer</span>
-    <button onclick="window.print()" style="padding:5px 14px;background:#c6a34e;color:#000;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;">🖨️ Imprimer / PDF</button>
+  // ── Blocs communs ──────────────────────────────────────────
+  const printBar = `<div class="print-bar">
+    <span>📄 <strong>Aureus Social Pro</strong> — Document confidentiel · ${coName} · ${dateStr}</span>
+    <button class="print-btn" onclick="window.print()">🖨️ Imprimer / Enregistrer PDF</button>
   </div>`
 
-  const headerBlock = `<div class="header">
-    <div class="header-left">
-      ${logoUrl ? `<img src="${escapeHtml(logoUrl)}" alt="Logo" style="max-height:60px;max-width:160px;object-fit:contain;margin-bottom:8px;" />` : ''}
-      <div class="company-name">${coName}</div>
-      <div class="company-info">
-        ${coAddr}<br/>
-        BCE : ${coBce} &nbsp;|&nbsp; N° ONSS : ${coOnss}<br/>
-        Commission Paritaire n° ${cp}
+  const headerBand = `<div class="header-band">
+    <div class="header-band-left">
+      ${logoUrl ? `<img src="${escapeHtml(logoUrl)}" class="header-logo" alt="Logo ${coName}" />` : ''}
+      <div>
+        <div class="header-company-name">${coName}</div>
+        <div class="header-company-sub">BCE ${coBce} &nbsp;·&nbsp; ONSS ${coOnss} &nbsp;·&nbsp; CP n° ${cp}</div>
       </div>
     </div>
-    <div style="text-align:right;font-size:10px;color:#888;">
-      <div style="font-weight:600;color:#555;">Bruxelles, le ${dateStr}</div>
-      <div style="margin-top:4px;">Document confidentiel</div>
+    <div class="header-ref">
+      <div>${coAddr}</div>
+      <div style="margin-top:2px;">Document généré le ${dateStr}</div>
+      <div style="margin-top:2px;color:#777;">Aureus Social Pro</div>
     </div>
-  </div>`
-
-  const sigBlock = `<div class="signatures">
-    <p class="sig-intro">Fait en double exemplaire à ${coCity}, le ${dateStr}.<br/>
-    Chaque partie reconnaît avoir pris connaissance de l'intégralité du présent contrat et l'accepte sans réserve.</p>
-    <table class="sig-table">
-      <tr>
-        <td>
-          <div class="sig-name">L'Employeur :</div>
-          <div class="sig-title">${coName}<br/>Représenté par : ${escapeHtml(company.signatoryName || company.representative || 'Le(a) Gérant(e)')}<br/>Qualité : ${escapeHtml(company.signatoryTitle || 'Gérant(e)')}</div>
-          <div class="sig-line">Signature et cachet :</div>
-        </td>
-        <td>
-          <div class="sig-name">Le/La Travailleur(euse) :</div>
-          <div class="sig-title">${workerName}<br/>NISS : ${workerNiss}<br/><span style="font-style:italic;">Précédée de la mention « Lu et approuvé, bon pour accord »</span></div>
-          <div class="sig-line">Signature :</div>
-        </td>
-      </tr>
-    </table>
-    <p class="exemplaire">✓ Chaque partie reconnaît avoir reçu son exemplaire original du présent contrat.</p>
-  </div>`
-
-  const legalFooter = `<div class="legal-footer">
-    <strong>Références légales :</strong>
-    Loi du 3 juillet 1978 relative aux contrats de travail —
-    Loi du 26 décembre 2013 (statut unique) —
-    Loi du 4 janvier 1974 relative aux jours fériés —
-    Lois coordonnées du 28 juin 1971 (vacances annuelles) —
-    Loi du 8 avril 1965 (règlement de travail) —
-    Loi du 4 août 1996 (bien-être au travail) —
-    Règlement (UE) 2016/679 (RGPD) — Loi belge 30 juillet 2018.<br/>
-    <span style="margin-top:6px;display:block;">Document généré par Aureus Social Pro — aureussocial.be — AUREUS IA SPRL — BCE BE 1028.230.781</span>
-  </div>`
-
-  let titleDoc = '', lawRef = '', bodyHTML = ''
-
-  // ════════════════════════════════════════════════════════════════
-  // CDI — CONTRAT À DURÉE INDÉTERMINÉE
-  // ════════════════════════════════════════════════════════════════
-  if (type === 'CONTRAT_CDI') {
-    titleDoc = 'CONTRAT DE TRAVAIL À DURÉE INDÉTERMINÉE'
-    lawRef = 'Articles 7 et suivants de la loi du 3 juillet 1978 relative aux contrats de travail'
-    bodyHTML = `
-    <div class="parties-block">
-      <p class="entre">ENTRE LES SOUSSIGNÉS :</p>
-      <p><strong>L'EMPLOYEUR :</strong> ${coName}, société de droit belge, dont le siège social est établi à ${coAddr}, inscrite à la BCE sous le numéro ${coBce}, numéro ONSS : ${coOnss}, représentée par ${escapeHtml(company.signatoryName || 'son gérant')}, agissant en sa qualité de ${escapeHtml(company.signatoryTitle || 'Gérant')}, dûment autorisé(e) aux fins des présentes, ci-après dénommée « <strong>l'Employeur</strong> ».</p>
-      <p style="margin-top:10px;"><strong>ET LE/LA TRAVAILLEUR(EUSE) :</strong> ${workerName}, né(e) le ${workerBirth}, domicilié(e) à ${workerAddr}, numéro de registre national (NISS) : ${workerNiss}, ci-après dénommé(e) « <strong>le/la Travailleur(euse)</strong> ».</p>
-    </div>
-    <p class="convenu">IL EST CONVENU ET ARRÊTÉ CE QUI SUIT :</p>
-
-    <div class="article">
-      <div class="article-title">Article 1 — Objet et engagement</div>
-      <div class="article-body">L'Employeur engage le/la Travailleur(euse) en qualité de <strong>${workerFn}</strong>, avec le statut de <strong>${escapeHtml(data.statut === 'OUV' ? 'Ouvrier/Ouvrière' : data.statut === 'DIR' ? 'Dirigeant(e)' : 'Employé(e)')}</strong>, sous la Commission Paritaire n° <strong>${cp}</strong>. Le/la Travailleur(euse) accepte cet engagement aux conditions ci-après définies.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 2 — Nature et durée du contrat</div>
-      <div class="article-body">Le présent contrat est conclu pour une <strong>durée indéterminée</strong>. Il prend cours le <strong>${startDate}</strong>. Conformément à l'article 37 de la loi du 3 juillet 1978 relative aux contrats de travail, sa résiliation est soumise au respect d'un délai de préavis calculé conformément à la loi du 26 décembre 2013 relative à l'introduction d'un statut unique, ou au paiement d'une indemnité compensatoire de préavis équivalente.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 3 — Période d'essai</div>
-      <div class="article-body"><strong>Il n'existe pas de période d'essai.</strong> Conformément à la loi du 26 décembre 2013 (article 67 de la loi du 3 juillet 1978 abrogé), la période d'essai a été supprimée pour tous les contrats de travail conclus à partir du 1er janvier 2014.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 4 — Fonction et lieu de travail</div>
-      <div class="article-body">Le/la Travailleur(euse) est engagé(e) en qualité de <strong>${workerFn}</strong>. Le lieu de travail principal est fixé à : <strong>${workplace}</strong>. L'Employeur se réserve le droit de modifier temporairement ou définitivement le lieu de travail dans des circonstances raisonnables, moyennant un préavis raisonnable. Le télétravail structurel est possible selon accord individuel distinct, conformément à la CCT n°149 du 26 janvier 2021 et à la loi du 3 octobre 2022.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 5 — Temps de travail et horaires</div>
-      <div class="article-body">Le/la Travailleur(euse) est engagé(e) à <strong>${regimeStr}</strong>, soit <strong>${hours} heures par semaine</strong>. Les horaires de travail sont définis dans le règlement de travail de l'entreprise. Toute prestation dépassant la durée du travail convenue constitue des heures supplémentaires soumises aux dispositions de la loi du 16 mars 1971 (art. 29 — sursalaire 50% en semaine, 100% dimanche/jours fériés).</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 6 — Rémunération</div>
-      <div class="article-body">Le salaire brut mensuel est fixé à <strong>${salary} € brut</strong> pour un régime de ${hours} heures par semaine (CP ${cp}). Ce montant respecte le barème sectoriel applicable et le RMMMG 2026 (art. 3bis L. 12/04/1965). La rémunération est payable le dernier jour ouvrable de chaque mois par virement SEPA sur le compte bancaire communiqué par le/la Travailleur(euse). Les fiches de paie détaillées sont remises mensuellement.
-      ${mealV ? `<div class="highlight-box">Avantage complémentaire : chèques-repas d'une valeur de ${mealV} €/jour (part patronale conforme à l'AR du 12/10/2010 — max 6,91 €/jr).</div>` : ''}
-      ${data.carPolicy ? `<div class="highlight-box">Véhicule de société : attribué selon la car policy de l'entreprise — ATN calculé conformément à l'art. 36 CIR/92 et mentionné sur la fiche de paie.</div>` : ''}
-      </div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 7 — Vacances annuelles et jours fériés</div>
-      <div class="article-body">Le/la Travailleur(euse) a droit à 20 jours ouvrables de vacances annuelles pour une année de référence complète à temps plein (lois coordonnées du 28 juin 1971). Les 10 jours fériés légaux sont accordés conformément à la loi du 4 janvier 1974. Les dates de vacances sont fixées en accord avec l'Employeur, en tenant compte des nécessités du service.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 8 — Préavis et résiliation</div>
-      <div class="article-body">En cas de résiliation du présent contrat, les délais de préavis sont déterminés conformément aux articles 37 à 40 de la loi du 3 juillet 1978, tels que modifiés par la loi du 26 décembre 2013. Les délais sont calculés sur la base de l'ancienneté acquise à la date de notification du préavis. Tout licenciement pour motif grave (art. 35 L. 3/07/1978) peut intervenir sans délai de préavis ni indemnité, sous réserve du respect de la procédure légale.
-      <div class="mention-legale">À titre indicatif, sur base de l'ancienneté actuelle — délai de préavis employeur : ~${noticeWeeksEmp} semaines — délai travailleur : ~${noticeWeeksTrav} semaines. Ce calcul sera actualisé à la date effective de résiliation.</div>
-      </div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 9 — Incapacité de travail et maladie</div>
-      <div class="article-body">En cas d'incapacité de travail pour raison médicale, le/la Travailleur(euse) est tenu(e) d'informer l'Employeur avant 9h00 le premier jour d'absence et de produire un certificat médical dans les 2 jours ouvrables suivants. Le salaire garanti est versé conformément aux articles 52 à 56 de la loi du 3 juillet 1978 (employés). L'Employeur se réserve le droit de faire effectuer un contrôle médical par un médecin agréé (art. 31bis L. 3/07/1978).</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 10 — Confidentialité et secret professionnel</div>
-      <div class="article-body">Le/la Travailleur(euse) s'engage, pendant et après la durée du contrat, à ne pas divulguer à des tiers les informations confidentielles auxquelles il/elle a accès dans le cadre de ses fonctions, notamment les données techniques, commerciales, financières, les codes sources, algorithmes, bases de données, et toute information qualifiée de confidentielle par l'Employeur. Cette obligation de confidentialité survit à la cessation du contrat pour une durée de 5 ans.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 11 — Propriété intellectuelle</div>
-      <div class="article-body">Toutes les créations, inventions, développements logiciels, bases de données et œuvres de l'esprit réalisés par le/la Travailleur(euse) dans le cadre de ses fonctions ou avec les moyens de l'Employeur sont la propriété exclusive de l'Employeur dès leur création, conformément à l'article 3 CDE, à l'article 8 de la loi du 30 juin 1994 sur les droits d'auteur et à l'article 5/1 de la loi du 28 mars 1984 sur les brevets. Aucune rémunération complémentaire n'est due à ce titre, sauf accord écrit distinct.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 12 — Protection des données (RGPD)</div>
-      <div class="article-body">Le/la Travailleur(euse) prend connaissance de la politique de protection des données de l'Employeur et s'engage à traiter les données personnelles auxquelles il/elle a accès dans le cadre de ses fonctions conformément au Règlement (UE) 2016/679 (RGPD), à la loi belge du 30 juillet 2018 et aux procédures internes de l'Employeur. Toute violation de données doit être signalée immédiatement à l'Employeur.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 13 — Exclusivité et obligations professionnelles</div>
-      <div class="article-body">Le/la Travailleur(euse) s'engage à consacrer toute son activité professionnelle à l'Employeur et à ne pas exercer, sans autorisation écrite préalable, d'activité professionnelle concurrente ou susceptible de nuire aux intérêts de l'Employeur pendant la durée du contrat (art. 17 L. 3/07/1978).</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 14 — Règlement de travail</div>
-      <div class="article-body">Le/la Travailleur(euse) déclare avoir reçu, pris connaissance et accepter le règlement de travail de l'Employeur, établi conformément à la loi du 8 avril 1965. Ce règlement de travail fait partie intégrante du présent contrat.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 15 — Bien-être au travail</div>
-      <div class="article-body">L'Employeur s'engage à respecter les dispositions du Code du bien-être au travail (AR 28/05/2003 et textes suivants). Le/la Travailleur(euse) est informé(e) de l'existence du Service de Prévention et Protection au Travail (SEPP) et des procédures en matière de prévention des risques, de harcèlement moral et sexuel (loi du 4 août 1996).</div>
-    </div>
-
-    ${data.nonCompete && data.nonCompete !== 'non' ? `
-    <div class="article">
-      <div class="article-title">Article 16 — Clause de non-concurrence</div>
-      <div class="article-body">Conformément à l'article 65 de la loi du 3 juillet 1978, une clause de non-concurrence d'une durée de <strong>${escapeHtml(String(data.nonCompete))}</strong> est annexée au présent contrat. Cette clause est applicable après la fin du contrat, sous réserve des conditions de l'article 65 (rémunération annuelle > 43.335 € en 2026). L'indemnité compensatoire correspondante sera versée conformément à l'article 65 §3.</div>
-    </div>` : ''}
-
-    <div class="article">
-      <div class="article-title">Article ${data.nonCompete && data.nonCompete !== 'non' ? '17' : '16'} — Loi applicable et juridiction compétente</div>
-      <div class="article-body">Le présent contrat est soumis exclusivement au droit belge, notamment à la loi du 3 juillet 1978 relative aux contrats de travail et aux dispositions légales et réglementaires belges en vigueur. Tout litige relatif à l'interprétation, l'exécution ou la résiliation du présent contrat sera soumis à la compétence exclusive du Tribunal du travail de Bruxelles.</div>
-    </div>`
-  }
-
-  // ════════════════════════════════════════════════════════════════
-  // CDD — CONTRAT À DURÉE DÉTERMINÉE
-  // ════════════════════════════════════════════════════════════════
-  else if (type === 'CONTRAT_CDD') {
-    titleDoc = 'CONTRAT DE TRAVAIL À DURÉE DÉTERMINÉE'
-    lawRef = 'Articles 7 et 10 de la loi du 3 juillet 1978 relative aux contrats de travail'
-    const motifCDD = escapeHtml(data.reason || data.motifcdd || '[motif du recours au CDD à préciser]')
-    bodyHTML = `
-    <div class="warn-box">⚠️ Le recours au CDD est strictement réglementé. Il doit être justifié par un motif légal (art. 10 L. 3/07/1978). En l'absence de motif valide, le contrat est requalifié en CDI.</div>
-    <div class="parties-block">
-      <p class="entre">ENTRE LES SOUSSIGNÉS :</p>
-      <p><strong>L'EMPLOYEUR :</strong> ${coName}, société de droit belge, BCE ${coBce}, ONSS ${coOnss}, dont le siège social est établi à ${coAddr}, représentée par ${escapeHtml(company.signatoryName || 'son gérant')}, ci-après dénommée « <strong>l'Employeur</strong> ».</p>
-      <p style="margin-top:10px;"><strong>ET LE/LA TRAVAILLEUR(EUSE) :</strong> ${workerName}, né(e) le ${workerBirth}, domicilié(e) à ${workerAddr}, NISS : ${workerNiss}, ci-après dénommé(e) « <strong>le/la Travailleur(euse)</strong> ».</p>
-    </div>
-    <p class="convenu">IL EST CONVENU ET ARRÊTÉ CE QUI SUIT :</p>
-
-    <div class="article">
-      <div class="article-title">Article 1 — Objet et nature du contrat</div>
-      <div class="article-body">L'Employeur engage le/la Travailleur(euse) en qualité de <strong>${workerFn}</strong> (${escapeHtml(data.statut === 'OUV' ? 'Ouvrier/Ouvrière' : 'Employé(e)')}), sous CP n° ${cp}, dans le cadre d'un <strong>contrat de travail à durée déterminée</strong>, conformément à l'article 10 de la loi du 3 juillet 1978.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 2 — Durée du contrat</div>
-      <div class="article-body">Le présent contrat prend cours le <strong>${startDate}</strong> et expire le <strong>${endDate}</strong>. Il prend fin de plein droit à la date d'échéance, sans qu'une notification préalable soit nécessaire. <strong>Motif du recours au CDD (art. 10 L. 3/07/1978) :</strong> ${motifCDD}.
-      <div class="mention-legale">Renouvellement : le CDD ne peut être renouvelé que 3 fois maximum et pour une durée totale n'excédant pas 2 ans, sauf exceptions légales (art. 10bis L. 3/07/1978). Au-delà : requalification automatique en CDI.</div>
-      </div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 3 — Fonction et lieu de travail</div>
-      <div class="article-body">Le/la Travailleur(euse) exercera la fonction de <strong>${workerFn}</strong> au lieu de travail principal : ${workplace}.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 4 — Temps de travail</div>
-      <div class="article-body">Le/la Travailleur(euse) est engagé(e) à <strong>${regimeStr}</strong>, soit <strong>${hours} heures par semaine</strong>, conformément au règlement de travail.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 5 — Rémunération</div>
-      <div class="article-body">Le salaire brut mensuel est fixé à <strong>${salary} € brut</strong> pour un régime de ${hours} h/semaine (CP ${cp}). Payable le dernier jour ouvrable de chaque mois.
-      ${mealV ? `<div class="highlight-box">Chèques-repas : ${mealV} €/jour (part patronale).</div>` : ''}</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 6 — Résiliation anticipée</div>
-      <div class="article-body">Le CDD ne peut être résilié avant son terme que :
-      <ul>
-        <li>Pour <strong>motif grave</strong> (art. 35 L. 3/07/1978), sans préavis ni indemnité ;</li>
-        <li>Moyennant le paiement d'une <strong>indemnité compensatoire</strong> égale au double du salaire correspondant au solde du contrat restant à courir, plafonné au délai de préavis applicable pour un CDI de même ancienneté (art. 40 L. 3/07/1978).</li>
-      </ul>
-      </div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 7 — Vacances annuelles et jours fériés</div>
-      <div class="article-body">Les droits aux vacances annuelles sont calculés prorata temporis conformément aux lois coordonnées du 28 juin 1971. Les jours fériés légaux sont accordés conformément à la loi du 4 janvier 1974.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 8 — Confidentialité et règlement de travail</div>
-      <div class="article-body">Le/la Travailleur(euse) s'engage au respect de la confidentialité des informations de l'Employeur pendant et après la durée du contrat. Le/la Travailleur(euse) déclare avoir reçu et accepter le règlement de travail (loi 8/04/1965).</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 9 — Protection des données (RGPD)</div>
-      <div class="article-body">Le/la Travailleur(euse) s'engage à traiter les données personnelles conformément au RGPD (2016/679) et à la loi belge du 30 juillet 2018 dans le cadre de ses fonctions.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 10 — Loi applicable et juridiction</div>
-      <div class="article-body">Le présent contrat est soumis au droit belge. Tout litige relève de la compétence du Tribunal du travail de Bruxelles.</div>
-    </div>`
-  }
-
-  // ════════════════════════════════════════════════════════════════
-  // CONTRAT ÉTUDIANT
-  // ════════════════════════════════════════════════════════════════
-  else if (type === 'CONTRAT_STUDENT') {
-    titleDoc = "CONVENTION D'OCCUPATION ÉTUDIANT"
-    lawRef = "Titre VII de la loi du 3 juillet 1978 — AR du 8 mars 2023 — Loi du 25 décembre 2016"
-    const hourlyRate = escapeHtml(String(data.hourlyRate || data.salary || '___'))
-    bodyHTML = `
-    <div class="highlight-box">📚 Régime cotisations réduites : 2,71% travailleur + 5,42% employeur — dans la limite de 600 heures/an (contingent étudiant). Au-delà : cotisations normales.</div>
-    <div class="parties-block">
-      <p class="entre">ENTRE LES SOUSSIGNÉS :</p>
-      <p><strong>L'EMPLOYEUR :</strong> ${coName}, BCE ${coBce}, ONSS ${coOnss}, ${coAddr}, représenté(e) par ${escapeHtml(company.signatoryName || 'son gérant')}, ci-après « <strong>l'Employeur</strong> ».</p>
-      <p style="margin-top:10px;"><strong>ET L'ÉTUDIANT(E) :</strong> ${workerName}, né(e) le ${workerBirth}, domicilié(e) à ${workerAddr}, NISS : ${workerNiss}, ci-après « <strong>l'Étudiant(e)</strong> ».</p>
-    </div>
-    <p class="convenu">IL EST CONVENU CE QUI SUIT :</p>
-
-    <div class="article">
-      <div class="article-title">Article 1 — Objet de la convention</div>
-      <div class="article-body">L'Employeur occupe l'Étudiant(e) en qualité de <strong>${workerFn}</strong>, dans le cadre d'une convention d'occupation étudiant régie par le Titre VII de la loi du 3 juillet 1978 et l'arrêté royal du 8 mars 2023.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 2 — Durée de la convention (mention obligatoire)</div>
-      <div class="article-body">La présente convention est conclue pour la période du <strong>${startDate}</strong> au <strong>${endDate}</strong>. Elle prend fin de plein droit à l'expiration du terme.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 3 — Lieu de travail (mention obligatoire)</div>
-      <div class="article-body">Le lieu de travail principal est : <strong>${workplace}</strong>.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 4 — Fonction et description du travail (mention obligatoire)</div>
-      <div class="article-body">L'Étudiant(e) exercera la fonction de : <strong>${workerFn}</strong>.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 5 — Rémunération et mode de paiement (mention obligatoire)</div>
-      <div class="article-body">La rémunération est fixée à <strong>${hourlyRate} € brut/heure</strong> (minimum : barème sectoriel CP ${cp}).
-      Pour un horaire de <strong>${hours} heures/semaine</strong>, le salaire mensuel estimé est : ${String(Math.round(parseFloat(data.salary || 0) || 0))} € brut/mois (estimation).
-      Paiement le dernier jour ouvrable de chaque mois par virement bancaire.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 6 — Horaire de travail (mention obligatoire)</div>
-      <div class="article-body"><strong>${hours} heures par semaine</strong>, réparties comme suit : ${escapeHtml(data.schedule || 'conformément aux plannings communiqués par l\'Employeur')}.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 7 — Délai de préavis (mention obligatoire)</div>
-      <div class="article-body">Pendant les 7 premiers jours d'exécution de la convention : <strong>3 jours calendriers</strong> (pendant les 7 premiers jours) / <strong>7 jours</strong> (après les 7 premiers jours), conformément à l'article 120 de la loi du 3 juillet 1978. Le préavis est notifié par lettre recommandée ou remis en main propre contre accusé de réception.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 8 — Cotisations sociales réduites — Contingent 600 heures</div>
-      <div class="article-body">L'Étudiant(e) bénéficie du régime de cotisations de solidarité réduites (2,71% travailleur + 5,42% employeur) dans la limite de <strong>600 heures par année civile</strong> (art. 17bis AR 28/11/1969, modifié). Au-delà de ce quota, les cotisations sociales normales s'appliquent.
-      <div class="highlight-box">L'Étudiant(e) déclare être informé(e) du quota de 600 heures et de son droit de consulter son contingent disponible sur <strong>student.be</strong>. L'Employeur déclarera les heures prestées via la DmfA trimestrielle.</div>
-      </div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 9 — Règlement de travail et obligations</div>
-      <div class="article-body">L'Étudiant(e) déclare avoir reçu et accepter le règlement de travail de l'Employeur. Il/elle s'engage au respect des instructions de l'Employeur, au secret professionnel et à la confidentialité des informations de l'entreprise et de ses clients.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 10 — Loi applicable</div>
-      <div class="article-body">La présente convention est soumise au droit belge. Tout litige relève du Tribunal du travail compétent.</div>
-    </div>`
-  }
-
-  // ════════════════════════════════════════════════════════════════
-  // CONTRAT TEMPS PARTIEL
-  // ════════════════════════════════════════════════════════════════
-  else if (type === 'CONTRAT_TEMPS_PARTIEL') {
-    titleDoc = 'CONTRAT DE TRAVAIL À TEMPS PARTIEL'
-    lawRef = "Art. 11bis de la loi du 3 juillet 1978 — AR du 25 juin 1990 relatif au travail à temps partiel"
-    const schedule = escapeHtml(data.schedule || '___')
-    bodyHTML = `
-    <div class="highlight-box">📋 Le travail à temps partiel doit être prévu dans le règlement de travail ou dans une convention collective (art. 11bis al.2 L. 3/07/1978). L'horaire DOIT figurer dans le contrat.</div>
-    <div class="parties-block">
-      <p class="entre">ENTRE LES SOUSSIGNÉS :</p>
-      <p><strong>L'EMPLOYEUR :</strong> ${coName}, BCE ${coBce}, ONSS ${coOnss}, ${coAddr}, représenté(e) par ${escapeHtml(company.signatoryName || 'son gérant')}, ci-après « <strong>l'Employeur</strong> ».</p>
-      <p style="margin-top:10px;"><strong>ET LE/LA TRAVAILLEUR(EUSE) :</strong> ${workerName}, né(e) le ${workerBirth}, domicilié(e) à ${workerAddr}, NISS : ${workerNiss}, ci-après « <strong>le/la Travailleur(euse)</strong> ».</p>
-    </div>
-    <p class="convenu">IL EST CONVENU CE QUI SUIT :</p>
-
-    <div class="article">
-      <div class="article-title">Article 1 — Objet et engagement</div>
-      <div class="article-body">L'Employeur engage le/la Travailleur(euse) en qualité de <strong>${workerFn}</strong> (${escapeHtml(data.statut === 'OUV' ? 'Ouvrier/Ouvrière' : 'Employé(e)')}), sous CP n° ${cp}, dans le cadre d'un <strong>contrat de travail à temps partiel</strong>, conformément à l'art. 11bis de la loi du 3 juillet 1978 et à l'AR du 25 juin 1990.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 2 — Durée du contrat</div>
-      <div class="article-body">Le présent contrat est conclu pour une <strong>durée indéterminée</strong>. Il prend cours le <strong>${startDate}</strong>.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 3 — Régime de travail (mention obligatoire — art. 11bis)</div>
-      <div class="article-body">Le/la Travailleur(euse) est engagé(e) à temps partiel à raison de <strong>${hours} heures par semaine</strong>, soit <strong>${regime}% d'un temps plein</strong> de référence (38h/sem).
-      <div class="highlight-box">Répartition des heures (mention obligatoire art. 11bis) :<br/>${schedule}</div>
-      <div class="mention-legale">L'horaire ci-dessus est mentionné obligatoirement dans le contrat conformément à l'art. 11bis al.4 L. 3/07/1978. Toute modification de l'horaire doit faire l'objet d'un avenant écrit signé par les deux parties.</div>
-      </div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 4 — Lieu de travail</div>
-      <div class="article-body">Le lieu de travail principal est : <strong>${workplace}</strong>.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 5 — Rémunération prorata temporis</div>
-      <div class="article-body">Le salaire mensuel brut est fixé à <strong>${salary} € brut</strong> (prorata du temps plein au même poste), pour ${hours} heures par semaine (CP ${cp}). Payable le dernier jour ouvrable de chaque mois. Tous les avantages (pécule de vacances, primes, etc.) sont calculés au prorata du régime de travail.
-      ${mealV ? `<div class="highlight-box">Chèques-repas : ${mealV} €/jour (uniquement les jours de prestation complète — AR 12/10/2010).</div>` : ''}</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 6 — Heures complémentaires (art. 11bis al.3)</div>
-      <div class="article-body">Des heures complémentaires (dépassant l'horaire contractuel sans atteindre le temps plein) peuvent être demandées par l'Employeur dans les limites prévues par le règlement de travail et la loi. Les heures complémentaires sont rémunérées avec un sursalaire de 50% pour les heures dépassant 1/3 de l'horaire contractuel (art. 11bis §1 al.3 L. 3/07/1978).</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 7 — Droit de priorité au temps plein</div>
-      <div class="article-body">Le/la Travailleur(euse) à temps partiel bénéficie d'un droit de priorité pour l'occupation d'un poste à temps plein qui se libère et correspond à ses qualifications (art. 11bis §2 L. 3/07/1978). L'Employeur doit l'informer de tout poste vacant.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 8 — Préavis, confidentialité et règlement de travail</div>
-      <div class="article-body">Les délais de préavis sont calculés conformément à la loi du 26 décembre 2013. Le/la Travailleur(euse) s'engage au secret professionnel et au respect du règlement de travail (loi 8/04/1965), dont il/elle déclare avoir reçu un exemplaire. Protection des données : art. 12 du RGPD (UE) 2016/679.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 9 — Loi applicable</div>
-      <div class="article-body">Le présent contrat est soumis au droit belge. Tout litige relève de la compétence du Tribunal du travail de Bruxelles.</div>
-    </div>`
-  }
-
-  // ════════════════════════════════════════════════════════════════
-  // AVENANT
-  // ════════════════════════════════════════════════════════════════
-  else if (type === 'AVENANT') {
-    titleDoc = 'AVENANT AU CONTRAT DE TRAVAIL'
-    lawRef = "Art. 1134 Code civil belge — Principe de l'accord mutuel des parties"
-    const effDate = escapeHtml(data.effectiveDate || data.startDate || dateStr)
-    const modif = escapeHtml(data.modification || '___')
-    bodyHTML = `
-    <div class="parties-block">
-      <p class="entre">ENTRE LES SOUSSIGNÉS :</p>
-      <p><strong>L'EMPLOYEUR :</strong> ${coName}, BCE ${coBce}, ONSS ${coOnss}, ${coAddr}.</p>
-      <p style="margin-top:10px;"><strong>ET LE/LA TRAVAILLEUR(EUSE) :</strong> ${workerName}, NISS : ${workerNiss}, domicilié(e) à ${workerAddr}.</p>
-    </div>
-    <p class="convenu">IL EST CONVENU CE QUI SUIT :</p>
-
-    <div class="article">
-      <div class="article-title">Article 1 — Objet de l'avenant</div>
-      <div class="article-body">Le présent avenant modifie le contrat de travail conclu entre les parties le ${startDate}. Les modifications ci-après prennent effet le <strong>${effDate}</strong>. Toutes les autres dispositions du contrat de travail initial demeurent inchangées et pleinement applicables.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 2 — Modifications convenues</div>
-      <div class="article-body">${modif}</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 3 — Accord libre et éclairé</div>
-      <div class="article-body">Les parties déclarent accepter librement et en connaissance de cause les modifications prévues au présent avenant. Le/la Travailleur(euse) reconnaît avoir été informé(e) de l'ensemble des implications des modifications convenues.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 4 — Loi applicable</div>
-      <div class="article-body">Le présent avenant est soumis au droit belge et fait partie intégrante du contrat de travail initial. Tout litige relève du Tribunal du travail compétent.</div>
-    </div>`
-  }
-
-  // ════════════════════════════════════════════════════════════════
-  // RUPTURE DE COMMUN ACCORD
-  // ════════════════════════════════════════════════════════════════
-  else if (type === 'CONVENTION_RUPTURE') {
-    titleDoc = 'CONVENTION DE RUPTURE DU CONTRAT DE TRAVAIL DE COMMUN ACCORD'
-    lawRef = "Art. 32 de la loi du 3 juillet 1978 relative aux contrats de travail"
-    bodyHTML = `
-    <div class="warn-box">⚠️ Une rupture de commun accord peut entraîner la suspension ou la réduction des allocations de chômage par l'ONEM. Le travailleur doit en être informé préalablement. L'accord doit être libre, éclairé et non vicié par une pression de l'employeur.</div>
-    <div class="parties-block">
-      <p class="entre">ENTRE LES SOUSSIGNÉS :</p>
-      <p><strong>L'EMPLOYEUR :</strong> ${coName}, BCE ${coBce}, ONSS ${coOnss}, ${coAddr}, représenté(e) par ${escapeHtml(company.signatoryName || 'son gérant')}.</p>
-      <p style="margin-top:10px;"><strong>ET LE/LA TRAVAILLEUR(EUSE) :</strong> ${workerName}, né(e) le ${workerBirth}, domicilié(e) à ${workerAddr}, NISS : ${workerNiss}.</p>
-    </div>
-    <p class="convenu">IL EST CONVENU CE QUI SUIT :</p>
-
-    <div class="article">
-      <div class="article-title">Article 1 — Rupture du contrat de travail</div>
-      <div class="article-body">Les parties conviennent, d'un commun accord libre et éclairé, de mettre fin au contrat de travail à durée indéterminée qui les lie depuis le <strong>${startDate}</strong>, avec effet au <strong>${endDate}</strong>. Cette rupture intervient conformément à l'article 32 de la loi du 3 juillet 1978.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 2 — Absence d'indemnité de préavis</div>
-      <div class="article-body">La présente convention met fin au contrat sans délai de préavis. <strong>Aucune indemnité compensatoire de préavis n'est due</strong> par l'une ou l'autre des parties, la rupture étant décidée d'un commun accord.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 3 — Solde de tout compte</div>
-      <div class="article-body">Un décompte final (solde de tout compte) sera établi et remis au/à la Travailleur(euse) au plus tard le dernier jour de travail, incluant : les salaires dus jusqu'à la date de fin, le pécule de vacances de départ (prorata), la prime de fin d'année prorata et tout avantage dû en vertu du contrat.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 4 — Remise des documents sociaux</div>
-      <div class="article-body">L'Employeur s'engage à remettre au/à la Travailleur(euse), dans les 8 jours ouvrables suivant la fin du contrat, les documents suivants : certificat de chômage (C4), attestation de vacances, fiche fiscale 281.10 (au plus tard le 28 février de l'année suivante), et tout autre document légalement requis (art. 59 L. 3/07/1978).</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 5 — Conséquences sur le chômage</div>
-      <div class="article-body">Le/la Travailleur(euse) déclare avoir été informé(e) que la rupture du contrat de commun accord peut entraîner <strong>une sanction de l'ONEM</strong> (exclusion temporaire du droit aux allocations de chômage). Il/elle reconnaît avoir fait son choix librement et en connaissance de cause, après avoir eu la possibilité de consulter un conseiller syndical ou juridique.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 6 — Accord libre et éclairé</div>
-      <div class="article-body">Les parties confirment que le présent accord est intervenu librement, sans contrainte ni pression. Le/la Travailleur(euse) déclare avoir eu le temps nécessaire pour réfléchir et pour consulter un représentant syndical ou un conseiller juridique s'il/elle le souhaitait.</div>
-    </div>
-
-    <div class="article">
-      <div class="article-title">Article 7 — Loi applicable</div>
-      <div class="article-body">La présente convention est soumise au droit belge. Tout litige relève de la compétence exclusive du Tribunal du travail de Bruxelles.</div>
-    </div>`
-  }
-
-  else {
-    return ''
-  }
-
-  return `<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${titleDoc} — ${workerName}</title>
-  <style>${CSS}</style>
-</head>
-<body>
-  ${printBar}
-  ${headerBlock}
-  <div class="doc-title-block">
-    <div class="doc-title">${titleDoc}</div>
-    <div class="doc-subtitle">${lawRef}</div>
   </div>
-  ${bodyHTML}
-  ${sigBlock}
-  ${legalFooter}
-</body>
-</html>`
+  <div class="gold-rule"></div>`
+
+  const signaturesBlock = (extraMention) => `<div class="signatures-section">
+    <p class="signatures-intro">
+      Fait en double exemplaire à ${coCity}, le ${dateStr}. Chaque partie reconnaît avoir pris connaissance de l'intégralité du présent contrat, en avoir compris toutes les dispositions et l'accepter sans réserve. Le/la Travailleur(euse) reconnaît avoir reçu son exemplaire original signé.
+    </p>
+    ${extraMention ? `<div class="encadre-info">${extraMention}</div>` : ''}
+    <div class="signatures-grid">
+      <div class="sig-box">
+        <div class="sig-label">Pour l'Employeur</div>
+        <div class="sig-name">${coName}</div>
+        <div class="sig-title">${signatory}, ${signatoryTitle}</div>
+        <div class="sig-mention">Signature précédée du cachet de la société</div>
+        <div class="sig-line">Signature :</div>
+      </div>
+      <div class="sig-box">
+        <div class="sig-label">Le/La Travailleur(euse)</div>
+        <div class="sig-name">${workerName}</div>
+        <div class="sig-title">NISS : ${workerNiss}</div>
+        <div class="sig-mention">Précédée de la mention manuscrite <em>« Lu et approuvé, bon pour accord »</em></div>
+        <div class="sig-line">Signature :</div>
+      </div>
+    </div>
+    <div class="sig-exemplaire">✓ Chaque partie reconnaît avoir reçu un exemplaire original du présent contrat.</div>
+  </div>`
+
+  const legalFooter = (refs) => `<div class="legal-footer">
+    <div class="legal-footer-title">Références légales applicables au présent contrat :</div>
+    <div class="legal-footer-refs">${refs}</div>
+    <div class="legal-footer-gen">Document généré automatiquement par Aureus Social Pro (aureussocial.be) · AUREUS IA SPRL · BCE BE 1028.230.781 · Les données du présent contrat sont traitées conformément au RGPD (UE) 2016/679 et à la loi belge du 30 juillet 2018 relative à la protection des personnes physiques à l'égard des traitements de données à caractère personnel.</div>
+  </div>`
+
+  // ══════════════════════════════════════════════════════════════════════
+  // CDI
+  // ══════════════════════════════════════════════════════════════════════
+  if (type === 'CONTRAT_CDI') {
+    const body = `
+    <div class="doc-title-block">
+      <div class="doc-title">Contrat de travail<br/>à durée indéterminée</div>
+      <div class="doc-subtitle">Conclu en application de la loi du 3 juillet 1978 relative aux contrats de travail,<br/>telle que modifiée par la loi du 26 décembre 2013 instaurant le statut unique.</div>
+      <div class="doc-ref">Référence : CDI · ${workerName} · Entrée : ${startDate}</div>
+    </div>
+
+    <div class="parties-section">
+      <div class="parties-intro">Entre les soussignés</div>
+      <div class="partie-block">
+        <div class="partie-label">L'Employeur</div>
+        <p><strong>${coName}</strong>, société de droit belge, dont le siège social est établi à <strong>${coAddr}</strong>, inscrite à la Banque-Carrefour des Entreprises sous le numéro <strong>${coBce}</strong>, enregistrée à l'Office National de Sécurité Sociale sous le numéro patronal <strong>${coOnss}</strong>, ressortissant de la Commission Paritaire n° <strong>${cp}</strong>, représentée aux fins du présent acte par <strong>${signatory}</strong>, agissant en sa qualité de <strong>${signatoryTitle}</strong>, dûment habilité(e) à cet effet ;</p>
+        <p>ci-après dénommée <strong>« l'Employeur »</strong> ;</p>
+      </div>
+      <div class="partie-block">
+        <div class="partie-label">Le/La Travailleur(euse)</div>
+        <p><strong>${workerName}</strong>, né(e) le <strong>${workerBirth}</strong>, domicilié(e) à <strong>${workerAddr}</strong>, titulaire du numéro de registre national (NISS) <strong>${workerNiss}</strong> ;</p>
+        <p>ci-après dénommé(e) <strong>« le/la Travailleur(euse) »</strong> ;</p>
+      </div>
+    </div>
+
+    <div class="convenu-intro">Il a été convenu et arrêté ce qui suit</div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 1.</span>Objet du contrat et engagement</div>
+      <div class="article-body">
+        <p>L'Employeur engage le/la Travailleur(euse) en qualité de <strong>${workerFn}</strong>, avec le statut de <strong>${escapeHtml(data.statut === 'OUV' ? 'Ouvrier / Ouvrière' : data.statut === 'DIR' ? 'Dirigeant(e) d\'entreprise' : 'Employé(e)')}</strong>, sous la Commission Paritaire n° <strong>${cp}</strong>. Le/la Travailleur(euse) accepte cet engagement aux conditions définies ci-après et déclare avoir pris connaissance de l'ensemble des obligations qui en découlent.</p>
+        <p>La présente convention a été librement conclue entre des parties ayant toute capacité de contracter et constitue la loi des parties, conformément à l'article 1134 du Code civil belge, sous réserve des dispositions impératives de la loi du 3 juillet 1978 et des conventions collectives de travail applicables.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 2.</span>Nature et durée du contrat</div>
+      <div class="article-body">
+        <p>Le présent contrat est conclu pour une <strong>durée indéterminée</strong> et prend cours le <strong>${startDate}</strong>. Il lie les parties sans limitation dans le temps, jusqu'à sa résiliation dans les formes et conditions prévues par la loi du 3 juillet 1978 et la loi du 26 décembre 2013 relative à l'introduction d'un statut unique pour ouvriers et employés.</p>
+        <p>Conformément à la loi du 26 décembre 2013 (article 67 de la loi du 3 juillet 1978, désormais abrogé), <strong>aucune période d'essai n'est applicable</strong> au présent contrat. Cette disposition est d'ordre public et ne peut faire l'objet d'aucune dérogation conventionnelle pour les contrats conclus postérieurement au 1er janvier 2014.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 3.</span>Fonction et lieu de travail</div>
+      <div class="article-body">
+        <p>Le/la Travailleur(euse) est engagé(e) pour exercer les fonctions de <strong>${workerFn}</strong>. Cette qualification correspond à la classification fonctionnelle en vigueur au sein de l'entreprise et au barème applicable sous la CP n° ${cp}.</p>
+        <p>Le lieu de travail principal est fixé à : <strong>${workplace}</strong>. L'Employeur se réserve le droit de modifier le lieu de travail dans des circonstances raisonnables liées aux nécessités de l'entreprise, moyennant un préavis approprié et dans le respect des dispositions légales. Le télétravail structurel est possible selon accord individuel distinct, conformément à la convention collective de travail n° 149 du 26 janvier 2021 et à la loi du 3 octobre 2022 réglementant le télétravail.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 4.</span>Durée du travail et horaires</div>
+      <div class="article-body">
+        <p>Le/la Travailleur(euse) est engagé(e) à <strong>${regimeLabel}</strong>, soit <strong>${hours} heures par semaine</strong>, conformément au régime de travail applicable dans l'entreprise. Les horaires spécifiques de travail sont définis dans le règlement de travail en vigueur et peuvent faire l'objet de plannings communiqués selon les besoins de l'entreprise.</p>
+        <p>Toute prestation excédant la durée du travail conventionnellement définie constitue des heures supplémentaires au sens de la loi du 16 mars 1971, soumises au régime des sursalaires légaux (majoration de 50 % en semaine ordinaire et le samedi, de 100 % le dimanche et les jours fériés légaux). Les heures supplémentaires ne peuvent être effectuées qu'avec l'accord préalable de l'Employeur et dans les limites fixées par la loi et les conventions collectives applicables.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 5.</span>Rémunération</div>
+      <div class="article-body">
+        <p>En contrepartie des prestations fournies, le/la Travailleur(euse) percevra un salaire mensuel brut de <strong>${salary} € (euros bruts)</strong> pour un régime de travail de ${hours} heures par semaine, conformément au barème sectoriel applicable à la CP n° ${cp} et au revenu minimum mensuel moyen garanti (RMMMG) en vigueur.</p>
+        <p>Ce salaire est payé le dernier jour ouvrable de chaque mois civil par virement bancaire SEPA sur le compte communiqué par le/la Travailleur(euse). Une fiche de paie détaillée, mentionnant l'ensemble des éléments de rémunération, est remise mensuellement conformément à l'arrêté royal du 28 octobre 1967 et à l'arrêté royal du 23 octobre 1978.</p>
+        ${mealV ? `<div class="encadre-info">Avantage complémentaire : chèques-repas d'une valeur faciale de ${mealV} € par jour de prestation effective, dont la part patronale est fixée conformément aux maxima prévus par l'arrêté royal du 12 octobre 2010 (maximum 6,91 € en 2026) et la part personnelle du travailleur au minimum légal (1,09 €). Les chèques-repas sont exonérés de cotisations ONSS et d'impôt dans ces limites.</div>` : ''}
+        ${data.carPolicy ? `<div class="encadre-info">Véhicule de société : une voiture de société est mise à disposition du/de la Travailleur(euse) selon les modalités de la politique véhicule (car policy) de l'entreprise. L'avantage de toute nature (ATN) correspondant est calculé conformément à l'article 36 du Code des impôts sur les revenus 1992 et mentionné mensuellement sur la fiche de paie et annuellement sur la fiche fiscale 281.10.</div>` : ''}
+        <p class="mention-ref">À titre indicatif, sur base de la date d'entrée indiquée : délai de préavis employeur estimé ~${noticeEmp} semaines — délai travailleur estimé ~${noticeTrav} semaines. Ce calcul sera actualisé à la date effective de notification.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 6.</span>Congés annuels et jours fériés</div>
+      <div class="article-body">
+        <p>Le/la Travailleur(euse) bénéficie de vingt jours ouvrables de vacances annuelles payées pour une année de référence complète prestée à temps plein, conformément aux lois coordonnées du 28 juin 1971 relatives aux vacances annuelles des travailleurs salariés. Le droit est calculé au prorata du temps de travail et des prestations effectives de l'année de référence. Les dates de vacances sont fixées en concertation avec l'Employeur, en tenant compte des nécessités du service.</p>
+        <p>Les dix jours fériés légaux énumérés par la loi du 4 janvier 1974 relative aux jours fériés sont accordés au/à la Travailleur(euse), sous réserve des dérogations sectorielles applicables. En cas de coïncidence d'un jour férié avec un dimanche ou un jour habituel d'inactivité, un jour de remplacement est accordé conformément à la législation en vigueur.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 7.</span>Incapacité de travail et maladie</div>
+      <div class="article-body">
+        <p>En cas d'incapacité de travail résultant d'une maladie ou d'un accident, le/la Travailleur(euse) est tenu(e) d'en informer l'Employeur avant 9 heures du matin le premier jour d'absence et de produire un certificat médical dans les deux jours ouvrables suivant le début de l'incapacité, ou dans le délai prévu par la convention collective sectorielle applicable.</p>
+        <p>La rémunération garantie durant les périodes d'incapacité est versée conformément aux articles 52 à 56 de la loi du 3 juillet 1978, selon le statut du/de la Travailleur(euse). L'Employeur se réserve le droit de faire procéder à un contrôle médical par un médecin agréé, conformément à l'article 31bis de la loi du 3 juillet 1978 et à la convention collective de travail n° 19bis.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 8.</span>Résiliation du contrat et délais de préavis</div>
+      <div class="article-body">
+        <p>Le présent contrat peut être résilié par l'une ou l'autre des parties moyennant le respect d'un délai de préavis calculé conformément aux articles 37 à 40 de la loi du 3 juillet 1978, tels que modifiés par la loi du 26 décembre 2013 relative à l'introduction d'un statut unique. Le délai de préavis est déterminé sur la base de l'ancienneté acquise dans l'entreprise à la date de la notification, selon le barème progressif légal.</p>
+        <p>En cas de non-respect du délai de préavis, la partie qui y met fin est tenue de verser à l'autre une indemnité compensatoire de préavis équivalente à la rémunération correspondant à la durée du préavis non presté, calculée conformément aux articles 39 et 39bis de la loi du 3 juillet 1978.</p>
+        <p>Le présent contrat peut également être résilié sans préavis ni indemnité en cas de faute grave de l'une des parties, constituant un manquement grave rendant immédiatement et définitivement impossible toute collaboration professionnelle, conformément à l'article 35 de la loi du 3 juillet 1978. La partie invoquant le motif grave dispose de trois jours ouvrables pour notifier la rupture et de trois jours supplémentaires pour communiquer les motifs précis par lettre recommandée.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 9.</span>Confidentialité et secret professionnel</div>
+      <div class="article-body">
+        <p>Le/la Travailleur(euse) s'engage à observer le secret le plus absolu sur toutes les informations confidentielles auxquelles il/elle a accès dans le cadre de l'exercice de ses fonctions. Sont réputées confidentielles, sans que cette liste soit limitative : les informations techniques, commerciales, financières, stratégiques, les codes sources et algorithmes, les bases de données clients et fournisseurs, les tarifs, les procédés de fabrication ou de développement, ainsi que toute information expressément désignée comme confidentielle par l'Employeur.</p>
+        <p>Cette obligation de confidentialité est d'application non seulement pendant la durée du contrat de travail, mais également après sa cessation pour quelque cause que ce soit, pour une durée de <strong>cinq ans</strong> à compter de la date de fin effective du contrat. La violation de cette obligation engage la responsabilité civile du/de la Travailleur(euse) et peut constituer un motif grave justifiant la résiliation immédiate du contrat.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 10.</span>Propriété intellectuelle</div>
+      <div class="article-body">
+        <p>L'ensemble des créations intellectuelles, inventions, développements logiciels, programmes informatiques, bases de données, algorithmes, œuvres audiovisuelles, textuelles ou graphiques, ainsi que tout autre résultat du travail intellectuel ou créatif réalisé par le/la Travailleur(euse) dans le cadre de l'exécution du présent contrat ou avec les ressources, outils ou informations mis à disposition par l'Employeur, est la propriété exclusive et intégrale de l'Employeur dès le moment de leur création.</p>
+        <p>Cette cession de droits est globale, définitive et couvre l'ensemble des droits patrimoniaux, à titre exclusif, pour toutes les formes d'exploitation actuelles et futures, pour le monde entier et pour toute la durée légale de protection, conformément à la loi du 30 juin 1994 relative aux droits d'auteur et aux droits voisins (art. 3 et suivants), à la loi du 28 mars 1984 sur les brevets et au Code de droit économique.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 11.</span>Protection des données à caractère personnel</div>
+      <div class="article-body">
+        <p>Le/la Travailleur(euse) est informé(e) que l'Employeur traite ses données personnelles aux fins de gestion des ressources humaines, d'exécution du contrat de travail, de respect des obligations légales (ONSS, déclarations fiscales, Dimona) et d'intérêts légitimes de gestion interne, conformément au Règlement (UE) 2016/679 du 27 avril 2016 (RGPD) et à la loi belge du 30 juillet 2018 relative à la protection des personnes physiques à l'égard des traitements de données à caractère personnel.</p>
+        <p>Dans le cadre de l'exercice de ses fonctions, le/la Travailleur(euse) s'engage à traiter avec la plus grande rigueur les données personnelles auxquelles il/elle a accès, en stricte conformité avec les instructions de l'Employeur, les politiques internes de protection des données et les dispositions du RGPD. Toute violation ou suspicion de violation de données doit être immédiatement portée à la connaissance de l'Employeur, conformément à l'article 33 du RGPD.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 12.</span>Exclusivité et obligations déontologiques</div>
+      <div class="article-body">
+        <p>Le/la Travailleur(euse) s'engage à consacrer l'intégralité de son activité professionnelle à l'Employeur durant l'exécution du présent contrat et à s'abstenir d'exercer, directement ou indirectement, sans autorisation écrite préalable de l'Employeur, toute activité professionnelle rémunérée ou non susceptible de concurrencer l'Employeur, de nuire à ses intérêts ou de compromettre l'exécution loyale du présent contrat, conformément à l'article 17 de la loi du 3 juillet 1978.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 13.</span>Règlement de travail</div>
+      <div class="article-body">
+        <p>Le/la Travailleur(euse) déclare avoir reçu un exemplaire du règlement de travail de l'Employeur, établi conformément à la loi du 8 avril 1965 instituant les règlements de travail, en avoir pris connaissance dans son intégralité et l'accepter sans réserve. Le règlement de travail constitue une annexe juridiquement contraignante du présent contrat et en fait partie intégrante. Toute modification ultérieure du règlement de travail fera l'objet de la procédure légale prévue par la loi du 8 avril 1965.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 14.</span>Bien-être au travail et prévention</div>
+      <div class="article-body">
+        <p>L'Employeur s'engage à prendre toutes les mesures nécessaires pour assurer la sécurité et la santé des travailleurs dans tous les aspects liés au travail, conformément au Code du bien-être au travail (loi du 4 août 1996 et ses arrêtés d'exécution). Le/la Travailleur(euse) est informé(e) de l'existence du Service Externe de Prévention et Protection au Travail (SEPP), de la personne de confiance et des procédures applicables en matière de prévention du harcèlement moral et sexuel au travail.</p>
+      </div>
+    </div>
+
+    ${nonConc ? `
+    <div class="article">
+      <div class="article-header"><span>Article 15.</span>Clause de non-concurrence</div>
+      <div class="article-body">
+        <p>Conformément à l'article 65 de la loi du 3 juillet 1978, une clause de non-concurrence d'une durée de <strong>${escapeHtml(String(data.nonCompete))}</strong> à compter de la cessation effective du contrat de travail est stipulée au bénéfice de l'Employeur. Cette clause interdit au/à la Travailleur(euse), à l'expiration du contrat pour quelque cause que ce soit, d'exercer une activité similaire, que ce soit comme travailleur salarié ou indépendant, susceptible de nuire à l'Employeur.</p>
+        <p>En contrepartie, l'Employeur s'engage à verser au/à la Travailleur(euse), dans les quinze jours suivant la fin du contrat, une indemnité compensatoire égale à la moitié de la rémunération brute correspondant à la durée de la clause, conformément à l'article 65 § 3 de la loi du 3 juillet 1978. L'Employeur se réserve le droit de renoncer à la clause dans les quinze jours suivant la fin du contrat, auquel cas aucune indemnité n'est due. La présente clause est nulle de plein droit si la rémunération annuelle brute du/de la Travailleur(euse) est inférieure au seuil légal en vigueur (43.335 € en 2026, indexé annuellement).</p>
+      </div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 16.</span>Loi applicable et juridiction compétente</div>` : `
+    <div class="article">
+      <div class="article-header"><span>Article 15.</span>Loi applicable et juridiction compétente</div>`}
+      <div class="article-body">
+        <p>Le présent contrat de travail est régi exclusivement par le droit belge dans toutes ses dispositions. Tout litige relatif à la conclusion, l'interprétation, l'exécution ou la résiliation du présent contrat sera soumis à la compétence exclusive du Tribunal du travail de Bruxelles, sans préjudice de la compétence d'une juridiction d'appel et des voies de recours extraordinaires prévues par le Code judiciaire belge.</p>
+      </div>
+    </div>`
+
+    return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CDI — ${workerName} — ${coName}</title><style>${CSS}</style></head><body>
+    ${printBar}${headerBand}${body}
+    ${signaturesBlock('Les parties certifient que le présent contrat a été établi en deux exemplaires originaux, dont chacun a reçu le sien. La signature du/de la Travailleur(euse) précédée de la mention manuscrite « Lu et approuvé, bon pour accord » vaut acceptation de l\'ensemble des clauses du présent contrat.')}
+    ${legalFooter('Loi du 3 juillet 1978 relative aux contrats de travail · Loi du 26 décembre 2013 (statut unique) · Loi du 16 mars 1971 sur le travail · Lois coordonnées du 28 juin 1971 (vacances annuelles) · Loi du 4 janvier 1974 (jours fériés) · Loi du 8 avril 1965 (règlement de travail) · Loi du 4 août 1996 (bien-être au travail) · Loi du 30 juin 1994 (droits d\'auteur) · RGPD (UE) 2016/679 · Loi belge du 30 juillet 2018 (protection des données) · CCT n°149 (télétravail)')}
+    </body></html>`
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // CDD
+  // ══════════════════════════════════════════════════════════════════════
+  if (type === 'CONTRAT_CDD') {
+    const body = `
+    <div class="encadre-warn">⚖️ <strong>Avertissement légal :</strong> Le recours à un contrat de travail à durée déterminée est soumis à des conditions strictes fixées par l'article 10 de la loi du 3 juillet 1978. L'absence de motif valide ou le renouvellement irrégulier entraîne de plein droit la requalification du contrat en contrat à durée indéterminée. Le présent contrat doit impérativement mentionner le motif de recours au CDD.</div>
+
+    <div class="doc-title-block">
+      <div class="doc-title">Contrat de travail<br/>à durée déterminée</div>
+      <div class="doc-subtitle">Conclu en application des articles 7 et 10 de la loi du 3 juillet 1978 relative aux contrats de travail.</div>
+      <div class="doc-ref">Référence : CDD · ${workerName} · Du ${startDate} au ${endDate}</div>
+    </div>
+
+    <div class="parties-section">
+      <div class="parties-intro">Entre les soussignés</div>
+      <div class="partie-block">
+        <div class="partie-label">L'Employeur</div>
+        <p><strong>${coName}</strong>, société de droit belge, BCE <strong>${coBce}</strong>, ONSS <strong>${coOnss}</strong>, dont le siège social est établi à <strong>${coAddr}</strong>, représentée par <strong>${signatory}</strong>, <strong>${signatoryTitle}</strong>, dûment autorisé(e) ;</p>
+        <p>ci-après dénommée <strong>« l'Employeur »</strong> ;</p>
+      </div>
+      <div class="partie-block">
+        <div class="partie-label">Le/La Travailleur(euse)</div>
+        <p><strong>${workerName}</strong>, né(e) le <strong>${workerBirth}</strong>, domicilié(e) à <strong>${workerAddr}</strong>, NISS : <strong>${workerNiss}</strong> ;</p>
+        <p>ci-après dénommé(e) <strong>« le/la Travailleur(euse) »</strong> ;</p>
+      </div>
+    </div>
+
+    <div class="convenu-intro">Il a été convenu et arrêté ce qui suit</div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 1.</span>Objet et nature du contrat</div>
+      <div class="article-body">
+        <p>L'Employeur engage le/la Travailleur(euse) en qualité de <strong>${workerFn}</strong>, avec le statut de <strong>${escapeHtml(data.statut === 'OUV' ? 'Ouvrier / Ouvrière' : 'Employé(e)')}</strong>, sous la Commission Paritaire n° <strong>${cp}</strong>, dans le cadre d'un contrat de travail à durée déterminée, conformément aux articles 7 et 10 de la loi du 3 juillet 1978 relative aux contrats de travail.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 2.</span>Durée du contrat et motif du recours au CDD</div>
+      <div class="article-body">
+        <p>Le présent contrat prend cours le <strong>${startDate}</strong> et expire de plein droit le <strong>${endDate}</strong>, sans qu'il soit nécessaire de procéder à une quelconque notification préalable. La survenance du terme entraîne automatiquement la fin du lien contractuel.</p>
+        <p><strong>Motif légal du recours au contrat à durée déterminée (art. 10 L. 3/07/1978) :</strong> ${motifCDD}.</p>
+        <div class="encadre-info"><strong>Renouvellement :</strong> Le présent contrat ne peut être renouvelé que dans les strictes conditions prévues par l'article 10bis de la loi du 3 juillet 1978 : maximum trois renouvellements successifs, pour une durée totale n'excédant pas deux ans, sous peine de requalification automatique en contrat à durée indéterminée. Tout renouvellement doit faire l'objet d'un avenant écrit signé par les deux parties.</div>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 3.</span>Fonction et lieu de travail</div>
+      <div class="article-body">
+        <p>Le/la Travailleur(euse) exercera la fonction de <strong>${workerFn}</strong> au lieu de travail principal fixé à <strong>${workplace}</strong>. Des déplacements occasionnels pourront être requis selon les nécessités du service.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 4.</span>Durée du travail et horaires</div>
+      <div class="article-body">
+        <p>Le/la Travailleur(euse) est engagé(e) à <strong>${regimeLabel}</strong>, soit <strong>${hours} heures par semaine</strong>, selon les horaires définis dans le règlement de travail. Les heures supplémentaires éventuelles sont soumises aux règles prévues par la loi du 16 mars 1971 et les conventions collectives applicables.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 5.</span>Rémunération</div>
+      <div class="article-body">
+        <p>En contrepartie de ses prestations, le/la Travailleur(euse) percevra un salaire mensuel brut de <strong>${salary} € (euros bruts)</strong> pour un régime de ${hours} heures par semaine, conformément au barème sectoriel CP n° ${cp}. Ce salaire est payable le dernier jour ouvrable de chaque mois par virement bancaire.</p>
+        ${mealV ? `<div class="encadre-info">Chèques-repas : ${mealV} € de valeur faciale par jour de prestation effective (part patronale dans les limites de l'AR du 12/10/2010).</div>` : ''}
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 6.</span>Résiliation anticipée du CDD</div>
+      <div class="article-body">
+        <p>Le présent contrat à durée déterminée ne peut être résilié avant son terme que dans les hypothèses limitativement prévues par la loi du 3 juillet 1978, à savoir :</p>
+        <p class="sub-clause">Pour <strong>motif grave</strong> de l'une des parties (art. 35), constitutif d'un manquement grave rendant impossible toute collaboration professionnelle immédiate, sans préavis ni indemnité, sous réserve du respect de la procédure légale (notification dans les trois jours, communication des motifs par recommandé dans les trois jours suivants) ;</p>
+        <p class="sub-clause">Moyennant le paiement d'une <strong>indemnité compensatoire</strong> égale à la rémunération restant à courir jusqu'au terme du contrat, limitée au double de la rémunération due en cas de résiliation d'un contrat à durée indéterminée de même ancienneté, conformément à l'article 40 de la loi du 3 juillet 1978.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 7.</span>Congés annuels, jours fériés et maladie</div>
+      <div class="article-body">
+        <p>Les droits aux vacances annuelles sont calculés au prorata des jours effectivement travaillés ou assimilés, conformément aux lois coordonnées du 28 juin 1971. Les jours fériés légaux sont accordés conformément à la loi du 4 janvier 1974. En cas d'incapacité de travail, la rémunération garantie est versée selon les règles de la loi du 3 juillet 1978.</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 8.</span>Confidentialité, PI, RGPD et obligations déontologiques</div>
+      <div class="article-body">
+        <p>Le/la Travailleur(euse) est tenu(e) au secret professionnel le plus strict durant et après l'exécution du présent contrat. L'ensemble des créations réalisées dans le cadre du contrat sont la propriété exclusive de l'Employeur (loi 30/06/1994). Le traitement des données personnelles s'effectue conformément au RGPD (UE) 2016/679. Le/la Travailleur(euse) déclare avoir reçu et accepté le règlement de travail (loi 8/04/1965).</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 9.</span>Loi applicable et juridiction</div>
+      <div class="article-body">
+        <p>Le présent contrat est régi par le droit belge. Tout litige relatif à son exécution ou à sa résiliation sera soumis à la compétence exclusive du Tribunal du travail de Bruxelles.</p>
+      </div>
+    </div>`
+
+    return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CDD — ${workerName} — ${coName}</title><style>${CSS}</style></head><body>
+    ${printBar}${headerBand}${body}
+    ${signaturesBlock(null)}
+    ${legalFooter('Loi du 3 juillet 1978 (art. 7 et 10 — CDD) · Loi du 26 décembre 2013 · Lois coordonnées 28 juin 1971 · Loi du 4 janvier 1974 · RGPD (UE) 2016/679')}
+    </body></html>`
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // CONTRAT ÉTUDIANT
+  // ══════════════════════════════════════════════════════════════════════
+  if (type === 'CONTRAT_STUDENT') {
+    const hourlyRate = escapeHtml(String(data.hourlyRate || data.salary || '___'))
+    const body = `
+    <div class="doc-title-block">
+      <div class="doc-title">Convention d'occupation étudiant</div>
+      <div class="doc-subtitle">Conclue en application du Titre VII de la loi du 3 juillet 1978 relative aux contrats de travail<br/>et de l'arrêté royal du 8 mars 2023 fixant les mentions obligatoires.</div>
+      <div class="doc-ref">Référence : Étudiant · ${workerName} · Du ${startDate} au ${endDate}</div>
+    </div>
+
+    <div class="encadre-info">📚 <strong>Régime spécial de cotisations sociales :</strong> Dans la limite de 600 heures par année civile, les cotisations sociales sont réduites à 2,71 % (travailleur) et 5,42 % (employeur), au lieu des taux normaux. Au-delà de ce contingent annuel, les cotisations ordinaires s'appliquent. L'étudiant peut consulter son contingent disponible sur <strong>www.student.be</strong>.</div>
+
+    <div class="parties-section">
+      <div class="parties-intro">Entre les soussignés</div>
+      <div class="partie-block">
+        <div class="partie-label">L'Employeur</div>
+        <p><strong>${coName}</strong>, BCE <strong>${coBce}</strong>, ONSS <strong>${coOnss}</strong>, ${coAddr}, représenté(e) par <strong>${signatory}</strong>, <strong>${signatoryTitle}</strong> — ci-après <strong>« l'Employeur »</strong>.</p>
+      </div>
+      <div class="partie-block">
+        <div class="partie-label">L'Étudiant(e)</div>
+        <p><strong>${workerName}</strong>, né(e) le <strong>${workerBirth}</strong>, domicilié(e) à <strong>${workerAddr}</strong>, NISS : <strong>${workerNiss}</strong> — ci-après <strong>« l'Étudiant(e) »</strong>.</p>
+      </div>
+    </div>
+
+    <div class="convenu-intro">Il a été convenu ce qui suit</div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 1.</span>Objet de la convention</div>
+      <div class="article-body"><p>L'Employeur occupe l'Étudiant(e) en qualité de <strong>${workerFn}</strong> dans le cadre d'une convention d'occupation étudiant régie par le Titre VII de la loi du 3 juillet 1978 et l'AR du 8 mars 2023. L'Étudiant(e) confirme être régulièrement inscrit(e) dans un établissement d'enseignement reconnu.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 2.</span>Durée de la convention <em>(mention obligatoire — AR 8 mars 2023)</em></div>
+      <div class="article-body"><p>La présente convention est conclue pour la période du <strong>${startDate}</strong> au <strong>${endDate}</strong> inclus. Elle prend fin de plein droit à l'expiration du terme convenu.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 3.</span>Lieu de travail <em>(mention obligatoire)</em></div>
+      <div class="article-body"><p>Le lieu de travail est : <strong>${workplace}</strong>.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 4.</span>Fonction <em>(mention obligatoire)</em></div>
+      <div class="article-body"><p>L'Étudiant(e) est occupé(e) en qualité de : <strong>${workerFn}</strong>.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 5.</span>Rémunération et mode de paiement <em>(mention obligatoire)</em></div>
+      <div class="article-body"><p>La rémunération est fixée à <strong>${hourlyRate} € brut par heure</strong>, conformément au barème sectoriel applicable à la CP n° ${cp}. Le paiement s'effectue le dernier jour ouvrable de chaque mois par virement bancaire.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 6.</span>Horaire de travail <em>(mention obligatoire)</em></div>
+      <div class="article-body"><p><strong>${hours} heures par semaine</strong>. Répartition : ${schedule}.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 7.</span>Délai de préavis <em>(mention obligatoire — art. 120 L. 3/07/1978)</em></div>
+      <div class="article-body"><p>Durant les sept premiers jours calendriers d'exécution de la convention : <strong>3 jours calendriers</strong>. Après ces sept premiers jours : <strong>7 jours calendriers</strong>. La notification s'effectue par lettre recommandée ou remise en main propre contre accusé de réception signé.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 8.</span>Cotisations de solidarité réduites — Contingent 600 heures</div>
+      <div class="article-body">
+        <p>L'Étudiant(e) bénéficie du régime de cotisations réduites (2,71 % à charge du travailleur, 5,42 % à charge de l'employeur) dans la limite globale de <strong>600 heures par année civile</strong> (art. 17bis de l'arrêté royal du 28 novembre 1969, tel que modifié). L'Employeur déclarera les heures prestées via la Déclaration multifonctionnelle (DmfA) trimestrielle à l'ONSS.</p>
+        <p>L'Étudiant(e) déclare avoir été informé(e) de son droit de consulter son contingent disponible sur www.student.be et certifie que l'occupation dans le cadre de la présente convention n'entraîne pas un dépassement du plafond de 600 heures.</p>
+      </div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 9.</span>Obligations, règlement de travail et protection des données</div>
+      <div class="article-body"><p>L'Étudiant(e) déclare avoir reçu et accepter le règlement de travail (loi 8/04/1965) et s'engage au respect des instructions de l'Employeur, au secret professionnel et à la confidentialité. Le traitement des données personnelles est effectué conformément au RGPD (UE) 2016/679.</p></div>
+    </div>`
+
+    return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Convention étudiant — ${workerName} — ${coName}</title><style>${CSS}</style></head><body>
+    ${printBar}${headerBand}${body}
+    ${signaturesBlock('L\'Étudiant(e) confirme sa qualité d\'étudiant(e) régulièrement inscrit(e) et son engagement à informer l\'Employeur de tout changement susceptible d\'affecter l\'application du régime des cotisations réduites.')}
+    ${legalFooter('Loi du 3 juillet 1978 Titre VII (convention étudiant) · AR du 8 mars 2023 (mentions obligatoires) · Art. 17bis AR 28/11/1969 (cotisations réduites) · Loi du 25 décembre 2016 · RGPD (UE) 2016/679')}
+    </body></html>`
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // TEMPS PARTIEL
+  // ══════════════════════════════════════════════════════════════════════
+  if (type === 'CONTRAT_TEMPS_PARTIEL') {
+    const body = `
+    <div class="doc-title-block">
+      <div class="doc-title">Contrat de travail<br/>à temps partiel</div>
+      <div class="doc-subtitle">Conclu en application de l'article 11bis de la loi du 3 juillet 1978<br/>et de l'arrêté royal du 25 juin 1990 relatif au travail à temps partiel.</div>
+      <div class="doc-ref">Référence : Temps partiel · ${workerName} · ${regimePct} · Entrée : ${startDate}</div>
+    </div>
+
+    <div class="encadre-warn">📋 <strong>Mention obligatoire (art. 11bis al.4 L. 3/07/1978) :</strong> L'horaire de travail convenu doit impérativement figurer dans le contrat écrit. Toute modification de l'horaire exige un avenant signé par les deux parties.</div>
+
+    <div class="parties-section">
+      <div class="parties-intro">Entre les soussignés</div>
+      <div class="partie-block">
+        <div class="partie-label">L'Employeur</div>
+        <p><strong>${coName}</strong>, BCE <strong>${coBce}</strong>, ONSS <strong>${coOnss}</strong>, ${coAddr}, CP n° ${cp}, représenté(e) par <strong>${signatory}</strong>, <strong>${signatoryTitle}</strong> — ci-après <strong>« l'Employeur »</strong>.</p>
+      </div>
+      <div class="partie-block">
+        <div class="partie-label">Le/La Travailleur(euse)</div>
+        <p><strong>${workerName}</strong>, né(e) le <strong>${workerBirth}</strong>, domicilié(e) à <strong>${workerAddr}</strong>, NISS : <strong>${workerNiss}</strong> — ci-après <strong>« le/la Travailleur(euse) »</strong>.</p>
+      </div>
+    </div>
+
+    <div class="convenu-intro">Il a été convenu et arrêté ce qui suit</div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 1.</span>Objet et engagement</div>
+      <div class="article-body"><p>L'Employeur engage le/la Travailleur(euse) en qualité de <strong>${workerFn}</strong> (${escapeHtml(data.statut === 'OUV' ? 'Ouvrier/Ouvrière' : 'Employé(e)')}), CP n° ${cp}, dans le cadre d'un contrat de travail à <strong>durée indéterminée à temps partiel</strong>, conformément à l'article 11bis de la loi du 3 juillet 1978 et à l'arrêté royal du 25 juin 1990.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 2.</span>Régime de travail et horaire contractuel <em>(mention obligatoire — art. 11bis al.4)</em></div>
+      <div class="article-body">
+        <p>Le/la Travailleur(euse) est engagé(e) à temps partiel à raison de <strong>${hours} heures par semaine</strong>, soit <strong>${regimePct} d'un temps plein de référence</strong> (38 heures par semaine). L'horaire convenu entre les parties est le suivant : <strong>${schedule}</strong>.</p>
+        <div class="encadre-info">Toute modification permanente ou structurelle de l'horaire contractuel ci-dessus doit faire l'objet d'un avenant écrit signé par les deux parties préalablement à sa mise en application, conformément à l'article 11bis alinéa 4 de la loi du 3 juillet 1978.</div>
+      </div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 3.</span>Prise de cours et lieu de travail</div>
+      <div class="article-body"><p>Le présent contrat prend cours le <strong>${startDate}</strong>. Conformément à la loi du 26 décembre 2013, aucune période d'essai n'est applicable. Le lieu de travail principal est : <strong>${workplace}</strong>.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 4.</span>Rémunération prorata temporis</div>
+      <div class="article-body">
+        <p>Le salaire mensuel brut est fixé à <strong>${salary} € brut</strong>, calculé au prorata du temps de travail convenu par rapport au temps plein de référence, conformément au barème sectoriel CP n° ${cp}. Tous les avantages légaux et conventionnels (pécule de vacances, prime de fin d'année, jours fériés) sont calculés et accordés au prorata du régime de travail.</p>
+        ${mealV ? `<div class="encadre-info">Chèques-repas : ${mealV} € par jour de prestation complète uniquement (AR 12/10/2010).</div>` : ''}
+      </div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 5.</span>Heures complémentaires</div>
+      <div class="article-body"><p>Des heures complémentaires (dépassant l'horaire contractuel sans atteindre le temps plein) peuvent être demandées par l'Employeur dans les limites prévues par la loi et le règlement de travail. Les heures complémentaires dépassant d'un tiers l'horaire contractuel sont rémunérées avec un sursalaire de 50 %, conformément à l'article 11bis § 1 alinéa 3 de la loi du 3 juillet 1978.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 6.</span>Droit de priorité à un emploi à temps plein</div>
+      <div class="article-body"><p>Le/la Travailleur(euse) à temps partiel bénéficie, conformément à l'article 11bis § 2 de la loi du 3 juillet 1978, d'un droit de priorité d'accès aux postes à temps plein vacants qui correspondent à ses qualifications. L'Employeur informera le/la Travailleur(euse) de toute vacance de poste à temps plein.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 7.</span>Confidentialité, propriété intellectuelle, RGPD et règlement de travail</div>
+      <div class="article-body"><p>Le/la Travailleur(euse) est soumis(e) aux mêmes obligations de confidentialité, de propriété intellectuelle et de protection des données que dans un contrat à temps plein. Il/elle déclare avoir reçu et accepté le règlement de travail (loi 8/04/1965). Les délais de préavis sont calculés conformément à la loi du 26 décembre 2013.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 8.</span>Loi applicable</div>
+      <div class="article-body"><p>Le présent contrat est régi par le droit belge. Tout litige relève de la compétence exclusive du Tribunal du travail de Bruxelles.</p></div>
+    </div>`
+
+    return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Temps partiel — ${workerName} — ${coName}</title><style>${CSS}</style></head><body>
+    ${printBar}${headerBand}${body}
+    ${signaturesBlock(null)}
+    ${legalFooter('Loi du 3 juillet 1978 (art. 11bis) · AR du 25 juin 1990 (temps partiel) · Loi du 26 décembre 2013 · Lois coordonnées 28 juin 1971 · RGPD (UE) 2016/679')}
+    </body></html>`
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // AVENANT
+  // ══════════════════════════════════════════════════════════════════════
+  if (type === 'AVENANT') {
+    const effDate = escapeHtml(data.effectiveDate || data.startDate || dateStr)
+    const modif = escapeHtml(data.modification || '[modifications à décrire précisément]')
+    const body = `
+    <div class="doc-title-block">
+      <div class="doc-title">Avenant au contrat de travail</div>
+      <div class="doc-subtitle">Modification du contrat de travail par accord mutuel des parties<br/>conformément à l'article 1134 du Code civil belge.</div>
+      <div class="doc-ref">Référence : Avenant · ${workerName} · Effet : ${effDate}</div>
+    </div>
+    <div class="parties-section">
+      <div class="parties-intro">Entre les soussignés</div>
+      <div class="partie-block">
+        <div class="partie-label">L'Employeur</div>
+        <p><strong>${coName}</strong>, BCE <strong>${coBce}</strong>, ${coAddr}, représenté(e) par <strong>${signatory}</strong>, <strong>${signatoryTitle}</strong>.</p>
+      </div>
+      <div class="partie-block">
+        <div class="partie-label">Le/La Travailleur(euse)</div>
+        <p><strong>${workerName}</strong>, domicilié(e) à <strong>${workerAddr}</strong>, NISS : <strong>${workerNiss}</strong>.</p>
+      </div>
+    </div>
+    <div class="convenu-intro">Il a été convenu et arrêté ce qui suit</div>
+    <div class="article">
+      <div class="article-header"><span>Article 1.</span>Objet du présent avenant</div>
+      <div class="article-body"><p>Le présent avenant a pour objet de modifier le contrat de travail conclu le <strong>${startDate}</strong> entre les parties. Les modifications ci-après prennent effet au <strong>${effDate}</strong>. Toutes les autres dispositions du contrat initial non expressément modifiées par le présent avenant demeurent inchangées et pleinement applicables.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 2.</span>Modifications convenues</div>
+      <div class="article-body"><p>${modif}</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 3.</span>Accord libre et éclairé</div>
+      <div class="article-body"><p>Les parties déclarent avoir librement consenti aux modifications prévues au présent avenant, en parfaite connaissance de cause et sans contrainte ni pression d'aucune sorte. Le/la Travailleur(euse) reconnaît avoir disposé du temps nécessaire pour réfléchir aux implications des modifications convenues et avoir eu la possibilité de consulter un conseiller juridique ou syndical.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 4.</span>Loi applicable</div>
+      <div class="article-body"><p>Le présent avenant fait partie intégrante du contrat de travail initial et est soumis au droit belge. Tout litige relève de la compétence du Tribunal du travail de Bruxelles.</p></div>
+    </div>`
+
+    return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Avenant — ${workerName} — ${coName}</title><style>${CSS}</style></head><body>
+    ${printBar}${headerBand}${body}
+    ${signaturesBlock(null)}
+    ${legalFooter('Art. 1134 Code civil · Loi du 3 juillet 1978 · Loi du 26 décembre 2013')}
+    </body></html>`
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // RUPTURE DE COMMUN ACCORD
+  // ══════════════════════════════════════════════════════════════════════
+  if (type === 'CONVENTION_RUPTURE') {
+    const body = `
+    <div class="encadre-warn">⚖️ <strong>Avertissement ONEM :</strong> La rupture du contrat de travail de commun accord peut entraîner une exclusion temporaire du droit aux allocations de chômage ou une réduction de celles-ci, conformément aux articles 44 à 52 de l'arrêté royal du 25 novembre 1991. Le/la Travailleur(euse) est vivement conseillé(e) de consulter son organisme de paiement ou un conseiller syndical avant de signer.</div>
+
+    <div class="doc-title-block">
+      <div class="doc-title">Convention de rupture<br/>du contrat de travail de commun accord</div>
+      <div class="doc-subtitle">Conclue en application de l'article 32 de la loi du 3 juillet 1978 relative aux contrats de travail.</div>
+      <div class="doc-ref">Référence : Rupture · ${workerName} · Fin : ${endDate}</div>
+    </div>
+
+    <div class="parties-section">
+      <div class="parties-intro">Entre les soussignés</div>
+      <div class="partie-block">
+        <div class="partie-label">L'Employeur</div>
+        <p><strong>${coName}</strong>, BCE <strong>${coBce}</strong>, ONSS <strong>${coOnss}</strong>, ${coAddr}, représenté(e) par <strong>${signatory}</strong>, <strong>${signatoryTitle}</strong> — ci-après <strong>« l'Employeur »</strong>.</p>
+      </div>
+      <div class="partie-block">
+        <div class="partie-label">Le/La Travailleur(euse)</div>
+        <p><strong>${workerName}</strong>, né(e) le <strong>${workerBirth}</strong>, domicilié(e) à <strong>${workerAddr}</strong>, NISS : <strong>${workerNiss}</strong> — ci-après <strong>« le/la Travailleur(euse) »</strong>.</p>
+      </div>
+    </div>
+
+    <div class="convenu-intro">Il a été convenu et arrêté ce qui suit</div>
+
+    <div class="article">
+      <div class="article-header"><span>Article 1.</span>Rupture amiable du contrat de travail</div>
+      <div class="article-body"><p>Les parties conviennent, d'un commun accord librement et éclairément exprimé, de mettre fin au contrat de travail à durée indéterminée qui les unit depuis le <strong>${startDate}</strong>, avec effet au <strong>${endDate}</strong>. Cette convention de rupture est conclue conformément à l'article 32 de la loi du 3 juillet 1978.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 2.</span>Absence d'indemnité compensatoire de préavis</div>
+      <div class="article-body"><p>La présente convention met fin au contrat sans délai de préavis. <strong>Aucune indemnité compensatoire de préavis n'est due</strong> par l'une ou l'autre des parties, la rupture étant décidée d'un commun accord mutuellement consenti.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 3.</span>Solde de tout compte et documents sociaux</div>
+      <div class="article-body">
+        <p>Un décompte final (solde de tout compte) sera établi et remis au/à la Travailleur(euse) au plus tard à la date de fin du contrat. Ce décompte comprendra : les salaires dus jusqu'à la date de fin, le pécule de vacances de départ calculé conformément aux lois coordonnées du 28 juin 1971, la prime de fin d'année prorata temporis selon la CCT applicable, et tout autre avantage dû en vertu du contrat.</p>
+        <p>L'Employeur remettra les documents sociaux légalement requis dans les délais impartis : certificat de chômage (C4) et attestation de vacances dans les 8 jours ouvrables suivant la fin du contrat (art. 59 L. 3/07/1978), fiche fiscale 281.10 au plus tard le 28 février de l'exercice fiscal suivant.</p>
+      </div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 4.</span>Conséquences sur le droit aux allocations de chômage</div>
+      <div class="article-body">
+        <p>Le/la Travailleur(euse) déclare avoir été expressément informé(e) par l'Employeur que la rupture du contrat de travail de commun accord est susceptible d'entraîner, conformément aux articles 44 à 52 de l'arrêté royal du 25 novembre 1991 relatif à l'octroi des allocations de chômage, une exclusion temporaire ou une réduction du montant des allocations de chômage auxquelles il/elle pourrait prétendre.</p>
+        <p>Le/la Travailleur(euse) reconnaît avoir eu la possibilité de consulter son organisme de paiement, son syndicat ou un conseiller juridique avant de signer la présente convention, et avoir fait son choix librement et en pleine connaissance des conséquences possibles.</p>
+      </div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 5.</span>Accord libre, éclairé et sans vice de consentement</div>
+      <div class="article-body"><p>Les parties certifient que la présente convention a été conclue librement, sans contrainte ni pression d'aucune nature, et que leur consentement n'a été vicié ni par erreur, ni par dol, ni par violence au sens des articles 1109 et suivants du Code civil belge. Le/la Travailleur(euse) confirme avoir disposé d'un délai de réflexion suffisant avant de signer.</p></div>
+    </div>
+    <div class="article">
+      <div class="article-header"><span>Article 6.</span>Loi applicable et juridiction</div>
+      <div class="article-body"><p>La présente convention est régie par le droit belge. Tout litige relatif à son interprétation ou son exécution sera soumis à la compétence exclusive du Tribunal du travail de Bruxelles.</p></div>
+    </div>`
+
+    return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rupture commun accord — ${workerName} — ${coName}</title><style>${CSS}</style></head><body>
+    ${printBar}${headerBand}${body}
+    ${signaturesBlock('Le/La Travailleur(euse) certifie avoir été informé(e) des conséquences possibles sur ses droits aux allocations de chômage et avoir signé la présente convention librement et en connaissance de cause.')}
+    ${legalFooter('Art. 32 L. 3/07/1978 · AR du 25 novembre 1991 (chômage, art. 44-52) · Lois coordonnées 28 juin 1971 · Art. 59 L. 3/07/1978 (documents sociaux) · Art. 1109 Code civil')}
+    </body></html>`
+  }
+
+  return ''
 }
 
 function calculateNotice(startDate, isEmployer, statut) {
