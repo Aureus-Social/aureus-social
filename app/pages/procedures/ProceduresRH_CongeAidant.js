@@ -166,7 +166,8 @@ export default function ProcedureCongeAidant() {
             </div>
           </div>}
         </div>;
-      })}</div>}
+      })}
+      </div>}
       {ong === 'simulation' && <div>
         <h2 style={s.st2}>🧮 {P.simulation.titre}</h2>
         <div style={s.cd}>
