@@ -1,4 +1,5 @@
 // API Monitoring — déclenchement manuel depuis le Dashboard
+import { NextResponse } from 'next/server';
 import { logInfo, logError, logWarn } from '../../lib/security/logger.js';
 import { createClient } from '@supabase/supabase-js';
 

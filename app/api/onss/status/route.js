@@ -1,9 +1,10 @@
 // ═══ AUREUS SOCIAL PRO — /api/onss/status ═══
 // Statut connexion ONSS (requis par dimona.js)
+import { getAuthUser } from '@/app/lib/supabase';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
-  const u = await getAuthUser(req);
+  const u = await getAuthUser(request);
   if (!u) return Response.json({ error: 'Non autorisé' }, { status: 401 });
 
   const { searchParams } = new URL(request.url);
