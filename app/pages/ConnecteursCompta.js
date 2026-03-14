@@ -70,6 +70,14 @@ const FORMATS = [
   { id: 'wb_classic', name: 'WinBooks Classic',    icon: '📒', ext: '.dbf.csv', color: '#a78bfa', desc: 'CSV compatible DBF WinBooks Classic local' },
 ];
 
+// ── Formats migration depuis secrétariats sociaux concurrents ─────────
+const IMPORT_FORMATS = [
+  { id: 'sdworx',  name: 'SD Worx',   icon: '🔵', color: '#3b82f6', desc: 'Export CSV SD Worx — Payroll Journal', parser: parseSDWorxCSV },
+  { id: 'partena', name: 'Partena',   icon: '🟣', color: '#a855f7', desc: 'Export CSV Partena Social', parser: parsePartenaCSV },
+  { id: 'securex', name: 'Securex',   icon: '🟠', color: '#f97316', desc: 'Export CSV Securex', parser: parseSecurexCSV },
+  { id: 'bob50i',  name: 'BOB 50 → Import', icon: '📘', color: '#64748b', desc: 'Import journal BOB 50', parser: parseBOB50Import },
+];
+
 // ── Générateurs ──────────────────────────────────────────────────────────
 function genBOB50(lines, pcmn, period, co) {
   const { month, year } = period;
@@ -210,6 +218,67 @@ function downloadFile(content, filename, mime = 'text/plain;charset=utf-8') {
 }
 
 // ── Parsers import ─────────────────────────────────────────────────────────
+// ── Parseurs migration depuis secrétariats sociaux concurrents ─────────────
+
+function parseSDWorxCSV(text) {
+  // Format SD Worx export "Payroll Journal" — colonnes typiques
+  const rows = text.split(/\r?\n/).filter(r=>r.trim());
+  const header = rows[0].split(';').map(h=>h.trim().toLowerCase().replace(/[^a-z0-9]/g,'_'));
+  const employees = {};
+  for (let i=1; i<rows.length; i++) {
+    const vals = rows[i].split(';');
+    const emp = {};
+    header.forEach((h,j)=>{ emp[h]=vals[j]?.trim()||''; });
+    // Champs SD Worx courants
+    const niss = emp.niss||emp.nr_national||emp.national_nr||emp.registre_national||'';
+    const first = emp.prenom||emp.voornaam||emp.first_name||emp.firstname||'';
+    const last = emp.nom||emp.naam||emp.last_name||emp.lastname||'';
+    const gross = parseFloat((emp.brut||emp.brut_imposable||emp.salaire_brut||emp.gross||'0').replace(',','.'));
+    const net = parseFloat((emp.net||emp.net_a_payer||emp.salaire_net||'0').replace(',','.'));
+    const onss = parseFloat((emp.onss||emp.cotisation_onss||emp.onss_travailleur||'0').replace(',','.'));
+    const pp = parseFloat((emp.pp||emp.precompte||emp.precompte_professionnel||'0').replace(',','.'));
+    const cp = emp.cp||emp.commission_paritaire||emp.secteur||'200';
+    if (first||last||niss) {
+      const key = niss||(first+last);
+      if (!employees[key]) employees[key] = { niss, first, last, cp, gross:0, net:0, onss:0, pp:0 };
+      employees[key].gross += gross;
+      employees[key].net += net;
+      employees[key].onss += onss;
+      employees[key].pp += pp;
+    }
+  }
+  return Object.values(employees).filter(e=>e.gross>0||e.first);
+}
+
+function parsePartenaCSV(text) {
+  // Format Partena export — similaire SD Worx avec quelques variantes
+  return parseSDWorxCSV(text); // Même logique, colonnes proches
+}
+
+function parseSecurexCSV(text) {
+  // Format Securex — colonnes légèrement différentes
+  const rows = text.split(/\r?\n/).filter(r=>r.trim());
+  const header = rows[0].split(';').map(h=>h.trim().toLowerCase());
+  const employees = {};
+  for (let i=1; i<rows.length; i++) {
+    const vals = rows[i].split(';');
+    const emp = {};
+    header.forEach((h,j)=>{ emp[h]=(vals[j]||'').trim(); });
+    const niss = emp['n° national']||emp['niss']||emp['matricule']||'';
+    const first = emp['prénom']||emp['voornaam']||'';
+    const last = emp['nom']||emp['naam']||'';
+    const gross = parseFloat((emp['brut']||emp['rémunération brute']||'0').replace(',','.'));
+    const net = parseFloat((emp['net']||emp['net à payer']||'0').replace(',','.'));
+    if (first||last) {
+      const key = niss||(first+last);
+      if (!employees[key]) employees[key] = { niss, first, last, cp:'200', gross:0, net:0, onss:0, pp:0 };
+      employees[key].gross += gross;
+      employees[key].net += net;
+    }
+  }
+  return Object.values(employees).filter(e=>e.gross>0);
+}
+
 function parseBOB50Import(text) {
   const lines = text.split(/\r?\n/).filter(l => l.trim() && !l.startsWith('JOURNAL'));
   return lines.map(l => {
@@ -352,6 +421,13 @@ export default function ConnecteursCompta({ s }) {
           rows = parseWinBooksImport(text);
         } else if (text.includes(';') && text.includes('JOURNAL')) {
           rows = parseBOB50Import(text);
+        } else if (text.toLowerCase().includes('niss') || text.toLowerCase().includes('registre') || text.toLowerCase().includes('nr_national')) {
+          // Auto-détection format secrétariat social (SD Worx / Partena / Securex)
+          if (text.toLowerCase().includes('securex') || text.toLowerCase().includes('n° national')) {
+            rows = parseSecurexCSV(text);
+          } else {
+            rows = parseSDWorxCSV(text); // Partena et SD Worx même parser
+          }
         } else {
           // CSV générique
           const lines = text.split(/\r?\n/).filter(l => l.trim());
@@ -614,6 +690,9 @@ export default function ConnecteursCompta({ s }) {
                 { id: 'bob50_import', label: '📘 BOB 50 CSV', desc: 'Format JOURNAL;YEAR;MONTH…' },
                 { id: 'wb_import',    label: '📙 WinBooks TXT', desc: 'Format DBKCODE\\tDOCNUMBER…' },
                 { id: 'csv_generic',  label: '📄 CSV Générique', desc: 'Tout fichier CSV/TXT tabulé' },
+                { id: 'sdworx',       label: '🔵 SD Worx CSV', desc: 'Migration depuis SD Worx — colonnes nom/NISS/brut/net' },
+                { id: 'partena',      label: '🟣 Partena CSV', desc: 'Migration depuis Partena Social' },
+                { id: 'securex',      label: '🟠 Securex CSV', desc: 'Migration depuis Securex' },
               ].map(f => (
                 <div key={f.id} style={{ ...S.card, padding: 12, flex: 1, minWidth: 160, margin: 0 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: '#e5e5e5' }}>{f.label}</div>
