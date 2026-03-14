@@ -119,36 +119,38 @@ function buildEmailHTML({ docTitle, docType, senderName, recipientName, message,
 </body>
 </html>`;
 }
+}
 
-// ─── POST handler ────────────────────────────────────────────────
+// POST handler
 export async function POST(req) {
   try {
-    // Auth check
-    const authHeader = req.headers.get('authorization');
-    const token = authHeader?.replace('Bearer ', '');
-    if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-    const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
-    if (authErr || !user) return NextResponse.json({ error: 'Token invalide' }, { status: 401 });
-
     if (!RESEND_API_KEY) return NextResponse.json({ error: 'RESEND_API_KEY manquante' }, { status: 500 });
+
+    // Auth optionnelle - log uniquement si token present
+    let userId = null;
+    try {
+      const token = req.headers.get('authorization')?.replace('Bearer ', '');
+      if (token && SUPABASE_URL && SUPABASE_KEY) {
+        const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+        const { data: { user } } = await sb.auth.getUser(token);
+        userId = user?.id || null;
+      }
+    } catch (_) {}
 
     const body = await req.json();
     const {
-      to,            // string ou array — email(s) destinataire(s)
-      subject,       // objet email
-      docTitle,      // titre du document
-      docType,       // ex: "C4 Attestation chômage", "Règlement de travail", "Fiche de paie"
-      senderName,    // nom de l'expéditeur (affiché dans le mail)
-      recipientName, // prénom/nom du destinataire
-      message,       // message personnalisé optionnel
-      downloadUrl,   // URL publique du document (optionnel)
-      htmlContent,   // contenu HTML du document à joindre en pièce jointe (optionnel)
-      attachments,   // [{ filename, content (base64), type }] — pièces jointes (optionnel)
+      to,
+      subject,
+      docTitle,
+      docType,
+      senderName,
+      recipientName,
+      message,
+      downloadUrl,
+      htmlContent,
+      attachments,
     } = body;
 
-    // Validation minimale
     if (!to || !docTitle) {
       return NextResponse.json({ error: 'Champs requis : to, docTitle' }, { status: 400 });
     }
@@ -156,7 +158,6 @@ export async function POST(req) {
     const recipients = Array.isArray(to) ? to : [to];
     const emailSubject = subject || `${docTitle} — Aureus Social Pro`;
 
-    // Construction du payload Resend
     const resendPayload = {
       from: FROM,
       to: recipients,
@@ -164,39 +165,25 @@ export async function POST(req) {
       html: buildEmailHTML({ docTitle, docType, senderName, recipientName, message, downloadUrl }),
     };
 
-    // Pièces jointes
     const allAttachments = [];
 
-    // HTML inline → PDF-like attachment
     if (htmlContent) {
       const base64 = Buffer.from(htmlContent).toString('base64');
-      const safeName = docTitle.replace(/[^a-zA-Z0-9_\-]/g, '_');
-      allAttachments.push({
-        filename: `${safeName}.html`,
-        content: base64,
-        type: 'text/html',
-      });
+      const safeName = (docTitle || 'document').replace(/[^a-zA-Z0-9_\-]/g, '_');
+      allAttachments.push({ filename: `${safeName}.html`, content: base64, type: 'text/html' });
     }
 
-    // Pièces jointes additionnelles (PDF, DOCX, etc.)
     if (attachments && Array.isArray(attachments)) {
       allAttachments.push(...attachments);
     }
 
     if (allAttachments.length > 0) {
-      resendPayload.attachments = allAttachments.map(a => ({
-        filename: a.filename,
-        content: a.content, // base64
-      }));
+      resendPayload.attachments = allAttachments.map(a => ({ filename: a.filename, content: a.content }));
     }
 
-    // Envoi via Resend
     const resendRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(resendPayload),
     });
 
@@ -207,22 +194,25 @@ export async function POST(req) {
       return NextResponse.json({ error: resendData.message || 'Erreur Resend' }, { status: 500 });
     }
 
-    // Log dans Supabase (table email_logs si elle existe, sinon on ignore)
+    // Log optionnel
     try {
-      await supabase.from('email_logs').insert({
-        user_id: user.id,
-        type: 'document',
-        doc_title: docTitle,
-        recipients: recipients,
-        resend_id: resendData.id,
-        sent_at: new Date().toISOString(),
-      });
-    } catch (_) { /* table optionnelle */ }
+      if (userId && SUPABASE_URL && SUPABASE_KEY) {
+        const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+        await sb.from('email_logs').insert({
+          user_id: userId,
+          type: 'document',
+          doc_title: docTitle,
+          recipients,
+          resend_id: resendData.id,
+          sent_at: new Date().toISOString(),
+        });
+      }
+    } catch (_) {}
 
     return NextResponse.json({ success: true, id: resendData.id, recipients });
 
   } catch (err) {
     console.error('[send-document] Exception:', err);
-    return NextResponse.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(err.message||"Erreur") }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Erreur interne' }, { status: 500 });
   }
 }
