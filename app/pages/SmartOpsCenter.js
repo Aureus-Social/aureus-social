@@ -2,6 +2,7 @@
 import { useLang } from '../lib/lang-context';
 import { C, CR_PAT, DPER, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, obf, quickNet, quickPP } from '@/app/lib/helpers';
 import{useState,useEffect,useMemo,useCallback,useRef}from'react';
+import{authFetch}from'@/app/lib/auth-fetch';
 
 // ═══════════════════════════════════════════════════════════
 // SMART OPS CENTER — Notifications + Smart Alerts + Journal
@@ -33,6 +34,21 @@ export function SmartAlertsEngine({s, d, state, dispatch, defaultTab}){
   const [filter,setFilter]=useState('all');
   const [selectedAlert,setSelectedAlert]=useState(null);
   const [rulesEnabled,setRulesEnabled]=useState({deadlines:true,compliance:true,contracts:true,payroll:true,rh:true,trends:true});
+  const [apiAlerts,setApiAlerts]=useState([]);
+  useEffect(()=>{
+    authFetch('/api/alerts').then(r=>r.ok?r.json():null).then(j=>{
+      if(j?.alerts) setApiAlerts(j.alerts.map(a=>({
+        id:'api-'+Math.random().toString(36).slice(2),
+        sev:a.severity==='critique'?'critical':a.severity==='warning'?'high':'info',
+        cat:a.severity==='critique'?'Critique':'RH',
+        title:a.message,
+        desc:a.emp?(a.emp+' — '+a.message):'',
+        icon:a.severity==='critique'?'🔴':a.severity==='warning'?'🟡':'ℹ️',
+        remedy:a.action||'Vérifier dans le module concerné',
+        emp:a.emp||'',
+      })));
+    }).catch(()=>{});
+  },[]);
 
   // ═══ ALERT ENGINE — Rules-based alert generation ═══
   const alerts=useMemo(()=>{
@@ -132,8 +148,8 @@ export function SmartAlertsEngine({s, d, state, dispatch, defaultTab}){
       if(sevOrder[x.sev]!==sevOrder[y.sev]) return sevOrder[x.sev]-sevOrder[y.sev];
       return(x.deadline||999)-(y.deadline||999);
     });
-    return a;
-  },[clients,rulesEnabled,day,month,yr]);
+    return [...a,...apiAlerts];
+  },[clients,rulesEnabled,day,month,yr,apiAlerts]);
 
   const cats=[...new Set(alerts.map(a=>a.cat))];
   const sevCounts={critical:alerts.filter(a=>a.sev==='critical').length,high:alerts.filter(a=>a.sev==='high').length,medium:alerts.filter(a=>a.sev==='medium').length,low:alerts.filter(a=>a.sev==='low').length,info:alerts.filter(a=>a.sev==='info').length};
