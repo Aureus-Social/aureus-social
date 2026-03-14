@@ -373,6 +373,10 @@ function DashboardLayoutInner({ user }) {
     return <AccessRequestRaw user={user} onApproved={() => setAccessStatus('approved')} />;
   }
 
+  return <DashboardLayoutApproved user={user} />;
+}
+
+function DashboardLayoutApproved({ user }) {
   const [page, setPage] = useState('dashboard');
   const [cryptoKey, setCryptoKey] = useState(null);
   const { lang, setLang, t: tCtx } = useLang();
