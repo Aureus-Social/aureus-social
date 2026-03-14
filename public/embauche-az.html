@@ -3784,6 +3784,142 @@ function wizLaunchDimona() {
         <div style="font-size:12px;font-weight:700;color:#ec4899;margin-bottom:8px;">🎨 Artiste rémunéré</div>
         <div style="font-size:11px;color:var(--text);line-height:1.9;">📌 Carte artiste obligatoire · 📌 Dimona type <strong>A17</strong> · 📌 Déduction frais pro 50% forfaitaire · 📌 Caisse congés spectacles (ONEM)</div>
       </div>
+
+      <!-- ══ INDÉPENDANT COMPLÉMENTAIRE ══ -->
+      <div id="w-indep-bloc" style="display:none;margin-top:12px;border-radius:10px;overflow:hidden;">
+
+        <!-- En-tête -->
+        <div style="background:linear-gradient(135deg,rgba(198,163,78,.15),rgba(198,163,78,.05));border:1px solid rgba(198,163,78,.35);border-radius:10px;padding:16px;">
+          <div style="font-size:13px;font-weight:700;color:#c6a34e;margin-bottom:4px;">💼 Indépendant complémentaire — Régime INASTI</div>
+          <div style="font-size:10px;color:#8b7340;line-height:1.6;">Cumul activité salariée principale + activité indépendante · Affilié à une caisse d'assurances sociales · AR du 19/12/1967</div>
+        </div>
+
+        <!-- Simulateur cotisations -->
+        <div style="background:rgba(198,163,78,.04);border:1px solid rgba(198,163,78,.15);border-top:none;border-radius:0 0 10px 10px;padding:14px;">
+          <div style="font-size:11px;font-weight:700;color:#c6a34e;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Simulateur cotisations INASTI 2026</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div>
+              <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Revenus nets annuels estimés (€)</label>
+              <input type="number" id="w-indep-revenus" placeholder="ex: 12000" oninput="wizCalcINASTI()"
+                style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(198,163,78,.3);background:rgba(0,0,0,.2);color:var(--text);font-family:inherit;font-size:12px;box-sizing:border-box;">
+              <div style="font-size:9px;color:#5e5c56;margin-top:3px;">Revenus nets = chiffre d'affaires − charges déductibles</div>
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Caisse d'assurances sociales</label>
+              <select id="w-indep-caisse" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
+                <option value="liantis">Liantis</option>
+                <option value="acerta">Acerta</option>
+                <option value="xerius">Xerius</option>
+                <option value="ucm">UCM</option>
+                <option value="securex">Securex Indépendants</option>
+                <option value="nisse">NISSE</option>
+                <option value="partena">Partena</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div>
+              <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Forme juridique</label>
+              <select id="w-indep-forme" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
+                <option value="pn">Personne physique (en nom propre)</option>
+                <option value="sc">Société (SRL, SA, SNC...)</option>
+                <option value="aisbl">ASBL</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:10px;color:var(--muted);display:block;margin-bottom:3px;">Activité principale</label>
+              <select id="w-indep-activite" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:12px;">
+                <option value="services">Prestations de services</option>
+                <option value="commerce">Commerce / Vente</option>
+                <option value="artisanat">Artisanat / Production</option>
+                <option value="liberal">Profession libérale</option>
+                <option value="numerique">Numérique / IT / Consulting</option>
+                <option value="immobilier">Immobilier / Gestion de biens</option>
+                <option value="agricole">Agricole / Horticole</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="w-indep-calc"></div>
+
+          <!-- Checklist obligations -->
+          <div style="margin-top:14px;border-top:1px solid rgba(198,163,78,.15);padding-top:12px;">
+            <div style="font-size:11px;font-weight:700;color:#c6a34e;margin-bottom:8px;">📋 Obligations légales avant démarrage</div>
+            <div class="checklist">
+              <div class="check-item important">📌 <strong>Inscription BCE obligatoire</strong> — numéro d'entreprise via Guichet d'entreprises agréé (Liantis, Acerta, UCM...) — coût : ~90 € — délai : avant tout acte commercial</div>
+              <div class="check-item important">📌 <strong>Affiliation caisse assurances sociales</strong> dans les 90 jours du début d'activité — cotisations trimestrielles</div>
+              <div class="check-item important">⚠️ <strong>Vérifier clause de non-concurrence</strong> dans le contrat de travail salarié — l'activité indépendante ne peut pas concurrencer l'employeur principal</div>
+              <div class="check-item">📌 <strong>Assujettissement TVA</strong> à évaluer : franchise TVA si CA &lt; 25.000 €/an (art. 56bis CTVA) — sinon déclarations trimestrielles/mensuelles</div>
+              <div class="check-item">📌 <strong>Comptabilité simplifiée</strong> obligatoire (recettes/dépenses) ou complète si SA/SRL — conservation 7 ans</div>
+              <div class="check-item">📌 <strong>RC professionnelle</strong> recommandée selon activité (obligatoire pour architectes, médecins, avocats...)</div>
+              <div class="check-item">📌 <strong>Numéro de TVA</strong> à demander via MyMinfin si assujetti — obligatoire sur toutes les factures</div>
+            </div>
+          </div>
+
+          <!-- Avantages fiscaux -->
+          <div style="margin-top:12px;border-top:1px solid rgba(198,163,78,.15);padding-top:12px;">
+            <div style="font-size:11px;font-weight:700;color:#c6a34e;margin-bottom:8px;">💡 Avantages & optimisations fiscales 2026</div>
+            <div class="checklist">
+              <div class="check-item">🏦 <strong>PLCI (Pension Libre Complémentaire pour Indépendants)</strong> — déductible à 100% des revenus nets · Plafond 2026 : 30% des revenus nets plafonnés à 39.622,03 € · Épargne pension défiscalisée</div>
+              <div class="check-item">🏥 <strong>Assurance hospitalisation complémentaire</strong> déductible à titre de frais professionnel</div>
+              <div class="check-item">🚗 <strong>Frais de véhicule</strong> déductibles à 75% (usage mixte) ou 100% (usage professionnel exclusif) — conserver journal de bord</div>
+              <div class="check-item">💻 <strong>Matériel informatique, téléphone, internet</strong> — prorata usage professionnel déductible (généralement 75-100%)</div>
+              <div class="check-item">🏠 <strong>Bureau à domicile</strong> — forfait ou prorata surface — déductible si espace dédié et exclusif</div>
+              <div class="check-item">📚 <strong>Frais de formation</strong> — déductibles à 100% si liés à l'activité professionnelle</div>
+            </div>
+          </div>
+
+          <!-- Documents à générer -->
+          <div style="margin-top:12px;border-top:1px solid rgba(198,163,78,.15);padding-top:12px;">
+            <div style="font-size:11px;font-weight:700;color:#c6a34e;margin-bottom:8px;">📄 Documents spécifiques à préparer</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div style="background:rgba(0,0,0,.15);border-radius:6px;padding:10px;border:1px solid rgba(198,163,78,.1);">
+                <div style="font-size:10px;font-weight:700;color:#e8e6e0;margin-bottom:4px;">Contrat de prestation</div>
+                <div style="font-size:9px;color:#5e5c56;">Entre l'indépendant et chaque client — mentions obligatoires loi B2B</div>
+              </div>
+              <div style="background:rgba(0,0,0,.15);border-radius:6px;padding:10px;border:1px solid rgba(198,163,78,.1);">
+                <div style="font-size:10px;font-weight:700;color:#e8e6e0;margin-bottom:4px;">Conditions générales de vente</div>
+                <div style="font-size:9px;color:#5e5c56;">Obligatoires B2B — délais paiement 30j max, intérêts légaux</div>
+              </div>
+              <div style="background:rgba(0,0,0,.15);border-radius:6px;padding:10px;border:1px solid rgba(198,163,78,.1);">
+                <div style="font-size:10px;font-weight:700;color:#e8e6e0;margin-bottom:4px;">Modèle de facture conforme</div>
+                <div style="font-size:9px;color:#5e5c56;">N° BCE, N° TVA, IBAN, mentions légales, délai paiement</div>
+              </div>
+              <div style="background:rgba(0,0,0,.15);border-radius:6px;padding:10px;border:1px solid rgba(198,163,78,.1);">
+                <div style="font-size:10px;font-weight:700;color:#e8e6e0;margin-bottom:4px;">Avenant contrat salarié</div>
+                <div style="font-size:9px;color:#5e5c56;">Autorisation employeur + absence clause non-concurrence conflictuelle</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Calendrier des obligations -->
+          <div style="margin-top:12px;border-top:1px solid rgba(198,163,78,.15);padding-top:12px;">
+            <div style="font-size:11px;font-weight:700;color:#c6a34e;margin-bottom:8px;">📅 Calendrier des obligations INASTI 2026</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+              <div style="background:rgba(198,163,78,.08);border-radius:6px;padding:8px;text-align:center;border:1px solid rgba(198,163,78,.15);">
+                <div style="font-size:9px;color:#c6a34e;font-weight:700;">T1 — 31 mars</div>
+                <div style="font-size:9px;color:#5e5c56;margin-top:2px;">Cotisation 1er trimestre</div>
+              </div>
+              <div style="background:rgba(198,163,78,.08);border-radius:6px;padding:8px;text-align:center;border:1px solid rgba(198,163,78,.15);">
+                <div style="font-size:9px;color:#c6a34e;font-weight:700;">T2 — 30 juin</div>
+                <div style="font-size:9px;color:#5e5c56;margin-top:2px;">Cotisation 2ème trimestre</div>
+              </div>
+              <div style="background:rgba(198,163,78,.08);border-radius:6px;padding:8px;text-align:center;border:1px solid rgba(198,163,78,.15);">
+                <div style="font-size:9px;color:#c6a34e;font-weight:700;">T3 — 30 sept.</div>
+                <div style="font-size:9px;color:#5e5c56;margin-top:2px;">Cotisation 3ème trimestre</div>
+              </div>
+              <div style="background:rgba(198,163,78,.08);border-radius:6px;padding:8px;text-align:center;border:1px solid rgba(198,163,78,.15);">
+                <div style="font-size:9px;color:#c6a34e;font-weight:700;">T4 — 31 déc.</div>
+                <div style="font-size:9px;color:#5e5c56;margin-top:2px;">Cotisation 4ème trimestre</div>
+              </div>
+            </div>
+            <div style="font-size:9px;color:#5e5c56;margin-top:6px;line-height:1.5;">⚠️ Cotisations provisoires sur base des revenus N-3 · Régularisation automatique 2 ans plus tard quand revenus définitifs connus par le SPF Finances · En cas de revenus supérieurs → appel de régularisation · En cas de revenus inférieurs → remboursement</div>
+          </div>
+        </div>
+      </div>
+      <!-- FIN INDÉPENDANT COMPLÉMENTAIRE -->
     </div>
 
     <!-- ══ BLOC 3 : AVANTAGES ══ -->
@@ -4040,6 +4176,13 @@ function wizContratChange() {
     if(t==='MITEMPS'||t==='MITHERP') regEl.value='50';
     else if(t==='4_5') regEl.value='80';
   }
+  // Panneau indépendant complémentaire
+  var indepBloc = document.getElementById('w-indep-bloc');
+  var salBloc = document.getElementById('w-sal-bloc');
+  if(indepBloc) indepBloc.style.display = (t==='INDEPENDANT_COMP') ? 'block' : 'none';
+  if(salBloc) salBloc.style.display = (t==='INDEPENDANT_COMP') ? 'none' : 'block';
+  // Calculer INASTI si montant renseigné
+  if(t==='INDEPENDANT_COMP') wizCalcINASTI();
 }
 
 function wizEtuCheck() {
@@ -4052,6 +4195,53 @@ function wizEtuCheck() {
   else warn.innerHTML='✅ '+total+'/50 jours utilisés — cotisation solidarité 5,42% OK. Vérifier quota sur <strong>student@work.be</strong>';
 }
 
+
+function wizCalcINASTI() {
+  var revenus = parseFloat(document.getElementById('w-indep-revenus')?.value) || 0;
+  var resDiv = document.getElementById('w-indep-calc');
+  if (!resDiv) return;
+  if (revenus <= 0) { resDiv.innerHTML = ''; return; }
+
+  // Barèmes INASTI 2026 — indépendant complémentaire
+  var SEUIL_MIN = 1704.96;   // En-dessous : cotisation mini réduite
+  var SEUIL_T1  = 17128.73;  // Tranche 1 : 20,50%
+  var SEUIL_T2  = 25693.30;  // Tranche 2 : 14,16%
+  // Au-delà de SEUIL_T2 : 0% (plafond)
+  var COTIS_MIN_TRIM = 0;     // Complémentaire en-dessous seuil : 0€ (couverture salarié prioritaire)
+
+  var cotisation = 0;
+  var detail = '';
+  if (revenus <= SEUIL_MIN) {
+    cotisation = 0;
+    detail = '<div class="check-item" style="color:#22c55e">✅ Revenus ≤ 1.704,96 €/an → <strong>cotisation INASTI = 0 €</strong> (couverture AMI du régime salarié prioritaire)</div>';
+  } else if (revenus <= SEUIL_T1) {
+    cotisation = Math.round(revenus * 0.2050 * 100) / 100;
+    var trimestre = Math.round(cotisation / 4 * 100) / 100;
+    detail = '<div class="check-item"><strong>Tranche 1 (1.704,96 → 17.128,73 €)</strong> : 20,50% × ' + revenus.toFixed(2) + ' € = <strong>' + cotisation.toFixed(2) + ' €/an</strong> soit ' + trimestre.toFixed(2) + ' €/trimestre</div>';
+  } else if (revenus <= SEUIL_T2) {
+    var t1 = Math.round((SEUIL_T1 - SEUIL_MIN) * 0.2050 * 100) / 100;
+    var t2 = Math.round((revenus - SEUIL_T1) * 0.1416 * 100) / 100;
+    cotisation = t1 + t2;
+    var trimestre = Math.round(cotisation / 4 * 100) / 100;
+    detail = '<div class="check-item"><strong>Tranche 1 :</strong> ' + t1.toFixed(2) + ' € (20,50%) + <strong>Tranche 2 :</strong> ' + t2.toFixed(2) + ' € (14,16%) = <strong>' + cotisation.toFixed(2) + ' €/an</strong> soit ' + trimestre.toFixed(2) + ' €/trimestre</div>';
+  } else {
+    var t1 = Math.round((SEUIL_T1 - SEUIL_MIN) * 0.2050 * 100) / 100;
+    var t2 = Math.round((SEUIL_T2 - SEUIL_T1) * 0.1416 * 100) / 100;
+    cotisation = t1 + t2;
+    var trimestre = Math.round(cotisation / 4 * 100) / 100;
+    detail = '<div class="check-item"><strong>Plafond atteint :</strong> ' + t1.toFixed(2) + ' € + ' + t2.toFixed(2) + ' € = <strong>' + cotisation.toFixed(2) + ' €/an</strong> (max) soit ' + trimestre.toFixed(2) + ' €/trimestre</div><div class="check-item" style="color:#c6a34e">Au-delà de 25.693,30 € nets : pas de cotisation supplémentaire</div>';
+  }
+
+  var net = Math.round((revenus - cotisation) * 100) / 100;
+  resDiv.innerHTML = '<div style="background:rgba(198,163,78,.06);border:1px solid rgba(198,163,78,.2);border-radius:8px;padding:14px;margin-top:10px">'
+    + '<div style="font-size:11px;color:#c6a34e;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Calcul cotisations INASTI 2026</div>'
+    + detail
+    + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px">'
+    + '<div style="background:rgba(0,0,0,.2);border-radius:6px;padding:10px;text-align:center"><div style="font-size:9px;color:#5e5c56;text-transform:uppercase">Revenus nets</div><div style="font-size:16px;font-weight:700;color:#e8e6e0">' + revenus.toFixed(0) + ' €</div></div>'
+    + '<div style="background:rgba(0,0,0,.2);border-radius:6px;padding:10px;text-align:center"><div style="font-size:9px;color:#5e5c56;text-transform:uppercase">INASTI/an</div><div style="font-size:16px;font-weight:700;color:#ef4444">- ' + cotisation.toFixed(0) + ' €</div></div>'
+    + '<div style="background:rgba(0,0,0,.2);border-radius:6px;padding:10px;text-align:center"><div style="font-size:9px;color:#5e5c56;text-transform:uppercase">Net après INASTI</div><div style="font-size:16px;font-weight:700;color:#22c55e">' + net.toFixed(0) + ' €</div></div>'
+    + '</div></div>';
+}
 
 function wizAtnChange() {
   document.getElementById('w-voiture-bloc').style.display = document.getElementById('w-voiture').checked ? 'block' : 'none';
@@ -4128,6 +4318,61 @@ function wizGenerate() {
   if(motif==='article60') primes.push({n:'🏛️ Article 60 §7 CPAS',d:'Remboursement intégral salaire + cotisations par le CPAS. Convention obligatoire.',u:'CPAS communal',urgent:true});
   if(contrat==='ETU') primes.push({n:'🎓 Cotisation solidarité étudiant 5,42%',d:'Au lieu des 13,07% ONSS normal. Valable 50j/an (475h). Quota annuel à surveiller !',u:'student@work.be — vérifier quota',urgent:true});
   if(region==='WAL') primes.push({n:'🌿 Impulsion (Wallonie)',d:'Réduction groupe cible pour engagements en Wallonie. Vérifier sur leforem.be',u:'Le Forem',urgent:false});
+
+  // ── CAS INDÉPENDANT COMPLÉMENTAIRE — checklist spécifique ──
+  if(contrat === 'INDEPENDANT_COMP') {
+    var revenus = parseFloat(document.getElementById('w-indep-revenus')?.value) || 0;
+    var caisse = document.getElementById('w-indep-caisse')?.value || 'Liantis';
+    var forme = document.getElementById('w-indep-forme')?.value || 'pn';
+    var activite = document.getElementById('w-indep-activite')?.value || 'services';
+    var cotisAnnuelle = 0;
+    if(revenus > 1704.96 && revenus <= 17128.73) cotisAnnuelle = Math.round((revenus - 1704.96) * 0.205 * 100)/100;
+    else if(revenus > 17128.73) cotisAnnuelle = Math.round(((17128.73-1704.96)*0.205 + Math.min(revenus,25693.30-17128.73)*0.1416)*100)/100;
+    var cotisTrimestrielle = Math.round(cotisAnnuelle / 4 * 100) / 100;
+
+    var indepDocs = [
+      {cat:'📋 DÉMARCHES PRÉALABLES (avant toute activité)', items:[
+        {d:'✅ Inscription BCE — numéro d'entreprise', detail:'Via guichet agréé ('+caisse+') — ~90 € — OBLIGATOIRE avant premier acte commercial', urgent:true},
+        {d:'✅ Affiliation caisse assurances sociales : '+caisse, detail:'Dans les 90 jours du début — cotisations trimestrielles' + (cotisTrimestrielle > 0 ? ' — Estimation : '+cotisTrimestrielle.toFixed(2)+'€/trimestre pour '+revenus.toFixed(0)+'€/an de revenus nets' : ' — Cotisation = 0€ si revenus < 1.704,96€/an'), urgent:true},
+        {d:'⚠️ Vérifier clause non-concurrence contrat salarié', detail:'L'activité indépendante ne peut pas concurrencer l'employeur principal sous peine de licenciement pour motif grave', urgent:true},
+        {d:'📄 Numéro TVA — franchise ou assujettissement', detail:'Franchise TVA si CA < 25.000€/an (art.56bis CTVA) · Sinon : demander numéro TVA via MyMinfin et déclarer trimestriellement', urgent:false},
+      ]},
+      {cat:'📄 DOCUMENTS COMMERCIAUX', items:[
+        {d:'✅ Modèle de facture conforme', detail:'Mentions obligatoires : numéro BCE, numéro TVA (si assujetti), IBAN, délai paiement (max 30j B2B), intérêts légaux en cas de retard'},
+        {d:'✅ Conditions générales de vente (B2B)', detail:'Obligatoires loi du 2 août 2002 sur les délais de paiement — mentionner taux intérêts légaux et indemnité forfaitaire 40€ minimum'},
+        {d:'✅ Contrat de prestation (type)', detail:'Pour chaque client — objet, durée, honoraires, confidentialité, propriété intellectuelle, résiliation'},
+      ]},
+      {cat:'🧾 COMPTABILITÉ & FISCALITÉ', items:[
+        {d:'✅ Ouvrir un compte bancaire dédié activité', detail:'Recommandé (pas obligatoire pour PN) — sépare les flux pro/privé et facilite la comptabilité'},
+        {d:'✅ Système de comptabilité simplifiée', detail:forme==='sc'?'Société : comptabilité complète obligatoire — expert-comptable recommandé':'Personne physique : registre recettes-dépenses suffit si CA < 500.000€'},
+        {d:'✅ Conservation des pièces 7 ans', detail:'Factures, reçus, relevés bancaires, contrats — en cas de contrôle SPF Finances ou ONSS'},
+        {d:'📅 Déclaration IPP annuelle (volet indépendant)', detail:'Revenus indépendants déclarés en code 1600-1601 dans la déclaration IPP annuelle — précompte mobilier si société'},
+      ]},
+      {cat:'🛡️ PROTECTIONS RECOMMANDÉES', items:[
+        {d:'✅ PLCI — Pension Libre Complémentaire', detail:'Déductible à 100% — plafond 30% des revenus nets (max 39.622€) — à ouvrir via banque ou assureur'},
+        {d:'💡 RC Professionnelle', detail:activite==='liberal'?'OBLIGATOIRE pour professions libérales réglementées (médecin, architecte, réviseur...)':'Vivement recommandée — couvre les dommages causés à des tiers dans le cadre de l'activité'},
+        {d:'💡 Assurance revenus garantis (invalidité)', detail:'Protection contre l'incapacité de travail — la mutuelle ne couvre que le régime salarié comme statut principal'},
+      ]},
+    ];
+
+    var indepHtml = '<div class="results-header"><h3 class="results-title">Checklist Indépendant Complémentaire</h3>'
+      + '<div style="font-size:11px;color:#8b7340;margin-top:4px;">'+prenom+' '+nom+' · Démarrage activité indépendante complémentaire · ' + new Date().toLocaleDateString('fr-BE') + '</div>'
+      + (revenus > 0 ? '<div style="margin-top:8px;padding:10px 14px;background:rgba(198,163,78,.08);border-radius:8px;border:1px solid rgba(198,163,78,.2);font-size:11px;color:#c6a34e;">💰 Estimation INASTI 2026 : <strong>' + cotisAnnuelle.toFixed(2) + ' €/an</strong> soit <strong>' + cotisTrimestrielle.toFixed(2) + ' €/trimestre</strong> pour ' + revenus.toFixed(0) + ' € de revenus nets</div>' : '')
+      + '</div>';
+
+    indepDocs.forEach(function(section) {
+      indepHtml += '<div class="result-section"><div class="result-section-title">'+section.cat+'</div>';
+      section.items.forEach(function(item) {
+        indepHtml += '<div class="result-item'+(item.urgent?' urgent':'')+'"><span class="result-item-icon">'+(item.urgent?'🔴':'🔵')+'</span><div class="result-item-content"><div class="result-item-title">'+item.d+'</div><div class="result-item-detail">'+item.detail+'</div></div></div>';
+      });
+      indepHtml += '</div>';
+    });
+
+    document.getElementById('wiz-results').innerHTML = indepHtml;
+    document.getElementById('wiz-step-5').classList.add('active');
+    document.querySelectorAll('.wiz-step').forEach(function(s,i){ s.classList.toggle('completed', i<4); });
+    return; // Stop — ne pas générer la checklist salarié
+  }
 
   // Documents obligatoires
   var docs = [
