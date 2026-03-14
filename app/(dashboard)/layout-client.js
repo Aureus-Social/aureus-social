@@ -53,6 +53,8 @@ const OnboardingPage = dynamic(() => import('../pages/OnboardingHub'), { ssr: fa
 const CloturePage = dynamic(() => import('../pages/ClotureMensuelle'), { ssr: false, loading: Loading });
 const AdminBaremesPageOld = dynamic(() => import('../pages/AdminBaremes'), { ssr: false, loading: Loading });
 const SecurityPage = dynamic(() => import('../pages/SecurityDashboard'), { ssr: false, loading: Loading });
+const MFASetupRaw = dynamic(() => import('../pages/MFASetup'), { ssr: false, loading: Loading });
+const MFASetupPg = ({ s, supabase, user }) => <MFASetupRaw supabase={supabase} user={user} />;
 const AuditCodePage = dynamic(() => import('../pages/AuditSecuriteCode'), { ssr: false, loading: Loading });
 const PayrollSimPage = dynamic(() => import('../pages/PayrollSimulator'), { ssr: false, loading: Loading });
 const AureusIAPage = dynamic(() => import('../pages/AureusSuitePage'), { ssr: false, loading: Loading });
@@ -603,6 +605,7 @@ function DashboardLayoutInner({ user }) {
       case 'commandcenter': return <SmartOpsPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'compliance': return <CompliancePage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'securitedata': return <SecurityPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} supabase={supabase} user={user} />;
+      case '2fa': case 'mfa': case 'totp': return <MFASetupPg s={s} supabase={supabase} user={user} />;
       case 'facturation': return <FacturationPg s={s} d={d} />;
       case 'gestionprimes': return <PrimesPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'seuilssociaux': return <LoisPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
