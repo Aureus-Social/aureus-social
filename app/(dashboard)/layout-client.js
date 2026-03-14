@@ -110,6 +110,8 @@ const FacturationRaw = dynamic(() => import('../pages/FacturationModule'), { ssr
 const FacturationPg = ({ s, d }) => <FacturationRaw s={s} d={d} />;
 const GestionCongesRaw = dynamic(() => import('../pages/GestionConges'), { ssr: false, loading: Loading });
 const GestionCongesPg = ({ s, d }) => <GestionCongesRaw s={s} d={d} />;
+const WebhooksRaw = dynamic(() => import('../pages/WebhooksManager'), { ssr: false, loading: Loading });
+const WebhooksPg = ({ s, d }) => <WebhooksRaw s={s} d={d} />;
 const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 
 // Reducer pour le state global
@@ -660,6 +662,7 @@ function DashboardLayoutInner({ user }) {
       case 'premieremploi': case 'activabruxelles': case 'art60cpas':
       case 'impulsion55': case 'monbee':
         return <MandatsAdminPg s={s} d={d} tab={page} />;
+      case 'webhooks': case 'apiwebhooks': return <WebhooksPg s={s} d={d} />;
       case 'connexionshub': case 'portailsbelges': case 'liensutiles':
         return <ConnexionsHubPg s={s} d={d} />;
       case 'bilansocial': return <AnalyticsPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
