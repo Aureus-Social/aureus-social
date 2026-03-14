@@ -112,6 +112,8 @@ const GestionCongesRaw = dynamic(() => import('../pages/GestionConges'), { ssr: 
 const GestionCongesPg = ({ s, d }) => <GestionCongesRaw s={s} d={d} />;
 const WebhooksRaw = dynamic(() => import('../pages/WebhooksManager'), { ssr: false, loading: Loading });
 const WebhooksPg = ({ s, d }) => <WebhooksRaw s={s} d={d} />;
+const OffboardingRaw = dynamic(() => import('../pages/OffboardingModule'), { ssr: false, loading: Loading });
+const OffboardingPg = ({ s, d }) => <OffboardingRaw s={s} d={d} />;
 const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 
 // Reducer pour le state global
@@ -663,6 +665,7 @@ function DashboardLayoutInner({ user }) {
       case 'impulsion55': case 'monbee':
         return <MandatsAdminPg s={s} d={d} tab={page} />;
       case 'webhooks': case 'apiwebhooks': return <WebhooksPg s={s} d={d} />;
+      case 'offboarding': case 'offboarding_suite': return <OffboardingPg s={s} d={d} />;
       case 'connexionshub': case 'portailsbelges': case 'liensutiles':
         return <ConnexionsHubPg s={s} d={d} />;
       case 'bilansocial': return <AnalyticsPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
