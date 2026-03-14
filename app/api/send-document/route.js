@@ -1,8 +1,5 @@
-// ═══════════════════════════════════════════════════════════════════
-//  AUREUS SOCIAL PRO — /api/send-document
-//  Envoi de documents par email via Resend
-//  Supporte : HTML inline, PDF base64, DOCX base64, lien URL
-// ═══════════════════════════════════════════════════════════════════
+// AUREUS SOCIAL PRO — /api/send-document
+// Envoi de documents par email via Resend
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
@@ -12,28 +9,20 @@ const FROM = 'Aureus Social Pro <noreply@aureussocial.be>';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// ─── Template email document ─────────────────────────────────────
-function buildEmailHTML({ docTitle, docType, senderName, recipientName, message, downloadUrl, appUrl }) {
+function buildEmailHTML({ docTitle, docType, recipientName, message, downloadUrl }) {
   const gold = '#c6a34e';
   const dark = '#060810';
   const card = '#0d1117';
   const border = '#1e2633';
   const text = '#e0e0e0';
   const muted = '#8b95a5';
-
   return `<!DOCTYPE html>
 <html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${docTitle}</title>
-</head>
+<head><meta charset="UTF-8"><title>${docTitle || 'Document'}</title></head>
 <body style="margin:0;padding:0;background:${dark};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:${dark};padding:24px 0;">
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:${card};border:1px solid ${border};border-radius:12px;overflow:hidden;">
-
-  <!-- Header -->
   <tr>
     <td style="background:linear-gradient(135deg,${dark},#111827);padding:24px 32px;border-bottom:2px solid ${gold};">
       <table width="100%" cellpadding="0" cellspacing="0">
@@ -44,89 +33,45 @@ function buildEmailHTML({ docTitle, docType, senderName, recipientName, message,
       </table>
     </td>
   </tr>
-
-  <!-- Doc badge -->
   <tr>
     <td style="padding:28px 32px 0;">
       <table cellpadding="0" cellspacing="0">
         <tr>
           <td style="background:rgba(198,163,78,.12);border:1px solid rgba(198,163,78,.3);border-radius:6px;padding:6px 14px;">
             <span style="font-size:11px;font-weight:700;color:${gold};letter-spacing:.5px;text-transform:uppercase;">
-              📄 ${docType || 'Document'}
+              ${docType || 'Document'}
             </span>
           </td>
         </tr>
       </table>
     </td>
   </tr>
-
-  <!-- Title -->
   <tr>
-    <td style="padding:16px 32px 0;">
-      <h1 style="margin:0;font-size:20px;font-weight:700;color:${text};">${docTitle}</h1>
+    <td style="padding:24px 32px;">
+      ${recipientName ? `<p style="color:${text};font-size:14px;margin:0 0 16px;">Bonjour <strong>${recipientName}</strong>,</p>` : ''}
+      <p style="color:${text};font-size:14px;margin:0 0 16px;">
+        Veuillez trouver ci-joint le document : <strong style="color:${gold};">${docTitle || 'Document'}</strong>
+      </p>
+      ${message ? `<p style="color:${muted};font-size:13px;margin:0 0 16px;padding:12px;background:rgba(255,255,255,.03);border-left:3px solid ${gold};border-radius:0 6px 6px 0;">${message}</p>` : ''}
+      ${downloadUrl ? `<p style="margin:20px 0;"><a href="${downloadUrl}" style="background:${gold};color:${dark};padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:700;font-size:13px;">Telecharger le document</a></p>` : ''}
+      <p style="color:${muted};font-size:12px;margin:24px 0 0;padding-top:16px;border-top:1px solid ${border};">
+        Aureus Social Pro &mdash; aureussocial.be<br>
+        Aureus IA SPRL &mdash; BCE BE 1028.230.781
+      </p>
     </td>
   </tr>
-
-  <!-- Body -->
-  <tr>
-    <td style="padding:20px 32px;">
-      ${recipientName ? `<p style="margin:0 0 12px;font-size:14px;color:${text};">Bonjour <strong style="color:${gold};">${recipientName}</strong>,</p>` : ''}
-      ${message
-        ? `<p style="margin:0 0 16px;font-size:14px;color:${text};line-height:1.6;">${message.replace(/\n/g, '<br>')}</p>`
-        : `<p style="margin:0 0 16px;font-size:14px;color:${text};line-height:1.6;">Veuillez trouver ci-joint le document <strong>${docTitle}</strong> généré via Aureus Social Pro.</p>`
-      }
-      ${senderName ? `<p style="margin:0 0 20px;font-size:13px;color:${muted};">Envoyé par : <strong style="color:${text};">${senderName}</strong></p>` : ''}
-    </td>
-  </tr>
-
-  <!-- CTA download si URL -->
-  ${downloadUrl ? `
-  <tr>
-    <td style="padding:0 32px 28px;">
-      <a href="${downloadUrl}" style="display:inline-block;padding:12px 28px;background:${gold};color:${dark};font-weight:700;text-decoration:none;border-radius:6px;font-size:13px;">
-        ⬇ Télécharger le document
-      </a>
-      <p style="margin:10px 0 0;font-size:11px;color:${muted};">Lien valide 30 jours.</p>
-    </td>
-  </tr>` : ''}
-
-  <!-- Divider -->
-  <tr><td style="padding:0 32px;"><hr style="border:none;border-top:1px solid ${border};margin:0;"></td></tr>
-
-  <!-- Footer -->
-  <tr>
-    <td style="padding:20px 32px;">
-      <table width="100%" cellpadding="0" cellspacing="0">
-        <tr>
-          <td>
-            <p style="margin:0 0 4px;font-size:11px;color:${muted};">Aureus IA SPRL — BCE 1028.230.781</p>
-            <p style="margin:0 0 4px;font-size:11px;color:${muted};">Place Marcel Broodthaers 8, 1060 Saint-Gilles</p>
-            <p style="margin:0;font-size:11px;color:${muted};">
-              <a href="${appUrl || 'https://app.aureussocial.be'}" style="color:${gold};text-decoration:none;">app.aureussocial.be</a>
-            </p>
-          </td>
-          <td align="right" style="font-size:10px;color:${muted};">
-            Document généré le<br>${new Date().toLocaleDateString('fr-BE', { day:'2-digit', month:'long', year:'numeric' })}
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-
 </table>
 </td></tr>
 </table>
 </body>
 </html>`;
 }
-}
 
-// POST handler
 export async function POST(req) {
   try {
     if (!RESEND_API_KEY) return NextResponse.json({ error: 'RESEND_API_KEY manquante' }, { status: 500 });
 
-    // Auth optionnelle - log uniquement si token present
+    // Auth optionnelle - pour le log uniquement
     let userId = null;
     try {
       const token = req.headers.get('authorization')?.replace('Bearer ', '');
@@ -138,18 +83,7 @@ export async function POST(req) {
     } catch (_) {}
 
     const body = await req.json();
-    const {
-      to,
-      subject,
-      docTitle,
-      docType,
-      senderName,
-      recipientName,
-      message,
-      downloadUrl,
-      htmlContent,
-      attachments,
-    } = body;
+    const { to, subject, docTitle, docType, senderName, recipientName, message, downloadUrl, htmlContent, attachments } = body;
 
     if (!to || !docTitle) {
       return NextResponse.json({ error: 'Champs requis : to, docTitle' }, { status: 400 });
@@ -166,17 +100,12 @@ export async function POST(req) {
     };
 
     const allAttachments = [];
-
     if (htmlContent) {
       const base64 = Buffer.from(htmlContent).toString('base64');
-      const safeName = (docTitle || 'document').replace(/[^a-zA-Z0-9_\-]/g, '_');
+      const safeName = (docTitle || 'document').replace(/[^a-zA-Z0-9_-]/g, '_');
       allAttachments.push({ filename: `${safeName}.html`, content: base64, type: 'text/html' });
     }
-
-    if (attachments && Array.isArray(attachments)) {
-      allAttachments.push(...attachments);
-    }
-
+    if (attachments && Array.isArray(attachments)) allAttachments.push(...attachments);
     if (allAttachments.length > 0) {
       resendPayload.attachments = allAttachments.map(a => ({ filename: a.filename, content: a.content }));
     }
@@ -188,7 +117,6 @@ export async function POST(req) {
     });
 
     const resendData = await resendRes.json();
-
     if (!resendRes.ok) {
       console.error('[send-document] Resend error:', resendData);
       return NextResponse.json({ error: resendData.message || 'Erreur Resend' }, { status: 500 });
@@ -199,12 +127,8 @@ export async function POST(req) {
       if (userId && SUPABASE_URL && SUPABASE_KEY) {
         const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
         await sb.from('email_logs').insert({
-          user_id: userId,
-          type: 'document',
-          doc_title: docTitle,
-          recipients,
-          resend_id: resendData.id,
-          sent_at: new Date().toISOString(),
+          user_id: userId, type: 'document', doc_title: docTitle,
+          recipients, resend_id: resendData.id, sent_at: new Date().toISOString(),
         });
       }
     } catch (_) {}
