@@ -55,6 +55,9 @@ const AdminBaremesPageOld = dynamic(() => import('../pages/AdminBaremes'), { ssr
 const SecurityPage = dynamic(() => import('../pages/SecurityDashboard'), { ssr: false, loading: Loading });
 const MFASetupRaw = dynamic(() => import('../pages/MFASetup'), { ssr: false, loading: Loading });
 const MFASetupPg = ({ s, supabase, user }) => <MFASetupRaw supabase={supabase} user={user} />;
+const AccessRequestRaw = dynamic(() => import('../pages/AccessRequest'), { ssr: false, loading: Loading });
+const AccessManagerRaw = dynamic(() => import('../pages/AccessManager'), { ssr: false, loading: Loading });
+const AccessManagerPg = ({ s, user }) => <AccessManagerRaw user={user} />;
 const AuditCodePage = dynamic(() => import('../pages/AuditSecuriteCode'), { ssr: false, loading: Loading });
 const PayrollSimPage = dynamic(() => import('../pages/PayrollSimulator'), { ssr: false, loading: Loading });
 const AureusIAPage = dynamic(() => import('../pages/AureusSuitePage'), { ssr: false, loading: Loading });
@@ -348,6 +351,28 @@ function DashboardHome({ state, onNavigate }) {
 }
 
 function DashboardLayoutInner({ user }) {
+  // ── Gate d'accès — vérifier si l'user est approuvé ──────────
+  const [accessStatus, setAccessStatus] = useState('checking'); // checking | approved | pending | new | rejected | blocked
+  const isAdminUser = user?.email === 'info@aureus-ia.com' || user?.email === 'moussati.nourdin@gmail.com';
+
+  useEffect(() => {
+    // Admin → accès direct sans vérification
+    if (isAdminUser) { setAccessStatus('approved'); return; }
+    // Vérifier si déjà approuvé via user_metadata
+    if (user?.user_metadata?.approved === true) { setAccessStatus('approved'); return; }
+    // Sinon vérifier via API
+    fetch('/api/access', { headers: { 'Authorization': 'Bearer ' + (typeof window !== 'undefined' ? (()=>{ try { const s = JSON.parse(localStorage.getItem('sb-qcunxnadjxggizdksvay-auth-token') || '{}'); return s?.access_token || ''; } catch { return ''; } })() : '') } })
+      .then(r => r.json())
+      .then(j => setAccessStatus(j.data?.status || 'new'))
+      .catch(() => setAccessStatus('new'));
+  }, [user, isAdminUser]);
+
+  // Afficher page d'attente si pas approuvé
+  if (accessStatus === 'checking') return <div style={{minHeight:'100vh',background:'#0d1117',display:'flex',alignItems:'center',justifyContent:'center',color:'#5e5c56',fontSize:13}}>Vérification de votre accès...</div>;
+  if (accessStatus !== 'approved') {
+    return <AccessRequestRaw user={user} onApproved={() => setAccessStatus('approved')} />;
+  }
+
   const [page, setPage] = useState('dashboard');
   const [cryptoKey, setCryptoKey] = useState(null);
   const { lang, setLang, t: tCtx } = useLang();
@@ -606,6 +631,7 @@ function DashboardLayoutInner({ user }) {
       case 'compliance': return <CompliancePage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'securitedata': return <SecurityPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} supabase={supabase} user={user} />;
       case '2fa': case 'mfa': case 'totp': return <MFASetupPg s={s} supabase={supabase} user={user} />;
+      case 'demandes_acces': case 'access_manager': return <AccessManagerPg s={s} user={user} />;
       case 'facturation': return <FacturationPg s={s} d={d} />;
       case 'gestionprimes': return <PrimesPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'seuilssociaux': return <LoisPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
