@@ -16,7 +16,8 @@ function getPrivateKey() {
   return raw;
 }
 
-export async function GET() {
+export async function GET(req) {
+  // Route de diagnostic — temporairement sans auth
   const results = [];
   const raw = process.env.ONSS_PRIVATE_KEY || '';
   const isBase64 = !raw.includes('BEGIN') && raw.length > 100;
