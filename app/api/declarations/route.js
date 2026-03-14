@@ -1,12 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
-import { getAuthUser } from '@/app/lib/supabase';
+import { sbFromRequest, sbAdmin } from '@/app/lib/supabase-server';
 export const dynamic = 'force-dynamic';
-const sb = () => process.env.SUPABASE_SERVICE_ROLE_KEY
-  ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY) : null;
 
 export async function GET(req) {
-  const u = await getAuthUser(req); if (!u) return Response.json({ error: 'Non autorisé' }, { status: 401 });
-  const db = sb(); if (!db) return Response.json({ error: 'DB indisponible' }, { status: 503 });
+  const { db, user: u } = await sbFromRequest(req);
+  if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
   const { searchParams } = new URL(req.url);
   const type = searchParams.get('type');
   let q = db.from('declarations').select('*').eq('created_by', u.id).order('created_at', { ascending: false }).limit(200);
@@ -17,8 +14,8 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
-  const u = await getAuthUser(req); if (!u) return Response.json({ error: 'Non autorisé' }, { status: 401 });
-  const db = sb(); if (!db) return Response.json({ error: 'DB indisponible' }, { status: 503 });
+  const { db, user: u } = await sbFromRequest(req);
+  if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
   const body = await req.json();
   const { type, data: declData, xml, reference } = body;
   if (!type) return Response.json({ error: 'Type requis (dimona|dmfa|belcotax|pp)' }, { status: 400 });
