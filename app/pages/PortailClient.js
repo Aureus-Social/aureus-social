@@ -129,13 +129,29 @@ export default function PortailClient({s, d}) {
                         <div style={{fontSize:14,fontWeight:700,color:x.c}}>{x.v}</div>
                       </div>
                     ))}
-                    <div style={{gridColumn:'1/-1',display:'flex',gap:6,marginTop:4}}>
+                    <div style={{gridColumn:'1/-1',marginTop:8,padding:'10px 12px',background:'rgba(255,255,255,.02)',borderRadius:8,border:'1px solid rgba(255,255,255,.04)'}}>
+                      <div style={{fontSize:9,color:'#5e5c56',marginBottom:6,textTransform:'uppercase',letterSpacing:'.5px'}}>Travailleurs actifs</div>
+                      <div style={{display:'flex',flexDirection:'column',gap:3,maxHeight:120,overflowY:'auto'}}>
+                        {(emps.filter(e=>(e.clientId===cl.id||(cl.id==='default'&&!e.clientId))&&(e.status==='active'||!e.status))||[]).slice(0,6).map(e=>(
+                          <div key={e.id} style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'#9e9b93'}}>
+                            <span>{e.first||e.fn||''} {e.last||e.ln||''}</span>
+                            <span style={{color:'#c6a34e'}}>{(e.monthlySalary||e.gross||0).toFixed(0)} €</span>
+                          </div>
+                        ))}
+                        {emps.filter(e=>(e.clientId===cl.id||(cl.id==='default'&&!e.clientId))&&(e.status==='active'||!e.status)).length>6&&<div style={{fontSize:9,color:'#5e5c56',marginTop:2}}>+{emps.filter(e=>(e.clientId===cl.id||(cl.id==='default'&&!e.clientId))&&(e.status==='active'||!e.status)).length-6} autres</div>}
+                      </div>
+                    </div>
+                    <div style={{gridColumn:'1/-1',display:'flex',gap:6,marginTop:4,flexWrap:'wrap'}}>
                       <button onClick={e=>{e.stopPropagation();d&&d({type:'NAV',page:'employees'})}}
                         style={{padding:'7px 14px',borderRadius:7,border:'1px solid rgba(198,163,78,.2)',background:'rgba(198,163,78,.06)',color:GOLD,fontSize:11,cursor:'pointer',fontWeight:600}}>👥 Travailleurs</button>
                       <button onClick={e=>{e.stopPropagation();d&&d({type:'NAV',page:'payslip'})}}
                         style={{padding:'7px 14px',borderRadius:7,border:'1px solid rgba(34,197,94,.2)',background:'rgba(34,197,94,.06)',color:GREEN,fontSize:11,cursor:'pointer',fontWeight:600}}>💰 Fiches de paie</button>
                       <button onClick={e=>{e.stopPropagation();d&&d({type:'NAV',page:'onss'})}}
                         style={{padding:'7px 14px',borderRadius:7,border:'1px solid rgba(96,165,250,.2)',background:'rgba(96,165,250,.06)',color:BLUE,fontSize:11,cursor:'pointer',fontWeight:600}}>📡 Dimona</button>
+                      <button onClick={e=>{e.stopPropagation();d&&d({type:'NAV',page:'conges'})}}
+                        style={{padding:'7px 14px',borderRadius:7,border:'1px solid rgba(249,115,22,.2)',background:'rgba(249,115,22,.06)',color:'#f97316',fontSize:11,cursor:'pointer',fontWeight:600}}>🗓️ Congés</button>
+                      <button onClick={e=>{e.stopPropagation();d&&d({type:'NAV',page:'facturation'})}}
+                        style={{padding:'7px 14px',borderRadius:7,border:'1px solid rgba(167,139,250,.2)',background:'rgba(167,139,250,.06)',color:'#a78bfa',fontSize:11,cursor:'pointer',fontWeight:600}}>🧾 Facturation</button>
                     </div>
                   </div>
                 )}
