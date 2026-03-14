@@ -67,7 +67,13 @@ export async function GET(request) {
       .limit(Math.min(limit, 200));
 
     if (table) query = query.eq('table_name', table);
-    if (userId) query = query.eq('user_id', userId);
+    // SÉCURITÉ : toujours filtrer par l'utilisateur connecté
+    const isAdmin = user.email?.includes('aureus-ia.com') || user.user_metadata?.role === 'admin';
+    if (userId && userId !== user.id && isAdmin) {
+      query = query.eq('user_id', userId); // admin peut voir logs d'un autre user
+    } else {
+      query = query.eq('user_id', user.id); // user ne voit que ses propres logs
+    }
 
     const { data, error } = await query;
     if (error) return Response.json({ error: error.message }, { status: 500 });

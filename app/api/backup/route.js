@@ -51,7 +51,11 @@ export async function POST(request) {
   if (!u) return Response.json({ error: 'Non autorisé' }, { status: 401 });
 
   try {
-    const { action, userId, userEmail, userRole } = await request.json();
+    const body = await request.json();
+    const { action, userRole } = body;
+    // SÉCURITÉ : userId et userEmail TOUJOURS depuis le JWT, jamais du body
+    const userId = u.id;
+    const userEmail = u.email;
 
     if (!supabase) return Response.json({ error: 'Supabase non configuré' }, { status: 500 });
 

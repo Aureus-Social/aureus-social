@@ -26,15 +26,24 @@ Tu es l'Agent IA Juridique d'Aureus Social Pro, expert en droit social belge, dr
 `;
 
 export async function POST(req) {
-  // Auth optionnelle — l'agent peut être utilisé sans connexion mais on log si connecté
+  // Auth obligatoire — protège la clé ANTHROPIC_API_KEY contre les abus
   let user = null;
   try { user = await getAuthUser(req); } catch(e) {}
+  if (!user) return Response.json({ error: 'Non autorisé' }, { status: 401 });
 
   const body = await req.json().catch(() => ({}));
   const { messages = [], lang = 'fr' } = body;
 
   if (!messages.length) {
     return Response.json({ error: 'messages requis' }, { status: 400 });
+  }
+  // Limiter la taille des messages pour éviter les abus
+  if (messages.length > 20) {
+    return Response.json({ error: 'Trop de messages (max 20)' }, { status: 400 });
+  }
+  const totalChars = messages.reduce((a, m) => a + (m.content?.length || 0), 0);
+  if (totalChars > 20000) {
+    return Response.json({ error: 'Messages trop longs' }, { status: 400 });
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;

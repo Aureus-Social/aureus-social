@@ -135,6 +135,10 @@ export async function POST(req) {
 
   const body = await req.json();
   const { content, format, filename, period } = body;
+  // SÉCURITÉ : limiter taille du fichier importé
+  if (content && content.length > 5 * 1024 * 1024) { // 5MB max
+    return Response.json({ error: 'Fichier trop volumineux (max 5MB)' }, { status: 413 });
+  }
   if (!content) return Response.json({ error: 'Contenu vide' }, { status: 400 });
 
   const detected = detectFormat(content, format, filename);

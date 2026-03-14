@@ -9,11 +9,16 @@ function getSupa() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
+// Échapper HTML pour prévenir XSS
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;'); }
+// Valider format email
+function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e); }
+
 // GET: lien depuis email (1-click unsubscribe)
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const email = searchParams.get('email');
-  if (!email) return new Response('<html><body style="font-family:sans-serif;text-align:center;padding:60px"><h2>❌ Email manquant</h2></body></html>', { headers: { 'Content-Type': 'text/html' } });
+  if (!email || !isValidEmail(email)) return new Response('<html><body style="font-family:sans-serif;text-align:center;padding:60px"><h2>❌ Email invalide</h2></body></html>', { headers: { 'Content-Type': 'text/html' } });
 
   const supa = getSupa();
   await supa.from('newsletter_subscribers').update({
@@ -26,7 +31,7 @@ export async function GET(req) {
     <div style="max-width:500px;margin:0 auto">
       <div style="font-size:48px;margin-bottom:24px">✅</div>
       <h2 style="color:#c6a34e">Désinscription confirmée</h2>
-      <p style="color:rgba(255,255,255,.6)">L'adresse <strong style="color:#fff">${email}</strong> a été supprimée de notre liste newsletter.</p>
+      <p style="color:rgba(255,255,255,.6)">L'adresse <strong style="color:#fff">${esc(email)}</strong> a été supprimée de notre liste newsletter.</p>
       <p style="color:rgba(255,255,255,.4);font-size:12px;margin-top:32px">Conformément au RGPD Art. 7.3 · Aureus IA SPRL · info@aureus-ia.com</p>
       <a href="https://app.aureussocial.be" style="display:inline-block;margin-top:24px;padding:10px 24px;background:#c6a34e;color:#000;text-decoration:none;border-radius:6px;font-weight:700">← Retour au site</a>
     </div>

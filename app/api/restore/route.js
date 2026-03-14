@@ -88,8 +88,10 @@ export async function POST(request) {
       }
       try {
         let restored = 0;
-        for (let i = 0; i < rows.length; i += 100) {
-          const batch = rows.slice(i, i + 100);
+        // SÉCURITÉ : forcer created_by/user_id sur chaque row pour éviter d'écraser des données d'autres users
+        const safeRows = rows.map(r => ({ ...r, created_by: caller.id, user_id: caller.id }));
+        for (let i = 0; i < safeRows.length; i += 100) {
+          const batch = safeRows.slice(i, i + 100);
           const { error } = await supabase.from(table).upsert(batch, { onConflict: 'id', ignoreDuplicates: false });
           if (error) { errors.push(`${table}: ${error.message}`); break; }
           restored += batch.length;

@@ -9,7 +9,9 @@ export async function POST(req) {
   if (!KEY) return Response.json({ error: 'Service email non configuré' }, { status: 503 });
 
   const body = await req.json().catch(() => ({}));
-  const { to, subject, html, text, from, replyTo } = body;
+  const { to, subject, html, text, replyTo } = body;
+  // SÉCURITÉ : from toujours depuis le domaine officiel — pas de spoofing
+  const from = 'Aureus Social Pro <noreply@aureussocial.be>';
 
   if (!to || !subject || (!html && !text)) {
     return Response.json({ error: 'to, subject et html/text requis' }, { status: 400 });
@@ -20,6 +22,10 @@ export async function POST(req) {
   if (!emailRegex.test(to)) {
     return Response.json({ error: 'Adresse email invalide' }, { status: 400 });
   }
+
+  // SÉCURITÉ : limiter la taille du contenu pour éviter les abus
+  if (subject.length > 200) return Response.json({ error: 'Objet trop long (max 200)' }, { status: 400 });
+  if ((html || text || '').length > 100000) return Response.json({ error: 'Contenu trop long' }, { status: 400 });
 
   try {
     const payload = {
