@@ -69,6 +69,10 @@ export async function PUT(req) {
   const body = await req.json();
   const { id, ...updates } = body;
   if (!id) return Response.json({ error: 'ID requis' }, { status: 400 });
+
+  // Valider format UUID pour éviter injections
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (id && !uuidRegex.test(id)) return Response.json({ error: 'ID invalide' }, { status: 400 });
   if (updates.niss) updates.niss = await encryptField(updates.niss);
   if (updates.iban) updates.iban = await encryptField(updates.iban);
   if (updates.NISS) updates.NISS = await encryptField(updates.NISS);

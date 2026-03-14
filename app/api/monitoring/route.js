@@ -13,11 +13,15 @@ function getSupabase() {
 }
 
 export async function GET(request) {
-  // Auth Bearer obligatoire
-  const auth = request.headers.get('Authorization');
-  if (!auth?.startsWith('Bearer ')) {
+  // Auth JWT obligatoire — valider le token
+  const { sbFromRequest } = await import('@/app/lib/supabase-server');
+  const { db: userDb, user: caller } = await sbFromRequest(request);
+  if (!caller || !userDb) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+  // Réservé aux admins (email aureus-ia.com)
+  const isAdmin = caller.email?.includes('aureus-ia.com') || caller.user_metadata?.role === 'admin';
+  if (!isAdmin) return NextResponse.json({ error: 'Accès refusé — admin requis' }, { status: 403 });
   const supabase = getSupabase();
   try {
     const checks = [];
@@ -26,10 +30,10 @@ export async function GET(request) {
     const { error: dbError } = await supabase.from('audit_log').select('id').limit(1);
     checks.push({ label: 'Base de données', ok: !dbError, detail: dbError?.message || 'Connexion OK' });
 
-    // 2. Compter employés actifs
-    const { data: empsRaw, error: empError } = await supabase
+    // 2. Compter employés actifs — filtrés par admin uniquement
+    const { data: empsRaw, error: empError } = await userDb
       .from('employees')
-      .select('id, contractEnd, end_date, first, fn, last, ln, niss_exists:niss, iban_exists:iban')
+      .select('id, contractEnd, end_date, first, fn, last, ln')
       .limit(500);
     // Masquer NISS/IBAN — on n'a besoin que de savoir s'ils existent
     const emps = (empsRaw || []).map(e => ({

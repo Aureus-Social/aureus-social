@@ -25,6 +25,10 @@ export async function PUT(req) {
   const body = await req.json();
   const { id, ...updates } = body;
   if (!id) return Response.json({ error: 'ID requis' }, { status: 400 });
+
+  // Valider format UUID pour éviter injections
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (id && !uuidRegex.test(id)) return Response.json({ error: 'ID invalide' }, { status: 400 });
   const { data, error } = await db.from('clients').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id).select().single();
   if (error) return Response.json({ error: error.message }, { status: 400 });
   return Response.json({ ok: true, data });

@@ -18,13 +18,17 @@ export async function GET(request) {
     if (section === 'all' || section === 'fiches') {
       const { data: fiches } = await supabase.from('fiches_paie')
         .select('id,period,gross,brut,onssNet,onss,pp,net,at,created_at,status')
-        .eq('empId', emp.id).order('created_at', { ascending: false }).limit(24);
+        .eq('empId', emp.id)
+        .eq('created_by', emp.created_by) // ISOLATION: fiches de l'employeur qui gère cet employé
+        .order('created_at', { ascending: false }).limit(24);
       result.fiches = fiches || [];
     }
     if (section === 'all' || section === 'dimona') {
       const { data: dimonas } = await supabase.from('declarations')
         .select('id,type,reference,status,data,created_at')
-        .eq('type', 'dimona').order('created_at', { ascending: false }).limit(10);
+        .eq('type', 'dimona')
+        .eq('created_by', emp.created_by) // ISOLATION
+        .order('created_at', { ascending: false }).limit(10);
       result.dimonas = (dimonas||[]).filter(d=>d.data?.worker_niss===emp.niss);
     }
     return Response.json(result);

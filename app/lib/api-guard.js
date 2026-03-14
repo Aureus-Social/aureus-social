@@ -106,3 +106,10 @@ export function requireCronSecret(request) {
   }
   return auth === `Bearer ${secret}`;
 }
+
+
+// Sanitiser les erreurs en production
+function safeError(e, fallback = 'Erreur interne') {
+  if (process.env.NODE_ENV === 'production') return fallback;
+  return e?.message || fallback;
+}

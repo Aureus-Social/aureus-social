@@ -54,7 +54,9 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const status  = searchParams.get('status') || 'active';
     const clientId= searchParams.get('clientId');
-    const search  = searchParams.get('search');
+    const searchRaw = searchParams.get('search') || '';
+    // Sanitize search — enlever caractères spéciaux SQL
+    const search = searchRaw.replace(/[%_\\;'"]/g, '').slice(0, 100);
     const page    = parseInt(searchParams.get('page') || '1', 10);
     const limit   = Math.min(parseInt(searchParams.get('limit') || '100', 10), 500);
 

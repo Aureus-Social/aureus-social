@@ -34,6 +34,10 @@ export async function DELETE(req) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
   if (!id) return Response.json({ error: 'ID requis' }, { status: 400 });
+
+  // Valider format UUID pour éviter injections
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (id && !uuidRegex.test(id)) return Response.json({ error: 'ID invalide' }, { status: 400 });
   const { error } = await db.from('fiches_paie').delete().eq('id', id);
   if (error) return Response.json({ error: error.message }, { status: 400 });
   await sbAdmin()?.from('audit_log').insert([{ user_id: u.id, user_email: u.email, action: 'DELETE_PAYSLIP', table_name: 'fiches_paie', record_id: id, created_at: new Date().toISOString() }]);
