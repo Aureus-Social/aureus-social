@@ -20,6 +20,7 @@ const AdminBaremesPage = dynamic(() => import('../pages/AdminBaremes'), { ssr: f
 const RelancesFacturationPage = dynamic(() => import('../pages/RelancesFacturation'), { ssr: false, loading: () => <Loading /> });
 const AureusSuitePagePage = dynamic(() => import('../pages/AureusSuitePage'), { ssr: false, loading: () => <Loading /> });
 const PayrollSimulatorPage = dynamic(() => import('../pages/PayrollSimulator'), { ssr: false, loading: () => <Loading /> });
+const HistoriquePayrollPage = dynamic(() => import('../pages/HistoriquePayroll'), { ssr: false, loading: () => <Loading /> });
 
 const AbsencesContratsV3Page = dynamic(() => import('../pages/AbsencesContratsV3'), { ssr: false, loading: () => <Loading /> });
 const AuditSecuriteCodePage = dynamic(() => import('../pages/AuditSecuriteCode'), { ssr: false, loading: () => <Loading /> });
@@ -110,6 +111,8 @@ export function routePage(page, state, dispatch) {
     case 'comparatif': return <CommercialHubPage s={state} d={dispatch} />;
     case 'backup': return <adminPage s={state} d={dispatch} />;
     case 'audittrail': return <AuditSecuriteCodePage s={state} d={dispatch} />;
+    case 'historiquepayroll': return <HistoriquePayrollPage s={state} d={dispatch} />;
+    case 'payrollhistory': return <HistoriquePayrollPage s={state} d={dispatch} />;
     default: return null;
   }
 }
