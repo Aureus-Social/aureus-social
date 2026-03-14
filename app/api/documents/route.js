@@ -10,7 +10,7 @@ export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const empId = searchParams.get('empId');
   const type = searchParams.get('type');
-  let q = db.from('documents').select('*').order('created_at', { ascending: false }).limit(500);
+  let q = db.from('documents').select('*').eq('created_by', u.id).order('created_at', { ascending: false }).limit(500);
   if (empId) q = q.eq('employee_id', empId);
   if (type) q = q.eq('type', type);
   const { data, error } = await q;
@@ -34,7 +34,7 @@ export async function DELETE(req) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
   if (!id) return Response.json({ error: 'ID requis' }, { status: 400 });
-  const { error } = await db.from('documents').delete().eq('id', id);
+  const { error } = await db.from('documents').delete().eq('id', id).eq('created_by', u.id);
   if (error) return Response.json({ error: error.message }, { status: 400 });
   return Response.json({ ok: true });
 }

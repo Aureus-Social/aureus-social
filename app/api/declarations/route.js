@@ -9,7 +9,7 @@ export async function GET(req) {
   const db = sb(); if (!db) return Response.json({ error: 'DB indisponible' }, { status: 503 });
   const { searchParams } = new URL(req.url);
   const type = searchParams.get('type');
-  let q = db.from('declarations').select('*').order('created_at', { ascending: false }).limit(200);
+  let q = db.from('declarations').select('*').eq('created_by', u.id).order('created_at', { ascending: false }).limit(200);
   if (type) q = q.eq('type', type);
   const { data, error } = await q;
   if (error) return Response.json({ error: error.message }, { status: 500 });

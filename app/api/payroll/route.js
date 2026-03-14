@@ -11,7 +11,8 @@ export async function GET(req) {
   const empId = searchParams.get('empId');
   const period = searchParams.get('period');
   const limit = parseInt(searchParams.get('limit') || '100');
-  let q = db.from('fiches_paie').select('*').order('created_at', { ascending: false }).limit(limit);
+  // ISOLATION : chaque user ne voit QUE ses propres fiches de paie
+  let q = db.from('fiches_paie').select('*').eq('created_by', u.id).order('created_at', { ascending: false }).limit(limit);
   if (empId) q = q.eq('empId', empId);
   if (period) q = q.eq('period', period);
   const { data, error } = await q;
@@ -37,7 +38,8 @@ export async function DELETE(req) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
   if (!id) return Response.json({ error: 'ID requis' }, { status: 400 });
-  const { error } = await db.from('fiches_paie').delete().eq('id', id);
+  // ISOLATION : on ne peut supprimer que ses propres fiches
+  const { error } = await db.from('fiches_paie').delete().eq('id', id).eq('created_by', u.id);
   if (error) return Response.json({ error: error.message }, { status: 400 });
   await db.from('audit_log').insert([{ user_id: u.id, user_email: u.email, action: 'DELETE_PAYSLIP', table_name: 'fiches_paie', record_id: id, created_at: new Date().toISOString() }]);
   return Response.json({ ok: true });

@@ -12,9 +12,9 @@ export async function GET(request) {
     const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth()-1, 1).toISOString();
     const [empsRes, fichesRes, dimRes, auditRes] = await Promise.all([
-      supabase.from('employees').select('id,status,monthlySalary,contractType,cp').limit(1000),
-      supabase.from('fiches_paie').select('id,gross,net,created_at').gte('created_at', firstDayLastMonth).limit(500),
-      supabase.from('declarations').select('id,type,status,created_at').eq('type','dimona').limit(100),
+      supabase.from('employees').select('id,status,monthlySalary,contractType,cp').eq('created_by', caller.id).limit(1000),
+      supabase.from('fiches_paie').select('id,gross,net,created_at').eq('created_by', caller.id).gte('created_at', firstDayLastMonth).limit(500),
+      supabase.from('declarations').select('id,type,status,created_at').eq('created_by', caller.id).eq('type','dimona').limit(100),
       supabase.from('audit_log').select('id,action,created_at').gte('created_at', firstDayThisMonth).limit(200),
     ]);
     const emps = empsRes.data||[];

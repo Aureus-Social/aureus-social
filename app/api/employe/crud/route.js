@@ -60,7 +60,8 @@ export async function GET(request) {
 
     let query = supabase
       .from('employees')
-      .select(PUBLIC_FIELDS.join(', '), { count: 'exact' });
+      .select(PUBLIC_FIELDS.join(', '), { count: 'exact' })
+      .eq('created_by', caller.id); // ISOLATION: chaque user voit ses propres employés
 
     if (status !== 'all') query = query.eq('status', status);
     if (clientId)         query = query.eq('clientId', clientId);

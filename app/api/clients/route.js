@@ -7,7 +7,8 @@ const sb = () => process.env.SUPABASE_SERVICE_ROLE_KEY
 export async function GET(req) {
   const u = await getAuthUser(req); if (!u) return Response.json({ error: 'Non autorisé' }, { status: 401 });
   const db = sb(); if (!db) return Response.json({ error: 'DB indisponible' }, { status: 503 });
-  const { data, error } = await db.from('clients').select('*').order('name', { ascending: true });
+  // ISOLATION : chaque user ne voit QUE ses propres clients
+  const { data, error } = await db.from('clients').select('*').eq('created_by', u.id).order('name', { ascending: true });
   if (error) return Response.json({ error: error.message }, { status: 500 });
   return Response.json({ ok: true, data, count: data?.length || 0 });
 }
@@ -28,7 +29,8 @@ export async function PUT(req) {
   const body = await req.json();
   const { id, ...updates } = body;
   if (!id) return Response.json({ error: 'ID requis' }, { status: 400 });
-  const { data, error } = await db.from('clients').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id).select().single();
+  // ISOLATION : on ne peut modifier que ses propres clients
+  const { data, error } = await db.from('clients').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id).eq('created_by', u.id).select().single();
   if (error) return Response.json({ error: error.message }, { status: 400 });
   return Response.json({ ok: true, data });
 }
@@ -39,7 +41,8 @@ export async function DELETE(req) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
   if (!id) return Response.json({ error: 'ID requis' }, { status: 400 });
-  const { error } = await db.from('clients').delete().eq('id', id);
+  // ISOLATION : on ne peut supprimer que ses propres clients
+  const { error } = await db.from('clients').delete().eq('id', id).eq('created_by', u.id);
   if (error) return Response.json({ error: error.message }, { status: 400 });
   return Response.json({ ok: true });
 }
