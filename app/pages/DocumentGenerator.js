@@ -1479,6 +1479,78 @@ function documentToPrintHTML(content, title) {
 </body></html>`
 }
 
+
+// ── UI Règlement de travail — téléchargement fichiers statiques ──
+function buildReglementUI(company) {
+  const co = company || {}
+  const coName = (co.name || 'AUREUS IA SPRL').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  const now = new Date().toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' })
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Règlement de travail — ${coName}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #e0e0e0; padding: 32px; }
+  .header { text-align: center; margin-bottom: 32px; }
+  .header h1 { font-size: 22px; color: #c6a34e; margin-bottom: 6px; }
+  .header p { font-size: 13px; color: #8b95a5; }
+  .badge { display: inline-block; background: rgba(198,163,78,.12); border: 1px solid rgba(198,163,78,.3); color: #c6a34e; border-radius: 20px; padding: 3px 12px; font-size: 11px; font-weight: 600; margin-bottom: 12px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 700px; margin: 0 auto 28px; }
+  .card { background: #111620; border: 1px solid #1e2633; border-radius: 12px; padding: 24px; text-align: center; }
+  .card-flag { font-size: 28px; margin-bottom: 8px; }
+  .card-title { font-size: 15px; font-weight: 700; color: #e0e0e0; margin-bottom: 4px; }
+  .card-sub { font-size: 11px; color: #8b95a5; margin-bottom: 16px; line-height: 1.5; }
+  .btn-group { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .btn-pdf { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; background: #c6a34e; color: #0d1117; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700; text-decoration: none; }
+  .btn-docx { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; background: rgba(59,130,246,.15); color: #60a5fa; border: 1px solid rgba(59,130,246,.3); border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; text-decoration: none; }
+  .info-box { max-width: 700px; margin: 0 auto; background: rgba(198,163,78,.06); border: 1px solid rgba(198,163,78,.2); border-radius: 10px; padding: 16px 20px; font-size: 12px; color: #b89a4a; line-height: 1.7; }
+  .info-box strong { font-size: 13px; display: block; margin-bottom: 8px; color: #c6a34e; }
+  .info-box b { color: #e0e0e0; }
+  .stats { max-width: 700px; margin: 0 auto 24px; display: flex; gap: 12px; justify-content: center; }
+  .stat { background: #111620; border: 1px solid #1e2633; border-radius: 8px; padding: 10px 20px; text-align: center; }
+  .stat-val { font-size: 20px; font-weight: 700; color: #c6a34e; }
+  .stat-label { font-size: 10px; color: #8b95a5; margin-top: 2px; }
+</style>
+</head><body>
+<div class="header">
+  <div class="badge">📋 Document officiel</div>
+  <h1>Règlement de travail</h1>
+  <p>${coName} &nbsp;·&nbsp; Conforme à la loi du 8 avril 1965 &nbsp;·&nbsp; FR et NL</p>
+</div>
+<div class="stats">
+  <div class="stat"><div class="stat-val">47</div><div class="stat-label">Pages</div></div>
+  <div class="stat"><div class="stat-val">22</div><div class="stat-label">Articles</div></div>
+  <div class="stat"><div class="stat-val">2</div><div class="stat-label">Langues</div></div>
+  <div class="stat"><div class="stat-val">2026</div><div class="stat-label">À jour</div></div>
+</div>
+<div class="grid">
+  <div class="card">
+    <div class="card-flag">🇫🇷</div>
+    <div class="card-title">Français</div>
+    <div class="card-sub">Règlement de travail complet<br/>Loi 8 avril 1965 — 47 pages</div>
+    <div class="btn-group">
+      <a href="/documents/reglement_travail_FR.pdf" target="_blank" class="btn-pdf">📄 Ouvrir PDF</a>
+      <a href="/documents/reglement_travail_FR.docx" download="Reglement_travail_FR.docx" class="btn-docx">📝 Word</a>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-flag">🇧🇪</div>
+    <div class="card-title">Nederlands</div>
+    <div class="card-sub">Arbeidsreglement volledig<br/>Wet 8 april 1965 — 47 pagina's</div>
+    <div class="btn-group">
+      <a href="/documents/reglement_travail_NL.pdf" target="_blank" class="btn-pdf">📄 Ouvrir PDF</a>
+      <a href="/documents/reglement_travail_NL.docx" download="Arbeidsreglement_NL.docx" class="btn-docx">📝 Word</a>
+    </div>
+  </div>
+</div>
+<div class="info-box">
+  <strong>ℹ️ Comment utiliser ce document</strong>
+  <b>PDF</b> — Version finale à remettre obligatoirement à chaque travailleur lors de son engagement (loi du 8 avril 1965, art. 15 — présomption de connaissance). Cliquez pour l'ouvrir dans votre navigateur, imprimez-le ou envoyez-le par email.<br/><br/>
+  <b>Word (.docx)</b> — Version modifiable pour adapter les champs spécifiques (horaires précis, CP, adresse, représentant syndical) avant impression. Toute modification structurelle doit suivre la procédure art. 12 loi 8 avril 1965 (dépôt SPF Emploi + affichage 8 jours).<br/><br/>
+  <b>Obligation légale</b> — La remise du règlement de travail est obligatoire pour tous les employeurs dès le premier travailleur. Disponible en FR et NL conformément à la législation linguistique. Mis à jour ${now}.
+</div>
+</body></html>`
+}
+
 // ── Composant principal ──
 export default function DocumentGeneratorWrapped({ s, d, tab }) {
   s=s||{}; d=d||(()=>{});
@@ -1508,6 +1580,13 @@ function DocumentGenerator({ state, defaultTab, initialCat }) {
 
   const handleGenerate = useCallback(() => {
     if (!selectedType) return
+
+    // ── Règlement de travail : servir les fichiers statiques ──
+    if (selectedType === 'REGLEMENT_TRAVAIL') {
+      const reglementHTML = buildReglementUI(company)
+      setGenerated({ type: 'REGLEMENT_TRAVAIL', content: '', data: {company}, html: reglementHTML, title: 'Règlement de travail' })
+      return
+    }
 
     const emp = selectedEmployee ? employees.find(e =>
       (e.id || e.niss) === selectedEmployee
