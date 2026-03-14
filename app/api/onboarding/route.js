@@ -36,8 +36,12 @@ export async function POST(request) {
   }
 
   try {
-    const { user_id, email, company_name, action } = await request.json();
-    if (!user_id || !email) return Response.json({ error: 'user_id et email requis' }, { status: 400 });
+    const body = await request.json();
+    const { company_name, action } = body;
+    // SÉCURITÉ : user_id et email TOUJOURS depuis le JWT — jamais du body
+    const user_id = u.id;
+    const email = u.email;
+    if (!user_id || !email) return Response.json({ error: 'Utilisateur non authentifié' }, { status: 401 });
 
     // ── 1. Vérifier si c'est vraiment un nouveau client ──
     const { data: existing } = await supabase

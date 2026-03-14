@@ -282,6 +282,7 @@ export async function GET(request) {
       .from('declarations')
       .select('id, period, status, data, created_at')
       .eq('type', 'dmfa')
+      .eq('created_by', caller.id)
       .order('created_at', { ascending: false })
       .limit(20);
 

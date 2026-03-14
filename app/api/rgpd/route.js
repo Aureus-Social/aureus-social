@@ -368,6 +368,9 @@ export async function POST(request) {
 
     // ── Purge rétention (Art. 5.1.e) ─────────────────────────────
     if (action === 'purge-retention') {
+      // SÉCURITÉ : purge globale réservée aux admins uniquement
+      const isAdmin = user.email?.includes('aureus-ia.com') || user.user_metadata?.role === 'admin';
+      if (!isAdmin) return NextResponse.json({ error: 'Accès refusé — admin requis pour purge globale' }, { status: 403 });
       const { data: purgeResult, error } = await getSupabase().rpc('rgpd_retention_purge');
       if (error) throw error;
 
