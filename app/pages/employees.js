@@ -2,6 +2,7 @@
 import { useLang } from '../lib/lang-context';
 import { B, C, CR_PAT, CR_TRAV, CR_MAX, DPER, I, LB, LEGAL, LOIS_BELGES, NET_FACTOR, PH, PP_EST, PV_DOUBLE, PV_SIMPLE, RMMMG, ST, TX_ONSS_E, TX_ONSS_W, Tbl, calc, f0, f2, fmt, validateNISS } from '@/app/lib/helpers';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { authFetch } from '@/app/lib/auth-fetch';
 
 const fmtP = n => `${((n||0)*100).toFixed(2)}%`;
 const uid = () => `${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
@@ -236,6 +237,14 @@ function Employees({s,d}) {
       </label>
       <B v="outline" onClick={()=>setShowROI(!showROI)} style={{padding:'8px 14px',fontSize:11}}>💰 ROI</B>
       <B v="outline" onClick={exportCSV} style={{padding:'8px 14px',fontSize:11}}>⬇ CSV</B>
+      <B v="outline" onClick={async()=>{
+        const active = (s?.emps||[]).filter(e=>(e.status==='active'||!e.status)&&e.email);
+        if(!active.length) return alert('Aucun travailleur actif avec email');
+        if(!confirm(`Envoyer une invitation portail à ${active.length} travailleur(s) ?`)) return;
+        const r = await authFetch('/api/invite',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({emp_ids:active.map(e=>e.id)})});
+        const j = await r.json();
+        alert(`✅ ${j.sent} invitation(s) envoyée(s)${j.failed?` · ${j.failed} échec(s)`:''}`);
+      }} style={{padding:'8px 14px',fontSize:11}}>📨 Inviter portail</B>
       <B v="outline" onClick={addExempleActivaNordin} style={{padding:'8px 14px',fontSize:11}}>💼 Exemple Activa Nourdin</B>
       <B onClick={()=>{setF({...empty});setEd(false);}}>+ Nouvel employé</B>
     </div>}/>
