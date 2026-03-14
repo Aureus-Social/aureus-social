@@ -1790,13 +1790,49 @@ function DocumentGenerator({ state, defaultTab, initialCat }) {
               </button>
             </div>
           </div>
-          <div style={{ borderRadius: 10, overflow: 'hidden', border: `1px solid ${BORDER}`, background: '#fff' }}>
-            <iframe
-              title="Aperçu document"
-              style={{ width: '100%', height: 680, border: 'none', display: 'block' }}
-              srcDoc={generated.html || (CONTRACT_TYPES.includes(generated.type) ? buildContractHTML(generated.type, generated.data) : documentToPrintHTML(generated.content || '', generated.title || ''))}
-            />
-          </div>
+          {generated.type === 'REGLEMENT_TRAVAIL' ? (
+            <div style={{ borderRadius: 10, border: '1px solid rgba(198,163,78,.2)', background: '#0d1117', padding: 32 }}>
+              <div style={{ textAlign: 'center', marginBottom: 28 }}>
+                <div style={{ fontSize: 14, color: '#c6a34e', fontWeight: 700, marginBottom: 6 }}>📋 Règlement de travail — Fichiers disponibles</div>
+                <div style={{ fontSize: 11, color: '#8b95a5' }}>Loi du 8 avril 1965 · 47 pages · Mis à jour 2026 · FR et NL</div>
+              </div>
+              <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 24 }}>
+                {[
+                  { lang: '🇫🇷 Français', pdf: '/documents/reglement_travail_FR.pdf', docx: '/documents/reglement_travail_FR.docx', dl: 'Reglement_travail_FR.docx' },
+                  { lang: '🇧🇪 Nederlands', pdf: '/documents/reglement_travail_NL.pdf', docx: '/documents/reglement_travail_NL.docx', dl: 'Arbeidsreglement_NL.docx' },
+                ].map((v, i) => (
+                  <div key={i} style={{ background: '#111620', border: '1px solid #1e2633', borderRadius: 12, padding: 24, textAlign: 'center', minWidth: 240 }}>
+                    <div style={{ fontSize: 24, marginBottom: 8 }}>{v.lang.split(' ')[0]}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#e0e0e0', marginBottom: 4 }}>{v.lang.split(' ').slice(1).join(' ')}</div>
+                    <div style={{ fontSize: 11, color: '#8b95a5', marginBottom: 16, lineHeight: 1.5 }}>Règlement complet · 47 pages<br/>Loi 8 avril 1965</div>
+                    <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                      <a href={v.pdf} target="_blank" rel="noopener noreferrer"
+                        style={{ padding: '8px 16px', background: '#c6a34e', color: '#0d1117', borderRadius: 6, fontSize: 12, fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        📄 PDF
+                      </a>
+                      <a href={v.docx} download={v.dl}
+                        style={{ padding: '8px 16px', background: 'rgba(59,130,246,.15)', color: '#60a5fa', border: '1px solid rgba(59,130,246,.3)', borderRadius: 6, fontSize: 12, fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        📝 Word
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ background: 'rgba(198,163,78,.06)', border: '1px solid rgba(198,163,78,.2)', borderRadius: 8, padding: '14px 18px', fontSize: 11, color: '#b89a4a', lineHeight: 1.7 }}>
+                <strong style={{ color: '#c6a34e', display: 'block', marginBottom: 6 }}>ℹ️ Obligation légale</strong>
+                <strong style={{ color: '#e0e0e0' }}>PDF</strong> — Remise obligatoire à chaque travailleur à l'embauche (art. 15 loi 8/04/1965 — présomption de connaissance).<br/>
+                <strong style={{ color: '#e0e0e0' }}>Word</strong> — Version modifiable pour adapter les champs (CP, horaires, adresse). Toute modification structurelle suit la procédure art. 12 (dépôt SPF Emploi + affichage 8 jours).
+              </div>
+            </div>
+          ) : (
+            <div style={{ borderRadius: 10, overflow: 'hidden', border: `1px solid ${BORDER}`, background: '#fff' }}>
+              <iframe
+                title="Aperçu document"
+                style={{ width: '100%', height: 680, border: 'none', display: 'block' }}
+                srcDoc={generated.html || (CONTRACT_TYPES.includes(generated.type) ? buildContractHTML(generated.type, generated.data) : documentToPrintHTML(generated.content || '', generated.title || ''))}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>
