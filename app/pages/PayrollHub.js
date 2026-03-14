@@ -291,7 +291,7 @@ export function SoldeToutCompteV2({s,d}){
           <option value="abus">Licenciement abusif (CCT 109)</option>
           <option value="faute">Faute grave (Art. 35)</option>
         </select></div>
-      <button onClick={calcul} style={{padding:'10px 24px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:13,cursor:'pointer',height:42}}>{t(tText('ui.calculate'))||tText('Calculer')}</button>
+      <button onClick={calcul} style={{padding:'10px 24px',borderRadius:8,border:'none',background:'linear-gradient(135deg,#c6a34e,#a07d3e)',color:'#060810',fontWeight:700,fontSize:13,cursor:'pointer',height:42}}>{t('ui.calculate')}</button>
     </div>
 
     {result&&<div>

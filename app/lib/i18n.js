@@ -370,5 +370,40 @@ export const I18N = {
   'msg.error': { fr:'Erreur', nl:'Fout', en:'Error', de:'Fehler' },
   'msg.confirm': { fr:'Confirmer', nl:'Bevestigen', en:'Confirm', de:'Bestätigen' },
   'msg.loading': { fr:'Chargement...', nl:'Laden...', en:'Loading...', de:'Laden...' },
+  // ── DocumentGenerator ──
+  'docs.title':    { fr:'Générateur de documents', nl:'Documentgenerator', en:'Document generator', de:'Dokumentengenerator' },
+  'docs.subtitle': { fr:'Contrats, attestations et documents sociaux belges', nl:'Contracten, attesten en Belgische sociale documenten', en:'Belgian employment contracts and social documents', de:'Belgische Arbeitsverträge und Sozialdokumente' },
+  // ── UI générique ──
+  'ui.print':      { fr:'Imprimer', nl:'Afdrukken', en:'Print', de:'Drucken' },
+  'ui.calculate':  { fr:'Calculer', nl:'Berekenen', en:'Calculate', de:'Berechnen' },
+  'ui.generate':   { fr:'Générer', nl:'Genereren', en:'Generate', de:'Generieren' },
+  'ui.preview':    { fr:'Aperçu', nl:'Voorbeeld', en:'Preview', de:'Vorschau' },
+  'ui.download':   { fr:'Télécharger', nl:'Downloaden', en:'Download', de:'Herunterladen' },
+  'ui.send':       { fr:'Envoyer', nl:'Verzenden', en:'Send', de:'Senden' },
+  'ui.close':      { fr:'Fermer', nl:'Sluiten', en:'Close', de:'Schließen' },
+  'ui.search':     { fr:'Rechercher', nl:'Zoeken', en:'Search', de:'Suchen' },
+  'ui.filter':     { fr:'Filtrer', nl:'Filteren', en:'Filter', de:'Filtern' },
+  'ui.add':        { fr:'Ajouter', nl:'Toevoegen', en:'Add', de:'Hinzufügen' },
+  'ui.back':       { fr:'Retour', nl:'Terug', en:'Back', de:'Zurück' },
+  'ui.next':       { fr:'Suivant', nl:'Volgende', en:'Next', de:'Weiter' },
+  'ui.all':        { fr:'Tout', nl:'Alles', en:'All', de:'Alle' },
+  // ── Navigation ──
+  'nav.dashboard': { fr:'Tableau de bord', nl:'Dashboard', en:'Dashboard', de:'Dashboard' },
+  'nav.employees': { fr:'Travailleurs', nl:'Werknemers', en:'Workers', de:'Arbeitnehmer' },
+  'nav.payroll':   { fr:'Fiches de paie', nl:'Loonfiches', en:'Payslips', de:'Gehaltszettel' },
+  'nav.documents': { fr:'Documents', nl:'Documenten', en:'Documents', de:'Dokumente' },
+  'nav.settings':  { fr:'Paramètres', nl:'Instellingen', en:'Settings', de:'Einstellungen' },
+  'nav.lois':      { fr:'Lois & Barèmes', nl:'Wetten & Schalen', en:'Laws & Scales', de:'Gesetze & Tarife' },
+  'nav.procedures':{ fr:'Procédures RH', nl:'HR-procedures', en:'HR Procedures', de:'HR-Verfahren' },
+  // ── Paie ──
+  'pay.period':    { fr:'Période', nl:'Periode', en:'Period', de:'Zeitraum' },
+  'pay.worker':    { fr:'Travailleur', nl:'Werknemer', en:'Worker', de:'Arbeitnehmer' },
+  'pay.status':    { fr:'Statut', nl:'Status', en:'Status', de:'Status' },
+  'pay.generate':  { fr:'Générer la fiche', nl:'Loonfiche genereren', en:'Generate payslip', de:'Gehaltszettel erstellen' },
+  // ── Contrats ──
+  'contrat':       { fr:'Contrat', nl:'Contract', en:'Contract', de:'Vertrag' },
+  'attestation':   { fr:'Attestation', nl:'Attest', en:'Certificate', de:'Bescheinigung' },
+  'sortie':        { fr:'Sortie / Fin contrat', nl:'Uitdiensttreding', en:'End of contract', de:'Vertragsende' },
+  'reglementaire': { fr:'Réglementaire', nl:'Reglementair', en:'Regulatory', de:'Regulatorisch' },
 };
 

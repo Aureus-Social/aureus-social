@@ -1556,7 +1556,7 @@ export default function DocumentGeneratorWrapped({ s, d, tab }) {
   s=s||{}; d=d||(()=>{});
   const _emps=s?.emps||[]; const _clients=s?.clients||[];
   const { t, lang, tText } = useLang();
-  const TAB_TO_CAT = {'contratgen': tText('contrat'), 'contratsmenu': tText('contrat'), 'annexeReglement': 'reglementaire', 'gendocsjur': 'reglementaire', 'formC4': 'sortie', 'formC131': 'attestation', 'legal': 'reglementaire', 'cgvsaas': 'reglementaire', 'mentionslegales': 'reglementaire'};
+  const TAB_TO_CAT = {'contratgen': 'contrat', 'contratsmenu': 'contrat', 'annexeReglement': 'reglementaire', 'gendocsjur': 'reglementaire', 'formC4': 'sortie', 'formC131': 'attestation', 'legal': 'reglementaire', 'cgvsaas': 'reglementaire', 'mentionslegales': 'reglementaire'};
   const initialCat = TAB_TO_CAT[tab] || null;
   return <DocumentGenerator state={s || {}} defaultTab={tab} initialCat={initialCat} />;
 }
@@ -1641,9 +1641,9 @@ function DocumentGenerator({ state, defaultTab, initialCat }) {
 
   return (
     <div style={{ padding: 24 }}>
-      <h2 style={{ color: GOLD, margin: '0 0 4px 0', fontSize: 20 }}>{t(tText('docs.title'))||'Générateur de documents'}</h2>
+      <h2 style={{ color: GOLD, margin: '0 0 4px 0', fontSize: 20 }}>{t('docs.title')}</h2>
       <p style={{ color: MUTED, margin: '0 0 20px 0', fontSize: 13 }}>
-        {t(tText('docs.subtitle'))||'Contrats, attestations'}
+        {t('docs.subtitle')}
       </p>
 
       {/* Filtres catégorie */}
@@ -1781,7 +1781,7 @@ function DocumentGenerator({ state, defaultTab, initialCat }) {
               <button onClick={handleDownloadPDF} style={{ ...btnStyle, background: GOLD, color: DARK, fontWeight: 600 }}>
                 📄 Télécharger PDF
               </button>
-              <button onClick={handlePrint} style={btnStyle}>{t(tText('ui.print'))||'Imprimer'}</button>
+              <button onClick={handlePrint} style={btnStyle}>{t('ui.print')}</button>
               <button
                 onClick={() => { navigator.clipboard?.writeText(generated.content) }}
                 style={btnStyle}
