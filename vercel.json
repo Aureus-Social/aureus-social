@@ -39,6 +39,10 @@
     {
       "path": "/api/alerts?send=1",
       "schedule": "30 6 * * *"
+    },
+    {
+      "path": "/api/rapport-mensuel?send=1",
+      "schedule": "0 7 1 * *"
     }
   ]
 }
