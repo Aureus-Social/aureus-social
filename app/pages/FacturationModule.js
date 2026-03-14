@@ -344,6 +344,12 @@ export default function FacturationModule({ s, d }) {
             <div style={{display:'flex',gap:6}}>
               <button onClick={()=>printFacture(showDetail)} style={{padding:'7px 14px',borderRadius:7,border:'1px solid rgba(255,255,255,.1)',background:'transparent',color:'#8b95a5',fontSize:11,cursor:'pointer'}}>🖨️ PDF</button>
               <button onClick={async()=>{
+                const r = await authFetch('/api/peppol', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({facture_id:showDetail.id})});
+                const j = await r.json();
+                if(r.ok){const blob=new Blob([j.xml],{type:'application/xml'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=j.filename;a.click();}
+                else showToast('Erreur Peppol','error');
+              }} style={{padding:'7px 14px',borderRadius:7,border:'1px solid rgba(96,165,250,.2)',background:'transparent',color:'#60a5fa',fontSize:11,cursor:'pointer'}}>📡 Peppol</button>
+              <button onClick={async()=>{
                 const r = await authFetch(`/api/peppol?id=${showDetail.id}`);
                 if(r.ok){const blob=await r.blob();const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`peppol-${showDetail.numero}.xml`;a.click();URL.revokeObjectURL(url);}
               }} style={{padding:'7px 14px',borderRadius:7,border:'1px solid rgba(198,163,78,.15)',background:'transparent',color:'#8b7340',fontSize:11,cursor:'pointer'}}>📋 Peppol UBL</button>

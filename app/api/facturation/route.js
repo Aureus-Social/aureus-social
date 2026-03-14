@@ -1,4 +1,5 @@
 import { sbFromRequest, sbAdmin } from '@/app/lib/supabase-server';
+import { triggerWebhook } from '@/app/lib/trigger-webhook';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req) {
@@ -32,6 +33,7 @@ export async function POST(req) {
   }]).select().single();
   if (error) return Response.json({ error: process.env.NODE_ENV==='production'?'Erreur interne':error.message }, { status: 400 });
   await sbAdmin()?.from('audit_log').insert([{ user_id: u.id, user_email: u.email, action: 'CREATE_FACTURE', table_name: 'factures', record_id: data.id, created_at: new Date().toISOString() }]);
+  triggerWebhook(u.id, 'facture.created', { id: data.id, numero: data.numero, client: data.client_name, montant: data.montant }).catch(()=>{});
   return Response.json({ ok: true, data }, { status: 201 });
 }
 

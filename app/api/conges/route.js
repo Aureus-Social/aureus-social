@@ -3,6 +3,7 @@
 // Workflow demandes de congé : création, lecture, approbation/refus
 // ═══════════════════════════════════════════════════════════════
 import { sbFromRequest, sbAdmin } from '@/app/lib/supabase-server';
+import { triggerWebhook } from '@/app/lib/trigger-webhook';
 export const dynamic = 'force-dynamic';
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
@@ -105,6 +106,7 @@ export async function PUT(req) {
     );
   }
   await sbAdmin()?.from('audit_log').insert([{ user_id: u.id, user_email: u.email, action: `CONGE_${status.toUpperCase()}`, table_name: 'conges', record_id: id, created_at: new Date().toISOString() }]);
+  if (status === 'approuve') triggerWebhook(u.id, 'conge.approved', { id, emp: conge.emp_name, type: conge.type, debut: conge.date_debut, fin: conge.date_fin }).catch(()=>{});
   return Response.json({ ok: true, data });
 }
 
