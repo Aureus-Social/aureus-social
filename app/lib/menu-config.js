@@ -53,7 +53,7 @@ export const MENU = [
   { id: 'permissions',      label: 'Rôles & Accès',     icon: '🔐', g: 6 },
   { id: 'webhooks',         label: 'Webhooks API',       icon: '🔗', g: 6 },
   { id: 'backup',           label: 'Backup & Restore',  icon: '💾', g: 6 },
-  { id: 'demandes_acces',    label: 'Demandes d'accès',   icon: '🔑', g: 6 },
+  { id: 'demandes_acces',    label: "Demandes d'accès",   icon: '🔑', g: 6 },
   { id: '2fa',               label: '2FA / TOTP',         icon: '🔐', g: 6 },
   { id: 'auditsecuritecode', label: 'Audit Sécurité',   icon: '🛡', g: 6 },
   { id: 'audittrail',       label: 'Audit Trail',       icon: '🔍', g: 6 },
