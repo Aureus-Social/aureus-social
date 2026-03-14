@@ -106,6 +106,8 @@ const MandatsAdminRaw = dynamic(() => import('../pages/MandatsAdminPage'), { ssr
 const MandatsAdminPg = ({ s, d, tab }) => <MandatsAdminRaw s={s} d={d} tab={tab} />;
 const ConnexionsHubRaw = dynamic(() => import('../pages/ConnexionsHub'), { ssr: false, loading: Loading });
 const ConnexionsHubPg = ({ s, d }) => <ConnexionsHubRaw s={s} d={d} />;
+const FacturationRaw = dynamic(() => import('../pages/FacturationModule'), { ssr: false, loading: Loading });
+const FacturationPg = ({ s, d }) => <FacturationRaw s={s} d={d} />;
 const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 
 // Reducer pour le state global
@@ -595,7 +597,7 @@ function DashboardLayoutInner({ user }) {
       case 'commandcenter': return <SmartOpsPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'compliance': return <CompliancePage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'securitedata': return <SecurityPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} supabase={supabase} user={user} />;
-      case 'facturation': return <RelancesPage s={s} d={d} t={t} lang={lang} th={TH} />;
+      case 'facturation': return <FacturationPg s={s} d={d} />;
       case 'gestionprimes': return <PrimesPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'seuilssociaux': return <LoisPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       // TABLEAU DE BORD
