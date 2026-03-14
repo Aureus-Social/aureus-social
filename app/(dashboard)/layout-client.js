@@ -108,6 +108,8 @@ const ConnexionsHubRaw = dynamic(() => import('../pages/ConnexionsHub'), { ssr: 
 const ConnexionsHubPg = ({ s, d }) => <ConnexionsHubRaw s={s} d={d} />;
 const FacturationRaw = dynamic(() => import('../pages/FacturationModule'), { ssr: false, loading: Loading });
 const FacturationPg = ({ s, d }) => <FacturationRaw s={s} d={d} />;
+const GestionCongesRaw = dynamic(() => import('../pages/GestionConges'), { ssr: false, loading: Loading });
+const GestionCongesPg = ({ s, d }) => <GestionCongesRaw s={s} d={d} />;
 const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 
 // Reducer pour le state global
@@ -614,6 +616,7 @@ function DashboardLayoutInner({ user }) {
       case 'gendocsjur': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
       case 'dashabsent': return <AbsencesContratsV3Pg s={s} d={d} tab={page} />;
       case 'gestionabs': return <AbsencesContratsV3Pg s={s} d={d} tab={page} />;
+      case 'conges': case 'demandesconges': return <GestionCongesPg s={s} d={d} />;
       case 'planifconges': return <AbsencesContratsV3Pg s={s} d={d} tab={page} />;
       case 'workflowAbs': return <AbsencesContratsV3Pg s={s} d={d} tab={page} />;
       case 'interimaires': return <EmployeePlanningPgW s={s} d={d} tab={page} />;

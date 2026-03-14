@@ -16,6 +16,7 @@ export const MENU = [
   { id: 'onboarding',  label: 'Nouvel employé',   icon: '🆕', g: 2 },
   { id: 'contratsmenu', label: 'Contrats & Docs',  icon: '📝', g: 2 },
   { id: 'gestionabs',  label: 'Absences & Congés', icon: '🗓', g: 2 },
+  { id: 'conges',       label: 'Demandes Congés',  icon: '✅', g: 2 },
   { id: 'dashrh',      label: 'Tableau de bord RH', icon: '📊', g: 2 },
   { id: 'portail',     label: 'Portail Employé',  icon: '🌐', g: 2 },
   { id: 'proceduresrh', label: 'Procédures RH',   icon: '📋', g: 2 },
