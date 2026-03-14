@@ -39,6 +39,7 @@ class ErrorBoundary extends React.Component {
 const DashboardPage = dynamic(() => import('../pages/dashboard'), { ssr: false, loading: Loading });
 const EmployeesPage = dynamic(() => import('../pages/employees'), { ssr: false, loading: Loading });
 const PayslipsPage = dynamic(() => import('../pages/payslips'), { ssr: false, loading: Loading });
+const FichesPaiePDFPg = dynamic(() => import('../pages/FichesPaiePDF'), { ssr: false, loading: Loading });
 const DimonaPageComp = dynamic(() => import('../pages/dimona'), { ssr: false, loading: Loading });
 const DeclarationsONSSPg = dynamic(() => import('../pages/DeclarationsONSS'), { ssr: false, loading: Loading });
 const AdminPage = dynamic(() => import('../pages/admin'), { ssr: false, loading: Loading });
@@ -615,6 +616,7 @@ function DashboardLayoutApproved({ user }) {
       case 'dashboard': return <DashboardPage s={s} d={d} t={t} lang={lang} th={TH} onNavigate={setPage} />;
       case 'employees': return <EmployeesPage s={s} d={d} t={t} lang={lang} th={TH} />;
       case 'payslip': return <PayslipsPage s={s} d={d} t={t} lang={lang} th={TH} scrollAnchor={scrollAnchor} onAnchorHandled={()=>setScrollAnchor(null)} />;
+      case 'fichespaie': case 'fichespaiepdf': case 'genpdf': return <FichesPaiePDFPg s={s} d={d} />;
       case 'declarations': case 'onss': return <DeclarationsONSSPg s={s} d={d} />;
       case 'admin': return <AdminPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'backup': return <AdminPage s={s} d={d} t={t} lang={lang} th={TH} tab='backup' />;

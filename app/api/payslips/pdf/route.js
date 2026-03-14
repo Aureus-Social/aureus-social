@@ -287,15 +287,29 @@ export async function POST(req) {
         const emp = body.emp || {};
         const per = body.period || {};
         const now = new Date();
+        const _brut   = parseFloat(emp.gross || emp.monthlySalary || 0);
+        const _regime = parseFloat(emp.regime || 100) / 100;
+        const _brutR  = Math.round(_brut * _regime * 100) / 100;
+        const _onssW  = Math.round(_brutR * TX_ONSS_W * 100) / 100;
+        const _onssE  = Math.round(_brutR * TX_ONSS_E * 100) / 100;
+        const _pp     = quickPP(_brutR);
+        const _css    = calcCSS(_brutR);
+        const _net    = Math.round((_brutR - _onssW - _pp - _css) * 100) / 100;
+        const _cout   = Math.round((_brutR + _onssE + _brutR * TX_AT) * 100) / 100;
         await db.from('fiches_paie').insert([{
           user_id: u.id,
-          eid: emp.id || null,
-          ename: [(emp.fn || emp.first || ''), (emp.ln || emp.last || '')].filter(Boolean).join(' '),
-          period: `${per.year || now.getFullYear()}-${String(per.month ?? now.getMonth() + 1).padStart(2,'0')}`,
-          month: per.month ?? (now.getMonth() + 1),
-          year:  per.year  ?? now.getFullYear(),
-          gross: parseFloat(emp.gross || emp.monthlySalary || 0),
-          at: now.toISOString(),
+          eid:      emp.id || null,
+          ename:    [(emp.fn || emp.first || ''), (emp.ln || emp.last || '')].filter(Boolean).join(' '),
+          period:   `${per.year || now.getFullYear()}-${String(per.month ?? now.getMonth() + 1).padStart(2,'0')}`,
+          month:    per.month ?? (now.getMonth() + 1),
+          year:     per.year  ?? now.getFullYear(),
+          gross:    _brutR,
+          net:      _net,
+          onss_w:   _onssW,
+          onss_e:   _onssE,
+          pp:       _pp,
+          cout_empl: _cout,
+          at:       now.toISOString(),
         }]).catch(() => {});
       }
     }
