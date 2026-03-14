@@ -55,8 +55,7 @@ export function middleware(request) {
   // Middleware vérifie la présence du token — la validation cryptographique se fait dans getAuthUser()
   const PROTECTED_API = [
     '/api/employees', '/api/payroll', '/api/declarations', '/api/export',
-    '/api/restore', '/api/rgpd', '/api/documents',
-    '/api/onss/dimona', '/api/onss/dmfa', '/api/onss/status', '/api/onss/token',
+    '/api/restore', '/api/rgpd', '/api/documents', '/api/onss',
     '/api/sepa', '/api/stats', '/api/permissions', '/api/backup',
     '/api/monitoring', '/api/anomaly', '/api/audit',
   ];

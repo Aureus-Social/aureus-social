@@ -17,7 +17,7 @@ function getPrivateKey() {
 }
 
 export async function GET(req) {
-  // Route de diagnostic — temporairement sans auth
+  // Route diagnostic — protégée par middleware JWT
   const results = [];
   const raw = process.env.ONSS_PRIVATE_KEY || '';
   const isBase64 = !raw.includes('BEGIN') && raw.length > 100;
