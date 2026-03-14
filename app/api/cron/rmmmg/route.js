@@ -79,7 +79,7 @@ async function pushToGitHub(newVal, oldVal) {
   const TOKEN = process.env.GH_PUSH_TOKEN || process.env.GITHUB_TOKEN;
   const REPO  = 'Aureus-Social/aureus-social';
   const PATH  = 'app/lib/lois-belges.js';
-  if (!TOKEN) throw new Error('GH_PUSH_TOKEN absent des variables Vercel');
+  if (!TOKEN) { console.warn('[CRON] GH_PUSH_TOKEN absent — mise à jour GitHub ignorée'); return { pushed: false, reason: 'no_token' }; }
 
   // Lire le fichier actuel
   const getRes = await fetchWithTimeout(`https://api.github.com/repos/${REPO}/contents/${PATH}`, 12000);

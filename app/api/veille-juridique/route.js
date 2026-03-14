@@ -31,7 +31,7 @@ async function checkSource(source) {
     const hash = snippet.length + '_' + btoa(snippet.slice(0, 50)).slice(0, 20);
     return { id: source.id, name: source.name, ok: true, status: res.status, hash, checked_at: new Date().toISOString() };
   } catch(e) {
-    return { id: source.id, name: source.name, ok: false, error: e.message, checked_at: new Date().toISOString() };
+    return { id: source.id, name: source.name, ok: false, error: process.env.NODE_ENV==="production"?"Erreur interne":(e.message||"Erreur"), checked_at: new Date().toISOString() };
   }
 }
 

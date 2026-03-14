@@ -77,11 +77,11 @@ export async function GET(request) {
     query = query.range(from, from + limit - 1).order('last', { ascending: true });
 
     const { data, error, count } = await query;
-    if (error) return Response.json({ error: error.message }, { status: 500 });
+    if (error) return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 500 });
 
     return Response.json({ employees: (data || []).map(sanitizeEmp), total: count || 0, page, limit });
   } catch (e) {
-    return Response.json({ error: e.message }, { status: 500 });
+    return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(e.message||"Erreur") }, { status: 500 });
   }
 }
 
@@ -122,7 +122,7 @@ export async function POST(request) {
     }
 
     const { data, error } = await supabase.from('employees').insert(emp).select().single();
-    if (error) return Response.json({ error: error.message, details: error }, { status: 500 });
+    if (error) return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 500 });
 
     // Audit log
     try {
@@ -136,7 +136,7 @@ export async function POST(request) {
 
     return Response.json({ ok: true, employee: sanitizeEmp(data) }, { status: 201 });
   } catch (e) {
-    return Response.json({ error: e.message }, { status: 500 });
+    return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(e.message||"Erreur") }, { status: 500 });
   }
 }
 
@@ -162,7 +162,7 @@ export async function PUT(request) {
       .select()
       .single();
 
-    if (error) return Response.json({ error: error.message }, { status: 500 });
+    if (error) return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 500 });
     if (!data)  return Response.json({ error: 'Employé non trouvé' }, { status: 404 });
 
     try {
@@ -176,7 +176,7 @@ export async function PUT(request) {
 
     return Response.json({ ok: true, employee: sanitizeEmp(data) });
   } catch (e) {
-    return Response.json({ error: e.message }, { status: 500 });
+    return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(e.message||"Erreur") }, { status: 500 });
   }
 }
 
@@ -201,7 +201,7 @@ export async function DELETE(request) {
       .select('id, first, last, fn, ln')
       .single();
 
-    if (error) return Response.json({ error: error.message }, { status: 500 });
+    if (error) return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 500 });
     if (!data)  return Response.json({ error: 'Employé non trouvé' }, { status: 404 });
 
     try {
@@ -215,6 +215,6 @@ export async function DELETE(request) {
 
     return Response.json({ ok: true, archived: id });
   } catch (e) {
-    return Response.json({ error: e.message }, { status: 500 });
+    return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(e.message||"Erreur") }, { status: 500 });
   }
 }

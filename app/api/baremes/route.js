@@ -75,7 +75,7 @@ export async function POST(req) {
     if (error.code === '42P01') {
       return Response.json({ success: true, entry: { ...entry, id: Date.now() } });
     }
-    return Response.json({ error: error.message }, { status: 400 });
+    return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 400 });
   }
 
   // Audit log
@@ -107,7 +107,7 @@ export async function DELETE(req) {
   if (!id) return Response.json({ error: 'id requis' }, { status: 400 });
 
   const { error } = await db.from('baremes_timeline').delete().eq('id', id);
-  if (error) return Response.json({ error: error.message }, { status: 400 });
+  if (error) return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 400 });
 
   return Response.json({ success: true });
 }

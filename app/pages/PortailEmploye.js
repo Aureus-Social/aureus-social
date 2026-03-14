@@ -122,13 +122,27 @@ export default function PortailEmploye({s, d}) {
                         <div style={{fontSize:16,fontWeight:700,color:GREEN}}>{fmt(f.net||0)}</div>
                         <Badge c={GREEN}>Net</Badge>
                       </div>
-                      <button onClick={()=>{
-                        const csv = `Période;Brut;ONSS;PP;Net\n${period};${f.gross||0};${f.onssNet||0};${f.pp||0};${f.net||0}`;
-                        const blob = new Blob(['\uFEFF'+csv],{type:'text/csv'});
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a'); a.href=url; a.download=`fiche_${period.replace(' ','_')}.csv`; a.click();
-                        URL.revokeObjectURL(url);
-                      }} style={{padding:'6px 12px',borderRadius:7,border:'1px solid rgba(198,163,78,.2)',background:'transparent',color:GOLD,fontSize:10,cursor:'pointer',fontWeight:600}}>📥 CSV</button>
+                      <div style={{display:'flex',gap:6}}>
+                        <button onClick={()=>{
+                          // PDF via HTML print
+                          const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Fiche de paie ${period}</title>
+                          <style>@page{margin:20mm}body{font-family:Arial,sans-serif;font-size:11pt;color:#111}.header{background:#0d1117;color:#c6a34e;padding:16px 24px;display:flex;justify-content:space-between}.title{font-size:16pt;font-weight:700;margin:20px 0 8px}.section{margin:16px 0;padding:14px;border:1px solid #e5e7eb;border-radius:6px}.row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:10pt}.row:last-child{border:none}.total{font-weight:700;font-size:12pt;color:#16a34a;border-top:2px solid #c6a34e;padding-top:8px;margin-top:8px}.footer{margin-top:24px;font-size:8pt;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:8px}</style></head><body>
+                          <div class="header"><div><b>${s.co?.name||'Employeur'}</b><br/><small>${s.co?.address||''}</small></div><div style="text-align:right"><small>BCE: ${s.co?.vat||''}</small><br/><small>ONSS: ${s.co?.onss||''}</small></div></div>
+                          <div class="title">Fiche de paie — ${period}</div>
+                          <div class="section"><div class="row"><span>Travailleur(euse)</span><span><b>${emp?.first||emp?.fn||''} ${emp?.last||emp?.ln||''}</b></span></div><div class="row"><span>NISS</span><span>${emp?.niss||'—'}</span></div><div class="row"><span>Fonction</span><span>${emp?.fonction||emp?.jobTitle||'—'}</span></div><div class="row"><span>Période</span><span>${period}</span></div></div>
+                          <div class="section"><div class="row"><span>Salaire brut</span><span>${(f.gross||f.brut||0).toFixed(2)} €</span></div><div class="row"><span>Cotisations ONSS (13,07%)</span><span>-${(f.onssNet||f.onss||0).toFixed(2)} €</span></div><div class="row"><span>Précompte professionnel</span><span>-${(f.pp||0).toFixed(2)} €</span></div><div class="row total"><span>Net à payer</span><span>${(f.net||0).toFixed(2)} €</span></div></div>
+                          <div class="footer">Document généré par Aureus Social Pro — ${new Date().toLocaleDateString('fr-BE')} — Confidentiel</div>
+                          </body></html>`;
+                          const w = window.open('','_blank'); w.document.write(html); w.document.close(); w.print();
+                        }} style={{padding:'6px 12px',borderRadius:7,border:'1px solid rgba(198,163,78,.3)',background:'rgba(198,163,78,.08)',color:GOLD,fontSize:10,cursor:'pointer',fontWeight:600}}>📄 PDF</button>
+                        <button onClick={()=>{
+                          const csv = `Période;Brut;ONSS;PP;Net\n${period};${f.gross||0};${f.onssNet||0};${f.pp||0};${f.net||0}`;
+                          const blob = new Blob(['\uFEFF'+csv],{type:'text/csv'});
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a'); a.href=url; a.download=`fiche_${period.replace(' ','_')}.csv`; a.click();
+                          URL.revokeObjectURL(url);
+                        }} style={{padding:'6px 12px',borderRadius:7,border:'1px solid rgba(139,115,60,.15)',background:'transparent',color:'#8b7340',fontSize:10,cursor:'pointer'}}>CSV</button>
+                      </div>
                     </div>
                   );
                 })}
@@ -255,11 +269,8 @@ export default function PortailEmploye({s, d}) {
                   icon:'💰', name:`Fiche de paie — ${period}`, date: d.toLocaleDateString('fr-BE'),
                   type:'paie', empId: f.empId||f.employee_id,
                   onDownload: () => {
-                    const csv = `Période;Brut;ONSS;PP;Net\n${period};${f.gross||0};${f.onssNet||0};${f.pp||0};${f.net||0}`;
-                    const blob = new Blob(['\uFEFF'+csv],{type:'text/csv'});
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a'); a.href=url; a.download=`fiche_${period.replace(' ','_')}.csv`; a.click();
-                    URL.revokeObjectURL(url);
+                    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Fiche ${period}</title><style>@page{margin:20mm}body{font-family:Arial,sans-serif;font-size:11pt;color:#111}.header{background:#0d1117;color:#c6a34e;padding:16px 24px;display:flex;justify-content:space-between}.title{font-size:16pt;font-weight:700;margin:20px 0 8px}.section{margin:16px 0;padding:14px;border:1px solid #e5e7eb;border-radius:6px}.row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:10pt}.row:last-child{border:none}.total{font-weight:700;font-size:12pt;color:#16a34a;border-top:2px solid #c6a34e;padding-top:8px;margin-top:8px}.footer{margin-top:24px;font-size:8pt;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:8px}</style></head><body><div class="header"><div><b>${emp?.first||''} ${emp?.last||''}</b></div><div style="text-align:right"><small>${period}</small></div></div><div class="title">Fiche de paie — ${period}</div><div class="section"><div class="row"><span>Brut</span><span>${(f.gross||0).toFixed(2)} €</span></div><div class="row"><span>ONSS (13,07%)</span><span>-${(f.onssNet||0).toFixed(2)} €</span></div><div class="row"><span>Précompte prof.</span><span>-${(f.pp||0).toFixed(2)} €</span></div><div class="row total"><span>Net à payer</span><span>${(f.net||0).toFixed(2)} €</span></div></div><div class="footer">Aureus Social Pro — ${new Date().toLocaleDateString('fr-BE')}</div></body></html>`;
+                    const w = window.open('','_blank'); w.document.write(html); w.document.close(); w.print();
                   }
                 };
               });

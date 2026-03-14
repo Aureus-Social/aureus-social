@@ -168,6 +168,6 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('[Backup API] Error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 500 });
   }
 }

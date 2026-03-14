@@ -32,5 +32,5 @@ export async function GET(request) {
       result.dimonas = (dimonas||[]).filter(d=>d.data?.worker_niss===emp.niss);
     }
     return Response.json(result);
-  } catch (e) { return Response.json({ error: e.message }, { status: 500 }); }
+  } catch (e) { return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(e.message||"Erreur") }, { status: 500 }); }
 }

@@ -9,7 +9,7 @@ export async function GET(req) {
   let q = db.from('declarations').select('*').eq('created_by', u.id).order('created_at', { ascending: false }).limit(200);
   if (type) q = q.eq('type', type);
   const { data, error } = await q;
-  if (error) return Response.json({ error: error.message }, { status: 500 });
+  if (error) return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 500 });
   return Response.json({ ok: true, data, count: data?.length || 0 });
 }
 
@@ -24,7 +24,7 @@ export async function POST(req) {
     type, reference: ref, status: 'submitted', data: declData || {}, xml: xml || null,
     created_by: u.id, created_at: new Date().toISOString()
   }]).select().single();
-  if (error) return Response.json({ error: error.message }, { status: 400 });
+  if (error) return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 400 });
   await db.from('audit_log').insert([{ user_id: u.id, user_email: u.email, action: `SUBMIT_${type.toUpperCase()}`, table_name: 'declarations', record_id: data.id, created_at: new Date().toISOString() }]);
   return Response.json({ ok: true, data, reference: ref }, { status: 201 });
 }

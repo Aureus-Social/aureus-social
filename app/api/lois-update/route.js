@@ -134,7 +134,7 @@ export async function POST(req) {
           // Table does not exist
           return Response.json({ status: 'table_missing', migration: 'Run migration in Supabase dashboard' });
         }
-        return Response.json({ error: error.message }, { status: 500 });
+        return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 500 });
       }
 
       await db.from('audit_log').insert([{
@@ -156,7 +156,7 @@ export async function POST(req) {
       const { error } = await db.from('lois_updates')
         .update({ status: 'approved' })
         .eq('id', id);
-      if (error) return Response.json({ error: error.message }, { status: 500 });
+      if (error) return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 500 });
       return Response.json({ ok: true, status: 'approved' });
     }
 
@@ -214,6 +214,6 @@ export async function POST(req) {
     return Response.json({ error: `Action inconnue: ${action}` }, { status: 400 });
 
   } catch (e) {
-    return Response.json({ error: e.message }, { status: 500 });
+    return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(e.message||"Erreur") }, { status: 500 });
   }
 }

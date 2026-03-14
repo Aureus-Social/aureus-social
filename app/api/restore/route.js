@@ -100,7 +100,7 @@ export async function POST(request) {
         totalRestored += restored;
       } catch (e) {
         errors.push(`${table}: ${e.message}`);
-        results.push({ table, restored: 0, total: rows.length, ok: false, error: e.message });
+        results.push({ table, restored: 0, total: rows.length, ok: false, error: process.env.NODE_ENV==="production"?"Erreur interne":(e.message||"Erreur") });
       }
     }
 
@@ -124,6 +124,6 @@ export async function POST(request) {
     });
 
   } catch (e) {
-    return Response.json({ error: e.message }, { status: 500 });
+    return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(e.message||"Erreur") }, { status: 500 });
   }
 }

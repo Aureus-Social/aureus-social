@@ -51,6 +51,6 @@ export async function POST(req) {
     }).eq('email', email.toLowerCase().trim());
     return NextResponse.json({ success: true });
   } catch (e) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return NextResponse.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(e.message||"Erreur") }, { status: 500 });
   }
 }

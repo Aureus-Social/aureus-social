@@ -147,7 +147,7 @@ async function scrapeAll() {
 
 async function pushGitHub(patches, msg) {
   const TOKEN=process.env.GH_PUSH_TOKEN||process.env.GITHUB_TOKEN;
-  if(!TOKEN) throw new Error('GH_PUSH_TOKEN absent');
+  if(!TOKEN) { console.warn('[CRON] GH_PUSH_TOKEN absent — mise à jour GitHub ignorée'); return { pushed: false, reason: 'no_token' }; }
   const REPO='Aureus-Social/aureus-social', PATH='app/lib/lois-belges.js';
 
   const gr=await fetch(`https://api.github.com/repos/${REPO}/contents/${PATH}`,{headers:{'Authorization':`token ${TOKEN}`,'User-Agent':'AureusSocialPro'}});

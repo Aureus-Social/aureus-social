@@ -67,6 +67,6 @@ export async function GET(req) {
 
     return Response.json({ alerts, checked_at: new Date().toISOString(), actions_last_hour: actions?.length || 0 });
   } catch (e) {
-    return Response.json({ error: e.message }, { status: 500 });
+    return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(e.message||"Erreur") }, { status: 500 });
   }
 }

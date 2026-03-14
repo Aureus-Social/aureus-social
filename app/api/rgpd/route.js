@@ -164,7 +164,7 @@ export async function GET(request) {
 
   } catch (err) {
     console.error('[RGPD GET]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(err.message||"Erreur") }, { status: 500 });
   }
 }
 
@@ -389,6 +389,6 @@ export async function POST(request) {
 
   } catch (err) {
     console.error('[RGPD POST]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(err.message||"Erreur") }, { status: 500 });
   }
 }

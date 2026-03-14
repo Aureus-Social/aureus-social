@@ -28,7 +28,7 @@ export async function GET(req) {
   let q = db.from('employees').select('*').order('last', { ascending: true });
   if (status) q = q.eq('status', status);
   const { data, error } = await q;
-  if (error) return Response.json({ error: error.message }, { status: 500 });
+  if (error) return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 500 });
   return Response.json({ ok: true, data, count: data?.length || 0 });
 }
 
@@ -54,7 +54,7 @@ export async function POST(req) {
   if (sec.iban) sec.iban = await encryptField(sec.iban);
   if (sec.NISS) sec.NISS = await encryptField(sec.NISS);
   const { data, error } = await db.from('employees').insert([{ ...sec, created_by: u.id, created_at: new Date().toISOString() }]).select().single();
-  if (error) return Response.json({ error: error.message }, { status: 400 });
+  if (error) return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 400 });
   // Audit via service role (ne contient pas de données sensibles)
   try {
     const { sbAdmin } = await import('@/app/lib/supabase-server');
@@ -78,7 +78,7 @@ export async function PUT(req) {
   if (updates.NISS) updates.NISS = await encryptField(updates.NISS);
   // RLS garantit que l'user ne peut modifier que ses propres employés
   const { data, error } = await db.from('employees').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id).select().single();
-  if (error) return Response.json({ error: error.message }, { status: 400 });
+  if (error) return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 400 });
   try {
     const { sbAdmin } = await import('@/app/lib/supabase-server');
     await sbAdmin()?.from('audit_log').insert([{ user_id: u.id, user_email: u.email, action: 'UPDATE_EMPLOYEE', table_name: 'employees', record_id: id, created_at: new Date().toISOString() }]);
@@ -94,7 +94,7 @@ export async function DELETE(req) {
   if (!id) return Response.json({ error: 'ID requis' }, { status: 400 });
   // RLS garantit que l'user ne peut supprimer que ses propres employés
   const { error } = await db.from('employees').update({ status: 'sorti', deleted_at: new Date().toISOString() }).eq('id', id);
-  if (error) return Response.json({ error: error.message }, { status: 400 });
+  if (error) return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 400 });
   try {
     const { sbAdmin } = await import('@/app/lib/supabase-server');
     await sbAdmin()?.from('audit_log').insert([{ user_id: u.id, user_email: u.email, action: 'DELETE_EMPLOYEE', table_name: 'employees', record_id: id, created_at: new Date().toISOString() }]);

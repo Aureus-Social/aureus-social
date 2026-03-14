@@ -223,6 +223,6 @@ export async function POST(req) {
 
   } catch (err) {
     console.error('[send-document] Exception:', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(err.message||"Erreur") }, { status: 500 });
   }
 }

@@ -96,7 +96,7 @@ async function fetchSource(source) {
       .trim();
     return { id: source.id, hash: hashContent(cleaned), length: cleaned.length, ok: true };
   } catch (e) {
-    return { id: source.id, error: e.message };
+    return { id: source.id, error: process.env.NODE_ENV==="production"?"Erreur interne":(e.message||"Erreur") };
   }
 }
 

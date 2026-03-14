@@ -50,6 +50,6 @@ export async function POST() {
     const tokenData = await resp.json();
     return Response.json(tokenData);
   } catch (e) {
-    return Response.json({ error: e.message }, { status: 500 });
+    return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(e.message||"Erreur") }, { status: 500 });
   }
 }

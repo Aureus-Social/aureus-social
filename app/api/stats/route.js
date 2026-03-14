@@ -32,5 +32,5 @@ export async function GET(request) {
       declarations: { dimonaTotal:dimonas.length, dimonaSubmitted:dimonas.filter(d=>d.status==='submitted').length },
       activite: { actionsAujourdHui:audits.filter(a=>a.created_at>=now.toISOString().slice(0,10)).length, actionsCeMois:audits.length }
     });
-  } catch (e) { return Response.json({ error: e.message }, { status: 500 }); }
+  } catch (e) { return Response.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(e.message||"Erreur") }, { status: 500 }); }
 }

@@ -53,7 +53,7 @@ export async function POST(req) {
     { key: scopedKey, val, updated_at: new Date().toISOString() },
     { onConflict: 'key' }
   );
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 500 });
 
   // Audit léger
   await db.from('audit_log').insert({
@@ -78,6 +78,6 @@ export async function DELETE(req) {
 
   const scopedKey = `${u.id}:${key}`;
   const { error } = await db.from('app_state').delete().eq('key', scopedKey);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: process.env.NODE_ENV==="production"?"Erreur interne":(error.message||"Erreur") }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
