@@ -783,7 +783,7 @@ function DashboardLayoutApproved({ user }) {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      {showWelcome && <WelcomeGuidePg state={s} dispatch={d} onNavigate={setPage} onDismiss={handleWelcomeDismiss} />}
+      {showWelcome && <WelcomeGuidePg state={s} dispatch={d} onNavigate={setPage} onDismiss={() => { setShowWelcome(false); if (typeof window !== 'undefined') localStorage.setItem('aureus_welcome_seen', '1'); }} />}
       {/* SIDEBAR */}
       <div style={{ width: sidebarOpen ? 260 : 0, background: '#0a0908', borderRight: '1px solid rgba(198,163,78,.06)', display: 'flex', flexDirection: 'column', transition: 'width .2s', overflow: 'hidden', flexShrink: 0 }}>
         {/* Logo */}
