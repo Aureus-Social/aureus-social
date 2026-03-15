@@ -106,25 +106,34 @@ export default function MigrationsAdmin({ state }) {
           </div>
           <button
             onClick={async () => {
-              if (!confirm('Lancer le chiffrement NISS/IBAN ? Cette opération est irréversible.')) return;
               try {
                 const r = await fetch('/api/migrate/pgcrypto', { method: 'POST' });
                 const j = await r.json();
-                alert(j.ok ? `✅ ${j.message}` : `❌ ${j.error}`);
+                const sqlStep = j.results?.find(r => r.step === 'sql_complet');
+                if (sqlStep?.sql) {
+                  navigator.clipboard?.writeText(sqlStep.sql).catch(()=>{});
+                  alert('✅ SQL copié dans le presse-papier !\n\nColler dans : Supabase Dashboard → SQL Editor → Run\n\nURL : https://supabase.com/dashboard/project/jwjtlpewwdjxdboxtbdf/sql');
+                } else {
+                  alert(j.ok ? `✅ ${j.message}` : `❌ ${j.error || 'Erreur inconnue'}`);
+                }
               } catch(e) { alert('Erreur : ' + e.message); }
             }}
             style={{ background: '#1e3a5f', color: '#3b82f6', border: '1px solid #1e3a5f', borderRadius: 6, padding: '8px 16px', fontWeight: 600, cursor: 'pointer', fontSize: 12 }}
           >
-            Lancer pgcrypto →
+            Obtenir le SQL →
           </button>
         </div>
         <div style={{ fontSize: 11, color: '#4b5563' }}>
-          Crée colonnes <code style={{ color: '#5B9BD6' }}>niss_enc</code> + <code style={{ color: '#5B9BD6' }}>iban_enc</code> · Vue <code style={{ color: '#5B9BD6' }}>employees_secure</code> avec masquage
+          Génère le SQL à coller dans <b style={{ color: '#3b82f6' }}>Supabase Dashboard → SQL Editor</b> · Colonnes <code style={{ color: '#5B9BD6' }}>niss_enc</code> + <code style={{ color: '#5B9BD6' }}>iban_enc</code>
         </div>
+        <a href="https://supabase.com/dashboard/project/jwjtlpewwdjxdboxtbdf/sql" target="_blank" rel="noreferrer"
+          style={{ display: 'inline-block', marginTop: 8, fontSize: 11, color: '#3b82f6', textDecoration: 'underline' }}>
+          → Ouvrir Supabase SQL Editor
+        </a>
       </div>
 
       {/* Migration 008 — RLS Multi-tenant */}
-      <div style={{ marginTop: 16, background: '#0d1117', border: '1px solid #1e3a5f', borderRadius: 8, padding: 16 }}>
+      <div style={{ marginTop: 16, background: '#0d1117', border: '1px solid #10b98140', borderRadius: 8, padding: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
           <div>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#10b981' }}>🔒 Migration 008 — RLS Multi-tenant</div>
@@ -132,21 +141,30 @@ export default function MigrationsAdmin({ state }) {
           </div>
           <button
             onClick={async () => {
-              if (!confirm('Appliquer les policies RLS multi-tenant ? Les policies existantes seront recréées.')) return;
               try {
                 const r = await fetch('/api/migrate/multitenant', { method: 'POST' });
                 const j = await r.json();
-                alert(j.ok ? `✅ ${j.message}` : `❌ ${j.error}`);
+                const sqlStep = j.results?.find(r => r.step === 'sql_rls_complet');
+                if (sqlStep?.sql) {
+                  navigator.clipboard?.writeText(sqlStep.sql).catch(()=>{});
+                  alert('✅ SQL RLS copié dans le presse-papier !\n\nColler dans : Supabase Dashboard → SQL Editor → Run\n\nURL : https://supabase.com/dashboard/project/jwjtlpewwdjxdboxtbdf/sql');
+                } else {
+                  alert(j.ok ? `✅ ${j.message}` : `❌ ${j.error || 'Erreur inconnue'}`);
+                }
               } catch(e) { alert('Erreur : ' + e.message); }
             }}
             style={{ background: '#0d2818', color: '#10b981', border: '1px solid #10b981', borderRadius: 6, padding: '8px 16px', fontWeight: 600, cursor: 'pointer', fontSize: 12 }}
           >
-            Lancer RLS →
+            Obtenir le SQL →
           </button>
         </div>
         <div style={{ fontSize: 11, color: '#4b5563' }}>
-          Garantit isolation DB · chaque employé voit uniquement ses données · chaque employer voit uniquement ses clients
+          Génère le SQL à coller dans <b style={{ color: '#10b981' }}>Supabase Dashboard → SQL Editor</b> · RLS policies + index email
         </div>
+        <a href="https://supabase.com/dashboard/project/jwjtlpewwdjxdboxtbdf/sql" target="_blank" rel="noreferrer"
+          style={{ display: 'inline-block', marginTop: 8, fontSize: 11, color: '#10b981', textDecoration: 'underline' }}>
+          → Ouvrir Supabase SQL Editor
+        </a>
       </div>
     </div>
   );

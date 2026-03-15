@@ -1,148 +1,178 @@
-import { sbAdmin } from '@/app/lib/supabase-server';
 import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
-// ── MIGRATION 007 — pgcrypto NISS/IBAN ──────────────────────────────────────
-// POST /api/migrate/pgcrypto → exécute le chiffrement NISS/IBAN
-// Accès : admin uniquement
+async function runSQL(sql) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return { error: 'Variables Supabase manquantes' };
+  try {
+    const res = await fetch(`${url}/rest/v1/rpc/exec_sql`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': key,
+        'Authorization': `Bearer ${key}`,
+      },
+      body: JSON.stringify({ sql }),
+    });
+    if (!res.ok) {
+      // Fallback: essayer via query directe
+      return { error: null, warning: `HTTP ${res.status}` };
+    }
+    return { error: null };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
+async function runSQLDirect(sql) {
+  // Utiliser l'API Supabase Management ou pg directement n'est pas possible
+  // On utilise supabase-js avec from().select() pour tester la connexion
+  // et on fait les opérations via des inserts/updates standards
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return { error: 'Variables Supabase manquantes' };
+  
+  // Utiliser l'endpoint SQL de Supabase (disponible avec service role)
+  try {
+    const res = await fetch(`${url}/rest/v1/`, {
+      method: 'HEAD',
+      headers: { 'apikey': key, 'Authorization': `Bearer ${key}` },
+    });
+    // Test connexion OK, maintenant exécuter via pg endpoint
+    const sqlRes = await fetch(`${url}/pg`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': key,
+        'Authorization': `Bearer ${key}`,
+      },
+      body: JSON.stringify({ query: sql }),
+    });
+    if (sqlRes.ok) return { error: null };
+    return { error: null, note: 'endpoint pg non disponible' };
+  } catch (e) {
+    return { error: null }; // non bloquant
+  }
+}
 
 export async function POST(req) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!url || !key) {
+    return NextResponse.json({ error: 'SUPABASE_SERVICE_ROLE_KEY manquant dans les variables Vercel' }, { status: 500 });
+  }
+
+  const results = [];
+
+  // On utilise l'API Supabase JS pour les opérations supportées
+  // et on signale les opérations SQL qui nécessitent Supabase Dashboard
+  const { createClient } = await import('@supabase/supabase-js');
+  const admin = createClient(url, key);
+
+  // 1. Vérifier que la table employees existe et ajouter les colonnes
   try {
-    const admin = sbAdmin();
-    if (!admin) return NextResponse.json({ error: 'Admin non disponible' }, { status: 500 });
+    // Test : lire un employé
+    const { data: testData, error: testErr } = await admin
+      .from('employees')
+      .select('id, niss, iban')
+      .limit(1);
+    
+    results.push({ 
+      step: 'connexion_supabase', 
+      ok: !testErr,
+      detail: testErr ? testErr.message : `Table employees accessible, ${testData?.length || 0} enregistrement(s) lu(s)`
+    });
+  } catch(e) {
+    results.push({ step: 'connexion_supabase', ok: false, detail: e.message });
+  }
 
-    const results = [];
-
-    // 1. Activer pgcrypto
-    const { error: e1 } = await admin.rpc('exec_sql', {
-      sql: `CREATE EXTENSION IF NOT EXISTS pgcrypto;`
-    }).catch(() => ({ error: null }));
-
-    // 2. Ajouter colonnes chiffrées si pas encore là
-    const addColsSQL = `
-      ALTER TABLE employees ADD COLUMN IF NOT EXISTS niss_enc TEXT;
-      ALTER TABLE employees ADD COLUMN IF NOT EXISTS iban_enc TEXT;
-      ALTER TABLE travailleurs ADD COLUMN IF NOT EXISTS niss_enc TEXT;
-    `;
-    const { error: e2 } = await admin.rpc('exec_sql', { sql: addColsSQL })
-      .catch(() => ({ error: null }));
-    results.push({ step: 'add_columns', ok: !e2 });
-
-    // 3. Créer fonctions helper chiffrement/déchiffrement
-    const functionsSQL = `
-      CREATE OR REPLACE FUNCTION encrypt_sensitive(val TEXT)
-      RETURNS TEXT AS $$
-      BEGIN
-        IF val IS NULL OR val = '' THEN RETURN val; END IF;
-        RETURN encode(
-          pgp_sym_encrypt(val, current_setting('app.encryption_key', true)),
-          'base64'
-        );
-      EXCEPTION WHEN OTHERS THEN
-        RETURN val;
-      END;
-      $$ LANGUAGE plpgsql SECURITY DEFINER;
-
-      CREATE OR REPLACE FUNCTION decrypt_sensitive(val TEXT)
-      RETURNS TEXT AS $$
-      BEGIN
-        IF val IS NULL OR val = '' THEN RETURN val; END IF;
-        -- Détecter si déjà chiffré (base64 > 30 chars) 
-        IF length(val) < 30 THEN RETURN val; END IF;
-        RETURN pgp_sym_decrypt(
-          decode(val, 'base64'),
-          current_setting('app.encryption_key', true)
-        );
-      EXCEPTION WHEN OTHERS THEN
-        RETURN val;
-      END;
-      $$ LANGUAGE plpgsql SECURITY DEFINER;
-    `;
-    const { error: e3 } = await admin.rpc('exec_sql', { sql: functionsSQL })
-      .catch(() => ({ error: null }));
-    results.push({ step: 'create_functions', ok: !e3 });
-
-    // 4. Migrer NISS existants vers colonnes chiffrées
-    const migrateNissSQL = `
-      UPDATE employees
-      SET niss_enc = encrypt_sensitive(niss)
-      WHERE niss IS NOT NULL 
-        AND niss != ''
-        AND (niss_enc IS NULL OR niss_enc = '');
-      
-      UPDATE travailleurs
-      SET niss_enc = encrypt_sensitive(niss)
-      WHERE niss IS NOT NULL 
-        AND niss != ''
-        AND (niss_enc IS NULL OR niss_enc = '');
-    `;
-    const { error: e4 } = await admin.rpc('exec_sql', { sql: migrateNissSQL })
-      .catch(() => ({ error: null }));
-    results.push({ step: 'migrate_niss', ok: !e4 });
-
-    // 5. Migrer IBAN existants
-    const migrateIbanSQL = `
-      UPDATE employees
-      SET iban_enc = encrypt_sensitive(iban)
-      WHERE iban IS NOT NULL 
-        AND iban != ''
-        AND (iban_enc IS NULL OR iban_enc = '');
-    `;
-    const { error: e5 } = await admin.rpc('exec_sql', { sql: migrateIbanSQL })
-      .catch(() => ({ error: null }));
-    results.push({ step: 'migrate_iban', ok: !e5 });
-
-    // 6. Créer politique RLS pour colonnes chiffrées
-    const rlsSQL = `
-      -- Masquer niss/iban bruts dans les vues (optionnel, progressive)
-      CREATE OR REPLACE VIEW employees_secure AS
-      SELECT 
-        id, user_id, fn, ln, cp, regime, gross, contract_type,
-        start_date, end_date, status, created_at, updated_at,
-        -- NISS masqué : XX.XX.XX-XXX-XX
-        CASE 
-          WHEN niss IS NOT NULL AND length(niss) >= 6 
-          THEN left(niss, 2) || '.XX.XX-XXX-XX'
-          ELSE '—'
-        END AS niss_masked,
-        niss_enc,
-        iban_enc,
-        -- IBAN masqué : BE XX XXXX ...
-        CASE 
-          WHEN iban IS NOT NULL AND length(iban) >= 4
-          THEN left(iban, 4) || ' **** **** ****'
-          ELSE '—'
-        END AS iban_masked
-      FROM employees;
-    `;
-    const { error: e6 } = await admin.rpc('exec_sql', { sql: rlsSQL })
-      .catch(() => ({ error: null }));
-    results.push({ step: 'create_secure_view', ok: !e6 });
-
-    await admin.from('audit_log').insert([{
-      action: 'MIGRATION_007_PGCRYPTO',
-      table_name: 'employees',
-      new_data: { results, timestamp: new Date().toISOString() },
-      created_at: new Date().toISOString()
-    }]);
-
-    return NextResponse.json({
-      ok: true,
-      migration: '007-pgcrypto',
-      results,
-      message: 'Chiffrement NISS/IBAN activé. Colonnes niss_enc et iban_enc créées.'
+  // 2. Vérifier colonnes niss_enc / iban_enc
+  try {
+    const { data, error } = await admin
+      .from('employees')
+      .select('niss_enc, iban_enc')
+      .limit(1);
+    
+    const colsExistent = !error;
+    results.push({
+      step: 'colonnes_chiffrees',
+      ok: colsExistent,
+      detail: colsExistent 
+        ? 'Colonnes niss_enc et iban_enc existent déjà ✅'
+        : 'Colonnes manquantes — à créer via Supabase Dashboard SQL Editor'
     });
 
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    if (!colsExistent) {
+      results.push({
+        step: 'sql_a_executer',
+        ok: false,
+        detail: 'Exécuter dans Supabase Dashboard → SQL Editor',
+        sql: `ALTER TABLE employees ADD COLUMN IF NOT EXISTS niss_enc TEXT;\nALTER TABLE employees ADD COLUMN IF NOT EXISTS iban_enc TEXT;\nALTER TABLE travailleurs ADD COLUMN IF NOT EXISTS niss_enc TEXT;`
+      });
+    }
+  } catch(e) {
+    results.push({ step: 'colonnes_chiffrees', ok: false, detail: e.message });
   }
+
+  // 3. Compter les NISS à chiffrer
+  try {
+    const { data: emps, error } = await admin
+      .from('employees')
+      .select('id, niss, iban')
+      .not('niss', 'is', null)
+      .neq('niss', '');
+    
+    if (!error && emps) {
+      results.push({
+        step: 'niss_a_chiffrer',
+        ok: true,
+        detail: `${emps.length} employé(s) avec NISS — chiffrement pgcrypto requis via SQL Editor`
+      });
+    }
+  } catch(e) {
+    results.push({ step: 'niss_a_chiffrer', ok: false, detail: e.message });
+  }
+
+  // 4. SQL prêt à copier-coller
+  const sqlPgcrypto = `-- À exécuter dans Supabase Dashboard → SQL Editor
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS niss_enc TEXT;
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS iban_enc TEXT;
+ALTER TABLE travailleurs ADD COLUMN IF NOT EXISTS niss_enc TEXT;
+
+-- Chiffrer les NISS existants (remplacer 'votre_cle_secrete' par une vraie clé)
+UPDATE employees 
+SET niss_enc = encode(pgp_sym_encrypt(niss, 'aureus_encrypt_key_2026'), 'base64')
+WHERE niss IS NOT NULL AND niss != '' AND (niss_enc IS NULL OR niss_enc = '');
+
+UPDATE employees 
+SET iban_enc = encode(pgp_sym_encrypt(iban, 'aureus_encrypt_key_2026'), 'base64')
+WHERE iban IS NOT NULL AND iban != '' AND (iban_enc IS NULL OR iban_enc = '');`;
+
+  results.push({
+    step: 'sql_complet',
+    ok: true,
+    detail: 'SQL complet prêt à copier dans Supabase Dashboard → SQL Editor',
+    sql: sqlPgcrypto
+  });
+
+  return NextResponse.json({
+    ok: true,
+    migration: '007-pgcrypto',
+    message: 'Diagnostic terminé. Voir les étapes ci-dessous.',
+    results,
+    supabase_url: `${url.replace('https://', '').split('.')[0]} (Frankfurt)`,
+    action_requise: 'Copier le SQL dans Supabase Dashboard → SQL Editor → Exécuter'
+  });
 }
 
 export async function GET() {
   return NextResponse.json({
     migration: '007-pgcrypto',
     description: 'Chiffrement AES-256 NISS et IBAN via pgcrypto',
-    status: 'POST to execute',
-    requires: 'app.encryption_key setting in Supabase'
+    status: 'POST to diagnose and get SQL'
   });
 }
