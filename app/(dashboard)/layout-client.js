@@ -877,7 +877,9 @@ function DashboardLayoutApproved({ user }) {
 
             // ── 1. Résultats menu principal ──────────────────────────────
             const menuResults = MENU.filter(m => !m.group && (
-              m.label.toLowerCase().includes(q) || m.id.toLowerCase().includes(q)
+              m.label.toLowerCase().includes(q) ||
+              (m.keywords && m.keywords.some(k => k.toLowerCase().includes(q))) ||
+              (q.length >= 4 && m.id.toLowerCase().includes(q))
             )).map(m => ({ ...m, type: 'page' }));
 
             // ── 2. Sous-sections fiche de paie ───────────────────────────
