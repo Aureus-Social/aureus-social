@@ -64,8 +64,7 @@ const ROLE_DATA = {
   }
 };
 
-function buildEmailHTML(prenom, role, roleData, inviteLink, societe) {
-  const isInviteLink = inviteLink && inviteLink !== 'https://app.aureussocial.be';
+function buildEmailHTML(prenom, role, roleData, tempPassword, societe) {
   const steps = roleData.premieres_etapes.map(s => `
     <tr>
       <td style="padding:10px 16px;border-bottom:1px solid #f0ede6;vertical-align:top;width:36px">
@@ -120,7 +119,9 @@ function buildEmailHTML(prenom, role, roleData, inviteLink, societe) {
     <div style="font-size:12px;font-weight:600;color:#6B6860;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Vos identifiants de connexion</div>
     <table width="100%">
       <tr><td style="font-size:13px;color:#1a1a1a;padding:4px 0"><strong>URL :</strong></td><td style="font-size:13px;color:#C9963A">app.aureussocial.be</td></tr>
-      ${isInviteLink ? `<tr><td colspan='2' style='padding-top:14px'><a href='${inviteLink}' style='background:#C9963A;color:#000;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:700;font-size:13px;display:inline-block'>Créer mon mot de passe →</a></td></tr>` : ''}
+      <tr><td style='font-size:13px;color:#1a1a1a;padding:4px 0'><strong>Mot de passe temporaire :</strong></td>
+       <td style='font-family:monospace;font-size:16px;font-weight:800;color:#C9963A;letter-spacing:2px'>${tempPassword}</td></tr>
+       <tr><td colspan='2' style='font-size:11px;color:#6B6860;padding-top:4px'>Changez votre mot de passe après la première connexion.</td></tr>
     </table>
   </td></tr>
 
@@ -132,8 +133,8 @@ function buildEmailHTML(prenom, role, roleData, inviteLink, societe) {
 
   <!-- CTA -->
   <tr><td style="padding:24px 32px;text-align:center">
-    <a href="${isInviteLink ? inviteLink : APP_URL}" style="background:${roleData.color};color:${role === 'admin' ? '#000' : '#fff'};padding:14px 36px;border-radius:6px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block">
-      ${isInviteLink ? "Créer mon compte →" : "Accéder à ma plateforme →"}
+    <a href="https://app.aureussocial.be" style="background:${roleData.color};color:${role === 'admin' ? '#000' : '#fff'};padding:14px 36px;border-radius:6px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block">
+      Se connecter à ma plateforme →
     </a>
     <p style="font-size:11px;color:#6B6860;margin-top:12px">Des questions ? Contactez-nous : info@aureus-ia.com</p>
   </td></tr>
@@ -163,8 +164,11 @@ export async function POST(req) {
   const roleData = ROLE_DATA[role];
   const prenomDisplay = prenom || email.split('@')[0];
 
-  // 1. Générer le lien d'accès
-  let inviteLink = APP_URL;
+  // 1. Créer ou mettre à jour l'utilisateur avec mot de passe temporaire
+  const tempPassword = Math.random().toString(36).slice(2, 6).toUpperCase() +
+                       Math.random().toString(36).slice(2, 6) +
+                       Math.floor(Math.random() * 90 + 10);
+
   try {
     const admin = sbAdmin();
 
@@ -173,41 +177,24 @@ export async function POST(req) {
     const existingUser = existingUsers?.users?.find(usr => usr.email === email);
 
     if (existingUser) {
-      // User existe — mettre à jour son rôle et générer un magic link
+      // Mettre à jour rôle + nouveau mot de passe temporaire
       await admin.auth.admin.updateUserById(existingUser.id, {
+        password: tempPassword,
         user_metadata: { role, prenom, nom, societe }
       });
-      // Générer un magic link pour connexion directe
-      const { data: magicData } = await admin.auth.admin.generateLink({
-        type: 'magiclink',
-        email,
-        options: { redirectTo: APP_URL }
-      });
-      const ml = magicData?.properties?.action_link || magicData?.action_link;
-      if (ml) inviteLink = ml;
     } else {
-      // Nouvel utilisateur — générer lien d'invitation
-      const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
-        type: 'invite',
+      // Créer le compte directement
+      await admin.auth.admin.createUser({
         email,
-        options: {
-          data: { role, prenom, nom, societe, invited_by: u.email },
-          redirectTo: APP_URL,
-        }
+        password: tempPassword,
+        email_confirm: true, // pas besoin de confirmation email
+        user_metadata: { role, prenom, nom, societe, invited_by: u.email }
       });
-      const link = linkData?.properties?.action_link
-        || linkData?.action_link
-        || linkData?.user?.action_link
-        || null;
-
-      if (!linkErr && link) {
-        inviteLink = link;
-      }
     }
-  } catch(e) { console.error('generateLink error:', e.message); }
+  } catch(e) { console.error('createUser error:', e.message); }
 
   // 2. Envoyer l'email Resend avec le vrai lien d'accès
-  const html = buildEmailHTML(prenomDisplay, role, roleData, inviteLink, societe);
+  const html = buildEmailHTML(prenomDisplay, role, roleData, tempPassword, societe);
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
@@ -235,8 +222,7 @@ export async function POST(req) {
     ok: true, 
     email_id: result.id, 
     role, 
-    debug_link_status: inviteLink !== APP_URL ? '✅ lien généré' : '⚠️ fallback — lien non généré',
-    debug_link_preview: inviteLink !== APP_URL ? inviteLink.substring(0, 80) + '...' : null,
+    
     roleData: { label: roleData.label, icon: roleData.icon } 
   });
 }
