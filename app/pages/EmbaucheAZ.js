@@ -36,14 +36,14 @@ const ETAPES = [
     obligatoire: true,
     urgent: true,
     taches: [
-      { id: 'dimona_in', label: '🚨 Soumettre Dimona IN à l\'ONSS', detail: 'OBLIGATOIRE avant le premier jour de travail. Amende : jusqu\'à 1.800€ par travailleur non déclaré. Via portail ONSS ou directement dans Aureus.', lien: 'https://www.socialsecurity.be', obligatoire: true },
+      { id: 'dimona_in', moduleAureus: 'declarations', label: '🚨 Soumettre Dimona IN à l\'ONSS', detail: 'OBLIGATOIRE avant le premier jour de travail. Amende : jusqu\'à 1.800€ par travailleur non déclaré. Via portail ONSS ou directement dans Aureus → Déclarations → ONSS & Dimona.', lien: 'https://www.socialsecurity.be', obligatoire: true },
       { id: 'type_contrat', label: 'Choisir le type Dimona correct', detail: 'DWR (ouvrier), EMP (employé), STU (étudiant), IVT (intérimaire), FLX (flexi-job), OTH (autres)', obligatoire: true },
       { id: 'flexi_contrat', label: 'Flexi-job : contrat-cadre + contrat journalier', detail: "Le flexi-job nécessite (1) un contrat-cadre signé en début de relation et (2) un contrat journalier envoyé le jour même via l'app Dimona Flexi ou SMS avant la prestation. Sans ces deux documents : pas de régime flexi, cotisations ordinaires applicables.", obligatoire: false },
       { id: 'mention_dimona', label: 'Mentionner l\'obligation Dimona dans le contrat', detail: "Obligation d'informer le travailleur que sa déclaration Dimona a été faite (numéro de référence ONSS). Bonne pratique légale recommandée par le SPF ETCS.", obligatoire: false },
       { id: 'dimona_out_prev', label: 'Encoder la Dimona OUT préventive pour CDD', detail: "Pour un CDD à durée déterminée, encoder la date de fin prévue dès la Dimona IN. Évite les oublis de Dimona OUT et prouve la durée convenue à l'ONSS.", obligatoire: false },
       { id: 'limosa', label: 'Déclaration LIMOSA si travailleur détaché', detail: "Obligatoire pour tout travailleur étranger détaché temporairement en Belgique. À faire AVANT la prise de service via le portail LIMOSA. Sans cette déclaration : amende jusqu'à 50.000€ par travailleur.", lien: 'https://www.limosa.be', obligatoire: false },
       { id: 'dimona_correctif', label: 'Possibilité de Dimona correctif (8 jours)', detail: "En cas d'erreur dans la Dimona IN (mauvais NISS, date incorrecte...), un correctif peut être soumis dans les 8 jours ouvrables sans pénalité. Au-delà : amende administrative.", obligatoire: false },
-      { id: 'reduction_avant', label: '💶 Demander réduction groupes cibles AVANT la prise de service', detail: "Les réductions ONSS (bas salaires, jeunes -26 ans, travailleurs âgés +55 ans, Activa) doivent être activées AVANT ou le jour de l'entrée en service. Après, certaines sont perdues définitivement. Via portail ONSS ou Actiris.", obligatoire: false },
+      { id: 'reduction_avant', moduleAureus: 'aidesembauche', label: '💶 Demander réduction groupes cibles AVANT la prise de service', detail: "Les réductions ONSS (bas salaires, jeunes -26 ans, travailleurs âgés +55 ans, Activa) doivent être activées AVANT ou le jour de l'entrée en service. Après, certaines sont perdues définitivement. Via portail ONSS ou Actiris.", obligatoire: false },
       { id: 'confirmation', label: 'Vérifier la confirmation ONSS reçue', detail: 'L\'ONSS renvoie un accusé de réception avec numéro de référence. À conserver.', obligatoire: true },
     ]
   },
@@ -93,22 +93,22 @@ const ETAPES = [
     color: '#3b82f6',
     obligatoire: true,
     taches: [
-      { id: 'onss_matricule', label: 'Vérifier le matricule employeur ONSS', detail: 'Matricule ONSS à 10 chiffres. Requis pour toutes les déclarations. Visible sur le portail ONSS.', obligatoire: true },
+      { id: 'onss_matricule', moduleAureus: 'declarations', label: 'Vérifier le matricule employeur ONSS', detail: 'Matricule ONSS à 10 chiffres. Requis pour toutes les déclarations. Visible sur le portail ONSS.', obligatoire: true },
       { id: 'cp', label: 'Identifier la Commission Paritaire applicable', detail: 'Détermine le barème salarial minimum, les primes sectorielles, les congés supplémentaires. Basé sur l\'activité principale de l\'entreprise.', lien: 'https://www.emploi.belgique.be', obligatoire: true },
       { id: 'reduction_bas', label: 'Vérifier les réductions ONSS applicables', detail: 'Bas salaires (< 3.500€ brut), jeunes non qualifiés, travailleurs âgés (+55 ans). Peuvent réduire jusqu\'à 1.500€/trimestre.', obligatoire: false },
-      { id: 'activa', label: 'Vérifier éligibilité Activa.brussels / MonBEE', detail: 'Primes à l\'embauche pour demandeurs d\'emploi inscrits chez Actiris. Jusqu\'à 15.900€ sur 3 ans.', lien: 'https://www.actiris.brussels', obligatoire: false },
+      { id: 'activa', moduleAureus: 'aidesembauche', label: 'Vérifier éligibilité Activa.brussels / MonBEE', detail: 'Primes à l\'embauche pour demandeurs d\'emploi inscrits chez Actiris. Jusqu\'à 15.900€ sur 3 ans.', lien: 'https://www.actiris.brussels', obligatoire: false },
       { id: 'reduction_premier_emp', label: 'Réduction premier emploi — conditions strictes', detail: "Pour les jeunes de moins de 26 ans n'ayant jamais travaillé (< 6 mois d'expérience). Réduction ONSS patronale de 1.000€/trimestre pendant max 2 ans. Demande via Dimona avec mention 'FIRST'. À activer AVANT la prise de service.", obligatoire: false },
       { id: 'sesam_bruxelles', label: 'SESAM Bruxelles — prime CDI premier emploi', detail: "Prime Actiris pour employeurs bruxellois qui engagent en CDI un chercheur d'emploi inscrit chez Actiris depuis + de 6 mois. Jusqu'à 11.250€ sur 3 ans. Demande dans les 3 mois de l'embauche.", lien: 'https://www.actiris.brussels', obligatoire: false },
       { id: 'maladie_pro', label: 'Maladie professionnelle — déclaration Fedris', detail: "Si le travailleur développe une maladie liée à son activité professionnelle (liste officielle Fedris ou extra-légale) : déclaration obligatoire à Fedris. Indemnisation distincte de l'accident du travail. Médecin conseil désigné.", lien: 'https://www.fedris.be', obligatoire: false },
       { id: 'assurance_groupe', label: 'Assurance groupe/EIP — déclaration FSMA obligatoire', detail: "Si pension complémentaire via assurance groupe ou EIP : déclaration obligatoire à la FSMA (Autorité des services financiers). Contributions patronales : ONSS 8,86% cotisation patronale spéciale. Contributions personnelles : déductibles PP à 30%. Fiche fiscale 281.11 annuelle.", lien: 'https://www.fsma.be', obligatoire: false },
-      { id: 'salaire_garanti', label: 'Salaire garanti maladie — 30 jours à charge employeur', detail: "En cas de maladie : les 30 premiers jours d'incapacité sont payés par l'employeur (100% les 7 premiers jours ouvriers, puis 60% brut). À partir du 31e jour : INAMI prend le relais. Régime différent pour ouvriers (<2 ans) : délai de carence.", obligatoire: true },
+      { id: 'salaire_garanti', moduleAureus: 'calcmaladie', label: 'Salaire garanti maladie — 30 jours à charge employeur', detail: "En cas de maladie : les 30 premiers jours d'incapacité sont payés par l'employeur (100% les 7 premiers jours ouvriers, puis 60% brut). À partir du 31e jour : INAMI prend le relais. Régime différent pour ouvriers (<2 ans) : délai de carence.", obligatoire: true },
       { id: 'heures_sup_compteur', label: 'Compteur d\'heures supplémentaires obligatoire', detail: "Toute heure prestée au-delà de la durée hebdomadaire normale doit être comptabilisée. Récupération (dans les 6 mois) ou sursalaire (50% ou 100% selon jour). Contingent général : 130h/an (temporairement 180h). Registre obligatoire conservé 5 ans.", obligatoire: true },
       { id: 'delai_paiement', label: 'Délai de paiement du salaire', detail: "Délai légal maximum : 7 jours après la fin de la période de rémunération (ou le lendemain si ce jour est chômé). Paiement exclusivement par virement bancaire (interdiction de paiement en cash au-delà de 3.000€). Retard = intérêts légaux automatiques.", obligatoire: true },
       { id: 'code_risque_at', label: 'Identifier le code risque Fedris (accidents du travail)', detail: "Chaque poste doit avoir un code risque AT Fedris (NACE). Détermine le taux de prime d'assurance accidents du travail. À communiquer à l'assureur AT lors de l'affiliation du travailleur.", obligatoire: true },
       { id: 'solidarisation', label: 'Vérification solidarisation ONSS (sous-traitance)', detail: "Si vous faites appel à un sous-traitant avec des dettes ONSS, vous êtes SOLIDAIREMENT responsable (art.40 loi 27/06/1969). Vérifier le statut ONSS du sous-traitant via le portail ONSS avant tout contrat.", lien: 'https://www.socialsecurity.be', obligatoire: false },
       { id: 'indemnite_velo', label: 'Indemnité vélo : 0,35€/km exonéré', detail: "Si le travailleur vient à vélo : indemnité de 0,35€/km est exonérée d'ONSS et de PP (CCT n°164). Obligation de transport en commun : remboursement 100% dans CP 200 (et beaucoup d'autres CP).", obligatoire: false },
       { id: 'fonds_exist', label: 'Vérifier fonds de sécurité d\'existence sectoriel', detail: "Certaines CP ont un FSE obligatoire (CP 124 Construction, CP 140 Transport, CP 302 Horeca...). Cotisation patronale supplémentaire. Finance les primes de fin d'année, les indemnités de licenciement supplémentaires.", obligatoire: false },
-      { id: 'dmfa', label: 'Prévoir DmfA trimestrielle', detail: 'Déclaration ONSS trimestrielle obligatoire. Délai : dernier jour du mois suivant la fin du trimestre.', obligatoire: true },
+      { id: 'dmfa', moduleAureus: 'declarations', label: 'Prévoir DmfA trimestrielle', detail: 'Déclaration ONSS trimestrielle obligatoire. Délai : dernier jour du mois suivant la fin du trimestre.', obligatoire: true },
       { id: 'af', label: 'Déclarer les allocations familiales', detail: "L'employeur doit s'affilier à une caisse d'allocations familiales (Famiwal, Kidslife, etc.) ou à l'ONSS. Le travailleur reçoit les AF directement de la caisse.", lien: 'https://www.famiwal.be', obligatoire: true },
       { id: 'pension_compl', label: 'Vérifier pension complémentaire sectorielle', detail: 'Certaines CP imposent une assurance groupe ou EIP obligatoire. Ex: CP 200, CP 124. Vérifier la CCT sectorielle applicable.', obligatoire: false },
     ]
@@ -121,8 +121,8 @@ const ETAPES = [
     color: '#10b981',
     obligatoire: true,
     taches: [
-      { id: 'fiche_paie', label: 'Générer la première fiche de paie', detail: 'Doit mentionner : brut, cotisations ONSS (13,07%), précompte professionnel, net à payer, période.', obligatoire: true },
-      { id: 'precompte', label: 'Calculer le précompte professionnel correct', detail: 'Basé sur les barèmes SPF Finances 2026. Tenir compte de la situation familiale et des enfants à charge.', obligatoire: true },
+      { id: 'fiche_paie', moduleAureus: 'payslip', label: 'Générer la première fiche de paie', detail: 'Doit mentionner : brut, cotisations ONSS (13,07%), précompte professionnel, net à payer, période.', obligatoire: true },
+      { id: 'precompte', moduleAureus: 'calcinstant', label: 'Calculer le précompte professionnel correct', detail: 'Basé sur les barèmes SPF Finances 2026. Tenir compte de la situation familiale et des enfants à charge.', obligatoire: true },
       { id: 'bonus_emploi', label: 'Appliquer le bonus à l\'emploi si applicable', detail: 'Pour salaires bruts < 2.997,59€/mois. Réduction PP de 33,14%. Maximum 194,03€/mois.', obligatoire: false },
       { id: 'rupture_cdd', label: 'Indemnité de rupture anticipée CDD (art.40)', detail: "Si l'employeur rompt un CDD avant terme sans motif grave : indemnité = rémunération restante jusqu'au terme, plafonnée à 2x la durée de préavis qui serait applicable en CDI. Attention : pas de préavis possible pour un CDD sauf clause expresse.", obligatoire: true },
       { id: 'preavis_variable', label: 'Préavis : inclure la rémunération variable', detail: "Depuis CCT n°109 (2014) : la rémunération variable des 12 derniers mois est incluse dans la base de calcul du préavis/indemnité compensatoire. Commissions, primes, avantages en nature... Souvent oublié, source de litiges.", obligatoire: true },
@@ -136,7 +136,7 @@ const ETAPES = [
       { id: 'plan_cafeteria', label: 'Plan cafétéria (flex income plan) — conditions strictes', detail: "Le plan cafétéria permet d'échanger une partie du salaire contre des avantages (vélo, PC, épargne-pension...). Conditions ONSS : seuls les éléments futurs non encore acquis peuvent être échangés. Échange de salaire brut existant = cotisations ONSS dues. Circulaire ONSS 2020/7 applicable.", obligatoire: false },
       { id: 'cla90', label: 'CLA90 — dépôt préalable obligatoire', detail: "Si bonus non-récurrent CLA90 : dépôt de la CCT ou plan d'avantages NON RÉCURRENTS au SPF ETCS AVANT versement. Sans dépôt : le bonus est traité comme salaire ordinaire (ONSS + PP plein).", lien: 'https://www.emploi.belgique.be', obligatoire: false },
       { id: 'attestation_a', label: 'Remettre attestation A pour la mutualité (délai 15j)', detail: "L'attestation de travail (formulaire 704 / attestation A) doit être remise au travailleur dans les 15 jours. Permet à la mutualité de calculer les droits aux indemnités maladie-invalidité INAMI.", obligatoire: true },
-      { id: 'virement', label: 'Effectuer le virement salaire (SEPA)', detail: 'Fichier SEPA pain.001.xml. Délai légal : pas de délai légal fixe mais généralement fin du mois.', obligatoire: true },
+      { id: 'virement', moduleAureus: 'sepa', label: 'Effectuer le virement salaire (SEPA)', detail: 'Fichier SEPA pain.001.xml. Délai légal : pas de délai légal fixe mais généralement fin du mois.', obligatoire: true },
       { id: 'pp_declaration', label: 'Déclarer le précompte professionnel (FinProf)', detail: 'Mensuel si > 50.240€/an, trimestriel sinon. Via application FinProf du SPF Finances.', lien: 'https://finances.belgium.be', obligatoire: true },
     ]
   },
@@ -186,7 +186,7 @@ const ETAPES = [
       { id: 'bilan_social', label: 'Bilan social annuel si +100 travailleurs', detail: "Obligatoire pour entreprises +100 travailleurs : dépôt à la BNB (Banque Nationale) dans les 30 jours après l'AG. Contient : effectifs, mouvements, formations, coûts. Public et consultable en ligne.", lien: 'https://www.nbb.be', obligatoire: false },
       { id: 'registre_tps_partiel', label: 'Registre spécial temps partiel + affichage horaire', detail: "Pour chaque travailleur à temps partiel : affichage de l'horaire dans l'entreprise obligatoire (5 jours avant). Registre spécial consultable par l'inspection sociale. Sans ces documents : présomption de temps plein avec toutes les cotisations.", obligatoire: false },
       { id: 'depot_greffe', label: 'Déposer le règlement de travail au greffe', detail: "Le règlement de travail MODIFIÉ doit être déposé au greffe du tribunal du travail dans les 8 jours (loi 8/04/1965, art.21). Pour un premier règlement, délai de 3 mois. Pas obligatoire si aucune modification.", obligatoire: false },
-      { id: 'donnees_supabase', label: 'Encoder dans Aureus Social Pro', detail: 'Employés → Nouvel employé. Toutes les données sont chiffrées AES-256 et stockées dans Supabase Frankfurt (RGPD UE).', obligatoire: true },
+      { id: 'donnees_supabase', moduleAureus: 'onboarding', label: 'Encoder dans Aureus Social Pro', detail: 'Employés → Nouvel employé. Toutes les données sont chiffrées AES-256 et stockées dans Supabase Frankfurt (RGPD UE).', obligatoire: true },
     ]
   },
   {
@@ -200,7 +200,7 @@ const ETAPES = [
       { id: 'conges_circonstances', label: 'Congés de circonstances (jours légaux)', detail: "Mariage travailleur : 2j · Mariage enfant : 1j · Naissance/adoption : 10j (coparentalité) · Décès conjoint/enfant : 3j · Décès parent/beau-parent : 3j · Communion solennelle enfant : 1j · Déménagement : 1j (si CCT). Ces jours sont à la charge de l'employeur.", obligatoire: true },
       { id: 'maternite', label: 'Congé de maternité — notification INAMI 7 semaines avant', detail: "15 semaines minimum (19 si grossesse multiple). La travailleure doit notifier l'INAMI et l'employeur au moins 7 semaines avant le terme. Congé prénatal obligatoire (1 semaine avant terme). Indemnisé par INAMI à 82% puis 75%.", lien: 'https://www.inami.fgov.be', obligatoire: true },
       { id: 'paternite', label: 'Congé de paternité/coparentalité — 20 jours', detail: "20 jours dans les 4 mois suivant la naissance (loi 3/07/1978). Les 3 premiers jours à charge de l'employeur. Du 4e au 20e : indemnité INAMI (82% du salaire plafonné). Formulaire INAMI à remplir.", lien: 'https://www.inami.fgov.be', obligatoire: true },
-      { id: 'conge_parental', label: 'Congé parental — formulaire ONEM C62', detail: "4 mois par parent (jusqu'aux 12 ans de l'enfant). Sous forme d'interruption complète, mi-temps ou 1/5. Allocation ONEM. Formulaire C62 à soumettre à l'ONEM 3 mois à l'avance. Protection contre licenciement pendant 6 mois.", lien: 'https://www.onem.be', obligatoire: false },
+      { id: 'conge_parental', moduleAureus: 'creditemps', label: 'Congé parental — formulaire ONEM C62', detail: "4 mois par parent (jusqu'aux 12 ans de l'enfant). Sous forme d'interruption complète, mi-temps ou 1/5. Allocation ONEM. Formulaire C62 à soumettre à l'ONEM 3 mois à l'avance. Protection contre licenciement pendant 6 mois.", lien: 'https://www.onem.be', obligatoire: false },
       { id: 'formation_deal', label: 'Droit à la formation — 5j/an (Deal emploi 2022)', detail: "Depuis 01/01/2023 : chaque travailleur a droit à 5 jours de formation par an (entreprises +20 personnes). L'employeur doit établir un plan de formation individuel. Non-respect : astreinte de 1.800€ par travailleur.", lien: 'https://employment.belgium.be', obligatoire: true },
       { id: 'credit_temps_info', label: 'Informer sur le crédit-temps (CCT n°103)', detail: "Tout travailleur peut demander un crédit-temps après 12 mois d'ancienneté. Réduction 1/5 (CDI), mi-temps ou interruption complète. Allocation ONEM si motif reconnu (soin enfant, formation, soins palliatifs). L'employeur ne peut pas refuser unilatéralement.", lien: 'https://www.onem.be', obligatoire: false },
       { id: 'outplacement', label: 'Outplacement obligatoire si licenciement futur (+45 ans)', detail: "Si le travailleur a +45 ans et est licencié avec préavis > 30 semaines : outplacement obligatoire (CCT n°82). Coût à charge de l'employeur. À mentionner dès le contrat pour les profils concernés.", obligatoire: false },
@@ -318,7 +318,7 @@ const ETAPES = [
   {
     id: 22, icon: '📋', titre: 'Gestion fins de contrat', delai: 'Préparer', color: '#f43f5e', obligatoire: false,
     taches: [
-      { id: 'calcul_preavis_cct109', label: 'Calcul préavis exact — formule CCT n°109', detail: "Depuis 2014 : préavis basé sur ancienneté. Semaines = ancienneté x coefficient (2 à 8 semaines par année). Rémunération variable des 12 derniers mois incluse. Outil de calcul sur site SPF ETCS.", lien: 'https://www.emploi.belgique.be', obligatoire: false },
+      { id: 'calcul_preavis_cct109', moduleAureus: 'simulicenciement', label: 'Calcul préavis exact — formule CCT n°109', detail: "Depuis 2014 : préavis basé sur ancienneté. Semaines = ancienneté x coefficient (2 à 8 semaines par année). Rémunération variable des 12 derniers mois incluse. Outil de calcul sur site SPF ETCS.", lien: 'https://www.emploi.belgique.be', obligatoire: false },
       { id: 'motif_grave_3j', label: 'Licenciement motif grave — délai 3 jours ouvrables', detail: "Notification dans les 3 jours ouvrables suivant la connaissance des faits. Lettre recommandée obligatoire. Si délai raté : requalification en licenciement ordinaire avec indemnité. Motif doit être précis et documenté.", obligatoire: true },
       { id: 'rupture_commun', label: "Rupture commun accord — points d'attention", detail: "Possible à tout moment par accord mutuel. Par écrit recommandé. Peut prévoir indemnités supplémentaires. Attention : risque perte chômage si non documentée comme involontaire.", obligatoire: false },
       { id: 'cct109_raison', label: 'CCT n°109 — licenciement manifestement déraisonnable', detail: "Tout licenciement sans motif valable peut être contesté. Indemnité : 3 à 17 semaines de salaire. Employeur peut devoir communiquer le motif si demandé dans les 2 mois. Documentation du dossier disciplinaire essentielle.", obligatoire: true },
@@ -503,11 +503,22 @@ export default function EmbaucheAZ() {
                         {t.obligatoire && <span style={{ background: '#ef444415', color: '#ef4444', borderRadius: 4, padding: '1px 5px', fontSize: 9, fontWeight: 700, flexShrink: 0 }}>OBLIGATOIRE</span>}
                       </div>
                       <div style={{ fontSize: 12, color: '#6b7280' }}>{t.detail}</div>
-                      {t.lien && (
-                        <a href={t.lien} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: '#3b82f6', marginTop: 4, display: 'inline-block' }}>
-                          🔗 Source officielle →
-                        </a>
-                      )}
+                      <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+                        {t.lien && (
+                          <a href={t.lien} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: '#3b82f6', display: 'inline-block', textDecoration: 'none' }}>
+                            🔗 Source officielle →
+                          </a>
+                        )}
+                        {t.moduleAureus && (
+                          <button onClick={() => {
+                            if (typeof window !== 'undefined' && window.setPageFromEmbauche) {
+                              window.setPageFromEmbauche(t.moduleAureus)
+                            }
+                          }} style={{ fontSize: 11, color: '#c6a34e', background: '#c6a34e15', border: '1px solid #c6a34e30', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                            ⚡ Ouvrir dans Aureus →
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -440,6 +440,11 @@ function DashboardLayoutApproved({ user }) {
     const target = MENU_REDIRECTS[id] || id;
     setPage(target);
   };
+
+  // ── Exposer navigateTo pour EmbaucheAZ (boutons "Ouvrir dans Aureus") ──
+  if (typeof window !== 'undefined') {
+    window.setPageFromEmbauche = navigateTo;
+  }
   const filteredMenu = getMenuForRole(MENU, userRole);
   const filteredGroupItems = (gNum) => filteredMenu.filter(m => m.g === gNum && !m.group);
 
