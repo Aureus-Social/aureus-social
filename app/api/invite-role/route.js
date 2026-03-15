@@ -216,7 +216,7 @@ export async function POST(req) {
     table_name: 'auth.users',
     new_values: { email, role, societe },
     created_at: new Date().toISOString()
-  }]).catch(() => {});
+  }]).then(() => {}).catch(() => {});
 
   return Response.json({ 
     ok: true, 
@@ -269,7 +269,7 @@ export async function PUT(req) {
       table_name: 'auth.users',
       new_values: { userId, role },
       created_at: new Date().toISOString()
-    }]).catch(() => {});
+    }]).then(() => {}).catch(() => {});
 
     return Response.json({ ok: true, userId, role });
   } catch(e) {
@@ -303,7 +303,7 @@ export async function DELETE(req) {
       table_name: 'auth.users',
       new_values: { userId },
       created_at: new Date().toISOString()
-    }]).catch(() => {});
+    }]).then(() => {}).catch(() => {});
 
     return Response.json({ ok: true, userId });
   } catch(e) {
