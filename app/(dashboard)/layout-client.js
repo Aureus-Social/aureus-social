@@ -684,6 +684,7 @@ function DashboardLayoutApproved({ user }) {
       case 'declarations': case 'onss': return <DeclarationsONSSPg s={s} d={d} />;
       case 'admin': return <AdminPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'backup': return <AdminPage s={s} d={d} t={t} lang={lang} th={TH} tab='backup' />;
+      case 'securite': return <AdminPage s={s} d={d} t={t} lang={lang} th={TH} tab='securite' />;
       case 'permissions': return <RolesPermissionsPage s={s} d={d} t={t} lang={lang} th={TH} />;
       case 'baremescp': return <BaremesCPPage s={s} d={d} t={t} lang={lang} th={TH} />;
       case 'calcinstant': return <SimuNetBrutPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;

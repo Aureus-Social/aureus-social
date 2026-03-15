@@ -76,15 +76,15 @@ export const MENU_BY_ROLE = {
   admin: null, // null = tout visible
 
   secretariat: new Set([
-    'dashboard', 'embaucheaz', 'notifications', 'smartalerts',
+    'dashboard', 'embaucheaz', 'smartalerts',
     // Employés
     'employees', 'onboarding', 'aidesembauche', 'contratsmenu', 'gestionabs', 'conges',
     'offboarding', 'dashrh', 'portail', 'proceduresrh', 'accidentTravail', 'assuranceloi',
+    // Gestion contrat (g:8)
     'calcmaladie', 'chomagetemporaire', 'creditemps', 'simutp', 'simulicenciement', 'compteIndividuel',
     // Paie
-    'payslip', 'calcinstant', 'gestionprimes', 'cloture', 'historiquepayroll', 'fichespaiepdf',
-    'baremescp', 'netaubrut', 'caissevacances', 'chequesrepas', 'coutsannuel',
-    'simupension', 'simembauche', 'simulateurspro',
+    'payslip', 'calcinstant', 'gestionprimes', 'cloture', 'baremescp', 'netaubrut',
+    'caissevacances', 'chequesrepas',
     // Déclarations
     'declarations', 'exportcompta', 'connecteurscompta', 'sepa', 'belcotax281',
     'documentsociaux', 'decava', 'listingtva', 'rapports', 'echeancier', 'facturation',
@@ -93,50 +93,37 @@ export const MENU_BY_ROLE = {
   ]),
 
   commercial: new Set([
-    'dashboard', 'notifications', 'embaucheaz',
+    'dashboard', 'smartalerts', 'embaucheaz',
     // Commercial
     'diagnostic', 'checklistclient', 'comparatif', 'guidecommercial', 'mandatonss',
-    'facturation', 'rapports', 'subscriptions', 'facturationfiches',
-    // Outils utiles pour les prospects
-    'calcinstant', 'baremescp', 'coutsannuel', 'simembauche',
-    'aidesembauche', 'echeancier',
+    'facturation', 'rapports', 'subscriptions', 'facturationfiches', 'coutsannuel',
+    'bilansocial',
+    // Outils
+    'calcinstant', 'baremescp', 'aidesembauche', 'echeancier',
   ]),
 
   rh_entreprise: new Set([
-    'dashboard', 'notifications', 'embaucheaz',
+    'dashboard', 'smartalerts', 'embaucheaz',
     // Employés
     'employees', 'onboarding', 'aidesembauche', 'contratsmenu', 'gestionabs', 'conges',
     'offboarding', 'dashrh', 'portail', 'proceduresrh', 'accidentTravail', 'assuranceloi',
+    // Gestion contrat (g:8)
     'calcmaladie', 'chomagetemporaire', 'creditemps', 'simutp', 'simulicenciement', 'compteIndividuel',
     // Paie (lecture)
-    'payslip', 'gestionprimes', 'baremescp', 'fichespaiepdf', 'historiquepayroll',
-    'chequesrepas', 'caissevacances', 'coutsannuel',
+    'payslip', 'gestionprimes', 'baremescp', 'chequesrepas', 'caissevacances',
     // Documents
     'documentsociaux', 'echeancier',
   ]),
 
   // ── EMPLOYÉ — accès à ses propres données uniquement ──────────
   employe: new Set([
-    'dashboard',
-    'portail',        // Portail employé = page principale
-    'conges',         // Demander ses congés
-    'gestionabs',     // Voir ses absences
-    'fichespaiepdf',  // Télécharger ses fiches de paie
-    'compteIndividuel', // Son récap annuel
-    'echeancier',     // Calendrier social (info)
+    'dashboard', 'portail', 'conges', 'gestionabs', 'payslip', 'compteIndividuel', 'echeancier',
   ]),
 
   // ── COMPTABLE EXTERNE — exports uniquement ────────────────────
   comptable: new Set([
-    'dashboard',
-    'exportcompta',      // Exports WinBooks, BOB, Exact
-    'connecteurscompta', // Connecteurs comptables
-    'sepa',              // Fichiers SEPA virements
-    'belcotax281',       // Fiches fiscales 281.xx
-    'listingtva',        // Listing TVA Intervat
-    'rapports',          // Rapports
-    'echeancier',        // Deadlines fiscales
-    'facturation',       // Factures clients
+    'dashboard', 'exportcompta', 'connecteurscompta', 'sepa', 'belcotax281',
+    'listingtva', 'rapports', 'echeancier', 'facturation',
   ]),
 };
 
