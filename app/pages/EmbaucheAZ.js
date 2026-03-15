@@ -207,6 +207,44 @@ const ETAPES = [
       { id: 'protection_maternite', label: 'Protection contre le licenciement — maternité/crédit-temps', detail: "Interdiction de licencier une travailleuse enceinte (de la grossesse à 1 mois après reprise). Protection aussi pendant crédit-temps (6 mois), congé parental (6 mois). Violation = indemnité forfaitaire 6 mois + dommages.", obligatoire: true },
     ]
   },
+  {
+    id: 13, icon: '🌍', titre: 'International & Expatriés', delai: 'Si applicable', color: '#0ea5e9', obligatoire: false,
+    taches: [
+      { id: 'formulaire_a1', label: 'Formulaire A1 — détachement intra-UE obligatoire', detail: "Tout travailleur détaché dans un pays UE doit avoir un formulaire A1 prouvant son affiliation ONSS belge. Délivré par l'ONSS. Sans A1 : risque de double cotisation dans le pays d'accueil. Demande minimum 2 semaines avant le départ.", lien: 'https://www.socialsecurity.be', obligatoire: false },
+      { id: 'permis_mtcm', label: 'MTCM — permis de travail combiné hors UE', detail: "Depuis 2019 : le permis de travail et le titre de séjour sont fusionnés en un seul document (MTCM). Demande via le service régional de l'emploi. Délai : 90 jours. Travailleur en séjour illégal = amende + responsabilité solidaire employeur.", lien: 'https://employment.belgium.be', obligatoire: false },
+      { id: 'expat_circulaire', label: 'Régime spécial expatriés — circulaire 2022', detail: "Nouveau régime fiscal expatriés depuis 2022. Conditions : nouveau en Belgique (ou absent +5 ans), rémunération brute ≥ 75.000€, compétences spécifiques. Avantage : 30% du salaire exonéré PP. Demande SPF Finances dans les 3 mois.", lien: 'https://finances.belgium.be', obligatoire: false },
+      { id: 'convention_bilat', label: 'Conventions bilatérales sécurité sociale', detail: "La Belgique a signé des conventions avec +50 pays (Maroc, Turquie, Tunisie, USA, Canada, Japon...). Évitent la double cotisation ONSS. Vérifier la convention applicable avant embauche d'un ressortissant étranger.", lien: 'https://www.socialsecurity.be', obligatoire: false },
+      { id: 'directive_detachement', label: 'Directive détachement 2018 — droits travailleur entrant', detail: "Un travailleur détaché en Belgique depuis un pays UE a droit aux conditions de travail belges dès le 1er jour (salaire minimum, durée travail...). Après 12 mois : toutes les conditions belges applicables. Déclaration Limosa obligatoire.", lien: 'https://www.limosa.be', obligatoire: false },
+      { id: 'nis_etranger', label: 'Numéro NIS pour travailleurs étrangers non-UE', detail: "Tout étranger non-UE travaillant en Belgique doit avoir un numéro NIS. Délivré lors de l'inscription communale. Requis pour Dimona, ONSS, PP. Sans NIS : impossible de déclarer le travailleur légalement.", obligatoire: false },
+      { id: 'apostille_diplome', label: 'Apostille et équivalence diplômes étrangers', detail: "Diplômes hors UE : apostille de La Haye requise + demande d'équivalence auprès de la communauté compétente (WBE, Vlaams Agentschap). Certaines professions réglementées nécessitent une reconnaissance spécifique.", obligatoire: false },
+    ]
+  },
+  {
+    id: 14, icon: '🤖', titre: 'Numérique & Pratique', delai: 'Dès l\'embauche', color: '#a855f7', obligatoire: false,
+    taches: [
+      { id: 'politique_ia', label: 'Politique IA générative au travail', detail: "L'utilisation de ChatGPT, Copilot, Gemini au travail crée des risques : confidentialité données clients, propriété intellectuelle des outputs, RGPD. Une politique écrite est fortement recommandée avant toute utilisation par les travailleurs.", obligatoire: false },
+      { id: 'nis2_cyber', label: 'Cybersécurité NIS2 — formation obligatoire secteurs critiques', detail: "Directive NIS2 transposée en Belgique 2024 : secteurs critiques (santé, énergie, transport, finance) doivent former leurs travailleurs à la cybersécurité. Responsabilité des dirigeants engagée personnellement. Sanctions jusqu'à 10M€.", lien: 'https://ccn.belgium.be', obligatoire: false },
+      { id: 'plateformes_salariat', label: 'Travail via plateformes — présomption salariat 2024', detail: "Directive UE 2024 : travailleurs de plateformes (Uber, Deliveroo...) bénéficient d'une présomption de salariat si +2 critères de contrôle. Conséquences : ONSS, préavis, congés. À vérifier pour tout recours à des freelances via plateforme.", obligatoire: false },
+      { id: 'inventaire_materiel', label: 'Inventaire matériel signé à l\'embauche et au départ', detail: "Dresser un inventaire signé de tout le matériel confié (PC, téléphone, voiture, clés, badges...). À faire signer à l'embauche ET au départ. Permet le recours en responsabilité civile en cas de matériel non restitué.", obligatoire: true },
+      { id: 'acces_it', label: 'Procédure création/suppression comptes IT', detail: "À l'embauche : créer comptes email, accès systèmes le jour J. Au départ : supprimer TOUS les accès le jour même (RGPD + sécurité). Checklist IT offboarding obligatoire pour chaque départ.", obligatoire: true },
+      { id: 'reseaux_sociaux_pol', label: 'Politique réseaux sociaux', detail: "Une clause dans le contrat ou règlement de travail doit définir ce que le travailleur peut publier sur LinkedIn, Facebook... Critiques publiques de l'employeur = motif licenciement si clause claire. Sans clause = flou juridique.", obligatoire: false },
+      { id: 'cloud_rh', label: 'Cloud RH — serveurs UE obligatoires (RGPD)', detail: "Données RH stockées dans le cloud : serveurs obligatoirement dans l'UE (RGPD art.44). Cloud américain : clauses contractuelles standard UE requises ou region EU. À vérifier avec votre fournisseur (AWS, Google, Microsoft).", obligatoire: true },
+      { id: 'algo_transparence', label: 'Transparence algorithmique — droit d\'explication', detail: "Décisions RH par algorithme (sélection CV, évaluation...) : le travailleur a droit à une explication (art.22 RGPD). Décision 100% automatisée avec effet juridique = interdite sans droit de recours humain.", obligatoire: false },
+    ]
+  },
+  {
+    id: 15, icon: '⚖️', titre: 'Égalité & Infractions', delai: 'Obligatoire', color: '#ef4444', obligatoire: true,
+    taches: [
+      { id: 'egalite_salariale', label: 'Rapport écart salarial H/F — entreprises +50', detail: "Loi 22/04/2012 : rapport bisannuel obligatoire sur l'écart salarial H/F. Soumis au CE ou DS. Si écart injustifié > moyenne sectorielle : plan d'action obligatoire. Publié sur le site de l'IEFH.", lien: 'https://igvm-iefh.belgium.be', obligatoire: false },
+      { id: 'allaitement_pauses', label: 'Pauses allaitement — 30 min × 2/j pendant 7 mois', detail: "La travailleuse allaitante a droit à des pauses allaitement rémunérées (30 min × 2/j) pendant les 7 mois suivant la naissance (loi 16/03/1971 art.39bis). Local adapté obligatoire (AR 15/02/2007). Refus = discrimination.", obligatoire: true },
+      { id: 'amenagement_locaux', label: 'Accessibilité handicap des locaux', detail: "Loi 10/05/2007 : aménagement raisonnable inclut l'accessibilité physique (rampe, ascenseur...). Subventions disponibles : PHARE (Bruxelles), VAPH (Flandre), AVIQ (Wallonie).", lien: 'https://www.unia.be', obligatoire: false },
+      { id: 'elections_2028', label: 'Élections sociales 2028 — 135 jours de procédure', detail: "Prochaines élections sociales : mai 2028. Procédure très stricte : 135 jours de X+15 à X+150. Annulation possible si une étape ratée. À anticiper 1 an à l'avance pour les entreprises +50 travailleurs.", obligatoire: false },
+      { id: 'defibrillateur_dae', label: 'DAE (défibrillateur) — obligatoire +100 travailleurs', detail: "Loi 18/03/2019 : défibrillateur automatisé externe obligatoire dans toute entreprise de +100 travailleurs. Formation recommandée. Contrôle annuel obligatoire.", obligatoire: false },
+      { id: 'infractions_penales', label: 'Infractions pénales — responsabilité personnelle dirigeant', detail: "Les infractions au droit social peuvent engager la responsabilité PERSONNELLE du dirigeant. Infractions niveau 4 : 4.800-48.000€ + possible peine de prison. La société et le dirigeant sont condamnés solidairement. RC dirigeant recommandée.", obligatoire: true },
+      { id: 'ruling_social', label: 'Ruling préalable ONSS — sécurité juridique', detail: "L'ONSS offre un service de ruling préalable pour les situations complexes (plan cafétéria, avantages innovants...). Demande écrite, réponse sous 3 mois. La décision est opposable à l'ONSS.", lien: 'https://www.socialsecurity.be', obligatoire: false },
+      { id: 'prescription_salaires', label: 'Prescription arriérés de salaires — 5 ans', detail: "Un travailleur peut réclamer des arriérés de salaires pendant 5 ans (art.15 loi 3/07/1978). Cotisations ONSS : 3 ans (7 ans en cas de fraude). À partir du moment où le salaire était dû. Interrompre par mise en demeure recommandée.", obligatoire: true },
+    ]
+  },
 ]
 
 export default function EmbaucheAZ() {
