@@ -145,11 +145,11 @@ ALTER TABLE travailleurs ADD COLUMN IF NOT EXISTS niss_enc TEXT;
 
 -- Chiffrer les NISS existants (remplacer 'votre_cle_secrete' par une vraie clé)
 UPDATE employees 
-SET niss_enc = encode(pgp_sym_encrypt(niss, 'aureus_encrypt_key_2026'), 'base64')
+SET niss_enc = encode(pgp_sym_encrypt(niss, '${process.env.PGCRYPTO_KEY || "aureus_encrypt_key_2026"}'), 'base64')
 WHERE niss IS NOT NULL AND niss != '' AND (niss_enc IS NULL OR niss_enc = '');
 
 UPDATE employees 
-SET iban_enc = encode(pgp_sym_encrypt(iban, 'aureus_encrypt_key_2026'), 'base64')
+SET iban_enc = encode(pgp_sym_encrypt(iban, '${process.env.PGCRYPTO_KEY || "aureus_encrypt_key_2026"}'), 'base64')
 WHERE iban IS NOT NULL AND iban != '' AND (iban_enc IS NULL OR iban_enc = '');`;
 
   results.push({

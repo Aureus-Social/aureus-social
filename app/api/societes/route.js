@@ -34,7 +34,7 @@ export async function POST(req) {
     status: 'active',
     created_at: new Date().toISOString(),
   }]).select().single();
-  if (error) return Response.json({ error: error.message }, { status: 400 });
+  if (error) return Response.json({ error: process.env.NODE_ENV === "production" ? "Erreur interne" : error.message }, { status: 400 });
   return Response.json({ ok: true, data }, { status: 201 });
 }
 
@@ -46,6 +46,6 @@ export async function DELETE(req) {
   const id = searchParams.get('id');
   if (!id) return Response.json({ error: 'ID requis' }, { status: 400 });
   const { error } = await db.from('clients').update({ status: 'cancelled' }).eq('id', id);
-  if (error) return Response.json({ error: error.message }, { status: 400 });
+  if (error) return Response.json({ error: process.env.NODE_ENV === "production" ? "Erreur interne" : error.message }, { status: 400 });
   return Response.json({ ok: true });
 }

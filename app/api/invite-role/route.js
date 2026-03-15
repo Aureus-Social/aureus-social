@@ -157,6 +157,19 @@ export async function POST(req) {
   const _rc = checkRole(u, 'admin_only'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   if (!RESEND_KEY) return Response.json({ error: 'RESEND_API_KEY manquante' }, { status: 500 });
 
+  // ── Rate limiting : max 10 invitations par heure par admin ──
+  const rateLimitKey = `invite_${u.id}_${new Date().getHours()}`;
+  try {
+    const { data: recentInvites } = await db.from('audit_log')
+      .select('id', { count: 'exact' })
+      .eq('user_id', u.id)
+      .eq('action', 'INVITE_USER_WITH_ROLE')
+      .gte('created_at', new Date(Date.now() - 3600000).toISOString());
+    if ((recentInvites?.length || 0) >= 20) {
+      return Response.json({ error: "Limite d'invitations atteinte (20/heure). Réessayez plus tard." }, { status: 429 });
+    }
+  } catch(_) {}
+
   const { email, prenom, nom, role = 'secretariat', societe } = await req.json();
   if (!email || !email.includes('@')) return Response.json({ error: 'Email valide requis' }, { status: 400 });
   if (!ROLE_DATA[role]) return Response.json({ error: 'Rôle invalide' }, { status: 400 });
@@ -288,6 +301,15 @@ export async function DELETE(req) {
   const permanent = searchParams.get('permanent') === 'true';
   if (!userId) return Response.json({ error: 'userId requis' }, { status: 400 });
   if (userId === u.id) return Response.json({ error: 'Impossible de modifier votre propre compte' }, { status: 400 });
+  // Protéger les comptes admin critiques
+  const PROTECTED_EMAILS = ['info@aureus-ia.com', 'moussati.nourdin@gmail.com'];
+  try {
+    const admin = sbAdmin();
+    const { data: targetUser } = await admin.auth.admin.getUserById(userId);
+    if (targetUser?.user?.email && PROTECTED_EMAILS.includes(targetUser.user.email)) {
+      return Response.json({ error: 'Ce compte administrateur ne peut pas être modifié.' }, { status: 403 });
+    }
+  } catch(_) {}
 
   try {
     const admin = sbAdmin();

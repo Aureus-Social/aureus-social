@@ -57,7 +57,7 @@ export async function POST(req) {
   }));
 
   const { data, error } = await db.from('fiches_paie').insert(toInsert).select();
-  if (error) return Response.json({ error: error.message }, { status: 400 });
+  if (error) return Response.json({ error: process.env.NODE_ENV === "production" ? "Erreur interne" : error.message }, { status: 400 });
 
   // Mise à jour agrégat
   const an = toInsert[0].annee;
