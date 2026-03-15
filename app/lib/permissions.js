@@ -146,6 +146,8 @@ export const KPI_SCOPE = {
   secretariat:   ['masse_salariale', 'cotisations', 'pp', 'fiches_paie', 'sepa', 'travailleurs', 'dimona', 'contrats'],
   commercial:    ['clients', 'facturation', 'revenue', 'prospects'],
   rh_entreprise: ['travailleurs', 'contrats', 'absences', 'dimona', 'fiches_paie'],
+  employe:       ['mes_fiches_paie', 'mes_conges', 'mon_contrat'],
+  comptable:     ['exports_comptables', 'sepa', 'facturation', 'echeances_fiscales'],
 };
 
 // ── Helpers ────────────────────────────────────────────────────

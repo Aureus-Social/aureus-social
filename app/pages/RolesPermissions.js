@@ -195,11 +195,11 @@ export default function RolesPermissions({ s }) {
           </C>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
-            {role.groupes.map((g, i) => (
+            {(role.groupes || []).map((g, i) => (
               <C key={i} style={{ marginBottom: 0 }}>
                 <ST>{g.titre}</ST>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  {g.items.map((item, j) => (
+                  {(g.items || []).map((item, j) => (
                     <div key={j} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, color: '#c8c5bc', padding: '3px 0', borderBottom: '1px solid rgba(255,255,255,.03)' }}>
                       <span style={{ color: role.color, fontSize: 10 }}>✓</span>
                       {item}
@@ -276,7 +276,7 @@ export default function RolesPermissions({ s }) {
                 <div style={{ fontSize: 13, fontWeight: 700, color: ROLE_COLORS[r] }}>{ROLE_LABELS[r]}</div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {KPI_SCOPE[r].map(kpi => (
+                {(KPI_SCOPE[r] || []).map(kpi => (
                   <div key={kpi} style={{ fontSize: 11, color: kpi === 'all' ? '#c6a34e' : '#c8c5bc', display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ color: ROLE_COLORS[r], fontSize: 10 }}>▸</span>
                     {kpi === 'all' ? '🔑 Tous les KPIs' : kpi.replace(/_/g, ' ')}
