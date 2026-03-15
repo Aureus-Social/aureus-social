@@ -40,6 +40,7 @@ export const MENU = [
   { id: 'connecteurscompta', label: 'BOB / WinBooks', icon: '📒', g: 4 },
   { id: 'sepa',          label: 'SEPA Virements',     icon: '💳', g: 4 },
   { id: 'belcotax281',   label: 'Belcotax 281.10',    icon: '📊', g: 4 },
+  { id: 'listingtva',     label: 'Listing Annuel TVA',  icon: '📋', g: 4 },
   { id: 'belcotaxmandat', label: 'Mandat Belcotax',     icon: '📄', g: 4 },
   { id: 'rapports',      label: 'Rapports',           icon: '📈', g: 4 },
   { id: 'facturation',   label: 'Facturation',        icon: '🧾', g: 4 },

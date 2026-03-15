@@ -121,6 +121,7 @@ const WebhooksRaw = dynamic(() => import('../pages/WebhooksManager'), { ssr: fal
 const WebhooksPg = ({ s, d }) => <WebhooksRaw s={s} d={d} />;
 const OffboardingRaw = dynamic(() => import('../pages/OffboardingModule'), { ssr: false, loading: Loading });
 const GestionSocietesPg = dynamic(() => import('../pages/GestionSocietes'), { ssr: false, loading: Loading });
+const ListingTVAPg = dynamic(() => import('../pages/ListingTVA'), { ssr: false, loading: Loading });
 const WelcomeGuidePg = dynamic(() => import('../pages/WelcomeGuide'), { ssr: false, loading: () => null });
 const HistoriquePayrollPg = dynamic(() => import('../pages/HistoriquePayroll'), { ssr: false, loading: Loading });
 const OffboardingPg = ({ s, d }) => <OffboardingRaw s={s} d={d} />;
@@ -650,6 +651,7 @@ function DashboardLayoutApproved({ user }) {
       case 'gestionprimes': return <PrimesPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'historiquepayroll': case 'payrollhistory': return <HistoriquePayrollPg state={s} dispatch={d} />;
       case 'gestionsocietes': return <GestionSocietesPg state={s} dispatch={d} />;
+      case 'listingtva': return <ListingTVAPg state={s} dispatch={d} />;
       case 'seuilssociaux': return <LoisPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       // TABLEAU DE BORD
       case 'accidentTravail': return <AbsencesContratsV3Pg s={s} d={d} tab={page} />;
