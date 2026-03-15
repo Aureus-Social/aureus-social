@@ -1,0 +1,14 @@
+-- Ajout colonnes manquantes à la table clients pour GestionSocietes
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS nom TEXT;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS bce TEXT;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS adresse TEXT;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS code_postal TEXT;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS ville TEXT;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS cp_paritaire TEXT DEFAULT '200';
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS contact_nom TEXT;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS contact_email TEXT;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS contact_tel TEXT;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS onss_numero TEXT;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS secteur TEXT;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS logiciel_compta TEXT DEFAULT 'winbooks';
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS format_export TEXT DEFAULT 'winbooks';
