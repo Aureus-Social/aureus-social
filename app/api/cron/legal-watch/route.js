@@ -19,6 +19,48 @@ const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SE
   ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
   : null;
 
+
+const GH_REPO = 'Aureus-Social/aureus-social';
+const GH_PATH = 'app/lib/lois-belges.js';
+
+// ── Patch automatique lois-belges.js via GitHub API ──
+async function patchLoisBelges(sourceId, sourceName) {
+  const TOKEN = process.env.GH_PUSH_TOKEN || process.env.GITHUB_TOKEN;
+  if (!TOKEN) return { pushed: false, reason: 'no_token' };
+
+  try {
+    // Récupérer le fichier actuel
+    const gr = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_PATH}`, {
+      headers: { 'Authorization': `token ${TOKEN}`, 'User-Agent': 'AureusSocialPro' }
+    });
+    if (!gr.ok) return { pushed: false, reason: `GET ${gr.status}` };
+    const file = await gr.json();
+    let content = Buffer.from(file.content, 'base64').toString('utf8');
+
+    // Mettre à jour la date de mise à jour et un flag de changement détecté
+    const today = new Date().toISOString().split('T')[0];
+    content = content.replace(/dateMAJ:\s*'[^']+'/, `dateMAJ: '${today}'`);
+    content = content.replace(/dernierChangement:\s*'[^']+'/, `dernierChangement: '${sourceId} — ${today}'`);
+
+    // Push via GitHub API → déclenche redéploiement Vercel automatique
+    const pr = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_PATH}`, {
+      method: 'PUT',
+      headers: { 'Authorization': `token ${TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: `auto(veille): changement détecté — ${sourceName} — ${today}`,
+        content: Buffer.from(content).toString('base64'),
+        sha: file.sha,
+        branch: 'main'
+      })
+    });
+    if (!pr.ok) return { pushed: false, reason: `PUT ${pr.status}` };
+    const result = await pr.json();
+    return { pushed: true, sha: result.commit?.sha?.substring(0, 7) };
+  } catch(e) {
+    return { pushed: false, reason: e.message };
+  }
+}
+
 // ── Sources légales à surveiller ──
 const SOURCES = [
   {
@@ -198,6 +240,28 @@ export async function GET(request) {
 
   await saveHashes(okResults);
   await sendAlertEmail(changes, okResults.length);
+
+  // ── Auto-patch lois-belges.js si changements détectés ──
+  const githubResults = [];
+  if (changes.length > 0) {
+    // On déclenche le cron baremes complet pour rescaper et mettre à jour
+    try {
+      const baremesUrl = new URL('/api/cron/baremes', 'https://app.aureussocial.be');
+      const cronSecret = process.env.CRON_SECRET;
+      const baremesRes = await fetch(baremesUrl.toString(), {
+        headers: cronSecret ? { 'Authorization': `Bearer ${cronSecret}` } : {},
+        signal: AbortSignal.timeout(55000)
+      });
+      const baremesJson = await baremesRes.json().catch(() => ({}));
+      githubResults.push({ triggered: 'cron/baremes', pushed: baremesJson.pushed, sha: baremesJson.sha });
+    } catch(e) {
+      // Fallback : juste mettre à jour la date dans lois-belges.js
+      for (const change of changes.slice(0, 1)) {
+        const r = await patchLoisBelges(change.id, change.name);
+        githubResults.push(r);
+      }
+    }
+  }
 
   // Audit log
   if (supabase) {

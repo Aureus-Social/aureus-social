@@ -3,7 +3,7 @@
 "use client";
 
 export const LOIS_BELGES = {
-  _meta: { version: '2026.1.0', dateMAJ: '2026-01-01', source: 'SPF Finances / ONSS / CNT / Moniteur Belge', annee: 2026 },
+  _meta: { version: '2026.1.0', dateMAJ: '2026-03-15', dernierChangement: 'init — 2026-03-15', source: 'SPF Finances / ONSS / CNT / Moniteur Belge', annee: 2026 },
 
   // ═══ ONSS ═══
   onss: {
