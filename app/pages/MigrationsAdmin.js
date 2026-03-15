@@ -96,6 +96,32 @@ export default function MigrationsAdmin({ state }) {
           Les migrations déjà exécutées sont ignorées — aucun risque de doublon.
         </div>
       </div>
+
+      {/* Migration 007 — pgcrypto NISS/IBAN */}
+      <div style={{ marginTop: 16, background: '#0d1117', border: '1px solid #1e3a5f', borderRadius: 8, padding: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#3b82f6' }}>🔐 Migration 007 — pgcrypto NISS/IBAN</div>
+            <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>Chiffrement AES-256 des données sensibles · RGPD obligatoire avant premier client</div>
+          </div>
+          <button
+            onClick={async () => {
+              if (!confirm('Lancer le chiffrement NISS/IBAN ? Cette opération est irréversible.')) return;
+              try {
+                const r = await fetch('/api/migrate/pgcrypto', { method: 'POST' });
+                const j = await r.json();
+                alert(j.ok ? `✅ ${j.message}` : `❌ ${j.error}`);
+              } catch(e) { alert('Erreur : ' + e.message); }
+            }}
+            style={{ background: '#1e3a5f', color: '#3b82f6', border: '1px solid #1e3a5f', borderRadius: 6, padding: '8px 16px', fontWeight: 600, cursor: 'pointer', fontSize: 12 }}
+          >
+            Lancer pgcrypto →
+          </button>
+        </div>
+        <div style={{ fontSize: 11, color: '#4b5563' }}>
+          Crée colonnes <code style={{ color: '#5B9BD6' }}>niss_enc</code> + <code style={{ color: '#5B9BD6' }}>iban_enc</code> · Vue <code style={{ color: '#5B9BD6' }}>employees_secure</code> avec masquage
+        </div>
+      </div>
     </div>
   );
 }
