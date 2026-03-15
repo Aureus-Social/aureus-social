@@ -76,7 +76,7 @@ export const MENU = [
   { id: 'activabruxelles',    label: 'Activa Bruxelles',         icon: '🏅', g: 6 },
   { id: 'adminbaremes',       label: 'Admin Barèmes',            icon: '⚙️', g: 7 },
   { id: 'gestionsocietes',    label: 'Gestion Sociétés',         icon: '🏢', g: 7 },
-  { id: 'migrations',         label: 'Migrations DB',             icon: '⚙️', g: 7 },
+  { id: 'migrations', label: 'Migrations DB', icon: '⚙️', g: 7, keywords: ['migration','pgcrypto','rls','niss','iban','chiffrement','base de donnees','db','supabase','securite'] },
   { id: 'analytics',          label: 'Analytics & KPIs',         icon: '📈', g: 4 },
   { id: 'annexeReglement',    label: 'Annexe Règlement',         icon: '📜', g: 3 },
   { id: 'archives',           label: 'Archives GED',             icon: '🗄', g: 7 },
