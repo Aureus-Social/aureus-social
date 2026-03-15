@@ -78,6 +78,7 @@ const AccessManagerPg = ({ s, user }) => <AccessManagerRaw user={user} />;
 const GestionUtilisateursPg = dynamic(() => import('../pages/GestionUtilisateurs'), { ssr: false, loading: Loading });
 const MonComptePg = dynamic(() => import('../pages/MonCompte'), { ssr: false, loading: Loading });
 const FacturationFichesPg = dynamic(() => import('../pages/FacturationFiches'), { ssr: false, loading: Loading });
+const EmbaucheAZPg = dynamic(() => import('../pages/EmbaucheAZ'), { ssr: false, loading: Loading });
 const AuditCodePage = dynamic(() => import('../pages/AuditSecuriteCode'), { ssr: false, loading: Loading });
 const PayrollSimPage = dynamic(() => import('../pages/PayrollSimulator'), { ssr: false, loading: Loading });
 const AureusIAPage = dynamic(() => import('../pages/AureusSuitePage'), { ssr: false, loading: Loading });
@@ -845,10 +846,7 @@ function DashboardLayoutApproved({ user }) {
       case 'support': return <NotificationCenterPgW s={s} d={d} tab={page} />;
       case 'team': return <EmployeeHubPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'testsuite': return <AuditCodePage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
-      case 'embaucheaz': {
-        if (typeof window !== 'undefined') window.open('/embauche-az.html', '_blank');
-        return <PlaceholderPage id={page} label={currentItem?.label || 'Embauche A→Z'} />;
-      }
+      case 'embaucheaz': return <EmbaucheAZPg />;
       default: return <PlaceholderPage id={page} label={currentItem.label} />;
     }
   };
