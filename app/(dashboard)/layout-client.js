@@ -1,3 +1,4 @@
+// v-welcome-fix
 'use client';
 import { logInfo, logWarn } from '../lib/security/logger.js';
 import React, { useState, useReducer, useMemo, useEffect, useCallback, useRef, Suspense } from 'react';
