@@ -26,7 +26,7 @@ export async function POST(req) {
         created_by AS employer_id
       FROM employees;
     `;
-    const { error: e1 } = await admin.rpc('exec_sql', { sql: viewSQL }).single().catch(() => ({ error: null }));
+    const { error: e1 } = await admin.rpc('exec_sql', { sql: viewSQL }).catch(() => ({ error: null }));
     results.push({ step: 'employees_portal_view', ok: !e1 });
 
     // 2. Policy RLS fiches_paie — l'employé voit uniquement ses propres fiches
@@ -49,7 +49,7 @@ export async function POST(req) {
           )
         );
     `;
-    const { error: e2 } = await admin.rpc('exec_sql', { sql: rlsFichesSQL }).single().catch(() => ({ error: null }));
+    const { error: e2 } = await admin.rpc('exec_sql', { sql: rlsFichesSQL }).catch(() => ({ error: null }));
     results.push({ step: 'rls_fiches_paie_employe', ok: !e2 });
 
     // 3. Policy RLS employees — multi-tenant strict
@@ -66,7 +66,7 @@ export async function POST(req) {
       CREATE POLICY "employees_self" ON employees
         FOR SELECT USING (email = auth.jwt()->>'email');
     `;
-    const { error: e3 } = await admin.rpc('exec_sql', { sql: rlsEmployeesSQL }).single().catch(() => ({ error: null }));
+    const { error: e3 } = await admin.rpc('exec_sql', { sql: rlsEmployeesSQL }).catch(() => ({ error: null }));
     results.push({ step: 'rls_employees_multitenant', ok: !e3 });
 
     // 4. Policy RLS clients — isolation totale entre clients
@@ -76,7 +76,7 @@ export async function POST(req) {
       CREATE POLICY "clients_owner" ON clients
         FOR ALL USING (auth.uid() = user_id);
     `;
-    const { error: e4 } = await admin.rpc('exec_sql', { sql: rlsClientsSQL }).single().catch(() => ({ error: null }));
+    const { error: e4 } = await admin.rpc('exec_sql', { sql: rlsClientsSQL }).catch(() => ({ error: null }));
     results.push({ step: 'rls_clients', ok: !e4 });
 
     // 5. Policy RLS payroll_history — isolation
@@ -86,7 +86,7 @@ export async function POST(req) {
       CREATE POLICY "payroll_history_owner" ON payroll_history
         FOR ALL USING (auth.uid() = user_id);
     `;
-    const { error: e5 } = await admin.rpc('exec_sql', { sql: rlsPayrollSQL }).single().catch(() => ({ error: null }));
+    const { error: e5 } = await admin.rpc('exec_sql', { sql: rlsPayrollSQL }).catch(() => ({ error: null }));
     results.push({ step: 'rls_payroll_history', ok: !e5 });
 
     // 6. Index email sur employees pour les lookups portail
@@ -95,7 +95,7 @@ export async function POST(req) {
       CREATE INDEX IF NOT EXISTS idx_employees_user_id ON employees(user_id);
       CREATE INDEX IF NOT EXISTS idx_fiches_paie_empid ON fiches_paie("empId");
     `;
-    const { error: e6 } = await admin.rpc('exec_sql', { sql: indexSQL }).single().catch(() => ({ error: null }));
+    const { error: e6 } = await admin.rpc('exec_sql', { sql: indexSQL }).catch(() => ({ error: null }));
     results.push({ step: 'indexes', ok: !e6 });
 
     await admin.from('audit_log').insert([{

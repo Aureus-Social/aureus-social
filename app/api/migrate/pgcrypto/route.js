@@ -16,7 +16,7 @@ export async function POST(req) {
     // 1. Activer pgcrypto
     const { error: e1 } = await admin.rpc('exec_sql', {
       sql: `CREATE EXTENSION IF NOT EXISTS pgcrypto;`
-    }).single().catch(() => ({ error: null }));
+    }).catch(() => ({ error: null }));
 
     // 2. Ajouter colonnes chiffrées si pas encore là
     const addColsSQL = `
@@ -25,7 +25,7 @@ export async function POST(req) {
       ALTER TABLE travailleurs ADD COLUMN IF NOT EXISTS niss_enc TEXT;
     `;
     const { error: e2 } = await admin.rpc('exec_sql', { sql: addColsSQL })
-      .single().catch(() => ({ error: null }));
+      .catch(() => ({ error: null }));
     results.push({ step: 'add_columns', ok: !e2 });
 
     // 3. Créer fonctions helper chiffrement/déchiffrement
@@ -59,7 +59,7 @@ export async function POST(req) {
       $$ LANGUAGE plpgsql SECURITY DEFINER;
     `;
     const { error: e3 } = await admin.rpc('exec_sql', { sql: functionsSQL })
-      .single().catch(() => ({ error: null }));
+      .catch(() => ({ error: null }));
     results.push({ step: 'create_functions', ok: !e3 });
 
     // 4. Migrer NISS existants vers colonnes chiffrées
@@ -77,7 +77,7 @@ export async function POST(req) {
         AND (niss_enc IS NULL OR niss_enc = '');
     `;
     const { error: e4 } = await admin.rpc('exec_sql', { sql: migrateNissSQL })
-      .single().catch(() => ({ error: null }));
+      .catch(() => ({ error: null }));
     results.push({ step: 'migrate_niss', ok: !e4 });
 
     // 5. Migrer IBAN existants
@@ -89,7 +89,7 @@ export async function POST(req) {
         AND (iban_enc IS NULL OR iban_enc = '');
     `;
     const { error: e5 } = await admin.rpc('exec_sql', { sql: migrateIbanSQL })
-      .single().catch(() => ({ error: null }));
+      .catch(() => ({ error: null }));
     results.push({ step: 'migrate_iban', ok: !e5 });
 
     // 6. Créer politique RLS pour colonnes chiffrées
@@ -116,7 +116,7 @@ export async function POST(req) {
       FROM employees;
     `;
     const { error: e6 } = await admin.rpc('exec_sql', { sql: rlsSQL })
-      .single().catch(() => ({ error: null }));
+      .catch(() => ({ error: null }));
     results.push({ step: 'create_secure_view', ok: !e6 });
 
     await admin.from('audit_log').insert([{
