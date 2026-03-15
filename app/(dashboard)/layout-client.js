@@ -128,6 +128,7 @@ const HistoriquePayrollPg = dynamic(() => import('../pages/HistoriquePayroll'), 
 const DocumentsSociauxPg = dynamic(() => import('../pages/DocumentsSociaux'), { ssr: false, loading: Loading });
 const DecavaPg = dynamic(() => import('../pages/Decava'), { ssr: false, loading: Loading });
 const AssuranceLoiPg = dynamic(() => import('../pages/AssuranceLoi'), { ssr: false, loading: Loading });
+const AidesEmbauchePg = dynamic(() => import('../pages/AidesEmbauche'), { ssr: false, loading: Loading });
 const BelcotaxFichesPg = dynamic(() => import('../pages/BelcotaxFiches'), { ssr: false, loading: Loading });
 const ChequesRepasPg = dynamic(() => import('../pages/ChequesRepas'), { ssr: false, loading: Loading });
 const BilanSocialPg = dynamic(() => import('../pages/BilanSocial'), { ssr: false, loading: Loading });
@@ -722,6 +723,7 @@ function DashboardLayoutApproved({ user }) {
       case 'documentsociaux': return <DocumentsSociauxPg state={s} dispatch={d} />;
       case 'decava': return <DecavaPg state={s} dispatch={d} />;
       case 'assuranceloi': return <AssuranceLoiPg state={s} dispatch={d} />;
+      case 'aidesembauche': return <AidesEmbauchePg state={s} dispatch={d} />;
       // ── MANDATS & PRIMES EMPLOI ──
       case 'mandatonss': case 'belcotaxmandat': case 'domiciliation':
       case 'premieremploi': case 'activabruxelles': case 'art60cpas':
