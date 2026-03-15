@@ -126,6 +126,8 @@ const MigrationsAdminPg = dynamic(() => import('../pages/MigrationsAdmin'), { ss
 const WelcomeGuidePg = dynamic(() => import('../pages/WelcomeGuide'), { ssr: false, loading: () => null });
 const HistoriquePayrollPg = dynamic(() => import('../pages/HistoriquePayroll'), { ssr: false, loading: Loading });
 const DocumentsSociauxPg = dynamic(() => import('../pages/DocumentsSociaux'), { ssr: false, loading: Loading });
+const DecavaPg = dynamic(() => import('../pages/Decava'), { ssr: false, loading: Loading });
+const AssuranceLoiPg = dynamic(() => import('../pages/AssuranceLoi'), { ssr: false, loading: Loading });
 const BelcotaxFichesPg = dynamic(() => import('../pages/BelcotaxFiches'), { ssr: false, loading: Loading });
 const ChequesRepasPg = dynamic(() => import('../pages/ChequesRepas'), { ssr: false, loading: Loading });
 const BilanSocialPg = dynamic(() => import('../pages/BilanSocial'), { ssr: false, loading: Loading });
@@ -718,6 +720,8 @@ function DashboardLayoutApproved({ user }) {
       case 'netaubrut': return <NetAuBrutPg state={s} dispatch={d} />;
       case 'caissevacances': return <CaisseVacancesPg state={s} dispatch={d} />;
       case 'documentsociaux': return <DocumentsSociauxPg state={s} dispatch={d} />;
+      case 'decava': return <DecavaPg state={s} dispatch={d} />;
+      case 'assuranceloi': return <AssuranceLoiPg state={s} dispatch={d} />;
       // ── MANDATS & PRIMES EMPLOI ──
       case 'mandatonss': case 'belcotaxmandat': case 'domiciliation':
       case 'premieremploi': case 'activabruxelles': case 'art60cpas':

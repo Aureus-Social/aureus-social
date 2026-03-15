@@ -41,6 +41,8 @@ export const MENU = [
   { id: 'sepa',          label: 'SEPA Virements',     icon: '💳', g: 4 },
   { id: 'belcotax281',   label: 'Belcotax 281.xx',    icon: '📊', g: 4, keywords: ['belcotax','281','fiche fiscale','finprof'] },
   { id: 'documentsociaux', label: 'Documents Sociaux DRS', icon: '📑', g: 4, keywords: ['drs','c4','c78','c103','inami','chomage','attestation','document social','formulaire'] },
+  { id: 'decava', label: 'DECAVA — Véhicules Mixtes', icon: '🚗', g: 4, keywords: ['decava','vehicule','voiture','tva voiture','atn','avantage nature','co2','usage mixte'] },
+  { id: 'assuranceloi', label: 'Assurance-Loi AT', icon: '🛡️', g: 4, keywords: ['assurance loi','accident travail','at','fedris','sinistre','prime at','declaration accident'] },
   { id: 'chequesrepas', label: 'Chèques-Repas', icon: '🍽️', g: 3, keywords: ['cheques repas','sodexo','edenred','monizze','titre repas'] },
   { id: 'netaubrut', label: 'Net au Brut', icon: '⚖️', g: 3, keywords: ['net au brut','brut au net','calcul salaire','salaire net','salaire brut'] },
   { id: 'caissevacances', label: 'Caisse de Vacances', icon: '🏖️', g: 3, keywords: ['caisse vacances','pecule vacances','onva','ouvriers vacances'] },
