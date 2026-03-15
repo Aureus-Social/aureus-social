@@ -549,6 +549,8 @@ function DashboardLayoutApproved({ user }) {
   useEffect(() => {
     if (!user) return;
     dispatch({ type: 'SET_USER', data: user });
+    // Attendre 300ms que la session Supabase soit bien initialisée
+    const timer = setTimeout(() => {
     import('../lib/auth-fetch').then(({ authFetch }) => {
       authFetch('/api/employees').then(res => {
         if (res.ok) res.json().then(j => {
@@ -573,6 +575,8 @@ function DashboardLayoutApproved({ user }) {
         });
       }).catch(() => {});
     });
+    }, 300);
+    return () => clearTimeout(timer);
   }, [user]);
 
   // ── RECHERCHE TRAVAILLEUR LIVE (Supabase) ──────────────────────────────

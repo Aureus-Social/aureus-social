@@ -13,7 +13,12 @@ export async function getSupabaseToken() {
 }
 
 export async function authFetch(url, options = {}) {
-  const token = await getSupabaseToken();
+  let token = await getSupabaseToken();
+  // Retry une fois si token absent (session pas encore chargée)
+  if (!token) {
+    await new Promise(r => setTimeout(r, 500));
+    token = await getSupabaseToken();
+  }
   return fetch(url, {
     ...options,
     headers: {
