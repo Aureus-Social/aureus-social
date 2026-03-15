@@ -1,3 +1,4 @@
+import { checkRole } from '@/app/lib/supabase-server';
 // ═══════════════════════════════════════════════════════════════
 // AUREUS SOCIAL PRO — /api/app-state
 // Stockage clé-valeur persistant dans Supabase (table app_state)
@@ -19,6 +20,7 @@ const sb = () => process.env.SUPABASE_SERVICE_ROLE_KEY
 export async function GET(req) {
   const u = await getAuthUser(req);
   if (!u) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'authenticated'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const db = sb();
   if (!db) return NextResponse.json({ error: 'DB indisponible' }, { status: 503 });
 
@@ -39,6 +41,7 @@ export async function GET(req) {
 export async function POST(req) {
   const u = await getAuthUser(req);
   if (!u) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'authenticated'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const db = sb();
   if (!db) return NextResponse.json({ error: 'DB indisponible' }, { status: 503 });
 
@@ -69,6 +72,7 @@ export async function POST(req) {
 export async function DELETE(req) {
   const u = await getAuthUser(req);
   if (!u) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'authenticated'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const db = sb();
   if (!db) return NextResponse.json({ error: 'DB indisponible' }, { status: 503 });
 

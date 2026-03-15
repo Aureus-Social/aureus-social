@@ -3,7 +3,7 @@
 // Notifications email automatiques sur événements critiques
 // Déclenché par cron quotidien + appel manuel depuis SmartOps
 // ═══════════════════════════════════════════════════════════════
-import { sbFromRequest, sbAdmin } from '@/app/lib/supabase-server';
+import { sbFromRequest, sbAdmin, checkRole } from '@/app/lib/supabase-server';
 import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
@@ -157,6 +157,7 @@ export async function GET(req) {
 export async function POST(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'authenticated'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const body = await req.json();
   const { to, subject, message, type } = body;
   if (!to || !message) return Response.json({ error: 'to et message requis' }, { status: 400 });

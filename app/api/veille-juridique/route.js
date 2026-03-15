@@ -1,3 +1,4 @@
+import { checkRole } from '@/app/lib/supabase-server';
 import { getAuthUser } from '@/app/lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 export const dynamic = 'force-dynamic';
@@ -38,6 +39,7 @@ async function checkSource(source) {
 export async function GET(req) {
   const u = await getAuthUser(req);
   if (!u) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'authenticated'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
 
   const { searchParams } = new URL(req.url);
   const manual = searchParams.get('manual') === 'true';

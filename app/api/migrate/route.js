@@ -1,3 +1,4 @@
+import { checkRole } from '@/app/lib/supabase-server';
 // ═══════════════════════════════════════════════════════════════
 // AUREUS SOCIAL PRO — Auto-Migration Supabase
 // Exécute toutes les migrations SQL automatiquement
@@ -5,6 +6,8 @@
 // ═══════════════════════════════════════════════════════════════
 import { createClient } from '@supabase/supabase-js';
 export const dynamic = 'force-dynamic';
+
+// Route admin-only — auth vérifiée dans chaque handler
 
 const CRON_SECRET = process.env.CRON_SECRET;
 

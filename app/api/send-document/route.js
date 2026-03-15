@@ -1,3 +1,4 @@
+import { checkRole } from '@/app/lib/supabase-server';
 // AUREUS SOCIAL PRO — /api/send-document
 // Envoi de documents par email via Resend
 

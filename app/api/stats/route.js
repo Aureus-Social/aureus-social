@@ -1,3 +1,4 @@
+import { checkRole } from '@/app/lib/supabase-server';
 import { createClient } from '@supabase/supabase-js';
 import { getAuthUser } from '@/app/lib/supabase';
 export const dynamic = 'force-dynamic';
@@ -7,6 +8,7 @@ export async function GET(request) {
   try {
     const caller = await getAuthUser(request);
     if (!caller) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(caller, 'authenticated'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
     if (!supabase) return Response.json({ error: 'DB non disponible' }, { status: 503 });
     const now = new Date();
     const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();

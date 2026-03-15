@@ -1,3 +1,4 @@
+import { checkRole } from '@/app/lib/supabase-server';
 // ═══════════════════════════════════════════════════════════════
 // AUREUS SOCIAL PRO — /api/rapport-mensuel
 // Génère et envoie le rapport RH mensuel PDF par email

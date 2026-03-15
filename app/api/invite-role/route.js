@@ -2,7 +2,7 @@
 // AUREUS SOCIAL PRO — /api/invite-role
 // Invitation utilisateur avec email mode d'emploi par rôle
 // ═══════════════════════════════════════════════════════════════
-import { sbFromRequest, sbAdmin } from '@/app/lib/supabase-server';
+import { sbFromRequest, sbAdmin, checkRole } from '@/app/lib/supabase-server';
 export const dynamic = 'force-dynamic';
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
@@ -152,6 +152,7 @@ function buildEmailHTML(prenom, role, roleData, tempPassword) {
 export async function POST(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'admin_only'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   if (!RESEND_KEY) return Response.json({ error: 'RESEND_API_KEY manquante' }, { status: 500 });
 
   const { email, prenom, nom, role = 'secretariat', send_password } = await req.json();

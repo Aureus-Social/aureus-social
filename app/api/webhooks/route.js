@@ -4,7 +4,7 @@
 // Events: payroll.generated, dimona.submitted, employee.created,
 //         conge.approved, facture.sent
 // ═══════════════════════════════════════════════════════════════
-import { sbFromRequest, sbAdmin } from '@/app/lib/supabase-server';
+import { sbFromRequest, sbAdmin, checkRole } from '@/app/lib/supabase-server';
 import { createHmac } from 'crypto';
 export const dynamic = 'force-dynamic';
 
@@ -42,6 +42,7 @@ async function deliverWebhook(endpoint, secret, event, data) {
 export async function GET(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'admin_only'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const { data, error } = await db.from('webhooks').select('id,url,events,active,created_at,last_delivery,last_status').order('created_at', { ascending: false });
   if (error) return Response.json({ error: process.env.NODE_ENV==='production'?'Erreur interne':error.message }, { status: 500 });
   return Response.json({ ok: true, data: data || [] });
@@ -51,6 +52,7 @@ export async function GET(req) {
 export async function POST(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'admin_only'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const body = await req.json();
 
   // Mode trigger: déclencher un event vers tous les webhooks actifs
@@ -97,6 +99,7 @@ export async function POST(req) {
 export async function PUT(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'admin_only'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const { id, active, url, events } = await req.json();
   if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return Response.json({ error: 'ID invalide' }, { status: 400 });
   const updates = { updated_at: new Date().toISOString() };
@@ -112,6 +115,7 @@ export async function PUT(req) {
 export async function DELETE(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'admin_only'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const id = new URL(req.url).searchParams.get('id');
   if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return Response.json({ error: 'ID invalide' }, { status: 400 });
   await db.from('webhooks').delete().eq('id', id);

@@ -1,3 +1,4 @@
+import { checkRole } from '@/app/lib/supabase-server';
 import { getAuthUser } from '@/app/lib/supabase';
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +31,7 @@ export async function POST(req) {
   let user = null;
   try { user = await getAuthUser(req); } catch(e) {}
   if (!user) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(user, 'authenticated'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
 
   const body = await req.json().catch(() => ({}));
   const { messages = [], lang = 'fr' } = body;

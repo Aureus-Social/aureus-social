@@ -1,3 +1,4 @@
+import { checkRole } from '@/app/lib/supabase-server';
 // ═══ AUREUS SOCIAL PRO — API Onboarding ═══
 // Déclenché au premier login d'un nouveau client
 // 1. Crée le tenant dans Supabase (table clients)
@@ -29,6 +30,7 @@ async function sendEmail(to, subject, html) {
 export async function POST(request) {
   const u = await getAuthUser(request);
   if (!u) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'employees_write'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
 
   if (!supabase) {
     console.warn('[Onboarding] Supabase non configuré — skip');

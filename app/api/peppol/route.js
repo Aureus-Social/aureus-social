@@ -3,7 +3,7 @@
 // Génération de factures électroniques au format Peppol BIS 3.0 (UBL 2.1)
 // Identifiant Peppol : 0208:1028230781
 // ═══════════════════════════════════════════════════════════════
-import { sbFromRequest } from '@/app/lib/supabase-server';
+import { sbFromRequest, checkRole } from '@/app/lib/supabase-server';
 export const dynamic = 'force-dynamic';
 
 const PEPPOL_ID = '0208:1028230781'; // Aureus IA SPRL
@@ -119,6 +119,7 @@ function genUBL(facture, supplier) {
 export async function GET(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'export_compta'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
 
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
@@ -143,6 +144,7 @@ export async function GET(req) {
 export async function POST(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'export_compta'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const { facture_id, client_peppol_id, client_vat } = await req.json();
   if (!facture_id) return Response.json({ error: 'facture_id requis' }, { status: 400 });
 

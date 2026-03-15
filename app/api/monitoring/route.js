@@ -1,9 +1,12 @@
+import { checkRole } from '@/app/lib/supabase-server';
 // API Monitoring — déclenchement manuel depuis le Dashboard
 import { NextResponse } from 'next/server';
 import { logInfo, logError, logWarn } from '../../lib/security/logger.js';
 import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
+
+// Route admin-only — auth vérifiée dans chaque handler
 
 function getSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

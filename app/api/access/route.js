@@ -2,7 +2,7 @@
 // AUREUS SOCIAL PRO — /api/access
 // Gestion des demandes d'accès et validation admin
 // ═══════════════════════════════════════════════════════════════
-import { sbFromRequest, sbAdmin } from '@/app/lib/supabase-server';
+import { sbFromRequest, sbAdmin, checkRole } from '@/app/lib/supabase-server';
 export const dynamic = 'force-dynamic';
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
@@ -31,6 +31,7 @@ async function sendEmail(to, subject, html) {
 export async function GET(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'authenticated'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
 
   const { searchParams } = new URL(req.url);
   const admin = searchParams.get('admin');
@@ -53,6 +54,7 @@ export async function GET(req) {
 export async function POST(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'authenticated'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
 
   const body = await req.json();
   const { full_name, company_name, company_bce, role_type, phone, message, nb_employees, nb_dossiers } = body;
@@ -120,6 +122,7 @@ export async function POST(req) {
 export async function PUT(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'authenticated'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
 
   const isAdmin = u.email === 'info@aureus-ia.com' || u.email === 'moussati.nourdin@gmail.com';
   if (!isAdmin) return Response.json({ error: 'Accès admin requis' }, { status: 403 });

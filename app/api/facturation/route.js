@@ -1,10 +1,11 @@
-import { sbFromRequest, sbAdmin } from '@/app/lib/supabase-server';
+import { sbFromRequest, sbAdmin, checkRole } from '@/app/lib/supabase-server';
 import { triggerWebhook } from '@/app/lib/trigger-webhook';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'facturation'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const { searchParams } = new URL(req.url);
   const status = searchParams.get('status');
   let q = db.from('factures').select('*').order('created_at', { ascending: false }).limit(200);
@@ -17,6 +18,7 @@ export async function GET(req) {
 export async function POST(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'facturation'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const body = await req.json();
   const { client_name, client_email, montant, description, echeance, items } = body;
   if (!client_name || !montant) return Response.json({ error: 'client_name et montant requis' }, { status: 400 });
@@ -40,6 +42,7 @@ export async function POST(req) {
 export async function PUT(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'facturation'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const body = await req.json();
   const { id, ...updates } = body;
   if (!id) return Response.json({ error: 'ID requis' }, { status: 400 });
@@ -53,6 +56,7 @@ export async function PUT(req) {
 export async function DELETE(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'facturation'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const id = new URL(req.url).searchParams.get('id');
   if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return Response.json({ error: 'ID invalide' }, { status: 400 });
   const { error } = await db.from('factures').delete().eq('id', id);

@@ -1,9 +1,11 @@
+import { checkRole } from '@/app/lib/supabase-server';
 import { getAuthUser } from '@/app/lib/supabase';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req) {
   const u = await getAuthUser(req);
   if (!u) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'authenticated'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
 
   const KEY = process.env.RESEND_API_KEY;
   if (!KEY) return Response.json({ error: 'Service email non configuré' }, { status: 503 });

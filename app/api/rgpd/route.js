@@ -1,3 +1,4 @@
+import { checkRole } from '@/app/lib/supabase-server';
 // ═══════════════════════════════════════════════════════════════════════
 //  Aureus Social Pro — /api/rgpd
 //  Endpoint central RGPD — Règlement (UE) 2016/679

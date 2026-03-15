@@ -1,9 +1,10 @@
-import { sbFromRequest } from '@/app/lib/supabase-server';
+import { sbFromRequest, checkRole } from '@/app/lib/supabase-server';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'admin_only'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const { data, error } = await db.from('clients').select('*').order('created_at', { ascending: false });
   if (error) return Response.json({ error: error.message }, { status: 500 });
   return Response.json({ ok: true, data: data || [] });
@@ -12,6 +13,7 @@ export async function GET(req) {
 export async function POST(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'admin_only'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const body = await req.json();
   const { data, error } = await db.from('clients').insert([{
     user_id: u.id,
@@ -39,6 +41,7 @@ export async function POST(req) {
 export async function DELETE(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'admin_only'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
   if (!id) return Response.json({ error: 'ID requis' }, { status: 400 });

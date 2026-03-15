@@ -1,3 +1,4 @@
+import { checkRole } from '@/app/lib/supabase-server';
 import { createClient } from '@supabase/supabase-js';
 import { getAuthUser } from '@/app/lib/supabase';
 export const dynamic = 'force-dynamic';
@@ -45,6 +46,7 @@ function genSEPA(emps, co, period) {
 
 export async function POST(req) {
   const u = await getAuthUser(req); if (!u) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'sepa'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const db = sb();
   const body = await req.json();
   const { emps, co, period } = body;
