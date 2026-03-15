@@ -44,7 +44,9 @@ const ETAPES = [
       { id: 'fiche_salariale', label: 'Informer sur la structure salariale', detail: 'Barème CP applicable, primes éventuelles, chèques-repas, voiture... À documenter.', obligatoire: true },
       { id: 'iban', label: 'Collecter l\'IBAN pour virement salaire', detail: 'Compte bancaire belge ou SEPA. Vérifier le format BE + 14 chiffres.', obligatoire: true },
       { id: 'rgpd_consent', label: 'Faire signer la déclaration RGPD', detail: 'Informer le travailleur du traitement de ses données personnelles (NISS, coordonnées, salaire). Obligatoire RGPD Art.13.', obligatoire: true },
-      { id: 'casier_remis', label: 'Remettre fiche de poste & description de fonction', detail: 'Recommandé pour cadrer les attentes et faciliter l\'évaluation.', obligatoire: false },
+      { id: 'casier_remis', label: 'Remettre fiche de poste & description de fonction', detail: "Recommandé pour cadrer les attentes et faciliter l'évaluation.", obligatoire: false },
+      { id: 'non_concurrence', label: 'Clause de non-concurrence si applicable', detail: "Conditions strictes (CCT n°1/1968) : salaire > 43.609€/an, durée max 12 mois, compensation obligatoire (50% rémunération variable). Invalide si salaire < seuil.", obligatoire: false },
+      { id: 'periode_essai', label: '⚠️ Période d\'essai supprimée en droit belge', detail: "Depuis le 1/01/2014, la période d'essai est supprimée pour les CDI. Seuls les contrats étudiants, intérimaires et CDD spéciaux maintiennent des règles particulières. Ne pas insérer de clause d'essai dans un CDI.", obligatoire: true },
     ]
   },
   {
@@ -60,6 +62,8 @@ const ETAPES = [
       { id: 'reduction_bas', label: 'Vérifier les réductions ONSS applicables', detail: 'Bas salaires (< 3.500€ brut), jeunes non qualifiés, travailleurs âgés (+55 ans). Peuvent réduire jusqu\'à 1.500€/trimestre.', obligatoire: false },
       { id: 'activa', label: 'Vérifier éligibilité Activa.brussels / MonBEE', detail: 'Primes à l\'embauche pour demandeurs d\'emploi inscrits chez Actiris. Jusqu\'à 15.900€ sur 3 ans.', lien: 'https://www.actiris.brussels', obligatoire: false },
       { id: 'dmfa', label: 'Prévoir DmfA trimestrielle', detail: 'Déclaration ONSS trimestrielle obligatoire. Délai : dernier jour du mois suivant la fin du trimestre.', obligatoire: true },
+      { id: 'af', label: 'Déclarer les allocations familiales', detail: "L'employeur doit s'affilier à une caisse d'allocations familiales (Famiwal, Kidslife, etc.) ou à l'ONSS. Le travailleur reçoit les AF directement de la caisse.", lien: 'https://www.famiwal.be', obligatoire: true },
+      { id: 'pension_compl', label: 'Vérifier pension complémentaire sectorielle', detail: 'Certaines CP imposent une assurance groupe ou EIP obligatoire. Ex: CP 200, CP 124. Vérifier la CCT sectorielle applicable.', obligatoire: false },
     ]
   },
   {
@@ -108,10 +112,17 @@ const ETAPES = [
 
 export default function EmbaucheAZ() {
   const [etapeActive, setEtapeActive] = useState(1)
-  const [tachesCompletes, setTachesCompletes] = useState({})
+  const [tachesCompletes, setTachesCompletes] = useState(() => {
+    if (typeof window === 'undefined') return {}
+    try { return JSON.parse(localStorage.getItem('embauche_az_progress') || '{}') } catch { return {} }
+  })
   const [showDetails, setShowDetails] = useState({})
 
-  const toggleTache = (id) => setTachesCompletes(prev => ({ ...prev, [id]: !prev[id] }))
+  const toggleTache = (id) => setTachesCompletes(prev => {
+    const next = { ...prev, [id]: !prev[id] }
+    if (typeof window !== 'undefined') localStorage.setItem('embauche_az_progress', JSON.stringify(next))
+    return next
+  })
   const toggleDetail = (id) => setShowDetails(prev => ({ ...prev, [id]: !prev[id] }))
 
   const totalTaches = ETAPES.flatMap(e => e.taches).length

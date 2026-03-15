@@ -122,7 +122,7 @@ export const MENU_BY_ROLE = {
 
   // ── COMPTABLE EXTERNE — exports uniquement ────────────────────
   comptable: new Set([
-    'dashboard', 'exportcompta', 'connecteurscompta', 'sepa', 'belcotax281',
+    'dashboard', 'embaucheaz', 'exportcompta', 'connecteurscompta', 'sepa', 'belcotax281',
     'listingtva', 'rapports', 'echeancier', 'facturation',
   ]),
 };
