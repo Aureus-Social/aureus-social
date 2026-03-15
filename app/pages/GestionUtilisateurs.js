@@ -87,7 +87,41 @@ export default function GestionUtilisateurs({ state, dispatch }) {
     }
   }
 
-  // Désactiver un utilisateur
+  // Réactiver un utilisateur
+  async function reactivateUser(userId, email) {
+    try {
+      const r = await authFetch(`/api/invite-role`, {
+        method: 'PUT',
+        body: JSON.stringify({ userId, action: 'reactivate' })
+      })
+      const j = await r.json()
+      if (j.ok) {
+        setMsg({ type: 'success', text: `✅ Compte ${email} réactivé` })
+        loadUsers()
+      } else {
+        setMsg({ type: 'error', text: `❌ ${j.error}` })
+      }
+    } catch(e) {
+      setMsg({ type: 'error', text: `❌ ${e.message}` })
+    }
+  }
+
+  // Supprimer définitivement un utilisateur
+  async function deleteUser(userId, email) {
+    if (!confirm(`⚠️ Supprimer définitivement le compte ${email} ?\n\nCette action est irréversible.`)) return
+    try {
+      const r = await authFetch(`/api/invite-role?userId=${userId}&permanent=true`, { method: 'DELETE' })
+      const j = await r.json()
+      if (j.ok) {
+        setMsg({ type: 'success', text: `✅ Compte ${email} supprimé définitivement` })
+        loadUsers()
+      } else {
+        setMsg({ type: 'error', text: `❌ ${j.error}` })
+      }
+    } catch(e) {
+      setMsg({ type: 'error', text: `❌ ${e.message}` })
+    }
+  }
   async function deactivateUser(userId, email) {
     if (!confirm(`Désactiver le compte de ${email} ?`)) return
     try {
@@ -163,11 +197,17 @@ export default function GestionUtilisateurs({ state, dispatch }) {
                   const role = u.user_metadata?.role || 'rh_entreprise'
                   const color = ROLE_COLORS[role] || '#6b7280'
                   const isEditing = editUser === u.id
+                  const isBanned = u.banned_until && new Date(u.banned_until) > new Date()
                   return (
-                    <tr key={u.id} style={{ borderBottom: '1px solid #1a1a1a' }}>
+                    <tr key={u.id} style={{ borderBottom: '1px solid #1a1a1a', opacity: isBanned ? 0.6 : 1, background: isBanned ? '#1a0d0d' : 'transparent' }}>
                       <td style={{ padding: '10px 12px' }}>
-                        <div style={{ fontWeight: 600 }}>{u.user_metadata?.prenom || ''} {u.user_metadata?.nom || u.email?.split('@')[0]}</div>
-                        <div style={{ fontSize: 11, color: '#6b7280' }}>{u.email}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <div>
+                            <div style={{ fontWeight: 600 }}>{u.user_metadata?.prenom || ''} {u.user_metadata?.nom || u.email?.split('@')[0]}</div>
+                            <div style={{ fontSize: 11, color: '#6b7280' }}>{u.email}</div>
+                          </div>
+                          {isBanned && <span style={{ background: '#ef444420', color: '#ef4444', border: '1px solid #ef444440', borderRadius: 4, padding: '1px 6px', fontSize: 10, fontWeight: 700 }}>🚫 DÉSACTIVÉ</span>}
+                        </div>
                       </td>
                       <td style={{ padding: '10px 12px' }}>
                         {isEditing ? (
@@ -194,9 +234,14 @@ export default function GestionUtilisateurs({ state, dispatch }) {
                             <button onClick={() => { setEditUser(null); setNewRole('') }} style={{ ...btn('secondary'), padding: '5px 10px', fontSize: 11 }}>✕</button>
                           </div>
                         ) : (
-                          <div style={{ display: 'flex', gap: 6 }}>
-                            <button onClick={() => { setEditUser(u.id); setNewRole(role) }} style={{ ...btn('secondary'), padding: '5px 10px', fontSize: 11 }}>✏️ Rôle</button>
-                            <button onClick={() => deactivateUser(u.id, u.email)} style={{ ...btn('danger'), padding: '5px 10px', fontSize: 11 }}>🚫</button>
+                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                            {!isBanned && <button onClick={() => { setEditUser(u.id); setNewRole(role) }} style={{ ...btn('secondary'), padding: '5px 10px', fontSize: 11 }}>✏️ Rôle</button>}
+                            {isBanned ? (
+                              <button onClick={() => reactivateUser(u.id, u.email)} style={{ background: '#0d2818', color: '#10b981', border: '1px solid #10b981', borderRadius: 6, padding: '5px 10px', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>✅ Réactiver</button>
+                            ) : (
+                              <button onClick={() => deactivateUser(u.id, u.email)} style={{ background: '#1a0d0d', color: '#f97316', border: '1px solid #f9741640', borderRadius: 6, padding: '5px 10px', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>🚫 Désactiver</button>
+                            )}
+                            <button onClick={() => deleteUser(u.id, u.email)} style={{ ...btn('danger'), padding: '5px 10px', fontSize: 11 }}>🗑️ Supprimer</button>
                           </div>
                         )}
                       </td>
