@@ -54,6 +54,32 @@ const SOURCES = [
   { id:'onem_credit_temps', name:'ONEM — Crédit-temps (CCT n°103)', url:'https://www.onem.be/fr/citoyen/credit-temps', cat:'CHOMAGE', impact:'allocation crédit-temps' },
   // Moniteur
   { id:'moniteur_lois_sociales', name:'Moniteur Belge — Lois sociales', url:'https://www.ejustice.just.fgov.be/loi/loi.htm', cat:'MONITEUR', impact:'nouvelles lois, CCT, AR' },
+  // ── CP SUPPLÉMENTAIRES ────────────────────────────────────────
+  { id:'cp111_metal', name:'CP 111 — Métal Flandre', url:'https://www.emploi.belgique.be/fr/themes/relations-collectives/commissions-paritaires/liste-des-commissions-paritaires/commission-111', cat:'CP', impact:'barème min métal' },
+  { id:'cp112_garage', name:'CP 112 — Garage', url:'https://www.emploi.belgique.be/fr/themes/relations-collectives/commissions-paritaires/liste-des-commissions-paritaires/commission-112', cat:'CP', impact:'barème min garage' },
+  { id:'cp201_commerce', name:'CP 201 — Commerce détail employés', url:'https://www.emploi.belgique.be/fr/themes/relations-collectives/commissions-paritaires/liste-des-commissions-paritaires/commission-201', cat:'CP', impact:'barème CP201' },
+  { id:'cp218_assistants', name:'CP 218 — Assistants commerciaux', url:'https://www.emploi.belgique.be/fr/themes/relations-collectives/commissions-paritaires/liste-des-commissions-paritaires/commission-218', cat:'CP', impact:'barème CP218' },
+  { id:'cp310_banques', name:'CP 310 — Banques', url:'https://www.emploi.belgique.be/fr/themes/relations-collectives/commissions-paritaires/liste-des-commissions-paritaires/commission-310', cat:'CP', impact:'barème CP310' },
+  { id:'cp317_pharmacie', name:'CP 317 — Pharmacie', url:'https://www.emploi.belgique.be/fr/themes/relations-collectives/commissions-paritaires/liste-des-commissions-paritaires/commission-317', cat:'CP', impact:'barème CP317' },
+  { id:'cp318_gardiennage', name:'CP 318 — Gardiennage', url:'https://www.emploi.belgique.be/fr/themes/relations-collectives/commissions-paritaires/liste-des-commissions-paritaires/commission-318', cat:'CP', impact:'barème CP318' },
+  { id:'cp322_interimaires', name:'CP 322 — Intérimaires', url:'https://www.emploi.belgique.be/fr/themes/relations-collectives/commissions-paritaires/liste-des-commissions-paritaires/commission-322', cat:'CP', impact:'barème CP322' },
+  // ── SAISIES ───────────────────────────────────────────────────
+  { id:'just_saisies', name:'SPF Justice — Saisies sur salaire art.1409', url:'https://justice.belgium.be/fr/themes_et_dossiers/saisie_-_cession_-_cede_en_paiement/montants_insaisissables', cat:'SAISIES', impact:'saisie1/2/3/4 mensuel' },
+  // ── ALLOCATIONS FAMILIALES ────────────────────────────────────
+  { id:'famiwal_af', name:'Famiwal — AF Wallonie', url:'https://www.famiwal.be/fr/montants-allocations-familiales', cat:'AF', impact:'afWal 2026' },
+  { id:'kidslife_af', name:'Kidslife — AF Bruxelles', url:'https://www.kidslife.be/fr/nos-allocations/montants/', cat:'AF', impact:'afBxl 2026' },
+  // ── DIMONA / DMFA ─────────────────────────────────────────────
+  { id:'onss_dimona', name:'ONSS — Dimona IN/OUT', url:'https://www.socialsecurity.be/employer/instructions/dmfa/fr/latest/instructions/various_topics/dimona.html', cat:'DIMONA', impact:'règles Dimona 2026' },
+  { id:'onss_dmfa', name:'ONSS — DmfA trimestrielle', url:'https://www.socialsecurity.be/employer/instructions/dmfa/fr/latest/instructions/general/intro.html', cat:'DMFA', impact:'DmfA instructions 2026' },
+  // ── ATN & AVANTAGES ──────────────────────────────────────────
+  { id:'spf_atn_voiture', name:'SPF Finances — ATN voitures société', url:'https://finances.belgium.be/fr/entreprises/personnel_et_remuneration/avantages_de_toute_nature/voiture_de_societe', cat:'ATN', impact:'formule ATN CO2 2026' },
+  { id:'spf_atn_autres', name:'SPF Finances — ATN GSM, PC, logement', url:'https://finances.belgium.be/fr/entreprises/personnel_et_remuneration/avantages_de_toute_nature/ordinateur_internet_gsm', cat:'ATN', impact:'atnGsm, atnPc forfaits' },
+  // ── PENSION & INAMI ──────────────────────────────────────────
+  { id:'inami_incapacite', name:'INAMI — Indemnités incapacité travail', url:'https://www.inami.fgov.be/fr/themes/incapacite-invalidite/Pages/default.aspx', cat:'INAMI', impact:'taux 60%, plafond INAMI' },
+  { id:'fedris_at', name:'Fedris — Accidents du travail', url:'https://www.fedris.be/fr/professionnel/accidents-du-travail', cat:'AT', impact:'primes AT, taux sectoriels' },
+  // ── ACTIRIS / AIDES EMPLOI ───────────────────────────────────
+  { id:'actiris_activa', name:'Actiris — Activa.Brussels 2026', url:'https://www.actiris.brussels/fr/entreprises/activa-brussels/', cat:'AIDES', impact:'primes Activa, montants, conditions' },
+  { id:'sprb_monbee', name:'SPRB — MonBEE prime recrutement', url:'https://economie-emploi.brussels/monbee', cat:'AIDES', impact:'MonBEE montant, conditions, deadline' },
 ];
 
 const CAT_COLORS = {
