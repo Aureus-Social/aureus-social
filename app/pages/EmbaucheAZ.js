@@ -245,6 +245,45 @@ const ETAPES = [
       { id: 'prescription_salaires', label: 'Prescription arriérés de salaires — 5 ans', detail: "Un travailleur peut réclamer des arriérés de salaires pendant 5 ans (art.15 loi 3/07/1978). Cotisations ONSS : 3 ans (7 ans en cas de fraude). À partir du moment où le salaire était dû. Interrompre par mise en demeure recommandée.", obligatoire: true },
     ]
   },
+  {
+    id: 16, icon: '🏗️', titre: 'Secteurs réglementés', delai: 'Avant activité', color: '#f97316', obligatoire: false,
+    taches: [
+      { id: 'construction_coord', label: 'Coordinateur sécurité chantier (AR 25/01/2001)', detail: "Chantier temporaire ou mobile avec +1 entrepreneur : coordinateur sécurité-santé obligatoire en phase projet ET réalisation. Dossier d'intervention ultérieure (DIU) à constituer. Sanctions pénales si absent lors d'un contrôle.", obligatoire: false },
+      { id: 'afsca_agrement', label: 'Agrément AFSCA — secteur alimentaire', detail: "Toute entreprise manipulant des denrées alimentaires doit être agréée par l'AFSCA. Travailleurs : formation hygiène alimentaire HACCP obligatoire. Contrôles inopinés. Retrait d'agrément = fermeture immédiate.", lien: 'https://www.favv-afsca.be', obligatoire: false },
+      { id: 'caisses_horeca', label: 'Caisse enregistreuse HORECA — SCE obligatoire', detail: "Restaurants avec CA > 25.000€/an de repas chauds : caisse enregistreuse certifiée SCE obligatoire (AR 30/12/2009). Travailleurs doivent être formés à son utilisation. Contrôle TVA possible à tout moment.", lien: 'https://finances.belgium.be', obligatoire: false },
+      { id: 'securite_privee', label: 'Sécurité privée — badge SPF Intérieur obligatoire', detail: "Loi 2/10/2017 : tout agent de sécurité doit avoir un badge délivré par SPF Intérieur. Entreprise de gardiennage agréée. Casier judiciaire vierge. Formation initiale 110h + recyclage annuel.", lien: 'https://www.ibz.rrn.fgov.be', obligatoire: false },
+      { id: 'transport_cqc', label: 'Transport routier — CQC et carte conducteur numérique', detail: "Conducteurs poids lourds et bus : CQC (Certificat de Qualification initiale) obligatoire + formation continue 35h/5 ans. Carte conducteur numérique pour tachygraphe. Sans CQC : amende + immobilisation du véhicule.", obligatoire: false },
+      { id: 'inami_visa', label: 'Professions de santé — visa INAMI obligatoire', detail: "Médecin, infirmier, kinésithérapeute, pharmacien : visa INAMI délivré par SPF Santé publique avant toute prestation remboursée. Diplôme UE : reconnaissance automatique (directive 2005/36). Hors UE : procédure SPF Santé.", lien: 'https://www.inami.fgov.be', obligatoire: false },
+      { id: 'enseignement_titre', label: 'Enseignement — titre requis par niveau', detail: "Enseignant : titre pédagogique requis selon niveau (AESI/AESS/Master agrégation). Titre étranger : équivalence auprès de la communauté compétente. Intérim possible avec titre provisoire.", obligatoire: false },
+      { id: 'immobilier_ipi', label: 'Agent immobilier — agrément IPI', detail: "Toute personne exerçant des activités immobilières à titre professionnel doit être agréée par l'IPI (Institut Professionnel des agents Immobiliers). Stagiaire pendant 1 an sous tutelle. Formation continue 10h/an.", lien: 'https://www.ipi.be', obligatoire: false },
+    ]
+  },
+  {
+    id: 17, icon: '💼', titre: 'Fiscalité employeur avancée', delai: 'Planifier', color: '#10b981', obligatoire: false,
+    taches: [
+      { id: 'isoc_remun_min', label: 'Rémunération minimale dirigeant — taux ISOC réduit 20%', detail: "Pour bénéficier du taux ISOC réduit de 20% (au lieu de 25%) : la société doit verser au moins 45.000€/an à au moins un dirigeant (ou égal au bénéfice si inférieur). Condition à vérifier chaque exercice comptable.", obligatoire: false },
+      { id: 'deduction_invest', label: 'Déduction pour investissement — économie d\'impôt ISOC', detail: "Investissement dans actifs professionnels : déduction pour investissement de 8% à 20% du coût d'acquisition. PME : taux majoré. Non cumulable avec déduction étalée. À planifier avec le comptable avant achat.", obligatoire: false },
+      { id: 'cotisation_co2_calc', label: 'Cotisation CO2 véhicule — formule exacte 2026', detail: "Cotisation mensuelle ONSS sur ATN voiture = (CO2 × 9€ – X) / 12. Minimum 31,34€/mois. Formule modifiée en 2026. Voiture électrique : cotisation minimum uniquement. À recalculer pour chaque véhicule de société lors de l'embauche.", obligatoire: true },
+      { id: 'tva_usage_mixte', label: 'TVA — déductibilité partielle biens à usage mixte', detail: "Voiture de société (usage pro + privé) : TVA déductible selon proportion d'usage professionnel (méthode carnet de bord ou forfait 35%). Mobilier bureau à domicile : idem. À justifier lors du contrôle TVA.", obligatoire: false },
+      { id: 'ruling_fiscal', label: 'Ruling fiscal — décision anticipée SPF Finances', detail: "Pour toute opération complexe (plan de rémunération innovant, avantage en nature atypique...) : demander une décision anticipée au SPF Finances. Validité 5 ans. Garantit la non-requalification fiscale. Demande gratuite.", lien: 'https://finances.belgium.be', obligatoire: false },
+      { id: 'deduction_formation_isoc', label: 'Déduction formation 120% — PME (Deal emploi 2022)', detail: "PME peuvent déduire 120% des frais de formation formelle depuis 2023. Formation reconnue + attestation délivrée obligatoires. Maximum 3M€/an. Excellent levier fiscal pour former les travailleurs.", obligatoire: false },
+      { id: 'patent_box', label: 'Déduction revenus d\'innovation (Patent Box) — 85%', detail: "Brevets, logiciels protégés, certificats de protection complémentaire : déduction de 85% des revenus nets d'innovation. Taux effectif d'imposition réduit à ~3,75%. Demande de ruling préalable recommandée.", obligatoire: false },
+      { id: 'tob_stock_options', label: 'TOB (Taxe Opérations Boursières) sur stock-options', detail: "La vente d'actions via plan d'options est soumise à la TOB (0,35% max 1.600€ par transaction). Retenue à la source par l'intermédiaire financier. À intégrer dans le calcul du gain net réel pour le travailleur.", obligatoire: false },
+    ]
+  },
+  {
+    id: 18, icon: '📚', titre: 'Statuts exceptionnels', delai: 'Si applicable', color: '#6366f1', obligatoire: false,
+    taches: [
+      { id: 'gens_de_mer', label: 'Gens de mer — loi 3/06/1970 (régime distinct)', detail: "Marins et personnel navigant : loi 3/06/1970 complètement distincte du droit du travail commun. ONSS gens de mer avec taux différents. Contrat d'engagement maritime obligatoire. Convention MLC 2006 de l'OIT applicable.", obligatoire: false },
+      { id: 'travailleurs_portuaires', label: 'Travailleurs portuaires — loi 8/06/1972', detail: "Régime spécial : embauche obligatoire via les pools reconnus (Antwerp, Gent, Liège...). Pas de contrat classique. Cotisations ONSS spéciales. Fonds de sécurité d'existence portuaire. Reconnaissance syndicale spécifique.", obligatoire: false },
+      { id: 'fonctionnaires_contrat', label: 'Contractuels fonction publique — droit du travail applicable', detail: "Les contractuels dans la fonction publique (communes, CPAS, provinces, fédéral...) relèvent du droit du travail ordinaire. ONSS et PP applicables. Les agents nommés (statutaires) relèvent d'un régime distinct (pas de préavis, pas d'ONSS ordinaire).", obligatoire: false },
+      { id: 'artistes_loi2022', label: 'Statut artiste — loi 16/12/2022 (depuis 2023)', detail: "Depuis 2023 : tout travail artistique rémunéré relève du salariat ou de l'indépendance. Suppression de l'ancienne exception. Commission des artistes délivre des attestations de besoins artistiques. ONSS et PP applicables selon le cas.", lien: 'https://www.commissieartiesten.be', obligatoire: false },
+      { id: 'volontaires_loi2005', label: 'Volontaires — loi 3/07/2005 et limites 2026', detail: "Défraiement max 35,89€/j et 1.437,55€/an (2026) exonéré d'ONSS et PP. Au-delà = présomption de travail rémunéré avec toutes les cotisations dues. Note d'organisation obligatoire. Assurance RC et accidents obligatoire.", obligatoire: false },
+      { id: 'conjoint_aidant', label: 'Conjoint aidant — statut et cotisations obligatoires', detail: "Le conjoint ou cohabitant légal aidant régulièrement un indépendant doit s'affilier comme conjoint aidant. Maxistatut (cotisations complètes, droits complets) ou ministatut (cotisations réduites, droits limités). Obligation légale souvent ignorée = risque d'irrégularité.", obligatoire: false },
+      { id: 'mandataires_cumul', label: 'Mandataires politiques — cumul et incompatibilités', detail: "Bourgmestre, échevin, parlementaire : règles strictes de cumul avec emploi privé. Plafonds de rémunération cumulée. Certains mandats sont incompatibles avec des fonctions dirigeantes privées. À vérifier selon le niveau de pouvoir (local, régional, fédéral).", obligatoire: false },
+      { id: 'independant_associe', label: 'Indépendant associé d\'une société — statut mixte', detail: "Un indépendant associé dans une société (gérant, administrateur) peut combiner une rémunération de mandataire et un contrat de travail si les fonctions sont distinctes et subordonnées. Double cotisation possible : ONSS + cotisations sociales indépendant.", obligatoire: false },
+    ]
+  },
 ]
 
 export default function EmbaucheAZ() {
@@ -282,11 +321,11 @@ export default function EmbaucheAZ() {
   }
   const toggleDetail = (id) => setShowDetails(prev => ({ ...prev, [id]: !prev[id] }))
 
-  const totalTaches = ETAPES.flatMap(e => e.taches).length
+  const totalTaches = ALL_ETAPES.flatMap(e => e.taches).length
   const totalCompletes = Object.values(tachesCompletes).filter(Boolean).length
   const pct = Math.round(totalCompletes / totalTaches * 100)
 
-  const etapeCourante = ETAPES.find(e => e.id === etapeActive)
+  const etapeCourante = ALL_ETAPES.find(e => e.id === etapeActive)
   const tachesEtape = etapeCourante?.taches || []
   const completesEtape = tachesEtape.filter(t => tachesCompletes[t.id]).length
 
@@ -341,7 +380,7 @@ export default function EmbaucheAZ() {
       <div style={{ display: 'grid', gridTemplateColumns: 'min(240px, 35%) 1fr', gap: 20 }}>
         {/* Sidebar étapes */}
         <div>
-          {ETAPES.map(e => {
+          {ALL_ETAPES.map(e => {
             const completesE = e.taches.filter(t => tachesCompletes[t.id]).length
             const totalE = e.taches.length
             const doneE = completesE === totalE
