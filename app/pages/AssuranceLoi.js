@@ -242,7 +242,7 @@ export default function AssuranceLoi({ state, dispatch }) {
               <div>
                 <label style={lbl}>Gravité</label>
                 <select style={input} value={newAccident.gravite} onChange={e => setAcc('gravite', e.target.value)}>
-                  <option value="leger">Léger (< 4 jours)</option>
+                  <option value="leger">{'Léger (< 4 jours)'}</option>
                   <option value="grave">Grave (≥ 4 jours)</option>
                   <option value="invalidite">Invalidité permanente</option>
                   <option value="mortel">Mortel</option>
