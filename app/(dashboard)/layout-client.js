@@ -191,11 +191,6 @@ function reducer(state, action) {
 
 // Placeholder pour les pages pas encore migrées
 function PlaceholderPage({ id, label }) {
-  const handleWelcomeDismiss = () => {
-    setShowWelcome(false);
-    if (typeof window !== 'undefined') localStorage.setItem('aureus_welcome_seen', '1');
-  };
-
   return (
     <div style={{ padding: 40 }}>
       <div style={{ fontSize: 19, fontWeight: 800, color: '#c6a34e', marginBottom: 8 }}>{label}</div>
@@ -1114,7 +1109,7 @@ function DashboardLayoutApproved({ user }) {
 
         {/* Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: 24, background: TH.bg, color: TH.text }}>
-          <ErrorBoundary pageKey={page} label={currentItem?.label}>{showWelcome && <WelcomeGuidePg state={s} onNavigate={(r) => { setPage(r); }} onDismiss={() => { setShowWelcome(false); if (typeof window !== 'undefined') localStorage.setItem('aureus_welcome_seen', '1'); }} />}
+          <ErrorBoundary pageKey={page} label={currentItem?.label}>
               {renderPage()}</ErrorBoundary>
         </div>
       </div>
