@@ -167,7 +167,6 @@ export async function POST(req) {
   let inviteLink = APP_URL; // fallback
   try {
     const admin = sbAdmin();
-    // generateLink crée le token sans envoyer d'email
     const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
       type: 'invite',
       email,
@@ -176,14 +175,23 @@ export async function POST(req) {
         redirectTo: APP_URL,
       }
     });
-    if (!linkErr && linkData?.properties?.action_link) {
-      inviteLink = linkData.properties.action_link;
+    // Supabase retourne le lien dans différents endroits selon la version
+    const link = linkData?.properties?.action_link
+      || linkData?.action_link
+      || linkData?.properties?.hashed_token && `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/verify?token=${linkData.properties.hashed_token}&type=invite&redirect_to=${APP_URL}`
+      || null;
+
+    if (!linkErr && link) {
+      inviteLink = link;
     } else {
-      // Fallback : inviteUserByEmail si generateLink échoue
-      await admin.auth.admin.inviteUserByEmail(email, {
+      // Fallback : inviteUserByEmail
+      const { data: invData } = await admin.auth.admin.inviteUserByEmail(email, {
         data: { role, prenom, nom, societe, invited_by: u.email },
         redirectTo: APP_URL,
       });
+      // Tenter de récupérer le lien depuis invData aussi
+      const invLink = invData?.properties?.action_link || invData?.action_link;
+      if (invLink) inviteLink = invLink;
     }
   } catch(e) {}
 
@@ -212,7 +220,7 @@ export async function POST(req) {
     created_at: new Date().toISOString()
   }]).catch(() => {});
 
-  return Response.json({ ok: true, email_id: result.id, role, roleData: { label: roleData.label, icon: roleData.icon } });
+  return Response.json({ ok: true, email_id: result.id, role, inviteLink: inviteLink !== APP_URL ? '✅ lien généré' : '⚠️ fallback APP_URL', roleData: { label: roleData.label, icon: roleData.icon } });
 }
 
 // ── GET — liste tous les utilisateurs ─────────────────────────
