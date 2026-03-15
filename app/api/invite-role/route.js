@@ -200,3 +200,87 @@ export async function POST(req) {
 
   return Response.json({ ok: true, email_id: result.id, role, roleData: { label: roleData.label, icon: roleData.icon } });
 }
+
+// ── GET — liste tous les utilisateurs ─────────────────────────
+export async function GET(req) {
+  const { db, user: u } = await sbFromRequest(req);
+  if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'admin_only'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
+
+  try {
+    const admin = sbAdmin();
+    const { data, error } = await admin.auth.admin.listUsers({ perPage: 200 });
+    if (error) return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ users: data.users || [] });
+  } catch(e) {
+    return Response.json({ error: e.message }, { status: 500 });
+  }
+}
+
+// ── PUT — modifier le rôle d'un utilisateur ───────────────────
+export async function PUT(req) {
+  const { db, user: u } = await sbFromRequest(req);
+  if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'admin_only'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
+
+  const { userId, role } = await req.json();
+  if (!userId || !role) return Response.json({ error: 'userId et role requis' }, { status: 400 });
+
+  const VALID_ROLES = ['admin', 'secretariat', 'commercial', 'rh_entreprise', 'employe', 'comptable'];
+  if (!VALID_ROLES.includes(role)) return Response.json({ error: 'Rôle invalide' }, { status: 400 });
+
+  try {
+    const admin = sbAdmin();
+    const { error } = await admin.auth.admin.updateUserById(userId, {
+      user_metadata: { role }
+    });
+    if (error) return Response.json({ error: error.message }, { status: 500 });
+
+    // Log audit
+    await db.from('audit_log').insert([{
+      user_id: u.id, user_email: u.email,
+      action: 'UPDATE_USER_ROLE',
+      table_name: 'auth.users',
+      new_values: { userId, role },
+      created_at: new Date().toISOString()
+    }]).catch(() => {});
+
+    return Response.json({ ok: true, userId, role });
+  } catch(e) {
+    return Response.json({ error: e.message }, { status: 500 });
+  }
+}
+
+// ── DELETE — désactiver un utilisateur ────────────────────────
+export async function DELETE(req) {
+  const { db, user: u } = await sbFromRequest(req);
+  if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'admin_only'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
+
+  const { searchParams } = new URL(req.url);
+  const userId = searchParams.get('userId');
+  if (!userId) return Response.json({ error: 'userId requis' }, { status: 400 });
+  // Sécurité : ne pas supprimer son propre compte
+  if (userId === u.id) return Response.json({ error: 'Impossible de désactiver votre propre compte' }, { status: 400 });
+
+  try {
+    const admin = sbAdmin();
+    // Ban plutôt que delete — désactive sans supprimer les données
+    const { error } = await admin.auth.admin.updateUserById(userId, {
+      ban_duration: '87600h' // 10 ans = désactivé
+    });
+    if (error) return Response.json({ error: error.message }, { status: 500 });
+
+    await db.from('audit_log').insert([{
+      user_id: u.id, user_email: u.email,
+      action: 'DEACTIVATE_USER',
+      table_name: 'auth.users',
+      new_values: { userId },
+      created_at: new Date().toISOString()
+    }]).catch(() => {});
+
+    return Response.json({ ok: true, userId });
+  } catch(e) {
+    return Response.json({ error: e.message }, { status: 500 });
+  }
+}

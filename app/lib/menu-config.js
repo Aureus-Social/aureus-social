@@ -74,6 +74,7 @@ export const MENU = [
   // ── ADMINISTRATION ───────────────────────────────────────────
   { id: '_g6', label: 'ADMINISTRATION', icon: '⚙️', group: true },
   { id: 'permissions',    label: 'Rôles & Accès',       icon: '🔐', g: 6, keywords: ['role','acces','permission','utilisateur','droit','securite acces','gestion utilisateur','profil'] },
+  { id: 'gestionutilisateurs', label: 'Gestion Utilisateurs', icon: '👥', g: 6, keywords: ['utilisateur','inviter','compte','email','role','accès','creer compte','nouveau user','invitation','désactiver'] },
   { id: 'webhooks',       label: 'Webhooks API',        icon: '🔗', g: 6, keywords: ['webhook','api','integration','notification api','automatisation','trigger','endpoint'] },
   { id: 'backup',         label: 'Backup & Restore',    icon: '💾', g: 6, keywords: ['backup','sauvegarde','restauration','restore','backblaze','donnees','securite donnees'] },
   { id: 'demandes_acces', label: "Demandes d'accès",    icon: '🔑', g: 6, keywords: ['demande acces','invitation','nouvel utilisateur','inscription','acces nouveau'] },
