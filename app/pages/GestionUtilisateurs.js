@@ -56,7 +56,7 @@ export default function GestionUtilisateurs({ state, dispatch }) {
       })
       const j = await r.json()
       if (j.ok || j.message) {
-        setMsg({ type: 'success', text: `✅ Invitation envoyée à ${form.email} avec le rôle ${ROLE_LABELS[form.role]}` })
+        setMsg({ type: 'success', text: `✅ Invitation envoyée à ${form.email} — ${j.debug_link_status || 'envoyé'}` })
         setForm({ email: '', role: 'secretariat', nom: '', prenom: '', societe: '' })
         loadUsers()
       } else {

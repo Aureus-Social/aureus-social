@@ -176,9 +176,16 @@ export async function POST(req) {
       }
     });
     // Supabase retourne le lien dans différents endroits selon la version
+    // Supabase JS v2 retourne le lien dans différents endroits
     const link = linkData?.properties?.action_link
       || linkData?.action_link
-      || linkData?.properties?.hashed_token && `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/verify?token=${linkData.properties.hashed_token}&type=invite&redirect_to=${APP_URL}`
+      || linkData?.user?.action_link
+      || (linkData?.properties?.hashed_token
+          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/verify?token=${linkData.properties.hashed_token}&type=invite&redirect_to=${encodeURIComponent(APP_URL)}`
+          : null)
+      || (linkData?.properties?.token_hash
+          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/verify?token=${linkData.properties.token_hash}&type=invite&redirect_to=${encodeURIComponent(APP_URL)}`
+          : null)
       || null;
 
     if (!linkErr && link) {
@@ -220,7 +227,14 @@ export async function POST(req) {
     created_at: new Date().toISOString()
   }]).catch(() => {});
 
-  return Response.json({ ok: true, email_id: result.id, role, inviteLink: inviteLink !== APP_URL ? '✅ lien généré' : '⚠️ fallback APP_URL', roleData: { label: roleData.label, icon: roleData.icon } });
+  return Response.json({ 
+    ok: true, 
+    email_id: result.id, 
+    role, 
+    debug_link_status: inviteLink !== APP_URL ? '✅ lien généré' : '⚠️ fallback — lien non généré',
+    debug_link_preview: inviteLink !== APP_URL ? inviteLink.substring(0, 80) + '...' : null,
+    roleData: { label: roleData.label, icon: roleData.icon } 
+  });
 }
 
 // ── GET — liste tous les utilisateurs ─────────────────────────
