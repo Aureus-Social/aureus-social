@@ -46,6 +46,9 @@ const ETAPES = [
       { id: 'rgpd_consent', label: 'Faire signer la déclaration RGPD', detail: 'Informer le travailleur du traitement de ses données personnelles (NISS, coordonnées, salaire). Obligatoire RGPD Art.13.', obligatoire: true },
       { id: 'casier_remis', label: 'Remettre fiche de poste & description de fonction', detail: "Recommandé pour cadrer les attentes et faciliter l'évaluation.", obligatoire: false },
       { id: 'non_concurrence', label: 'Clause de non-concurrence si applicable', detail: "Conditions strictes (CCT n°1/1968) : salaire > 43.609€/an, durée max 12 mois, compensation obligatoire (50% rémunération variable). Invalide si salaire < seuil.", obligatoire: false },
+      { id: 'conges_annuels', label: 'Informer sur les droits aux congés annuels', detail: "En Belgique : 4 semaines (20 jours) pour un temps plein. Ouvriers : via la caisse de vacances (ONVA). Employés : payés par l'employeur. Pécule de vacances = double pécule en mai/juin.", obligatoire: true },
+      { id: 'classification', label: 'Déterminer la classification de fonction', detail: "La fonction détermine le barème salarial dans la CP. Ex : CP 200 a des barèmes par catégorie (A, B, C...). Impacte le salaire minimum légal applicable.", obligatoire: true },
+      { id: 'anciennete', label: 'Enregistrer la date d\'ancienneté', detail: "L'ancienneté sectorielle peut être reprise si le travailleur vient d'un autre employeur du même secteur. Impacte le barème et le préavis.", obligatoire: false },
       { id: 'periode_essai', label: '⚠️ Période d\'essai supprimée en droit belge', detail: "Depuis le 1/01/2014, la période d'essai est supprimée pour les CDI. Seuls les contrats étudiants, intérimaires et CDD spéciaux maintiennent des règles particulières. Ne pas insérer de clause d'essai dans un CDI.", obligatoire: true },
     ]
   },
@@ -92,6 +95,9 @@ const ETAPES = [
       { id: 'seppt', label: 'Affilier à un service de prévention (SEPPT)', detail: 'Service Externe de Prévention et de Protection au Travail. Obligatoire pour toutes les entreprises. Ex : Mensura, Idewe, Securex...', obligatoire: true },
       { id: 'accidents', label: 'Souscrire assurance accidents du travail', detail: 'Obligatoire légalement (loi 10/04/1971). Déclarer le nouveau travailleur à votre assureur AT.', obligatoire: true },
       { id: 'formation', label: 'Prévoir formation à la sécurité', detail: 'Information sur les risques du poste. Obligatoire pour postes à risque. À documenter dans le registre de formation.', obligatoire: false },
+      { id: 'mutualite', label: 'Informer sur l\'affiliation à la mutualité', detail: "Chaque travailleur doit être affilié à une mutualité (Solidaris, Mutualité Chrétienne, OZ...) pour bénéficier des remboursements INAMI. Rappeler au nouveau travailleur de mettre à jour son affiliation.", obligatoire: false },
+      { id: 'registre_presence', label: 'Mettre en place le registre des présences', detail: "Obligatoire pour certains secteurs (construction, HORECA). Enregistrement électronique ou papier des heures prestées. Contrôlé par l'inspection sociale.", obligatoire: false },
+      { id: 'cheques_repas_cct', label: 'Vérifier si chèques-repas obligatoires via CCT', detail: "Dans certaines CP, les chèques-repas sont obligatoires via CCT sectorielle (même si la loi ne les impose pas). Vérifier la CCT de votre CP. Max 8€/jour, part patronale max 6,91€.", obligatoire: false },
       { id: 'personne_conf', label: 'Informer sur la personne de confiance', detail: 'Obligatoire si > 50 travailleurs ou sur demande d\'un travailleur. Contact interne pour harcèlement/violence.', obligatoire: false },
     ]
   },
@@ -105,6 +111,7 @@ const ETAPES = [
     taches: [
       { id: 'registre', label: 'Inscrire dans le registre du personnel', detail: 'Obligatoire pour tous les travailleurs. Doit contenir : nom, prénom, adresse, date entrée, fonction, CP, type contrat.', obligatoire: true },
       { id: 'dossier', label: 'Créer le dossier individuel du travailleur', detail: 'Contrat signé, Dimona, NISS, IBAN, fiche de poste, déclaration RGPD. À conserver pendant la durée du contrat + 5 ans.', obligatoire: true },
+      { id: 'depot_greffe', label: 'Déposer le règlement de travail au greffe', detail: "Le règlement de travail MODIFIÉ doit être déposé au greffe du tribunal du travail dans les 8 jours (loi 8/04/1965, art.21). Pour un premier règlement, délai de 3 mois. Pas obligatoire si aucune modification.", obligatoire: false },
       { id: 'donnees_supabase', label: 'Encoder dans Aureus Social Pro', detail: 'Employés → Nouvel employé. Toutes les données sont chiffrées AES-256 et stockées dans Supabase Frankfurt (RGPD UE).', obligatoire: true },
     ]
   },
@@ -112,17 +119,37 @@ const ETAPES = [
 
 export default function EmbaucheAZ() {
   const [etapeActive, setEtapeActive] = useState(1)
+  const [travailleur, setTravailleur] = useState('')
   const [tachesCompletes, setTachesCompletes] = useState(() => {
     if (typeof window === 'undefined') return {}
-    try { return JSON.parse(localStorage.getItem('embauche_az_progress') || '{}') } catch { return {} }
+    try { return JSON.parse(localStorage.getItem('embauche_az_progress_default') || '{}') } catch { return {} }
   })
   const [showDetails, setShowDetails] = useState({})
 
+  const storageKey = `embauche_az_${travailleur.trim().toLowerCase().replace(/\s+/g,'_') || 'default'}`
+
   const toggleTache = (id) => setTachesCompletes(prev => {
     const next = { ...prev, [id]: !prev[id] }
-    if (typeof window !== 'undefined') localStorage.setItem('embauche_az_progress', JSON.stringify(next))
+    if (typeof window !== 'undefined') localStorage.setItem(storageKey, JSON.stringify(next))
     return next
   })
+
+  const loadTravailleur = (nom) => {
+    setTravailleur(nom)
+    const key = `embauche_az_${nom.trim().toLowerCase().replace(/\s+/g,'_') || 'default'}`
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) || '{}')
+      setTachesCompletes(saved)
+      setEtapeActive(1)
+    } catch { setTachesCompletes({}) }
+  }
+
+  const resetChecklist = () => {
+    if (!confirm('Remettre à zéro toute la checklist pour ce travailleur ?')) return
+    if (typeof window !== 'undefined') localStorage.removeItem(storageKey)
+    setTachesCompletes({})
+    setEtapeActive(1)
+  }
   const toggleDetail = (id) => setShowDetails(prev => ({ ...prev, [id]: !prev[id] }))
 
   const totalTaches = ETAPES.flatMap(e => e.taches).length
@@ -150,6 +177,22 @@ export default function EmbaucheAZ() {
           </div>
         </div>
 
+        {/* Nom du travailleur */}
+        <div style={{ display:'flex', gap:8, marginBottom:12 }}>
+          <input
+            value={travailleur}
+            onChange={e => loadTravailleur(e.target.value)}
+            placeholder="👤 Nom du travailleur (ex: Jean Dupont) — une checklist par personne"
+            style={{ flex:1, background:'#111', border:'1px solid #2a2a2a', borderRadius:8, padding:'9px 14px', color:'#f1f5f9', fontSize:13, fontFamily:'inherit' }}
+          />
+          {(travailleur || totalCompletes > 0) && (
+            <button onClick={resetChecklist}
+              style={{ padding:'9px 14px', borderRadius:8, border:'1px solid #2a2a2a', background:'transparent', color:'#6b7280', fontSize:12, cursor:'pointer' }}>
+              🔄 Reset
+            </button>
+          )}
+        </div>
+
         {/* Barre de progression globale */}
         <div style={{ background: '#1a1a1a', borderRadius: 8, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{ flex: 1 }}>
@@ -165,7 +208,7 @@ export default function EmbaucheAZ() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'min(240px, 35%) 1fr', gap: 20 }}>
         {/* Sidebar étapes */}
         <div>
           {ETAPES.map(e => {
