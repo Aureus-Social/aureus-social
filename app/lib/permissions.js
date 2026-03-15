@@ -70,24 +70,43 @@ export const MENU_BY_ROLE = {
   admin: null, // null = tout visible
 
   secretariat: new Set([
-    'dashboard', 'embaucheaz', 'notifications',
-    'employees', 'onboarding', 'contratsmenu', 'gestionabs', 'dashrh', 'portail', 'proceduresrh',
-    'payslip', 'calcinstant', 'gestionprimes', 'cloture', 'baremescp',
-    'declarations', 'exportcompta', 'sepa', 'belcotax281', 'rapports',
-    'mandatonss',
+    'dashboard', 'embaucheaz', 'notifications', 'smartalerts',
+    // Employés
+    'employees', 'onboarding', 'aidesembauche', 'contratsmenu', 'gestionabs', 'conges',
+    'offboarding', 'dashrh', 'portail', 'proceduresrh', 'accidentTravail', 'assuranceloi',
+    'calcmaladie', 'chomagetemporaire', 'creditemps', 'simutp', 'simulicenciement', 'compteIndividuel',
+    // Paie
+    'payslip', 'calcinstant', 'gestionprimes', 'cloture', 'historiquepayroll', 'fichespaiepdf',
+    'baremescp', 'netaubrut', 'caissevacances', 'chequesrepas', 'coutsannuel',
+    'simupension', 'simembauche', 'simulateurspro',
+    // Déclarations
+    'declarations', 'exportcompta', 'connecteurscompta', 'sepa', 'belcotax281',
+    'documentsociaux', 'decava', 'listingtva', 'rapports', 'echeancier', 'facturation',
+    // Commercial
+    'mandatonss', 'bilansocial',
   ]),
 
   commercial: new Set([
-    'dashboard', 'notifications',
-    'diagnostic', 'checklistclient', 'comparatif', 'guidecommercial',
-    'facturation', 'rapports',
-    'calcinstant', 'baremescp',
+    'dashboard', 'notifications', 'embaucheaz',
+    // Commercial
+    'diagnostic', 'checklistclient', 'comparatif', 'guidecommercial', 'mandatonss',
+    'facturation', 'rapports', 'subscriptions',
+    // Outils utiles pour les prospects
+    'calcinstant', 'baremescp', 'coutsannuel', 'simembauche',
+    'aidesembauche', 'echeancier',
   ]),
 
   rh_entreprise: new Set([
-    'dashboard', 'notifications',
-    'employees', 'onboarding', 'contratsmenu', 'gestionabs', 'dashrh', 'portail', 'proceduresrh',
-    'payslip', 'gestionprimes', 'baremescp',
+    'dashboard', 'notifications', 'embaucheaz',
+    // Employés
+    'employees', 'onboarding', 'aidesembauche', 'contratsmenu', 'gestionabs', 'conges',
+    'offboarding', 'dashrh', 'portail', 'proceduresrh', 'accidentTravail', 'assuranceloi',
+    'calcmaladie', 'chomagetemporaire', 'creditemps', 'simutp', 'simulicenciement', 'compteIndividuel',
+    // Paie (lecture)
+    'payslip', 'gestionprimes', 'baremescp', 'fichespaiepdf', 'historiquepayroll',
+    'chequesrepas', 'caissevacances', 'coutsannuel',
+    // Documents
+    'documentsociaux', 'echeancier',
   ]),
 };
 
