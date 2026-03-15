@@ -51,6 +51,18 @@
     {
       "path": "/api/cron/backup-auto",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/rapport-hebdo",
+      "schedule": "0 6 * * 1"
+    },
+    {
+      "path": "/api/cron/alerte-echeances",
+      "schedule": "30 6 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-backups",
+      "schedule": "0 3 * * 0"
     }
   ]
 }
