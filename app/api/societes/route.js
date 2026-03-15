@@ -6,7 +6,7 @@ export async function GET(req) {
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
   const _rc = checkRole(u, 'admin_only'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const { data, error } = await db.from('clients').select('*').order('created_at', { ascending: false });
-  if (error) return Response.json({ error: error.message }, { status: 500 });
+  if (error) return Response.json({ error: process.env.NODE_ENV === "production" ? "Erreur interne" : (e || error).message }, { status: 500 });
   return Response.json({ ok: true, data: data || [] });
 }
 

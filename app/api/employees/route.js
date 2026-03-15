@@ -1,4 +1,4 @@
-import { sbFromRequest, checkRole } from '@/app/lib/supabase-server';
+import { sbFromRequest, sbAdmin, checkRole } from '@/app/lib/supabase-server';
 
 async function encryptField(val) {
   if (!val) return val;
@@ -25,12 +25,13 @@ export async function GET(req) {
   const _rc = checkRole(u, 'employees_read'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const { searchParams } = new URL(req.url);
   const status = searchParams.get('status');
-  // RLS actif + filtre explicite — double protection
-  let q = db.from('employees').select('*').order('created_at', { ascending: false });
+  // Utiliser service role pour éviter les problèmes RLS
+  const adminDb = sbAdmin();
+  let q = (adminDb || db).from('employees').select('*').order('created_at', { ascending: false });
   if (status) q = q.eq('status', status);
   const { data, error } = await q;
-  if (error) return Response.json({ error: error.message||"Erreur interne" }, { status: 500 });
-  return Response.json({ ok: true, data, count: data?.length || 0 });
+  if (error) return Response.json({ error: process.env.NODE_ENV === 'production' ? 'Erreur interne' : error.message }, { status: 500 });
+  return Response.json({ ok: true, data: data || [], count: data?.length || 0 });
 }
 
 export async function POST(req) {

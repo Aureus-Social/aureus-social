@@ -15,7 +15,7 @@ export async function GET(req) {
     let q = db.from('payroll_history').select('*').eq('client_id', u.id).order('annee',{ascending:false}).order('mois',{ascending:false}).limit(24);
     if (annee) q = q.eq('annee', parseInt(annee));
     const { data, error } = await q;
-    if (error) return Response.json({ error: error.message }, { status: 500 });
+    if (error) return Response.json({ error: process.env.NODE_ENV === "production" ? "Erreur interne" : (e || error).message }, { status: 500 });
     return Response.json({ ok: true, data, count: data?.length || 0 });
   }
 
@@ -24,7 +24,7 @@ export async function GET(req) {
   if (mois) q = q.eq('mois', parseInt(mois));
   if (type) q = q.eq('employe_type', type);
   const { data, error } = await q;
-  if (error) return Response.json({ error: error.message }, { status: 500 });
+  if (error) return Response.json({ error: process.env.NODE_ENV === "production" ? "Erreur interne" : (e || error).message }, { status: 500 });
   return Response.json({ ok: true, data, count: data?.length || 0 });
 }
 
@@ -94,6 +94,6 @@ export async function PUT(req) {
     .eq('id', id)
     .select().single();
 
-  if (error) return Response.json({ error: error.message }, { status: 500 });
+  if (error) return Response.json({ error: process.env.NODE_ENV === "production" ? "Erreur interne" : (e || error).message }, { status: 500 });
   return Response.json({ ok: true, data });
 }

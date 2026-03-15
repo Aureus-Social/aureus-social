@@ -249,10 +249,10 @@ export async function GET(req) {
   try {
     const admin = sbAdmin();
     const { data, error } = await admin.auth.admin.listUsers({ perPage: 200 });
-    if (error) return Response.json({ error: error.message }, { status: 500 });
+    if (error) return Response.json({ error: process.env.NODE_ENV === "production" ? "Erreur interne" : (e || error).message }, { status: 500 });
     return Response.json({ users: data.users || [] });
   } catch(e) {
-    return Response.json({ error: e.message }, { status: 500 });
+    return Response.json({ error: process.env.NODE_ENV === "production" ? "Erreur interne" : (e || error).message }, { status: 500 });
   }
 }
 
@@ -271,7 +271,7 @@ export async function PUT(req) {
     // Réactivation
     if (action === 'reactivate') {
       const { error } = await admin.auth.admin.updateUserById(userId, { ban_duration: 'none' });
-      if (error) return Response.json({ error: error.message }, { status: 500 });
+      if (error) return Response.json({ error: process.env.NODE_ENV === "production" ? "Erreur interne" : (e || error).message }, { status: 500 });
       return Response.json({ ok: true, userId, action: 'reactivated' });
     }
 
@@ -280,13 +280,13 @@ export async function PUT(req) {
     if (!role || !VALID_ROLES.includes(role)) return Response.json({ error: 'Rôle invalide' }, { status: 400 });
 
     const { error } = await admin.auth.admin.updateUserById(userId, { user_metadata: { role } });
-    if (error) return Response.json({ error: error.message }, { status: 500 });
+    if (error) return Response.json({ error: process.env.NODE_ENV === "production" ? "Erreur interne" : (e || error).message }, { status: 500 });
 
     try { await db.from('audit_log').insert([{ user_id: u.id, user_email: u.email, action: 'UPDATE_USER_ROLE', table_name: 'auth.users', new_values: { userId, role }, created_at: new Date().toISOString() }]); } catch(_) {}
 
     return Response.json({ ok: true, userId, role });
   } catch(e) {
-    return Response.json({ error: e.message }, { status: 500 });
+    return Response.json({ error: process.env.NODE_ENV === "production" ? "Erreur interne" : (e || error).message }, { status: 500 });
   }
 }
 
@@ -316,15 +316,15 @@ export async function DELETE(req) {
     if (permanent) {
       // Suppression définitive
       const { error } = await admin.auth.admin.deleteUser(userId);
-      if (error) return Response.json({ error: error.message }, { status: 500 });
+      if (error) return Response.json({ error: process.env.NODE_ENV === "production" ? "Erreur interne" : (e || error).message }, { status: 500 });
     } else {
       // Désactivation (ban)
       const { error } = await admin.auth.admin.updateUserById(userId, { ban_duration: '87600h' });
-      if (error) return Response.json({ error: error.message }, { status: 500 });
+      if (error) return Response.json({ error: process.env.NODE_ENV === "production" ? "Erreur interne" : (e || error).message }, { status: 500 });
     }
     try { await db.from('audit_log').insert([{ user_id: u.id, user_email: u.email, action: permanent ? 'DELETE_USER' : 'DEACTIVATE_USER', table_name: 'auth.users', new_values: { userId }, created_at: new Date().toISOString() }]); } catch(_) {}
     return Response.json({ ok: true, userId, permanent });
   } catch(e) {
-    return Response.json({ error: e.message }, { status: 500 });
+    return Response.json({ error: process.env.NODE_ENV === "production" ? "Erreur interne" : (e || error).message }, { status: 500 });
   }
 }

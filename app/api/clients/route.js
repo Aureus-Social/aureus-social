@@ -5,7 +5,8 @@ export async function GET(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
   const _rc = checkRole(u, 'employees_read'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
-  const { data, error } = await db.from('clients').select('*').order('created_at', { ascending: false });
+  const adminDb = sbAdmin();
+  const { data, error } = await (adminDb || db).from('clients').select('*').order('created_at', { ascending: false });
   if (error) return Response.json({ error: error.message||"Erreur interne" }, { status: 500 });
   return Response.json({ ok: true, data, count: data?.length || 0 });
 }

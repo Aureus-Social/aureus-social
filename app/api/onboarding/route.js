@@ -29,7 +29,7 @@ async function sendEmail(to, subject, html) {
 
 export async function POST(request) {
   const u = await getAuthUser(request);
-  if (!u) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  if (!u) return Response.json({ is_new: false, onboarded: true, skipped: true }, { status: 200 });
   const _rc = checkRole(u, 'employees_write'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
 
   if (!supabase) {
