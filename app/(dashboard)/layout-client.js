@@ -49,6 +49,8 @@ const SettingsPageComp = dynamic(() => import('../pages/settings'), { ssr: false
 const LoisPage = dynamic(() => import('../pages/lois'), { ssr: false, loading: Loading });
 const BaremesCPPage = dynamic(() => import('../pages/BaremesCP'), { ssr: false, loading: Loading });
 const SimuNetBrutPage = dynamic(() => import('../pages/SimulateurNetBrut'), { ssr: false, loading: Loading });
+const SimuLicenciementPg = dynamic(() => import('../pages/SimulateurLicenciement'), { ssr: false, loading: Loading });
+const SimuPensionPg = dynamic(() => import('../pages/SimulateurPension'), { ssr: false, loading: Loading });
 const DiagnosticPage = dynamic(() => import('../pages/DiagnosticCommercial'), { ssr: false, loading: Loading });
 const SeuilsPage = dynamic(() => import('../pages/SeuilsSociaux'), { ssr: false, loading: Loading });
 const OnboardingPage = dynamic(() => import('../pages/OnboardingHub'), { ssr: false, loading: Loading });
@@ -716,8 +718,8 @@ function DashboardLayoutApproved({ user }) {
       case 'salaires': return <PayrollHubPg s={s} d={d} tab={page} />;
       case 'simembauche': return <SimuNetBrutPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'simulateurspro': return <PayrollSimPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
-      case 'simulicenciement': return <PayrollSimPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
-      case 'simupension': return <PayrollSimPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
+      case 'simulicenciement': return <SimuLicenciementPg state={s} dispatch={d} />;
+      case 'simupension': return <SimuPensionPg state={s} dispatch={d} />;
       case 'simutp': return <SimuNetBrutPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'soldetoutcompte': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'timeline': return <PayrollGroupPg s={s} d={d} tab={page} />;
