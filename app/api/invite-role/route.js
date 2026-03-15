@@ -163,44 +163,48 @@ export async function POST(req) {
   const roleData = ROLE_DATA[role];
   const prenomDisplay = prenom || email.split('@')[0];
 
-  // 1. Générer le lien d'invitation Supabase (sans envoyer l'email Supabase)
-  let inviteLink = APP_URL; // fallback
+  // 1. Générer le lien d'accès
+  let inviteLink = APP_URL;
   try {
     const admin = sbAdmin();
-    const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
-      type: 'invite',
-      email,
-      options: {
-        data: { role, prenom, nom, societe, invited_by: u.email },
-        redirectTo: APP_URL,
-      }
-    });
-    // Supabase retourne le lien dans différents endroits selon la version
-    // Supabase JS v2 retourne le lien dans différents endroits
-    const link = linkData?.properties?.action_link
-      || linkData?.action_link
-      || linkData?.user?.action_link
-      || (linkData?.properties?.hashed_token
-          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/verify?token=${linkData.properties.hashed_token}&type=invite&redirect_to=${encodeURIComponent(APP_URL)}`
-          : null)
-      || (linkData?.properties?.token_hash
-          ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/verify?token=${linkData.properties.token_hash}&type=invite&redirect_to=${encodeURIComponent(APP_URL)}`
-          : null)
-      || null;
 
-    if (!linkErr && link) {
-      inviteLink = link;
-    } else {
-      // Fallback : inviteUserByEmail
-      const { data: invData } = await admin.auth.admin.inviteUserByEmail(email, {
-        data: { role, prenom, nom, societe, invited_by: u.email },
-        redirectTo: APP_URL,
+    // Vérifier si l'utilisateur existe déjà
+    const { data: existingUsers } = await admin.auth.admin.listUsers({ perPage: 1000 });
+    const existingUser = existingUsers?.users?.find(usr => usr.email === email);
+
+    if (existingUser) {
+      // User existe — mettre à jour son rôle et générer un magic link
+      await admin.auth.admin.updateUserById(existingUser.id, {
+        user_metadata: { role, prenom, nom, societe }
       });
-      // Tenter de récupérer le lien depuis invData aussi
-      const invLink = invData?.properties?.action_link || invData?.action_link;
-      if (invLink) inviteLink = invLink;
+      // Générer un magic link pour connexion directe
+      const { data: magicData } = await admin.auth.admin.generateLink({
+        type: 'magiclink',
+        email,
+        options: { redirectTo: APP_URL }
+      });
+      const ml = magicData?.properties?.action_link || magicData?.action_link;
+      if (ml) inviteLink = ml;
+    } else {
+      // Nouvel utilisateur — générer lien d'invitation
+      const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
+        type: 'invite',
+        email,
+        options: {
+          data: { role, prenom, nom, societe, invited_by: u.email },
+          redirectTo: APP_URL,
+        }
+      });
+      const link = linkData?.properties?.action_link
+        || linkData?.action_link
+        || linkData?.user?.action_link
+        || null;
+
+      if (!linkErr && link) {
+        inviteLink = link;
+      }
     }
-  } catch(e) {}
+  } catch(e) { console.error('generateLink error:', e.message); }
 
   // 2. Envoyer l'email Resend avec le vrai lien d'accès
   const html = buildEmailHTML(prenomDisplay, role, roleData, inviteLink, societe);
