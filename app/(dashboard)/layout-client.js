@@ -390,8 +390,13 @@ function DashboardLayoutInner({ user }) {
   useEffect(() => {
     // Admin → accès direct sans vérification
     if (isAdminUser) { setAccessStatus('approved'); return; }
-    // Vérifier si déjà approuvé via user_metadata
-    if (user?.user_metadata?.approved === true) { setAccessStatus('approved'); return; }
+    // Utilisateur avec rôle assigné → accès direct (invité via Gestion Utilisateurs)
+    const meta = user?.user_metadata || {};
+    if (meta.role && ['admin','secretariat','commercial','rh_entreprise','employe','comptable'].includes(meta.role)) {
+      setAccessStatus('approved'); return;
+    }
+    // Déjà approuvé via user_metadata
+    if (meta.approved === true) { setAccessStatus('approved'); return; }
     // Sinon vérifier via API
     fetch('/api/access', { headers: { 'Authorization': 'Bearer ' + (typeof window !== 'undefined' ? (()=>{ try { const s = JSON.parse(localStorage.getItem('sb-jwjtlpewwdjxdboxtbdf-auth-token') || '{}'); return s?.access_token || ''; } catch { return ''; } })() : '') } })
       .then(r => r.json())

@@ -180,15 +180,15 @@ export async function POST(req) {
       // Mettre à jour rôle + nouveau mot de passe temporaire
       await admin.auth.admin.updateUserById(existingUser.id, {
         password: tempPassword,
-        user_metadata: { role, prenom, nom, societe }
+        user_metadata: { role, prenom, nom, societe, approved: true }
       });
     } else {
       // Créer le compte directement
       await admin.auth.admin.createUser({
         email,
         password: tempPassword,
-        email_confirm: true, // pas besoin de confirmation email
-        user_metadata: { role, prenom, nom, societe, invited_by: u.email }
+        email_confirm: true,
+        user_metadata: { role, prenom, nom, societe, approved: true, invited_by: u.email }
       });
     }
   } catch(e) { console.error('createUser error:', e.message); }
