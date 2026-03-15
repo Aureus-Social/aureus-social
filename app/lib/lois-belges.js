@@ -15,27 +15,35 @@ export const LOIS_BELGES = {
     groupeCible: { jeunesNonQualifies: { age: 25, reduc: 1500 }, agees: { age: 55, reduc: 1500 }, handicapes: { reduc: 1500 }},
   },
 
-  // ═══ PRÉCOMPTE PROFESSIONNEL ═══
+  // ═══ PRÉCOMPTE PROFESSIONNEL — Barèmes 2026 (Annexe III AR/CIR 92) ═══
+  // Source : SPF Finances — Moniteur belge 2026
   pp: {
     tranches: [
-      { min: 0, max: 16710, taux: 0.2675 },
-      { min: 16710, max: 29500, taux: 0.4280 },
-      { min: 29500, max: 51050, taux: 0.4815 },
-      { min: 51050, max: Infinity, taux: 0.5350 },
+      { min: 0,      max: 16310,    taux: 0.2675 },  // 26,75%
+      { min: 16310,  max: 28790,    taux: 0.4280 },  // 42,80%
+      { min: 28790,  max: 49820,    taux: 0.4815 },  // 48,15%
+      { min: 49820,  max: Infinity, taux: 0.5350 },  // 53,50%
     ],
-    fraisPro: { salarie: { pct: 0.30, max: 6070 }, dirigeant: { pct: 0.03, max: 3120 }},
-    quotiteExemptee: { bareme1: 2987.98, bareme2: 5975.96 },
+    fraisPro: { salarie: { pct: 0.30, max: 5930 }, dirigeant: { pct: 0.03, max: 3120 }},
+    quotiteExemptee: { bareme1: 10900, bareme2: 21800 }, // Quotité exemptée 2026
     quotientConjugal: { pct: 0.30, max: 12520 },
-    reductionsEnfants: [0, 624, 1656, 4404, 7620, 11100, 14592, 18120, 21996],
+    // Réductions pour enfants à charge 2026 (annuelles)
+    reductionsEnfants: [0, 612, 1656, 4404, 7620, 11100, 14592, 18120, 21996],
     reductionEnfantSupp: 3864,
-    reductionParentIsole: 624,
-    reductionHandicape: 624,
-    reductionConjointHandicape: 624,
-    reductionConjointRevenuLimite: 1698,
+    reductionParentIsole: 612,
+    reductionHandicape: 612,
+    reductionConjointHandicape: 612,
+    reductionConjointRevenuLimite: 1656,
     reductionConjointPensionLimitee: 3390,
     reductionPersonne65: 1992,
-    reductionAutreCharge: 624,
+    reductionAutreCharge: 612, // 51€/mois × 12
     bonusEmploi: { pctReduction: 0.3314, maxMensuel: 194.03, seuilBrut1: 2561.42, seuilBrut2: 2997.59 },
+    // Impôts fixes par tranche (pour calcul rapide)
+    impotFixe: {
+      tranche2: 4362.93,  // impôt fixe sur première tranche (0→16310 × 26,75%)
+      tranche3: 9704.37,  // impôt fixe sur tranches 1+2
+      tranche4: 19830.32, // impôt fixe sur tranches 1+2+3
+    },
   },
 
   // ═══ CSSS — Cotisation Spéciale Sécurité Sociale ═══
