@@ -19,10 +19,10 @@ const FB = {
   // Bonus emploi
   bonusEmploiMax:194.03, bonusSeuil1:2561.42, bonusSeuil2:2997.59, bonusPct:0.3314,
   // PP tranches
-  ppTranche1:16710, ppTranche2:29500, ppTranche3:51050,
+  ppTranche1:16310, ppTranche2:28790, ppTranche3:49820,
   ppTaux1:0.2675, ppTaux2:0.4280, ppTaux3:0.4815, ppTaux4:0.5350,
-  quotiteExemptee:2987.98,
-  fraisProMax:6070,
+  quotiteExemptee:10900,
+  fraisProMax:5930,
   // CSSS tranches
   csssTranche1:18592.02, csssTranche2:21070.96, csssTranche3:37344.02, csssTranche4:60181.95,
   // Saisies sur salaire
@@ -102,10 +102,10 @@ async function scrapeAll() {
 
   // ── TRANCHES PP + QUOTITÉ EXEMPTÉE ──
   if(htmlPP){
-    const t1=pick(htmlPP,[/(1[5-8][,. ]?\d{3})\s*(?:EUR|€)/g],14000,20000); if(t1) R.ppTranche1=t1;
-    const t2=pick(htmlPP,[/(2[5-9][,. ]?\d{3})\s*(?:EUR|€)/g],24000,35000); if(t2) R.ppTranche2=t2;
-    const t3=pick(htmlPP,[/(4[5-9][,. ]?\d{3}|5[0-5][,. ]?\d{3})\s*(?:EUR|€)/g],44000,58000); if(t3) R.ppTranche3=t3;
-    const qe=pick(htmlPP,[/quotit[eé][^>]{0,80}(\d[,. ]\d{3}[,.]\d{2})/gi,/(2[89]\d{2}[,.]\d{2})/g],2500,3500); if(qe) R.quotiteExemptee=qe;
+    const t1=pick(htmlPP,[/(1[56][,. ]?\d{3})\s*(?:EUR|€)/g],15000,18000); if(t1) R.ppTranche1=t1;
+    const t2=pick(htmlPP,[/(2[7-9][,. ]?\d{3})\s*(?:EUR|€)/g],26000,32000); if(t2) R.ppTranche2=t2;
+    const t3=pick(htmlPP,[/(4[5-9][,. ]?\d{3}|5[0-2][,. ]?\d{3})\s*(?:EUR|€)/g],44000,55000); if(t3) R.ppTranche3=t3;
+    const qe=pick(htmlPP,[/quotit[eé][^>]{0,80}(\d{2}[,. ]\d{3})/gi,/(10[,. ]?900)/g],9000,12000); if(qe) R.quotiteExemptee=qe;
   }
 
   // ── ONSS taux + plafond + flexi ──
@@ -248,14 +248,14 @@ export async function GET(req) {
   log.push('\n── Tranches précompte professionnel ──');
   chk('ppTranche1','PP tranche 1 max','📊',(v)=>{
     patches.push({pattern:/(\{[^}]*min:\s*0[^}]*max:\s*)[\d.]+([^}]*taux:\s*0\.26)/,replacement:`$1${v}$2`});
-    patches.push({pattern:/(min:\s*)[\d.]+([^}]*max:\s*29500)/,replacement:`$1${v}$2`});
+    patches.push({pattern:/(min:\s*)[\d.]+([^}]*max:\s*28790)/,replacement:`$1${v}$2`});
   });
   chk('ppTranche2','PP tranche 2 max','📊',(v)=>{
-    patches.push({pattern:/(min:\s*16710[^}]*max:\s*)[\d.]+/,replacement:`$1${v}`});
-    patches.push({pattern:/(min:\s*)[\d.]+([^}]*max:\s*51050)/,replacement:`$1${v}$2`});
+    patches.push({pattern:/(min:\s*16310[^}]*max:\s*)[\d.]+/,replacement:`$1${v}`});
+    patches.push({pattern:/(min:\s*)[\d.]+([^}]*max:\s*49820)/,replacement:`$1${v}$2`});
   });
   chk('ppTranche3','PP tranche 3 max','📊',(v)=>{
-    patches.push({pattern:/(min:\s*29500[^}]*max:\s*)[\d.]+/,replacement:`$1${v}`});
+    patches.push({pattern:/(min:\s*28790[^}]*max:\s*)[\d.]+/,replacement:`$1${v}`});
     patches.push({pattern:/(min:\s*)[\d.]+([^}]*max:\s*Infinity[^}]*taux:\s*0\.535)/,replacement:`$1${v}$2`});
   });
   chk('quotiteExemptee','Quotité exemptée PP','📊',(v)=>{

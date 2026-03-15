@@ -105,7 +105,7 @@ async function loadPreviousHashes() {
   if (!supabase) return {};
   try {
     const { data } = await supabase
-      .from('legal_watch')
+      .from('legal_watch_hashes')
       .select('source_id, hash, checked_at')
       .order('checked_at', { ascending: false })
       .limit(100);
@@ -121,9 +121,9 @@ async function loadPreviousHashes() {
 async function saveHashes(results) {
   if (!supabase) return;
   const now = new Date().toISOString();
-  const rows = results.filter(r => r.ok).map(r => ({ source_id: r.id, hash: r.hash, checked_at: now }));
+  const rows = results.filter(r => r.ok).map(r => ({ source_id: r.id, hash: r.hash, checked_at: now, updated_at: now }));
   if (!rows.length) return;
-  try { await supabase.from('legal_watch').insert(rows); } catch (_) {}
+  try { await supabase.from('legal_watch_hashes').insert(rows); } catch (_) {}
 }
 
 // ── Email d'alerte Resend ──
