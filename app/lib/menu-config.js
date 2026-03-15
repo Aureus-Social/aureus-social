@@ -165,6 +165,8 @@ export const MENU = [
   { id: 'simulicenciement',   label: 'Simulation Licenciement',  icon: '⚖️', g: 3 },
   { id: 'simupension',        label: 'Simulateur Pension',       icon: '🏖', g: 3 },
   { id: 'simutp',             label: 'Temps Partiel',            icon: '⏱', g: 3 },
+  { id: 'creditemps',         label: 'Crédit-Temps',             icon: '🔄', g: 3, keywords: ['credit temps','cct103','conge','reduction carriere','allocation onem'] },
+  { id: 'subscriptions',      label: 'Plans & Abonnements',      icon: '💳', g: 6, keywords: ['abonnement','plan','pricing','mrr','starter','pro','fiduciaire'] },
   { id: 'social',             label: 'Social & Assurances',      icon: '◆', g: 5 },
   { id: 'soldetoutcompte',    label: 'Solde Tout Compte',        icon: '📑', g: 3 },
   { id: 'support',            label: 'Support & Tickets',        icon: '🎫', g: 7 },

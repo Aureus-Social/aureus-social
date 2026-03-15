@@ -51,6 +51,12 @@ const BaremesCPPage = dynamic(() => import('../pages/BaremesCP'), { ssr: false, 
 const SimuNetBrutPage = dynamic(() => import('../pages/SimulateurNetBrut'), { ssr: false, loading: Loading });
 const SimuLicenciementPg = dynamic(() => import('../pages/SimulateurLicenciement'), { ssr: false, loading: Loading });
 const SimuPensionPg = dynamic(() => import('../pages/SimulateurPension'), { ssr: false, loading: Loading });
+const ChomageTemporairePg = dynamic(() => import('../pages/ChomageTemporaire'), { ssr: false, loading: Loading });
+const CalcMaladiePg = dynamic(() => import('../pages/CalcMaladie'), { ssr: false, loading: Loading });
+const CoutsAnnuelsPg = dynamic(() => import('../pages/CoutsAnnuels'), { ssr: false, loading: Loading });
+const SimulateurTPPg = dynamic(() => import('../pages/SimulateurTP'), { ssr: false, loading: Loading });
+const CreditTempsPg = dynamic(() => import('../pages/CreditTemps'), { ssr: false, loading: Loading });
+const SubscriptionsPg = dynamic(() => import('../pages/Subscriptions'), { ssr: false, loading: Loading });
 const DiagnosticPage = dynamic(() => import('../pages/DiagnosticCommercial'), { ssr: false, loading: Loading });
 const SeuilsPage = dynamic(() => import('../pages/SeuilsSociaux'), { ssr: false, loading: Loading });
 const OnboardingPage = dynamic(() => import('../pages/OnboardingHub'), { ssr: false, loading: Loading });
@@ -707,9 +713,9 @@ function DashboardLayoutApproved({ user }) {
       case 'avantages': return <PrimesPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'baremespp': return <TransversalCPPg s={s} d={d} tab={page} />;
       case 'budget': return <PayrollGroupPg s={s} d={d} tab={page} />;
-      case 'calcmaladie': return <PayrollGroupPg s={s} d={d} tab={page} />;
+      case 'calcmaladie': return <CalcMaladiePg state={s} dispatch={d} />;
       case 'calendrier': return <PayrollGroupPg s={s} d={d} tab={page} />;
-      case 'coutsannuel': return <PayrollGroupPg s={s} d={d} tab={page} />;
+      case 'coutsannuel': return <CoutsAnnuelsPg state={s} dispatch={d} />;
       case 'echeancier': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'flexijobs': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'formC131': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
@@ -720,7 +726,7 @@ function DashboardLayoutApproved({ user }) {
       case 'simulateurspro': return <PayrollSimPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'simulicenciement': return <SimuLicenciementPg state={s} dispatch={d} />;
       case 'simupension': return <SimuPensionPg state={s} dispatch={d} />;
-      case 'simutp': return <SimuNetBrutPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
+      case 'simutp': return <SimulateurTPPg state={s} dispatch={d} />;
       case 'soldetoutcompte': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'timeline': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'validation': return <PayrollGroupPg s={s} d={d} tab={page} />;
@@ -747,8 +753,10 @@ function DashboardLayoutApproved({ user }) {
       case 'connexionshub': case 'portailsbelges': case 'liensutiles':
         return <ConnexionsHubPg s={s} d={d} />;
       case 'bilansocial': return <BilanSocialPg state={s} dispatch={d} />;
+      case 'creditemps': case 'credit_temps': return <CreditTempsPg state={s} dispatch={d} />;
+      case 'subscriptions': case 'pricing': case 'plans': return <SubscriptionsPg state={s} dispatch={d} />;
       case 'chargessociales': return <ModsBatch2Pg s={s} d={d} tab={page} />;
-      case 'chomagetemporaire': return <ModsBatch2Pg s={s} d={d} tab={page} />;
+      case 'chomagetemporaire': return <ChomageTemporairePg state={s} dispatch={d} />;
       case 'exportWinbooks': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'exportbatch': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'exportcoda': return <ExportCODAPg s={s} />;
