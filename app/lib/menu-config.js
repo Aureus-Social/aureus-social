@@ -28,6 +28,7 @@ export const MENU = [
   { id: 'calcinstant',   label: 'Calcul & Simulation', icon: '🧮', g: 3 },
   { id: 'gestionprimes', label: 'Primes & Avantages', icon: '🎁', g: 3 },
   { id: 'cloture',       label: 'Clôture Mensuelle',  icon: '🔄', g: 3 },
+  { id: 'historiquepayroll', label: 'Historique Paie',  icon: '📊', g: 3 },
   { id: 'baremescp',     label: 'Barèmes & Seuils',   icon: '📐', g: 3 },
 
   // ── DÉCLARATIONS ─────────────────────────────────────────────
