@@ -98,11 +98,36 @@ const MODULES_PAR_ROLE = {
     color: '#22c55e',
     desc: 'Responsable RH d\'une société cliente. Accès à la gestion de ses propres employés, absences, contrats, portail et documents. Lecture seule sur les fiches de paie.',
     groupes: [
-      { titre: 'Tableau de bord', items: ['Dashboard Principal', 'Dashboard RH', 'Notifications'] },
-      { titre: 'Gestion RH', items: ['Liste Employés', 'Onboarding', 'Contrats & Documents', 'Formul. C4 / C131', 'Gestion Absences', 'Dashboard Absences', 'Planning Congés', 'Workflow Absences', 'Accident du Travail', 'Jours Prestés', 'Registre Personnel', 'Procédures RH (64)', 'Portail Employé'] },
-      { titre: 'Paie (lecture seule)', items: ['Fiches de Paie', 'Salaires & Calculs', 'Gestion Primes (lecture)', 'Avantages & Rémunération', 'Salaire Garanti', 'Calendrier Social'] },
-      { titre: 'Documents & Juridique', items: ['Annexe Règlement', 'Juridique & Veille'] },
-      { titre: 'Concertation Sociale (lecture)', items: ['CCT / Conventions', 'Seuils Sociaux', 'Egalité H/F', 'Elections Sociales', 'Formation & Sécurité', 'Délégations Syndicales', 'Plan Diversité', 'Lanceurs d\'Alerte', 'Bilan Social', 'Rapport Annuel CE'] },
+      { titre: 'Tableau de bord', items: ['Dashboard Principal', 'Dashboard RH', 'Notifications', 'Embauche A→Z'] },
+      { titre: 'Gestion RH', items: ['Liste Employés', 'Onboarding', 'Contrats & Docs', 'Aides à l\'embauche', 'Absences & Congés', 'Demandes Congés', 'Offboarding', 'Accident du Travail', 'Assurance-Loi AT', 'Procédures RH', 'Portail Employé'] },
+      { titre: 'Gestion contrat', items: ['Calcul Maladie', 'Chômage Temporaire', 'Crédit-Temps', 'Temps Partiel', 'Simulateur Licenciement', 'Compte Individuel'] },
+      { titre: 'Paie (lecture)', items: ['Fiches de Paie', 'Fiches PDF', 'Historique Paie', 'Primes & Avantages', 'Barèmes & Seuils', 'Chèques-Repas', 'Caisse Vacances', 'Coûts Annuels'] },
+      { titre: 'Documents', items: ['Documents Sociaux DRS', 'Échéancier'] },
+    ]
+  },
+
+  employe: {
+    label: 'Employé',
+    icon: '👤',
+    color: '#06b6d4',
+    desc: 'Travailleur d\'une société cliente. Accès uniquement à ses propres données — fiches de paie, congés, récapitulatif annuel. Isolation totale des données des autres employés.',
+    groupes: [
+      { titre: 'Mon espace', items: ['Dashboard (personnel)', 'Portail Employé'] },
+      { titre: 'Mes documents', items: ['Mes Fiches de Paie (PDF)', 'Mon Compte Individuel (recap annuel)'] },
+      { titre: 'Mes congés', items: ['Demander un Congé', 'Voir mes Absences'] },
+      { titre: 'Information', items: ['Échéancier Social (lecture)'] },
+    ]
+  },
+
+  comptable: {
+    label: 'Comptable Externe',
+    icon: '🧮',
+    color: '#f97316',
+    desc: 'Comptable ou fiduciaire externe. Accès limité aux exports comptables, SEPA, Belcotax et facturation. Aucun accès aux données RH ou aux fiches de paie individuelles.',
+    groupes: [
+      { titre: 'Tableau de bord', items: ['Dashboard (synthèse)'] },
+      { titre: 'Exports & Comptabilité', items: ['Exports Comptables (WinBooks, BOB, Exact)', 'Connecteurs Comptables', 'SEPA Virements', 'Rapports'] },
+      { titre: 'Fiscal & TVA', items: ['Belcotax 281.xx', 'Listing TVA Annuel', 'Facturation', 'Échéancier Fiscal'] },
     ]
   },
 };
@@ -117,7 +142,7 @@ export default function RolesPermissions({ s }) {
 
   return (
     <div>
-      <PH title="Gestion des Rôles & Accès" sub="4 profils utilisateur — filtrage menu automatique + garde d'accès serveur" />
+      <PH title="Gestion des Rôles & Accès" sub="6 profils utilisateur — filtrage menu automatique + garde d'accès serveur" />
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 20, flexWrap: 'wrap' }}>

@@ -408,7 +408,6 @@ function DashboardLayoutInner({ user }) {
 }
 
 function DashboardLayoutApproved({ user }) {
-  const [page, setPage] = useState('dashboard');
   const [showWelcome, setShowWelcome] = useState(() => {
     if (typeof window === 'undefined') return false;
     return !localStorage.getItem('aureus_welcome_seen');
@@ -418,6 +417,14 @@ function DashboardLayoutApproved({ user }) {
 
   // ── Rôle utilisateur (filtrage menu + accès pages) ───────
   const userRole = getRoleFromUser(user);
+
+  // ── Page initiale selon le rôle ──────────────────────────
+  const getInitialPage = () => {
+    if (userRole === 'employe') return 'portail';
+    if (userRole === 'comptable') return 'exportcompta';
+    return 'dashboard';
+  };
+  const [page, setPage] = useState(getInitialPage);
 
   // ── Navigation avec redirection automatique (doublons → page canonique) ──
   const navigateTo = (id) => {
