@@ -96,7 +96,7 @@ export const MENU_BY_ROLE = {
     'dashboard', 'notifications', 'embaucheaz',
     // Commercial
     'diagnostic', 'checklistclient', 'comparatif', 'guidecommercial', 'mandatonss',
-    'facturation', 'rapports', 'subscriptions',
+    'facturation', 'rapports', 'subscriptions', 'facturationfiches',
     // Outils utiles pour les prospects
     'calcinstant', 'baremescp', 'coutsannuel', 'simembauche',
     'aidesembauche', 'echeancier',

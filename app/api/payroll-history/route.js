@@ -80,3 +80,20 @@ export async function POST(req) {
   await sbAdmin()?.from('audit_log').insert([{ user_id: u.id, user_email: u.email, action: 'SAVE_PAYROLL_HISTORY', table_name: 'fiches_paie', created_at: new Date().toISOString() }]);
   return Response.json({ ok: true, data, count: data?.length }, { status: 201 });
 }
+
+export async function PUT(req) {
+  const { db, user: u } = await sbFromRequest(req);
+  if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'payroll_read'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
+
+  const { id, statut_paiement, date_paiement } = await req.json();
+  if (!id) return Response.json({ error: 'id requis' }, { status: 400 });
+
+  const { data, error } = await db.from('payroll_history')
+    .update({ statut_paiement, date_paiement, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select().single();
+
+  if (error) return Response.json({ error: error.message }, { status: 500 });
+  return Response.json({ ok: true, data });
+}

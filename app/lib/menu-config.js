@@ -70,6 +70,7 @@ export const MENU = [
   { id: 'mandatonss',     label: 'Mandats & Primes',    icon: '🏛', g: 5, keywords: ['mandat','onss','mahis','activa','monbee','impulsion','art60','cpas','premier emploi','aide emploi','reduction patronale','activa bruxelles'] },
   { id: 'bilansocial',    label: 'Bilan Social',        icon: '📋', g: 5, keywords: ['bilan social','effectif','mouvement','formation','cout formation','egalite','rapport annuel','employe annuel'] },
   { id: 'subscriptions',  label: 'Plans & Abonnements', icon: '💳', g: 5, keywords: ['abonnement','plan','pricing','mrr','arr','starter','pro','fiduciaire','revenue','chiffre affaires','client payant'] },
+  { id: 'facturationfiches', label: 'Facturation Fiches', icon: '💰', g: 5, keywords: ['facturation fiches','2 euro','fiche paie facturation','paiement fiche','encaisser','impaye','paye','revenus fiches'] },
 
   // ── ADMINISTRATION ───────────────────────────────────────────
   { id: '_g6', label: 'ADMINISTRATION', icon: '⚙️', group: true },

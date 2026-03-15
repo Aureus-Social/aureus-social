@@ -77,6 +77,7 @@ const AccessManagerRaw = dynamic(() => import('../pages/AccessManager'), { ssr: 
 const AccessManagerPg = ({ s, user }) => <AccessManagerRaw user={user} />;
 const GestionUtilisateursPg = dynamic(() => import('../pages/GestionUtilisateurs'), { ssr: false, loading: Loading });
 const MonComptePg = dynamic(() => import('../pages/MonCompte'), { ssr: false, loading: Loading });
+const FacturationFichesPg = dynamic(() => import('../pages/FacturationFiches'), { ssr: false, loading: Loading });
 const AuditCodePage = dynamic(() => import('../pages/AuditSecuriteCode'), { ssr: false, loading: Loading });
 const PayrollSimPage = dynamic(() => import('../pages/PayrollSimulator'), { ssr: false, loading: Loading });
 const AureusIAPage = dynamic(() => import('../pages/AureusSuitePage'), { ssr: false, loading: Loading });
@@ -703,6 +704,7 @@ function DashboardLayoutApproved({ user }) {
       case 'demandes_acces': case 'access_manager': return <AccessManagerPg s={s} user={user} />;
       case 'gestionutilisateurs': case 'gestion_utilisateurs': return <GestionUtilisateursPg state={s} dispatch={d} />;
       case 'moncompte': return <MonComptePg user={user} />;
+      case 'facturationfiches': return <FacturationFichesPg state={s} dispatch={d} />;
       case 'facturation': return <FacturationPg s={s} d={d} />;
       case 'gestionprimes': return <PrimesPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'historiquepayroll': case 'payrollhistory': return <HistoriquePayrollPg state={s} dispatch={d} />;
