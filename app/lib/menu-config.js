@@ -318,3 +318,4 @@ export const SEARCH_SUBSECTIONS = [
   { id: 'baremescp', anchor: 'section-cp', icon: '📋', label: 'Barème sectoriel CP',
     sub: 'Barèmes & Seuils', keywords: ['bareme','cp','commission paritaire','sectoriel','minimum','cp 200','cp 111','cp 118'] },
 ];
+
