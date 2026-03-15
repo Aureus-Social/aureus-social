@@ -83,6 +83,8 @@ export default function FichesPaiePDF({ s, d }) {
   const [coOverride, setCoOverride] = useState({ name: '', vat: '', onss: '', address: '' });
   const [coLoaded, setCoLoaded]   = useState(false);
   const [previewEmp, setPreviewEmp] = useState(null);
+  const [emailSending, setEmailSending] = useState({});
+  const [emailResults, setEmailResults] = useState({});
 
   // Tous les employés (clients + directs)
   const allEmps = [
@@ -118,6 +120,40 @@ export default function FichesPaiePDF({ s, d }) {
     else setSelected(allEmps.map(e => e.id));
   };
   const toggleEmp = (id) => setSelected(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+
+  // ── Envoi email fiche de paie ─────────────────────────────────────────────
+  const sendEmailFiche = async (emp) => {
+    if (!emp.email) { alert(`Aucun email pour ${emp.first || ''} ${emp.last || ''}`); return; }
+    const key = emp.id || (emp.first + emp.last);
+    setEmailSending(p => ({ ...p, [key]: true }));
+    try {
+      const co = state?.co || coOverride;
+      const net = calcNet(emp);
+      const brut = parseFloat(emp.gross || emp.monthlySalary || 0);
+      const onssW = Math.round(brut * 0.1307 * 100) / 100;
+      const pp = Math.round(brut * 0.22 * 100) / 100;
+      const r = await authFetch('/api/email-fiche', {
+        method: 'POST',
+        body: JSON.stringify({
+          employe: { nom: emp.last || '', prenom: emp.first || '', email: emp.email, niss: emp.niss || '' },
+          societe: { name: co.name || co.nom || '', vat: co.vat || co.bce || '' },
+          fiche: {
+            brut, net, onss_travailleur: onssW, precompte_pro: pp,
+            onss_patronale: Math.round(brut * 0.2507 * 100) / 100,
+            net_a_payer: net,
+            mois: month, annee: year,
+          }
+        })
+      });
+      const j = await r.json();
+      setEmailResults(p => ({ ...p, [key]: j.ok ? 'sent' : 'error' }));
+      setTimeout(() => setEmailResults(p => ({ ...p, [key]: null })), 4000);
+    } catch(e) {
+      setEmailResults(p => ({ ...p, [key]: 'error' }));
+    } finally {
+      setEmailSending(p => ({ ...p, [key]: false }));
+    }
+  };
 
   // ── Génération PDF individuelle ──────────────────────────────────────────
   const generateOne = async (emp) => {
@@ -311,6 +347,14 @@ export default function FichesPaiePDF({ s, d }) {
                                 style={{ ...S.btn(true), padding: '5px 12px', fontSize: 10, opacity: st === 'generating' ? 0.5 : 1 }}
                               >
                                 {st === 'generating' ? '⏳' : '📥 PDF'}
+                              </button>
+                              <button
+                                onClick={() => sendEmailFiche(emp)}
+                                disabled={!emp.email || emailSending[emp.id || (emp.first+emp.last)]}
+                                title={emp.email ? `Envoyer à ${emp.email}` : 'Pas d\'email configuré'}
+                                style={{ ...S.btn(false), padding: '5px 10px', fontSize: 10, opacity: (!emp.email || emailSending[emp.id || (emp.first+emp.last)]) ? 0.4 : 1, background: emailResults[emp.id || (emp.first+emp.last)] === 'sent' ? '#10b981' : emailResults[emp.id || (emp.first+emp.last)] === 'error' ? '#ef4444' : undefined }}
+                              >
+                                {emailSending[emp.id || (emp.first+emp.last)] ? '⏳' : emailResults[emp.id || (emp.first+emp.last)] === 'sent' ? '✅' : emailResults[emp.id || (emp.first+emp.last)] === 'error' ? '❌' : '📧'}
                               </button>
                               <button
                                 onClick={() => { setPreviewEmp(emp); setTab('apercu'); }}
