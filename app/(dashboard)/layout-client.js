@@ -76,6 +76,7 @@ const AccessRequestRaw = dynamic(() => import('../pages/AccessRequest'), { ssr: 
 const AccessManagerRaw = dynamic(() => import('../pages/AccessManager'), { ssr: false, loading: Loading });
 const AccessManagerPg = ({ s, user }) => <AccessManagerRaw user={user} />;
 const GestionUtilisateursPg = dynamic(() => import('../pages/GestionUtilisateurs'), { ssr: false, loading: Loading });
+const MonComptePg = dynamic(() => import('../pages/MonCompte'), { ssr: false, loading: Loading });
 const AuditCodePage = dynamic(() => import('../pages/AuditSecuriteCode'), { ssr: false, loading: Loading });
 const PayrollSimPage = dynamic(() => import('../pages/PayrollSimulator'), { ssr: false, loading: Loading });
 const AureusIAPage = dynamic(() => import('../pages/AureusSuitePage'), { ssr: false, loading: Loading });
@@ -701,6 +702,7 @@ function DashboardLayoutApproved({ user }) {
       case '2fa': case 'mfa': case 'totp': return <MFASetupPg s={s} supabase={supabase} user={user} />;
       case 'demandes_acces': case 'access_manager': return <AccessManagerPg s={s} user={user} />;
       case 'gestionutilisateurs': case 'gestion_utilisateurs': return <GestionUtilisateursPg state={s} dispatch={d} />;
+      case 'moncompte': return <MonComptePg user={user} />;
       case 'facturation': return <FacturationPg s={s} d={d} />;
       case 'gestionprimes': return <PrimesPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
       case 'historiquepayroll': case 'payrollhistory': return <HistoriquePayrollPg state={s} dispatch={d} />;
@@ -1169,6 +1171,10 @@ function DashboardLayoutApproved({ user }) {
               <span style={{ fontSize: 11, color: TH.text3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email || 'demo'}</span>
               <span style={{ fontSize: 10, fontWeight:700, color: ROLE_COLORS[userRole] || '#c6a34e', letterSpacing:'.3px' }}>{ROLE_LABELS[userRole] || 'Admin'}</span>
             </div>
+            <button onClick={() => setPage('moncompte')}
+              style={{ padding: '5px 12px', borderRadius: 6, border: '1px solid rgba(198,163,78,.2)', background: 'rgba(198,163,78,.06)', color: '#c6a34e', fontSize: 10, cursor: 'pointer', fontFamily: 'inherit' }}>
+              ⚙️ Mon compte
+            </button>
             <button onClick={handleLogout}
               style={{ padding: '5px 12px', borderRadius: 6, border: '1px solid rgba(239,68,68,.15)', background: 'rgba(239,68,68,.05)', color: '#ef4444', fontSize: 10, cursor: 'pointer', fontFamily: 'inherit' }}>
               {t('nav.logout') || 'Déconnexion'}
