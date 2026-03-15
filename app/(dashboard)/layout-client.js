@@ -37,7 +37,7 @@ class ErrorBoundary extends React.Component {
 }
 
 // Pages migrées (import dynamique = code splitting)
-const DashboardPage = dynamic(() => import('../pages/dashboard'), { ssr: false, loading: Loading });
+const DashboardPage = dynamic(() => import('../pages/Dashboard'), { ssr: false, loading: Loading });
 const EmployeesPage = dynamic(() => import('../pages/employees'), { ssr: false, loading: Loading });
 const PayslipsPage = dynamic(() => import('../pages/payslips'), { ssr: false, loading: Loading });
 const FichesPaiePDFPg = dynamic(() => import('../pages/FichesPaiePDF'), { ssr: false, loading: Loading });
