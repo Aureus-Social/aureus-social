@@ -383,11 +383,11 @@ export default function EmbaucheAZ() {
   }
   const toggleDetail = (id) => setShowDetails(prev => ({ ...prev, [id]: !prev[id] }))
 
-  const totalTaches = ALL_ETAPES.flatMap(e => e.taches).length
+  const totalTaches = ETAPES.flatMap(e => e.taches).length
   const totalCompletes = Object.values(tachesCompletes).filter(Boolean).length
   const pct = Math.round(totalCompletes / totalTaches * 100)
 
-  const etapeCourante = ALL_ETAPES.find(e => e.id === etapeActive)
+  const etapeCourante = ETAPES.find(e => e.id === etapeActive)
   const tachesEtape = etapeCourante?.taches || []
   const completesEtape = tachesEtape.filter(t => tachesCompletes[t.id]).length
 
@@ -442,7 +442,7 @@ export default function EmbaucheAZ() {
       <div style={{ display: 'grid', gridTemplateColumns: 'min(240px, 35%) 1fr', gap: 20 }}>
         {/* Sidebar étapes */}
         <div>
-          {ALL_ETAPES.map(e => {
+          {ETAPES.map(e => {
             const completesE = e.taches.filter(t => tachesCompletes[t.id]).length
             const totalE = e.taches.length
             const doneE = completesE === totalE
@@ -530,13 +530,13 @@ export default function EmbaucheAZ() {
                   style={{ padding: '8px 20px', borderRadius: 8, border: '1px solid #2a2a2a', background: 'transparent', color: etapeActive === 1 ? '#2a2a2a' : '#f1f5f9', cursor: etapeActive === 1 ? 'default' : 'pointer', fontSize: 13 }}>
                   ← Étape précédente
                 </button>
-                {completesEtape === tachesEtape.length && etapeActive < ETAPES.length && (
+                {completesEtape === tachesEtape.length && etapeActive < Math.max(...ETAPES.map(e => e.id)) && (
                   <button onClick={() => setEtapeActive(e => e + 1)}
                     style={{ padding: '8px 20px', borderRadius: 8, border: 'none', background: etapeCourante.color, color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>
                     Étape suivante →
                   </button>
                 )}
-                {etapeActive === ETAPES.length && totalCompletes === totalTaches && (
+                {etapeActive === Math.max(...ETAPES.map(e => e.id)) && totalCompletes === totalTaches && (
                   <div style={{ padding: '8px 20px', borderRadius: 8, background: '#0d1a0d', color: '#10b981', fontSize: 13, fontWeight: 700, border: '1px solid #10b98140' }}>
                     ✅ Embauche complète !
                   </div>
