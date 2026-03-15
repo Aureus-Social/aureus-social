@@ -64,7 +64,8 @@ const ROLE_DATA = {
   }
 };
 
-function buildEmailHTML(prenom, role, roleData, tempPassword) {
+function buildEmailHTML(prenom, role, roleData, inviteLink, societe) {
+  const isInviteLink = inviteLink && inviteLink !== 'https://app.aureussocial.be';
   const steps = roleData.premieres_etapes.map(s => `
     <tr>
       <td style="padding:10px 16px;border-bottom:1px solid #f0ede6;vertical-align:top;width:36px">
@@ -105,7 +106,7 @@ function buildEmailHTML(prenom, role, roleData, tempPassword) {
   <!-- WELCOME -->
   <tr><td style="padding:28px 32px;border-bottom:1px solid #f0ede6">
     <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a1a">Bienvenue sur Aureus Social Pro, ${prenom} 👋</h2>
-    <p style="margin:0;font-size:13px;color:#6B6860;line-height:1.6">${roleData.description}</p>
+    ${societe ? `<div style="font-size:12px;color:#C9963A;font-weight:600;margin-bottom:6px">${societe}</div>` : ""}<p style="margin:0;font-size:13px;color:#6B6860;line-height:1.6">${roleData.description}</p>
   </td></tr>
 
   <!-- ACCÈS -->
@@ -119,7 +120,7 @@ function buildEmailHTML(prenom, role, roleData, tempPassword) {
     <div style="font-size:12px;font-weight:600;color:#6B6860;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Vos identifiants de connexion</div>
     <table width="100%">
       <tr><td style="font-size:13px;color:#1a1a1a;padding:4px 0"><strong>URL :</strong></td><td style="font-size:13px;color:#C9963A">app.aureussocial.be</td></tr>
-      ${tempPassword ? `<tr><td style="font-size:13px;color:#1a1a1a;padding:4px 0"><strong>Mot de passe provisoire :</strong></td><td style="font-size:13px;font-family:monospace;color:#E05C3A;font-weight:700">${tempPassword}</td></tr>` : ''}
+      ${isInviteLink ? `<tr><td colspan='2' style='padding-top:14px'><a href='${inviteLink}' style='background:#C9963A;color:#000;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:700;font-size:13px;display:inline-block'>Créer mon mot de passe →</a></td></tr>` : ''}
     </table>
   </td></tr>
 
@@ -131,8 +132,8 @@ function buildEmailHTML(prenom, role, roleData, tempPassword) {
 
   <!-- CTA -->
   <tr><td style="padding:24px 32px;text-align:center">
-    <a href="${APP_URL}" style="background:${roleData.color};color:${role === 'admin' ? '#000' : '#fff'};padding:14px 36px;border-radius:6px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block">
-      Accéder à ma plateforme →
+    <a href="${isInviteLink ? inviteLink : APP_URL}" style="background:${roleData.color};color:${role === 'admin' ? '#000' : '#fff'};padding:14px 36px;border-radius:6px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block">
+      ${isInviteLink ? "Créer mon compte →" : "Accéder à ma plateforme →"}
     </a>
     <p style="font-size:11px;color:#6B6860;margin-top:12px">Des questions ? Contactez-nous : info@aureus-ia.com</p>
   </td></tr>
@@ -155,27 +156,39 @@ export async function POST(req) {
   const _rc = checkRole(u, 'admin_only'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   if (!RESEND_KEY) return Response.json({ error: 'RESEND_API_KEY manquante' }, { status: 500 });
 
-  const { email, prenom, nom, role = 'secretariat', send_password } = await req.json();
+  const { email, prenom, nom, role = 'secretariat', societe } = await req.json();
   if (!email || !email.includes('@')) return Response.json({ error: 'Email valide requis' }, { status: 400 });
   if (!ROLE_DATA[role]) return Response.json({ error: 'Rôle invalide' }, { status: 400 });
 
   const roleData = ROLE_DATA[role];
   const prenomDisplay = prenom || email.split('@')[0];
 
-  // Inviter via Supabase Auth
-  let tempPassword = null;
-  if (send_password) {
-    tempPassword = Math.random().toString(36).slice(2, 10).toUpperCase();
-  }
-
+  // 1. Générer le lien d'invitation Supabase (sans envoyer l'email Supabase)
+  let inviteLink = APP_URL; // fallback
   try {
-    await sbAdmin()?.auth.admin.inviteUserByEmail(email, {
-      data: { role, prenom, nom, invited_by: u.email }
+    const admin = sbAdmin();
+    // generateLink crée le token sans envoyer d'email
+    const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
+      type: 'invite',
+      email,
+      options: {
+        data: { role, prenom, nom, societe, invited_by: u.email },
+        redirectTo: APP_URL,
+      }
     });
+    if (!linkErr && linkData?.properties?.action_link) {
+      inviteLink = linkData.properties.action_link;
+    } else {
+      // Fallback : inviteUserByEmail si generateLink échoue
+      await admin.auth.admin.inviteUserByEmail(email, {
+        data: { role, prenom, nom, societe, invited_by: u.email },
+        redirectTo: APP_URL,
+      });
+    }
   } catch(e) {}
 
-  // Envoyer l'email mode d'emploi
-  const html = buildEmailHTML(prenomDisplay, role, roleData, tempPassword);
+  // 2. Envoyer l'email Resend avec le vrai lien d'accès
+  const html = buildEmailHTML(prenomDisplay, role, roleData, inviteLink, societe);
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
@@ -190,11 +203,12 @@ export async function POST(req) {
   const result = await res.json();
   if (!res.ok) return Response.json({ error: result.message }, { status: 500 });
 
-  // Log audit
+  // 3. Log audit
   await db.from('audit_log').insert([{
     user_id: u.id, user_email: u.email,
     action: 'INVITE_USER_WITH_ROLE',
     table_name: 'auth.users',
+    new_values: { email, role, societe },
     created_at: new Date().toISOString()
   }]).catch(() => {});
 
