@@ -2,6 +2,7 @@
 import { useLang } from '../lib/lang-context';
 import{useState,useMemo,useEffect}from'react';
 import{TX_ONSS_E,TX_ONSS_W,RMMMG,CR_MAX,CR_PAT,FORF_BUREAU}from'@/app/lib/helpers';
+import { authFetch } from '@/app/lib/auth-fetch';
 
 // ═══════════════════════════════════════════════════════════
 // ONBOARDING HUB — Wizard complet + Reprise concurrent
@@ -104,7 +105,7 @@ export function OnboardingWizardV2({s,d,initialMode,th}){
     setErrors([]);setStep(s2=>Math.min(s2+1,7));
   };
 
-  const finalize=()=>{
+  const finalize=async ()=>{
     const newClient={
       id:'CL-'+Date.now(),
       company:{...data.company,...data.bank,email:data.contact.email},
@@ -114,6 +115,78 @@ export function OnboardingWizardV2({s,d,initialMode,th}){
       checklist:{bce:!!data.company.vat,cp:!!data.company.cp,contact:!!data.contact.email,iban:!!data.bank.iban,onss:!!data.social.onss,sepp:!!data.social.sepp},
     };
     if(d)d({type:'ADD_CLIENT',client:newClient});
+
+    // ── Persistance Supabase ──────────────────────────────────────────────
+    try {
+      // 1. Sauvegarder le client
+      await authFetch('/api/clients', {
+        method: 'POST',
+        body: JSON.stringify({
+          nom: data.company.name || data.company.nom || '',
+          email: data.contact.email || '',
+          siret_bce: data.company.vat || '',
+          adresse: data.company.address ? `${data.company.address}, ${data.company.zip||''} ${data.company.city||''}`.trim() : '',
+          cp_paritaire: data.company.cp || '200',
+          plan: 'starter',
+          status: 'active',
+          onss_number: data.social.onss || '',
+          contact_nom: data.contact.name || '',
+          contact_phone: data.contact.phone || '',
+          iban: data.bank.iban || '',
+          bic: data.bank.bic || '',
+          banque: data.bank.bank || '',
+          sepp: data.social.sepp || '',
+          medecine_travail: data.social.medecineTravail || '',
+          assurance_at: data.social.assuranceAT || '',
+          caisse_vacances: data.social.caisseVacances || '',
+          options: data.options || {},
+        })
+      }).catch(()=>{});
+
+      // 2. Sauvegarder chaque employé
+      if (data.employees.length > 0) {
+        for (const emp of data.employees) {
+          await authFetch('/api/employees', {
+            method: 'POST',
+            body: JSON.stringify({
+              fn: emp.first || '',
+              ln: emp.last || '',
+              niss: emp.niss || '',
+              email: emp.email || '',
+              iban: emp.iban || '',
+              cp: data.company.cp || '200',
+              regime: emp.regime || 100,
+              gross: parseFloat(emp.monthlySalary || 0),
+              contract_type: emp.contractType || 'CDI',
+              start_date: emp.startDate || null,
+              end_date: emp.endDate || null,
+              function: emp.function || '',
+              status: 'active',
+            })
+          }).catch(()=>{});
+        }
+      }
+
+      // 3. Email de bienvenue au contact
+      if (data.contact.email) {
+        await authFetch('/api/alerts', {
+          method: 'POST',
+          body: JSON.stringify({
+            to: data.contact.email,
+            subject: `Bienvenue sur Aureus Social Pro — ${data.company.name || ''}`,
+            html: `<div style="font-family:Inter,sans-serif;background:#0D0D0E;color:#e8e6e0;padding:32px;border-radius:8px;max-width:560px">
+              <div style="color:#C9963A;font-size:20px;font-weight:700;margin-bottom:16px">AUREUS SOCIAL PRO</div>
+              <p>Bonjour ${data.contact.name || ''},</p>
+              <p>Votre dossier <strong>${data.company.name || ''}</strong> a été créé avec succès sur Aureus Social Pro.</p>
+              <p style="color:#6B6860;font-size:13px">${data.employees.length} travailleur(s) encodé(s) · CP ${data.company.cp||'200'}</p>
+              <a href="https://app.aureussocial.be" style="display:inline-block;margin-top:16px;background:#C9963A;color:#000;padding:12px 24px;border-radius:4px;text-decoration:none;font-weight:700">Accéder à l'application →</a>
+              <p style="font-size:11px;color:#6B6860;margin-top:24px">Aureus IA SPRL · BCE BE 1028.230.781</p>
+            </div>`
+          })
+        }).catch(()=>{});
+      }
+    } catch(err) { /* non bloquant */ }
+
     setStep(7);
   };
 

@@ -115,6 +115,47 @@ export default function BelcotaxFiches({ state, dispatch }) {
             <p style={{ margin:0, fontSize:13, color:'#6b7280' }}>Génération XML conforme BelcotaxOnWeb — SPF Finances</p>
           </div>
         </div>
+
+        {/* Bannière certification */}
+        <div style={{ background:'#0d1a0d', border:'1px solid #10b981', borderRadius:10, padding:'12px 16px', marginTop:16, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:12 }}>
+          <div>
+            <div style={{ fontSize:13, fontWeight:700, color:'#10b981' }}>🏅 Certification Belcotax-on-Web — SPF Finances</div>
+            <div style={{ fontSize:11, color:'#6b7280', marginTop:3 }}>
+              Agrément obligatoire avant de soumettre des fiches pour des clients tiers · Dossier à introduire via SPF Finances
+            </div>
+          </div>
+          <div style={{ display:'flex', gap:8 }}>
+            <a href="https://finances.belgium.be/fr/entreprises/personnel_et_remuneration/belcotax-on-web" target="_blank" rel="noreferrer"
+              style={{ background:'#10b98120', color:'#10b981', border:'1px solid #10b981', borderRadius:6, padding:'6px 14px', fontWeight:600, cursor:'pointer', fontSize:11, textDecoration:'none' }}>
+              SPF Finances →
+            </a>
+            <a href="https://www.socialsecurity.be/employer/instructions/dmfa/fr/latest/instructions/various_concepts/belcotax.html" target="_blank" rel="noreferrer"
+              style={{ background:'transparent', color:'#6b7280', border:'1px solid #2a2a2a', borderRadius:6, padding:'6px 14px', fontWeight:600, cursor:'pointer', fontSize:11, textDecoration:'none' }}>
+              Guide ONSS
+            </a>
+          </div>
+        </div>
+
+        {/* Checklist certification */}
+        <div style={{ background:'#111', border:'1px solid #1e1e1e', borderRadius:10, padding:'14px 16px', marginTop:12 }}>
+          <div style={{ fontSize:12, fontWeight:700, color:'#f59e0b', marginBottom:10 }}>📋 Checklist certification Belcotax (à compléter avant premier client)</div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+            {[
+              ['Obtenir n° d\'agrément SPF Finances (formulaire 604B)', false],
+              ['BCE BE 1028.230.781 valide et actif', true],
+              ['Tester la connexion BelcotaxOnWeb en mode test', false],
+              ['Générer une fiche 281.10 de test et la valider', false],
+              ['Signer la convention d\'utilisation BelcotaxOnWeb', false],
+              ['Activer le certificat eID ou Token pour signature XML', false],
+            ].map(([label, done]) => (
+              <div key={label} style={{ display:'flex', alignItems:'flex-start', gap:8, fontSize:12 }}>
+                <span style={{ color: done ? '#10b981' : '#f59e0b', fontSize:14, lineHeight:1.4 }}>{done ? '✅' : '☐'}</span>
+                <span style={{ color: done ? '#6b7280' : '#e2e8f0', lineHeight:1.5 }}>{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div style={{ display:'flex', alignItems:'center', gap:12, marginTop:16 }}>
           <div>
             <label style={lbl}>Année d'imposition</label>
