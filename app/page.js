@@ -12,10 +12,16 @@ export default function Home() {
 
   async function triggerOnboarding(u) {
     try {
+      // Récupérer le token JWT pour l'auth
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || '';
       // Vérifier si nouveau client + déclencher le flow
       const res = await fetch('/api/onboarding', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           user_id:      u.id,
           email:        u.email,

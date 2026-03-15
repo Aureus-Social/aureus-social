@@ -393,7 +393,7 @@ function DashboardLayoutInner({ user }) {
     // Vérifier si déjà approuvé via user_metadata
     if (user?.user_metadata?.approved === true) { setAccessStatus('approved'); return; }
     // Sinon vérifier via API
-    fetch('/api/access', { headers: { 'Authorization': 'Bearer ' + (typeof window !== 'undefined' ? (()=>{ try { const s = JSON.parse(localStorage.getItem('sb-qcunxnadjxggizdksvay-auth-token') || '{}'); return s?.access_token || ''; } catch { return ''; } })() : '') } })
+    fetch('/api/access', { headers: { 'Authorization': 'Bearer ' + (typeof window !== 'undefined' ? (()=>{ try { const s = JSON.parse(localStorage.getItem('sb-jwjtlpewwdjxdboxtbdf-auth-token') || '{}'); return s?.access_token || ''; } catch { return ''; } })() : '') } })
       .then(r => r.json())
       .then(j => setAccessStatus(j.data?.status || 'new'))
       .catch(() => setAccessStatus('new'));
@@ -580,7 +580,7 @@ function DashboardLayoutApproved({ user }) {
   }, [user]);
 
   // ── RECHERCHE TRAVAILLEUR LIVE (Supabase) ──────────────────────────────
-  const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://qcunxnadjxggizdksvay.supabase.co';
+  const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://jwjtlpewwdjxdboxtbdf.supabase.co';
   const SB_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
   const searchWorkersLive = useCallback((query) => {

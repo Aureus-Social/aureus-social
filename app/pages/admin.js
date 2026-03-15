@@ -608,7 +608,7 @@ function IntegrationsPage({s}) {
   const { tText } = useLang();
   const GOLD='#c6a34e',GREEN='#22c55e',RED='#ef4444',ORANGE='#f97316';
   const integrations = [
-    {name:'Supabase',icon:'🗄️',desc:'Base de données & Auth',status:'connected',detail:'Instance: qcunxnadjxggizdksvay · Frankfurt'},
+    {name:'Supabase',icon:'🗄️',desc:'Base de données & Auth',status:'connected',detail:'Instance: jwjtlpewwdjxdboxtbdf · Frankfurt'},
     {name:'Vercel',icon:'▲',desc:'Déploiement & Edge Functions',status:'connected',detail:'www.aureussocial.be · auto-deploy main'},
     {name:'ONSS / WIDE',icon:'🏛️',desc:'Déclarations sociales belges',status:'partial',detail:'Matricule provisoire 51357716-02 · validation en cours'},
     {name:'Dimona REST API',icon:'📤',desc:'Déclarations travailleurs',status:'simulation',detail:'Mode simulation — credentials prod à configurer'},
