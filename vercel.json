@@ -63,6 +63,34 @@
     {
       "path": "/api/cron/cleanup-backups",
       "schedule": "0 3 * * 0"
+    },
+    {
+      "path": "/api/cron/alerte-impayes",
+      "schedule": "0 7 * * 1"
+    },
+    {
+      "path": "/api/cron/alerte-dimona",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/alerte-cdd",
+      "schedule": "15 7 * * *"
+    },
+    {
+      "path": "/api/cron/rapport-clients",
+      "schedule": "0 7 1 * *"
+    },
+    {
+      "path": "/api/cron/alerte-absence",
+      "schedule": "30 7 * * 1"
+    },
+    {
+      "path": "/api/cron/index-sante",
+      "schedule": "45 5 1 * *"
+    },
+    {
+      "path": "/api/cron/cleanup-emails",
+      "schedule": "30 3 * * 0"
     }
   ]
 }
