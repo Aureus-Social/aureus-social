@@ -126,6 +126,11 @@ const MigrationsAdminPg = dynamic(() => import('../pages/MigrationsAdmin'), { ss
 const WelcomeGuidePg = dynamic(() => import('../pages/WelcomeGuide'), { ssr: false, loading: () => null });
 const HistoriquePayrollPg = dynamic(() => import('../pages/HistoriquePayroll'), { ssr: false, loading: Loading });
 const DocumentsSociauxPg = dynamic(() => import('../pages/DocumentsSociaux'), { ssr: false, loading: Loading });
+const BelcotaxFichesPg = dynamic(() => import('../pages/BelcotaxFiches'), { ssr: false, loading: Loading });
+const ChequesRepasPg = dynamic(() => import('../pages/ChequesRepas'), { ssr: false, loading: Loading });
+const BilanSocialPg = dynamic(() => import('../pages/BilanSocial'), { ssr: false, loading: Loading });
+const NetAuBrutPg = dynamic(() => import('../pages/NetAuBrut'), { ssr: false, loading: Loading });
+const CaisseVacancesPg = dynamic(() => import('../pages/CaisseVacances'), { ssr: false, loading: Loading });
 const OffboardingPg = ({ s, d }) => <OffboardingRaw s={s} d={d} />;
 const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 
@@ -708,7 +713,10 @@ function DashboardLayoutApproved({ user }) {
       case 'compteIndividuel': return <PayrollGroupPg s={s} d={d} tab={page} />;
       // DECLARATIONS & COMPTABILITE
       case 'batchdecl': return <ModsBatch2Pg s={s} d={d} tab={page} />;
-      case 'belcotax281': return <ModsBatch2Pg s={s} d={d} tab={page} />;
+      case 'belcotax281': return <BelcotaxFichesPg state={s} dispatch={d} />;
+      case 'chequesrepas': return <ChequesRepasPg state={s} dispatch={d} />;
+      case 'netaubrut': return <NetAuBrutPg state={s} dispatch={d} />;
+      case 'caissevacances': return <CaisseVacancesPg state={s} dispatch={d} />;
       case 'documentsociaux': return <DocumentsSociauxPg state={s} dispatch={d} />;
       // ── MANDATS & PRIMES EMPLOI ──
       case 'mandatonss': case 'belcotaxmandat': case 'domiciliation':
@@ -719,7 +727,7 @@ function DashboardLayoutApproved({ user }) {
       case 'offboarding': case 'offboarding_suite': return <OffboardingPg s={s} d={d} />;
       case 'connexionshub': case 'portailsbelges': case 'liensutiles':
         return <ConnexionsHubPg s={s} d={d} />;
-      case 'bilansocial': return <AnalyticsPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
+      case 'bilansocial': return <BilanSocialPg state={s} dispatch={d} />;
       case 'chargessociales': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'chomagetemporaire': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'exportWinbooks': return <ModsBatch2Pg s={s} d={d} tab={page} />;
