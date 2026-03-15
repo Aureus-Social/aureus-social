@@ -509,6 +509,17 @@ function DashboardLayoutApproved({ user }) {
     }
   },[s._nav]);
 
+  // ── HANDLER NAVIGATION DEPUIS IFRAME (embauche-az.html) ─────────────────
+  useEffect(()=>{
+    function handleMessage(e) {
+      if (e.data && e.data.type === 'navigate' && e.data.page) {
+        setPage(e.data.page);
+      }
+    }
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
   const toggleGroup = (gId) => setCollapsed(p => ({ ...p, [gId]: !p[gId] }));
 
   // ── CHARGEMENT INITIAL DES DONNÉES (Supabase) ───────────────────────────

@@ -2514,7 +2514,7 @@ function docOpen(type) {
         '☐ Badge / accès informatique créés<br>' +
         '☐ Compte email professionnel créé<br>' +
         '☐ Matériel de travail préparé (PC, outils, véhicule si applicable)<br>' +
-        '☐ Affiliation assurance accidents du travail vérifiée (obligatoire dès le 1er travailleur — Fedris)<br>' +
+        '☐ Affiliation assurance accidents du travail vérifiée (obligatoire dès le 1er travailleur — Fedris) <a href=\"javascript:void(0)\" onclick=\"window.parent&&window.parent.postMessage({type:\'navigate\',page:\'assuranceloi\'},\'*\')\" style=\"color:#c6a34e;font-size:10px;text-decoration:none;border:1px solid rgba(198,163,78,.3);border-radius:4px;padding:1px 6px;margin-left:6px;\">→ Module Assurance-Loi</a><br>' +
         '☐ SEPP (Service Externe de Prévention) notifié si nécessaire<br>' +
         (d.cp ? '☐ Caisse de vacances sectorielle identifiée (CP ' + d.cp + ')<br>' : '') +
         '</div>' +
@@ -6396,6 +6396,18 @@ function wizGenerate() {
               <div class="check-item warning"><strong>⚠ Deadline : 01/06/2026</strong> — à introduire AVANT cette date</div>
               <div class="check-item">Conditions : travailleur peu qualifié ou demandeur d'emploi longue durée</div>
             </div>
+          </div>
+          <div>
+            <div class="sub-section-title">Documents DRS — Aides à l'emploi</div>
+            <div class="checklist">
+              <div class="check-item important">C78 Activa/Winwin/Actiris — réduction ONSS patronale mensuelle</div>
+              <div class="check-item">C103 Jeunes (−25 ans) ou C103 Seniors (+55 ans) — réduction structurelle</div>
+              <div class="check-item">C78 SINE — travailleur très peu qualifié, longue durée</div>
+              <div class="check-item law">À générer via module Documents Sociaux DRS</div>
+            </div>
+            <button onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'documentsociaux'},'*')" style="margin-top:10px;padding:7px 14px;border-radius:6px;border:1px solid rgba(198,163,78,.4);background:rgba(198,163,78,.08);color:#c6a34e;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">
+              → Ouvrir Documents Sociaux DRS dans Aureus Social Pro
+            </button>
           </div>
         </div>
       </div>
