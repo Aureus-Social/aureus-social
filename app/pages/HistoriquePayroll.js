@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
-import { TX_ONSS_W, TX_ONSS_E, quickPP, calcCSS, fmt } from '@/app/lib/helpers';
+import { TX_ONSS_W, TX_ONSS_E, quickPP, fmt } from '@/app/lib/helpers';
 
 const GOLD = '#c6a34e';
 const TYPES = [
@@ -30,7 +30,7 @@ function calcFiche(gross, type, regime = 100) {
   const onssW = Math.round(brutR * TX_ONSS_W * 100) / 100;
   const onssE = Math.round(brutR * TX_ONSS_E * 100) / 100;
   const pp = Math.round((quickPP ? quickPP(brutR - onssW) : (brutR - onssW) * 0.25) * 100) / 100;
-  const css = calcCSS ? Math.round(calcCSS(brutR - onssW) * 100) / 100 : 0;
+  const css = 0; // calcCSS sera ajouté ultérieurement
   const onva = type === 'ouvrier' ? Math.round(brutR * 0.1584 * 100) / 100 : 0;
   const net = Math.round((brutR - onssW - pp - css) * 100) / 100;
   const coutEmpl = Math.round((brutR + onssE + (type === 'ouvrier' ? onva : 0)) * 100) / 100;

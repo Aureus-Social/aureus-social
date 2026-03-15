@@ -120,6 +120,7 @@ const WebhooksRaw = dynamic(() => import('../pages/WebhooksManager'), { ssr: fal
 const WebhooksPg = ({ s, d }) => <WebhooksRaw s={s} d={d} />;
 const OffboardingRaw = dynamic(() => import('../pages/OffboardingModule'), { ssr: false, loading: Loading });
 const GestionSocietesPg = dynamic(() => import('../pages/GestionSocietes'), { ssr: false, loading: Loading });
+const WelcomeGuidePg = dynamic(() => import('../pages/WelcomeGuide'), { ssr: false });
 const HistoriquePayrollPg = dynamic(() => import('../pages/HistoriquePayroll'), { ssr: false, loading: Loading });
 const OffboardingPg = ({ s, d }) => <OffboardingRaw s={s} d={d} />;
 const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
@@ -190,6 +191,11 @@ function reducer(state, action) {
 
 // Placeholder pour les pages pas encore migrées
 function PlaceholderPage({ id, label }) {
+  const handleWelcomeDismiss = () => {
+    setShowWelcome(false);
+    if (typeof window !== 'undefined') localStorage.setItem('aureus_welcome_seen', '1');
+  };
+
   return (
     <div style={{ padding: 40 }}>
       <div style={{ fontSize: 19, fontWeight: 800, color: '#c6a34e', marginBottom: 8 }}>{label}</div>
@@ -381,6 +387,10 @@ function DashboardLayoutInner({ user }) {
 
 function DashboardLayoutApproved({ user }) {
   const [page, setPage] = useState('dashboard');
+  const [showWelcome, setShowWelcome] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return !localStorage.getItem('aureus_welcome_seen');
+  });
   const [cryptoKey, setCryptoKey] = useState(null);
   const { lang, setLang, t: tCtx } = useLang();
 
@@ -778,6 +788,7 @@ function DashboardLayoutApproved({ user }) {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      {showWelcome && <WelcomeGuidePg state={s} dispatch={d} onNavigate={setPage} onDismiss={handleWelcomeDismiss} />}
       {/* SIDEBAR */}
       <div style={{ width: sidebarOpen ? 260 : 0, background: '#0a0908', borderRight: '1px solid rgba(198,163,78,.06)', display: 'flex', flexDirection: 'column', transition: 'width .2s', overflow: 'hidden', flexShrink: 0 }}>
         {/* Logo */}
