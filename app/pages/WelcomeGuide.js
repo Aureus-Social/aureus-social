@@ -5,158 +5,155 @@ const GOLD = '#C9963A';
 
 const ROLE_GUIDES = {
   admin: {
-    label: 'Administrateur', icon: '👑', color: GOLD,
-    bienvenue: 'Bienvenue sur votre plateforme de secrétariat social digital.',
-    description: 'Vous disposez d\'un accès complet. Voici comment démarrer efficacement.',
-    etapes: [
-      { icon: '🏢', titre: 'Configurez votre société', desc: 'Renseignez BCE, ONSS, CP paritaire, coordonnées bancaires.', action: 'gestionsocietes', cta: 'Configurer' },
-      { icon: '👤', titre: 'Ajoutez vos employés', desc: 'Importez ou créez les dossiers de vos travailleurs.', action: 'employees', cta: 'Ajouter' },
-      { icon: '💰', titre: 'Générez votre première fiche', desc: 'Calculez et envoyez une fiche de paie en quelques clics.', action: 'payslip', cta: 'Générer' },
-      { icon: '📡', titre: 'Soumettez vos Dimona', desc: 'Déclarez vos travailleurs à l\'ONSS via l\'interface intégrée.', action: 'declarations', cta: 'Déclarer' },
-      { icon: '🔐', titre: 'Invitez votre équipe', desc: 'Donnez accès à vos collaborateurs avec les bons rôles.', action: 'authroles', cta: 'Inviter' },
+    label: 'Administrateur', icon: '👑', couleur: '#C9963A',
+    bienvenue: 'Vous disposez des droits administrateur complets sur Aureus Social Pro.',
+    modules_cles: [
+      { icon: '👤', label: 'Employés', desc: 'Gérer tous les travailleurs', route: 'employees' },
+      { icon: '◈', label: 'Fiches de Paie', desc: 'Générer et envoyer les fiches', route: 'payslip' },
+      { icon: '📡', label: 'Déclarations', desc: 'Dimona, DmfA, Belcotax', route: 'declarations' },
+      { icon: '🏢', label: 'Gestion Sociétés', desc: 'Gérer vos sociétés clientes', route: 'gestionsocietes' },
+      { icon: '📊', label: 'Historique Paie', desc: 'Suivi complet par type', route: 'historiquepayroll' },
+      { icon: '🔐', label: 'Rôles & Accès', desc: 'Inviter et gérer les utilisateurs', route: 'authroles' },
     ],
-    raccourcis: [
-      { label: 'Dashboard', id: 'dashboard', icon: '◫' },
-      { label: 'Fiches de Paie', id: 'payslip', icon: '◈' },
-      { label: 'ONSS & Dimona', id: 'declarations', icon: '📡' },
-      { label: 'Exports Compta', id: 'exportcompta', icon: '📤' },
-      { label: 'Smart Alertes', id: 'smartalerts', icon: '🔔' },
-      { label: 'Audit Trail', id: 'audittrail', icon: '🔍' },
+    etapes: [
+      'Ajoutez vos employés dans "Liste & Fiches"',
+      'Configurez vos déclarations ONSS',
+      'Invitez vos collaborateurs via "Rôles & Accès"',
+      'Activez les Smart Alertes pour les échéances',
     ]
   },
   secretariat: {
-    label: 'Secrétariat Social', icon: '📋', color: '#3b82f6',
-    bienvenue: 'Bienvenue sur votre espace Secrétariat Social.',
-    description: 'Gérez la paie, les déclarations et les exports comptables.',
-    etapes: [
-      { icon: '👥', titre: 'Consultez les dossiers', desc: 'Accédez aux dossiers travailleurs de vos clients.', action: 'employees', cta: 'Voir' },
-      { icon: '🧮', titre: 'Calculez les salaires', desc: 'Simulateur net/brut pour des calculs instantanés.', action: 'calcinstant', cta: 'Simuler' },
-      { icon: '📄', titre: 'Générez les fiches', desc: 'Créez et envoyez les fiches du mois par email.', action: 'payslip', cta: 'Générer' },
-      { icon: '📡', titre: 'Dimona IN/OUT', desc: 'Traitez les entrées et sorties de personnel.', action: 'declarations', cta: 'Déclarer' },
-      { icon: '📤', titre: 'Export comptable', desc: 'Générez WinBooks, BOB ou Exact Online.', action: 'exportcompta', cta: 'Exporter' },
+    label: 'Secrétariat Social', icon: '📋', couleur: '#5B9BD6',
+    bienvenue: 'Votre espace est centré sur la gestion de la paie et les déclarations sociales.',
+    modules_cles: [
+      { icon: '◈', label: 'Fiches de Paie', desc: 'Générer les fiches du mois', route: 'payslip' },
+      { icon: '🧮', label: 'Calcul & Simulation', desc: 'Net/brut instantané', route: 'calcinstant' },
+      { icon: '📡', label: 'Dimona', desc: 'Soumettre les déclarations', route: 'declarations' },
+      { icon: '📊', label: 'Historique Paie', desc: 'Historique complet', route: 'historiquepayroll' },
+      { icon: '🔄', label: 'Clôture Mensuelle', desc: 'Valider la période', route: 'cloture' },
+      { icon: '📤', label: 'Exports Comptables', desc: 'WinBooks, BOB, Exact', route: 'exportcompta' },
     ],
-    raccourcis: [
-      { label: 'Fiches de Paie', id: 'payslip', icon: '◈' },
-      { label: 'Calcul Instantané', id: 'calcinstant', icon: '🧮' },
-      { label: 'ONSS & Dimona', id: 'declarations', icon: '📡' },
-      { label: 'Belcotax 281.10', id: 'belcotax281', icon: '📊' },
-      { label: 'Exports Compta', id: 'exportcompta', icon: '📤' },
-      { label: 'Historique Paie', id: 'historiquepayroll', icon: '📊' },
+    etapes: [
+      'Vérifiez les dossiers travailleurs dans "Liste & Fiches"',
+      'Utilisez "Validation Pré-Paie" avant chaque clôture',
+      'Générez les fiches et envoyez-les par email',
+      'Exportez les écritures pour votre logiciel comptable',
     ]
   },
   commercial: {
-    label: 'Commercial', icon: '🎯', color: '#a78bfa',
-    bienvenue: 'Bienvenue sur votre espace Commercial.',
-    description: 'Prospectez, diagnostiquez et convertissez vos clients.',
-    etapes: [
-      { icon: '🔍', titre: 'Analysez un prospect', desc: 'Identifiez les économies possibles vs son secrétariat actuel.', action: 'diagnostic', cta: 'Analyser' },
-      { icon: '⚔️', titre: 'Comparez la concurrence', desc: 'Générez un comparatif SD Worx / Partena / Securex.', action: 'comparatif', cta: 'Comparer' },
-      { icon: '📖', titre: 'Préparez votre pitch', desc: 'Scripts, objections et argumentaires.', action: 'guidecommercial', cta: 'Voir le guide' },
-      { icon: '🏢', titre: 'Hub Fiduciaire', desc: 'Approchez les experts-comptables partenaires.', action: 'hubfidu', cta: 'Voir' },
-      { icon: '✅', titre: 'Checklist reprise', desc: 'Processus complet de reprise d\'un concurrent.', action: 'checklistclient', cta: 'Voir' },
+    label: 'Commercial', icon: '🎯', couleur: '#4CAF80',
+    bienvenue: 'Votre espace est dédié aux outils de prospection et aux guides commerciaux.',
+    modules_cles: [
+      { icon: '🔍', label: 'Diagnostic Client', desc: 'Analyser un prospect', route: 'diagnostic' },
+      { icon: '⚔️', label: 'Comparatif Marché', desc: 'vs SD Worx / Partena', route: 'comparatif' },
+      { icon: '📖', label: 'Guide Commercial', desc: 'Scripts et argumentaires', route: 'guidecommercial' },
+      { icon: '🏢', label: 'Hub Fiduciaire', desc: 'Portail fiduciaires', route: 'hubfidu' },
+      { icon: '✅', label: 'Checklist Reprise', desc: 'Reprendre un concurrent', route: 'checklistclient' },
+      { icon: '📋', label: 'Procédures RH', desc: 'Répondre aux questions', route: 'proceduresrh' },
     ],
-    raccourcis: [
-      { label: 'Diagnostic Client', id: 'diagnostic', icon: '🔍' },
-      { label: 'Comparatif Marché', id: 'comparatif', icon: '⚔️' },
-      { label: 'Guide Commercial', id: 'guidecommercial', icon: '📖' },
-      { label: 'Hub Fiduciaire', id: 'hubfidu', icon: '🏢' },
-      { label: 'Checklist Reprise', id: 'checklistclient', icon: '✅' },
-      { label: 'Procédures RH', id: 'proceduresrh', icon: '📋' },
+    etapes: [
+      'Testez le Diagnostic Client en démo avec un prospect',
+      'Préparez le Comparatif Marché pour vos rendez-vous',
+      'Consultez le Guide Commercial pour les scripts',
+      'Utilisez les Procédures RH pour les questions juridiques',
     ]
   },
-  rh_entreprise: {
-    label: 'RH Entreprise', icon: '👥', color: '#22c55e',
-    bienvenue: 'Bienvenue sur votre espace RH.',
-    description: 'Gérez vos employés, absences, congés et contrats au quotidien.',
-    etapes: [
-      { icon: '👤', titre: 'Consultez vos employés', desc: 'Accédez aux dossiers complets de votre équipe.', action: 'employees', cta: 'Voir' },
-      { icon: '🗓', titre: 'Gérez les absences', desc: 'Vue calendaire de toutes les absences et congés.', action: 'absences', cta: 'Gérer' },
-      { icon: '✅', titre: 'Traitez les demandes', desc: 'Approuvez ou refusez les demandes de congé.', action: 'congesdemandes', cta: 'Traiter' },
-      { icon: '📝', titre: 'Générez un contrat', desc: 'Contrat CDD ou CDI en quelques minutes.', action: 'generatcontrats', cta: 'Générer' },
-      { icon: '🚀', titre: 'Onboardez un employé', desc: 'Wizard d\'intégration étape par étape.', action: 'onboarding', cta: 'Démarrer' },
+  rh: {
+    label: 'RH Entreprise', icon: '👥', couleur: '#a78bfa',
+    bienvenue: 'Votre espace est dédié à la gestion quotidienne des ressources humaines.',
+    modules_cles: [
+      { icon: '👤', label: 'Liste Employés', desc: 'Dossiers des travailleurs', route: 'employees' },
+      { icon: '🗓', label: 'Absences & Congés', desc: 'Gérer les absences', route: 'absences' },
+      { icon: '🚀', label: 'Onboarding', desc: 'Intégrer un nouvel employé', route: 'onboarding' },
+      { icon: '👋', label: 'Offboarding', desc: 'Gérer les départs', route: 'offboarding' },
+      { icon: '📝', label: 'Générateur Contrats', desc: 'Créer des contrats', route: 'contratslegaux' },
+      { icon: '📊', label: 'Dashboard RH', desc: 'KPIs absentéisme, turnover', route: 'dashrh' },
     ],
-    raccourcis: [
-      { label: 'Liste Employés', id: 'employees', icon: '👤' },
-      { label: 'Absences & Congés', id: 'absences', icon: '🗓' },
-      { label: 'Planning Congés', id: 'conges', icon: '📅' },
-      { label: 'Dashboard RH', id: 'dashrh', icon: '📊' },
-      { label: 'Procédures RH', id: 'proceduresrh', icon: '📋' },
-      { label: 'Portail Employé', id: 'portailemploye', icon: '🌐' },
+    etapes: [
+      'Consultez le planning absences dans "Absences & Congés"',
+      'Utilisez le Wizard Onboarding pour les nouveaux',
+      'Configurez les alertes de fin de CDD',
+      'Explorez le Dashboard RH pour vos KPIs',
     ]
   }
 };
 
-export default function WelcomeGuide({ state, dispatch, onNavigate, onDismiss }) {
-  const userRole = state?.user?.user_metadata?.role || 'admin';
-  const guide = ROLE_GUIDES[userRole] || ROLE_GUIDES.admin;
-  const prenom = state?.user?.user_metadata?.prenom || state?.user?.email?.split('@')[0] || 'vous';
+function getRoleGuide(role) {
+  if (!role) return ROLE_GUIDES.admin;
+  const k = role.toLowerCase();
+  if (k.includes('admin')) return ROLE_GUIDES.admin;
+  if (k.includes('secret') || k.includes('paie') || k.includes('social')) return ROLE_GUIDES.secretariat;
+  if (k.includes('commercial') || k.includes('vente')) return ROLE_GUIDES.commercial;
+  if (k.includes('rh') || k.includes('ressource') || k.includes('entreprise')) return ROLE_GUIDES.rh;
+  return ROLE_GUIDES.admin;
+}
 
-  const navigate = (id) => {
-    if (onNavigate) onNavigate(id);
-    if (dispatch) dispatch({ type: 'SET_PAGE', payload: id });
-    if (onDismiss) onDismiss();
-  };
+export default function WelcomeGuide({ state, onNavigate, onDismiss }) {
+  const guide = getRoleGuide(state?.userRole || state?.role || 'admin');
+  const userName = state?.user?.name || state?.user?.email?.split('@')[0] || 'vous';
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.75)', zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div style={{ background: '#141416', border: `1px solid ${guide.color}40`, borderRadius: 12, padding: 32, maxWidth: 700, width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: `0 0 60px ${guide.color}15` }}>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+      <div style={{ background: '#141416', border: `1px solid ${guide.couleur}40`, borderRadius: 14, maxWidth: 680, width: '100%', maxHeight: '90vh', overflow: 'auto', boxShadow: `0 0 60px ${guide.couleur}20` }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-              <span style={{ fontSize: 28 }}>{guide.icon}</span>
-              <span style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>Bienvenue, {prenom} !</span>
+        <div style={{ background: '#0D0D0E', padding: '24px 28px', borderBottom: '1px solid #2A2A30', borderRadius: '14px 14px 0 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: GOLD, letterSpacing: 2 }}>AUREUS SOCIAL PRO</div>
+              <div style={{ fontSize: 10, color: '#6B6860', letterSpacing: 3, marginTop: 2 }}>SÉCRÉTARIAT SOCIAL DIGITAL</div>
             </div>
-            <div style={{ fontSize: 13, color: '#6B6860' }}>{guide.bienvenue}</div>
+            <span style={{ background: guide.couleur + '20', color: guide.couleur, padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 600 }}>
+              {guide.icon} {guide.label}
+            </span>
           </div>
-          <button onClick={() => onDismiss && onDismiss()} style={{ background: 'none', border: '1px solid #2A2A30', color: '#6B6860', padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 12, flexShrink: 0, marginLeft: 16 }}>✕</button>
         </div>
 
-        {/* Badge rôle */}
-        <div style={{ marginBottom: 20 }}>
-          <span style={{ padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: guide.color + '20', color: guide.color }}>
-            {guide.icon} {guide.label}
-          </span>
-          <span style={{ fontSize: 13, color: '#6B6860', marginLeft: 10 }}>{guide.description}</span>
+        {/* Bienvenue */}
+        <div style={{ padding: '24px 28px', borderBottom: '1px solid #2A2A30' }}>
+          <h2 style={{ margin: '0 0 8px', color: '#fff', fontSize: 20 }}>Bienvenue, {userName} 👋</h2>
+          <p style={{ margin: 0, color: '#6B6860', fontSize: 13, lineHeight: 1.6 }}>{guide.bienvenue}</p>
         </div>
 
-        {/* Étapes */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#6B6860', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12 }}>Par où commencer ?</div>
-          <div style={{ display: 'grid', gap: 8 }}>
-            {guide.etapes.map((e, i) => (
-              <div key={i} onClick={() => navigate(e.action)} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#1A1A1E', border: '1px solid #2A2A30', borderRadius: 8, padding: '10px 14px', cursor: 'pointer' }}
-                onMouseEnter={el => el.currentTarget.style.borderColor = guide.color}
-                onMouseLeave={el => el.currentTarget.style.borderColor = '#2A2A30'}>
-                <span style={{ fontSize: 20, flexShrink: 0 }}>{e.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{e.titre}</div>
-                  <div style={{ fontSize: 11, color: '#6B6860', marginTop: 1 }}>{e.desc}</div>
-                </div>
-                <span style={{ background: guide.color + '20', color: guide.color, border: `1px solid ${guide.color}30`, borderRadius: 4, padding: '3px 10px', fontSize: 11, fontWeight: 600, flexShrink: 0 }}>{e.cta} →</span>
+        {/* Modules */}
+        <div style={{ padding: '20px 28px', borderBottom: '1px solid #2A2A30' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: GOLD, marginBottom: 14, textTransform: 'uppercase', letterSpacing: 1 }}>Vos modules</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 8 }}>
+            {guide.modules_cles.map(m => (
+              <div key={m.route} onClick={() => { onNavigate && onNavigate(m.route); onDismiss && onDismiss(); }}
+                style={{ background: '#1A1A1E', border: '1px solid #2A2A30', borderRadius: 8, padding: '12px 14px', cursor: 'pointer' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = guide.couleur}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#2A2A30'}>
+                <div style={{ fontSize: 20, marginBottom: 4 }}>{m.icon}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#e8e6e0' }}>{m.label}</div>
+                <div style={{ fontSize: 11, color: '#6B6860', marginTop: 2 }}>{m.desc}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Raccourcis */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#6B6860', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>Accès rapides</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {guide.raccourcis.map(r => (
-              <button key={r.id} onClick={() => navigate(r.id)} style={{ background: '#1A1A1E', border: '1px solid #2A2A30', color: '#e8e6e0', borderRadius: 6, padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>
-                {r.icon} {r.label}
-              </button>
-            ))}
-          </div>
+        {/* Premiers pas */}
+        <div style={{ padding: '20px 28px', borderBottom: '1px solid #2A2A30' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: GOLD, marginBottom: 14, textTransform: 'uppercase', letterSpacing: 1 }}>Par où commencer</div>
+          {guide.etapes.map((e, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '8px 0', borderBottom: i < guide.etapes.length - 1 ? '1px solid #1A1A1E' : 'none' }}>
+              <div style={{ width: 22, height: 22, borderRadius: '50%', background: guide.couleur, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>
+                {i + 1}
+              </div>
+              <div style={{ fontSize: 13, color: '#e8e6e0', lineHeight: 1.5 }}>{e}</div>
+            </div>
+          ))}
         </div>
 
-        {/* Footer */}
-        <div style={{ paddingTop: 16, borderTop: '1px solid #2A2A30', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 11, color: '#6B6860' }}>Rouvrez ce guide via Menu → Support</span>
-          <button onClick={() => navigate('dashboard')} style={{ background: guide.color, color: '#000', border: 'none', borderRadius: 6, padding: '8px 20px', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
-            Accéder au dashboard →
+        {/* Actions */}
+        <div style={{ padding: '20px 28px', display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+          <button onClick={() => onDismiss && onDismiss()}
+            style={{ background: 'none', border: '1px solid #2A2A30', color: '#6B6860', padding: '10px 20px', borderRadius: 6, cursor: 'pointer', fontSize: 13 }}>
+            Passer
+          </button>
+          <button onClick={() => { onNavigate && onNavigate(guide.modules_cles[0].route); onDismiss && onDismiss(); }}
+            style={{ background: GOLD, color: '#000', border: 'none', borderRadius: 6, padding: '10px 24px', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+            Commencer {guide.modules_cles[0].icon} →
           </button>
         </div>
       </div>

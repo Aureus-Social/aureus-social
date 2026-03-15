@@ -120,7 +120,7 @@ const WebhooksRaw = dynamic(() => import('../pages/WebhooksManager'), { ssr: fal
 const WebhooksPg = ({ s, d }) => <WebhooksRaw s={s} d={d} />;
 const OffboardingRaw = dynamic(() => import('../pages/OffboardingModule'), { ssr: false, loading: Loading });
 const GestionSocietesPg = dynamic(() => import('../pages/GestionSocietes'), { ssr: false, loading: Loading });
-const WelcomeGuidePg = dynamic(() => import('../pages/WelcomeGuide'), { ssr: false });
+const WelcomeGuidePg = dynamic(() => import('../pages/WelcomeGuide'), { ssr: false, loading: () => null });
 const HistoriquePayrollPg = dynamic(() => import('../pages/HistoriquePayroll'), { ssr: false, loading: Loading });
 const OffboardingPg = ({ s, d }) => <OffboardingRaw s={s} d={d} />;
 const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
@@ -1114,7 +1114,8 @@ function DashboardLayoutApproved({ user }) {
 
         {/* Content */}
         <div style={{ flex: 1, overflowY: 'auto', padding: 24, background: TH.bg, color: TH.text }}>
-          <ErrorBoundary pageKey={page} label={currentItem?.label}>{renderPage()}</ErrorBoundary>
+          <ErrorBoundary pageKey={page} label={currentItem?.label}>{showWelcome && <WelcomeGuidePg state={s} onNavigate={(r) => { setPage(r); }} onDismiss={() => { setShowWelcome(false); if (typeof window !== 'undefined') localStorage.setItem('aureus_welcome_seen', '1'); }} />}
+              {renderPage()}</ErrorBoundary>
         </div>
       </div>
       {/* ── MODAL GLOBAL ─────────────────────────────────── */}
