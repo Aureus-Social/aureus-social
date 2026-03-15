@@ -64,6 +64,30 @@ export default function HistoriquePayroll({ state, dispatch }) {
     setLoading(false);
   };
 
+  const [sending, setSending] = useState(null);
+
+  const sendEmail = async (fiche) => {
+    const email = prompt(`Email pour ${fiche.employe_prenom} ${fiche.employe_nom} :`, fiche.employe_email || '');
+    if (!email) return;
+    setSending(fiche.id);
+    try {
+      const res = await fetch('/api/email-fiche', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fiche_id: fiche.id,
+          fiche: fiche,
+          email_override: email,
+          employe: { nom: fiche.employe_nom, prenom: fiche.employe_prenom, email },
+        })
+      });
+      const j = await res.json();
+      if (j.ok) alert('✅ Email envoyé !');
+      else alert('❌ Erreur : ' + j.error);
+    } catch(e) { alert('❌ Erreur réseau'); }
+    setSending(null);
+  };
+
   const loadHistory = async () => {
     try {
       const r = await fetch(`/api/payroll-history?mode=history`);
@@ -302,6 +326,12 @@ export default function HistoriquePayroll({ state, dispatch }) {
                         <td style={{ padding: '10px 12px', color: '#E05C3A' }}>{fmt(f.cout_empl)} €</td>
                         <td style={{ padding: '10px 12px' }}>
                           <span style={{ padding: '2px 8px', borderRadius: 3, fontSize: 10, background: f.statut==='paye'?'#4CAF8020':'#c6a34e20', color: f.statut==='paye'?'#4CAF80':GOLD }}>{f.statut}</span>
+                        </td>
+                        <td style={{ padding: '10px 12px' }}>
+                          <button onClick={() => sendEmail(f)} disabled={sending === f.id} style={{
+                            background: sending===f.id ? '#2A2A30' : '#1A1A1E', color: sending===f.id ? '#6B6860' : '#C9963A',
+                            border: '1px solid #2A2A30', borderRadius: 4, padding: '4px 10px', cursor: 'pointer', fontSize: 11
+                          }}>{sending===f.id ? '⏳' : '📧'}</button>
                         </td>
                       </tr>
                     );
