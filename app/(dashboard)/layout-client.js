@@ -60,6 +60,10 @@ const SubscriptionsPg = dynamic(() => import('../pages/Subscriptions'), { ssr: f
 const VehiculesATNPg = dynamic(() => import('../pages/VehiculesATN'), { ssr: false, loading: Loading });
 const BudgetPrevPg = dynamic(() => import('../pages/BudgetPrevisionnel'), { ssr: false, loading: Loading });
 const FlexiJobsPg = dynamic(() => import('../pages/FlexiJobs'), { ssr: false, loading: Loading });
+const CalendrierSocialPg = dynamic(() => import('../pages/CalendrierSocial'), { ssr: false, loading: Loading });
+const SoldeToutComptePg = dynamic(() => import('../pages/SoldeToutCompte'), { ssr: false, loading: Loading });
+const CompteIndividuelPg = dynamic(() => import('../pages/CompteIndividuel'), { ssr: false, loading: Loading });
+const EcheancierPg = dynamic(() => import('../pages/Echeancier'), { ssr: false, loading: Loading });
 const DiagnosticPage = dynamic(() => import('../pages/DiagnosticCommercial'), { ssr: false, loading: Loading });
 const SeuilsPage = dynamic(() => import('../pages/SeuilsSociaux'), { ssr: false, loading: Loading });
 const OnboardingPage = dynamic(() => import('../pages/OnboardingHub'), { ssr: false, loading: Loading });
@@ -717,9 +721,9 @@ function DashboardLayoutApproved({ user }) {
       case 'baremespp': return <TransversalCPPg s={s} d={d} tab={page} />;
       case 'budget': return <BudgetPrevPg s={s} d={d} />;
       case 'calcmaladie': return <CalcMaladiePg state={s} dispatch={d} />;
-      case 'calendrier': return <PayrollGroupPg s={s} d={d} tab={page} />;
+      case 'calendrier': return <CalendrierSocialPg s={s} d={d} />;
       case 'coutsannuel': return <CoutsAnnuelsPg state={s} dispatch={d} />;
-      case 'echeancier': return <PayrollGroupPg s={s} d={d} tab={page} />;
+      case 'echeancier': return <EcheancierPg state={s} dispatch={d} />;
       case 'flexijobs': return <FlexiJobsPg state={s} dispatch={d} />;
       case 'formC131': return <DocumentGeneratorPgW s={s} d={d} tab={page} />;
       case 'joursPrestes': return <EmployeePlanningPgW s={s} d={d} tab={page} />;
@@ -730,12 +734,12 @@ function DashboardLayoutApproved({ user }) {
       case 'simulicenciement': return <SimuLicenciementPg state={s} dispatch={d} />;
       case 'simupension': return <SimuPensionPg state={s} dispatch={d} />;
       case 'simutp': return <SimulateurTPPg state={s} dispatch={d} />;
-      case 'soldetoutcompte': return <PayrollGroupPg s={s} d={d} tab={page} />;
+      case 'soldetoutcompte': return <SoldeToutComptePg s={s} d={d} />;
       case 'timeline': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'validation': return <PayrollGroupPg s={s} d={d} tab={page} />;
       case 'vehiculesatn': return <VehiculesATNPg s={s} d={d} />;
       case 'comparateur': return <PayrollSimPage s={s} d={d} t={t} lang={lang} th={TH} tab={page} />;
-      case 'compteIndividuel': return <PayrollGroupPg s={s} d={d} tab={page} />;
+      case 'compteIndividuel': case 'compteindividuelannuel': return <CompteIndividuelPg state={s} dispatch={d} />;
       // DECLARATIONS & COMPTABILITE
       case 'batchdecl': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'belcotax281': return <BelcotaxFichesPg state={s} dispatch={d} />;

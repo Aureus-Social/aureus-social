@@ -4931,6 +4931,47 @@ function wizGenerate() {
         </div>
       </div></div>
     </div>
+
+    <!-- MODULES AUREUS SOCIAL PRO — CALCULATEURS AVANCÉS -->
+    <div class="step-card phase-monthly" onclick="toggle(this)">
+      <div class="step-header">
+        <div class="step-number">🔬</div>
+        <div class="step-meta">
+          <div class="step-title">🚀 Simulateurs avancés — Aureus Social Pro</div>
+          <div class="step-desc">Accès direct aux modules de calcul complets depuis l'application</div>
+          <div class="step-tags"><span class="tag tag-doc">App intégrée</span><span class="tag tag-amount">Temps réel</span></div>
+        </div><span class="step-chevron">▼</span>
+      </div>
+      <div class="step-body"><div class="step-body-inner">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-top:8px">
+          <div onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'coutsannuel'},'*')" style="padding:12px;border-radius:8px;border:1px solid rgba(201,150,58,.2);background:rgba(201,150,58,.04);cursor:pointer">
+            <div style="font-weight:600;font-size:12px;color:var(--gold)">📊 Coûts Annuels</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Masse salariale totale · Projection 12 mois · Par employé</div>
+          </div>
+          <div onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'simutp'},'*')" style="padding:12px;border-radius:8px;border:1px solid rgba(91,155,214,.2);background:rgba(91,155,214,.04);cursor:pointer">
+            <div style="font-weight:600;font-size:12px;color:var(--blue)">⏱ Temps Partiel</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Plancher ONSS fictif · Pro-rata droits · Comparaison plein temps</div>
+          </div>
+          <div onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'simulicenciement'},'*')" style="padding:12px;border-radius:8px;border:1px solid rgba(239,68,68,.2);background:rgba(239,68,68,.04);cursor:pointer">
+            <div style="font-weight:600;font-size:12px;color:#ef4444">⚖️ Licenciement</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Préavis statut unique · Indemnités · Pécules · CCT n°109</div>
+          </div>
+          <div onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'simupension'},'*')" style="padding:12px;border-radius:8px;border:1px solid rgba(76,175,128,.2);background:rgba(76,175,128,.04);cursor:pointer">
+            <div style="font-weight:600;font-size:12px;color:var(--green)">🏖 Pension</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Simulation pension légale · Épargne · Bonus pension</div>
+          </div>
+          <div onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'netaubrut'},'*')" style="padding:12px;border-radius:8px;border:1px solid rgba(201,150,58,.2);background:rgba(201,150,58,.04);cursor:pointer">
+            <div style="font-weight:600;font-size:12px;color:var(--gold)">⚖️ Net → Brut</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Trouver le brut à partir d'un net souhaité</div>
+          </div>
+          <div onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'echeancier'},'*')" style="padding:12px;border-radius:8px;border:1px solid rgba(91,155,214,.2);background:rgba(91,155,214,.04);cursor:pointer">
+            <div style="font-weight:600;font-size:12px;color:var(--blue)">📅 Échéancier 2026</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Toutes les deadlines ONSS · Fiscal · TVA · Alertes</div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
   </div>
 </section>
 
@@ -4972,6 +5013,9 @@ function wizGenerate() {
           <div class="check-item">La demande se fait via le formulaire C60 auprès de l'Onem</div>
           <div class="check-item">Pendant le crédit-temps : contrat suspendu — pas de préavis — protection contre le licenciement (6 mois avant + pendant)</div>
         </div>
+        <button onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'creditemps'},'*')" style="margin-top:12px;padding:7px 16px;border-radius:6px;border:1px solid rgba(91,155,214,.4);background:rgba(91,155,214,.08);color:#5b9bd6;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">
+          → Simulateur Crédit-Temps Aureus Social Pro
+        </button>
       </div></div>
     </div>
 
@@ -5748,6 +5792,9 @@ function wizGenerate() {
         <div class="info-box" style="margin-top:12px">
           <strong>CP 200 — supplément sectoriel</strong> : les travailleurs CP 200 en chômage économique reçoivent en plus de l'Onem un supplément patronal fixé par la CP (environ 5 €/jour de chômage en 2026). Vérifier la CCT sectorielle en vigueur.
         </div>
+        <button onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'chomagetemporaire'},'*')" style="margin-top:10px;padding:7px 16px;border-radius:6px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#f59e0b;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">
+          → Calculer les allocations chômage temporaire
+        </button>
       </div></div>
     </div>
 
@@ -6972,6 +7019,42 @@ function wizGenerate() {
       </div>
     </div>
 
+    <!-- MODULE AUREUS — CLÔTURE ANNUELLE -->
+    <div class="step-card phase-annual" onclick="toggle(this)">
+      <div class="step-header">
+        <div class="step-number">🗂</div>
+        <div class="step-meta">
+          <div class="step-title">📊 Outils de clôture annuelle — Aureus Social Pro</div>
+          <div class="step-desc">Compte individuel · Coûts annuels · Fiches Belcotax · Bilan Social</div>
+          <div class="step-tags"><span class="tag tag-doc">App intégrée</span></div>
+        </div><span class="step-chevron">▼</span>
+      </div>
+      <div class="step-body"><div class="step-body-inner">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
+          <div onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'compteIndividuel'},'*')" style="padding:12px;border-radius:8px;border:1px solid rgba(76,175,128,.2);background:rgba(76,175,128,.04);cursor:pointer">
+            <div style="font-weight:600;font-size:12px;color:var(--green)">📄 Compte Individuel</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Récapitulatif annuel par travailleur · Cotisations · Net · Coût employeur</div>
+          </div>
+          <div onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'coutsannuel'},'*')" style="padding:12px;border-radius:8px;border:1px solid rgba(201,150,58,.2);background:rgba(201,150,58,.04);cursor:pointer">
+            <div style="font-weight:600;font-size:12px;color:var(--gold)">📊 Coûts Annuels</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Masse salariale totale · MRR · Projection graphique 12 mois</div>
+          </div>
+          <div onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'belcotax281'},'*')" style="padding:12px;border-radius:8px;border:1px solid rgba(91,155,214,.2);background:rgba(91,155,214,.04);cursor:pointer">
+            <div style="font-weight:600;font-size:12px;color:var(--blue)">📊 Fiches Belcotax 281.xx</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Génération XML conforme BelcotaxOnWeb · 9 types de fiches</div>
+          </div>
+          <div onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'bilansocial'},'*')" style="padding:12px;border-radius:8px;border:1px solid rgba(168,85,247,.2);background:rgba(168,85,247,.04);cursor:pointer">
+            <div style="font-weight:600;font-size:12px;color:#a855f7">📋 Bilan Social</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Effectifs · Mouvements · Formation · Export</div>
+          </div>
+          <div onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'echeancier'},'*')" style="padding:12px;border-radius:8px;border:1px solid rgba(91,155,214,.2);background:rgba(91,155,214,.04);cursor:pointer">
+            <div style="font-weight:600;font-size:12px;color:var(--blue)">📅 Échéancier 2026</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">Toutes les deadlines ONSS · Fiscal · TVA · J-X alertes</div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
   </div>
 </section>
 
@@ -7047,6 +7130,9 @@ function wizGenerate() {
               <div class="check-item">Ou indemnité compensatoire de préavis = rémunération brute période</div>
               <div class="check-item warning">Motif grave : préavis = 0 · mais motif doit être prouvé et notifié dans 3 jours</div>
             </div>
+            <button onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'simulicenciement'},'*')" style="margin-top:10px;padding:7px 16px;border-radius:6px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#ef4444;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">
+              → Calculer le préavis et les indemnités exactes
+            </button>
           </div>
           <div class="info-box">
             <strong>Art. 1231 C.civ. — Réduction judiciaire des clauses pénales</strong><br>
@@ -7137,6 +7223,9 @@ function wizGenerate() {
           <strong>Impact sur les chèques-repas</strong><br>
           Jours de maladie = pas de chèque-repas. Seuls les jours effectivement prestés donnent droit à un chèque-repas. Ajuster le décompte mensuel en conséquence.
         </div>
+        <button onclick="event.stopPropagation();window.parent&&window.parent.postMessage({type:'navigate',page:'calcmaladie'},'*')" style="margin-top:12px;padding:7px 16px;border-radius:6px;border:1px solid rgba(59,130,246,.4);background:rgba(59,130,246,.08);color:#3b82f6;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">
+          → Calculer le salaire garanti exact (Aureus Social Pro)
+        </button>
       </div></div>
     </div>
 
