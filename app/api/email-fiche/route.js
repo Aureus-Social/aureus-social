@@ -2,7 +2,7 @@
 // AUREUS SOCIAL PRO — /api/email-fiche
 // Envoi fiche de paie par email via Resend
 // ═══════════════════════════════════════════════════════════════
-import { sbFromRequest } from '@/app/lib/supabase-server';
+import { sbFromRequest, checkRole } from '@/app/lib/supabase-server';
 export const dynamic = 'force-dynamic';
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
@@ -99,6 +99,7 @@ function buildHTML(fiche, employe, societe) {
 export async function POST(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'payroll_read'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
 
   if (!RESEND_KEY) return Response.json({ error: 'RESEND_API_KEY manquante dans les variables Vercel' }, { status: 500 });
 

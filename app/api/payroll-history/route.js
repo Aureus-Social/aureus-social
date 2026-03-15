@@ -1,9 +1,10 @@
-import { sbFromRequest, sbAdmin } from '@/app/lib/supabase-server';
+import { sbFromRequest, sbAdmin, checkRole } from '@/app/lib/supabase-server';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'payroll_read'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const { searchParams } = new URL(req.url);
   const annee = searchParams.get('annee') || searchParams.get('year');
   const mois = searchParams.get('mois') || searchParams.get('month');
@@ -30,6 +31,7 @@ export async function GET(req) {
 export async function POST(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'payroll_read'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const body = await req.json();
   const fiches = Array.isArray(body) ? body : [body];
   const now = new Date();

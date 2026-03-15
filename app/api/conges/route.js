@@ -2,7 +2,7 @@
 // AUREUS SOCIAL PRO — /api/conges
 // Workflow demandes de congé : création, lecture, approbation/refus
 // ═══════════════════════════════════════════════════════════════
-import { sbFromRequest, sbAdmin } from '@/app/lib/supabase-server';
+import { sbFromRequest, sbAdmin, checkRole } from '@/app/lib/supabase-server';
 import { triggerWebhook } from '@/app/lib/trigger-webhook';
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +23,7 @@ async function sendNotif(to, subject, html) {
 export async function GET(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'conges'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const { searchParams } = new URL(req.url);
   const empId = searchParams.get('empId');
   const status = searchParams.get('status');
@@ -37,6 +38,7 @@ export async function GET(req) {
 export async function POST(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'conges'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const body = await req.json();
   const { emp_id, emp_name, emp_email, type, date_debut, date_fin, nb_jours, motif, manager_email } = body;
   if (!emp_id || !type || !date_debut || !date_fin) return Response.json({ error: 'emp_id, type, date_debut, date_fin requis' }, { status: 400 });
@@ -75,6 +77,7 @@ export async function POST(req) {
 export async function PUT(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'conges'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const body = await req.json();
   const { id, status, commentaire } = body;
   if (!id || !status) return Response.json({ error: 'id et status requis' }, { status: 400 });
@@ -113,6 +116,7 @@ export async function PUT(req) {
 export async function DELETE(req) {
   const { db, user: u } = await sbFromRequest(req);
   if (!u || !db) return Response.json({ error: 'Non autorisé' }, { status: 401 });
+  const _rc = checkRole(u, 'conges'); if (!_rc.ok) return Response.json({ error: _rc.error }, { status: 403 });
   const id = new URL(req.url).searchParams.get('id');
   if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return Response.json({ error: 'ID invalide' }, { status: 400 });
   const { error } = await db.from('conges').delete().eq('id', id);
