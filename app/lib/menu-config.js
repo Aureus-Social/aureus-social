@@ -40,6 +40,7 @@ export const MENU = [
   { id: 'connecteurscompta', label: 'BOB / WinBooks', icon: '📒', g: 4 },
   { id: 'sepa',          label: 'SEPA Virements',     icon: '💳', g: 4 },
   { id: 'belcotax281',   label: 'Belcotax 281.10',    icon: '📊', g: 4 },
+  { id: 'documentsociaux', label: 'Documents Sociaux DRS', icon: '📑', g: 4, keywords: ['drs','c4','c78','c103','inami','chomage','attestation','document social','formulaire'] },
   { id: 'listingtva',     label: 'Listing Annuel TVA',  icon: '📋', g: 4 },
   { id: 'belcotaxmandat', label: 'Mandat Belcotax',     icon: '📄', g: 4 },
   { id: 'rapports',      label: 'Rapports',           icon: '📈', g: 4 },

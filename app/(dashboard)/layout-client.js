@@ -125,6 +125,7 @@ const ListingTVAPg = dynamic(() => import('../pages/ListingTVA'), { ssr: false, 
 const MigrationsAdminPg = dynamic(() => import('../pages/MigrationsAdmin'), { ssr: false, loading: Loading });
 const WelcomeGuidePg = dynamic(() => import('../pages/WelcomeGuide'), { ssr: false, loading: () => null });
 const HistoriquePayrollPg = dynamic(() => import('../pages/HistoriquePayroll'), { ssr: false, loading: Loading });
+const DocumentsSociauxPg = dynamic(() => import('../pages/DocumentsSociaux'), { ssr: false, loading: Loading });
 const OffboardingPg = ({ s, d }) => <OffboardingRaw s={s} d={d} />;
 const ProceduresRHHubPgW = ({ s, d }) => <ProceduresRHHubRaw />;
 
@@ -708,6 +709,7 @@ function DashboardLayoutApproved({ user }) {
       // DECLARATIONS & COMPTABILITE
       case 'batchdecl': return <ModsBatch2Pg s={s} d={d} tab={page} />;
       case 'belcotax281': return <ModsBatch2Pg s={s} d={d} tab={page} />;
+      case 'documentsociaux': return <DocumentsSociauxPg state={s} dispatch={d} />;
       // ── MANDATS & PRIMES EMPLOI ──
       case 'mandatonss': case 'belcotaxmandat': case 'domiciliation':
       case 'premieremploi': case 'activabruxelles': case 'art60cpas':
